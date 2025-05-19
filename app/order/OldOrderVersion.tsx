@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useState } from 'react';
 import SearchItem from '../components/Modals/SearchItem';
-import OrderOnVacationModal from '../admin/components/Modals/OrderOnVacationModal';
+import OrderOnVacationModal from '../admin/[companyId]/components/Modals/OrderOnVacationModal';
 import { Box, Grid, IconButton, TextField, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';

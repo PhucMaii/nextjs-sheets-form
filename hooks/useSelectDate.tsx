@@ -9,7 +9,12 @@ import {
 } from '@/app/utils/time'; // Assuming this utility exists
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
-const useSelectDate = (providedDate?: string, fullWidth?: boolean, hideLabel?: boolean, disablePast?: boolean) => {
+const useSelectDate = (
+  providedDate?: string,
+  fullWidth?: boolean,
+  hideLabel?: boolean,
+  disablePast?: boolean,
+) => {
   const [date, setDate] = useState(
     providedDate ? providedDate : generateRecommendDate(),
   );

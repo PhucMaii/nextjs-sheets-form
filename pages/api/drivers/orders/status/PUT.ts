@@ -2,7 +2,7 @@ import { ORDER_STATUS } from '@/app/utils/enum';
 import {
   restockInventoryItem,
   subtractInventoryItem,
-} from '@/pages/api/admin/orderedItems/single';
+} from '@/pages/api/admin/[companyId]/orderedItems/single';
 import { getDriverInfo } from '@/pages/api/utils/auth';
 import { getTodayDate } from '@/pages/api/utils/date';
 import { OrderedItems, PrismaClient } from '@prisma/client';
@@ -40,8 +40,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     let deliveredAt: string | null = dateAndTime;
 
     if (
-      (existingOrder.status !== ORDER_STATUS.DELIVERED &&
-        existingOrder.status !== ORDER_STATUS.COMPLETED) &&
+      existingOrder.status !== ORDER_STATUS.DELIVERED &&
+      existingOrder.status !== ORDER_STATUS.COMPLETED &&
       (updatedStatus === ORDER_STATUS.DELIVERED ||
         updatedStatus === ORDER_STATUS.COMPLETED)
     ) {

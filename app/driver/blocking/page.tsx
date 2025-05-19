@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
-import { ShadowSection } from '@/app/admin/reports/styled';
+import { ShadowSection } from '@/app/admin/[companyId]/reports/styled';
 import {
   Autocomplete,
   Box,
@@ -16,13 +16,13 @@ import { IDayRange, UserType } from '@/app/utils/type';
 import { generateCurrentTime, generateMonthRange } from '@/app/utils/time';
 import { LoadingButton } from '@mui/lab';
 import AddIcon from '@mui/icons-material/Add';
-import DateRange from '@/app/admin/components/Modals/DateRangeModal';
+import DateRange from '@/app/admin/[companyId]/components/Modals/DateRangeModal';
 import axios from 'axios';
-import DayRange from '@/app/admin/components/DayRange';
-import ErrorComponent from '@/app/admin/components/ErrorComponent';
+import DayRange from '@/app/admin/[companyId]/components/DayRange';
+import ErrorComponent from '@/app/admin/[companyId]/components/ErrorComponent';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import useNotification from '@/hooks/useNotification';
-import BlockOrders from '@/app/admin/components/Modals/BlockOrders';
+import BlockOrders from '@/app/admin/[companyId]/components/Modals/BlockOrders';
 
 const apiURL = `/api/unavailable_days`;
 export default function BlockingPage() {

@@ -3,15 +3,15 @@ import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import { Box, Grid, Skeleton, Typography } from '@mui/material';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
-import OverviewCard from '@/app/admin/components/OverviewCard/OverviewCard';
+import OverviewCard from '@/app/admin/[companyId]/components/OverviewCard/OverviewCard';
 import { blue } from '@mui/material/colors';
 import { primaryColor } from '@/theme/color';
 import { API_URL } from '@/app/utils/enum';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import ManifestTable from '@/app/admin/components/Tables/ManifestTable';
+import ManifestTable from '@/app/admin/[companyId]/components/Tables/ManifestTable';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
-import StatusText from '@/app/admin/components/StatusText';
+import StatusText from '@/app/admin/[companyId]/components/StatusText';
 import { SWRFetchData } from '@/app/utils/db';
 
 export default function OverviewPage() {
@@ -22,7 +22,7 @@ export default function OverviewPage() {
   // Data Fetching
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [orders, mutate, isValidating] = SWRFetchData(
-    `${API_URL.DRIVER_ORDERS}?deliveryDate=${today}`,
+    `${API_URL.DRIVER}/orders?deliveryDate=${today}`,
   );
 
   useEffect(() => {
@@ -35,7 +35,7 @@ export default function OverviewPage() {
     <Sidebar>
       {/* <LoadingModal open={isValidating} /> */}
       <Typography variant="h5" fontWeight="bold">
-        Welcome back, {orders?.data.driver.name || ''}
+        Welcome back, {orders?.data.employee.name || ''}
       </Typography>
       <Typography variant="subtitle1">We wish you have a good day</Typography>
       <Grid container spacing={2} my={2}>

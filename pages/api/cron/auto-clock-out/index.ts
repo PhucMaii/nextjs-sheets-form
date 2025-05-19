@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getTodayDate } from '../../utils/date';
-import { calculateHours } from '../../drivers/shift/clock-out';
+import { getTodayDate } from '@/pages/api/utils/date';
+import { calculateHours } from '@/pages/api/drivers/shift/clock-out';
 
 const prisma = new PrismaClient();
 
@@ -16,13 +16,14 @@ export default async function handler(
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const activeShifts = await prisma.shiftSession.findMany({
+    const activeShifts: any = await prisma.shiftSession.findMany({
       where: {
         endedAt: null,
         isActive: true,
       },
       include: {
         driver: true,
+        employee: true,
         route: true,
       },
     });
@@ -52,7 +53,7 @@ export default async function handler(
       // });
 
       const orderDeliveredByDriver = todayOrders.filter((order) => {
-        return order.deliveredBy === shift.driver.name;
+        return order.deliveredBy === shift.employee.name;
       });
 
       // Get the latest order delivered by driver
@@ -74,7 +75,7 @@ export default async function handler(
             endedAt: latestOrder.deliveredAt,
             hours,
             isActive: false,
-            cost: hours * (shift?.driver?.hourlyRate || 1),
+            cost: hours * (shift?.employee?.hourlyRate || 1),
           },
         });
       } else {
@@ -87,7 +88,7 @@ export default async function handler(
             endedAt: today.dateAndTime,
             isActive: false,
             hours,
-            cost: hours * (shift?.driver?.hourlyRate || 1),
+            cost: hours * (shift?.employee?.hourlyRate || 1),
           },
         });
       }

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { BoxModal } from '@/app/admin/components/Modals/styled';
-import { ModalProps } from '@/app/admin/components/Modals/type';
+import { BoxModal } from '@/app/admin/[companyId]/components/Modals/styled';
+import { ModalProps } from '@/app/admin/[companyId]/components/Modals/type';
 import { Box, IconButton, Modal, Typography } from '@mui/material';
 import React, { memo, useState } from 'react';
 import CloseIcon from '@mui/icons-material/Close';

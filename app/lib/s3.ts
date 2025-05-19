@@ -54,7 +54,10 @@ export default async function uploadToS3(
   }
 }
 
-export const generateImgUrl = async (fileKey: string, isCheque: boolean = false) => {
+export const generateImgUrl = async (
+  fileKey: string,
+  isCheque: boolean = false,
+) => {
   if (!fileKey) return '';
 
   if (isCheque) {
@@ -71,7 +74,7 @@ export const generateImgUrl = async (fileKey: string, isCheque: boolean = false)
     isCheque
       ? process.env.NEXT_PUBLIC_S3_BUCKET_NAME_CHEQUE
       : process.env.NEXT_PUBLIC_S3_BUCKET_NAME
-  }.s3.amazonaws.com/${fileKey}`;
+  }.s3.us-west-2.amazonaws.com/${fileKey}`;
 };
 
 export const getAllS3Images = async (folder: string = '') => {

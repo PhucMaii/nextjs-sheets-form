@@ -54,7 +54,7 @@ export const getDriverInfo = async (
       });
     }
 
-    const driverInfo = await prisma.driver.findUnique({
+    const driverInfo = await prisma.employee.findUnique({
       where: {
         id: Number(session.user.id),
       },

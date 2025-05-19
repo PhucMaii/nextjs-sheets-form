@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getTodayDate } from '../../utils/date';
+import { getTodayDate } from '@/pages/api/utils/date';
 import { ACTION, USER_ROLE } from '@/app/utils/enum';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 
@@ -21,6 +21,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       where: {
         name: ACTION.CANCEL_AFFECT_INVENTORY,
         date: date,
+        companyId: 1,
       },
     });
 
@@ -41,6 +42,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     await prisma.orders.updateMany({
       where: {
         deliveryDate: threeDaysAgoString,
+        companyId: 1,
       },
       data: {
         isAffectInventory: false,
@@ -54,6 +56,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         description: 'Cancel Affect Inventory For Date: ' + threeDaysAgoString,
         createdAt: time,
         createdBy: USER_ROLE.SYSTEM,
+        companyId: 1,
       },
     });
 

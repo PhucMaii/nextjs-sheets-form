@@ -1,8 +1,8 @@
 import React from 'react';
-import { BoxModal } from '@/app/admin/components/Modals/styled';
+import { BoxModal } from '@/app/admin/[companyId]/components/Modals/styled';
 import { AlertColor, Modal } from '@mui/material';
-import { ModalProps } from '@/app/admin/components/Modals/type';
-import { Order } from '@/app/admin/orders/page';
+import { ModalProps } from '@/app/admin/[companyId]/components/Modals/type';
+import { Order } from '@/app/admin/[companyId]/orders/page';
 import { API_URL, USER_ROLE } from '@/app/utils/enum';
 import OrderView, { ORDER_USAGE_PURPOSE } from '@/app/components/OrderView';
 import { SWRFetchData } from '@/app/utils/db';
@@ -19,7 +19,7 @@ export default function OrderDetails({
   order,
   showNotification,
 }: IProps) {
-  const [items] = SWRFetchData(`${API_URL.CLIENT_ITEM}?userId=${order.userId}`);
+  const [items] = SWRFetchData(`/api/item?userId=${order.userId}`);
   const onUpdateOrder = async (orderParam: Order) => {
     try {
       const response = await axios.put(

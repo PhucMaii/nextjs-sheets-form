@@ -35,7 +35,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const codBoard: any = await prisma.codBoard.findFirst({
       where: {
         date,
-        driverId: currentDriver.id,
+        // driverId: currentDriver.id,
+        employeeId: currentDriver.id,
       },
       include: {
         orders: {
@@ -89,6 +90,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         id: {
           notIn: orderExistedInBoard,
         },
+        companyId: currentDriver.companyId,
         deliveryDate: date,
         status: {
           in: [
@@ -126,6 +128,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const wcodOrders = await prisma.orders.findMany({
       where: {
+        companyId: currentDriver.companyId,
         id: {
           notIn: orderExistedInBoard,
         },

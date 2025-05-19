@@ -21,7 +21,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { blue, blueGrey } from '@mui/material/colors';
 import { clientMaxWidth, clientTabs } from '@/app/lib/constant';
-import { ListItemButtonStyled } from '@/app/admin/components/Sidebar/styled';
+import { ListItemButtonStyled } from '@/app/admin/[companyId]/components/Sidebar/styled';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { UserContext } from '@/app/context/UserContextAPI';
 import CloseIcon from '@mui/icons-material/Close';

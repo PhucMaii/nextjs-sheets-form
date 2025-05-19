@@ -7,8 +7,8 @@ import {
   Typography,
 } from '@mui/material';
 import React, { useState } from 'react';
-import { DropdownItemContainer } from '../admin/orders/styled';
-import { API_URL, ORDER_STATUS } from '../utils/enum';
+import { DropdownItemContainer } from '../admin/[companyId]/orders/styled';
+import { ORDER_STATUS, getAdminApiUrl } from '../utils/enum';
 import {
   errorColor,
   infoColor,
@@ -19,9 +19,10 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PendingIcon from '@mui/icons-material/Pending';
 import BlockIcon from '@mui/icons-material/Block';
-import { Order } from '../admin/orders/page';
+import { Order } from '../admin/[companyId]/orders/page';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import axios from 'axios';
+import { useParams } from 'next/navigation';
 // import LoadingModal from '../admin/components/Modals/LoadingModal';
 
 interface ActionProps {
@@ -49,6 +50,7 @@ export default function StatusActionDropdown({
   fullWidth,
   variant,
 }: IProps) {
+  const { companyId }: any = useParams();
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
   const openActionsDropdown = Boolean(actionButtonAnchor);
@@ -65,10 +67,13 @@ export default function StatusActionDropdown({
       return order.id;
     });
     try {
-      const response = await axios.put(API_URL.ORDER_STATUS, {
-        status,
-        updatedOrderIds,
-      });
+      const response = await axios.put(
+        getAdminApiUrl(companyId, '/orders/status'),
+        {
+          status,
+          updatedOrderIds,
+        },
+      );
 
       showNotification('success', response.data.message);
       setIsLoading(false);

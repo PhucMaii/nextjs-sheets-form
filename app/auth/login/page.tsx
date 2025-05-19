@@ -53,10 +53,10 @@ export default function LoginPage() {
         }
 
         const session: any = await getSession();
-        const response = await axios.get(
-          `${API_URL.USER}?id=${session?.user.id}`,
+        await axios.get(
+          `${API_URL.USER}?id=${session?.user.id}&role=${session?.user.role}`,
         );
-        const userData = response.data.data;
+        // const userData = response.data.data;
 
         if (user && user.error) {
           showNotification('error', user.error);
@@ -67,11 +67,9 @@ export default function LoginPage() {
         showNotification('success', 'Login Successful');
         setIsLoading(false);
         setTimeout(() => {
-          if (userData.role === 'client') {
+          // if (userData.role === 'client') {
             router.push('/');
-          } else {
-            router.push('/admin/orders');
-          }
+          // }
         }, 500);
       } catch (error: any) {
         console.log('Fail to sign in: ', error?.response?.data?.error);
@@ -166,7 +164,7 @@ export default function LoginPage() {
             </form>
           </Paper>
           <Box display="flex" justifyContent="flex-start">
-            <Link href="/driver/login">Sign in here as a driver</Link>
+            <Link href="/driver/login">Sign in here as an employee</Link>
           </Box>
         </Box>
       </FadeIn>

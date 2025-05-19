@@ -6,12 +6,12 @@ import {
 import { User } from '@prisma/client';
 import { generateOrderTemplate } from '@/config/email';
 import { UserType } from '@/app/utils/type';
-import InvoiceDocument from '@/app/admin/components/PDF/InvoiceDocument';
+import InvoiceDocument from '@/app/admin/[companyId]/components/PDF/InvoiceDocument';
 import ReactPDF from '@react-pdf/renderer';
 import React from 'react';
-import { Order } from '@/app/admin/orders/page';
+import { Order } from '@/app/admin/[companyId]/orders/page';
 import nodemailer from 'nodemailer';
-import DebtOrders from '@/app/admin/components/PDF/DebtOrders';
+import DebtOrders from '@/app/admin/[companyId]/components/PDF/DebtOrders';
 
 const emailHandler = async (
   email: string,
@@ -60,7 +60,6 @@ const emailHandler = async (
       text: title,
       html: template,
       ...(cc && typeof cc === 'string' && cc.trim() !== '' ? { cc } : {}),
-
     });
   } catch (error) {
     console.log('Fail to send email, ', error);

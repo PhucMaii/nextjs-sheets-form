@@ -1,4 +1,4 @@
-import StatusText from '@/app/admin/components/StatusText';
+import StatusText from '@/app/admin/[companyId]/components/StatusText';
 import { SHIFT_STATUS } from '@/app/utils/enum';
 import { IShiftSession } from '@/app/utils/type';
 import { Box, Typography } from '@mui/material';

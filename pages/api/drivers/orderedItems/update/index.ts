@@ -3,12 +3,12 @@ import {
   categorizeUpdatedItems,
   generateOrderTotalPrice,
   ITEM_CATEGORIZED,
-} from '@/pages/api/admin/orderedItems/PUT';
+} from '@/pages/api/admin/[companyId]/orderedItems/PUT';
 import {
   // generateCostAndProfit,
   restockInventoryItem,
   updateSingleInventoryItem,
-} from '@/pages/api/admin/orderedItems/single';
+} from '@/pages/api/admin/[companyId]/orderedItems/single';
 import { getDriverInfo } from '@/pages/api/utils/auth';
 import { getTodayDate } from '@/pages/api/utils/date';
 import { formatItemsWithTotalPrice } from '@/pages/api/utils/order';
@@ -71,14 +71,22 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
 
     // Categorize updated items into create, update, delete
-    const newItems = categorizeUpdatedItems(orderedItemList, updatedItems);
+    const newItems = categorizeUpdatedItems(
+      existingOrder?.companyId || -1,
+      orderedItemList,
+      updatedItems,
+    );
 
     for (const item of newItems) {
       // Check item categorize to create, update or delete
 
       // CREATE
       if (item.type === ITEM_CATEGORIZED.CREATE) {
-        await createOrderedItems(existingOrder, [item]);
+        await createOrderedItems(
+          existingOrder?.companyId || -1,
+          existingOrder,
+          [item],
+        );
         continue;
       } else if (item.type === ITEM_CATEGORIZED.REMAIN) {
         // REMAIN

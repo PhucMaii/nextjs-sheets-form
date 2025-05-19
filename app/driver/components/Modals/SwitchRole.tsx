@@ -1,11 +1,11 @@
-import { BoxModal } from '@/app/admin/components/Modals/styled';
+import { BoxModal } from '@/app/admin/[companyId]/components/Modals/styled';
 import { Box, IconButton, Modal, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import React, { memo, useState } from 'react';
 import { getTodayDate } from '@/pages/api/utils/date';
 import { RoleOption, roles } from './ShiftModal';
 import { API_URL, WORKING_ROLE } from '@/app/utils/enum';
-import { ModalProps } from '@/app/admin/components/Modals/type';
+import { ModalProps } from '@/app/admin/[companyId]/components/Modals/type';
 import { LoadingButton } from '@mui/lab';
 import TransferWithinAStationIcon from '@mui/icons-material/TransferWithinAStation';
 import useNotification from '@/hooks/useNotification';

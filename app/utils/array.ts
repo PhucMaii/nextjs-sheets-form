@@ -1,5 +1,5 @@
 import { UserRoute } from '@prisma/client';
-import { Order } from '../admin/orders/page';
+import { Order } from '../admin/[companyId]/orders/page';
 import { fetchWcodOrders } from './db';
 import { ORDER_STATUS, PAYMENT_TYPE } from './enum';
 import { getWCODDay } from './time';
@@ -63,13 +63,22 @@ export const sortedItemKeys = (
   });
 };
 
-export const getCODData = async (routeOrders: Order[], date: string) => {
+export const getCODData = async (
+  routeOrders: Order[],
+  date: string,
+  companyId: string,
+) => {
   if (!routeOrders || routeOrders.length === 0) {
     return {};
   }
 
   const wcodDay: any = getWCODDay(date);
-  const wcodResponse = await fetchWcodOrders(routeOrders, date, wcodDay);
+  const wcodResponse = await fetchWcodOrders(
+    routeOrders,
+    date,
+    wcodDay,
+    companyId,
+  );
 
   const orders = [...routeOrders];
 
@@ -186,6 +195,18 @@ export const compareTwoArrays = (arr1: any[], arr2: any[]) => {
   }
 
   return JSON.stringify(arr1) === JSON.stringify(arr2);
+};
+
+export const compareTwoArraysWithFields = (arr1: any[], arr2: any[], fields: string[]) => {
+  if (arr1.length !== arr2.length) {
+    return false;
+  }
+
+  return arr1.every((item1: any) => {
+    return arr2.some((item2: any) => {
+      return fields.every((field: string) => item1[field] === item2[field]);
+    });
+  });
 };
 
 export const getUniqueUnitRatios = (units: any[]) => {
