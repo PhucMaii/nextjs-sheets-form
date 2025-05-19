@@ -29,12 +29,13 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     // Update Password
     if (oldPassword && newPassword) {
+      console.log({ oldPassword, newPassword }, 'oldPassword && newPassword');
       const isOldPasswordMatch = await bcrypt.compare(
         oldPassword,
         existingUser.password,
       );
       if (!isOldPasswordMatch) {
-        return res.status(401).json({
+        return res.status(404).json({
           error: 'Old password is incorrect',
         });
       }

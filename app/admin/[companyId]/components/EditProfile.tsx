@@ -13,7 +13,7 @@ import { blueGrey } from '@mui/material/colors';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 import axios from 'axios';
-import { API_URL, getAdminApiUrl } from '@/app/utils/enum';
+import { getAdminApiUrl } from '@/app/utils/enum';
 import useNotification from '@/hooks/useNotification';
 import { useParams } from 'next/navigation';
 import { fetchApi } from '@/app/utils/db';
@@ -116,7 +116,10 @@ export default function EditProfile() {
       setIsSubmitting(true);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { confirmPassword, ...submittedData } = passwordGroup;
-      const response = await axios.put(API_URL.USER, submittedData);
+      const response = await axios.put(getAdminApiUrl(companyId, '/profile'), {
+        ...submittedData,
+        id: employee?.id,
+      });
 
       if (response.data.error) {
         showNotification('error', response.data.error);
@@ -150,7 +153,9 @@ export default function EditProfile() {
             // label="Name"
             placeholder="Please enter your name..."
             value={employee?.name}
-            onChange={(e: any) => setEmployee({ ...employee, name: e.target.value })}
+            onChange={(e: any) =>
+              setEmployee({ ...employee, name: e.target.value })
+            }
           />
         </Box>
         <Box display="flex" flexDirection="column" gap={1}>
@@ -162,7 +167,9 @@ export default function EditProfile() {
             // label="Name"
             placeholder="Please enter your email..."
             value={employee?.email}
-            onChange={(e: any) => setEmployee({ ...employee, email: e.target.value })}
+            onChange={(e: any) =>
+              setEmployee({ ...employee, email: e.target.value })
+            }
           />
         </Box>
         <Box display="flex" justifyContent="right" mt={2}>

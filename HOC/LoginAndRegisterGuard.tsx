@@ -28,6 +28,8 @@ export default function LoginAndRegisterGuard({ children }: any) {
   //   },
   // );
 
+  console.log({ session }, 'session');
+
   useEffect(() => {
     if (session?.user?.role === 'driver') {
       router.push('/driver/overview');

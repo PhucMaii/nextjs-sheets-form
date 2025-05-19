@@ -61,6 +61,8 @@ export const authOptions: NextAuthOptions = {
             throw new Error('Password missing');
           }
 
+          console.log({ credentials }, 'credentials');
+
           if (credentials?.clientId) {
             const userData = await loginUser(credentials);
             return userData as any; // Type assertion needed due to NextAuth's type constraints
@@ -87,7 +89,7 @@ export const authOptions: NextAuthOptions = {
           ...token,
           ...user,
           id: user.id,
-          role: token.role,
+          // role: token.role,
           // clientId: user.clientId,
           // clientName: user.clientName,
           // contactNumber: user.contactNumber,
@@ -105,14 +107,14 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       // Add token data to the session
-      // console.log('session in session', {session, token});
+      console.log('session in session', {session, token});
       return {
         ...session,
         user: {
           ...session.user,
           ...token,
           id: token.id as number,
-          role: token.role as string,
+          // role: token.role as string,
           // clientId: token.clientId as string,
           // clientName: token.clientName as string,
           // contactNumber: token.contactNumber as string,
@@ -175,6 +177,7 @@ const loginEmployee = async (credentials: any) => {
   if (!employee) {
     throw new Error('Employee code does not Exist');
   }
+  
   const isPasswordValid = await bcrypt.compare(
     credentials.password,
     employee.password,
