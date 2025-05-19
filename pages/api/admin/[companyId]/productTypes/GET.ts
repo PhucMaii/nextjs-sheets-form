@@ -3,14 +3,14 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IQuery {
   id?: string;
+  companyId?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { id }: IQuery = req.query;
-
+    const { id, companyId }: IQuery = req.query;
     if (id) {
       const productType = await prisma.itemType.findUnique({
         where: {
@@ -40,6 +40,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             inventoryUnit: true,
           },
         },
+      },
+      where: {
+        companyId: Number(companyId),
       },
     });
 

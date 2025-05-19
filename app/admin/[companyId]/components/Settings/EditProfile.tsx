@@ -1,10 +1,4 @@
-<<<<<<<< HEAD:app/admin/[companyId]/components/Settings/EditProfile.tsx
-import React, { useContext, useEffect, useState } from 'react';
-import { ShadowSection } from '../../reports/styled';
-========
 import React, { useEffect, useState } from 'react';
-import { ShadowSection } from '../reports/styled';
->>>>>>>> 8cea7cbcfc98a59b10c1479d559175c8dd70c4b0:app/admin/[companyId]/components/EditProfile.tsx
 import {
   Box,
   IconButton,
@@ -22,6 +16,7 @@ import { getAdminApiUrl } from '@/app/utils/enum';
 import useNotification from '@/hooks/useNotification';
 import { useParams } from 'next/navigation';
 import { fetchApi } from '@/app/utils/db';
+import { ShadowSection } from '../../reports/styled';
 
 export default function EditProfile() {
   const { companyId }: any = useParams();

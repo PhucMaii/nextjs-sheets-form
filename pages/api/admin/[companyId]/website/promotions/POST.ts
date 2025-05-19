@@ -15,6 +15,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { title, status, itemIds }: IBody = req.body;
 
+    const { companyId }: any = req.query;
+
     const today = getTodayDate();
 
     const newPromotion = await prisma.promotion.create({
@@ -26,6 +28,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         createdAt: today.dateAndTime,
         rows: 1,
         priority: 0,
+        companyId: Number(companyId),
       },
     });
 

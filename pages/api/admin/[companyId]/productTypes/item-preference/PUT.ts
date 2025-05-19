@@ -22,7 +22,8 @@ interface IBody {
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
-
+    const { companyId }: any = req.query;
+    
     const {
       id,
       inventoryItemId,
@@ -87,6 +88,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       const admin: any = await getUserInfo(req, res);
 
       await checkAndUpdateUnits(
+        companyId,
         dbUnits,
         units,
         selectedUnit.vendorItemId,

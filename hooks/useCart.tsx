@@ -7,8 +7,68 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+
+const CartItemDisplay = ({item}: {item: any}) => {
+  const [imgUrl, setImgUrl] = useState<string>('');
+
+  useEffect(() => {
+    const fetchImgUrl = async () => {
+      const data = await generateImgUrl(item?.item?.image || item?.item?.inventoryItem?.image);
+      setImgUrl(data || '/images/landing/image_not_found.jpeg');
+    };
+    fetchImgUrl();
+  }, [item]);
+
+  return (
+    <Box
+    display="flex"
+    alignItems="flex-start"
+    justifyContent="space-between"
+    key={item.id}
+  >
+    <Box display="flex" gap={1}>
+      <img
+        src={imgUrl}
+        style={{ width: '100px', height: '100%', objectFit: 'contain' }}
+      />
+      <Box>
+        <Typography fontWeight="bold">
+          {item?.item?.name || item?.item?.inventoryItem?.name}
+        </Typography>
+        {item?.option && (
+          <Typography variant="body2">{item?.option?.name}</Typography>
+        )}
+        <Typography variant="body2">x{item.quantity}</Typography>
+      </Box>
+    </Box>
+    {/* <Typography fontWeight="bold">
+      ${((item?.option?.price || item?.item?.price) * item?.quantity)?.toFixed(2)}
+    </Typography> */}
+    <Box display="flex" alignItems="center" flexWrap="wrap" gap={1}>
+      {(item?.option?.isShowDiscount || item?.item?.isShowDiscount) && (
+        <Typography
+          variant="h6"
+          fontWeight="bold"
+          style={{ textDecoration: 'line-through' }}
+        >
+          ${((item?.option?.prevPrice || item?.item?.prevPrice) * item?.quantity)?.toFixed(2)}
+        </Typography>
+      )}
+      <Typography
+        variant="h6"
+        fontWeight="bold"
+        style={{
+          color: (item?.option?.isShowDiscount || item?.item?.isShowDiscount) ? 'red' : 'black',
+        }}
+      >
+        ${((item?.option?.price || item?.item?.price) * item?.quantity)?.toFixed(2)}
+      </Typography>
+    </Box>
+  </Box>
+  );
+};
 
 export default function useCart() {
   const [note, setNote] = useState('');
@@ -61,57 +121,7 @@ export default function useCart() {
     return (
       <Box display="flex" flexDirection="column" gap={2} mt={4}>
         {cart?.items?.map((item) => (
-          <Box
-            display="flex"
-            alignItems="flex-start"
-            justifyContent="space-between"
-            key={item.id}
-          >
-            <Box display="flex" gap={1}>
-              <img
-                src={
-                  item?.item?.image || item?.item?.inventoryItem?.image
-                    ? generateImgUrl(
-                        item?.item?.image || item?.item?.inventoryItem?.image,
-                      )
-                    : '/images/landing/image_not_found.jpeg'
-                }
-                style={{ width: '100px', height: '100%', objectFit: 'contain' }}
-              />
-              <Box>
-                <Typography fontWeight="bold">
-                  {item?.item?.name || item?.item?.inventoryItem?.name}
-                </Typography>
-                {item?.option && (
-                  <Typography variant="body2">{item?.option?.name}</Typography>
-                )}
-                <Typography variant="body2">x{item.quantity}</Typography>
-              </Box>
-            </Box>
-            {/* <Typography fontWeight="bold">
-              ${((item?.option?.price || item?.item?.price) * item?.quantity)?.toFixed(2)}
-            </Typography> */}
-            <Box display="flex" alignItems="center" flexWrap="wrap" gap={1}>
-              {(item?.option?.isShowDiscount || item?.item?.isShowDiscount) && (
-                <Typography
-                  variant="h6"
-                  fontWeight="bold"
-                  style={{ textDecoration: 'line-through' }}
-                >
-                  ${((item?.option?.prevPrice || item?.item?.prevPrice) * item?.quantity)?.toFixed(2)}
-                </Typography>
-              )}
-              <Typography
-                variant="h6"
-                fontWeight="bold"
-                style={{
-                  color: (item?.option?.isShowDiscount || item?.item?.isShowDiscount) ? 'red' : 'black',
-                }}
-              >
-                ${((item?.option?.price || item?.item?.price) * item?.quantity)?.toFixed(2)}
-              </Typography>
-            </Box>
-          </Box>
+          <CartItemDisplay key={item.id} item={item} />
         ))}
       </Box>
     );

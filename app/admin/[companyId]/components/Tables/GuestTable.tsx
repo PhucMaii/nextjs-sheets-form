@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import React, { memo, useState } from 'react';
 import StatusText from '../StatusText';
-import { API_URL, getAdminApiUrl, USER_CATEGORIZED } from '@/app/utils/enum';
+import { getAdminApiUrl, USER_CATEGORIZED } from '@/app/utils/enum';
 import ApproveGuest from '../Modals/ApproveGuest';
 import axios from 'axios';
 import { LoadingButton } from '@mui/lab';

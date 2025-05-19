@@ -12,6 +12,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
+    const { companyId }: any = req.query;
+
     const { name, icon }: IBody = req.body;
 
     const sameNameProductType = await prisma.itemType.findFirst({
@@ -35,6 +37,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         icon: icon,
         createdAt,
         createdBy: `Admin - ${createdBy.clientName}`,
+        companyId: Number(companyId),
       },
     });
 

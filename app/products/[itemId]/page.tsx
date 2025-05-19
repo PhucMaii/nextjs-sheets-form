@@ -27,6 +27,8 @@ import { primaryColor } from '@/theme/color';
 
 export default function ItemPage() {
   const { itemId }: any = useParams();
+
+  const [imgUrl, setImgUrl] = useState<string>('');
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [itemData, setItemData] = useState<IItem | null>(null);
@@ -41,6 +43,14 @@ export default function ItemPage() {
   useEffect(() => {
     fetchItemData();
   }, []);
+
+  useEffect(() => {
+    const fetchImgUrl = async () => {
+      const data = await generateImgUrl(itemData?.image || itemData?.inventoryItem?.image);
+      setImgUrl(data);
+    };
+    fetchImgUrl();
+  }, [itemData]);
 
   const fetchItemData = async () => {
     try {
@@ -270,13 +280,7 @@ export default function ItemPage() {
             }}
           >
             <img
-              src={
-                itemData?.image || itemData?.inventoryItem?.image
-                  ? generateImgUrl(
-                      itemData?.image || itemData?.inventoryItem?.image,
-                    )
-                  : '/images/landing/image_not_found.jpeg'
-              }
+              src={imgUrl}
               alt={itemData?.inventoryItem.name}
               style={{
                 maxWidth: '100%',

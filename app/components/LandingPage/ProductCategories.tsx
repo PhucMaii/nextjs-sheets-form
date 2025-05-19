@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react';
 
 export default function ProductCategories() {
   const [itemTypes, setItemTypes] = useState<IItemType[] | any[]>([]);
+  const [img, setImg] = useState<string | undefined>(undefined);
 
   const router = useRouter();
 
@@ -28,6 +29,14 @@ export default function ProductCategories() {
     };
     fetchItemTypes();
   }, []);
+
+  useEffect(() => {
+    if (itemTypes[0]?.items[0]?.image || itemTypes[0]?.items[0]?.inventoryItem?.image) {
+      generateImgUrl(itemTypes[0]?.items[0]?.image || itemTypes[0]?.items[0]?.inventoryItem?.image).then((img) => {
+        setImg(img);
+      });
+    }
+  }, [itemTypes]);
   return (
     <Box sx={{ backgroundColor: 'white' }}>
       <Box sx={{ maxWidth: maxWidth, mx: 'auto', pt: 4, px: 6 }}>
@@ -58,15 +67,7 @@ export default function ProductCategories() {
               >
                 <Box display="flex" flexDirection="column" alignItems="center">
                   <img
-                    src={
-                      itemType?.items[0]?.image ||
-                      itemType?.items[0]?.inventoryItem?.image
-                        ? generateImgUrl(
-                            itemType?.items[0]?.image ||
-                              itemType?.items[0]?.inventoryItem?.image
-                          )
-                        : '/images/not-found.png'
-                    }
+                    src={img}
                     alt={itemType?.name}
                     style={{
                       width: '100%',

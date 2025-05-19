@@ -14,13 +14,13 @@ import {
 } from '@mui/material';
 import { deliveryCities, maxWidth } from '../lib/constant';
 import { grey } from '@mui/material/colors';
-import AutoCompleteAddress from '../admin/components/AutoCompleteAddress';
-import { ShadowSection } from '../admin/reports/styled';
+import AutoCompleteAddress from '@/app/admin/[companyId]/components/AutoCompleteAddress';
 import useCart from '@/hooks/useCart';
 // import useNotification from '@/hooks/useNotification';
 import useDatePicker from '@/hooks/useDatePicker';
-import CheckoutButton from '../admin/components/CheckoutButton';
+import CheckoutButton from '@/app/admin/[companyId]/components/CheckoutButton';
 import useNotification from '@/hooks/useNotification';
+import { ShadowSection } from '../admin/[companyId]/reports/styled';
 
 export default function CheckoutPage() {
   const [address, setAddress] = useState<any>({

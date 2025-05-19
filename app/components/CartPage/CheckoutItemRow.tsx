@@ -24,9 +24,18 @@ interface IProps {
 }
 
 export default function CheckoutItemRow({ item, showNotification }: IProps) {
+  const [img, setImg] = useState<string | undefined>(undefined);
   const [quantity, setQuantity] = useState<number>(item.quantity);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [targetItem, setTargetItem] = useState<ICartItem | null>(item);
+
+  useEffect(() => {
+    if (item?.item?.image || item?.item?.inventoryItem?.image) {
+      generateImgUrl(item?.item?.image || item?.item?.inventoryItem?.image).then((img) => {
+        setImg(img);
+      });
+    }
+  }, [item]);
 
   useEffect(() => {
     if (item) {
@@ -137,11 +146,7 @@ export default function CheckoutItemRow({ item, showNotification }: IProps) {
         <Box display="flex" gap={2} alignItems="center">
           <img
             style={{ width: '150px', height: '100%', objectFit: 'contain' }}
-            src={
-              targetItem?.item?.image
-                ? generateImgUrl(targetItem?.item?.image)
-                : 'images/landing/image_not_found.jpeg'
-            }
+            src={img}
             alt=""
           />
           <Box display="flex" flexDirection="column">

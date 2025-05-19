@@ -35,6 +35,8 @@ export default function AddItemIntoType({
   typeId,
 }: IProps) {
   const { companyId }: any = useParams();
+
+  const [img, setImg] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [promptedItem, setPromptedItem] = useState<any>({
     id: -1,
@@ -66,6 +68,7 @@ export default function AddItemIntoType({
       false,
     );
 
+
   useEffect(() => {
     if (promptedItem.id > 0) {
       const itemPrice = promptedItem.vendorItem[0].unit.find(
@@ -86,6 +89,14 @@ export default function AddItemIntoType({
       }));
     }
   }, [promptedItem.id]);
+
+  useEffect(() => {
+    if (promptedItem?.image) {
+      generateImgUrl(promptedItem?.image).then((img) => {
+        setImg(img);
+      });
+    }
+  }, [promptedItem?.image]);
 
   useEffect(() => {
     if (selectedUnit) {
@@ -301,9 +312,7 @@ export default function AddItemIntoType({
           {promptedItem?.image && (
             <Box display="flex" gap={2} alignItems="center">
               <img
-                src={
-                  promptedItem?.image ? generateImgUrl(promptedItem?.image) : ''
-                }
+                src={img}
                 alt={promptedItem.name}
                 width={100}
                 height={100}
