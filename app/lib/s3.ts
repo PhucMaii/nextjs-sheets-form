@@ -54,7 +54,10 @@ export default async function uploadToS3(
   }
 }
 
-export const generateImgUrl = async (fileKey: string, isCheque: boolean = false) => {
+export const generateImgUrl = async (
+  fileKey: string,
+  isCheque: boolean = false,
+) => {
   if (!fileKey) return '';
 
   if (isCheque) {

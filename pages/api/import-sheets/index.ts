@@ -10,7 +10,7 @@ import {
 } from '../utils/date';
 import withAuthGuard from '../utils/withAuthGuard';
 import { checkHasClientOrder, getCreatedBy } from './utils';
-import { createOrder } from '../admin/orders/POST';
+import { createOrder } from '@/pages/api/admin/[companyId]/orders/POST';
 import { pusherServer } from '@/app/pusher';
 import { sendEmail } from '../utils/email';
 import { formatItemsWithTotalPrice } from '../utils/order';
@@ -105,7 +105,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       }
     }
 
-    const formattedCreatedBy = await getCreatedBy(req, res, createdBy);
+    const session = await getServerSession(req, res, authOptions);
+    const formattedCreatedBy = await getCreatedBy(
+      req,
+      res,
+      session?.user?.role as USER_ROLE || createdBy,
+    );
 
     // Check is delivery date in client's vacation range
     if (isCheckUnavailableRange) {
@@ -149,6 +154,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       ) {
         const itemsWithNo0 = items.filter((item: any) => item.quantity > 0);
         const newOrder: any = await createOrder(
+          existingUser?.companyId || 1,
           existingUser,
           itemsWithNo0,
           deliveryDate,
@@ -172,7 +178,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           newOrder.items,
         );
 
-        await pusherServer?.trigger('admin', 'incoming-order', {
+        await pusherServer?.trigger(`admin-${existingUser.companyId}`, 'incoming-order', {
           ...newOrder,
           items: itemListWithTotalPrice,
           ...existingUser,
@@ -266,6 +272,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // )
     const itemsWithNo0 = items.filter((item: any) => item.quantity > 0);
     const newOrder: any = await createOrder(
+      existingUser?.companyId || 1,
       existingUser,
       itemsWithNo0,
       deliveryDate,
@@ -286,7 +293,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return item.quantity > 0;
     });
 
-    await pusherServer?.trigger('admin', 'incoming-order', {
+    await pusherServer?.trigger(`admin-${existingUser.companyId}`, 'incoming-order', {
       ...newOrder,
       items: itemHasQuantity,
       ...existingUser,

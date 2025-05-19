@@ -1,6 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import withDriverAuthGuard from '../../utils/withDriverAuthGuar';
+import { authOptions } from '../../auth/[...nextauth]';
+import { getServerSession } from 'next-auth';
 
 interface QueryTypes {
   dayRoute?: string;
@@ -17,10 +19,18 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const { dayRoute }: QueryTypes = req.query;
 
+    const session: any = await getServerSession(req, res, authOptions);
+
+    if (!session?.user || !session?.user?.companyId) {
+      return res.status(404).json({
+        error: 'Driver Not Found',
+      });
+    }
     // Get all clients
     const clientList = await prisma.user.findMany({
       where: {
         role: 'client',
+        companyId: session?.user?.companyId,
       },
       include: {
         category: true,
@@ -39,6 +49,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const routesInDay = await prisma.route.findMany({
       where: {
         day: dayRoute,
+        companyId: session?.user?.companyId,
       },
       include: {
         clients: {

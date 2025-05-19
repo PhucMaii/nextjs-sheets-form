@@ -1,5 +1,5 @@
 import { ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
-import { createOrder } from '@/pages/api/admin/orders/POST';
+import { createOrder } from '@/pages/api/admin/[companyId]/orders/POST';
 import { loginTestAccountBeforeAll } from '../../setUpAuth';
 
 loginTestAccountBeforeAll();

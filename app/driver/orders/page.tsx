@@ -11,7 +11,7 @@ import {
   Typography,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import { ShadowSection } from '@/app/admin/reports/styled';
+import { ShadowSection } from '@/app/admin/[companyId]/reports/styled';
 import { OrderedItems } from '@/app/utils/type';
 import axios from 'axios';
 import {
@@ -21,17 +21,17 @@ import {
   USER_ROLE,
 } from '@/app/utils/enum';
 import { getWCODDay, YYYYMMDDFormat } from '@/app/utils/time';
-import { Item, Order } from '@/app/admin/orders/page';
-import LoadingModal from '@/app/admin/components/Modals/LoadingModal';
+import { Item, Order } from '@/app/admin/[companyId]/orders/page';
+import LoadingModal from '@/app/admin/[companyId]/components/Modals/LoadingModal';
 import { Virtuoso } from 'react-virtuoso';
 import OrderComponent from '../components/OrderComponent';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
 import { primary, success } from '@/theme/color';
-import ErrorComponent from '@/app/admin/components/ErrorComponent';
+import ErrorComponent from '@/app/admin/[companyId]/components/ErrorComponent';
 import SearchModal from '../components/Modals/SearchModal';
 import { SWRFetchData } from '@/app/utils/db';
 import useNotification from '@/hooks/useNotification';
-import InsertOrderToCodBoard from '@/app/admin/components/Modals/add/InsertOrderToCodBoard';
+import InsertOrderToCodBoard from '@/app/admin/[companyId]/components/Modals/add/InsertOrderToCodBoard';
 import SwitchRole from '../components/Modals/SwitchRole';
 
 function CircularProgressWithLabel(props: any) {
@@ -117,7 +117,7 @@ export default function OrdersPage() {
   );
 
   useEffect(() => {
-  const windowDimensions = getWindowDimensions();
+    const windowDimensions = getWindowDimensions();
     setVirtuosoHeight(windowDimensions.height - totalYPosition);
   }, []);
 

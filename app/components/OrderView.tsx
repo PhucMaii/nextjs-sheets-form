@@ -25,10 +25,9 @@ import React, {
 import { IItem, IOption } from '../utils/type';
 import { infoBackground, primary } from '@/theme/color';
 import { blueGrey, grey, red } from '@mui/material/colors';
-import { ShadowSection } from '../admin/reports/styled';
-import { generateOrderTotalPrice } from '@/pages/api/admin/orderedItems/PUT';
+import { ShadowSection } from '../admin/[companyId]/reports/styled';
 import { SearchIcon, Trash2 } from 'lucide-react';
-import ErrorComponent from '../admin/components/ErrorComponent';
+import ErrorComponent from '../admin/[companyId]/components/ErrorComponent';
 import useDebounce from '@/hooks/useDebounce';
 import { handleSearch } from '../utils/search';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
@@ -42,12 +41,12 @@ import {
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-import { Order } from '../admin/orders/page';
-import { API_URL, TYPE, USER_ROLE } from '../utils/enum';
+import { Order } from '../admin/[companyId]/orders/page';
+import { getAdminApiUrl, TYPE, USER_ROLE } from '../utils/enum';
 import axios from 'axios';
 import useNotification from '@/hooks/useNotification';
-import AddCustomAmount from '../admin/components/Modals/add/AddCustomAmount';
-import { ItemTypeButton } from '../admin/components/Inventory/StockItems';
+import AddCustomAmount from '../admin/[companyId]/components/Modals/add/AddCustomAmount';
+import { ItemTypeButton } from '../admin/[companyId]/components/Inventory/StockItems';
 import { SWRFetchData } from '../utils/db';
 import EditIcon from '@mui/icons-material/Edit';
 import EditOffIcon from '@mui/icons-material/EditOff';
@@ -55,7 +54,9 @@ import { blackColor } from '@/theme/create-palette';
 import { Discount } from '@mui/icons-material';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import SetItemQuantity from './SetItemQuantity';
-import DisplayFile from '../admin/components/Modals/DisplayFile';
+import DisplayFile from '../admin/[companyId]/components/Modals/DisplayFile';
+import { generateOrderTotalPrice } from '@/pages/api/admin/[companyId]/orderedItems/PUT';
+import { useParams } from 'next/navigation';
 
 export const WhiteSpace = () => {
   return (
@@ -371,6 +372,7 @@ const OrderView = ({
   role,
   hideButton,
 }: IProps) => {
+  const { companyId }: any = useParams();
   const [displayItems, setDisplayItems] = useState<IItem[]>(items);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [orderedItems, setOrderedItems] = useState<IItem[]>(
@@ -440,7 +442,7 @@ const OrderView = ({
       });
     });
 
-    console.log(newTypes, 'new Types');
+    // console.log(newTypes, 'new Types');
 
     return newTypes;
   }, [items, appearance]);
@@ -543,7 +545,7 @@ const OrderView = ({
     try {
       setIsAffectInventory(e.target.checked);
       const response = await axios.put(
-        `${API_URL.ADMIN}/orders/isAffectInventory`,
+        getAdminApiUrl(companyId, '/orders/isAffectInventory'),
         {
           id: order.id,
           isAffectInventory: e.target.checked,
@@ -586,7 +588,7 @@ const OrderView = ({
       (i) => i[comparedField] === item[comparedField],
     );
 
-    console.log(option, 'ITEM OPTION');
+    // console.log(option, 'ITEM OPTION');
     if (existingItem) {
       const newOrderedItems = orderedItems.map((i) => {
         if (i[comparedField] === item[comparedField]) {
@@ -1019,7 +1021,7 @@ const OrderView = ({
 
         {orderedItems.length > 0 ? (
           orderedItems.map((item: IItem | any) => {
-            console.log('item', item);
+            // console.log('item', item);
             return (
               <Box
                 key={item.id}

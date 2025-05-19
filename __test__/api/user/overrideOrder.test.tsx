@@ -10,7 +10,7 @@ loginTestAccountBeforeAll();
 
 import { overrideOrder } from '@/pages/api/import-sheets/utils';
 import { testClient, testOrderData } from './createOrder.test';
-import { createOrder } from '@/pages/api/admin/orders/POST';
+import { createOrder } from '@/pages/api/admin/[companyId]/orders/POST';
 import { ORDER_STATUS, USER_CATEGORIZED } from '../../../app/utils/enum';
 import { generateRecommendDate } from '@/app/utils/time';
 import UpdateOrderStatus from '../../../pages/api/order/status/index';

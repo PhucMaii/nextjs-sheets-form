@@ -18,13 +18,13 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import PendingIcon from '@mui/icons-material/Pending';
 import { generateMonthRange } from '../utils/time';
-import { Order } from '../admin/orders/page';
+import { Order } from '../admin/[companyId]/orders/page';
 import TuneIcon from '@mui/icons-material/Tune';
-import { API_URL, ORDER_STATUS } from '../utils/enum';
+import { ORDER_STATUS } from '../utils/enum';
 import OrderAccordion from '../components/OrderAccordion';
 import { Virtuoso } from 'react-virtuoso';
 import useDebounce from '@/hooks/useDebounce';
-import { DropdownItemContainer } from '../admin/orders/styled';
+import { DropdownItemContainer } from '../admin/[companyId]/orders/styled';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import {
   errorColor,
@@ -35,12 +35,12 @@ import {
 import { blue } from '@mui/material/colors';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import ErrorComponent from '../admin/components/ErrorComponent';
+import ErrorComponent from '../admin/[companyId]/components/ErrorComponent';
 import { SWRFetchData } from '../utils/db';
 import { filterDateRangeOrders } from '@/pages/api/utils/date';
-import OverviewCard from '../admin/components/OverviewCard/OverviewCard';
+import OverviewCard from '../admin/[companyId]/components/OverviewCard/OverviewCard';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
-import SelectDateRange from '../admin/components/Select/SelectDateRange';
+import SelectDateRange from '../admin/[companyId]/components/Select/SelectDateRange';
 
 const totalYPosition = 250;
 export default function HistoryPage() {
@@ -66,7 +66,7 @@ export default function HistoryPage() {
   // }, []);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [orderData, _mutateOrders, isValidating] = SWRFetchData(
-    `${API_URL.CLIENT_ORDER}?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
+    `/api/order?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
   );
 
   // const currentMonthBill = useMemo(() => {

@@ -1,12 +1,14 @@
-import { Order } from '@/app/admin/orders/page';
+import { Order } from '@/app/admin/[companyId]/orders/page';
 import { fetchWcodOrders } from '@/app/utils/db';
 import { ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
 import { getWCODDay } from '@/app/utils/time';
+import { useParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
 // Current date is in MM/DD/YYYY format
 const useCODAndWCOD = (orderList: Order[], selectedDate: string) => {
   const [wcod, setWcod] = useState<any>(null);
+  const { companyId }: any = useParams();
 
   const wcodDay: any = useMemo(() => {
     const day = getWCODDay(selectedDate);
@@ -24,6 +26,7 @@ const useCODAndWCOD = (orderList: Order[], selectedDate: string) => {
       orderList,
       selectedDate,
       wcodDay,
+      companyId,
     );
     setWcod(wcodResponse);
   };

@@ -1,4 +1,4 @@
-import SelectExpenseStatus from '@/app/admin/components/Select/SelectExpenseStatus';
+import SelectExpenseStatus from '@/app/admin/[companyId]/components/Select/SelectExpenseStatus';
 import { mainPaymentMethodId } from '@/app/lib/constant';
 import { SWRFetchData } from '@/app/utils/db';
 import { API_URL, TRANSACTION_STATUS } from '@/app/utils/enum';

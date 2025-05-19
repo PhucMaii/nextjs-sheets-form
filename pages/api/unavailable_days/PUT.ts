@@ -8,13 +8,15 @@ interface IBody {
   startDate: Date;
   endDate: Date;
   userId: number;
+  companyId: number;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { updatedRangeId, startDate, endDate, userId }: IBody = req.body;
+    const { updatedRangeId, startDate, endDate, userId, companyId }: IBody =
+      req.body;
 
     const existingUser = await prisma.user.findUnique({
       where: {
@@ -30,6 +32,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     // Check is same start date or same end date exist
     const isRangeValid = await handleCheckRangeValid(
+      companyId,
       startDate,
       endDate,
       userId,

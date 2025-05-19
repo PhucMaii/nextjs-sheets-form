@@ -1,6 +1,6 @@
-import ErrorComponent from '@/app/admin/components/ErrorComponent';
-import { BoxModal } from '@/app/admin/components/Modals/styled';
-import { ModalProps } from '@/app/admin/components/Modals/type';
+import ErrorComponent from '@/app/admin/[companyId]/components/ErrorComponent';
+import { BoxModal } from '@/app/admin/[companyId]/components/Modals/styled';
+import { ModalProps } from '@/app/admin/[companyId]/components/Modals/type';
 import { IItem } from '@/app/utils/type';
 import useDebounce from '@/hooks/useDebounce';
 import { Box, Modal, TextField, Typography } from '@mui/material';

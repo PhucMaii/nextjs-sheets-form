@@ -3,16 +3,16 @@ import { PrismaClient } from '@prisma/client';
 import {
   restockInventoryItem,
   updateSingleInventoryItem,
-} from '../admin/orderedItems/single';
-import { sendEmail } from '../utils/email';
+} from '@/pages/api/admin/[companyId]/orderedItems/single';
+import { sendEmail } from '@/pages/api/utils/email';
 import { pusherServer } from '@/app/pusher';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
-import { generateOrderTotalPrice } from '../admin/orderedItems/PUT';
+import { generateOrderTotalPrice } from '@/pages/api/admin/[companyId]/orderedItems/PUT';
 import { checkOrderDeliveryDateValid } from '../utils/date';
 import { OrderedItems } from '@/app/utils/type';
-import { createOrderedItems } from '../utils/orderedItems';
+import { createOrderedItems } from '@/pages/api/utils/orderedItems';
 
 export function calculateNextPos(currentPos: number, result: string[]): string {
   const columns = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -114,7 +114,12 @@ export const overrideOrder = async (
 
       if (!existingItem) {
         // If item not exists -> create new item
-        await createOrderedItems(order, [item], updatedBy);
+        await createOrderedItems(
+          order?.companyId || -1,
+          order,
+          [item],
+          updatedBy,
+        );
       } else {
         // Else, Update each item
         const newItem = await prisma.orderedItems.update({
@@ -221,7 +226,7 @@ export const overrideOrder = async (
       newNote,
     );
 
-    await pusherServer?.trigger('override-order', 'incoming-order', {
+    await pusherServer?.trigger(`override-order-${user.companyId}`, 'incoming-order', {
       ...updatedOrder,
       items: itemList,
       ...user,
@@ -248,19 +253,23 @@ export const getCreatedBy = async (
 
   let createdBy = '';
 
-  if (createdByRole === USER_ROLE.DRIVER) {
-    const driverCreate: any = await prisma.driver.findUnique({
+  if (
+    createdByRole === USER_ROLE.DRIVER ||
+    createdByRole === USER_ROLE.ADMIN ||
+    createdByRole === USER_ROLE.SUPER_ADMIN
+  ) {
+    const driverCreate: any = await prisma.employee.findUnique({
       where: {
         id: Number(session.user.id),
       },
     });
 
-    createdBy = `Driver - ${driverCreate.name}`;
-  } else if (
-    createdByRole === USER_ROLE.ADMIN ||
-    createdByRole === USER_ROLE.CLIENT ||
-    createdByRole === USER_ROLE.SUPER_ADMIN
-  ) {
+    const capitalizeRole =
+      createdByRole === USER_ROLE.SUPER_ADMIN
+        ? 'S Admin'
+        : createdByRole.charAt(0).toUpperCase() + createdByRole.slice(1);
+    createdBy = `${capitalizeRole} - ${driverCreate.name}`;
+  } else if (createdByRole === USER_ROLE.CLIENT) {
     const userCreate: any = await prisma.user.findUnique({
       where: {
         id: Number(session.user.id),

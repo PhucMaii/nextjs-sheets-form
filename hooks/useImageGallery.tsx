@@ -1,10 +1,10 @@
-import FileUpload from '@/app/admin/components/FileUpload';
+import FileUpload from '@/app/admin/[companyId]/components/FileUpload';
 import { getAllS3Images } from '@/app/lib/s3';
 import { primaryColor } from '@/theme/color';
 import { Box } from '@mui/material';
 import { useEffect, useState } from 'react';
 import useNotification from './useNotification';
-import DisplayFile from '@/app/admin/components/Modals/DisplayFile';
+import DisplayFile from '@/app/admin/[companyId]/components/Modals/DisplayFile';
 
 const useImageGallery = (
   initialSelectedImage: string = '',
@@ -81,16 +81,16 @@ const useImageGallery = (
               /> */}
               <DisplayFile
                 fileKey={image}
-                width='100px'
-                height='100px'
+                width="100px"
+                height="100px"
                 style={{
                   borderRadius: '10px',
                   border:
                     selectedImage === image
                       ? `4px solid ${primaryColor}`
                       : 'none',
-                }} 
-                />
+                }}
+              />
             </Box>
           ))}
       </Box>

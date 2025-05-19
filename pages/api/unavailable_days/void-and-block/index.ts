@@ -2,8 +2,10 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
 import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
 import { getTodayDate } from '../../utils/date';
-import { getDriverInfo, getUserInfo } from '../../utils/auth';
+import { getDriverInfo } from '../../utils/auth';
 import withAuthGuard from '../../utils/withAuthGuard';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/pages/api/auth/[...nextauth]';
 
 interface IBody {
   orderIds: number[];
@@ -57,13 +59,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const driver: any = await getDriverInfo(req, res);
       createdBy = driver.name;
     } else if (role === USER_ROLE.ADMIN) {
-      const admin: any = await getUserInfo(req, res);
-      createdBy = `Admin - ${admin?.clientName}`;
+      const session: any = await getServerSession(req, res, authOptions);
+      const admin: any = session?.user;
+      createdBy = `Admin - ${admin?.name}`;
     } else if (role === USER_ROLE.SUPER_ADMIN) {
-      const admin: any = await getUserInfo(req, res);
-      createdBy = `S Admin - ${admin?.clientName}`;
+      const session: any = await getServerSession(req, res, authOptions);
+      const admin: any = session?.user;
+      createdBy = `S Admin - ${admin?.name}`;
     }
-    
+
     // Void orders
     await prisma.orders.updateMany({
       where: {

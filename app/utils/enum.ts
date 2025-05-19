@@ -12,14 +12,22 @@ export enum API_URL {
   ORDER_STATUS = '/api/admin/orders/status',
   ORDERED_ITEMS = '/api/admin/orderedItems',
   CLIENTS = '/api/admin/clients',
-CLIENT_ORDER = '/api/order',
+  CLIENT_ORDER = '/api/order',
   CATEGORIES = '/api/admin/categories',
   SCHEDULED_ORDER = '/api/admin/scheduledOrders',
-  SUBCATEGORIES = '/api/admin/subcategories',
   ROUTES = '/api/admin/routes',
   ADMIN_DRIVERS = '/api/admin/drivers',
   DRIVER_ORDERS = '/api/drivers/orders',
 }
+
+// Helper function to get admin API URL with companyId
+export const getAdminApiUrl = (
+  companyId: string,
+  path: string,
+  query?: string,
+) => {
+  return `/api/admin/${companyId}${path}${query ? `?${query}` : ''}`;
+};
 
 export enum VIEW_TYPE {
   STOCK_PURCHASED = 'stock_purchased',
@@ -81,9 +89,17 @@ export enum PAYMENT_METHOD_TYPE {
 export enum USER_ROLE {
   CLIENT = 'client',
   ADMIN = 'admin',
-  DRIVER = 'driver',
-  SYSTEM = 'system',
   SUPER_ADMIN = 'super admin',
+  DRIVER = 'driver',
+  WAREHOUSE = 'warehouse',
+  SYSTEM = 'system',
+}
+
+export enum EMPLOYEE_ROLE {
+  ADMIN = 'admin',
+  SUPER_ADMIN = 'super admin',
+  DRIVER = 'driver',
+  WAREHOUSE = 'warehouse',
 }
 
 export enum FLAG_ORDER_TYPE {

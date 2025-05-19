@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { PrismaClient } from '@prisma/client';
+import { USER_ROLE } from '@/app/utils/enum';
 
 type HandlerFunction = (
   req: NextApiRequest,
@@ -26,9 +27,10 @@ const withAuthGuard =
         },
       });
 
-      const driver = await prisma.driver.findUnique({
+      const driver = await prisma.employee.findUnique({
         where: {
           id: Number(session.user.id),
+          role: USER_ROLE.DRIVER,
         },
       });
 

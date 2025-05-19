@@ -1,10 +1,14 @@
 import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
 import { MenuItem, Select } from '@mui/material';
 import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 
 const useEmployee = (defaultEmployee?: string) => {
+  const { companyId }: any = useParams();
   const [employee, setEmployee] = useState<string[]>([]);
-  const [selectedEmployee, setSelectedEmployee] = useState<string>(defaultEmployee || '');
+  const [selectedEmployee, setSelectedEmployee] = useState<string>(
+    defaultEmployee || '',
+  );
 
   useEffect(() => {
     if (defaultEmployee) {
@@ -14,7 +18,7 @@ const useEmployee = (defaultEmployee?: string) => {
 
   const fetchEmployee = async () => {
     try {
-      const data = await getAdminsAndDrivers();
+      const data = await getAdminsAndDrivers(companyId);
 
       setEmployee(data || []);
     } catch (error: any) {
@@ -23,8 +27,10 @@ const useEmployee = (defaultEmployee?: string) => {
   };
 
   useEffect(() => {
-    fetchEmployee();
-  }, []);
+    if (companyId) {
+      fetchEmployee();
+    }
+  }, [companyId]);
 
   const renderEmployeeSearch = () => {
     return (
@@ -37,7 +43,7 @@ const useEmployee = (defaultEmployee?: string) => {
         {employee.map((employee: string, index: number) => (
           <MenuItem key={index} value={employee}>
             {employee}
-          </MenuItem> 
+          </MenuItem>
         ))}
       </Select>
     );
