@@ -2,7 +2,7 @@ import { USER_CATEGORIZED, USER_ROLE } from '@/app/utils/enum';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-
+import bcrypt from 'bcrypt';
 interface IBody {
   id: number;
   newClientId: string;
@@ -32,6 +32,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(404).json({ error: 'Client Not Found' });
     }
 
+    if (existingClient?.type !== USER_CATEGORIZED.PENDING && existingClient?.type === USER_ROLE.CLIENT) {
+      return res.status(404).json({ error: 'Client Already Approved' });
+    }
+
+    const password = await bcrypt.hash(existingClient?.contactNumber || 'welcomeToOurApp', 10);
+
     await prisma.user.update({
       where: {
         id: existingClient.id,
@@ -40,6 +46,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         clientId: newClientId.trim(),
         role: USER_ROLE.CLIENT,
         type: USER_CATEGORIZED.NONE,
+        password,
       },
     });
 

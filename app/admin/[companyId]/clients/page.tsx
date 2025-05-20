@@ -74,7 +74,7 @@ export default function ClientsPage() {
       ? getAdminApiUrl(companyId, '/clients')
       : selectedTab === 1
         ? getAdminApiUrl(companyId, '')
-        : '',
+        : getAdminApiUrl(companyId, '/clients', 'role=guest'),
   );
   const [categories, mutateCategories] = SWRFetchData(
     getAdminApiUrl(companyId, '/categories'),

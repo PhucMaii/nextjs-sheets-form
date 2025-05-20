@@ -84,7 +84,13 @@ export default function RequestToJoinModal({ open, onClose, onClick }: IProps) {
   return (
     <>
       {NotificationComp}
-      <Modal open={open} onClose={onClose}>
+      <Modal
+        open={open}
+        onClose={() => {
+          if (isLoading) return;
+          onClose();
+        }}
+      >
         <BoxModal sx={{ maxHeight: '80vh', overflow: 'scroll' }}>
           <Box
             display="flex"

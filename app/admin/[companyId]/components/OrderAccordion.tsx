@@ -1,7 +1,6 @@
 'use client';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  AlertColor,
   Box,
   Button,
   Checkbox,
@@ -51,11 +50,13 @@ import { renderType } from '@/app/lib/render';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import { useParams } from 'next/navigation';
+import ApproveGuest from './Modals/ApproveGuest';
 
+import { ShowNotificationType } from '@/hooks/useNotification';
 interface PropTypes {
   order: Order;
-  showNotification?: (type: AlertColor, message: string) => void;
-  selectedOrders?: Order[];
+  showNotification?: ShowNotificationType;
+  selectedOrders?: Order[]; 
   handleSelectOrder?: (e: any, targetOrder: Order) => void;
   // handleUpdateItem?: (
   //   orderTotalPrice: number,
@@ -89,6 +90,8 @@ const OrderAccordion = ({
   const [isClientModalOpen, setIsClientModalOpen] = useState<boolean>(false);
   const [isMarkButtonDisabled, setIsMarkButtonDisabled] =
     useState<boolean>(false);
+
+  const [isApproveGuestOpen, setIsApproveGuestOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isOpenEditPrice, setIsOpenEditPrice] = useState<boolean>(false);
   const [isOpenDetails, setIsOpenDetails] = useState<boolean>(false);
@@ -208,6 +211,11 @@ const OrderAccordion = ({
     }, 0);
 
     setTotalQuantity(quantity);
+  };
+
+  const onOpenApproveGuest = (e: any) => {
+    e.stopPropagation();
+    setIsApproveGuestOpen(true);
   };
 
   const handleDeleteOrder = async (targetOrder: Order) => {
@@ -382,6 +390,16 @@ const OrderAccordion = ({
         contactNumber={order?.user?.contactNumber || ''}
         categoryName={order?.user?.category?.name || ''}
       />
+      {
+        order?.user?.type === USER_CATEGORIZED.PENDING && showNotification && (
+          <ApproveGuest
+            open={isApproveGuestOpen}
+            onClose={() => setIsApproveGuestOpen(false)}
+            client={order?.user}
+            showNotification={showNotification}
+          />
+        )
+      }
       {showNotification && (
         <>
           <EditDeliveryDate
@@ -574,7 +592,7 @@ const OrderAccordion = ({
               color={
                 order?.user?.role === USER_ROLE.CLIENT ? 'info' : 'error'
               }
-              variant="contained"
+              variant={order?.user?.role === USER_ROLE.CLIENT ? 'contained' : 'outlined'}
               sx={{ textTransform: 'none' }}
               onClick={handleOpenClientModal}
             >
@@ -584,8 +602,17 @@ const OrderAccordion = ({
                     order?.user?.clientName?.toUpperCase()}
                 </Typography>
                 {order?.user?.type &&
+                  order?.user?.role === USER_ROLE.CLIENT &&
                   order?.user?.type !== USER_CATEGORIZED.NONE &&
                   renderType(order.user.type)}
+
+                  {
+                    order?.user?.type === USER_CATEGORIZED.PENDING && (
+                      <Button onClick={onOpenApproveGuest} variant="contained" color="success">
+                        Approve
+                      </Button>
+                    )
+                  }
               </Box>
             </Button>
           </Grid>

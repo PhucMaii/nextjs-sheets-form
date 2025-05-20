@@ -1,5 +1,4 @@
 import {
-  AlertColor,
   Box,
   Divider,
   Modal,
@@ -14,10 +13,11 @@ import ModalHead from '@/app/lib/ModalHead';
 import axios from 'axios';
 import { getAdminApiUrl } from '@/app/utils/enum';
 import { useParams } from 'next/navigation';
+import { ShowNotificationType } from '@/hooks/useNotification';
 
 interface IProps extends ModalProps {
   client: UserType;
-  showNotification: (type: AlertColor, message: string) => void;
+  showNotification: ShowNotificationType;
 }
 
 const ApproveGuest = ({ open, onClose, client, showNotification }: IProps) => {

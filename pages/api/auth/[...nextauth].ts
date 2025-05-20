@@ -107,7 +107,7 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       // Add token data to the session
-      console.log('session in session', {session, token});
+      // console.log('session in session', {session, token});
       return {
         ...session,
         user: {

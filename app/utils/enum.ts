@@ -88,6 +88,7 @@ export enum PAYMENT_METHOD_TYPE {
 }
 
 export enum USER_ROLE {
+  PENDING = 'pending',
   CLIENT = 'client',
   ADMIN = 'admin',
   SUPER_ADMIN = 'super admin',

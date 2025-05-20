@@ -13,7 +13,7 @@ import { Box, Paper, TextField, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import axios from 'axios';
 import { useFormik } from 'formik';
-import { getSession, signIn } from 'next-auth/react';
+import { getSession, signIn, signOut } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -73,9 +73,11 @@ export default function LoginPage() {
         setIsLoading(false);
         setTimeout(() => {
           if (userData.role === 'client') {
-            router.push('/user');
+            router.push('/user/overview');
           } else {
-            router.push('/admin/orders');
+            signOut({
+              callbackUrl: `https://www.supremesprouts.com/auth/login`,
+            });
           }
         }, 1000);
       } catch (error: any) {
