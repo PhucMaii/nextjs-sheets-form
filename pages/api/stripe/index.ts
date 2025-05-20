@@ -20,12 +20,14 @@ export type CheckoutClientData = {
   contactName: string;
   contactNumber: string;
   deliveryAddress: string;
+  note?: string;
 };
 
 interface IBody {
   cartId: number;
   deliveryDate: string;
   clientData: CheckoutClientData;
+  note?: string;
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -38,7 +40,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // Only unregistered user are forced to checkout with provided information
 
-    const { cartId, deliveryDate, clientData }: IBody = req.body;
+    const { cartId, deliveryDate, clientData, note }: IBody = req.body;
 
     const cart: any = await prisma.cart.findUnique({
       where: {
@@ -141,13 +143,18 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return acc + item.price * item.quantity;
     }, 0);
 
+    const shippingFee = calculateShippingFee(
+      isAddressValid.distance,
+      totalRevenue,
+    );
+    
     const totalGST = cartItems.reduce((acc: number, item: any) => {
       if (item?.inventoryItem?.hasGST) {
         return acc + (item.price * item.quantity) * gstRate;
       }
 
       return acc;
-    }, 0);
+    }, 0) + (shippingFee * gstRate);
 
 
     const totalPST = cartItems.reduce((acc: number, item: any) => {
@@ -156,12 +163,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       }
 
       return acc;
-    }, 0);
+    }, 0) + (shippingFee * pstRate);
 
-    const shippingFee = calculateShippingFee(
-      isAddressValid.distance,
-      totalRevenue,
-    );
     // console.log(shippingFee, 'shipping fee');
 
     const stripeSession: any = (await stripe.checkout.sessions.create({
@@ -237,6 +240,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           deliveryAddress: addressLatAndLng.fullName,
         }),
         shippingFee: String(shippingFee.toFixed(2)),
+        note: note || '',
       },
     })) as any;
 

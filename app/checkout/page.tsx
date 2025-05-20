@@ -1,5 +1,5 @@
 'use client';
-import React, { useCallback, useState } from 'react';
+import React, { Suspense, useCallback, useState } from 'react';
 import NavbarWrapper from '../lib/NavbarWrapper';
 import {
   Box,
@@ -21,8 +21,13 @@ import useDatePicker from '@/hooks/useDatePicker';
 import CheckoutButton from '@/app/admin/[companyId]/components/CheckoutButton';
 import useNotification from '@/hooks/useNotification';
 import { ShadowSection } from '../admin/[companyId]/reports/styled';
+import { useSearchParams } from 'next/navigation';
+import LoadingComponent from '../components/LoadingComponent/LoadingComponent';
 
-export default function CheckoutPage() {
+const CheckoutContentPage = () => {
+  const searchParams: any = useSearchParams();
+  const note = searchParams?.get('note');
+
   const [address, setAddress] = useState<any>({
     address: '',
     city: 'Burnaby',
@@ -45,9 +50,9 @@ export default function CheckoutPage() {
     // cart,
     renderDisplayTotal,
     renderItemsDisplay,
-    // note,
+    note: cartNote,
     renderNoteInput,
-  }: any = useCart();
+  }: any = useCart(note);
 
   const { renderDatePicker, deliveryDate } = useDatePicker();
   const { showNotification, NotificationComp } = useNotification();
@@ -297,6 +302,7 @@ export default function CheckoutPage() {
                 clientData={{
                   ...userInfo,
                   deliveryAddress: `${address?.address}, ${address?.city}, ${address.province} ${address?.postalCode}`,
+                  note: cartNote,
                 }}
                 showNotification={showNotification}
               />
@@ -307,3 +313,11 @@ export default function CheckoutPage() {
     </NavbarWrapper>
   );
 }
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<LoadingComponent />}>
+      <CheckoutContentPage />
+    </Suspense>
+  );
+};

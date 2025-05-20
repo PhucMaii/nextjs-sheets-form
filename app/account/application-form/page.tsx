@@ -117,7 +117,7 @@ export default function ApplicatinForm() {
           }}
           onClick={() => router.push('/products')}
         >
-          Back to browsing
+          Back to shopping
         </Button>
       </Box>
     );

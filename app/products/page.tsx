@@ -79,41 +79,6 @@ const ProductPage = () => {
     }
   }, [debouncedKeywords]);
 
-  // On search items when query params change
-  useEffect(() => {
-    if (queryParams) {
-      if (queryParams !== searchKeywords) {
-        setSearchKeywords(queryParams || '');
-      }
-      const newDisplayItems = onSearchItems(displayItems || [], queryParams, [
-        'inventoryItem.name',
-        'inventoryItem.type.name',
-      ]);
-      setDisplayItems(newDisplayItems);
-    } else {
-      if (selectedType?.id === 0) {
-        setDisplayItems(allItemPreferences?.data);
-      } else {
-        setDisplayItems(selectedType?.itemPreferences);
-      }
-    }
-  }, [queryParams]);
-
-  // On select type and render items from that type
-  useEffect(() => {
-    // if (selectedType?.id === 0) {
-    //   setDisplayItems(allItemPreferences?.data);
-    // } else {
-    //   // setDisplayItems(selectedType?.itemPreferences);
-    //   onUpdateTypeParams();
-    // }
-
-    if (selectedType && selectedType?.name !== decodeURIComponent(queryType?.replace(/\+/g, ' '))) {
-      onUpdateTypeParams();
-    }
-  }, [selectedType, types]);
-
-  // On sort items
   useEffect(() => {
     if (allItemPreferences && selectedType) {
       const items =
@@ -131,6 +96,59 @@ const ProductPage = () => {
       }
     }
   }, [sortedBy, allItemPreferences, selectedType]);
+
+  // On search items when query params change
+  useEffect(() => {
+    if (queryParams) {
+      if (queryParams !== searchKeywords) {
+        setSearchKeywords(queryParams || '');
+      }
+      const newDisplayItems = onSearchItems(allItemPreferences?.data || [], queryParams, [
+        'inventoryItem.name',
+        'inventoryItem.type.name',
+      ]);
+      setDisplayItems(newDisplayItems);
+    } else {
+      if (selectedType?.id === 0) {
+        setDisplayItems(allItemPreferences?.data);
+      } else {
+        setDisplayItems(selectedType?.itemPreferences);
+      }
+    }
+  }, [queryParams, allItemPreferences]);
+
+  // On select type and render items from that type
+  useEffect(() => {
+    // if (selectedType?.id === 0) {
+    //   setDisplayItems(allItemPreferences?.data);
+    // } else {
+    //   // setDisplayItems(selectedType?.itemPreferences);
+    //   onUpdateTypeParams();
+    // }
+
+    if (selectedType && selectedType?.name !== decodeURIComponent(queryType?.replace(/\+/g, ' '))) {
+      onUpdateTypeParams();
+    }
+  }, [selectedType, types]);
+
+  // On sort items
+  // useEffect(() => {
+  //   if (allItemPreferences && selectedType) {
+  //     const items =
+  //       selectedType?.name === 'All'
+  //         ? [...allItemPreferences.data]
+  //         : [...selectedType.items];
+  //     if (sortedBy === 'best-sellers') {
+  //       filterBestSellerItems(items);
+  //     } else if (sortedBy === 'a-z' || sortedBy === 'z-a') {
+  //       sortItemsAlphabetically(items);
+  //     } else if (sortedBy === 'price-asc' || sortedBy === 'price-desc') {
+  //       sortByPrice(items);
+  //     } else {
+  //       setDisplayItems(items);
+  //     }
+  //   }
+  // }, [sortedBy, allItemPreferences, selectedType]);
 
   const filterBestSellerItems = (items: IItem[]) => {
     if (!allItemPreferences) {
@@ -434,7 +452,7 @@ const ProductPage = () => {
             rowGap={4}
             width="100%"
             sx={{ 
-              my: 2, 
+              my: 2,
               px: 2,
               display: "flex",
               flexWrap: "wrap"

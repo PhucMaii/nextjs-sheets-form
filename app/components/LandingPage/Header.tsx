@@ -27,7 +27,7 @@ export default function Header({ sx }: IProps) {
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   const onGoToSearchPage = () => {
-    router.push(`/products?q=${searchKeywords}`);
+    router.push(`/products?type=All&q=${searchKeywords}`);
   };
 
   return (
@@ -133,6 +133,11 @@ export default function Header({ sx }: IProps) {
                 '.mui-apo49d-MuiInputBase-root-MuiOutlinedInput-root': {
                   padding: 1,
                 },
+              }}
+              onKeyDown={(e: any) => {
+                if (e.key === 'Enter') {
+                  onGoToSearchPage();
+                }
               }}
               InputProps={{
                 endAdornment: (

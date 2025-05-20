@@ -89,7 +89,7 @@ export default function OrderSummary({ showNotification }: IProps) {
   };
 
   const proceedToCheckout = () => {
-    router.push('/checkout');
+    router.push(`/checkout?note=${note}`);
   };
 
   const renderOrderInfo = () => {

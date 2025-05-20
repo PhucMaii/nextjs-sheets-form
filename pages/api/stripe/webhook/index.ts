@@ -92,7 +92,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         formattedItems,
         session.metadata.deliveryDate,
         `Guest - ${clientInfo.clientName}`,
-        '',
+        session.metadata.note,
         Number(session.metadata?.shippingFee) || 0,
       );
 

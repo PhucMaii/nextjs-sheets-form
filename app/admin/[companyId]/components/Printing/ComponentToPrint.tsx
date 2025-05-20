@@ -43,9 +43,11 @@ export const ComponentToPrint = forwardRef(
       getAdminApiUrl(companyId, '/announcement'),
     );
 
-    const total = generateOrderTotalPrice(order.items);
+    const total = generateOrderTotalPrice(order.items, order?.shippingFee);
 
-    const totalPrice = total?.subTotal + (total?.PST || 0) + (total?.GST || 0);
+    // const totalPrice = total?.subTotal + (total?.PST || 0) + (total?.GST || 0);
+    const GST = total?.GST || 0;
+    const PST = total?.PST || 0;
 
     const orderDetailsTemplate: any = [];
 
@@ -214,11 +216,13 @@ export const ComponentToPrint = forwardRef(
               {order?.shippingFee &&
                 (order?.shippingFee > 0 && (
                   <>
-                    <Grid item xs={4} textAlign="left" ml={2}>
-                      <Typography>Shipping Fee</Typography>
+                    <Grid item xs={6} textAlign="left">
+                      <Typography sx={{ fontSize: printFontSize - 5 }}>
+                        Shipping Fee
+                      </Typography>
                     </Grid>
                     <Grid item xs={6} textAlign="right">
-                      <Typography fontWeight="bold">
+                      <Typography sx={{ fontSize: printFontSize - 5 }}>
                         ${order?.shippingFee?.toFixed(2) || 0}
                       </Typography>
                     </Grid>
@@ -231,7 +235,7 @@ export const ComponentToPrint = forwardRef(
               </Grid>
               <Grid item xs={6} textAlign="right">
                 <Typography sx={{ fontSize: printFontSize - 5 }}>
-                  ${total?.GST?.toFixed(2) || order?.GST?.toFixed(2) || 0}
+                  ${GST?.toFixed(2) || order?.GST?.toFixed(2) || 0}
                 </Typography>
               </Grid>
               <Grid item xs={6}>
@@ -241,7 +245,7 @@ export const ComponentToPrint = forwardRef(
               </Grid>
               <Grid item xs={6} textAlign="right">
                 <Typography sx={{ fontSize: printFontSize - 5 }}>
-                  ${total?.PST?.toFixed(2) || order?.PST?.toFixed(2) || 0}
+                  ${PST?.toFixed(2) || order?.PST?.toFixed(2) || 0}
                 </Typography>
               </Grid>
 
@@ -262,7 +266,7 @@ export const ComponentToPrint = forwardRef(
                   fontWeight="bold"
                 >
                   $
-                  {totalPrice?.toFixed(2) || order?.totalPrice?.toFixed(2) || 0}
+                  {total?.totalPrice?.toFixed(2) || order?.totalPrice?.toFixed(2) || 0}
                 </Typography>
               </Grid>
             </Grid>

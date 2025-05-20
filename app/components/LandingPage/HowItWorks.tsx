@@ -48,10 +48,10 @@ export default function HowItWorks() {
                   <Image
                     src={hiw.image}
                     alt={hiw.title}
-                    width={300}
+                    width={230}
                     height={200}
                     objectFit="contain" // Ensures the image maintains its aspect ratio
-                    style={{ borderRadius: 20, minWidth: '100%' }}
+                    style={{ borderRadius: 20}}
                   />
 
                   <Typography

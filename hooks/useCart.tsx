@@ -70,9 +70,15 @@ const CartItemDisplay = ({item}: {item: any}) => {
   );
 };
 
-export default function useCart() {
-  const [note, setNote] = useState('');
+export default function useCart(defaultNote?: string) {
+  const [note, setNote] = useState(defaultNote || '');
   const cart = useSelector((state: RootState) => state.cart);
+
+  useEffect(() => {
+    if (defaultNote) {
+      setNote(defaultNote);
+    }
+  }, [defaultNote]);
 
   const renderDisplayTotal = useCallback(() => {
     return (

@@ -390,6 +390,7 @@ const OrderView = ({
     id: defaultOrder?.id || -1,
     subTotal: 0,
     totalPrice: 0,
+    shippingFee: defaultOrder?.shippingFee || 0,
     PST: defaultOrder?.PST || 0,
     GST: defaultOrder?.GST || 0,
     note: defaultOrder?.note || '',
@@ -535,9 +536,10 @@ const OrderView = ({
 
   useEffect(() => {
     // Update order whenever the orderedItems change
-    const newSubtotal = generateOrderTotalPrice(orderedItems);
+    const newSubtotal = generateOrderTotalPrice(orderedItems, order?.shippingFee);
     setOrder({
       ...order,
+      shippingFee: order?.shippingFee || 0,
       subTotal: newSubtotal?.subTotal || 0,
       totalPrice: newSubtotal?.totalPrice || 0,
       PST: defaultOrder?.PST || newSubtotal?.PST || 0,
@@ -1266,6 +1268,9 @@ const OrderView = ({
           <Typography fontWeight="bold">
             ${order?.subTotal?.toFixed(2) || order?.totalPrice?.toFixed(2) || 0}
           </Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <Divider />
         </Grid>
         {order?.shippingFee &&
           order?.shippingFee > 0 ? (
