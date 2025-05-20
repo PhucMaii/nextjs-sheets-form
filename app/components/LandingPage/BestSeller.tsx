@@ -86,10 +86,10 @@ export default function BestSeller() {
                       <ProductListing
                         key={index}
                         product={item}
-                        containerStyle={{
-                          backgroundColor: 'white',
-                          height: '100%',
-                        }}
+                          // containerStyle={{
+                          //   backgroundColor: 'white',
+                          //   height: '100%',
+                          // }}
                         showNotification={showNotification}
                       />
                     </SwiperSlide>
@@ -121,10 +121,10 @@ export default function BestSeller() {
                       <ProductListing
                         key={index}
                         product={item}
-                        containerStyle={{
-                          backgroundColor: 'white',
-                          height: '100%',
-                        }}
+                        // containerStyle={{
+                        //   backgroundColor: 'white',
+                        //   height: '100%',
+                        // }}
                         showNotification={showNotification}
                       />
                     </SwiperSlide>

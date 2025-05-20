@@ -8,6 +8,7 @@ import { withGuestSessionGuard } from '../utils/withGuestSessionGuard';
 import { calculateShippingFee } from '@/app/utils/shipping';
 import { verifyDeliveryAddress } from '../utils/address';
 import { generateLatLng } from '../admin/[companyId]/clients/POST';
+import { gstRate, pstRate } from '@/app/lib/constant';
 // import { ORDER_STATUS } from '@/app/utils/enum';
 // import { generateCostAndProfit } from '../admin/orderedItems/single';
 
@@ -140,6 +141,23 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return acc + item.price * item.quantity;
     }, 0);
 
+    const totalGST = cartItems.reduce((acc: number, item: any) => {
+      if (item?.inventoryItem?.hasGST) {
+        return acc + (item.price * item.quantity) * gstRate;
+      }
+
+      return acc;
+    }, 0);
+
+
+    const totalPST = cartItems.reduce((acc: number, item: any) => {
+      if (item?.inventoryItem?.hasPST) {
+        return acc + (item.price * item.quantity) * pstRate;
+      }
+
+      return acc;
+    }, 0);
+
     const shippingFee = calculateShippingFee(
       isAddressValid.distance,
       totalRevenue,
@@ -171,14 +189,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
               ...(item?.option?.name && {
                 description: item?.option?.name,
               }),
+              
             },
             unit_amount: Math.round(
-              Number(item?.option?.price || item.item?.price) * 100,
+              (Number(item?.option?.price || item.item?.price)) * 100,
             ),
           },
           quantity: item.quantity,
         })),
         // Add shipping fee as an additional line item
+        // If GST then add GST, if not then remove
         {
           price_data: {
             currency: 'cad',
@@ -189,6 +209,24 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           },
           quantity: 1,
         },
+        ...(totalGST > 0 ? [{
+          price_data: {
+            currency: 'cad',
+            product_data: { name: 'GST' },
+            unit_amount: Math.round(Number(totalGST) * 100),
+          },
+          quantity: 1,
+        }] : []),
+        ...(totalPST > 0 ? [{
+          price_data: {
+            currency: 'cad',
+            product_data: {
+              name: 'PST',  
+            },
+            unit_amount: Math.round(Number(totalPST) * 100),
+          },
+          quantity: 1,
+        }] : []),
       ],
       metadata: {
         cartId: String(cartId),

@@ -2,7 +2,6 @@ import { generateImgUrl } from '@/app/lib/s3';
 import { IItem } from '@/app/utils/type';
 import {
   landingPagePrimaryColor,
-  landingPageSecondaryColor,
 } from '@/constant/landingPage';
 import { addItemToCartAsync } from '@/state/cart/cartSlice';
 import { AppDispatch, RootState } from '@/state/store';
@@ -18,15 +17,16 @@ interface IProps {
   product: IItem;
   showNotification: (type: AlertColor, message: string) => void;
   onClick?: () => void;
-  containerStyle?: any;
+  // containerStyle?: any;
 }
 
 export default function ProductListing({
   product,
   onClick,
   showNotification,
-  containerStyle,
+  // containerStyle,
 }: IProps) {
+  console.log('product', product);
   const [isOpenChooseOption, setIsOpenChooseOption] = useState<boolean>(false);
 
   const [img, setImg] = useState<string | undefined>(undefined);
@@ -133,7 +133,12 @@ export default function ProductListing({
         }}
         position="relative"
         onClick={onClick}
-        style={containerStyle}
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column"
+        }}
       >
         {(discountPercent || product?.isShowDiscount) && (
           <Box position="absolute" top={30} right={20}>
@@ -153,8 +158,15 @@ export default function ProductListing({
         />
         <Typography
           variant="h6"
-          fontWeight="regular"
-          sx={{ color: green[800] }}
+          fontWeight="semibold"
+          sx={{
+            // textAlign: 'center',
+            height: '50px',
+            overflow: 'hidden',
+            // textOverflow: 'ellipsis',
+            whiteSpace: 'wrap',
+          }}
+          // sx={{ color: green[800] }}
         >
           {product?.name || product.inventoryItem.name}
         </Typography>
@@ -162,7 +174,7 @@ export default function ProductListing({
         <Box display="flex" alignItems="flex-end" gap={1}>
           <Typography
             variant="h5"
-            fontWeight="bold"
+            fontWeight="semibold"
             sx={{
               color:
                 product?.isShowDiscount && product?.prevPrice
@@ -186,7 +198,7 @@ export default function ProductListing({
           )}
         </Box>
         <LoadingButton
-          variant="contained"
+          variant="outlined"
           fullWidth
           loading={isAdding}
           onClick={(e: any) => {
@@ -199,12 +211,14 @@ export default function ProductListing({
           }}
           disabled={!product?.availability}
           sx={{
-            backgroundColor: landingPagePrimaryColor,
+            // backgroundColor: landingPagePrimaryColor,
+            borderColor: landingPagePrimaryColor,
             alignSelf: 'flex-end',
-            color: 'white',
+            color: landingPagePrimaryColor,
             borderRadius: 2,
             ':hover': {
-              backgroundColor: landingPageSecondaryColor,
+              backgroundColor: landingPagePrimaryColor,
+              color: 'white',
             },
           }}
         >

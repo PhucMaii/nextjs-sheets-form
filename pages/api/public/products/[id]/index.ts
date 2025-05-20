@@ -75,6 +75,7 @@ const getRelatedProducts = async (product: IItem) => {
             unit: true,
           },
         },
+        inventoryItem: true,
       },
     });
 

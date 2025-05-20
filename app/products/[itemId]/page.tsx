@@ -119,7 +119,7 @@ export default function ItemPage() {
         <Typography
           variant="h5"
           fontWeight="medium"
-          sx={{ color: landingPagePrimaryColor }}
+          // sx={{ color: landingPagePrimaryColor }}
         >
           {itemData?.name || itemData?.inventoryItem?.name}
         </Typography>
@@ -223,10 +223,10 @@ export default function ItemPage() {
     return (
       <>
         <Typography
-          variant="h5"
-          fontWeight="bold"
+          variant="h6"
+          fontWeight="semibold"
           textAlign="center"
-          sx={{ color: landingPagePrimaryColor }}
+          // sx={{ color: landingPagePrimaryColor }}
         >
           Don't miss these favorites
         </Typography>
@@ -235,10 +235,10 @@ export default function ItemPage() {
           display="flex"
           flexDirection="row"
           gap={4}
-          sx={{ overflowX: 'scroll', whiteSpace: 'nowrap' }}
+          sx={{ overflowX: 'scroll', whiteSpace: 'nowrap', }}
         >
           {relatedProducts.map((item) => (
-            <Box key={item.id} sx={{ minWidth: 200 }}>
+            <Box key={item.id} sx={{ width: 200 }}>
               <ProductListing
                 product={item}
                 onClick={() => {}}

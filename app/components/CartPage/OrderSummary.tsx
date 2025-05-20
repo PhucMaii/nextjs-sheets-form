@@ -85,7 +85,7 @@ export default function OrderSummary({ showNotification }: IProps) {
   };
 
   const proceedToLoginPage = () => {
-    router.push('/login');
+    router.push('/account/login');
   };
 
   const proceedToCheckout = () => {

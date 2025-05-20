@@ -392,7 +392,7 @@ const ProductPage = () => {
           </FormControl>
         </Grid>
         <Grid item xs={12}>
-          <Typography variant="h3" fontWeight="bold" sx={{ color: green[800] }}>
+          <Typography variant="h5" fontWeight="semibold" sx={{ my: 2 }}>
             {selectedType?.name}
           </Typography>
         </Grid>
@@ -431,10 +431,14 @@ const ProductPage = () => {
           {/* Product Display */}
           <Grid
             container
-            // columnSpacing={1}
             rowGap={4}
             width="100%"
-            sx={{ my: 2, px: 2 }}
+            sx={{ 
+              my: 2, 
+              px: 2,
+              display: "flex",
+              flexWrap: "wrap"
+            }}
           >
             {displayItems?.length > 0 ? (
               displayItems?.map((product: IItem, index: number) => {
@@ -445,13 +449,24 @@ const ProductPage = () => {
                     sm={4}
                     md={2}
                     key={index}
-                    sx={{ height: '370px' }}
+                    sx={{
+                      display: "flex",
+                      alignItems: "stretch"
+                    }}
                   >
-                    <ProductListing
-                      product={product}
-                      onClick={() => router.push(`/products/${product.id}`)}
-                      showNotification={showNotification}
-                    />
+                    <Box sx={{ width: "100%" }}>
+                      <ProductListing
+                        product={product}
+                        onClick={() => router.push(`/products/${product.id}`)}
+                        showNotification={showNotification}
+                        // containerStyle={{
+                        //   width: "100%",
+                        //   height: "100%",
+                        //     display: "flex",
+                        //     flexDirection: "column"
+                        //   }}
+                      />
+                    </Box>
                   </Grid>
                 );
               })

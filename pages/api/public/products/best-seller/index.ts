@@ -21,6 +21,7 @@ export default async function handler(
       },
       include: {
         options: true,
+        inventoryItem: true,
       },
     });
 
@@ -37,6 +38,7 @@ export default async function handler(
                 unit: true,
               },
             },
+            inventoryItem: true,
           },
         },
       },

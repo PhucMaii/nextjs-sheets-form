@@ -7,9 +7,66 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
+const ItemTypeDisplay = ({
+  itemType,
+  onClick,
+}: {
+  itemType: IItemType;
+  onClick: () => void;
+}) => {
+
+  const [img, setImg] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    generateImgUrl(
+      itemType?.items[0]?.image || itemType?.items[0]?.inventoryItem?.image,
+    ).then((img) => {
+      setImg(img);
+    });
+  }, [itemType]);
+
+
+  return (
+    <Grid
+      item
+      xs={6}
+      sm={4}
+      md={3}
+      lg={2}
+      sx={{
+        '&:hover': {
+          cursor: 'pointer',
+          transform: 'scale(1.05)',
+          transition: 'all 0.3s ease-in-out',
+        },
+      }}
+      onClick={onClick}
+    >
+      <Box display="flex" flexDirection="column" alignItems="center">
+        <img
+          src={img}
+          alt={itemType?.name}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
+            borderRadius: 10,
+          }}
+        />
+        <Typography
+          variant="subtitle1"
+          textAlign="center"
+          sx={{ fontWeight: 'medium' }}
+        >
+          {itemType?.name}
+        </Typography>
+      </Box>
+    </Grid>
+  );
+};
+
 export default function ProductCategories() {
   const [itemTypes, setItemTypes] = useState<IItemType[] | any[]>([]);
-  const [img, setImg] = useState<string | undefined>(undefined);
 
   const router = useRouter();
 
@@ -30,13 +87,6 @@ export default function ProductCategories() {
     fetchItemTypes();
   }, []);
 
-  useEffect(() => {
-    if (itemTypes[0]?.items[0]?.image || itemTypes[0]?.items[0]?.inventoryItem?.image) {
-      generateImgUrl(itemTypes[0]?.items[0]?.image || itemTypes[0]?.items[0]?.inventoryItem?.image).then((img) => {
-        setImg(img);
-      });
-    }
-  }, [itemTypes]);
   return (
     <Box sx={{ backgroundColor: 'white' }}>
       <Box sx={{ maxWidth: maxWidth, mx: 'auto', pt: 4, px: 6 }}>
@@ -47,44 +97,13 @@ export default function ProductCategories() {
         <Grid container spacing={2} alignItems="flex-end">
           {itemTypes.map((itemType: any, index: number) => {
             return (
-              <Grid
-                item
-                xs={6}
-                sm={4}
-                md={3}
-                lg={2}
+              <ItemTypeDisplay
                 key={index}
-                sx={{
-                  '&:hover': {
-                    cursor: 'pointer',
-                    transform: 'scale(1.05)',
-                    transition: 'all 0.3s ease-in-out',
-                  },
-                }}
+                itemType={itemType}
                 onClick={() =>
                   router.push(`/products?type=${encodeURIComponent(itemType?.name)}`)
                 }
-              >
-                <Box display="flex" flexDirection="column" alignItems="center">
-                  <img
-                    src={img}
-                    alt={itemType?.name}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'contain',
-                      borderRadius: 10,
-                    }}
-                  />
-                  <Typography
-                    variant="subtitle1"
-                    textAlign="center"
-                    sx={{ fontWeight: 'medium' }}
-                  >
-                    {itemType?.name}
-                  </Typography>
-                </Box>
-              </Grid>
+              />
             );
           })}
         </Grid>
