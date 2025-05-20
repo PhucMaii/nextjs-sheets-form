@@ -22,10 +22,10 @@ import { ColorPicker, useColor } from 'react-color-palette';
 import { infoBackground, primaryColor } from '@/theme/color';
 import { ItemButton } from '@/app/components/OrderView';
 import FileUpload from '../FileUpload';
-import { generateImgUrl, getAllS3Images } from '@/app/lib/s3';
 import { grey } from '@mui/material/colors';
 import { Image } from 'lucide-react';
 import { useParams } from 'next/navigation';
+import useImageGallery from '@/hooks/useImageGallery';
 
 interface IProps extends ModalProps {
   types: IItemType[];
@@ -47,38 +47,48 @@ export default function SwitchTypeAndAppearanceModal({
     item?.typeId || null,
   );
   const [itemImage, setItemImage] = useState<string>(item?.image || '');
-  const [imageGallery, setImageGallery] = useState<string[]>([]);
+  // const [imageGallery, setImageGallery] = useState<string[]>([]);
   const [isUploadFile, setIsUploadFile] = useState<boolean>(false);
 
-  const [imgUrl, setImgUrl] = useState<string>('');
+  // const [imgUrl, setImgUrl] = useState<string>('');
 
   const [color, setColor] = useColor(item?.color || infoBackground);
 
-  useEffect(() => {
-    const fetchUrl = async () => {
-      const url = await generateImgUrl(itemImage, true);
-      setImgUrl(url);
-    };
-    fetchUrl();
-  }, [itemImage]);
+  const { selectedImage, renderImageGallery } = useImageGallery(item?.image || '', '100%', 'products');
+
+  // useEffect(() => {
+  //   const fetchUrl = async () => {
+  //     const url = await generateImgUrl(itemImage, true);
+  //     setImgUrl(url);
+  //   };
+  //   fetchUrl();
+  // }, [itemImage]);
 
   useEffect(() => {
     if (item) {
       setSelectedType(item.typeId);
       setItemImage(item?.image || '');
 
-      const getImageGallery = async () => {
-        console.log('running');
-        try {
-          const images = await getAllS3Images(`products`);
-          setImageGallery(images || []);
-        } catch (error: any) {
-          console.log('There was an error: ', error);
-          showNotification('error', 'There was an error: ' + error);
-        }
-      };
+      // const getImageGallery = async () => {
+      //   console.log('running');
+      //   try {
+      //     const images: any = await getAllS3Images(`products`);
 
-      getImageGallery();
+      //     const allImagesPromises = images.map(async (image: string) => {
+      //       const url = await generateImgUrl(image);
+      //       return url;
+      //     });
+
+      //     const allImages = await Promise.all(allImagesPromises);
+      //     console.log(allImages, 'allImages');
+      //     setImageGallery(allImages || []);
+      //   } catch (error: any) {
+      //     console.log('There was an error: ', error);
+      //     showNotification('error', 'There was an error: ' + error);
+      //   }
+      // };
+
+      // getImageGallery();
     }
   }, [item]);
 
@@ -92,7 +102,7 @@ export default function SwitchTypeAndAppearanceModal({
           id: Number(actualId),
           typeId: selectedType,
           color: color.hex,
-          image: itemImage,
+          image: itemImage || selectedImage,
         },
       );
 
@@ -156,7 +166,8 @@ export default function SwitchTypeAndAppearanceModal({
           >
             <Image width={50} height={50} />
           </Box>
-          {imageGallery?.map((image: string, index: number) => (
+          {renderImageGallery()}
+          {/* {imageGallery?.map((image: string, index: number) => (
             <img
               key={index}
               src={imgUrl}
@@ -173,7 +184,7 @@ export default function SwitchTypeAndAppearanceModal({
               }}
               onClick={() => setItemImage(image)}
             />
-          ))}
+          ))} */}
         </Box>
 
         <Button

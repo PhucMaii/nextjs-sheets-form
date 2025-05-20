@@ -74,7 +74,7 @@ export const generateImgUrl = async (
     isCheque
       ? process.env.NEXT_PUBLIC_S3_BUCKET_NAME_CHEQUE
       : process.env.NEXT_PUBLIC_S3_BUCKET_NAME
-  }.s3.amazonaws.com/${fileKey}`;
+  }.s3.us-west-2.amazonaws.com/${fileKey}`;
 };
 
 export const getAllS3Images = async (folder: string = '') => {

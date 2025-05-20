@@ -26,8 +26,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
-    const { orderIds, startDate, endDate, userId, role, companyId }: IBody =
-      req.body;
+    const { orderIds, startDate, endDate, userId, role }: IBody = req.body;
+
+    const session: any = await getServerSession(req, res, authOptions);
+    const companyId = Number(session?.user?.companyId);
 
     const existingUser = await prisma.user.findUnique({
       where: {

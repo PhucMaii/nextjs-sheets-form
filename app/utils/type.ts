@@ -209,6 +209,7 @@ type Cash = {
 
 export interface IBoard extends CodBoard {
   employee: Employee;
+  driver: Driver;
   uncollected: Cash;
   collected: Cash;
   boardClients: UserType[];

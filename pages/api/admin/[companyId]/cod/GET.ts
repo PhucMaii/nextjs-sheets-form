@@ -260,6 +260,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           companyId: Number(companyId),
         },
         include: {
+          employee: true,
           expense: {
             include: {
               paymentMethod: true,
