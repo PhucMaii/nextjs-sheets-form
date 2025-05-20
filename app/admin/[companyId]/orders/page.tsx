@@ -65,6 +65,7 @@ import {
 import LoadingModal from '../components/Modals/LoadingModal';
 import { MemoizedAllPrint } from '../components/Printing/AllPrint';
 import { useParams } from 'next/navigation';
+import DeleteModal from '../components/Modals/delete/DeleteModal';
 
 interface Category {
   id: number;
@@ -144,7 +145,10 @@ export default function Orders() {
   const [currentStatus, setCurrentStatus] = useState<ORDER_STATUS>(
     ORDER_STATUS.NONE,
   );
+
   const [isAddOrderOpen, setIsAddOrderOpen] = useState<boolean>(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+  
   const [filterOptions, setFilterOptions] = useState<PAYMENT_TYPE[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isExecutingAction, setIsExecutingAction] = useState<boolean>(false);
@@ -424,7 +428,7 @@ export default function Orders() {
   // );
 
   const handleDeleteSelectedOrders = async () => {
-    setIsExecutingAction(true);
+    // setIsExecutingAction(true);
     try {
       const response = await axios.delete(
         getAdminApiUrl(companyId, '/clients/orders'),
@@ -437,11 +441,11 @@ export default function Orders() {
       setSelectedOrders([]);
       mutate();
 
-      setIsExecutingAction(false);
+      // setIsExecutingAction(false);
     } catch (error: any) {
       console.log('Fail to mark all as completed: ', error);
 
-      setIsExecutingAction(false);
+      // setIsExecutingAction(false);
       showNotification(
         'error',
         'Fail to mark all as completed: ' + error.response.data.error,
@@ -591,7 +595,7 @@ export default function Orders() {
         </MenuItem>
         <MenuItem
           onClick={() => {
-            handleDeleteSelectedOrders();
+            setIsDeleteModalOpen(true);
             handleCloseAnchor();
           }}
           disabled={orderData.length === 0}
@@ -827,6 +831,12 @@ export default function Orders() {
           ref={componentRef}
         />
       </div>
+      <DeleteModal 
+        open={isDeleteModalOpen}
+        handleCloseModal={() => setIsDeleteModalOpen(false)}
+        targetObj={selectedOrders}
+        handleDelete={handleDeleteSelectedOrders}
+      />
       <AddOrder
         open={isAddOrderOpen}
         onClose={() => setIsAddOrderOpen(false)}
