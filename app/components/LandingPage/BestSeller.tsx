@@ -1,6 +1,6 @@
 import { API_URL } from '@/app/utils/enum';
 import { maxWidth } from '@/constant/landingPage';
-import { Box, Divider, Grid, Typography } from '@mui/material';
+import { Box, Divider, Grid, Typography, useMediaQuery } from '@mui/material';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import ProductListing from '../ProductListingPage/ProductListing';
@@ -23,6 +23,10 @@ export default function BestSeller() {
 
   // FETCH BEST SELLERS AND POROMOTIONS
   const { showNotification, NotificationComp } = useNotification();
+
+  const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
+  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
+  const lgDown = useMediaQuery((theme: any) => theme.breakpoints.down('lg'));
 
   useEffect(() => {
     const fetchBestSellersAndSpecials = async () => {
@@ -52,7 +56,7 @@ export default function BestSeller() {
         display="flex"
         flexDirection="column"
         gap={4}
-        px={6}
+        // px={6}
         py={8}
         sx={{ backgroundColor: 'white' }}
       >
@@ -68,7 +72,7 @@ export default function BestSeller() {
           }}
         >
           <Grid item xs={12}>
-            <Typography variant="h3" fontWeight="medium">
+            <Typography variant="h4" fontWeight="medium">
               Shop our Best Sellers 📈
             </Typography>
             <Swiper
@@ -76,7 +80,7 @@ export default function BestSeller() {
               navigation
               pagination={{ clickable: true }}
               spaceBetween={50}
-              slidesPerView={5}
+              slidesPerView={smDown ? 1 : mdDown ? 2 : lgDown ? 3 : 5}
               // style={{ padding: '20px' }}
             >
               {bestSeller &&
@@ -103,7 +107,7 @@ export default function BestSeller() {
           </Grid>
 
           <Grid item xs={12}>
-            <Typography variant="h3" fontWeight="medium">
+            <Typography variant="h4" fontWeight="medium">
               {promotion?.title} 💸
             </Typography>
             <Swiper
@@ -111,7 +115,7 @@ export default function BestSeller() {
               navigation
               pagination={{ clickable: true }}
               spaceBetween={50}
-              slidesPerView={5}
+              slidesPerView={smDown ? 1 : mdDown ? 2 : lgDown ? 3 : 5}
               style={{ padding: '20px' }}
             >
               {promotion?.websiteItems &&

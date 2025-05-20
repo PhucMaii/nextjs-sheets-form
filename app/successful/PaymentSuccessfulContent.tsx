@@ -53,7 +53,7 @@ export default function PaymentSuccessfulContent() {
           {queryParams === 'payment'
             ? 'Payment Successful'
             : 'Order Successful'}
-        </Typography>p
+        </Typography>
         <Typography textAlign="center" variant="h6" fontWeight="bold" mt={2}>
           Thank you for your order
         </Typography>

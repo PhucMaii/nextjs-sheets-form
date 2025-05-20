@@ -25,7 +25,12 @@ import {
   landingPageSecondaryColor,
 } from '@/constant/landingPage';
 import { ListItemButtonStyled } from '@/app/admin/[companyId]/components/Sidebar/styled';
-import { HomeIcon, ShoppingBagIcon, ShoppingCartIcon, UserIcon } from 'lucide-react';
+import {
+  HomeIcon,
+  ShoppingBagIcon,
+  ShoppingCartIcon,
+  UserIcon,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Searchbar from './Search/Searchbar';
 import useLocalStorage from '@/hooks/useLocalStorage';
@@ -231,8 +236,21 @@ export default function Navbar() {
           columnSpacing={1}
           sx={{ backgroundColor: 'white', my: 1, px: 2 }}
         >
-          <Grid item xs={12}>
+          <Grid item xs={6}>
             <Logo />
+          </Grid>
+          <Grid item xs={6} display="flex" justifyContent="flex-end">
+            <IconButton
+              sx={{ color: landingPagePrimaryColor }}
+              onClick={() => router.push('/cart')}
+            >
+              <ShoppingCartIcon style={{ width: 30, height: 30 }} />
+              <CartBadge
+                badgeContent={cartItemsQty}
+                color="error"
+                overlap="circular"
+              />
+            </IconButton>
           </Grid>
           <Grid item xs={1}>
             <IconButton onClick={() => setIsNavOpen(true)}>
@@ -388,7 +406,6 @@ export default function Navbar() {
             itemType: null,
           })
         }
-        
       />
       <Box
         px={4}
@@ -521,7 +538,6 @@ export default function Navbar() {
                 //     });
                 //   }, 300); // Adjust delay time if necessary
                 // }}
-              
               >
                 {/* <ItemTypePopover
                   open={itemTypePopoverProps.open}
@@ -553,7 +569,9 @@ export default function Navbar() {
                   variant="h6"
                   key={index}
                   onClick={() => {
-                    router.push(`/products?type=${encodeURIComponent(itemType.name)}`);
+                    router.push(
+                      `/products?type=${encodeURIComponent(itemType.name)}`,
+                    );
                     // setSelectedTab(itemType.href);
                   }}
                   sx={{

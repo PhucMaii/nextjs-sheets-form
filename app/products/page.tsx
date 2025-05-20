@@ -348,7 +348,7 @@ const ProductPage = () => {
         spacing={1}
         sx={{ px: 2 }}
       >
-        <Grid item xs={12} md={10}>
+        <Grid item xs={10}>
           <TextField
             value={searchKeywords}
             onChange={(e) => setSearchKeywords(e.target.value)}
@@ -371,7 +371,7 @@ const ProductPage = () => {
             }}
           />
         </Grid>
-        <Grid item xs={12} md={2} textAlign="right">
+        <Grid item xs={2} textAlign="right">
           <FormControl sx={{ width: 'fit-content' }}>
             <InputLabel id="sort-by">Sort by</InputLabel>
             <Select
@@ -447,7 +447,8 @@ const ProductPage = () => {
                     item
                     xs={6}
                     sm={4}
-                    md={2}
+                    md={3}
+                    lg={2}
                     key={index}
                     sx={{
                       display: "flex",

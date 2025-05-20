@@ -123,7 +123,7 @@ export default function ProductListing({
         sx={{
           height: '100%',
           maxWidth: '300px',
-          minWidth: '250px',
+          minWidth: '200px',
           cursor: 'pointer',
           p: 2,
           borderRadius: 1,

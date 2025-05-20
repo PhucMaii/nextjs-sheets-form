@@ -77,7 +77,7 @@ export default function CartPage() {
   return (
     <NavbarWrapper>
       {NotificationComp}
-      <Box sx={{ maxWidth: maxWidth, mx: 'auto', p: 4 }}>
+      <Box sx={{ maxWidth: maxWidth, mx: 'auto', width: '100%', p: 4 }}>
         <Typography
           variant="h5"
           fontWeight="bold"
@@ -85,7 +85,7 @@ export default function CartPage() {
         >
           Your cart
         </Typography>
-        <Grid container columnSpacing={2} rowGap={2} mt={2}>
+        <Grid container columnSpacing={2} rowGap={2} mt={2} sx={{ width: '100%' }}>
           <Grid item xs={12} md={8}>
             <ShadowSection>
               <CartItemTable showNotification={showNotification} />

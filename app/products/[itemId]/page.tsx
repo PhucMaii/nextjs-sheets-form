@@ -10,7 +10,14 @@ import {
   maxWidth,
 } from '@/constant/landingPage';
 import useNotification from '@/hooks/useNotification';
-import { Box, Grid, MenuItem, Select, Typography } from '@mui/material';
+import {
+  Box,
+  Grid,
+  MenuItem,
+  Select,
+  Typography,
+  useMediaQuery,
+} from '@mui/material';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
@@ -24,6 +31,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/state/store';
 import { ItemButton } from '@/app/components/OrderView';
 import { primaryColor } from '@/theme/color';
+import { SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, Scrollbar, A11y } from 'swiper/modules';
+import { Swiper } from 'swiper/react';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import 'swiper/css/scrollbar';
+import '../../../styles/swiper.css';
 
 export default function ItemPage() {
   const { itemId }: any = useParams();
@@ -40,13 +55,19 @@ export default function ItemPage() {
   const { showNotification, NotificationComp } = useNotification();
   const dispatch = useDispatch<AppDispatch>();
 
+  const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
+  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
+  const lgDown = useMediaQuery((theme: any) => theme.breakpoints.down('lg'));
+
   useEffect(() => {
     fetchItemData();
   }, []);
 
   useEffect(() => {
     const fetchImgUrl = async () => {
-      const data = await generateImgUrl(itemData?.image || itemData?.inventoryItem?.image);
+      const data = await generateImgUrl(
+        itemData?.image || itemData?.inventoryItem?.image,
+      );
       setImgUrl(data);
     };
     fetchImgUrl();
@@ -221,7 +242,7 @@ export default function ItemPage() {
 
   const renderRelatedItems = () => {
     return (
-      <>
+      <Box display="flex" flexDirection="column" gap={2}>
         <Typography
           variant="h6"
           fontWeight="semibold"
@@ -231,11 +252,39 @@ export default function ItemPage() {
           Don't miss these favorites
         </Typography>
 
-        <Box
+        <Box sx={{ maxWidth: '90vw', width: '100%' }}>
+          <Swiper
+            modules={[Navigation, Pagination, Scrollbar, A11y]}
+            navigation
+            pagination={{ clickable: true }}
+            spaceBetween={50}
+            slidesPerView={smDown ? 1 : mdDown ? 2 : lgDown ? 3 : 5}
+            // style={{ maxWidth: mdDOwn ? '200px' : '100%' }}
+          >
+            {relatedProducts &&
+              relatedProducts?.map((item: any, index: number) => {
+                return (
+                  <SwiperSlide>
+                    <ProductListing
+                      key={index}
+                      product={item}
+                      // containerStyle={{
+                      //   backgroundColor: 'white',
+                      //   height: '100%',
+                      // }}
+                      showNotification={showNotification}
+                    />
+                  </SwiperSlide>
+                );
+              })}
+          </Swiper>
+        </Box>
+
+        {/* <Box
           display="flex"
           flexDirection="row"
           gap={4}
-          sx={{ overflowX: 'scroll', whiteSpace: 'nowrap', }}
+          sx={{ overflowX: 'scroll', whiteSpace: 'nowrap', width: '100%' }}
         >
           {relatedProducts.map((item) => (
             <Box key={item.id} sx={{ width: 200 }}>
@@ -246,8 +295,8 @@ export default function ItemPage() {
               />
             </Box>
           ))}
-        </Box>
-      </>
+        </Box> */}
+      </Box>
     );
   };
 
@@ -268,7 +317,7 @@ export default function ItemPage() {
         gap={4}
         sx={{ maxWidth: maxWidth, mx: 'auto', p: 4 }}
       >
-        <Grid container rowGap={2} columnSpacing={2}>
+        <Grid container rowGap={2} columnSpacing={2} sx={{ width: '100%' }}>
           <Grid
             item
             xs={12}
@@ -292,8 +341,11 @@ export default function ItemPage() {
           <Grid item xs={12} md={6}>
             {renderProductInfo()}
           </Grid>
+
+          <Grid item xs={12}>
+            {renderRelatedItems()}
+          </Grid>
         </Grid>
-        {renderRelatedItems()}
       </Box>
       {/* <Footer /> */}
     </NavbarWrapper>

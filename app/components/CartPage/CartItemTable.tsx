@@ -4,6 +4,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
 } from '@mui/material';
@@ -19,9 +20,10 @@ export default function CartItemTable({ showNotification }: IProps) {
   const cart: any = useSelector((state: RootState) => state.cart);
 
   return (
-    <Table>
-      <TableHead>
-        <TableRow>
+    <TableContainer sx={{ width: '100%', maxWidth: '100%', overflowX: 'auto' }}>
+      <Table sx={{ width: '100%' }}>
+        <TableHead>
+          <TableRow>
           <TableCell>Product</TableCell>
           <TableCell>Price</TableCell>
           <TableCell>Quantity</TableCell>
@@ -38,8 +40,9 @@ export default function CartItemTable({ showNotification }: IProps) {
               showNotification={showNotification}
               cart={cart}
             />
-          ))}
-      </TableBody>
-    </Table>
+            ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 }
