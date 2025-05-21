@@ -30,7 +30,7 @@ export default function AuthenGuard({ children }: any) {
     if (
       (sessionError ||
         (!isSessionValidating && Object.keys(session).length === 0)) &&
-      (pathname?.startsWith('/admin') || pathname?.startsWith('/driver')) &&
+      (pathname?.startsWith('/admin') || pathname?.startsWith('/driver') || pathname?.startsWith('/user')) &&
       pathname !== '/driver/login'
       // pathname !== '/auth/login'
     ) {

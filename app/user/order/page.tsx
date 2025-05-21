@@ -171,7 +171,7 @@ export default function OrderForm() {
 
       // SHOULD BE /user/overview after website is done
       setTimeout(() => {
-        router.push('/');
+        router.push('/user/overview');
       }, 500);
     } catch (error: any) {
       console.log(error);
