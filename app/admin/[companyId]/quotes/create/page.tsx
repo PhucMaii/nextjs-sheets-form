@@ -4,7 +4,6 @@ import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import {
   Box,
-  Button,
   Grid,
   IconButton,
   TextField,
@@ -20,11 +19,13 @@ import useClients from '@/hooks/autocomplete/useClients';
 import { generateQuoteTotal } from '@/app/utils/quote';
 import useNotification from '@/hooks/useNotification';
 import axios from 'axios';
-import { API_URL, QUOTE_STATUS } from '@/app/utils/enum';
+import { getAdminApiUrl, QUOTE_STATUS } from '@/app/utils/enum';
 import ClientSection from './ClientSection';
 import { LoadingButton } from '@mui/lab';
+import { useParams } from 'next/navigation';
 
 export default function CreateQuotePage() {
+  const { companyId }: any = useParams();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [address, setAddress] = useState<any>(null);
   const [client, setClient] = useState<any>({
@@ -177,7 +178,7 @@ export default function CreateQuotePage() {
           inventoryUnitId: item.unit.id,
         };
       });
-      const response = await axios.post(`${API_URL.ADMIN}/quotes`, {
+      const response = await axios.post(getAdminApiUrl(companyId, '/quotes'), {
         quote: {
           status: QUOTE_STATUS.SENT,
           note,
@@ -195,7 +196,7 @@ export default function CreateQuotePage() {
 
       // TODO: Redirect to the quote page
       setTimeout(() => {
-        router.push(`/admin/quotes`);
+        router.push(`/admin/${companyId}/quotes`);
       }, 1000);
     } catch (error: any) {
       console.log('Something went wrong: ', error);
@@ -218,7 +219,7 @@ export default function CreateQuotePage() {
       />
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Box display="flex" alignItems="center">
-          <IconButton onClick={() => router.push('/admin/quotes')}>
+          <IconButton onClick={() => router.push(`/admin/${companyId}/quotes`)}>
             <ArrowLeftIcon />
           </IconButton>
           <Typography variant="h5" fontWeight="semibold">

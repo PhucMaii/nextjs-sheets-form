@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Box,
@@ -14,14 +14,40 @@ import SearchInput from '../components/SearchInput';
 import { generateMonthRange } from '@/app/utils/time';
 import SelectDateRange from '../components/Select/SelectDateRange';
 import { useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
+import useNotification from '@/hooks/useNotification';
+import { fetchApi } from '@/app/utils/db';
+import { getAdminApiUrl } from '@/app/utils/enum';
 
 export default function QuoteClientPage() {
+  const { companyId }: any = useParams();
+  
   const [dateRange, setDateRange] = useState<any>(generateMonthRange());
   const [searchKeywords, setSearchKeywords] = useState<string>('');
+  const [quotes, setQuotes] = useState<any>([]);
+  
   const router = useRouter();
+
+  const { showNotification, NotificationComp } = useNotification();
+
+  useEffect(() => {
+    fetchQuotes();
+  }, []);
+
+  const fetchQuotes = async () => {
+    try {
+      const data = await fetchApi(getAdminApiUrl(companyId, `/quotes?companyId=${companyId}`));
+      console.log(data);
+      setQuotes(data);
+    } catch (error) {
+      console.error('Error fetching quotes:', error);
+      showNotification('error', 'Error fetching quotes');
+    }
+  }
 
   return (
     <Sidebar>
+      {NotificationComp}
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Typography variant="h5">Quotes</Typography>
         <SelectDateRange
@@ -59,7 +85,7 @@ export default function QuoteClientPage() {
           </Grid>
 
           <Grid item xs={1.5} lg={1}>
-            <Button fullWidth variant="contained" color="primary" onClick={() => router.push('/admin/quotes/create')}>
+            <Button fullWidth variant="contained" color="primary" onClick={() => router.push(`/admin/${companyId}/quotes/create`)}>
               + Create Quote
             </Button>
           </Grid>

@@ -1,14 +1,16 @@
 import { fetchApi } from '@/app/utils/db';
-import { API_URL } from '@/app/utils/enum';
+import { getAdminApiUrl } from '@/app/utils/enum';
 import { Autocomplete, TextField } from '@mui/material';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useParams } from 'next/navigation';
 
 const useClients = () => {
+  const { companyId }: any = useParams();
   const [clients, setClients] = useState<any[]>([]);
   const [selectedClient, setSelectedClient] = useState<any>(null);
 
   const fetchClients = async () => {
-    const data = await fetchApi(`${API_URL.ADMIN}/clients`);
+    const data = await fetchApi(getAdminApiUrl(companyId, '/clients'));
     setClients(data);
   };
 

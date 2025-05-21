@@ -1,14 +1,16 @@
 import { fetchApi } from '@/app/utils/db';
-import { API_URL } from '@/app/utils/enum';
+import { getAdminApiUrl } from '@/app/utils/enum';
 import { Autocomplete, TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 
 const useCategory = () => {
+  const { companyId }: any = useParams();
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<any>(null);
 
   const fetchCategories = async () => {
-    const data = await fetchApi(`${API_URL.ADMIN}/categories`);
+    const data = await fetchApi(getAdminApiUrl(companyId, '/categories'));
     setCategories(data);
   };
 

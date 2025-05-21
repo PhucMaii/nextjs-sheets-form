@@ -1,15 +1,17 @@
 import { generateQuoteTotal } from "@/app/utils/quote";
+import { getUserInfo } from "@/pages/api/utils/auth";
+import { getTodayDate } from "@/pages/api/utils/date";
 import { PrismaClient } from "@prisma/client";
 import { hash } from "bcryptjs";
 import { NextApiRequest, NextApiResponse } from "next";
-import { getTodayDate } from "../../utils/date";
-import { getUserInfo } from "../../utils/auth";
 
 const prisma = new PrismaClient();
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { quote, quoteItems, user } = req.body;
+
+    const { companyId }: any = req.query;
 
     // Check if user is new
     let quoteUser = await prisma.user.findUnique({
@@ -49,6 +51,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         subtotal: quoteTotal.subtotal,
         createdBy: `Admin - ${admin?.clientName}`,
         createdAt: today.dateAndTime,
+        companyId: Number(companyId),
       },
     });
 
@@ -60,6 +63,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         quoteId: newQuote.id,
         price: item.price,
         quantity: item.quantity,
+        companyId: Number(companyId),
       })),
     });
 
