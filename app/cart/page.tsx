@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useEffect } from 'react';
 import NavbarWrapper from '../lib/NavbarWrapper';
 import { Box, Button, Grid, Typography } from '@mui/material';
 import {
@@ -9,22 +9,37 @@ import {
 import { ShadowSection } from '@/app/admin/[companyId]/reports/styled';
 import useNotification from '@/hooks/useNotification';
 import { ShoppingBagIcon } from 'lucide-react';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/state/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '@/state/store';
 import CartItemTable from '@/app/components/CartPage/CartItemTable';
 import { useRouter } from 'next/navigation';
 import OrderSummary from '@/app/components/CartPage/OrderSummary';
 import { ArrowBack } from '@mui/icons-material';
 import { maxWidth } from '@/app/lib/constant';
+import { fetchApi } from '../utils/db';
+import { updateCart } from '@/state/cart/cartSlice';
 
 export default function CartPage() {
   const router = useRouter();
   const cart = useSelector((state: RootState) => state.cart);
+  const dispatch = useDispatch<AppDispatch>();
 
   const { showNotification, NotificationComp } = useNotification();
 
+  useEffect(() => {
+    fetchCart();
+  }, []);
+
   const goToProductsPage = () => {
     router.push('/products');
+  };
+
+  const fetchCart = async () => {
+    const data = await fetchApi('/api/public/cart');
+
+    if (data) {
+      dispatch(updateCart(data));
+    }
   };
 
   const renderEmptyCart = () => {

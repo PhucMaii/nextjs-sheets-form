@@ -138,6 +138,8 @@ export default async function handler(
       // `${date} ${time}`,
       `Guest - ${user.clientId}`,
       note,
+      0,
+      ORDER_STATUS.PENDING,
     );
 
     // Set guest to pending

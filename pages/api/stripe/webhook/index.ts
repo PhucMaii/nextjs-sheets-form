@@ -1,7 +1,7 @@
 import { stripe } from '@/app/lib/stripe';
 import Stripe from 'stripe';
 import { createGuest } from '../../public/create-guest';
-import { USER_CATEGORIZED } from '@/app/utils/enum';
+import { ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
 import { createOrder } from '../../admin/[companyId]/orders/POST';
 import { convertCartItemsToOrderItems } from '../../public/place-order';
@@ -94,6 +94,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         `Guest - ${clientInfo.clientName}`,
         session.metadata.note,
         Number(session.metadata?.shippingFee) || 0,
+        ORDER_STATUS.PENDING,
       );
 
       // Set guest to pending

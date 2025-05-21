@@ -50,6 +50,7 @@ export enum ORDER_STATUS {
   DELIVERED = 'Fulfilled',
   INCOMPLETED = 'Unfulfilled',
   VOID = 'Void',
+  PENDING = 'Pending',
 }
 
 export enum PROMOTION_STATUS {
