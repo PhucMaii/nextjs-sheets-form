@@ -60,7 +60,7 @@ export default function EditItemAvailability({
       const response = await axios.put(
         getAdminApiUrl(companyId, '/items/availability'),
         {
-          itemId: item.id,
+          item,
           availability: !item.availability,
         },
       );
