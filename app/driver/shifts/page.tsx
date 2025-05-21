@@ -5,13 +5,13 @@ import { IShiftSession } from '@/app/utils/type';
 import useNotification from '@/hooks/useNotification';
 import axios from 'axios';
 import { API_URL } from '@/app/utils/enum';
-import OverviewCard from '@/app/admin/components/OverviewCard/OverviewCard';
+import OverviewCard from '@/app/admin/[companyId]/components/OverviewCard/OverviewCard';
 import { Box, Divider, Grid, Typography } from '@mui/material';
-import { ShadowSection } from '@/app/admin/reports/styled';
+import { ShadowSection } from '@/app/admin/[companyId]/reports/styled';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ShiftSummary from '../components/ShiftSummary';
 import { generateMonthRange } from '@/app/utils/time';
-import SelectDateRange from '@/app/admin/components/Select/SelectDateRange';
+import SelectDateRange from '@/app/admin/[companyId]/components/Select/SelectDateRange';
 
 export default function ShiftPage() {
   const [shifts, setShifts] = useState<IShiftSession[]>([]);

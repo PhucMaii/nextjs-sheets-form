@@ -1,9 +1,11 @@
-importScripts('https://storage.googleapis.com/workbox-cdn/releases/6.5.3/workbox-sw.js');
+importScripts(
+  'https://storage.googleapis.com/workbox-cdn/releases/6.5.3/workbox-sw.js',
+);
 self.addEventListener('push', async (e) => {
   const data = JSON.parse(e.data.text());
 
   const title = data?.message || 'Notification';
-  const body = data?.body || '' 
+  const body = data?.body || '';
 
   e.waitUntil(
     self.registration.showNotification(title, {
@@ -11,8 +13,8 @@ self.addEventListener('push', async (e) => {
       icon: '/logo-144.png',
     }),
   );
-// console.log('Access to push event')
-// self.registration.showNotification('Wohooo!!!', {body: 'Hello world!'})
+  // console.log('Access to push event')
+  // self.registration.showNotification('Wohooo!!!', {body: 'Hello world!'})
 });
 
 self.addEventListener('notificationclick', (event) => {

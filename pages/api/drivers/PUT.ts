@@ -20,7 +20,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       return res.status(401).json({ error: 'You are not authenticated' });
     }
 
-    const existingDriver = await prisma.driver.findUnique({
+    const existingDriver = await prisma.employee.findUnique({
       where: {
         id: Number(session.user.id),
       },
@@ -43,7 +43,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
       const newHashedPassword = await bcrypt.hash(newPassword, 12);
 
-      await prisma.driver.update({
+      await prisma.employee.update({
         where: {
           id: Number(session.user.id),
         },

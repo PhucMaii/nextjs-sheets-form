@@ -1,6 +1,6 @@
-import { BoxModal } from '@/app/admin/components/Modals/styled';
-import { ModalProps } from '@/app/admin/components/Modals/type';
-import { Order } from '@/app/admin/orders/page';
+import { BoxModal } from '@/app/admin/[companyId]/components/Modals/styled';
+import { ModalProps } from '@/app/admin/[companyId]/components/Modals/type';
+import { Order } from '@/app/admin/[companyId]/orders/page';
 import {
   AlertColor,
   Box,
@@ -14,7 +14,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import useDebounce from '@/hooks/useDebounce';
 import OrderComponent from '../OrderComponent';
 import { ORDER_STATUS } from '@/app/utils/enum';
-import ErrorComponent from '@/app/admin/components/ErrorComponent';
+import ErrorComponent from '@/app/admin/[companyId]/components/ErrorComponent';
 import { blueGrey, grey } from '@mui/material/colors';
 import { OrderedItems } from '@/app/utils/type';
 

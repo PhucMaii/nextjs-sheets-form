@@ -1,6 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { handleCheckRangeValid } from './POST';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../auth/[...nextauth]';
 // import { convertToPSTDate } from '../utils/date';
 
 interface IBody {
@@ -16,6 +18,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     const { updatedRangeId, startDate, endDate, userId }: IBody = req.body;
 
+    const session: any = await getServerSession(req, res, authOptions);
+    const companyId = Number(session?.user?.companyId);
+
     const existingUser = await prisma.user.findUnique({
       where: {
         id: userId,
@@ -30,6 +35,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     // Check is same start date or same end date exist
     const isRangeValid = await handleCheckRangeValid(
+      companyId,
       startDate,
       endDate,
       userId,

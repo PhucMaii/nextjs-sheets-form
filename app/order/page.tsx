@@ -7,12 +7,12 @@ import dayjs from 'dayjs';
 import { Box, Tab, Tabs } from '@mui/material';
 import moment from 'moment';
 import { limitOrderHour } from '../lib/constant';
-import { Order } from '../admin/orders/page';
+import { Order } from '../admin/[companyId]/orders/page';
 import Sidebar from '../components/Sidebar';
 import useNotification from '@/hooks/useNotification';
 import { SWRFetchData } from '../utils/db';
 import OrderView, { ORDER_USAGE_PURPOSE } from '../components/OrderView';
-import NotificationPopup from '../admin/components/Notification';
+import NotificationPopup from '../admin/[companyId]/components/Notification';
 import { useRouter } from 'next/navigation';
 import { TourProvider } from '@reactour/tour';
 import TourStartButton from './TourStartButton';
@@ -69,7 +69,7 @@ export default function OrderForm() {
 
   const minDate = today.startOf('day');
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [items, _mutate, isValidating] = SWRFetchData(API_URL.CLIENT_ITEM);
+  const [items, _mutate, isValidating] = SWRFetchData('/api/item');
 
   useEffect(() => {
     if (!items && isValidating) {

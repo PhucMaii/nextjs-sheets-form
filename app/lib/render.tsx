@@ -1,4 +1,4 @@
-import StatusText from '../admin/components/StatusText';
+import StatusText from '../admin/[companyId]/components/StatusText';
 import { USER_CATEGORIZED } from '../utils/enum';
 import { userCategorizedColor } from './constant';
 

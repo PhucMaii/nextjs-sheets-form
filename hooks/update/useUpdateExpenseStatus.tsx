@@ -1,7 +1,7 @@
-import SingleFieldEdit from '@/app/admin/components/Modals/edit/SingleFieldEdit';
+import SingleFieldEdit from '@/app/admin/[companyId]/components/Modals/edit/SingleFieldEdit';
 import { otherPaymentMethodId } from '@/app/lib/constant';
 import { SWRFetchData } from '@/app/utils/db';
-import { API_URL, TRANSACTION_STATUS } from '@/app/utils/enum';
+import { TRANSACTION_STATUS, getAdminApiUrl } from '@/app/utils/enum';
 import { IExpense } from '@/app/utils/type';
 import axios from 'axios';
 import { useCallback, useState } from 'react';
@@ -18,13 +18,15 @@ import AddIcon from '@mui/icons-material/Add';
 import { errorColor, primaryColor, successColor } from '@/theme/color';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
-import { DropdownItemContainer } from '@/app/admin/orders/styled';
-import AddExpense from '@/app/admin/components/Modals/add/AddExpense';
+import { DropdownItemContainer } from '@/app/admin/[companyId]/orders/styled';
+import AddExpense from '@/app/admin/[companyId]/components/Modals/add/AddExpense';
+import { useParams } from 'next/navigation';
 
 export const useUpdateExpenseStatus = (
   showNotification: (type: AlertColor, message: string) => void,
   selectedExpenses: IExpense[] = [],
 ) => {
+  const { companyId }: any = useParams();
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [selectPaymentMethod, setSelectPaymentMethod] = useState<any>({
     isOpenModal: false,
@@ -37,7 +39,9 @@ export const useUpdateExpenseStatus = (
   const openDropdown = Boolean(actionButtonAnchor);
   const [isOpenAddExpense, setIsOpenAddExpense] = useState<boolean>(false);
 
-  const [paymentMethods] = SWRFetchData(`${API_URL.ADMIN}/paymentMethods`);
+  const [paymentMethods] = SWRFetchData(
+    getAdminApiUrl(companyId, '/paymentMethods'),
+  );
 
   const handleUpdateStatus = async (
     transaction: any,
@@ -62,11 +66,14 @@ export const useUpdateExpenseStatus = (
 
     try {
       setIsUpdating(true);
-      const response = await axios.put(`${API_URL.ADMIN}/expenses/status`, {
-        id: transaction.id,
-        status: newStatus,
-        newPaymentMethodId,
-      });
+      const response = await axios.put(
+        getAdminApiUrl(companyId, '/expenses/status'),
+        {
+          id: transaction.id,
+          status: newStatus,
+          newPaymentMethodId,
+        },
+      );
 
       if (response.data.error) {
         showNotification('error', response.data.error);
@@ -118,11 +125,14 @@ export const useUpdateExpenseStatus = (
         }
 
         setIsUpdating(true);
-        const response = await axios.put(`${API_URL.ADMIN}/expenses/status`, {
-          idsToUpdate,
-          status: newStatus,
-          newPaymentMethodId,
-        });
+        const response = await axios.put(
+          getAdminApiUrl(companyId, '/expenses/status'),
+          {
+            idsToUpdate,
+            status: newStatus,
+            newPaymentMethodId,
+          },
+        );
 
         if (response.data.error) {
           showNotification('error', response.data.error);
@@ -141,7 +151,7 @@ export const useUpdateExpenseStatus = (
         setIsUpdating(false);
       }
     },
-    [selectedExpenses, showNotification],
+    [selectedExpenses, showNotification, companyId],
   );
 
   const UpdateExpenseStatusComp = (

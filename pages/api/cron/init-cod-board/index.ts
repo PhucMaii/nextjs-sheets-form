@@ -1,9 +1,11 @@
 import { PrismaClient } from '@prisma/client';
-import { getTodayDate, normalizeDate } from '../../utils/date';
+import { getTodayDate, normalizeDate } from '@/pages/api/utils/date';
 import { days } from '@/app/lib/constant';
 import { COD_STATUS, ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
 import { getWCODDay } from '@/app/utils/time';
-import { insertOrdersToSelectedBoards } from '../../admin/cod/auto-add-board';
+import { insertOrdersToSelectedBoards } from '@/pages/api/admin/[companyId]/cod/auto-add-board';
+
+// CRON JOB FOR COMPANY ID 1 ONLY
 
 export default async function handler(req: any, res: any) {
   try {
@@ -19,6 +21,7 @@ export default async function handler(req: any, res: any) {
 
     const codBoards = await prisma.codBoard.findMany({
       where: {
+        companyId: 1,
         date: date,
       },
     });
@@ -38,9 +41,10 @@ export default async function handler(req: any, res: any) {
     const routeOnDate: any = await prisma.route.findMany({
       where: {
         day,
+        companyId: 1,
       },
       include: {
-        driver: true,
+        employee: true,
         clients: true,
       },
     });
@@ -50,10 +54,12 @@ export default async function handler(req: any, res: any) {
         date: date,
         cash: 0,
         driverId: route.driverId,
+        employeeId: route.employeeId,
         note: '',
         status: COD_STATUS.IN_PROCESS,
         createdAt: `${date} ${time}`,
         createdBy: `System`,
+        companyId: 1,
       };
     });
 
@@ -63,6 +69,7 @@ export default async function handler(req: any, res: any) {
 
     const newBoards: any = await prisma.codBoard.findMany({
       where: {
+        companyId: 1,
         date: date,
       },
     });
@@ -81,6 +88,7 @@ export default async function handler(req: any, res: any) {
           },
         },
         codBoardId: null,
+        companyId: 1,
       },
       include: {
         items: true,
@@ -104,6 +112,7 @@ export default async function handler(req: any, res: any) {
 
     // Add Orders Into Boards
     await insertOrdersToSelectedBoards(
+      1, // Temporary only update for companyId 1
       dateOrders,
       newBoards,
       routeOnDate,

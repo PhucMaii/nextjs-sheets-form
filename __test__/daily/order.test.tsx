@@ -34,10 +34,9 @@ describe('Check for incorrect orders', () => {
         return acc + item.price * item.quantity;
       }, 0);
 
-      actualTotalPrice = actualTotalPrice + (order?.PST || 0) + (order?.GST || 0);
-      if (
-        actualTotalPrice.toFixed(2) !== order?.totalPrice?.toFixed(2)
-      ) {
+      actualTotalPrice =
+        actualTotalPrice + (order?.PST || 0) + (order?.GST || 0);
+      if (actualTotalPrice.toFixed(2) !== order?.totalPrice?.toFixed(2)) {
         console.log({
           actualTotalPrice: actualTotalPrice.toFixed(2),
           orderTotalPrice: order.totalPrice.toFixed(2),

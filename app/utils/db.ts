@@ -3,8 +3,8 @@ import { Notification } from './type';
 import axios from 'axios';
 import useSWR from 'swr';
 import { fetcher } from '@/HOC/AuthenGuard';
-import { API_URL } from './enum';
-import { Order } from '../admin/orders/page';
+import { getAdminApiUrl } from './enum';
+import { Order } from '../admin/[companyId]/orders/page';
 import { AlertColor } from '@mui/material';
 
 export const fetchData = async (
@@ -65,7 +65,12 @@ export const fetchWcodOrders = async (
   orderList: any,
   selectedDate: string,
   wcodDay: string,
+  companyId: string,
 ) => {
+  if (!companyId || !selectedDate || !wcodDay) {
+    return null;
+  }
+
   try {
     const clientIds = orderList
       .filter((order: Order) => {
@@ -78,7 +83,10 @@ export const fetchWcodOrders = async (
     }
 
     const response = await axios.get(
-      `${API_URL.ADMIN}/wcod?clientIdList=${[...clientIds]}&date=${selectedDate}`,
+      getAdminApiUrl(
+        companyId,
+        `/wcod?clientIdList=${[...clientIds]}&date=${selectedDate}`,
+      ),
     );
 
     if (response.data.error) {

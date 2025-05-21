@@ -1,8 +1,8 @@
 import { Fifo, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getTodayDate } from '../../utils/date';
+import { getTodayDate } from '@/pages/api/utils/date';
 import { ACTION, ORDER_STATUS } from '@/app/utils/enum';
-import { subtractInventoryItem } from '../../admin/orderedItems/single';
+import { subtractInventoryItem } from '@/pages/api/admin/[companyId]/orderedItems/single';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 
 interface ItemMap {
@@ -42,11 +42,15 @@ export default async function handler(
       where: {
         name: ACTION.RECORD_INVENTORY,
         date: yesterdayString,
+        companyId: 1,
       },
     });
 
     if (!recordInventoryAction) {
       const inventoryItems = await prisma.inventoryItem.findMany({
+        where: {
+          companyId: 1,
+        },
         include: {
           fifo: true,
         },
@@ -69,6 +73,7 @@ export default async function handler(
           date: yesterdayString,
           description: actionDescription,
           createdAt: `${date.time} ${date.date}`,
+          companyId: 1,
         },
       });
 
@@ -81,6 +86,7 @@ export default async function handler(
       where: {
         name: ACTION.TRACK_INVENTORY,
         date: date.date,
+        companyId: 1,
       },
     });
 
@@ -97,6 +103,7 @@ export default async function handler(
         quantity: {
           gt: 0,
         },
+        companyId: 1,
         orderId: {
           not: null, // Make sure the orderId is not null
         },
@@ -167,6 +174,7 @@ export default async function handler(
         date: date.date,
         description: actionDescription,
         createdAt: `${date.time} ${date.date}`,
+        companyId: 1,
       },
     });
     return res.status(200).json({ message: 'Track Inventory Successfully' });

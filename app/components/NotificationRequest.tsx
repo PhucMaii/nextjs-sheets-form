@@ -1,6 +1,6 @@
 import { Modal, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { BoxModal } from '../admin/components/Modals/styled';
+import { BoxModal } from '../admin/[companyId]/components/Modals/styled';
 import { LoadingButton } from '@mui/lab';
 import axios from 'axios';
 import useNotification from '@/hooks/useNotification';

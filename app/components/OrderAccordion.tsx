@@ -16,8 +16,10 @@ import {
   Typography,
 } from '@mui/material';
 import React, { useState } from 'react';
-import StatusText, { COLOR_TYPE } from '../admin/components/StatusText';
-import { Item, Order } from '../admin/orders/page';
+import StatusText, {
+  COLOR_TYPE,
+} from '../admin/[companyId]/components/StatusText';
+import { Item, Order } from '../admin/[companyId]/orders/page';
 import { ORDER_STATUS } from '../utils/enum';
 import { blue, grey } from '@mui/material/colors';
 import EditIcon from '@mui/icons-material/Edit';

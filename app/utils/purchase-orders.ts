@@ -1,10 +1,14 @@
 import axios from 'axios';
-import { API_URL, PO_STATUS } from './enum';
+import { PO_STATUS, getAdminApiUrl } from './enum';
 
-export const handleUpdatePOStatus = async (id: number, status: PO_STATUS) => {
+export const handleUpdatePOStatus = async (
+  companyId: string,
+  id: number,
+  status: PO_STATUS,
+) => {
   try {
     const response = await axios.put(
-      `${API_URL.ADMIN}/purchase-orders/status`,
+      getAdminApiUrl(companyId, '/purchase-orders/status'),
       {
         id,
         status,

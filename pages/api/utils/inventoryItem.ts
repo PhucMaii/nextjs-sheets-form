@@ -64,7 +64,12 @@ export const manuallyRestockInventoryItemQty = async (
   quantity: number,
   ratio: number = 1,
 ) => {
-  return manipulateInventoryItemQty(inventoryItemId, quantity, ratio, 'restock');
+  return manipulateInventoryItemQty(
+    inventoryItemId,
+    quantity,
+    ratio,
+    'restock',
+  );
 };
 
 export const manuallySubtractInventoryItemQty = async (
@@ -72,5 +77,10 @@ export const manuallySubtractInventoryItemQty = async (
   quantity: number,
   ratio: number = 1,
 ) => {
-  return manipulateInventoryItemQty(inventoryItemId, quantity, ratio, 'subtract');
+  return manipulateInventoryItemQty(
+    inventoryItemId,
+    quantity,
+    ratio,
+    'subtract',
+  );
 };

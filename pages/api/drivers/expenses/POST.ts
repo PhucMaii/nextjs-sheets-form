@@ -61,7 +61,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const dateBoard = await prisma.codBoard.findFirst({
       where: {
         date: date,
-        driverId: driver.id,
+        // driverId: driver.id,
+        employeeId: driver.id,
+        companyId: driver.companyId,
       },
       include: {
         expense: true,
@@ -118,6 +120,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         spentBy: `Driver - ${driver?.name}`,
         createdBy: `Driver - ${driver?.name}`,
         codBoardId: dateBoard.id,
+        companyId: driver.companyId,
       },
     });
 

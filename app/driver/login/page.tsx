@@ -1,10 +1,12 @@
 'use client';
+import { USER_ROLE } from '@/app/utils/enum';
 import FadeIn from '@/HOC/FadeIn';
 import LoginAndRegisterGuard from '@/HOC/LoginAndRegisterGuard';
 import useNotification from '@/hooks/useNotification';
 import { LoadingButton } from '@mui/lab';
 import { Box, Paper, TextField, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
+import axios from 'axios';
 import { useFormik } from 'formik';
 import { signIn } from 'next-auth/react';
 import Image from 'next/image';
@@ -14,7 +16,7 @@ import React, { useState } from 'react';
 import * as Yup from 'yup';
 
 interface FormValues {
-  driverName: string;
+  employeeCode: string;
   password: string;
   submit: any;
 }
@@ -26,26 +28,35 @@ export default function LoginPage() {
 
   const formik = useFormik<FormValues>({
     initialValues: {
-      driverName: '',
+      employeeCode: '',
       password: '',
       submit: null,
     },
     validationSchema: Yup.object({
-      driverName: Yup.string().max(255).required('Name is required'),
+      employeeCode: Yup.string().max(255).required('Employee code is required'),
       password: Yup.string().max(255).required('Password is required'),
     }),
     onSubmit: async (values) => {
       setIsLoading(true);
 
       try {
-        const driver = await signIn('credentials', {
+        const employee = await signIn('credentials', {
           redirect: false,
-          driverName: values.driverName.toUpperCase(),
+          employeeCode: values.employeeCode.toUpperCase(),
           password: values.password,
         });
 
-        if (driver && driver.error) {
-          showNotification('error', driver.error);
+        if (employee && employee.error) {
+          showNotification('error', employee.error);
+          setIsLoading(false);
+          return;
+        }
+
+        const employeeData = await axios.get(`/api/employee`);
+        const { role, companyId } = employeeData.data.data;
+
+        if (employeeData.data.error) {
+          showNotification('error', employeeData.data.error);
           setIsLoading(false);
           return;
         }
@@ -53,13 +64,17 @@ export default function LoginPage() {
         showNotification('success', 'Login Successful');
         setIsLoading(false);
         setTimeout(() => {
-          router.push('/driver/overview');
+          if (role === USER_ROLE.DRIVER) {
+            router.push('/driver/overview');
+          } else {
+            router.push(`/admin/${companyId}/orders`);
+          }
         }, 1000);
       } catch (error: any) {
         console.log('Fail to sign in: ', error);
         showNotification(
           'error',
-          'Your client id and/or password are not correct',
+          'Your employee code and/or password are not correct',
         );
         setIsLoading(false);
       }
@@ -111,18 +126,20 @@ export default function LoginPage() {
               </Box>
               <Box display="flex" flexDirection="column" gap={4}>
                 <TextField
-                  name="driverName"
-                  label="Driver Name"
-                  placeholder="Enter your name"
+                  name="employeeCode"
+                  label="Employee Code"
+                  placeholder="Enter your employee code"
                   type="text"
                   onChange={formik.handleChange}
-                  value={formik.values.driverName}
+                  value={formik.values.employeeCode}
                   onBlur={formik.handleBlur}
                   error={
-                    !!(formik.touched.driverName && formik.errors.driverName)
+                    !!(
+                      formik.touched.employeeCode && formik.errors.employeeCode
+                    )
                   }
                   helperText={
-                    formik.touched.driverName && formik.errors.driverName
+                    formik.touched.employeeCode && formik.errors.employeeCode
                   }
                   variant="standard"
                 />

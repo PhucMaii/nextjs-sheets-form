@@ -1,4 +1,4 @@
-import { API_URL } from '@/app/utils/enum';
+import { getAdminApiUrl } from '@/app/utils/enum';
 import { IInventoryItem } from '@/app/utils/type';
 import {
   Autocomplete,
@@ -8,8 +8,10 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useParams } from 'next/navigation';
 
 const useInventoryItems = () => {
+  const { companyId }: any = useParams();
   const [inventoryItems, setInventoryItems] = useState<IInventoryItem[]>([]);
   const [selectedInventoryItem, setSelectedInventoryItem] = useState<
     any | null
@@ -26,7 +28,7 @@ const useInventoryItems = () => {
 
   const fetchInventoryItems = async () => {
     try {
-      const response = await axios.get(`${API_URL.ADMIN}/inventory`);
+      const response = await axios.get(getAdminApiUrl(companyId, '/inventory'));
 
       if (response.data.error) {
         return;

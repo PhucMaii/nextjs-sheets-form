@@ -9,12 +9,12 @@ import {
   // generateCostAndProfit,
   restockInventoryItem,
   updateSingleInventoryItem,
-} from '../admin/orderedItems/single';
+} from '@/pages/api/admin/[companyId]/orderedItems/single';
 import {
   categorizeUpdatedItems,
   generateOrderTotalPrice,
   ITEM_CATEGORIZED,
-} from '../admin/orderedItems/PUT';
+} from '@/pages/api/admin/[companyId]/orderedItems/PUT';
 import { formatItemsWithTotalPrice } from '../utils/order';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { createOrderedItems } from '../utils/orderedItems';
@@ -66,7 +66,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    const newItems = categorizeUpdatedItems(userLastOrder.items, body.items);
+    const newItems = categorizeUpdatedItems(
+      userLastOrder?.companyId || -1,
+      userLastOrder.items,
+      body.items,
+    );
 
     console.log(newItems, 'acutalUpdatedItems');
 
@@ -75,7 +79,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
       // CREATE
       if (item.type === ITEM_CATEGORIZED.CREATE) {
-        await createOrderedItems(userLastOrder, [item]);
+        await createOrderedItems(
+          userLastOrder?.companyId || -1,
+          userLastOrder,
+          [item],
+        );
         continue;
       } else if (item.type === ITEM_CATEGORIZED.REMAIN) {
         // REMAIN
@@ -278,7 +286,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     const itemsWithTotalPrice = formatItemsWithTotalPrice(updatedOrderedItems);
 
-    await pusherServer?.trigger('override-order', 'incoming-order', {
+    await pusherServer?.trigger(`override-order-${existingUser.companyId}`, 'incoming-order', {
       ...existingUser,
       ...newOrder,
       items: itemsWithTotalPrice,

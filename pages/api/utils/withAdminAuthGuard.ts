@@ -19,35 +19,42 @@ const withAdminAuthGuard =
       const prisma = new PrismaClient();
 
       const session: any = await getServerSession(req, res, authOptions);
+      // console.log(session, 'session');
 
       if (!session) {
         return res.status(401).json({ error: 'You are not authenticated' });
       }
 
-      const existingUser = await prisma.user.findUnique({
+      const existingAdmin = await prisma.employee.findUnique({
         where: {
           id: Number(session.user.id),
         },
       });
 
-      if (!existingUser) {
+      // console.log(existingAdmin, 'existingAdmin');
+
+      if (!existingAdmin) {
         return res.status(404).json({ error: 'User Not Found in DB' });
       }
 
-      if (existingUser.role === 'client') {
+      if (existingAdmin.role === USER_ROLE.DRIVER) {
         return res
           .status(404)
           .json({ error: 'You are not authorized to access' });
       }
 
+      // console.log(existingAdmin.role, 'existingAdmin.role');
+
       if (
         isSuperAdminPrivilege &&
-        existingUser.role !== USER_ROLE.SUPER_ADMIN
+        existingAdmin.role !== USER_ROLE.SUPER_ADMIN
       ) {
         return res
           .status(404)
           .json({ error: 'You are not authorized to access' });
       }
+
+      // console.log('passed');
 
       return await handler(req, res);
     } catch (error: any) {

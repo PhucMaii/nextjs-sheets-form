@@ -12,7 +12,7 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import { ShadowSection } from '../admin/reports/styled';
+import { ShadowSection } from '../admin/[companyId]/reports/styled';
 import axios from 'axios';
 import { API_URL } from '../utils/enum';
 import { signOut, useSession } from 'next-auth/react';
@@ -69,7 +69,7 @@ export default function AccountPage() {
     setIsFetching(true);
     try {
       const response = await axios.get(
-        `${API_URL.USER}?id=${session?.user?.id}`,
+        `${API_URL.USER}?id=${session?.user?.id}&role=${session?.user?.role}`,
       );
 
       if (response.data.error) {
