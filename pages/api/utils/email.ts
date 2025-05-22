@@ -217,38 +217,41 @@ export const sendWelcomeEmail = async (guest: User) => {
 
 export const generateWelcomeEmail = (clientName: string) => {
   return `
-Dear ${clientName},
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; color: #333;">
+      <h2 style="text-align: center; background-color: #5cb85c; color: white; padding: 10px; border-radius: 5px;">Welcome to Supreme Sprouts!</h2>
 
-We hope you're having a fantastic day. At Supreme Sprouts, we’re thrilled to announce some wonderful news—your interest in partnering with us has brought us great joy and excitement!
+      <p>Dear ${clientName},</p>
 
-At Supreme Sprouts, providing the highest quality ingredients is our top priority. We take pride in offering a wide range of vegetables that meet the needs of restaurants, markets, and supermarkets. 
-By partnering with us, you’ll have access to fresh, premium produce that will set you apart, helping you attract more customers and grow your business.
+      <p>We hope you're having a fantastic day! At <strong>Supreme Sprouts</strong>, we’re thrilled to welcome you and explore the opportunity of working together.</p>
 
-We know that your dedication to excellence means we can continue to grow together and deliver even better produce solutions to our customers. 
-This collaboration is proof to our shared commitment to quality and innovation in the food industry.
+      <p>We take great pride in providing the highest quality vegetables to restaurants, markets, and supermarkets. By joining forces with us, you’ll have access to fresh, premium produce that helps you stand out and attract more customers.</p>
 
-Thank you for choosing Supreme Sprouts. We’re eager to welcome you as part of our expanding family and look forward to working with you to make an impact on the industry.
-We’ll be reaching out shortly with more details about how we can collaborate effectively. In the meantime, feel free to reach out if you have any questions or need anything from us.
+      <p>Your dedication to excellence aligns perfectly with our values, and we believe this collaboration will lead to something truly impactful in the food industry.</p>
 
-Best regards,
+      <p>Thank you for considering Supreme Sprouts as your partner. We're excited to have you as part of our growing family and will be reaching out shortly with more details on how we can work together effectively.</p>
 
-${TimFooter}
+      <p>In the meantime, if you have any questions or need anything at all, don’t hesitate to reach out. We’re here to help.</p>
 
+      <p>Warm regards,</p>
+
+      ${TimFooter}
+    </div>
   `;
 };
+
 
 export const generateApproveToBePartnerEmail = (
   user: User
 ) => {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; color: #333;">
-      <h2 style="text-align: center; color: #5cb85c;">Welcome to the Supreme Sprouts Family!</h2>
+      <h2 style="text-align: center;  background-color: #5cb85c; color: white; padding: 10px; border-radius: 5px;">Welcome to the Supreme Sprouts Family!</h2>
       
       <p>Dear ${user.clientName},</p>
 
-      <p>We’re excited to officially welcome you as a valued partner of <strong>Supreme Sprouts Ltd</strong>. Your partnership means a lot to us, and we’re looking forward to growing together—quite literally!</p>
+      <p>We’re excited to officially welcome you as a valued partner of <strong>Supreme Sprouts Ltd</strong>. Your partnership means a lot to us, and we’re looking forward to growing together!</p>
 
-      <p>To help you get started, we’ve created an account for you on our partner platform, where you can easily place orders, track deliveries, and manage your profile.</p>
+      <p>To help you get started, we’ve created an account for you on our partner platform, where you can access to our wholesale price, easily place orders, manage your orders, and manage your profile.</p>
 
       <h3>Your Login Credentials:</h3>
       <ul style="line-height: 1.8;">

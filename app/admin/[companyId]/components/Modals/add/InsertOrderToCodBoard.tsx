@@ -81,7 +81,7 @@ export default function InsertOrderToCodBoard({
   const [orders] = SWRFetchData(fetchUrl());
 
   const [clients] = SWRFetchData(
-    `${role === USER_ROLE.ADMIN ? getAdminApiUrl(companyId, '/clients') : API_URL.DRIVER}/clients`,
+    `${role === USER_ROLE.ADMIN ? getAdminApiUrl(companyId, '/clients') : `${API_URL.DRIVER}/clients`}`,
   );
 
   useEffect(() => {
@@ -188,7 +188,7 @@ export default function InsertOrderToCodBoard({
               <Typography variant="h6">Clients</Typography>
               <Autocomplete
                 options={[
-                  { id: -1, clientName: '-- Choose Client --' },
+                  { id: -1, clientName: '-- Choose Client --', clientId: 'N/A' },
                   ...(clients?.data || []),
                 ]}
                 // PopperComponent={(props: any) => (

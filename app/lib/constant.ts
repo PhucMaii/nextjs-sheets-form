@@ -305,7 +305,6 @@ export const adminTabs = {
       path: '/admin/[companyId]/promotions',
       id: 17,
     },
-    { name: 'Promotions', icon: CampaignIcon, path: '/admin/promotions' },
     {
       id: 18,
       name: 'Statements',

@@ -202,7 +202,7 @@ export const rejectOrderTemplate = (
 ) => {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; color: #333;">
-      <h2 style="text-align: center; color: #d9534f;">Order Rejection Notice</h2>
+      <h2 style="text-align: center; background-color: #d9534f; color: white; padding: 10px; border-radius: 5px;">Order Rejection Notice</h2>
       
       <p>Dear ${order?.user?.clientName || 'Customer'},</p>
       
@@ -230,7 +230,7 @@ export const approveOrderTemplate = (
 ) => {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; color: #333;">
-      <h2 style="text-align: center; color: #5cb85c;">Order Confirmation</h2>
+      <h2 style="text-align: center; background-color: #5cb85c; color: white; padding: 10px; border-radius: 5px;">Order Confirmation</h2>
       
       <p>Dear ${order?.user?.clientName || 'Customer'},</p>
       

@@ -106,10 +106,11 @@ export default function BestSeller() {
             <Divider />
           </Grid>
 
-          <Grid item xs={12}>
-            <Typography variant="h4" fontWeight="medium">
-              {promotion?.title} 💸
-            </Typography>
+          {promotion && (
+            <Grid item xs={12}>
+              <Typography variant="h4" fontWeight="medium">
+                {promotion?.title}
+              </Typography>
             <Swiper
               modules={[Navigation, Pagination, Scrollbar, A11y]}
               navigation
@@ -137,6 +138,7 @@ export default function BestSeller() {
             </Swiper>
             {/* </Box */}
           </Grid>
+          )}
         </Grid>
       </Box>
     </>

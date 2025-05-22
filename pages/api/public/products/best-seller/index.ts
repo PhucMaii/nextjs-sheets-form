@@ -29,6 +29,7 @@ export default async function handler(
       where: {
         isWebsite: true,
         status: 'ACTIVE',
+        visibility: true,
       },
       include: {
         websiteItems: {
