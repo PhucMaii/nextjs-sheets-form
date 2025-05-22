@@ -53,10 +53,12 @@ import { useParams } from 'next/navigation';
 import ApproveGuest from './Modals/ApproveGuest';
 
 import { ShowNotificationType } from '@/hooks/useNotification';
+import ApproveOrder from './Modals/ApproveOrder';
+import RejectOrder from './Modals/RejectOrder';
 interface PropTypes {
   order: Order;
   showNotification?: ShowNotificationType;
-  selectedOrders?: Order[]; 
+  selectedOrders?: Order[];
   handleSelectOrder?: (e: any, targetOrder: Order) => void;
   // handleUpdateItem?: (
   //   orderTotalPrice: number,
@@ -92,6 +94,8 @@ const OrderAccordion = ({
     useState<boolean>(false);
 
   const [isApproveGuestOpen, setIsApproveGuestOpen] = useState<boolean>(false);
+  const [isApproveOrderOpen, setIsApproveOrderOpen] = useState<boolean>(false);
+  const [isRejectOrderOpen, setIsRejectOrderOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isOpenEditPrice, setIsOpenEditPrice] = useState<boolean>(false);
   const [isOpenDetails, setIsOpenDetails] = useState<boolean>(false);
@@ -390,16 +394,30 @@ const OrderAccordion = ({
         contactNumber={order?.user?.contactNumber || ''}
         categoryName={order?.user?.category?.name || ''}
       />
-      {
-        order?.user?.type === USER_CATEGORIZED.PENDING && showNotification && (
-          <ApproveGuest
-            open={isApproveGuestOpen}
-            onClose={() => setIsApproveGuestOpen(false)}
-            client={order?.user}
+      {order?.status === ORDER_STATUS.PENDING && showNotification && (
+        <>
+          <ApproveOrder
+            open={isApproveOrderOpen}
+            onClose={() => setIsApproveOrderOpen(false)}
+            order={order}
             showNotification={showNotification}
           />
-        )
-      }
+          <RejectOrder
+            open={isRejectOrderOpen}
+            onClose={() => setIsRejectOrderOpen(false)}
+            order={order}
+            showNotification={showNotification}
+          />
+        </>
+      )}
+      {order?.user?.type === USER_CATEGORIZED.PENDING && showNotification && (
+        <ApproveGuest
+          open={isApproveGuestOpen}
+          onClose={() => setIsApproveGuestOpen(false)}
+          client={order?.user}
+          showNotification={showNotification}
+        />
+      )}
       {showNotification && (
         <>
           <EditDeliveryDate
@@ -506,7 +524,21 @@ const OrderAccordion = ({
               alignItems="center"
               gap={1}
             >
-              {order?.profit
+              {order?.status === ORDER_STATUS.PENDING && (
+                <Box display="flex" gap={1} alignItems="center">
+                  <Button
+                    variant="contained"
+                    color="success"
+                    onClick={() => setIsApproveOrderOpen(true)}
+                  >
+                    Approve
+                  </Button>
+                  <Button variant="contained" color="error" onClick={() => setIsRejectOrderOpen(true)}>
+                    Reject
+                  </Button>
+                </Box>
+              )}
+              {order?.status !== ORDER_STATUS.PENDING && order?.profit
                 ? order.profit > 0 && (
                     <StatusText
                       text={`Profit: $${order.profit.toFixed(2)}`}
@@ -589,10 +621,12 @@ const OrderAccordion = ({
           )}
           <Grid item xs={12} md={4} textAlign={mdDown ? 'center' : 'left'}>
             <Button
-              color={
-                order?.user?.role === USER_ROLE.CLIENT ? 'info' : 'error'
+              color={order?.user?.role === USER_ROLE.CLIENT ? 'info' : 'error'}
+              variant={
+                order?.user?.role === USER_ROLE.CLIENT
+                  ? 'contained'
+                  : 'outlined'
               }
-              variant={order?.user?.role === USER_ROLE.CLIENT ? 'contained' : 'outlined'}
               sx={{ textTransform: 'none' }}
               onClick={handleOpenClientModal}
             >
@@ -606,13 +640,15 @@ const OrderAccordion = ({
                   order?.user?.type !== USER_CATEGORIZED.NONE &&
                   renderType(order.user.type)}
 
-                  {
-                    order?.user?.type === USER_CATEGORIZED.PENDING && (
-                      <Button onClick={onOpenApproveGuest} variant="contained" color="success">
-                        Approve
-                      </Button>
-                    )
-                  }
+                {order?.user?.type === USER_CATEGORIZED.PENDING && (
+                  <Button
+                    onClick={onOpenApproveGuest}
+                    variant="contained"
+                    color="success"
+                  >
+                    Approve Client
+                  </Button>
+                )}
               </Box>
             </Button>
           </Grid>

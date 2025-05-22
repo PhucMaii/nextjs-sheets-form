@@ -4,7 +4,7 @@ import {
   yahooTransporter,
 } from './transporter';
 import { User } from '@prisma/client';
-import { generateOrderTemplate } from '@/config/email';
+import { generateOrderTemplate, TimFooter } from '@/config/email';
 import { UserType } from '@/app/utils/type';
 import InvoiceDocument from '@/app/admin/[companyId]/components/PDF/InvoiceDocument';
 import ReactPDF from '@react-pdf/renderer';
@@ -232,8 +232,40 @@ We’ll be reaching out shortly with more details about how we can collaborate e
 
 Best regards,
 
-Tim
-Supreme Sprouts Ltd
+${TimFooter}
 
+  `;
+};
+
+export const generateApproveToBePartnerEmail = (
+  user: User
+) => {
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; color: #333;">
+      <h2 style="text-align: center; color: #5cb85c;">Welcome to the Supreme Sprouts Family!</h2>
+      
+      <p>Dear ${user.clientName},</p>
+
+      <p>We’re excited to officially welcome you as a valued partner of <strong>Supreme Sprouts Ltd</strong>. Your partnership means a lot to us, and we’re looking forward to growing together—quite literally!</p>
+
+      <p>To help you get started, we’ve created an account for you on our partner platform, where you can easily place orders, track deliveries, and manage your profile.</p>
+
+      <h3>Your Login Credentials:</h3>
+      <ul style="line-height: 1.8;">
+        <li><strong>Client ID:</strong> ${user.clientId}</li>
+        <li><strong>Password:</strong> ${user?.contactNumber || 'welcomeToOurApp'}</li>
+        <li><strong>Login URL:</strong> <a href="https://supremesprouts.com/account/login" target="_blank">https://supremesprouts.com/account/login</a></li>
+      </ul>
+
+      <p>For security reasons, we recommend logging in and updating your password as soon as possible.</p>
+
+      <p>Should you have any questions or need assistance, our team is always here to help. We’re committed to making your experience with Supreme Sprouts seamless, efficient, and rewarding.</p>
+
+      <p>Once again, thank you for joining us. We’re proud to partner with you and can’t wait to support your growth with the freshest, most reliable produce available.</p>
+
+      <p>Warm regards,</p>
+
+      ${TimFooter}
+    </div>
   `;
 };

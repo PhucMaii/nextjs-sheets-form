@@ -75,7 +75,7 @@ export default async function handler(
       message,
     });
     await emailHandler(
-      'maithienphuc0102@gmail.com',
+      'info@supremesprout.com',
       'New Client Sign Up Request',
       'New Client Sign Up Request',
       template,

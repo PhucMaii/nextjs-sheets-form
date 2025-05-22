@@ -1,3 +1,23 @@
+export const LouisFooter = `
+    <p>
+      <strong>Louis Le</strong><br />
+      Supreme Sprouts Ltd.<br />
+      1-6420 Beresford Street, Burnaby, BC, V5E 1B3<br />
+      Contact: 778-789-1060 | 709-989-6000<br />
+      Website: <a href="https://supremesprouts.com">supremesprouts.com</a>
+    </p>
+`;
+
+export const TimFooter = `
+    <p>
+      <strong>Tim Le</strong><br />
+      Supreme Sprouts Ltd.<br />
+      1-6420 Beresford Street, Burnaby, BC, V5E 1B3<br />
+      Contact: 778-789-1060 | 709-989-6000<br />
+      Website: <a href="https://supremesprouts.com">supremesprouts.com</a>
+    </p>
+`;
+
 export const generateOrderTemplate = (
   clientName: string,
   clientNumber: string,
@@ -101,134 +121,6 @@ export const generateOrderTemplate = (
   `;
 };
 
-// export const generateOrderTemplate = (
-//   clientName: string,
-//   clientNumber: string,
-//   // orderDetails: any,
-//   order: any,
-//   phoneNumber: string,
-//   deliveryAddress: string,
-//   orderId: number,
-//   flag?: string,
-// ) => {
-//   let orderDetailsTemplate = '';
-//   // let total = 0;
-
-//   const flagText = flag
-//     ? `<h2 style="text-align: center; font-weight: 300">${flag}</h2>`
-//     : '';
-
-//   for (const item of order?.items as any[]) {
-//     if (item.quantity === 0) continue;
-//     const optionText = item?.option?.name
-//       ? `
-//     <p> - ${item?.option.name}</p>
-//   `
-//       : '';
-//     console.log(optionText, 'OPTION TEXT');
-//     const totalPrice = item.price * item.quantity;
-//     if (item?.isShowDiscount && item?.prevPrice) {
-//       orderDetailsTemplate += `
-//       <tr>
-//       <td style="padding: 8px">
-//       <h4>${item?.name} ${item?.option?.name ? `- ${item.option.name}` : ''}</h4>
-//         </td>
-//       <td style="padding: 8px; text-align: center">${item?.quantity}</td>
-//       <td style="padding: 8px; text-align: center">
-//         <div style="display: flex; flex-direction: column; align-items: center; gap: 1px">
-//           <h4 style="text-decoration: line-through">$${item.prevPrice.toFixed(2)}</h4>
-//           <br />
-//           <h4>$${item.price.toFixed(2)}</h4>
-//         </div>
-//       </td>
-//       <td style="padding: 8px; text-align: center; display: flex; flex-direction: column; align-items: center;">
-//           <h4>$${totalPrice.toFixed(2)}</h4>
-//       </td>
-//       </tr>
-//         `;
-//     } else {
-//       orderDetailsTemplate += `
-//         <tr>
-//         <td style="padding: 8px">
-//         <div style="display: flex; flex-direction: column; align-items: center; gap: 1px">
-//         <h4>${item?.name}</h4>
-//         <br />
-//         <h4 style="font-weight: regular">
-//         ${optionText}
-//         </h4>
-
-//         </div>
-//         </td>
-//         <td style="padding: 8px; text-align: center">${item?.quantity}</td>
-//         <td style="padding: 8px; text-align: center">
-//           $${item.price.toFixed(2)}
-//         </td>
-//         <td style="padding: 8px; text-align: center">$${totalPrice.toFixed(2)}</td>
-//         </tr>
-//           `;
-//     }
-//   }
-
-//   return `
-//     <div style="margin: auto; width: 500px">
-//         <div style="width: 100%;">
-//         ${flagText}
-//             <h2 style="text-align: center; font-weight: 300">Supreme Sprouts LTD</h2>
-//             <h4 style="text-align: center;font-weight: 300;">1-6420 Beresford Street, Burnaby, BC, V5E 1B3</h4>
-//             <div style="text-align: center;font-weight: 300;">
-//                 778 789 1060
-//                 <br/>
-//                 709 989 6000
-//             </div>
-//         </div>
-//         <div style="height: 1px; background-color: black; width: 100%; margin: auto"></div>
-//         <div style="width: 100%;">
-//             <h3 style="text-align: left;font-weight: 300;">Invoice: ${orderId}</h3>
-//             <h3 style="text-align: left;font-weight: 300;">Client Name: ${clientName}</h3>
-//             <h3 style="text-align: left;font-weight: 300;">Client Number: ${clientNumber}</h3>
-//             <h3 style="text-align: left;font-weight: 300;">Order Time: ${
-//               order?.orderTime
-//             }</h3>
-//             <h3 style="text-align: left;font-weight: 300;">Delivery Date: ${
-//               order?.deliveryDate
-//             }</h3>
-//             <h3 style="text-align: left;">ORDER DETAILS</h3>
-//             <table style="width: 100%"; border-collapse: collapse;>
-//               <thead>
-//                 <tr>
-//                   <th style="padding: 8px; border: 1px solid #000 font-weight: bold">Item</th>
-//                   <th style="padding: 8px; border: 1px solid #000 font-weight: bold">Quantity</th>
-//                   <th style="padding: 8px; border: 1px solid #000 font-weight: bold">Unit Price</th>
-//                   <th style="padding: 8px; border: 1px solid #000 font-weight: bold">Total Price</th>
-//                 </tr>
-//               </thead>
-//               <tbody>
-//                 ${orderDetailsTemplate}
-//               </tbody>
-//             </table>
-//             <div style="height: 1px; background-color: black; width: 100%; margin: auto"></div>
-//             <h4 style="text-align: right;font-weight: 300;">Discount: -$${order?.discount?.toFixed(2)}</h4>
-//             <h4 style="text-align: right;font-weight: 300;">Subtotal: $${order?.subTotal?.toFixed(2) || order?.totalPrice?.toFixed(2) || 0}</h4>
-//             <h4 style="text-align: right;font-weight: 300;">GST: $${order?.GST?.toFixed(
-//               2,
-//             )}</h4>
-//             <h4 style="text-align: right;font-weight: 300;">PST: $${order?.PST?.toFixed(
-//               2,
-//             )}</h4>
-//             <h4 style="text-align: right;font-weight: 300;">Total: $${order?.totalPrice?.toFixed(
-//               2,
-//             )}</h4>
-//             <h4 style="text-align: left;font-weight: 300;">DELIVERY ADDRESS: ${deliveryAddress}</h4>
-//             <h4 style="text-align: left;font-weight: 300;">CONTACT: ${phoneNumber}</h4>
-//             <div style="height: 1px; background-color: black; width: 100%; margin: auto"></div>
-//             <h4 style="text-align: left;font-weight: 300;">NOTE: ${order?.note}</h4>
-//             <div style="height: 1px; background-color: black; width: 100%; margin: auto"></div>
-//             <h4 style="text-align: right;font-weight: 300;">Order by: ${order?.createdBy}</h4>
-//         </div>
-//     </div>
-//     `;
-// };
-
 export const generatePurchaseOrderTemplate = (vendor: any, po: any) => {
   let poItemsTemplate = '';
 
@@ -265,13 +157,7 @@ export const generatePurchaseOrderTemplate = (vendor: any, po: any) => {
       </tbody>
     </table>
 
-    <p>
-      <strong>Louis Le</strong><br />
-      Supreme Sprouts Ltd.<br />
-      1-6420 Beresford Street, Burnaby, BC, V5E 1B3<br />
-      Contact: 778-789-1060 | 709-989-6000<br />
-      Website: <a href="https://supremesprouts.com">supremesprouts.com</a>
-    </p>
+    ${LouisFooter}
     </div>
   `;
 };
@@ -305,6 +191,67 @@ export const signUpRequest = (newClient: {
         <h4 style="font-weight: 100;">Message:</h4>
         <h4 style="font-weight: 300;">${newClient.message}</h4>
       </div>
+    </div>
+  `;
+};
+
+export const rejectOrderTemplate = (
+  reason: string,
+  order: any,
+  note?: string,
+) => {
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; color: #333;">
+      <h2 style="text-align: center; color: #d9534f;">Order Rejection Notice</h2>
+      
+      <p>Dear ${order?.user?.clientName || 'Customer'},</p>
+      
+      <p>We regret to inform you that your order <strong>#${order?.id}</strong> placed on <strong>${order?.orderTime}</strong> has been rejected.</p>
+      
+      <p><strong>Reason:</strong> ${reason}</p>
+      
+      ${note ? `<p><strong>Additional Note:</strong> ${note}</p>` : ''}
+
+      <p>If you have any questions or would like to place a new order, feel free to reach out to us by replying to this email. We sincerely apologize for the inconvenience.</p>
+      
+      <hr style="margin: 20px 0;" />
+
+      ${generateOrderTemplate(order?.user?.clientName, order?.user?.clientId, order, order?.user?.contactNumber, order?.user?.deliveryAddress, order?.id)}
+
+      ${LouisFooter}
+    </div>
+  `;
+};
+
+export const approveOrderTemplate = (
+  deliveryDate: string,
+  deliveryTime: string,
+  order: any,
+) => {
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; color: #333;">
+      <h2 style="text-align: center; color: #5cb85c;">Order Confirmation</h2>
+      
+      <p>Dear ${order?.user?.clientName || 'Customer'},</p>
+      
+      <p>Good news! Your order <strong>#${order?.id}</strong> placed on <strong>${order?.orderTime}</strong> has been <strong>approved</strong> and is scheduled for delivery.</p>
+
+      <p><strong>Scheduled Delivery:</strong> ${deliveryDate} at ${deliveryTime}</p>
+
+      <p>If there are any changes or issues, feel free to contact us as soon as possible by replying to this email.</p>
+
+      <hr style="margin: 20px 0;" />
+
+      ${generateOrderTemplate(
+        order?.user?.clientName,
+        order?.user?.clientId,
+        order,
+        order?.user?.contactNumber,
+        order?.user?.deliveryAddress,
+        order?.id,
+      )}
+
+      ${LouisFooter}
     </div>
   `;
 };

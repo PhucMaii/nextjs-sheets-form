@@ -226,7 +226,7 @@ export const createGuest = async (companyId: number, client: any) => {
       message: client.message,
     });
     await emailHandler(
-      'maithienphuc0102@gmail.com',
+      'info@supremesprout.com',
       'New Client Sign Up Request',
       'New Client Sign Up Request',
       template,

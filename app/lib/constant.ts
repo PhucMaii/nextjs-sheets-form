@@ -499,6 +499,14 @@ export const transactionStatusList = [
   TRANSACTION_STATUS.UNPAID,
 ];
 
+export const rejectOrderReasons = [
+  'Item unavailable',
+  'Propose new delivery date',
+  'Suspicious or duplicate order',
+  'Customer requested cancellation',
+  'Other (specify)',
+]
+
 export const units = ['bags', 'g', 'kg', 'lbs', 'pcs', 'cases', 'cans'];
 
 export const userCategorizedColor: any = {

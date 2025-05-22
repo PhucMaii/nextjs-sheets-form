@@ -3,6 +3,9 @@ import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import bcrypt from 'bcrypt';
+import emailHandler, {
+  generateApproveToBePartnerEmail,
+} from '@/pages/api/utils/email';
 interface IBody {
   id: number;
   newClientId: string;
@@ -32,13 +35,19 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(404).json({ error: 'Client Not Found' });
     }
 
-    if (existingClient?.type !== USER_CATEGORIZED.PENDING && existingClient?.type === USER_ROLE.CLIENT) {
+    if (
+      existingClient?.type !== USER_CATEGORIZED.PENDING &&
+      existingClient?.type === USER_ROLE.CLIENT
+    ) {
       return res.status(404).json({ error: 'Client Already Approved' });
     }
 
-    const password = await bcrypt.hash(existingClient?.contactNumber || 'welcomeToOurApp', 10);
+    const password = await bcrypt.hash(
+      existingClient?.contactNumber || 'welcomeToOurApp',
+      10,
+    );
 
-    await prisma.user.update({
+    const updatedClient = await prisma.user.update({
       where: {
         id: existingClient.id,
       },
@@ -49,6 +58,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         password,
       },
     });
+
+    const template = generateApproveToBePartnerEmail(updatedClient);
+
+    if (updatedClient.email) {
+      await emailHandler(
+        updatedClient.email,
+        'Welcome to the Supreme Sprouts Family!',
+        'Welcome to the Supreme Sprouts Family!',
+        template,
+      );
+    }
 
     return res.status(200).json({ message: 'Client Approved Successfully' });
   } catch (error: any) {

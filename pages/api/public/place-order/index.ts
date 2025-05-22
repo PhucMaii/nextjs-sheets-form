@@ -3,7 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { createOrder } from '../../admin/[companyId]/orders/POST';
 import { checkOrderDeliveryDateValid } from '../../utils/date';
 import { createGuest } from '../create-guest';
-import { sendEmail } from '../../utils/email';
+import { sendEmail, sendWelcomeEmail } from '../../utils/email';
 import { ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
 
 interface IBody {
@@ -58,6 +58,8 @@ export default async function handler(
           ...req.body.client,
           type: USER_CATEGORIZED.GUEST,
         });
+
+        await sendWelcomeEmail(user);
       }
     }
 
