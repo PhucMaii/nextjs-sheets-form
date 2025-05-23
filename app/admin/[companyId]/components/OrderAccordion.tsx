@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   AlertColor,
   Box,
@@ -19,7 +19,6 @@ import {
 import ClientDetailsModal from './Modals/ClientDetailsModal';
 import { Order } from '../orders/page';
 import { useReactToPrint } from 'react-to-print';
-import SellIcon from '@mui/icons-material/Sell';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import axios from 'axios';
 import {
@@ -50,6 +49,7 @@ import { renderType } from '@/app/lib/render';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import { useParams } from 'next/navigation';
+import QuickViewOrderedItems from './Tooltip/QuickViewOrderedItems';
 
 interface PropTypes {
   order: Order;
@@ -94,7 +94,7 @@ const OrderAccordion = ({
   const [open, setOpen] = useMultipleBoolean({
     isOpenConfirmModal: false,
   });
-  const [totalQuantity, setTotalQuantity] = useState(0);
+  // const [totalQuantity, setTotalQuantity] = useState(0);
   const statusText = {
     text: order.status,
     type:
@@ -129,9 +129,9 @@ const OrderAccordion = ({
     return order.createdBy;
   }, [order]);
 
-  useEffect(() => {
-    calculateTotalQuantity();
-  }, [order]);
+  // useEffect(() => {
+  //   calculateTotalQuantity();
+  // }, [order]);
 
   const handleAvoidInventory = async (e: any) => {
     if (!showNotification) {
@@ -201,13 +201,13 @@ const OrderAccordion = ({
     }
   };
 
-  const calculateTotalQuantity = () => {
-    const quantity = order.items.reduce((acc: number, cV: any) => {
-      return acc + cV.quantity;
-    }, 0);
+  // const calculateTotalQuantity = () => {
+  //   const quantity = order.items.reduce((acc: number, cV: any) => {
+  //     return acc + cV.quantity;
+  //   }, 0);
 
-    setTotalQuantity(quantity);
-  };
+  //   setTotalQuantity(quantity);
+  // };
 
   const handleDeleteOrder = async (targetOrder: Order) => {
     if (!showNotification) {
@@ -669,12 +669,21 @@ const OrderAccordion = ({
             </Grid>
           )}
           <Grid item xs={6} md={4}>
-            <Box display="flex" gap={1} alignItems="center">
-              <SellIcon color="primary" />
-              <Typography color="primary" variant="subtitle1">
-                {totalQuantity}
-              </Typography>
-            </Box>
+            <QuickViewOrderedItems order={order} />
+            {/* <HtmlTooltip title={
+              <Box display="flex" flexDirection="column" gap={1}>
+                <StatusText text={order.status} type={order.status === ORDER_STATUS.COMPLETED ? 'success' : order.status === ORDER_STATUS.DELIVERED ? 'info' : order.status === ORDER_STATUS.INCOMPLETED ? 'warning' : 'error'} />
+                
+              </Box>
+            } placement='top-start'>
+              <Box display="flex" gap={1} alignItems="center">
+                <SellIcon color="primary" />
+                <Typography color="primary" variant="subtitle1">
+                  {totalQuantity}
+                </Typography>
+              </Box>
+            </HtmlTooltip> */}
+
           </Grid>
           {!mdDown && (
             <Grid item xs={4}>
