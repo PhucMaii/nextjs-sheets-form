@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-// import bcrypt from 'bcrypt';
+import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 // const checkIsKorean = (text: string) => {
 //   // const koreanRange = /^[\uAC00-\uD7AF]+$/;
@@ -121,14 +121,19 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-  const today = getTodayDate();
-  await prisma.pageView.create({
-    data: {
-      title: 'Website',
-      createdAt: today.dateAndTime,
-    }
-  })
+  const password = await bcrypt.hash('admin123', 12);
 
+  await prisma.employee.updateMany({
+    where: {
+      id: {
+        in: [14, 15],
+      },
+    },
+    data: {
+      password,
+    },
+  });
+  
 }
 
 // async function main() {
@@ -148,7 +153,6 @@ async function main() {
 //   }
 
 // }
-
 
 main()
   .then(() => prisma.$disconnect())

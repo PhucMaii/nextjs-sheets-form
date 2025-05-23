@@ -36,6 +36,8 @@ import { grey } from '@mui/material/colors';
 import { useParams } from 'next/navigation';
 import ApproveOrder from '../Modals/ApproveOrder';
 import RejectOrder from '../Modals/RejectOrder';
+import QuickViewOrderedItems from '../Tooltip/QuickViewOrderedItems';
+
 interface PropTypes {
   clientOrders: Order[];
   onUpdateOrderUI?: (updatedOrder: Order) => void;
@@ -162,6 +164,9 @@ const ClientOrdersTable = ({
           Delivery Date
         </TableCell>
         <TableCell variant="head" style={{ width: 120 }}>
+          Items
+        </TableCell>
+        <TableCell variant="head" style={{ width: 120 }}>
           Total Bill
         </TableCell>
         <TableCell variant="head" style={{ width: 180 }}>
@@ -242,6 +247,9 @@ const ClientOrdersTable = ({
         <TableCell>{order.user.clientId}</TableCell>
         <TableCell>{order.user.clientName}</TableCell>
         <TableCell>{order.deliveryDate}</TableCell>
+        <TableCell>
+          <QuickViewOrderedItems order={order} isTable={true} placement="bottom-start" />
+        </TableCell>
         <TableCell>${order.totalPrice.toFixed(2)}</TableCell>
         <TableCell>
           <Select
