@@ -454,7 +454,7 @@ export default function OrderInReportPage({
         onClose={() => setIsOpenUploadCheque(false)}
         showNotification={showNotification}
         year={dateRange[0].getFullYear().toString()}
-        month={dateRange[0].getMonth() + 1}
+        // month={dateRange[0].getMonth() + 1}
         client={clientValue}
       />
       <LoadingModal open={isLoading} />
