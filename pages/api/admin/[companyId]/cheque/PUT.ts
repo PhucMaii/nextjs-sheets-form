@@ -6,7 +6,9 @@ interface IBody {
   updatedCheque: {
     fileKeyFront: string;
     fileKeyBack?: string;
-    month: string;
+    month?: string;
+    startDate?: string;
+    endDate?: string;
     year: string;
     chequeNumber: string;
     amount: number;

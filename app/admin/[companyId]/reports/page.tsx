@@ -376,7 +376,7 @@ export default function ReportPage() {
               value={1}
               disabled={
                 clientValue?.clientName === 'All Clients' ||
-                clientValue?.preference.paymentType !== PAYMENT_TYPE.MONTHLY
+                clientValue?.preference?.paymentType !== PAYMENT_TYPE.MONTHLY
               }
             />
           </Tabs>
