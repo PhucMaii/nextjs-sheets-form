@@ -34,7 +34,8 @@ import LockIcon from '@mui/icons-material/Lock';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import { grey } from '@mui/material/colors';
 import { useParams } from 'next/navigation';
-
+import ApproveOrder from '../Modals/ApproveOrder';
+import RejectOrder from '../Modals/RejectOrder';
 interface PropTypes {
   clientOrders: Order[];
   onUpdateOrderUI?: (updatedOrder: Order) => void;
@@ -66,6 +67,14 @@ const ClientOrdersTable = ({
   const [openDelete, setOpenDelete] = useState<any>({
     open: false,
     order: clientOrders[0],
+  });
+  const [openApproveOrder, setOpenApproveOrder] = useState<any>({
+    open: false,
+    order: null,
+  });
+  const [openRejectOrder, setOpenRejectOrder] = useState<any>({
+    open: false,
+    order: null,
   });
   const windowDimensions = useWindowDimensions();
   const { companyId }: any = useParams();
@@ -191,6 +200,31 @@ const ClientOrdersTable = ({
                 </IconButton>
               </Tooltip>
             )}
+
+            {
+              order.status === ORDER_STATUS.PENDING && (
+                <Box display="flex" gap={1} alignItems="center">
+                  <Button
+                    color="success"
+                    onClick={() => setOpenApproveOrder({
+                      open: true,
+                      order,
+                    })}
+                  >
+                    Approve
+                  </Button>
+                  <Button
+                    color="error"
+                    onClick={() => setOpenApproveOrder({
+                      open: true,
+                      order,
+                    })}
+                  >
+                    Reject
+                  </Button>
+                </Box>
+              )
+            }
           </Box>
         </TableCell>
         <TableCell padding="checkbox">
@@ -327,6 +361,25 @@ const ClientOrdersTable = ({
         }
         mutateOrders={mutateOrders}
         onUpdateOrderUI={onUpdateOrderUI}
+      />
+
+      <ApproveOrder
+        open={openApproveOrder}
+        onClose={() => setOpenApproveOrder({
+          open: false,
+          order: null,
+        })}
+        order={openApproveOrder?.order}
+        showNotification={showNotification}
+      />
+      <RejectOrder
+        open={openRejectOrder}
+        onClose={() => setOpenRejectOrder({
+          open: false,
+          order: null,
+        })}
+        order={openRejectOrder?.order}
+        showNotification={showNotification}
       />
       <LoadingModal open={isLoading} />
       <Paper
