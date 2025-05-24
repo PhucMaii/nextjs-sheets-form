@@ -28,7 +28,7 @@ export default function LoginAndRegisterGuard({ children }: any) {
   //   },
   // );
 
-  console.log({ session }, 'session');
+  // console.log({ session }, 'session');
 
   useEffect(() => {
     if (session?.user?.role === 'driver') {

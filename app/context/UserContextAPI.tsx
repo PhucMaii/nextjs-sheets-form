@@ -13,7 +13,7 @@ const UserContextAPI = ({ children }: { children: ReactNode }) => {
     revalidateOnFocus: false,
   });
 
-  console.log(session, 'session');
+  // console.log(session, 'session');
 
   const {
     data: user,
