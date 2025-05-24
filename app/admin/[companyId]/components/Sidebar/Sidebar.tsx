@@ -52,7 +52,21 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
   const [singleOrder, setSingleOrder] = useState<Order | null>(null);
   const router = useRouter();
   const pathname: any = usePathname();
+
   const { user } = useContext(UserContext);
+
+  // Auto change the greeting based on the time
+  const [greeting, setGreeting] = useState<string>('');
+  useEffect(() => {
+    const hours = new Date().getHours();
+    if (hours < 12) {
+      setGreeting('Good morning');
+    } else if (hours < 18) {
+      setGreeting('Good afternoon');
+    } else {
+      setGreeting('Good evening');
+    }
+  }, []);
 
   const { companyId }: any = useParams();
 
@@ -177,7 +191,7 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
         }}
       >
         <Typography sx={{ fontWeight: 'bold' }} variant="subtitle2">
-          Good afternoon, {user?.name.split(' ')[0]}
+          {greeting}, {user?.name.split(' ')[0]}
         </Typography>
         <Typography variant="caption">{user?.company?.name}</Typography>
       </Box>
