@@ -26,7 +26,7 @@ import { adminTabs } from '../../../../lib/constant';
 import { ListItemButtonStyled } from './styled';
 import { useParams, usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
-import { blueGrey, grey } from '@mui/material/colors';
+import { blue, blueGrey, grey } from '@mui/material/colors';
 import { ComponentToPrint } from '../Printing/ComponentToPrint';
 import { useReactToPrint } from 'react-to-print';
 import { Order } from '../../orders/page';
@@ -164,6 +164,23 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
           src="/supremesproutsIcon.png"
         />
       </Toolbar>
+      <Box
+        sx={{
+          mt: 6,
+          mx: 1,
+          px: 1,
+          py: 0.5,
+          fontWeight: 'bold',
+          backgroundColor: blue[50],
+          borderRadius: 1,
+          color: blue[900],
+        }}
+      >
+        <Typography sx={{ fontWeight: 'bold' }} variant="subtitle2">
+          Good afternoon, {user?.name.split(' ')[0]}
+        </Typography>
+        <Typography variant="caption">{user?.company?.name}</Typography>
+      </Box>
 
       {/* <Toolbar sx={{ mt: 6 }}>
         <LoadingButton

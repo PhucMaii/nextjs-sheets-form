@@ -18,6 +18,7 @@ const GET = async (req: NextApiRequest, res: NextApiResponse) => {
         },
         include: {
           Orders: true,
+          company: true,
         },
       });
 
@@ -35,6 +36,7 @@ const GET = async (req: NextApiRequest, res: NextApiResponse) => {
         },
         include: {
           adminPages: true,
+          company: true,
         }
       });
 
