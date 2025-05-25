@@ -19,7 +19,7 @@ import {
   useMediaQuery,
 } from '@mui/material';
 import axios from 'axios';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import React, { useEffect, useState } from 'react';
 import { grey, orange } from '@mui/material/colors';
@@ -51,6 +51,8 @@ export default function ItemPage() {
   const [relatedProducts, setRelatedProducts] = useState<IItem[]>([]);
   const [selectedOption, setSelectedOption] = useState<any>(null);
   const cart = useSelector((state: RootState) => state.cart);
+
+  const router = useRouter();
 
   const { showNotification, NotificationComp } = useNotification();
   const dispatch = useDispatch<AppDispatch>();
@@ -273,6 +275,9 @@ export default function ItemPage() {
                       //   height: '100%',
                       // }}
                       showNotification={showNotification}
+                      onClick={() => {
+                        router.push(`/products/${item.id}`);
+                      }}
                     />
                   </SwiperSlide>
                 );

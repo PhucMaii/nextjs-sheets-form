@@ -57,7 +57,7 @@ export default function Sidebar({ children }: PropTypes) {
   useEffect(() => {
     if (user?.type === USER_CATEGORIZED.INACTIVE) {
       signOut({
-        callbackUrl: `https://www.supremesprouts.com/auth/login`,
+        callbackUrl: `https://www.supremesprouts.com/account/login`,
       });
     }
   }, [user]);
@@ -126,7 +126,7 @@ export default function Sidebar({ children }: PropTypes) {
         <Button
           onClick={() =>
             signOut({
-              callbackUrl: `https://www.supremesprouts.com/auth/login`,
+              callbackUrl: `https://www.supremesprouts.com/account/login`,
             })
           }
           variant="outlined"

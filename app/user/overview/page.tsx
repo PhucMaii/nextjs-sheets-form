@@ -247,7 +247,7 @@ export default function MainPage() {
           <Typography variant="h6" fontWeight="bold">
             Create an order for {isTomorrow ? 'tomorrow' : 'today'}
           </Typography>
-          <IconButton onClick={() => router.push('/order')}>
+          <IconButton onClick={() => router.push('/user/order')}>
             <AddBoxIcon sx={{ color: blue[500], fontSize: 50 }} />
           </IconButton>
         </Box>

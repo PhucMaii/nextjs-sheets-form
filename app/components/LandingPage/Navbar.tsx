@@ -224,7 +224,7 @@ export default function Navbar() {
   };
 
   const proceedToApplicationForm = () => {
-    router.push('/account/login');
+    router.push('/account/application-form');
   };
 
   if (mdDown) {
@@ -346,11 +346,11 @@ export default function Navbar() {
               sx={{ m: 2, mt: 4 }}
             >
               <Button
-                onClick={() => router.push('/account/login')}
+                onClick={proceedToApplicationForm}
                 fullWidth
                 sx={{ color: landingPageSecondaryColor }}
               >
-                Sign in
+                Sign up
               </Button>
               <Button
                 variant="contained"
@@ -361,9 +361,9 @@ export default function Navbar() {
                   py: 1,
                   borderRadius: 2,
                 }}
-                onClick={proceedToApplicationForm}
+                onClick={() => router.push('/account/login')}
               >
-                Sign up
+                Sign in
               </Button>
             </Box>
           </Drawer>
@@ -430,7 +430,7 @@ export default function Navbar() {
           <Searchbar width="50%" />
           <Box display="flex" alignItems="center" gap={1}>
             <IconButton
-              onClick={proceedToApplicationForm}
+              onClick={() => router.push('/account/login')}
               size="large"
               sx={{
                 color: landingPagePrimaryColor,

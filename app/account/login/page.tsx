@@ -76,7 +76,7 @@ export default function LoginPage() {
             router.push('/user/overview');
           } else {
             signOut({
-              callbackUrl: `https://www.supremesprouts.com/auth/login`,
+              callbackUrl: `https://www.supremesprouts.com/account/login`,
             });
           }
         }, 1000);

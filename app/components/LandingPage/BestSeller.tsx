@@ -15,11 +15,14 @@ import 'swiper/css/scrollbar';
 import '../../../styles/swiper.css';
 import { IItem, IPromotion } from '@/app/utils/type';
 import useNotification from '@/hooks/useNotification';
+import { useRouter } from 'next/navigation';
 
 export default function BestSeller() {
   const [bestSeller, setBestSeller] = useState<IItem[]>([]);
   const [promotion, setPromotion] = useState<IPromotion | null>(null);
   // const [weeklySpecials, setWeeklySpecials] = useState<IItemPreference[]>([]);
+
+  const router = useRouter();
 
   // FETCH BEST SELLERS AND POROMOTIONS
   const { showNotification, NotificationComp } = useNotification();
@@ -90,6 +93,9 @@ export default function BestSeller() {
                       <ProductListing
                         key={index}
                         product={item}
+                        onClick={() => {
+                          router.push(`/products/${item.id}`);
+                        }}
                           // containerStyle={{
                           //   backgroundColor: 'white',
                           //   height: '100%',
@@ -126,6 +132,9 @@ export default function BestSeller() {
                       <ProductListing
                         key={index}
                         product={item}
+                        onClick={() => {
+                          router.push(`/products/${item.id}`);
+                        }}
                         // containerStyle={{
                         //   backgroundColor: 'white',
                         //   height: '100%',

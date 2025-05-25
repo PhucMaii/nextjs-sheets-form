@@ -54,7 +54,7 @@ export default function SwitchTypeAndAppearanceModal({
 
   const [color, setColor] = useColor(item?.color || infoBackground);
 
-  const { selectedImage, renderImageGallery } = useImageGallery(item?.image || '', '100%', 'products');
+  const { selectedImage, renderImageGallery } = useImageGallery('products', item?.image || '', '100%');
 
   // useEffect(() => {
   //   const fetchUrl = async () => {
@@ -102,7 +102,7 @@ export default function SwitchTypeAndAppearanceModal({
           id: Number(actualId),
           typeId: selectedType,
           color: color.hex,
-          image: itemImage || selectedImage,
+          image: selectedImage,
         },
       );
 

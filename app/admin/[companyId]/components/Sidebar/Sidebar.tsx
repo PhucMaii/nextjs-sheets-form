@@ -139,7 +139,7 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
         setCurrentTab(pathname);
       } else {
         signOut({
-          callbackUrl: `https://www.supremesprouts.com/auth/login`,
+          callbackUrl: `https://www.supremesprouts.com/account/login`,
         });
       }
     } else {
@@ -335,7 +335,7 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
         <Button
           onClick={() =>
             signOut({
-              callbackUrl: `https://www.supremesprouts.com/auth/login`,
+              callbackUrl: `https://www.supremesprouts.com/account/login`,
             })
           }
           variant="outlined"

@@ -274,7 +274,7 @@ export default function AccountPage() {
           sx={{ mt: 2 }}
           onClick={() =>
             signOut({
-              callbackUrl: `https://www.supremesprouts.com/auth/login`,
+              callbackUrl: `https://www.supremesprouts.com/account/login`,
             })
           }
         >
