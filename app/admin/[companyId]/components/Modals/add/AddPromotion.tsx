@@ -25,12 +25,16 @@ import { useParams } from 'next/navigation';
 
 interface IProps extends ModalProps {
   showNotification: ShowNotificationType;
+  isWebsite?: boolean;
+  customOnClick?: (data: any) => void;
 }
 
 export default function AddPromotion({
   open,
   onClose,
   showNotification,
+  isWebsite = false,
+  customOnClick,
 }: IProps) {
   const { companyId }: any = useParams();
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -41,20 +45,30 @@ export default function AddPromotion({
   const [selectedItems, setSelectedItems] = useState<IInventoryItem[]>([]);
 
   const [inventoryItems] = SWRFetchData(
-    getAdminApiUrl(companyId, '/inventory'),
+    `${isWebsite ? getAdminApiUrl(companyId, '/website/items') : getAdminApiUrl(companyId, '/inventory')}`,
   );
 
   const handleAddPromotion = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.post(
-        getAdminApiUrl(companyId, '/promotions'),
-        {
+      let response: any;
+
+      if (customOnClick) {
+        response = await customOnClick({
           title,
           status,
           itemIds: selectedItems.map((item) => item.id),
-        },
-      );
+        });
+      } else {
+        response = await axios.post(
+          getAdminApiUrl(companyId, '/promotions'),
+          {
+            title,
+            status,
+            itemIds: selectedItems.map((item) => item.id),
+          },
+        );
+      }
 
       if (response.data.error) {
         showNotification('error', response.data.error);

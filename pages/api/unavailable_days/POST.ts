@@ -21,9 +21,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { startDate, endDate, userId, createdAt, role }: IBody = req.body;
 
-    const session: any = await getServerSession(req, res, authOptions);
-    const companyId = Number(session?.user?.companyId);
-
     const existingUser = await prisma.user.findUnique({
       where: {
         id: userId,
@@ -52,6 +49,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       const admin: any = session?.user;
       createdBy = `S Admin - ${admin?.name}`;
     }
+
+    const session: any = await getServerSession(req, res, authOptions);
+    const companyId = Number(session?.user?.companyId);
 
     // Check is same start date or same end date exist
     const isRangeValid = await handleCheckRangeValid(

@@ -27,7 +27,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // Updated Status will always be VOID - Delete order button on client side
     const { orderId, updatedStatus }: BodyTypes = req.body;
 
-    let existingUser = await prisma.user.findUnique({
+    let existingUser: any = await prisma.user.findUnique({
       where: {
         id: testAccountId,
       },

@@ -363,7 +363,6 @@ export default function ScheduledOrderPage() {
 
   const onAddRouteUI = (targetRoute: IRoutes) => {
     setRoutes([...routes, targetRoute]);
-    // mutate(`${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`);
     mutateClients();
   };
 
@@ -448,7 +447,6 @@ export default function ScheduledOrderPage() {
   //     return route;
   //   });
 
-  //   // mutate(`${API_URL.CLIENTS}?dayRoute=${days[dayIndex]}`);
   //   // fetchRoutes();
   //   setRoutes(newRoutes);
   // };

@@ -47,7 +47,6 @@ export default function ReportPage() {
   const [clientValue, setClientValue] = useState<UserType | null>(null);
   const [clientOrders, setClientOrders] = useState<Order[]>([]);
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
-  // const [deletedOrder, setDeletedOrder] = useState<Order | null>(null);
   const [unpaidOrders, setUnpaidOrders] = useState<Order[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
@@ -119,37 +118,6 @@ export default function ReportPage() {
 
     return unpaidBill;
   }, [unpaidOrders]);
-
-  // useEffect(() => {
-  //   pusherClient?.subscribe('admin-delete-order');
-
-  //   pusherClient?.bind('delete-order', (deletedOrder: Order) => {
-  //     showNotification(
-  //       'success',
-  //       `Order ${deletedOrder.id} deleted successfully`,
-  //     );
-  //     setDeletedOrder(deletedOrder);
-  //   });
-
-  //   return () => {
-  //     pusherClient?.unsubscribe('admin-delete-order');
-  //   };
-  // }, []);
-
-  // useEffect(() => {
-  //   if (deletedOrder) {
-  //     const newClientOrders = clientOrders.filter((order: Order) => {
-  //       return order.id !== deletedOrder.id;
-  //     });
-
-  //     const newBaseClientOrders = clientOrders.filter((order: Order) => {
-  //       return order.id !== deletedOrder.id;
-  //     });
-
-  //     setClientOrders(newClientOrders);
-  //     setBaseClientOrders(newBaseClientOrders);
-  //   }
-  // }, [deletedOrder]);
 
   // Reset display data
   useEffect(() => {

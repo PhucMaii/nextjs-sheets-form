@@ -13,6 +13,7 @@ interface IBody {
   endDate: Date;
   userId: number;
   role: USER_ROLE;
+  companyId: number;
 }
 
 const prisma = new PrismaClient();

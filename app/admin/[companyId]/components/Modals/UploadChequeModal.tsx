@@ -65,7 +65,7 @@ export default function UploadChequeModal({
       back: '',
     });
   }, [open]);
-
+  
   const handleUpload = async () => {
     console.log(client, 'client');
     if (!client) {

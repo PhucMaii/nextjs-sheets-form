@@ -1,5 +1,7 @@
 import { AlertColor } from '@mui/material';
 import {
+  Cart,
+  CartItem,
   Category,
   CodBoard,
   DayRange,
@@ -10,6 +12,7 @@ import {
   FixedTransaction,
   InventoryItem,
   InventoryUnit,
+  ItemPreference,
   ItemType,
   ItemType_Category,
   LossReport,
@@ -101,6 +104,7 @@ export interface UserType {
   id: number;
   clientId: string;
   clientName: string;
+  contactName?: string;
   contactNumber: string;
   password?: string;
   email?: string;
@@ -149,6 +153,7 @@ export interface IItem {
   options?: IOption[];
 
   image?: string;
+  isBestSeller?: boolean;
 }
 
 export interface OrderedItems {
@@ -236,11 +241,13 @@ export interface IInventoryItem extends InventoryItem {
   fifo: IFifo[];
   totalValue: number;
   stockStatus: STOCK_STATUS;
+  preference?: ItemPreference;
   type?: ItemType;
 }
 
 export interface IItemType extends ItemType {
   inventoryItems: IInventoryItem[];
+  items: IItem[];
 }
 
 export interface IVendorItem extends VendorItem {
@@ -263,8 +270,40 @@ export interface IFifo extends Fifo {
   orderedItems: OrderedItems[];
 }
 
+export interface IProductType extends ItemType {
+  itemPreferences: IItemPreference[];
+}
+
+export interface IItemPreference extends ItemPreference {
+  inventoryItem: IInventoryItem;
+  price: number;
+}
+
+export interface ICart extends Cart {
+  items: ICartItem[];
+}
+
+export interface ICartItem extends CartItem {
+  quantity: number;
+  cartId: number;
+  inventoryUnit: IInventoryUnit;
+  itemId: number;
+  option: any;
+
+  item: IItem;
+}
+
+export type OrderSummary = {
+  subtotal: number;
+  discount: number;
+  totalPrice: number;
+  PST: number;
+  GST: number;
+  shippingFee: number;
+};
 export interface IPromotion extends Promotion {
   items: IInventoryItem[];
+  websiteItems?: IItem[];
 }
 
 export interface IOption extends Option {

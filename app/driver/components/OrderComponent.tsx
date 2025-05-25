@@ -125,7 +125,7 @@ export default function OrderComponent({
         onClose={() => setIsOpenClientDetails(false)}
         deliveryAddress={order.user.deliveryAddress}
         contactNumber={order.user.contactNumber}
-        categoryName={order.user.category.name}
+        categoryName={order.user?.category?.name}
       />
       <ConfirmModal
         open={confirmModalProps.on}

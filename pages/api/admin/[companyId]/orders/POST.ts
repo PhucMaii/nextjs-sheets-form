@@ -275,6 +275,8 @@ export const createOrder = async (
   deliveryDate: string,
   createdBy: string,
   note: string = '',
+  shippingFee: number = 0,
+  status: ORDER_STATUS = ORDER_STATUS.INCOMPLETED,
 ) => {
   try {
     const prisma = new PrismaClient();
@@ -296,14 +298,17 @@ export const createOrder = async (
     }
 
     // Check if user order within invalid date
-    if (createdBy.split(' - ')[0] === 'Client') {
+    if (
+      createdBy.split(' - ')[0] === 'Client' ||
+      createdBy.split(' - ')[0] === 'Guest'
+    ) {
       const isValidDate = checkOrderDeliveryDateValid(deliveryDate);
       if (!isValidDate.ok) {
         throw new Error(isValidDate.message);
       }
     }
 
-    const total = generateOrderTotalPrice(items);
+    const total = generateOrderTotalPrice(items, shippingFee);
     const { date, time } = getTodayDate();
 
     // initialize order
@@ -311,11 +316,12 @@ export const createOrder = async (
       data: {
         deliveryDate,
         note,
-        status: ORDER_STATUS.INCOMPLETED,
+        status,
         userId: user.id,
         subTotal: total.subTotal,
         PST: total.PST,
         GST: total.GST,
+        shippingFee,
         discount: total.discount,
         totalPrice: total.totalPrice,
         isAffectInventory: true,

@@ -25,21 +25,22 @@ export default function AuthenGuard({ children }: any) {
   } = useSWR('/api/auth/session', fetcher, {
     revalidateOnFocus: false,
   });
-  console.log('pathname?.split("/")[2]"', pathname?.split('/')[2]);
-  console.log('session?.user.companyId', session?.user?.companyId);
+
   useEffect(() => {
     if (
       (sessionError ||
         (!isSessionValidating && Object.keys(session).length === 0)) &&
+      (pathname?.startsWith('/admin') || pathname?.startsWith('/driver') || pathname?.startsWith('/user')) &&
       pathname !== '/driver/login'
-    ) {
-      router.push('/auth/login');
-    } else if (
-      session?.user &&
-      (pathname?.startsWith('/admin') || pathname?.startsWith('/driver')) &&
-      session.user.role === USER_ROLE.CLIENT
+      // pathname !== '/auth/login'
     ) {
       router.push('/');
+    } else if (
+      session?.user &&
+      !pathname?.startsWith('/user') &&
+      session.user.role === USER_ROLE.CLIENT
+    ) {
+      router.push('/user/overview');
     } else if (
       session?.user &&
       (session?.user.role === USER_ROLE.ADMIN ||

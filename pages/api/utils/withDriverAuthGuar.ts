@@ -4,7 +4,7 @@ import { authOptions } from '../auth/[...nextauth]';
 import { PrismaClient } from '@prisma/client';
 import { USER_ROLE } from '@/app/utils/enum';
 
-type HandlerFunction = (
+export type HandlerFunction = (
   req: NextApiRequest,
   res: NextApiResponse,
 ) => Promise<any>;

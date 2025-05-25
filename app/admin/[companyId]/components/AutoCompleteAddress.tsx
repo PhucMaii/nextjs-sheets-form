@@ -120,6 +120,13 @@ function GoogleMaps(props: any) {
           {...params}
           label={props.label ? props.label : 'Address'}
           fullWidth
+          // InputProps={{
+          //   startAdornment: (
+          //     <InputAdornment position="start">
+          //       <SearchIcon style={{ color: grey[500] }} />
+          //     </InputAdornment>
+          // ),
+          // }}
         />
       )}
       renderOption={(props, option) => {

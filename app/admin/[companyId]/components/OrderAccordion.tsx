@@ -1,7 +1,6 @@
 'use client';
 import React, { useMemo, useRef, useState } from 'react';
 import {
-  AlertColor,
   Box,
   Button,
   Checkbox,
@@ -25,6 +24,7 @@ import {
   ORDER_STATUS,
   TYPE,
   USER_CATEGORIZED,
+  USER_ROLE,
   getAdminApiUrl,
 } from '@/app/utils/enum';
 import EditIcon from '@mui/icons-material/Edit';
@@ -49,11 +49,15 @@ import { renderType } from '@/app/lib/render';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import { useParams } from 'next/navigation';
+import ApproveGuest from './Modals/ApproveGuest';
 import QuickViewOrderedItems from './Tooltip/QuickViewOrderedItems';
 
+import { ShowNotificationType } from '@/hooks/useNotification';
+import ApproveOrder from './Modals/ApproveOrder';
+import RejectOrder from './Modals/RejectOrder';
 interface PropTypes {
   order: Order;
-  showNotification?: (type: AlertColor, message: string) => void;
+  showNotification?: ShowNotificationType;
   selectedOrders?: Order[];
   handleSelectOrder?: (e: any, targetOrder: Order) => void;
   // handleUpdateItem?: (
@@ -88,6 +92,10 @@ const OrderAccordion = ({
   const [isClientModalOpen, setIsClientModalOpen] = useState<boolean>(false);
   const [isMarkButtonDisabled, setIsMarkButtonDisabled] =
     useState<boolean>(false);
+
+  const [isApproveGuestOpen, setIsApproveGuestOpen] = useState<boolean>(false);
+  const [isApproveOrderOpen, setIsApproveOrderOpen] = useState<boolean>(false);
+  const [isRejectOrderOpen, setIsRejectOrderOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isOpenEditPrice, setIsOpenEditPrice] = useState<boolean>(false);
   const [isOpenDetails, setIsOpenDetails] = useState<boolean>(false);
@@ -208,6 +216,11 @@ const OrderAccordion = ({
 
   //   setTotalQuantity(quantity);
   // };
+
+  const onOpenApproveGuest = (e: any) => {
+    e.stopPropagation();
+    setIsApproveGuestOpen(true);
+  };
 
   const handleDeleteOrder = async (targetOrder: Order) => {
     if (!showNotification) {
@@ -381,6 +394,30 @@ const OrderAccordion = ({
         contactNumber={order?.user?.contactNumber || ''}
         categoryName={order?.user?.category?.name || ''}
       />
+      {order?.status === ORDER_STATUS.PENDING && showNotification && (
+        <>
+          <ApproveOrder
+            open={isApproveOrderOpen}
+            onClose={() => setIsApproveOrderOpen(false)}
+            order={order}
+            showNotification={showNotification}
+          />
+          <RejectOrder
+            open={isRejectOrderOpen}
+            onClose={() => setIsRejectOrderOpen(false)}
+            order={order}
+            showNotification={showNotification}
+          />
+        </>
+      )}
+      {order?.user?.type === USER_CATEGORIZED.PENDING && showNotification && (
+        <ApproveGuest
+          open={isApproveGuestOpen}
+          onClose={() => setIsApproveGuestOpen(false)}
+          client={order?.user}
+          showNotification={showNotification}
+        />
+      )}
       {showNotification && (
         <>
           <EditDeliveryDate
@@ -487,7 +524,21 @@ const OrderAccordion = ({
               alignItems="center"
               gap={1}
             >
-              {order?.profit
+              {order?.status === ORDER_STATUS.PENDING && (
+                <Box display="flex" gap={1} alignItems="center">
+                  <Button
+                    variant="contained"
+                    color="success"
+                    onClick={() => setIsApproveOrderOpen(true)}
+                  >
+                    Approve
+                  </Button>
+                  <Button variant="contained" color="error" onClick={() => setIsRejectOrderOpen(true)}>
+                    Reject
+                  </Button>
+                </Box>
+              )}
+              {order?.status !== ORDER_STATUS.PENDING && order?.profit
                 ? order.profit > 0 && (
                     <StatusText
                       text={`Profit: $${order.profit.toFixed(2)}`}
@@ -570,8 +621,12 @@ const OrderAccordion = ({
           )}
           <Grid item xs={12} md={4} textAlign={mdDown ? 'center' : 'left'}>
             <Button
-              color="info"
-              variant="contained"
+              color={order?.user?.role === USER_ROLE.CLIENT ? 'info' : 'error'}
+              variant={
+                order?.user?.role === USER_ROLE.CLIENT
+                  ? 'contained'
+                  : 'outlined'
+              }
               sx={{ textTransform: 'none' }}
               onClick={handleOpenClientModal}
             >
@@ -581,8 +636,19 @@ const OrderAccordion = ({
                     order?.user?.clientName?.toUpperCase()}
                 </Typography>
                 {order?.user?.type &&
+                  order?.user?.role === USER_ROLE.CLIENT &&
                   order?.user?.type !== USER_CATEGORIZED.NONE &&
                   renderType(order.user.type)}
+
+                {order?.user?.type === USER_CATEGORIZED.PENDING && (
+                  <Button
+                    onClick={onOpenApproveGuest}
+                    variant="contained"
+                    color="success"
+                  >
+                    Approve Client
+                  </Button>
+                )}
               </Box>
             </Button>
           </Grid>

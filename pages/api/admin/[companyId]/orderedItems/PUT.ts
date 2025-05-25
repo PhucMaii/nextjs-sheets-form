@@ -317,7 +317,7 @@ export const categorizeUpdatedItems = (
   return [...newItems, ...deletedItems];
 };
 
-export const generateOrderTotalPrice = (listOfItems: any[]) => {
+export const generateOrderTotalPrice = (listOfItems: any[], shippingFee: number = 0) => {
   try {
     const total = listOfItems.reduce((acc: any, item: any) => {
       if (!acc?.subTotal) {
@@ -361,10 +361,16 @@ export const generateOrderTotalPrice = (listOfItems: any[]) => {
 
       return acc;
     }, {});
+    
+    if (shippingFee > 0) {
+      total.PST += shippingFee * pstRate;
+      total.GST += shippingFee * gstRate;
+    }
 
     return {
       ...total,
-      totalPrice: total.subTotal + total.PST + total.GST,
+      totalPrice: total.subTotal + total.PST + total.GST + shippingFee,
+      shippingFee,
     };
   } catch (error: any) {
     console.log('Internal Server Error: ', error);

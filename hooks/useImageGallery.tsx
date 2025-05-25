@@ -7,6 +7,7 @@ import useNotification from './useNotification';
 import DisplayFile from '@/app/admin/[companyId]/components/Modals/DisplayFile';
 
 const useImageGallery = (
+  from: string = '',
   initialSelectedImage: string = '',
   width: string | number,
   folder: string = '',
@@ -18,7 +19,8 @@ const useImageGallery = (
 
   useEffect(() => {
     const getImages = async () => {
-      const images = await getAllS3Images(folder);
+      const images = await getAllS3Images(from);
+      console.log(images, 'images');
       setGalleryImages(images || []);
     };
 

@@ -22,7 +22,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { IItem, IOption } from '../utils/type';
+import { IItem } from '../utils/type';
 import { infoBackground, primary } from '@/theme/color';
 import { blueGrey, grey, red } from '@mui/material/colors';
 import { ShadowSection } from '../admin/[companyId]/reports/styled';
@@ -70,7 +70,7 @@ export const WhiteSpace = () => {
   );
 };
 
-const OnSaleBadge = ({
+export const OnSaleBadge = ({
   discountPrice,
   prevPrice,
   percentage, // if percentage is provided, no need to calculate percentage
@@ -390,6 +390,7 @@ const OrderView = ({
     id: defaultOrder?.id || -1,
     subTotal: 0,
     totalPrice: 0,
+    shippingFee: defaultOrder?.shippingFee || 0,
     PST: defaultOrder?.PST || 0,
     GST: defaultOrder?.GST || 0,
     note: defaultOrder?.note || '',
@@ -506,6 +507,13 @@ const OrderView = ({
   }, [orderedItems]);
 
   useEffect(() => {
+    setOrder({
+      ...order,
+      ...defaultOrder,
+    });
+  }, [defaultOrder]);
+
+  useEffect(() => {
     setOrderedItems(defaultOrderedItems || []);
   }, [clientName, defaultOrderedItems]);
 
@@ -528,9 +536,10 @@ const OrderView = ({
 
   useEffect(() => {
     // Update order whenever the orderedItems change
-    const newSubtotal = generateOrderTotalPrice(orderedItems);
+    const newSubtotal = generateOrderTotalPrice(orderedItems, order?.shippingFee);
     setOrder({
       ...order,
+      shippingFee: order?.shippingFee || 0,
       subTotal: newSubtotal?.subTotal || 0,
       totalPrice: newSubtotal?.totalPrice || 0,
       PST: defaultOrder?.PST || newSubtotal?.PST || 0,
@@ -571,7 +580,7 @@ const OrderView = ({
   };
 
   // Handle the input of order items
-  const onAddItem = (quantity: number, option: IOption | null = null) => {
+  const onAddItem = (quantity: number, option: any | null = null) => {
     if (quantity % 1 !== 0) {
       showNotification('error', 'Quantity must be a whole number');
       return;
@@ -1260,6 +1269,22 @@ const OrderView = ({
             ${order?.subTotal?.toFixed(2) || order?.totalPrice?.toFixed(2) || 0}
           </Typography>
         </Grid>
+        <Grid item xs={12}>
+          <Divider />
+        </Grid>
+        {order?.shippingFee &&
+          order?.shippingFee > 0 ? (
+            <>
+              <Grid item xs={4} textAlign="left" ml={2}>
+                <Typography>Shipping Fee</Typography>
+              </Grid>
+              <Grid item xs={6} textAlign="right">
+                <Typography fontWeight="bold">
+                  ${order?.shippingFee?.toFixed(2) || 0}
+                </Typography>
+              </Grid>
+            </>
+          ) : null}
         <Grid item xs={12}>
           <Divider />
         </Grid>

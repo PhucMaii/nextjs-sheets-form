@@ -20,6 +20,7 @@ import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
 import DayRange from '../DayRange';
 import { USER_ROLE } from '@/app/utils/enum';
+import { useParams } from 'next/navigation';
 
 interface IProps extends ModalProps {
   currentUser: UserType;
@@ -33,6 +34,8 @@ export default function UnavailableRange({
   currentUser,
   showNotification,
 }: IProps) {
+  const { companyId }: any = useParams();
+
   const [newDateRange, setNewDateRange] = useState<any>(() =>
     generateMonthRange(),
   );
@@ -78,6 +81,7 @@ export default function UnavailableRange({
         userId: currentUser.id,
         createdAt,
         role: USER_ROLE.ADMIN,
+        companyId: Number(companyId),
       });
 
       if (response.data.error) {

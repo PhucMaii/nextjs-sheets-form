@@ -72,7 +72,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    // Get all categories
+    // Get all categories - not including website categories
     const categories = await prisma.category.findMany({
       where: {
         companyId: Number(companyId),

@@ -7,7 +7,6 @@ import { authOptions } from '@/pages/api/auth/[...nextauth]';
 interface IQuery {
   userId?: string;
   date?: string;
-  companyId?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {

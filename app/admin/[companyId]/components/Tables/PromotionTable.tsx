@@ -24,11 +24,13 @@ import { useParams } from 'next/navigation';
 interface IProps {
   promotions: IPromotion[];
   showNotification: ShowNotificationType;
+  isWebsite?: boolean;
 }
 
 export default function PromotionTable({
   promotions,
   showNotification,
+  isWebsite,
 }: IProps) {
   const { companyId }: any = useParams();
   const [deleteProps, setDeleteProps] = useState<any>({
@@ -72,6 +74,7 @@ export default function PromotionTable({
         {
           id,
           status,
+          isWebsite: isWebsite,
         },
       );
 
@@ -100,6 +103,7 @@ export default function PromotionTable({
         {
           id,
           visibility: e.target.checked,
+          isWebsite: isWebsite,
         },
       );
       if (response.data.error) {
@@ -133,6 +137,7 @@ export default function PromotionTable({
           onClose={() => setEditProps({ open: false, promotion: null })}
           promotion={editProps.promotion}
           showNotification={showNotification}
+          isWebsite={isWebsite}
         />
       )}
       <Table>
@@ -201,7 +206,7 @@ export default function PromotionTable({
                     </Select>
                     {/* {promotion.status} */}
                   </TableCell>
-                  <TableCell>{promotion.items.length}</TableCell>
+                  <TableCell>{promotion?.items?.length || promotion?.websiteItems?.length || 0}</TableCell>
                   <TableCell>{promotion.createdAt}</TableCell>
                   <TableCell>
                     <Button

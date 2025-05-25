@@ -102,7 +102,7 @@ export const SummaryManifest = forwardRef(
                       <Table>
                         <TableHead>
                           <TableRow>
-                            <TableCell>Name - id</TableCell>
+                            <TableCell>Client</TableCell>
                             <TableCell>Note</TableCell>
                           </TableRow>
                         </TableHead>
