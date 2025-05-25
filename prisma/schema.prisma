@@ -764,7 +764,6 @@ model ScheduledShift {
   id            Int    @id @default(autoincrement())
   companyId     Int
   employeeId    Int
-  date          String
   startedAt     String
   endedAt       String?
   hours         Float?
