@@ -26,7 +26,7 @@ import { adminTabs } from '../../../../lib/constant';
 import { ListItemButtonStyled } from './styled';
 import { useParams, usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
-import { blueGrey, grey } from '@mui/material/colors';
+import { blue, blueGrey, grey } from '@mui/material/colors';
 import { ComponentToPrint } from '../Printing/ComponentToPrint';
 import { useReactToPrint } from 'react-to-print';
 import { Order } from '../../orders/page';
@@ -52,7 +52,21 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
   const [singleOrder, setSingleOrder] = useState<Order | null>(null);
   const router = useRouter();
   const pathname: any = usePathname();
+
   const { user } = useContext(UserContext);
+
+  // Auto change the greeting based on the time
+  const [greeting, setGreeting] = useState<string>('');
+  useEffect(() => {
+    const hours = new Date().getHours();
+    if (hours < 12) {
+      setGreeting('Good morning');
+    } else if (hours < 18) {
+      setGreeting('Good afternoon');
+    } else {
+      setGreeting('Good evening');
+    }
+  }, []);
 
   const { companyId }: any = useParams();
 
@@ -164,6 +178,23 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
           src="/supremesproutsIcon.png"
         />
       </Toolbar>
+      <Box
+        sx={{
+          mt: 6,
+          mx: 1,
+          px: 1,
+          py: 0.5,
+          fontWeight: 'bold',
+          backgroundColor: blue[50],
+          borderRadius: 1,
+          color: blue[900],
+        }}
+      >
+        <Typography sx={{ fontWeight: 'bold' }} variant="subtitle2">
+          {greeting}, {user?.name.split(' ')[0]}
+        </Typography>
+        <Typography variant="caption">{user?.company?.name}</Typography>
+      </Box>
 
       {/* <Toolbar sx={{ mt: 6 }}>
         <LoadingButton

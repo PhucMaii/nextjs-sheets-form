@@ -346,7 +346,7 @@ export default function Navbar() {
               sx={{ m: 2, mt: 4 }}
             >
               <Button
-                onClick={() => {}}
+                onClick={() => router.push('/account/login')}
                 fullWidth
                 sx={{ color: landingPageSecondaryColor }}
               >

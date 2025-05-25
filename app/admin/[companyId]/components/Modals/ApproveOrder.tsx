@@ -21,7 +21,7 @@ interface IProps extends ModalProps {
 export default function ApproveOrder({open, onClose, order, showNotification}: IProps) {
     const { companyId }: any = useParams();
 
-    const { date, SelectDate } = useSelectDate(order.deliveryDate, true, true);
+    const { date, SelectDate } = useSelectDate(order?.deliveryDate || '', true, true);
     const [isLoading, setIsLoading] = useState(false);
     const [deliveryTime, setDeliveryTime] = useState<any>(dayjs(new Date()));
 

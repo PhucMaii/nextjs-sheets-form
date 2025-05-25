@@ -372,7 +372,7 @@ const ClientOrdersTable = ({
       />
 
       <ApproveOrder
-        open={openApproveOrder}
+        open={openApproveOrder.open}
         onClose={() => setOpenApproveOrder({
           open: false,
           order: null,
@@ -381,7 +381,7 @@ const ClientOrdersTable = ({
         showNotification={showNotification}
       />
       <RejectOrder
-        open={openRejectOrder}
+        open={openRejectOrder.open}
         onClose={() => setOpenRejectOrder({
           open: false,
           order: null,
