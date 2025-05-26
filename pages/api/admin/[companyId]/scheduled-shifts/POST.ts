@@ -14,33 +14,49 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     const session: any = await getServerSession(req, res, authOptions);
 
-    const { scheduledShifts } = req.body;
+    const { scheduledShift } = req.body;
 
     const today = getTodayDate();
     const createdBy = await getCreatedBy(req, res, session?.user?.role);
 
-    const formattedScheduledShifts = scheduledShifts.map((shift: any) => {
-      const cost = shift.hours * shift.employee.hourlyRate;
-      return {
+    // const formattedScheduledShifts = scheduledShifts.map((shift: any) => {
+    //   const cost = shift.hours * shift.employee.hourlyRate;
+    //   return {
+    //     companyId: Number(companyId),
+    //     employeeId: Number(shift.employeeId),
+    //     startedAt: shift.start,
+    //     endedAt: shift.end,
+    //     createdAt: today.dateAndTime,
+    //     createdBy,
+    //     assignedBy: createdBy,
+    //     assignedAt: today.dateAndTime,
+    //     role: shift.role,
+    //     hours: shift.hours,
+    //     cost
+    //   };
+    // });
+
+    const cost = scheduledShift.hours * scheduledShift.employee.hourlyRate;
+
+    await prisma.scheduledShift.create({
+      data: {
         companyId: Number(companyId),
-        employeeId: Number(shift.employeeId),
-        startedAt: shift.start,
-        endedAt: shift.end,
+        employeeId: Number(scheduledShift.employeeId),
+        startedAt: scheduledShift.start,
+        endedAt:  scheduledShift.end,
         createdAt: today.dateAndTime,
         createdBy,
         assignedBy: createdBy,
         assignedAt: today.dateAndTime,
-        role: shift.role,
-        hours: shift.hours,
-        cost
-      };
+        role: scheduledShift.role,
+        hours: scheduledShift.hours,
+        cost,
+      },
     });
 
-    await prisma.scheduledShift.createMany({
-      data: formattedScheduledShifts
-    })
-
-    return res.status(200).json({ message: 'Scheduled Shifts Created Successfully' });
+    return res
+      .status(200)
+      .json({ message: 'Scheduled Shifts Created Successfully' });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({ message: 'Internal Server Error: ' + error });

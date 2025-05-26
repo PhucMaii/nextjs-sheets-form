@@ -1,7 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import withAdminAuthGuard from '../../../utils/withAdminAuthGuard';
-import { USER_ROLE } from '@/app/utils/enum';
+// import { USER_ROLE } from '@/app/utils/enum';
+import { getRole } from '@/pages/api/utils/employee';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -39,19 +40,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
 
     const adminsAndDrivers = employees.map((employee: any) => {
-      if (employee.role === USER_ROLE.ADMIN) {
-        return 'Admin - ' + employee.name;
-      }
-
-      if (employee.role === USER_ROLE.DRIVER) {
-        return 'Driver - ' + employee.name;
-      }
-
-      if (employee.role === USER_ROLE.SUPER_ADMIN) {
-        return 'S Admin - ' + employee.name;
-      }
-
-      return null;
+      const role = getRole(employee.role, employee.name);
+      
+      return role
     });
 
     return res.status(200).json({
