@@ -246,7 +246,7 @@ export const overrideOrder = async (
 export const getCreatedBy = async (
   req: NextApiRequest,
   res: NextApiResponse,
-  createdByRole: USER_ROLE,
+  createdByRole: USER_ROLE = USER_ROLE.CLIENT,
 ) => {
   const prisma = new PrismaClient();
   const session: any = await getServerSession(req, res, authOptions);

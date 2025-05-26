@@ -13,11 +13,14 @@ import AddScheduledShift from '../components/Modals/add/AddScheduledShift';
 import { getRole } from '@/pages/api/utils/employee';
 import { generateWeekRange } from '@/app/utils/time';
 import { IEmployee, IScheduledShift } from '@/app/utils/type';
+import axios from 'axios';
+import { LoadingButton } from '@mui/lab';
 
 export default function ScheduledShifts() {
   const { companyId }: any = useParams();
 
   const [employees, setEmployees] = useState<IEmployee[]>([]);
+  const [isSavingAll, setIsSavingAll] = useState<boolean>(false);
   const [scheduledShifts, setScheduledShifts] = useState<IScheduledShift[]>([]);
   const [selectedWeek, setSelectedWeek] = useState<any>(generateWeekRange());
   const [openAddScheduledShift, setOpenAddScheduledShift] = useState<any>({
@@ -53,6 +56,30 @@ export default function ScheduledShifts() {
     setScheduledShifts(data);
   };
 
+  const handleSaveAll = async () => {
+    try {
+      setIsSavingAll(true);
+      const response = await axios.post(getAdminApiUrl(companyId, '/scheduled-shifts/save-all'), {
+        shifts: scheduledShifts,
+        startedAt: selectedWeek[0].toString(),
+        endedAt: selectedWeek[1].toString(),
+      });
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      showNotification('success', 'Shifts saved successfully');
+      fetchScheduledShifts();
+    } catch (error: any) {
+      console.log('Internal Server Error: ', error);
+      showNotification('error', 'Something went wrong: ' + error);
+    } finally {
+      setIsSavingAll(false);
+    }
+  }
+
   const onOpenAddScheduledShift = (employee: Employee, date: string) => {
     setOpenAddScheduledShift({
       isOpen: true,
@@ -81,7 +108,18 @@ export default function ScheduledShifts() {
         defaultDate={openAddScheduledShift?.defaultDate}
         refresh={fetchScheduledShifts}
         />
-      <Typography variant="h6">Schedule</Typography>
+
+      <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
+        <Typography variant="h6">Schedule</Typography>
+        <LoadingButton
+          loading={isSavingAll}
+          onClick={handleSaveAll}
+          variant="contained"
+          color="primary"
+        >
+          Save All
+        </LoadingButton>
+        </Box>
 
       <ShadowSection>
         <Box
@@ -102,6 +140,9 @@ export default function ScheduledShifts() {
           employees={employees}
           shifts={scheduledShifts}
           selectedWeek={selectedWeek}
+          setShifts={setScheduledShifts}
+          showNotification={showNotification}
+          refresh={fetchScheduledShifts}
         />
       </ShadowSection>
     </>
