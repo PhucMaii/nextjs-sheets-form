@@ -4,12 +4,15 @@ import Logo from './Logo';
 import Link from 'next/link';
 import { landingPagePrimaryColor, maxWidth } from '@/constant/landingPage';
 import { grey } from '@mui/material/colors';
+import MotionSection from '../MotionSection';
 
 const textColor = grey[300];
 const linkStyles = { textDecoration: 'none', color: textColor };
 
 export default function Footer() {
   return (
+    <MotionSection>
+
     <Box sx={{ backgroundColor: landingPagePrimaryColor, mt: 2 }}>
       <Grid
         container
@@ -177,5 +180,6 @@ export default function Footer() {
         </Grid>
       </Grid>
     </Box>
+    </MotionSection>
   );
 }

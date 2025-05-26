@@ -16,6 +16,7 @@ import '../../../styles/swiper.css';
 import { IItem, IPromotion } from '@/app/utils/type';
 import useNotification from '@/hooks/useNotification';
 import { useRouter } from 'next/navigation';
+import MotionSection from '../MotionSection';
 
 export default function BestSeller() {
   const [bestSeller, setBestSeller] = useState<IItem[]>([]);
@@ -53,7 +54,7 @@ export default function BestSeller() {
   }, []);
 
   return (
-    <>
+    <MotionSection>
       {NotificationComp}
       <Box
         display="flex"
@@ -96,10 +97,10 @@ export default function BestSeller() {
                         onClick={() => {
                           router.push(`/products/${item.id}`);
                         }}
-                          // containerStyle={{
-                          //   backgroundColor: 'white',
-                          //   height: '100%',
-                          // }}
+                        // containerStyle={{
+                        //   backgroundColor: 'white',
+                        //   height: '100%',
+                        // }}
                         showNotification={showNotification}
                       />
                     </SwiperSlide>
@@ -117,39 +118,39 @@ export default function BestSeller() {
               <Typography variant="h4" fontWeight="medium">
                 {promotion?.title}
               </Typography>
-            <Swiper
-              modules={[Navigation, Pagination, Scrollbar, A11y]}
-              navigation
-              pagination={{ clickable: true }}
-              spaceBetween={50}
-              slidesPerView={smDown ? 1 : mdDown ? 2 : lgDown ? 3 : 5}
-              style={{ padding: '20px' }}
-            >
-              {promotion?.websiteItems &&
-                promotion?.websiteItems?.map((item: any, index: number) => {
-                  return (
-                    <SwiperSlide>
-                      <ProductListing
-                        key={index}
-                        product={item}
-                        onClick={() => {
-                          router.push(`/products/${item.id}`);
-                        }}
-                        // containerStyle={{
-                        //   backgroundColor: 'white',
-                        //   height: '100%',
-                        // }}
-                        showNotification={showNotification}
-                      />
-                    </SwiperSlide>
-                  );
-                })}
-            </Swiper>
-            {/* </Box */}
-          </Grid>
+              <Swiper
+                modules={[Navigation, Pagination, Scrollbar, A11y]}
+                navigation
+                pagination={{ clickable: true }}
+                spaceBetween={50}
+                slidesPerView={smDown ? 1 : mdDown ? 2 : lgDown ? 3 : 5}
+                style={{ padding: '20px' }}
+              >
+                {promotion?.websiteItems &&
+                  promotion?.websiteItems?.map((item: any, index: number) => {
+                    return (
+                      <SwiperSlide>
+                        <ProductListing
+                          key={index}
+                          product={item}
+                          onClick={() => {
+                            router.push(`/products/${item.id}`);
+                          }}
+                          // containerStyle={{
+                          //   backgroundColor: 'white',
+                          //   height: '100%',
+                          // }}
+                          showNotification={showNotification}
+                        />
+                      </SwiperSlide>
+                    );
+                  })}
+              </Swiper>
+              {/* </Box */}
+            </Grid>
           )}
         </Grid>
       </Box>
-    </>
+    </MotionSection>
   );
 }

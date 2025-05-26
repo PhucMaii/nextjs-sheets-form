@@ -9,6 +9,7 @@ import {
 } from '@/constant/landingPage';
 import Logo from '../components/LandingPage/Logo';
 import { green, grey } from '@mui/material/colors';
+import MotionSection from '../components/MotionSection';
 
 export default function AboutPage() {
   const renderHeader = () => {
@@ -118,7 +119,7 @@ export default function AboutPage() {
     );
   };
   return (
-    <>
+    <MotionSection>
       <NavbarWrapper>
         <Box
           sx={{
@@ -134,6 +135,6 @@ export default function AboutPage() {
           {/* <Footer /> */}
         </Box>
       </NavbarWrapper>
-    </>
+    </MotionSection>
   );
 }
