@@ -16,4 +16,20 @@ const getRole = (role: string, name: string) => {
       return name;
 };
 
-export { getRole };
+const decodeRole = (role: string) => {
+    if (role.includes('Admin')) {
+        return USER_ROLE.ADMIN;
+    }
+    
+    if (role.includes('Driver')) {
+        return USER_ROLE.DRIVER;
+    }
+
+    if (role.includes('S Admin')) {
+        return USER_ROLE.SUPER_ADMIN;
+    }
+
+    return USER_ROLE.GUEST;
+}
+
+export { getRole, decodeRole };

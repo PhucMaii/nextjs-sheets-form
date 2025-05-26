@@ -1,4 +1,3 @@
-import { USER_ROLE } from '@/app/utils/enum';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { getTodayDate } from '@/pages/api/utils/date';
@@ -16,25 +15,10 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     const { scheduledShift } = req.body;
 
+    console.log('scheduledShift', scheduledShift);
+
     const today = getTodayDate();
     const createdBy = await getCreatedBy(req, res, session?.user?.role);
-
-    // const formattedScheduledShifts = scheduledShifts.map((shift: any) => {
-    //   const cost = shift.hours * shift.employee.hourlyRate;
-    //   return {
-    //     companyId: Number(companyId),
-    //     employeeId: Number(shift.employeeId),
-    //     startedAt: shift.start,
-    //     endedAt: shift.end,
-    //     createdAt: today.dateAndTime,
-    //     createdBy,
-    //     assignedBy: createdBy,
-    //     assignedAt: today.dateAndTime,
-    //     role: shift.role,
-    //     hours: shift.hours,
-    //     cost
-    //   };
-    // });
 
     const cost = scheduledShift.hours * scheduledShift.employee.hourlyRate;
 
@@ -42,8 +26,10 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       data: {
         companyId: Number(companyId),
         employeeId: Number(scheduledShift.employeeId),
-        startedAt: scheduledShift.start,
-        endedAt:  scheduledShift.end,
+        startedAt: scheduledShift.startedAt,
+        date: scheduledShift.date,
+        queryDate: scheduledShift.queryDate,
+        endedAt:  scheduledShift.endedAt,
         createdAt: today.dateAndTime,
         createdBy,
         assignedBy: createdBy,

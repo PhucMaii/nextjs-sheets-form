@@ -764,7 +764,8 @@ model ScheduledShift {
   id            Int    @id @default(autoincrement())
   companyId     Int
   employeeId    Int
-  day           String
+  date          String
+  queryDate     String? // Use for query
   startedAt     String
   endedAt       String?
   hours         Float?
@@ -777,6 +778,10 @@ model ScheduledShift {
 
   company       Company     @relation(fields: [companyId], references: [id])
   employee      Employee    @relation(fields: [employeeId], references: [id])
+
+  @@index([companyId])
+  @@index([employeeId])
+  @@index([queryDate])
 }
 
 model ShiftSession {

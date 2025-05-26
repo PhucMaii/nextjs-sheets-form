@@ -78,6 +78,22 @@ export const generateMonthRange = () => {
   return [firstDayOfThisMonth, lastDayOfThisMonth];
 };
 
+export const generateWeekRange = () => {
+  const today = new Date();
+  const week = today.getDay(); // 0 (Sunday) - 6 (Saturday)
+
+  const firstDayOfThisWeek = new Date(today);
+  const diff = today.getDate() - week + (week === 0 ? -6 : 1); // adjust for Sunday
+  firstDayOfThisWeek.setDate(diff);
+  firstDayOfThisWeek.setHours(0, 0, 0);
+
+  const lastDayOfThisWeek = new Date(firstDayOfThisWeek);
+  lastDayOfThisWeek.setDate(firstDayOfThisWeek.getDate() + 6);
+  lastDayOfThisWeek.setHours(23, 59, 59);
+
+  return [firstDayOfThisWeek, lastDayOfThisWeek];
+};
+
 export const generateListOfDateString = (
   startDate: Date,
   endDate: Date,

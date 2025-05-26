@@ -4,6 +4,7 @@ import {
   CartItem,
   Category,
   CodBoard,
+  Company,
   DayRange,
   Driver,
   Employee,
@@ -23,6 +24,7 @@ import {
   PositionIndex,
   Promotion,
   Route,
+  ScheduledShift,
   ShiftSession,
   User,
   UserRoute,
@@ -336,4 +338,13 @@ export interface IProductLoss extends LossReport {
 
 export interface IFixedTransaction extends FixedTransaction {
   paymentMethod: IPaymentMethod;
+}
+
+export interface IScheduledShift extends ScheduledShift {
+  employee: Employee;
+}
+
+export interface IEmployee extends Employee {
+  scheduledShifts: IScheduledShift[];
+  company: Company;
 }

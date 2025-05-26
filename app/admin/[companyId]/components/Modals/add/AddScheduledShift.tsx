@@ -8,15 +8,30 @@ import { RoleOption, roles } from '@/app/driver/components/Modals/ShiftModal';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { WORKING_ROLE } from '@/app/utils/enum';
+import { getAdminApiUrl, WORKING_ROLE } from '@/app/utils/enum';
 import dayjs from 'dayjs';
+import axios from 'axios';
+import { useParams } from 'next/navigation';
+import { ShowNotificationType } from '@/hooks/useNotification';
 
 interface IProps extends ModalProps {
-    defaultEmployee?: string;
-    defaultDate?: string;
+  defaultEmployee?: string;
+  defaultDate?: string;
+  showNotification: ShowNotificationType;
+  refresh: () => Promise<void>;
 }
 
-export default function AddScheduledShift({ open, onClose, defaultEmployee, defaultDate }: IProps) {
+export default function AddScheduledShift({
+  open,
+  onClose,
+  defaultEmployee,
+  defaultDate,
+  showNotification,
+  refresh,
+}: IProps) {
+  const { companyId }: any = useParams();
+
+  const [isAdding, setIsAdding] = useState<boolean>(false);
   const [newShift, setNewShift] = useState<any>({
     startedAt: defaultDate ? dayjs(defaultDate) : null,
     endedAt: defaultDate ? dayjs(defaultDate).add(1, 'hour') : null,
@@ -24,15 +39,61 @@ export default function AddScheduledShift({ open, onClose, defaultEmployee, defa
     role: WORKING_ROLE.DRIVER,
   });
 
-  console.log({defaultEmployee, defaultDate});
+  console.log({ defaultEmployee, defaultDate });
 
-  const { selectedEmployee, renderEmployeeSearch } = useEmployee(defaultEmployee);
+  const { renderEmployeeSearch, selectedEmployeeData } =
+    useEmployee(defaultEmployee);
 
   useEffect(() => {
     if (defaultDate) {
-      setNewShift({ ...newShift, startedAt: dayjs(defaultDate).hour(10), endedAt: dayjs(defaultDate).add(1, 'hour') });
+      setNewShift({
+        ...newShift,
+        startedAt: dayjs(defaultDate).hour(8),
+        endedAt: dayjs(defaultDate).hour(16),
+      });
     }
   }, [defaultDate]);
+
+  const handleAddScheduledShift = async () => {
+    try {
+      setIsAdding(true);
+
+      const hours = newShift.endedAt.diff(newShift.startedAt, 'hours');
+
+      const response = await axios.post(
+        getAdminApiUrl(companyId, '/scheduled-shifts'),
+        {
+          scheduledShift: {
+            ...newShift,
+            startedAt: newShift.startedAt.format('YYYY-MM-DD HH:mm:ss'),
+            endedAt: newShift.endedAt.format('YYYY-MM-DD HH:mm:ss'),
+            companyId: Number(companyId),
+            employeeId: selectedEmployeeData.id,
+            employee: selectedEmployeeData,
+            date: new Date(newShift.startedAt).toLocaleDateString('en-US', {
+              dateStyle: 'full',
+            }),
+            queryDate: newShift.startedAt.format('MM/DD/YYYY'),
+            hours,
+          },
+        },
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+      await refresh();
+
+      showNotification('success', response.data.message);
+      onClose();
+    } catch (error) {
+      console.log(error);
+      showNotification('error', 'Something went wrong: ' + error);
+    } finally {
+      setIsAdding(false);
+    }
+  };
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -40,10 +101,9 @@ export default function AddScheduledShift({ open, onClose, defaultEmployee, defa
         <ModalHead
           heading="Add Scheduled Shift"
           buttonLabel="Add"
-          onClick={() => {}}
+          onClick={handleAddScheduledShift}
           buttonProps={{
-            variant: 'contained',
-            color: 'primary',
+            loading: isAdding,
           }}
           onClose={onClose}
         />

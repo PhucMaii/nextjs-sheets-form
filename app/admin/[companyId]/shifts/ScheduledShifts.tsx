@@ -11,12 +11,15 @@ import ScheduledShiftTable from '../components/ScheduledShifts/ScheduledShiftTab
 import { Employee } from '@prisma/client';
 import AddScheduledShift from '../components/Modals/add/AddScheduledShift';
 import { getRole } from '@/pages/api/utils/employee';
+import { generateWeekRange } from '@/app/utils/time';
+import { IEmployee, IScheduledShift } from '@/app/utils/type';
 
 export default function ScheduledShifts() {
   const { companyId }: any = useParams();
 
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [selectedWeek, setSelectedWeek] = useState<any>(null);
+  const [employees, setEmployees] = useState<IEmployee[]>([]);
+  const [scheduledShifts, setScheduledShifts] = useState<IScheduledShift[]>([]);
+  const [selectedWeek, setSelectedWeek] = useState<any>(generateWeekRange());
   const [openAddScheduledShift, setOpenAddScheduledShift] = useState<any>({
     isOpen: false,
     defaultEmployee: null,
@@ -29,6 +32,10 @@ export default function ScheduledShifts() {
     fetchEmployees();
   }, []);
 
+  useEffect(() => {
+    fetchScheduledShifts();
+  }, [selectedWeek]);
+
   const fetchEmployees = async () => {
     const data = await fetchApi(
       getAdminApiUrl(companyId, '/employees'),
@@ -36,6 +43,14 @@ export default function ScheduledShifts() {
     );
 
     setEmployees(data);
+  };
+
+  const fetchScheduledShifts = async () => {
+    const data = await fetchApi(
+      getAdminApiUrl(companyId, '/scheduled-shifts', `startDate=${selectedWeek[0]}&endDate=${selectedWeek[1]}`),
+      showNotification,
+    );
+    setScheduledShifts(data);
   };
 
   const onOpenAddScheduledShift = (employee: Employee, date: string) => {
@@ -52,7 +67,7 @@ export default function ScheduledShifts() {
   return (
     <>
       {NotificationComp}
-      <AddScheduledShift
+      <AddScheduledShift  
         open={openAddScheduledShift.isOpen}
         onClose={() =>
           setOpenAddScheduledShift({
@@ -61,9 +76,11 @@ export default function ScheduledShifts() {
             defaultDate: null,
           })
         }
+        showNotification={showNotification}
         defaultEmployee={openAddScheduledShift?.defaultEmployee}
         defaultDate={openAddScheduledShift?.defaultDate}
-      />
+        refresh={fetchScheduledShifts}
+        />
       <Typography variant="h6">Schedule</Typography>
 
       <ShadowSection>
@@ -83,21 +100,7 @@ export default function ScheduledShifts() {
         <ScheduledShiftTable
           onOpenAddShift={onOpenAddScheduledShift}
           employees={employees}
-          shifts={[
-            {
-              startedAt: '08:00',
-              endedAt: '11:00',
-              employeeId: 13,
-              companyId: companyId,
-              employee: {
-                id: 13,
-                name: 'PETER',
-                role: 'driver',
-              },
-              day: 'Monday',
-              hours: 3,
-            },
-          ]}
+          shifts={scheduledShifts}
           selectedWeek={selectedWeek}
         />
       </ShadowSection>
