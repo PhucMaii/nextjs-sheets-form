@@ -240,17 +240,44 @@ export default function Navbar() {
             <Logo />
           </Grid>
           <Grid item xs={6} display="flex" justifyContent="flex-end">
-            <IconButton
-              sx={{ color: landingPagePrimaryColor }}
-              onClick={() => router.push('/cart')}
-            >
-              <ShoppingCartIcon style={{ width: 30, height: 30 }} />
-              <CartBadge
-                badgeContent={cartItemsQty}
-                color="error"
-                overlap="circular"
-              />
-            </IconButton>
+            <Box display="flex" alignItems="center" gap={1}>
+              <IconButton
+                onClick={() => router.push('/account/login')}
+                size="small"
+                sx={{
+                  color: landingPagePrimaryColor,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                }}
+              >
+                <UserIcon style={{ width: 30, height: 30 }} />
+                <Box sx={{ display: 'flex', alignItems: 'center', height: 0 }}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: landingPagePrimaryColor,
+                      fontWeight: 'bold',
+                      mt: 2,
+                    }}
+                  >
+                    Log in
+                  </Typography>
+                </Box>
+              </IconButton>
+              <Divider orientation="vertical" flexItem />
+              <IconButton
+                sx={{ color: landingPagePrimaryColor }}
+                onClick={() => router.push('/cart')}
+              >
+                <ShoppingCartIcon style={{ width: 30, height: 30 }} />
+                <CartBadge
+                  badgeContent={cartItemsQty}
+                  color="error"
+                  overlap="circular"
+                />
+              </IconButton>
+            </Box>
           </Grid>
           <Grid item xs={1}>
             <IconButton onClick={() => setIsNavOpen(true)}>
@@ -324,7 +351,7 @@ export default function Navbar() {
                 );
               })}
 
-              {itemTypes?.map((itemType: any, index: any) => {
+              {/* {itemTypes?.map((itemType: any, index: any) => {
                 return (
                   <ListItemButtonStyled
                     $textColor={landingPagePrimaryColor}
@@ -336,7 +363,7 @@ export default function Navbar() {
                     <ListItemText primary={itemType.name} />
                   </ListItemButtonStyled>
                 );
-              })}
+              })} */}
             </List>
 
             <Box
@@ -442,7 +469,7 @@ export default function Navbar() {
               <UserIcon style={{ width: 30, height: 30 }} />
               <Box sx={{ display: 'flex', alignItems: 'center', height: 0 }}>
                 <Typography
-                  variant="body1"
+                  variant="caption"
                   sx={{
                     color: landingPagePrimaryColor,
                     fontWeight: 'bold',

@@ -1,5 +1,5 @@
 import { TrustedType } from '@/constant/landingPage';
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Grid, Typography, useMediaQuery } from '@mui/material';
 import React from 'react';
 
 type Props = {
@@ -7,6 +7,7 @@ type Props = {
 };
 
 export default function TrustedCard({ trusted }: Props) {
+  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
   return (
     <Grid
       container
@@ -21,13 +22,14 @@ export default function TrustedCard({ trusted }: Props) {
         minHeight: 200,
       }}
     >
-      <Grid item xs={2}>
+      <Grid item xs={mdDown ? 3 : 2}>
         <Box
           display="flex"
           justifyContent="center"
           alignItems="center"
           style={{
             width: 80,
+            maxWidth: '100%',
             height: 70,
             borderRadius: 10,
             backgroundColor: trusted.iconBackground,
@@ -36,12 +38,16 @@ export default function TrustedCard({ trusted }: Props) {
           <trusted.icon style={{ width: 40, height: 40 }} />
         </Box>
       </Grid>
-      <Grid item xs={9}>
+      <Grid item xs={mdDown ? 8 : 9}>
         <Box display="flex" flexDirection="column" gap={3}>
-          <Typography variant="h4" fontWeight="bold">
+          <Typography variant={'h5'} fontWeight="bold">
             {trusted.title}
           </Typography>
-          <Typography variant="h5" fontWeight="normal" sx={{ lineHeight: 1.5 }}>
+          <Typography
+            variant={mdDown ? 'h6' : 'h5'}
+            fontWeight="normal"
+            sx={{ lineHeight: 1.5 }}
+          >
             {trusted.description}
           </Typography>
         </Box>
