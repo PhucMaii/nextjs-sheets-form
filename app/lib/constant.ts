@@ -383,7 +383,7 @@ export const clientTabs = [
   {
     name: 'Statements',
     icon: DocumentScannerIcon,
-    path: '/statements',
+    path: '/user/statements',
   },
   {
     name: 'Account',

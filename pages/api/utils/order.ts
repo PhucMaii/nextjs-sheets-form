@@ -42,15 +42,17 @@ export const checkOrderValidToAffectInventory = async (
         // }
 
         // CHECK IF TRACK INVENTORY ACTION IS TAKEN
-        const selectedDayAction = await prisma.action.findFirst({
-          where: {
-            name: ACTION.TRACK_INVENTORY,
-            date: deliveryDate,
-            companyId: companyId,
-          },
-        });
-
-        return !!selectedDayAction;
+        if (companyId === 1) {
+          const selectedDayAction = await prisma.action.findFirst({
+            where: {
+              name: ACTION.TRACK_INVENTORY,
+              date: deliveryDate,
+              companyId: companyId,
+            },
+          });
+  
+          return !!selectedDayAction;
+        }
       }
     }
 

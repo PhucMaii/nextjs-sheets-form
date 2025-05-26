@@ -2,9 +2,12 @@ import { maxWidth, trustedList, TrustedType } from '@/constant/landingPage';
 import { Box, Grid, Typography } from '@mui/material';
 import React from 'react';
 import TrustedCard from './TrustedCard';
+import MotionSection from '../MotionSection';
 
 export default function TrustedBrand() {
   return (
+    <MotionSection>
+
     <Box sx={{ backgroundColor: 'white' }}>
       <Box
         display="flex"
@@ -45,5 +48,6 @@ export default function TrustedBrand() {
       </Box>
 
     </Box>
+    </MotionSection>
   );
 }

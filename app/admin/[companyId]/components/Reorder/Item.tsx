@@ -13,6 +13,7 @@ interface IProps {
   handleDeleteItem: (targetItem: IItem) => Promise<void>;
   handleUpdateItem: (updatedItem: IItem) => Promise<void>;
   showNotification: (type: AlertColor, message: string) => void;
+  isWebsiteItem?: boolean;
 }
 
 export default function Item({
@@ -20,6 +21,7 @@ export default function Item({
   handleUpdateItem,
   handleDeleteItem,
   showNotification,
+  isWebsiteItem = false,
 }: IProps) {
 
   const [img, setImg] = useState<string | undefined>(undefined);
@@ -51,6 +53,7 @@ export default function Item({
         onClose={() => setIsOpenEditItem(false)}
         targetItem={item}
         showNotification={showNotification}
+        isWebsiteItem={isWebsiteItem}
       />
       <Paper
         elevation={0}

@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import emailHandler from '../utils/email';
+import emailHandler, { generateWelcomeEmail } from '../utils/email';
 import { signUpRequest } from '@/config/email';
 import { verifyDeliveryAddress } from '../utils/address';
 import { generateLatLng } from '../admin/[companyId]/clients/POST';
@@ -79,6 +79,15 @@ export default async function handler(
       'New Client Sign Up Request',
       'New Client Sign Up Request',
       template,
+    );
+
+    // Send Welcome Email To Client
+    const welcomeTemplate = generateWelcomeEmail(name);
+    await emailHandler(
+      email,
+      'Welcome to Supreme Sprouts',
+      'Supreme Sprouts Ltd',
+      welcomeTemplate,
     );
 
     return res.status(200).json({

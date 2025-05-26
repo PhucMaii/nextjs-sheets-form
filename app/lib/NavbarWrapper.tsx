@@ -10,8 +10,8 @@ export default function NavbarWrapper({ children }: { children: ReactNode }) {
   return (
     <AuthenGuard>
       <Box>
-        <Navbar />
-        <Box display="flex" flexDirection="column" sx={{ mx: 0, px: 0, overflowX: 'hidden' }} mt={!mdDown ? '140px' : 0}>
+        <Navbar style={{position: 'fixed', zIndex: 100}} />
+        <Box display="flex" flexDirection="column" sx={{ mx: 0, px: 0, pt: mdDown ? '140px' : 0, overflowX: 'hidden' }} mt={!mdDown ? '140px' : 0}>
           {children}
           <Footer />
         </Box>

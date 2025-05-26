@@ -72,7 +72,7 @@ const tabs = [
 ];
 const drawerWidth = 250;
 
-export default function Navbar() {
+export default function Navbar({style}: {style?: any}) {
   // const [cId, setCId] = useLocalStorage('cartId', cartId || '');
   const [itemTypes, setItemTypes] = useState<IItemType[]>([]);
   const [guestSession, setGuestSession, isInitialized] = useLocalStorage(
@@ -229,12 +229,12 @@ export default function Navbar() {
 
   if (mdDown) {
     return (
-      <>
+      <div style={{...style}}>
         <Grid
           container
           alignItems="center"
           columnSpacing={1}
-          sx={{ backgroundColor: 'white', my: 1, px: 2 }}
+          sx={{ backgroundColor: 'white', px: 2, py: 1 }}
         >
           <Grid item xs={6}>
             <Logo />
@@ -407,7 +407,7 @@ export default function Navbar() {
             </Box>
           </Box> */}
         </Box>
-      </>
+      </div>
     );
   }
 
@@ -445,6 +445,7 @@ export default function Navbar() {
           backgroundColor: 'white',
           boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 12px',
           zIndex: 100,
+          ...style,
         }}
       >
         <Box
@@ -510,7 +511,6 @@ export default function Navbar() {
                 key={tab.label}
                 onClick={() => {
                   window.location.href = tab.href;
-                  // setSelectedTab(tab.href);
                 }}
                 sx={{
                   backgroundColor:
@@ -556,42 +556,7 @@ export default function Navbar() {
                     itemType,
                   });
                 }}
-                // onMouseLeave={() => {
-                //   popoverTimeout = setTimeout(() => {
-                //     setItemTypePopoverProps({
-                //       open: false,
-                //       anchorEl: null,
-                //       itemType: null,
-                //     });
-                //   }, 300); // Adjust delay time if necessary
-                // }}
               >
-                {/* <ItemTypePopover
-                  open={itemTypePopoverProps.open}
-                  // set Open={itemTypePopoverProps.setOpen}
-                  anchorEl={itemTypePopoverProps.anchorEl}
-                  itemType={itemTypePopoverProps.itemType}
-                  onClose={() =>
-                    setItemTypePopoverProps({
-                      open: false,
-                      anchorEl: null,
-                      itemType: null,
-                    })
-                  }
-                  onMouseEnter={() => {
-                    setItemTypePopoverProps((prev) => ({
-                      ...prev,
-                      open: true,
-                    }));
-                  }}
-                  onMouseLeave={() =>
-                    setItemTypePopoverProps({
-                      open: false,
-                      anchorEl: null,
-                      itemType: null,
-                    })
-                  }
-                /> */}
                 <Typography
                   variant="h6"
                   key={index}
@@ -599,7 +564,6 @@ export default function Navbar() {
                     router.push(
                       `/products?type=${encodeURIComponent(itemType.name)}`,
                     );
-                    // setSelectedTab(itemType.href);
                   }}
                   sx={{
                     color:
@@ -607,20 +571,6 @@ export default function Navbar() {
                         ? green[700]
                         : landingPageGreyColor,
                   }}
-                  // onMouseOver={(e: any) => {
-                  //   setItemTypePopoverProps({
-                  //     open: true,
-                  //     anchorEl: e.currentTarget,
-                  //     itemType,
-                  //   });
-                  // }}
-                  // onMouseLeave={(e: any) => {
-                  //   setItemTypePopoverProps({
-                  //     open: false,
-                  //     anchorEl: null,
-                  //     itemType: null,
-                  //   });
-                  // }}
                 >
                   {itemType.name}
                 </Typography>
