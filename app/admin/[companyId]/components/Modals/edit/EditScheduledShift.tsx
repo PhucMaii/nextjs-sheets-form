@@ -21,14 +21,16 @@ import { Trash2Icon } from 'lucide-react';
 
 interface IProps extends ModalProps {
   shift: IScheduledShift;
+  shifts: IScheduledShift[];
   showNotification: ShowNotificationType;
-  refresh: () => Promise<void>;
+  refresh: (newShifts: IScheduledShift[]) => Promise<void>;
 }
 
 export default function EditScheduledShift({
   open,
   onClose,
   shift,
+  shifts,
   showNotification,
   refresh,
 }: IProps) {
@@ -64,21 +66,28 @@ export default function EditScheduledShift({
         return;
       }
 
+      const newShifts = shifts.filter((baseShift) => baseShift.id !== shift.id);
+      await refresh(newShifts);
       showNotification('success', response.data.message);
       onClose();
-      refresh();
     } catch (error) {
       console.log('Internal Server Error: ', error);
       showNotification('error', 'Something went wrong: ' + error);
     } finally {
       setIsDeleting(false);
     }
-  }
+  };
+
+  console.log(shifts, 'shifts');
 
   const handleUpdateShift = async () => {
     try {
       setIsUpdating(true);
-      const hours = dayjs(updatedShift?.endedAt).diff(dayjs(updatedShift?.startedAt), 'hours', true);
+      const hours = dayjs(updatedShift?.endedAt).diff(
+        dayjs(updatedShift?.startedAt),
+        'hours',
+        true,
+      );
 
       const response = await axios.put(
         getAdminApiUrl(companyId, '/scheduled-shifts'),
@@ -86,13 +95,18 @@ export default function EditScheduledShift({
           updatedShift: {
             ...updatedShift,
             hours: Math.round(hours * 100) / 100,
-            startedAt: dayjs(updatedShift?.startedAt).format('YYYY-MM-DD HH:mm:ss'),
+            startedAt: dayjs(updatedShift?.startedAt).format(
+              'YYYY-MM-DD HH:mm:ss',
+            ),
             endedAt: dayjs(updatedShift?.endedAt).format('YYYY-MM-DD HH:mm:ss'),
-            date: new Date(updatedShift?.startedAt).toLocaleDateString('en-US', {
-              dateStyle: 'full',
-            }),
+            date: new Date(updatedShift?.startedAt).toLocaleDateString(
+              'en-US',
+              {
+                dateStyle: 'full',
+              },
+            ),
             queryDate: dayjs(updatedShift?.startedAt).format('MM/DD/YYYY'),
-          }
+          },
         },
       );
 
@@ -101,9 +115,23 @@ export default function EditScheduledShift({
         return;
       }
 
+      const updatedShiftData = response.data.data;
+
+      const newShifts = shifts.map((baseShift) => {
+        // if (baseShift.id === updatedShiftData.id) {
+        //   return updatedShiftData;
+        // }
+
+        if (baseShift.id === shift.id) {
+          return updatedShiftData;
+        }
+
+        return baseShift;
+      });
+
+      await refresh(newShifts);
       showNotification('success', response.data.message);
       onClose();
-      refresh();
     } catch (error) {
       console.log('Internal Server Error: ', error);
       showNotification('error', 'Something went wrong: ' + error);

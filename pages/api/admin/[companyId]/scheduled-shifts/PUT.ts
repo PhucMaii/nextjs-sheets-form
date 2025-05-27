@@ -13,9 +13,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         const today = getTodayDate();
         const createdBy: any = await getCreatedBy(req, res);
 
-        if (!parseInt(updatedShift.id)) {
+        if (!Number(updatedShift.id)) {
             // Create new shift
-            await prisma.scheduledShift.create({
+            const newShift = await prisma.scheduledShift.create({
                 data: {
                     companyId: Number(companyId),
                     createdAt: today.dateAndTime,
@@ -30,13 +30,18 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
                     startedAt: updatedShift.startedAt,
                     endedAt: updatedShift.endedAt,
                     role: updatedShift.role,
+                },
+                include: {
+                    employee: {
+                        include: {
+                            company: true,
+                        }
+                    },
                 }
             });
 
-            return res.status(200).json({ message: 'Shift created successfully' });
+            return res.status(200).json({ message: 'Shift created successfully', data: newShift });
         }
-
-
 
         const shift = await prisma.scheduledShift.findUnique({
             where: { id: updatedShift.id },
@@ -51,7 +56,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
         const cost = updatedShift.hours * (shift?.employee?.hourlyRate || 0);
 
-        await prisma.scheduledShift.update({
+        const updatedScheduledShift = await prisma.scheduledShift.update({
             where: { id: updatedShift.id },
             data: {
                 startedAt: updatedShift.startedAt,
@@ -62,10 +67,17 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
                 queryDate: updatedShift.queryDate,
                 hours: updatedShift.hours,
                 cost: cost,
+            },
+            include: {
+                employee: {
+                    include: {
+                        company: true,
+                    }
+                }
             }
         })
 
-        return res.status(200).json({ message: 'Shift updated successfully' });
+        return res.status(200).json({ message: 'Shift updated successfully', data: updatedScheduledShift });
     } catch (error: any) {
         console.log('Internal Server Error: ', error);
         return res.status(500).json({ error: 'Internal Server Error' });

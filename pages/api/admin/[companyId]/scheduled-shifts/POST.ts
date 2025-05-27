@@ -22,7 +22,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     const cost = scheduledShift.hours * scheduledShift.employee.hourlyRate;
 
-    await prisma.scheduledShift.create({
+    const newShift = await prisma.scheduledShift.create({
       data: {
         companyId: Number(companyId),
         employeeId: Number(scheduledShift.employeeId),
@@ -42,7 +42,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     return res
       .status(200)
-      .json({ message: 'Scheduled Shifts Created Successfully' });
+      .json({ message: 'Scheduled Shifts Created Successfully', data: newShift });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({ message: 'Internal Server Error: ' + error });

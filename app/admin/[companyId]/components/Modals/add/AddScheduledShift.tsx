@@ -13,12 +13,14 @@ import dayjs from 'dayjs';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
 import { ShowNotificationType } from '@/hooks/useNotification';
+import { IScheduledShift } from '@/app/utils/type';
 
 interface IProps extends ModalProps {
   defaultEmployee?: string;
   defaultDate?: string;
   showNotification: ShowNotificationType;
-  refresh: () => Promise<void>;
+  refresh: (newShifts: IScheduledShift[]) => Promise<void>;
+  shifts: IScheduledShift[];
 }
 
 export default function AddScheduledShift({
@@ -28,6 +30,7 @@ export default function AddScheduledShift({
   defaultDate,
   showNotification,
   refresh,
+  shifts,
 }: IProps) {
   const { companyId }: any = useParams();
 
@@ -83,7 +86,9 @@ export default function AddScheduledShift({
         showNotification('error', response.data.error);
         return;
       }
-      await refresh();
+
+      const newShifts = [...shifts, response.data.data];
+      await refresh(newShifts);
 
       showNotification('success', response.data.message);
       onClose();

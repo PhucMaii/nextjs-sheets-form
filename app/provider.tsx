@@ -9,6 +9,7 @@ import { Provider } from 'react-redux';
 import { store } from '@/state/store';
 import { DragDropProvider } from '@dnd-kit/react';
 import registerSW from './registerSW';
+import { Toaster } from 'react-hot-toast';
 
 type Props = {
   children?: React.ReactNode;
@@ -34,6 +35,7 @@ export const Providers = ({ children }: Props) => {
           </Provider>
         </DragDropProvider>
       </AuthenGuard>
+      <Toaster />
     </SessionProvider>
   );
 };

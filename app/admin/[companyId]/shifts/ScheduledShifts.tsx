@@ -1,5 +1,5 @@
-import { Box, Typography } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import { Box, Grid, Typography } from '@mui/material';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ShadowSection } from '../reports/styled';
 import '../../../../styles/fullCalendar.css';
 import { fetchApi } from '@/app/utils/db';
@@ -21,6 +21,9 @@ export default function ScheduledShifts() {
 
   const [employees, setEmployees] = useState<IEmployee[]>([]);
   const [isSavingAll, setIsSavingAll] = useState<boolean>(false);
+  const [baseScheduledShifts, setBaseScheduledShifts] = useState<
+    IScheduledShift[]
+  >([]);
   const [scheduledShifts, setScheduledShifts] = useState<IScheduledShift[]>([]);
   const [selectedWeek, setSelectedWeek] = useState<any>(generateWeekRange());
   const [openAddScheduledShift, setOpenAddScheduledShift] = useState<any>({
@@ -31,9 +34,40 @@ export default function ScheduledShifts() {
 
   const { showNotification, NotificationComp } = useNotification();
 
+  const overview = useMemo(() => {
+    if (scheduledShifts.length === 0)
+      return {
+        totalShifts: 0,
+        totalHours: 0,
+        totalCost: 0,
+      };
+    const totalHours = scheduledShifts.reduce(
+      (acc, shift) => acc + (shift.hours || 0),
+      0,
+    );
+    const totalCost = scheduledShifts.reduce(
+      (acc, shift) =>
+        acc + (shift.hours || 0) * (shift.employee?.hourlyRate || 0),
+      0,
+    );
+    return {
+      totalShifts: scheduledShifts.length,
+      totalHours,
+      totalCost,
+    };
+  }, [scheduledShifts]);
+
   useEffect(() => {
     fetchEmployees();
   }, []);
+
+  useEffect(() => {
+    if (
+      JSON.stringify(baseScheduledShifts) !== JSON.stringify(scheduledShifts)
+    ) {
+      showNotification('info', 'Shifts needs to be saved');
+    }
+  }, [scheduledShifts]);
 
   useEffect(() => {
     fetchScheduledShifts();
@@ -50,43 +84,50 @@ export default function ScheduledShifts() {
 
   const fetchScheduledShifts = async () => {
     const data = await fetchApi(
-      getAdminApiUrl(companyId, '/scheduled-shifts', `startDate=${selectedWeek[0]}&endDate=${selectedWeek[1]}`),
+      getAdminApiUrl(
+        companyId,
+        '/scheduled-shifts',
+        `startDate=${selectedWeek[0]}&endDate=${selectedWeek[1]}`,
+      ),
       showNotification,
     );
+    setBaseScheduledShifts(data);
     setScheduledShifts(data);
   };
 
-  const handleSaveAll = async () => {
+  const handleSaveAll = async (newShifts: IScheduledShift[] = []) => {
     try {
       setIsSavingAll(true);
-      const response = await axios.post(getAdminApiUrl(companyId, '/scheduled-shifts/save-all'), {
-        shifts: scheduledShifts,
-        startedAt: selectedWeek[0].toString(),
-        endedAt: selectedWeek[1].toString(),
-      });
+      const response = await axios.post(
+        getAdminApiUrl(companyId, '/scheduled-shifts/save-all'),
+        {
+          shifts: newShifts.length > 0 ? newShifts : scheduledShifts,
+          startedAt: selectedWeek[0].toString(),
+          endedAt: selectedWeek[1].toString(),
+        },
+      );
 
       if (response.data.error) {
         showNotification('error', response.data.error);
         return;
       }
 
+      setScheduledShifts(response.data.data);
+      setBaseScheduledShifts(response.data.data);
       showNotification('success', 'Shifts saved successfully');
-      fetchScheduledShifts();
+      // fetchScheduledShifts();
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
       showNotification('error', 'Something went wrong: ' + error);
     } finally {
       setIsSavingAll(false);
     }
-  }
+  };
 
   const onOpenAddScheduledShift = (employee: Employee, date: string) => {
     setOpenAddScheduledShift({
       isOpen: true,
-      defaultEmployee: getRole(
-        employee?.role || '',
-        employee?.name || '',
-      ),
+      defaultEmployee: getRole(employee?.role || '', employee?.name || ''),
       defaultDate: date,
     });
   };
@@ -94,7 +135,8 @@ export default function ScheduledShifts() {
   return (
     <>
       {NotificationComp}
-      <AddScheduledShift  
+      <AddScheduledShift
+        shifts={scheduledShifts}
         open={openAddScheduledShift.isOpen}
         onClose={() =>
           setOpenAddScheduledShift({
@@ -106,34 +148,57 @@ export default function ScheduledShifts() {
         showNotification={showNotification}
         defaultEmployee={openAddScheduledShift?.defaultEmployee}
         defaultDate={openAddScheduledShift?.defaultDate}
-        refresh={fetchScheduledShifts}
-        />
-
-      <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
+        refresh={handleSaveAll}
+      />
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+        width="100%"
+      >
         <Typography variant="h6">Schedule</Typography>
         <LoadingButton
           loading={isSavingAll}
-          onClick={handleSaveAll}
+          onClick={() => handleSaveAll()}
           variant="contained"
           color="primary"
         >
           Save All
         </LoadingButton>
-        </Box>
-
+      </Box>
       <ShadowSection>
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          width="100%"
-        >
-          <SelectWeek
-            selectedWeek={selectedWeek}
-            setSelectedWeek={setSelectedWeek}
-            variant="standard"
-          />
-        </Box>
+        <Grid container spacing={2} alignItems="center">
+          <Grid item xs={4}>
+            <Typography fontWeight="medium">
+              Total: {overview.totalShifts} shifts
+            </Typography>
+          </Grid>
+          <Grid item xs={4} textAlign="center">
+            <SelectWeek
+              selectedWeek={selectedWeek}
+              setSelectedWeek={setSelectedWeek}
+              variant="standard"
+            />
+          </Grid>
+          <Grid
+            item
+            xs={4}
+            textAlign="right"
+            sx={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              gap: 1,
+            }}
+          >
+            <Typography fontWeight="medium">
+              {overview.totalHours?.toFixed(1)} hours
+            </Typography>
+            <Typography fontWeight="medium">
+              • ${overview.totalCost?.toFixed(2)}
+            </Typography>
+          </Grid>
+        </Grid>
 
         <ScheduledShiftTable
           onOpenAddShift={onOpenAddScheduledShift}
@@ -142,7 +207,7 @@ export default function ScheduledShifts() {
           selectedWeek={selectedWeek}
           setShifts={setScheduledShifts}
           showNotification={showNotification}
-          refresh={fetchScheduledShifts}
+          refresh={handleSaveAll}
         />
       </ShadowSection>
     </>

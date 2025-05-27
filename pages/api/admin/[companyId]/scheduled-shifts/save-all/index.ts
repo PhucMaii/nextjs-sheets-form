@@ -22,7 +22,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       formattedEndDate,
     );
 
-    console.log({listOfDateString, startedAt, endedAt});
+    console.log({ listOfDateString, startedAt, endedAt });
 
     const baseShifts = await prisma.scheduledShift.findMany({
       where: {
@@ -40,30 +40,38 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
 
     // Create new shifts
-    const createShifts = categorizedShifts.filter((shift) => shift.type === ITEM_CATEGORIZED.CREATE);
-    await prisma.scheduledShift.createMany({
-      data: createShifts.map((shift) => ({
-        companyId: Number(companyId),
-        startedAt: shift.startedAt,
-        endedAt: shift.endedAt,
-        role: shift.role,
-        employeeId: shift.employeeId,
-        date: shift.date,
-        queryDate: shift.queryDate,
-        hours: shift.hours,
-        createdAt: today.dateAndTime,
-        createdBy: createdBy,
-        assignedBy: createdBy,
-        assignedAt: today.dateAndTime,
-      })),
-    });
-
+    const createShifts = categorizedShifts.filter(
+      (shift) => shift.type === ITEM_CATEGORIZED.CREATE,
+    );
+    if (createShifts.length > 0) {
+      await prisma.scheduledShift.createMany({
+        data: createShifts.map((shift) => ({
+          companyId: Number(companyId),
+          startedAt: shift.startedAt,
+          endedAt: shift.endedAt,
+          role: shift.role,
+          employeeId: shift.employeeId,
+          date: shift.date,
+          queryDate: shift.queryDate,
+          hours: shift.hours,
+          createdAt: today.dateAndTime,
+          createdBy: createdBy,
+          assignedBy: createdBy,
+          assignedAt: today.dateAndTime,
+        })),
+      });
+    }
+    
     // Update existing shifts
-    const updateShifts = categorizedShifts.filter((shift) => shift.type === ITEM_CATEGORIZED.UPDATE);
-    for (const shift of updateShifts) {
-      await prisma.scheduledShift.update({
-        where: { id: shift.id },
-        data: {
+    const updateShifts = categorizedShifts.filter(
+      (shift) => shift.type === ITEM_CATEGORIZED.UPDATE,
+    );
+
+    if (updateShifts.length > 0) {
+      for (const shift of updateShifts) {
+        await prisma.scheduledShift.update({
+          where: { id: shift.id },
+          data: {
             startedAt: shift.startedAt,
             endedAt: shift.endedAt,
             role: shift.role,
@@ -72,11 +80,29 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             queryDate: shift.queryDate,
             hours: shift.hours,
             cost: shift.cost,
-        },
-      });
+          },
+        });
+      }
     }
 
-    return res.status(200).json({ message: 'Shifts saved successfully' });
+    const returnUpdatedData = await prisma.scheduledShift.findMany({
+      where: {
+        companyId: Number(companyId),
+        queryDate: {
+          in: listOfDateString,
+        },
+      },
+      include: {
+        employee: {
+          include: {
+            company: true,
+          },
+        },
+      },
+    });
+    return res
+      .status(200)
+      .json({ message: 'Shifts saved successfully', data: returnUpdatedData });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({ error: 'Internal Server Error' });
