@@ -15,12 +15,14 @@ import { generateWeekRange } from '@/app/utils/time';
 import { IEmployee, IScheduledShift } from '@/app/utils/type';
 import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
+import dayjs from 'dayjs';
 
 export default function ScheduledShifts() {
   const { companyId }: any = useParams();
 
   const [employees, setEmployees] = useState<IEmployee[]>([]);
   const [isSavingAll, setIsSavingAll] = useState<boolean>(false);
+  const [isCopyingLastWeek, setIsCopyingLastWeek] = useState<boolean>(false);
   const [baseScheduledShifts, setBaseScheduledShifts] = useState<
     IScheduledShift[]
   >([]);
@@ -132,6 +134,41 @@ export default function ScheduledShifts() {
     });
   };
 
+  const handleCopyLastWeek = async () => {
+    try {
+      setIsCopyingLastWeek(true);
+      const lastWeekStartedDate = dayjs(selectedWeek[0]).subtract(7, 'day').toString();
+      const lastWeekEndedDate = dayjs(selectedWeek[1]).subtract(8, 'day').toString();
+
+      const currentWeekStartedDate = dayjs(selectedWeek[0]).toString();
+      const currentWeekEndedDate = dayjs(selectedWeek[1]).toString();
+
+      const response = await axios.post(
+        getAdminApiUrl(companyId, '/scheduled-shifts/copy-last-week'),
+        {
+          lastWeekStartedDate,
+          lastWeekEndedDate,
+          currentWeekStartedDate,
+          currentWeekEndedDate,
+        },
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      await fetchScheduledShifts();
+
+      showNotification('success', 'Shifts copied successfully');
+    } catch (error: any) {
+      console.log('Internal Server Error: ', error);
+      showNotification('error', 'Something went wrong: ' + error);
+    } finally {
+      setIsCopyingLastWeek(false);
+    }
+  };
+
   return (
     <>
       {NotificationComp}
@@ -157,14 +194,25 @@ export default function ScheduledShifts() {
         width="100%"
       >
         <Typography variant="h6">Schedule</Typography>
-        <LoadingButton
-          loading={isSavingAll}
-          onClick={() => handleSaveAll()}
-          variant="contained"
-          color="primary"
-        >
-          Save All
-        </LoadingButton>
+
+        <Box display="flex" alignItems="center" gap={1}>
+          <LoadingButton
+            loading={isCopyingLastWeek}
+            onClick={() => handleCopyLastWeek()}
+            variant="outlined"
+            color="primary"
+          >
+            Copy Last Week
+          </LoadingButton>
+          <LoadingButton
+            loading={isSavingAll}
+            onClick={() => handleSaveAll()}
+            variant="contained"
+            color="primary"
+          >
+            Save All
+          </LoadingButton>
+        </Box>
       </Box>
       <ShadowSection>
         <Grid container spacing={2} alignItems="center">

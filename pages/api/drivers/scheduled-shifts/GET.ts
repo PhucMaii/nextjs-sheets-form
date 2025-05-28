@@ -25,6 +25,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       formattedEndedDate,
     );
 
+    console.log({startedDate, endedDate, listOfDates});
+
     const shifts = await prisma.scheduledShift.findMany({
       where: {
         employeeId: session.user.id,

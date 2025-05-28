@@ -163,3 +163,9 @@ export const disableChristmasAndNewYear = (date: Dayjs) => {
 export const convertToMonthText = (month: number) => {
   return months[month];
 };
+
+export const convertToDateStyleFull = (date: Date) => {
+  return date.toLocaleDateString('en-US', {
+    dateStyle: 'full',
+  });
+};

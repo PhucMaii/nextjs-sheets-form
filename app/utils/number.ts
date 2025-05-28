@@ -18,3 +18,9 @@ export const minifyNumber = (num: number | null) => {
 
   return Math.round(reducedNum * 10) / 10 + units[unitIndex];
 };
+
+export const formatTime = (time: string) => {
+  if (!time) return '';
+
+  return time.split(' ')[1].slice(0, 5);
+};

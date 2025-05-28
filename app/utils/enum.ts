@@ -194,3 +194,8 @@ export enum FIXED_TRANSACTION_STATUS {
   CANCELLED = 'Cancelled',
   ARCHIVED = 'Archived',
 }
+
+export enum SCHEDULED_SHIFT_STATUS {
+  PUBLISHED = 'PUBLISHED',
+  UNPUBLISHED = 'UNPUBLISHED',
+}

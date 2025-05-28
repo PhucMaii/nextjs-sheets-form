@@ -775,6 +775,7 @@ model ScheduledShift {
   assignedBy    String?
   createdAt     String
   createdBy     String
+  status        ScheduledShiftStatus?
 
   company       Company     @relation(fields: [companyId], references: [id])
   employee      Employee    @relation(fields: [employeeId], references: [id])
@@ -892,4 +893,9 @@ enum QuoteStatus {
   SENT
   ACCEPTED
   REJECTED
+}
+
+enum ScheduledShiftStatus {
+  PUBLISHED
+  UNPUBLISHED
 }

@@ -1,3 +1,4 @@
+import { USER_ROLE } from "@/app/utils/enum";
 import { getCreatedBy } from "@/pages/api/import-sheets/utils";
 import { getTodayDate } from "@/pages/api/utils/date";
 import { PrismaClient } from "@prisma/client";
@@ -11,7 +12,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         const { updatedShift } = req.body;
 
         const today = getTodayDate();
-        const createdBy: any = await getCreatedBy(req, res);
+        const createdBy: any = await getCreatedBy(req, res, USER_ROLE.ADMIN);
 
         if (!Number(updatedShift.id)) {
             // Create new shift
@@ -26,7 +27,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
                     date: updatedShift.date,
                     queryDate: updatedShift.queryDate,
                     hours: updatedShift.hours,
-                    cost: updatedShift.cost,
+                    cost: updatedShift?.cost || updatedShift.hours * (updatedShift?.employee?.hourlyRate || 0),
                     startedAt: updatedShift.startedAt,
                     endedAt: updatedShift.endedAt,
                     role: updatedShift.role,

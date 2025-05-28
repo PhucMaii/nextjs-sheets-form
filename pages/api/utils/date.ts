@@ -136,6 +136,31 @@ export const formatDateString = (inputDate: Date | string) => {
   return `${dateRes} ${time}`;
 };
 
+export const formatDateStringInHoursOver12 = (inputDate: Date | string) => {
+  const dateString = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Los_Angeles',
+    year: '2-digit',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+    // timeStyle,
+  }).format(new Date(inputDate));
+
+  const date = dateString.split(',')[0];
+  const dateSplitted = date.split('/');
+
+  const month = dateSplitted[0].padStart(2, '0');
+  const day = dateSplitted[1].padStart(2, '0');
+  const year = dateSplitted[2];
+
+  const dateRes = `20${year}-${month}-${day}`;
+  const time = dateString.split(', ')[1];
+
+  return `${dateRes} ${time}:00`;
+};
+
 export const checkOrderDeliveryDateValid = (deliveryDate: string) => {
   const selectedDate = normalizeDate(deliveryDate);
   const today = getTodayDate();

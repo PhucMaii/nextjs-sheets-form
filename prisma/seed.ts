@@ -1,5 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt';
+import { PrismaClient, ScheduledShiftStatus } from '@prisma/client';
 const prisma = new PrismaClient();
 // const checkIsKorean = (text: string) => {
 //   // const koreanRange = /^[\uAC00-\uD7AF]+$/;
@@ -121,19 +120,11 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-  const password = await bcrypt.hash('admin123', 12);
-
-  await prisma.employee.updateMany({
-    where: {
-      id: {
-        in: [14, 15],
-      },
-    },
+  await prisma.scheduledShift.updateMany({
     data: {
-      password,
+      status: ScheduledShiftStatus.PUBLISHED,
     },
   });
-  
 }
 
 // async function main() {
