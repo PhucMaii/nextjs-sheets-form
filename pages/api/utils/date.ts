@@ -194,3 +194,19 @@ export const formatDate = (date: string) => {
 
   return formattedDate;
 };
+
+export const getDaysOfThisWeek = (startedDate: string, endedDate: string) => {
+    const startDate = new Date(startedDate);
+    const endDate = new Date(endedDate);
+    const dates = [];
+
+    for (
+      let d = new Date(startDate);
+      d <= endDate;
+      d.setDate(d.getDate() + 1)
+    ) {
+      dates.push(d.toLocaleDateString('en-US', { dateStyle: 'full' }));
+    }
+
+    return dates;
+}

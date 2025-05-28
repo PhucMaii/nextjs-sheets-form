@@ -30,6 +30,7 @@ import ShiftContainer from './ShiftContainer';
 import EditScheduledShift from '../Modals/edit/EditScheduledShift';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import dayjs from 'dayjs';
+import { getDaysOfThisWeek } from '@/pages/api/utils/date';
 
 interface IProps {
   employees: IEmployee[];
@@ -61,18 +62,20 @@ export default function ScheduledShiftTable({
   const daysInWeek = useMemo(() => {
     if (!selectedWeek) return [];
 
-    const startDate = new Date(selectedWeek[0]);
-    const endDate = new Date(selectedWeek[1]);
-    const dates = [];
+    // const startDate = new Date(selectedWeek[0]);
+    // const endDate = new Date(selectedWeek[1]);
+    // const dates = [];
 
-    for (
-      let d = new Date(startDate);
-      d <= endDate;
-      d.setDate(d.getDate() + 1)
-    ) {
-      dates.push(d.toLocaleDateString('en-US', { dateStyle: 'full' }));
-    }
+    // for (
+    //   let d = new Date(startDate);
+    //   d <= endDate;
+    //   d.setDate(d.getDate() + 1)
+    // ) {
+    //   dates.push(d.toLocaleDateString('en-US', { dateStyle: 'full' }));
+    // }
 
+    // return dates;
+    const dates = getDaysOfThisWeek(selectedWeek[0], selectedWeek[1]);
     return dates;
   }, [selectedWeek]);
 
