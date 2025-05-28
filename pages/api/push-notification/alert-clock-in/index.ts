@@ -2,12 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import webpush from 'web-push';
 // import { getTodayDate } from '../../utils/date';
-import {
-  convertDeliveryDateStringToDate,
-  getTodayDate,
-} from '../../utils/date';
-import { days } from '@/app/lib/constant';
-import { USER_ROLE } from '@/app/utils/enum';
+import { getTodayDate } from '../../utils/date';
 // import { getDriverInfo } from '../../utils/auth';
 
 const prisma = new PrismaClient();
@@ -27,53 +22,63 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       vapidKeys.privateKey,
     );
 
-    // Check if this is driver
-    const drivers: any = await prisma.employee.findMany({
+    const today = getTodayDate();
+
+    const scheduledShifts = await prisma.scheduledShift.findMany({
       where: {
         companyId: 1,
-        role: USER_ROLE.DRIVER,
+        queryDate: today.date,
       },
       include: {
-        routes: true,
+        employee: true,
       },
     });
 
-    // const driverData: any = await getDriverInfo(req, res);
-    // driverId = driverData.id;
+    const shiftInHour = scheduledShifts.filter((shift) => {
+      let nowHour = Number(today.time.split(':')[0]);
+      const pmOrAm = today.time.split(' ')[1];
 
-    const today = getTodayDate();
-
-    const date = convertDeliveryDateStringToDate(today.date);
-    const day = days[date.getDay()];
-
-    for (const driver of drivers) {
-      console.log('🔔 Driver: ', driver);
-      const currentRoute = driver.routes.find((route: any) => {
-        return route.day === day;
-      });
-
-      if (!currentRoute) {
-        continue;
+      if (pmOrAm === 'PM') {
+        nowHour = Number(nowHour) + 12;
       }
+
+      return nowHour === Number(shift.startedAt.split(' ')[1].split(':')[0]);
+    });
+
+    for (const shift of shiftInHour) {
+      console.log('🔔 Driver: ', shift.employee.name);
+
+      // if (!currentRoute) {
+      //   continue;
+      // }
 
       try {
         console.log(
           '🔔 Send push notification to driver: ',
-          driver.notification,
+          shift.employee.notification,
         );
-        const subscription = JSON.parse(driver.notification);
+        const subscription = JSON.parse(shift.employee.notification as string);
         console.log(subscription);
 
         if (!subscription) {
           continue;
         }
 
+        const diffInMinutes = Number(
+          shift.startedAt.split(' ')[1].split(':')[1],
+        );
+
+        const message =
+          diffInMinutes > 0
+            ? `Your shift is starting in ${diffInMinutes} minutes`
+            : 'Your shift is starting now';
+
         console.log('send successfully');
         await webpush.sendNotification(
           subscription,
           JSON.stringify({
-            message: 'Good morning ' + driver.name,
-            body: 'Clock in now to view your route for today 🚚. Have a safe drive!',
+            message: 'Hello ' + shift.employee.name,
+            body: `${message}. Don't forget to clock in and check your route!`,
           }),
         );
       } catch (error: any) {
@@ -81,7 +86,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         if (error.statusCode === 410 || error.statusCode === 404) {
           await prisma.employee.update({
             where: {
-              id: driver.id,
+              id: shift.employee.id,
             },
             data: {
               notification: {},

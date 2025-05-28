@@ -78,17 +78,17 @@ export default function UpcomingShifts() {
     <Box sx={{ height: '100%' }}>
       {/* Date Scroll Picker */}
       <Grid container alignItems="center" sx={{ mt: 2 }}>
-        <Grid item xs={4}></Grid>
-        <Grid item xs={4} textAlign="center">
+        <Grid item xs={3}></Grid>
+        <Grid item xs={6} textAlign="center">
           <SelectWeek
             selectedWeek={selectedWeek}
             setSelectedWeek={setSelectedWeek}
-            // variant="standard"
+            variant="standard"
           />
         </Grid>
         <Grid
           item
-          xs={4}
+          xs={3}
           textAlign="right"
           sx={{
             display: 'flex',
