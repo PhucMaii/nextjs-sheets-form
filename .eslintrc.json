@@ -3,7 +3,8 @@
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:prettier/recommended"
+    "plugin:prettier/recommended",
+    "next/core-web-vitals"
     // "next/core-web-vitals"
     // "plugin:testing-library/react",
     // "plugin:jest-dom/recommended"

@@ -58,5 +58,9 @@ export default function AuthenGuard({ children }: any) {
     }
   }, [pathname, session]);
 
+  if (!session) {
+    return <LoadingComponent />;
+  }
+
   return children;
 }

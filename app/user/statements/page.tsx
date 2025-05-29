@@ -1,6 +1,6 @@
 'use client';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
-import Sidebar from '../components/Sidebar';
+import Sidebar from '../../components/Sidebar';
 import {
   Box,
   CircularProgress,
@@ -10,10 +10,10 @@ import {
 } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import axios from 'axios';
-import { ShadowSection } from '../admin/[companyId]/reports/styled';
+import { ShadowSection } from '../../admin/[companyId]/reports/styled';
 import { blueGrey, grey } from '@mui/material/colors';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
-import { UserContext } from '../context/UserContextAPI';
+import { UserContext } from '../../context/UserContextAPI';
 import useNotification from '@/hooks/useNotification';
 
 export default function StatementPage() {

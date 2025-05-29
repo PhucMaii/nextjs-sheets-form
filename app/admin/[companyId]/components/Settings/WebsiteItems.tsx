@@ -164,6 +164,7 @@ export default function WebsiteItems() {
                     handleUpdateItem={handleUpdateItem}
                     handleDeleteItem={handleDeleteItem}
                     showNotification={showNotification}
+                    isWebsiteItem
                   />
                   <Divider />
                 </Fragment>

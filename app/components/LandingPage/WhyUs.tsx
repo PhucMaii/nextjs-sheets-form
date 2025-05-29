@@ -2,11 +2,14 @@ import { landingPagePrimaryColor } from '@/constant/landingPage';
 import { Box, Button, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import React from 'react';
+import MotionSection from '../MotionSection';
 
 export default function WhyUs() {
   const router = useRouter();
 
-  return (
+  return (  
+    <MotionSection>
+
     <Box
       display="flex"
       justifyContent="center"
@@ -95,5 +98,6 @@ export default function WhyUs() {
         </Box>
       </Box>
     </Box>
+    </MotionSection>
   );
 }

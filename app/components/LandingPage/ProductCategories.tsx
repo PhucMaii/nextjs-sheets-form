@@ -6,6 +6,7 @@ import { Box, Grid, Typography } from '@mui/material';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
+import MotionSection from '../MotionSection';
 
 const ItemTypeDisplay = ({
   itemType,
@@ -14,7 +15,6 @@ const ItemTypeDisplay = ({
   itemType: IItemType;
   onClick: () => void;
 }) => {
-
   const [img, setImg] = useState<string | undefined>(undefined);
 
   useEffect(() => {
@@ -24,7 +24,6 @@ const ItemTypeDisplay = ({
       setImg(img);
     });
   }, [itemType]);
-
 
   return (
     <Grid
@@ -42,14 +41,19 @@ const ItemTypeDisplay = ({
       }}
       onClick={onClick}
     >
-      <Box display="flex" flexDirection="column" alignItems="center">
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        sx={{ width: '100%' }}
+      >
         <img
-          src={img}
+          src={img || ''}
           alt={itemType?.name}
           style={{
             width: '100%',
-            height: '100%',
-            objectFit: 'contain',
+            height: 200,
+            // objectFit: 'cover',
             borderRadius: 10,
           }}
         />
@@ -88,26 +92,30 @@ export default function ProductCategories() {
   }, []);
 
   return (
-    <Box sx={{ backgroundColor: 'white' }}>
-      <Box sx={{ maxWidth: maxWidth, mx: 'auto', pt: 4, px: 6 }}>
-        <Typography variant="h4" textAlign="center">
-          Product Categories
-        </Typography>
+    <MotionSection>
+      <Box sx={{ backgroundColor: 'white' }}>
+        <Box sx={{ maxWidth: maxWidth, mx: 'auto', pt: 4, px: 6 }}>
+          <Typography variant="h4" textAlign="center">
+            Product Categories
+          </Typography>
 
-        <Grid container spacing={2} alignItems="flex-end">
-          {itemTypes.map((itemType: any, index: number) => {
-            return (
-              <ItemTypeDisplay
-                key={index}
-                itemType={itemType}
-                onClick={() =>
-                  router.push(`/products?type=${encodeURIComponent(itemType?.name)}`)
-                }
-              />
-            );
-          })}
-        </Grid>
+          <Grid container spacing={2} alignItems="flex-end">
+            {itemTypes.map((itemType: any, index: number) => {
+              return (
+                <ItemTypeDisplay
+                  key={index}
+                  itemType={itemType}
+                  onClick={() =>
+                    router.push(
+                      `/products?type=${encodeURIComponent(itemType?.name)}`,
+                    )
+                  }
+                />
+              );
+            })}
+          </Grid>
+        </Box>
       </Box>
-    </Box>
+    </MotionSection>
   );
 }

@@ -386,7 +386,7 @@ export default function ItemPage() {
             <Button
               variant="outlined"
               onClick={() =>
-                router.push(`/admin/items/export/${currentCategory?.id}`)
+                router.push(`/admin/${companyId}/items/export/${currentCategory?.id}`)
               }
             >
               Export

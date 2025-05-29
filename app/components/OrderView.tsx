@@ -536,7 +536,10 @@ const OrderView = ({
 
   useEffect(() => {
     // Update order whenever the orderedItems change
-    const newSubtotal = generateOrderTotalPrice(orderedItems, order?.shippingFee);
+    const newSubtotal = generateOrderTotalPrice(
+      orderedItems,
+      order?.shippingFee,
+    );
     setOrder({
       ...order,
       shippingFee: order?.shippingFee || 0,
@@ -1272,22 +1275,21 @@ const OrderView = ({
         <Grid item xs={12}>
           <Divider />
         </Grid>
-        {order?.shippingFee &&
-          order?.shippingFee > 0 ? (
-            <>
-              <Grid item xs={4} textAlign="left" ml={2}>
-                <Typography>Shipping Fee</Typography>
-              </Grid>
-              <Grid item xs={6} textAlign="right">
-                <Typography fontWeight="bold">
-                  ${order?.shippingFee?.toFixed(2) || 0}
-                </Typography>
-              </Grid>
-            </>
-          ) : null}
-        <Grid item xs={12}>
-          <Divider />
-        </Grid>
+        {order?.shippingFee && order?.shippingFee > 0 ? (
+          <>
+            <Grid item xs={4} textAlign="left" ml={2}>
+              <Typography>Shipping Fee</Typography>
+            </Grid>
+            <Grid item xs={6} textAlign="right">
+              <Typography fontWeight="bold">
+                ${order?.shippingFee?.toFixed(2) || 0}
+              </Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Divider />
+            </Grid>
+          </>
+        ) : null}
         <Grid item xs={4} textAlign="left" ml={2}>
           <Typography>GST (5%)</Typography>
         </Grid>

@@ -213,8 +213,8 @@ export const ComponentToPrint = forwardRef(
                     0}
                 </Typography>
               </Grid>
-              {order?.shippingFee &&
-                (order?.shippingFee > 0 && (
+
+                  {order?.shippingFee ? order.shippingFee > 0 && (
                   <>
                     <Grid item xs={6} textAlign="left">
                       <Typography sx={{ fontSize: printFontSize - 5 }}>
@@ -227,7 +227,7 @@ export const ComponentToPrint = forwardRef(
                       </Typography>
                     </Grid>
                   </>
-                ))}
+                ) : null}
               <Grid item xs={6}>
                 <Typography sx={{ fontSize: printFontSize - 5 }}>
                   GST (5%):

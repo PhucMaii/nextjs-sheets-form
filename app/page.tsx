@@ -9,9 +9,25 @@ import RequestToJoinModal from './components/Modals/RequestToJoinModal';
 import NavbarWrapper from './lib/NavbarWrapper';
 import ProductCategories from './components/LandingPage/ProductCategories';
 import WhyUs from './components/LandingPage/WhyUs';
+import useSWR from 'swr';
+import { fetcher } from '@/HOC/AuthenGuard';
+import LoadingComponent from './components/LoadingComponent/LoadingComponent';
 
 export default function page() {
   const [isOpenSignUp, setIsOpenSignUp] = useState<boolean>(false);
+
+  const {
+    data: session,
+    isValidating,
+  } = useSWR('/api/auth/session', fetcher, {
+    revalidateOnFocus: false,
+  });
+
+
+  if (!session && isValidating) {
+    return <LoadingComponent />
+  }
+
 
   return (
     <NavbarWrapper>

@@ -13,6 +13,6 @@
   font-size: 10px;
 }
 
-/* .swiper-slide {
-  width: fit-content !important;
-} */
+.swiper-pagination-bullets {
+  bottom: 0 !important;
+}

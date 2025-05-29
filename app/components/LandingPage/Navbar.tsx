@@ -72,7 +72,7 @@ const tabs = [
 ];
 const drawerWidth = 250;
 
-export default function Navbar() {
+export default function Navbar({style}: {style?: any}) {
   // const [cId, setCId] = useLocalStorage('cartId', cartId || '');
   const [itemTypes, setItemTypes] = useState<IItemType[]>([]);
   const [guestSession, setGuestSession, isInitialized] = useLocalStorage(
@@ -224,33 +224,60 @@ export default function Navbar() {
   };
 
   const proceedToApplicationForm = () => {
-    router.push('/account/login');
+    router.push('/account/application-form');
   };
 
   if (mdDown) {
     return (
-      <>
+      <div style={{...style}}>
         <Grid
           container
           alignItems="center"
           columnSpacing={1}
-          sx={{ backgroundColor: 'white', my: 1, px: 2 }}
+          sx={{ backgroundColor: 'white', px: 2, py: 1 }}
         >
           <Grid item xs={6}>
             <Logo />
           </Grid>
           <Grid item xs={6} display="flex" justifyContent="flex-end">
-            <IconButton
-              sx={{ color: landingPagePrimaryColor }}
-              onClick={() => router.push('/cart')}
-            >
-              <ShoppingCartIcon style={{ width: 30, height: 30 }} />
-              <CartBadge
-                badgeContent={cartItemsQty}
-                color="error"
-                overlap="circular"
-              />
-            </IconButton>
+            <Box display="flex" alignItems="center" gap={1}>
+              <IconButton
+                onClick={() => router.push('/account/login')}
+                size="small"
+                sx={{
+                  color: landingPagePrimaryColor,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                }}
+              >
+                <UserIcon style={{ width: 30, height: 30 }} />
+                <Box sx={{ display: 'flex', alignItems: 'center', height: 0 }}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: landingPagePrimaryColor,
+                      fontWeight: 'bold',
+                      mt: 2,
+                    }}
+                  >
+                    Log in
+                  </Typography>
+                </Box>
+              </IconButton>
+              <Divider orientation="vertical" flexItem />
+              <IconButton
+                sx={{ color: landingPagePrimaryColor }}
+                onClick={() => router.push('/cart')}
+              >
+                <ShoppingCartIcon style={{ width: 30, height: 30 }} />
+                <CartBadge
+                  badgeContent={cartItemsQty}
+                  color="error"
+                  overlap="circular"
+                />
+              </IconButton>
+            </Box>
           </Grid>
           <Grid item xs={1}>
             <IconButton onClick={() => setIsNavOpen(true)}>
@@ -324,7 +351,7 @@ export default function Navbar() {
                 );
               })}
 
-              {itemTypes?.map((itemType: any, index: any) => {
+              {/* {itemTypes?.map((itemType: any, index: any) => {
                 return (
                   <ListItemButtonStyled
                     $textColor={landingPagePrimaryColor}
@@ -336,7 +363,7 @@ export default function Navbar() {
                     <ListItemText primary={itemType.name} />
                   </ListItemButtonStyled>
                 );
-              })}
+              })} */}
             </List>
 
             <Box
@@ -346,11 +373,11 @@ export default function Navbar() {
               sx={{ m: 2, mt: 4 }}
             >
               <Button
-                onClick={() => router.push('/auth/login')}
+                onClick={proceedToApplicationForm}
                 fullWidth
                 sx={{ color: landingPageSecondaryColor }}
               >
-                Sign in
+                Sign up
               </Button>
               <Button
                 variant="contained"
@@ -361,9 +388,9 @@ export default function Navbar() {
                   py: 1,
                   borderRadius: 2,
                 }}
-                onClick={proceedToApplicationForm}
+                onClick={() => router.push('/account/login')}
               >
-                Sign up
+                Sign in
               </Button>
             </Box>
           </Drawer>
@@ -380,7 +407,7 @@ export default function Navbar() {
             </Box>
           </Box> */}
         </Box>
-      </>
+      </div>
     );
   }
 
@@ -418,6 +445,7 @@ export default function Navbar() {
           backgroundColor: 'white',
           boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 12px',
           zIndex: 100,
+          ...style,
         }}
       >
         <Box
@@ -430,7 +458,7 @@ export default function Navbar() {
           <Searchbar width="50%" />
           <Box display="flex" alignItems="center" gap={1}>
             <IconButton
-              onClick={proceedToApplicationForm}
+              onClick={() => router.push('/account/login')}
               size="large"
               sx={{
                 color: landingPagePrimaryColor,
@@ -442,7 +470,7 @@ export default function Navbar() {
               <UserIcon style={{ width: 30, height: 30 }} />
               <Box sx={{ display: 'flex', alignItems: 'center', height: 0 }}>
                 <Typography
-                  variant="body1"
+                  variant="caption"
                   sx={{
                     color: landingPagePrimaryColor,
                     fontWeight: 'bold',
@@ -483,7 +511,6 @@ export default function Navbar() {
                 key={tab.label}
                 onClick={() => {
                   window.location.href = tab.href;
-                  // setSelectedTab(tab.href);
                 }}
                 sx={{
                   backgroundColor:
@@ -529,42 +556,7 @@ export default function Navbar() {
                     itemType,
                   });
                 }}
-                // onMouseLeave={() => {
-                //   popoverTimeout = setTimeout(() => {
-                //     setItemTypePopoverProps({
-                //       open: false,
-                //       anchorEl: null,
-                //       itemType: null,
-                //     });
-                //   }, 300); // Adjust delay time if necessary
-                // }}
               >
-                {/* <ItemTypePopover
-                  open={itemTypePopoverProps.open}
-                  // set Open={itemTypePopoverProps.setOpen}
-                  anchorEl={itemTypePopoverProps.anchorEl}
-                  itemType={itemTypePopoverProps.itemType}
-                  onClose={() =>
-                    setItemTypePopoverProps({
-                      open: false,
-                      anchorEl: null,
-                      itemType: null,
-                    })
-                  }
-                  onMouseEnter={() => {
-                    setItemTypePopoverProps((prev) => ({
-                      ...prev,
-                      open: true,
-                    }));
-                  }}
-                  onMouseLeave={() =>
-                    setItemTypePopoverProps({
-                      open: false,
-                      anchorEl: null,
-                      itemType: null,
-                    })
-                  }
-                /> */}
                 <Typography
                   variant="h6"
                   key={index}
@@ -572,7 +564,6 @@ export default function Navbar() {
                     router.push(
                       `/products?type=${encodeURIComponent(itemType.name)}`,
                     );
-                    // setSelectedTab(itemType.href);
                   }}
                   sx={{
                     color:
@@ -580,20 +571,6 @@ export default function Navbar() {
                         ? green[700]
                         : landingPageGreyColor,
                   }}
-                  // onMouseOver={(e: any) => {
-                  //   setItemTypePopoverProps({
-                  //     open: true,
-                  //     anchorEl: e.currentTarget,
-                  //     itemType,
-                  //   });
-                  // }}
-                  // onMouseLeave={(e: any) => {
-                  //   setItemTypePopoverProps({
-                  //     open: false,
-                  //     anchorEl: null,
-                  //     itemType: null,
-                  //   });
-                  // }}
                 >
                   {itemType.name}
                 </Typography>

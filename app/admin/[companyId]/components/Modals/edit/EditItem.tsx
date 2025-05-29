@@ -37,6 +37,7 @@ interface IProps {
   targetItem: IItem;
   showNotification: (type: AlertColor, message: string) => void;
   includedButton?: boolean;
+  isWebsiteItem?: boolean;
 }
 
 export enum UPDATE_OPTION {
@@ -44,7 +45,7 @@ export enum UPDATE_OPTION {
   ALL_ITEMS_SAME_NAME = 'all items same name',
 }
 
-const EditItem = ({ open, onClose, targetItem, showNotification }: IProps) => {
+const EditItem = ({ open, onClose, targetItem, showNotification, isWebsiteItem = false }: IProps) => {
   const { companyId }: any = useParams();
   const [isOpenDeleteModal, setIsOpenDeleteModal] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
@@ -181,7 +182,7 @@ const EditItem = ({ open, onClose, targetItem, showNotification }: IProps) => {
             buttonProps={{ loading: isUpdating }}
             onClose={onClose}
           />
-          <RadioGroup
+          {!isWebsiteItem && <RadioGroup
             row
             value={updateOption}
             onChange={(e) => setUpdateOption(e.target.value as UPDATE_OPTION)}
@@ -196,7 +197,7 @@ const EditItem = ({ open, onClose, targetItem, showNotification }: IProps) => {
               control={<Radio />}
               label="Same inventory item"
             />
-          </RadioGroup>
+          </RadioGroup>}
           <Divider sx={{ my: 2 }}>Price ($)</Divider>
           <Grid container rowGap={2} alignItems="center">
             <Grid item xs={12} textAlign="right">

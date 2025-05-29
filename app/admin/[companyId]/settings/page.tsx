@@ -9,12 +9,14 @@ import EditProfile from '../components/Settings/EditProfile';
 import ErrorComponent from '../components/ErrorComponent';
 import Announcement from '../components/Settings/Announcement';
 import ProductType from '../components/Settings/WebsiteItems';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 
 function SettingsContent() {
   const [tabIndex, setTabIndex] = useState<number>(0);
   const searchParams = useSearchParams();
   const router = useRouter();
+
+  const { companyId }: any = useParams();
 
   useEffect(() => {
     const tab = searchParams?.get('tab');
@@ -33,7 +35,7 @@ function SettingsContent() {
           aria-label="basic tabs"
           value={tabIndex}
           onChange={(e, newValue) =>
-            router.push('/admin/settings?tab=' + newValue)
+            router.push(`/admin/${companyId}/settings?tab=${newValue}`)
           }
           variant="scrollable"
           scrollButtons="auto"
