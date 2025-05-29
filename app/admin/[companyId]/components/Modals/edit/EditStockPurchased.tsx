@@ -920,8 +920,12 @@ const EditStockPurchased = ({
                 </MenuItem>
                 {paymentMethods &&
                   paymentMethods?.data.length > 0 &&
-                  paymentMethods?.data.map((item: any) => {
-                    return <MenuItem value={item.id}>{item.name}</MenuItem>;
+                  paymentMethods?.data.map((item: any, index: number) => {
+                    return (
+                      <MenuItem key={index} value={item.id}>
+                        {item.name}
+                      </MenuItem>
+                    );
                   })}
               </Select>
             </Box>
@@ -944,7 +948,11 @@ const EditStockPurchased = ({
                 {adminsAndDrivers &&
                   adminsAndDrivers?.length > 0 &&
                   adminsAndDrivers?.map((person: string) => {
-                    return <MenuItem value={person}>{person}</MenuItem>;
+                    return (
+                      <MenuItem key={person} value={person}>
+                        {person}
+                      </MenuItem>
+                    );
                   })}
               </Select>
             </Box>

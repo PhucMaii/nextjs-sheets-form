@@ -93,7 +93,7 @@ export default function SearchPopover({
         sx={{ width: '100%', py: 2, px: 2 }}
       >
         <Typography>
-          You are looking for "<a>{debouncedKeywords}</a>"
+          You are looking for   &quot;<a>{debouncedKeywords}</a>&quot;
         </Typography>
 
         <Box display="flex" flexDirection="column" gap={2}>

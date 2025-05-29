@@ -536,6 +536,7 @@ export default function Navbar({style}: {style?: any}) {
           {itemTypes?.map((itemType: any, index: any) => {
             return (
               <Box
+                key={index}
                 display="flex"
                 alignItems="center"
                 sx={{

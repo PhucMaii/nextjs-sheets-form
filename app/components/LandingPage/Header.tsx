@@ -68,7 +68,7 @@ export default function Header({ sx }: IProps) {
               textAlign="center"
               sx={{ color: 'white' }}
             >
-              Freshness You Can Trust <br /> Prices You'll Love
+              Freshness You Can Trust <br /> Prices You&apos;ll Love
             </Typography>
             <Typography
               variant="h5"

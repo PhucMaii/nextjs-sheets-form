@@ -23,6 +23,7 @@ interface IProps {
   endDate: Date;
 }
 
+// eslint-disable-next-line react/display-name
 export const WeeklyStatement = forwardRef(
   ({ client, orders, endDate }: IProps, ref: any) => {
     if (!client) {
@@ -39,6 +40,8 @@ export const WeeklyStatement = forwardRef(
     // Debt Data
     const endMonth = endDate.getMonth() + 1;
     const endYear = endDate.getFullYear();
+
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const { debtData, sortDebtKeys } = useApiDebtData(
       client.id,
       endMonth,

@@ -338,7 +338,7 @@ export default function Overview() {
         <Grid item xs={12}>
           <Box display="flex" flexDirection="column" my={2}>
             <Typography variant="h5" fontWeight="bold">
-              Customer's Profit
+              Customer&apos;s Profit
             </Typography>
             <Typography variant="subtitle2">
               Calculate based on all orders in selected date range

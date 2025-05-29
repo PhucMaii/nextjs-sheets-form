@@ -7,6 +7,7 @@ import {
 import prisma from '@/client';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import {
+  convertToPSTDate,
   formatDate,
   formatDateStringInHoursOver12,
   getTodayDate,
@@ -61,7 +62,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
       include: {
         employee: true,
-      }
+      },
     });
 
     const today = getTodayDate();
@@ -73,20 +74,25 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const formattedEndedAt = new Date(shift?.endedAt || '');
       formattedEndedAt.setDate(formattedEndedAt.getDate() + 7);
 
-    //   console.log({
-    //     formattedStartedAt: formatDateStringInHoursOver12(formattedStartedAt),
-    //     formattedEndedAt: formatDateStringInHoursOver12(formattedEndedAt),
-    //     startedAt: shift.startedAt,
-    //     endedAt: shift.endedAt,
-    //   });
+      const pstStartedAt = convertToPSTDate(formattedStartedAt);
+      const pstEndedAt = convertToPSTDate(formattedEndedAt);
+
+      //   console.log({
+      //     formattedStartedAt: formatDateStringInHoursOver12(formattedStartedAt),
+      //     formattedEndedAt: formatDateStringInHoursOver12(formattedEndedAt),
+      //     startedAt: shift.startedAt,
+      //     endedAt: shift.endedAt,
+      //   });
 
       return {
         queryDate: YYYYMMDDFormat(formattedStartedAt),
         date: convertToDateStyleFull(formattedStartedAt),
-        startedAt: formatDateStringInHoursOver12(formattedStartedAt),
-        endedAt: formatDateStringInHoursOver12(formattedEndedAt),
+        startedAt: formatDateStringInHoursOver12(pstStartedAt),
+        endedAt: formatDateStringInHoursOver12(pstEndedAt),
         hours: shift.hours,
-        cost: shift?.cost || (shift?.hours || 0) * (shift?.employee?.hourlyRate || 0),
+        cost:
+          shift?.cost ||
+          (shift?.hours || 0) * (shift?.employee?.hourlyRate || 0),
         role: shift.role,
         assignedAt: today.dateAndTime,
         assignedBy: createdBy,

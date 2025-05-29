@@ -13,7 +13,7 @@ import useSWR from 'swr';
 import { fetcher } from '@/HOC/AuthenGuard';
 import LoadingComponent from './components/LoadingComponent/LoadingComponent';
 
-export default function page() {
+export default function MainPage() {
   const [isOpenSignUp, setIsOpenSignUp] = useState<boolean>(false);
 
   const {

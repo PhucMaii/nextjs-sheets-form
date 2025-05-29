@@ -810,9 +810,10 @@ export default function StockPurchased({
               -- Choose a method --
             </MenuItem>
             {paymentMethods.length > 0 &&
-              paymentMethods.map((item: any) => {
+              paymentMethods.map((item: any, index: number) => {
                 return (
-                  <MenuItem
+                  <MenuItem 
+                    key={index}
                     value={item.id}
                     disabled={
                       role !== USER_ROLE.ADMIN &&
@@ -845,7 +846,11 @@ export default function StockPurchased({
               </MenuItem>
               {adminsAndDrivers.length > 0 &&
                 adminsAndDrivers.map((person: string) => {
-                  return <MenuItem value={person}>{person}</MenuItem>;
+                  return (
+                    <MenuItem key={person} value={person}>
+                      {person}
+                    </MenuItem>
+                  );
                 })}
             </Select>
           </Box>

@@ -343,6 +343,7 @@ const ClientOrdersTable = ({
         />
       );
     },
+    // eslint-disable-next-line react/display-name
     TableBody: React.forwardRef<HTMLTableSectionElement>((props, ref) => (
       <TableBody {...props} ref={ref} />
     )),

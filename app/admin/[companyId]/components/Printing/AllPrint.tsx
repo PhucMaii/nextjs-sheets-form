@@ -7,7 +7,7 @@ const AllPrint = forwardRef(({ orders }: { orders: any }, ref: any) => {
     <div ref={ref}>
       {orders.map((order: any, index: number) => {
         return (
-          <React.Fragment key={index}>
+          <React.Fragment key={order.id}>
             <ComponentToPrint order={order} ref={order.ref} />
             {index < orders.length - 1 && <div className="page-break"></div>}
           </React.Fragment>
@@ -17,4 +17,5 @@ const AllPrint = forwardRef(({ orders }: { orders: any }, ref: any) => {
   );
 });
 
+AllPrint.displayName = 'AllPrint';
 export const MemoizedAllPrint = memo(AllPrint);

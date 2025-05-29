@@ -40,7 +40,7 @@ export default function OverviewPage() {
       <Typography variant="body2">We wish you have a good day!</Typography>
       <Grid container spacing={2} my={1}>
         <Grid item xs={12}>
-          <Typography variant="subtitle1">Today's overview</Typography>
+          <Typography variant="subtitle1">Today&apos;s overview</Typography>
         </Grid>
         <Grid item xs={12} md={6}>
           <OverviewCard

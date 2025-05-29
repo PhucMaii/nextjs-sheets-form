@@ -54,7 +54,7 @@ export default function InvitationSection() {
           sx={{ lineHeight: 1.5, color: 'white' }}
         >
           Grow Your Business with Supreme Sprouts <br />
-          Partner with Vancouver&apos;s Trusted Freshness Experts!" 🌱✨
+          Partner with Vancouver&apos;s Trusted Freshness Experts! 🌱✨
         </Typography>
         <Button
           variant="contained"

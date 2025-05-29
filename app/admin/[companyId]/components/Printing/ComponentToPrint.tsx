@@ -31,14 +31,15 @@ const generateTaxNote = (item: Item) => {
   return '';
 };
 
+// eslint-disable-next-line react/display-name
 export const ComponentToPrint = forwardRef(
-  ({ order }: { order: Order | null }, ref: any) => {
+  ({ order }: { order: Order | null }, ref: any) => {    
+    const { companyId }: any = useParams();
+    
     if (!order) {
       return null;
     }
-
-    const { companyId }: any = useParams();
-
+    
     const [announcement] = SWRFetchData(
       getAdminApiUrl(companyId, '/announcement'),
     );
@@ -334,3 +335,4 @@ export const ComponentToPrint = forwardRef(
     );
   },
 );
+ComponentToPrint.displayName = 'ComponentToPrint';

@@ -251,7 +251,7 @@ export default function ItemPage() {
           textAlign="center"
           // sx={{ color: landingPagePrimaryColor }}
         >
-          Don't miss these favorites
+          Don&apos;t miss these favorites
         </Typography>
 
         <Box sx={{ maxWidth: '90vw', width: '100%' }}>
@@ -266,7 +266,7 @@ export default function ItemPage() {
             {relatedProducts &&
               relatedProducts?.map((item: any, index: number) => {
                 return (
-                  <SwiperSlide>
+                  <SwiperSlide key={index}>
                     <ProductListing
                       key={index}
                       product={item}

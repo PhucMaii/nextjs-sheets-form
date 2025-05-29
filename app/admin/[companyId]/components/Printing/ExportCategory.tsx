@@ -12,6 +12,8 @@ import React, { forwardRef } from 'react';
 import { BorderTableCell } from './ManifestPrint';
 import { CheckIcon, XIcon } from 'lucide-react';
 import DisplayFile from '../Modals/DisplayFile';
+
+// eslint-disable-next-line react/display-name
 const ExportCategory = forwardRef(({ items }: any, ref: any) => {
   return (
     <div ref={ref} style={{ padding: '20px' }}>

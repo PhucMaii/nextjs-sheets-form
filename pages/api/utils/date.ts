@@ -136,7 +136,7 @@ export const formatDateString = (inputDate: Date | string) => {
   return `${dateRes} ${time}`;
 };
 
-export const formatDateStringInHoursOver12 = (inputDate: Date | string) => {
+export const formatDateStringInHoursOver12 = (inputDate: Date) => {
   const dateString = new Intl.DateTimeFormat('en-US', {
     timeZone: 'America/Los_Angeles',
     year: '2-digit',

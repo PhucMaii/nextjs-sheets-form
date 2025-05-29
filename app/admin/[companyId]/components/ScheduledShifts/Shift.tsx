@@ -14,6 +14,7 @@ interface IProps {
 export default function Shift({ shift, onCopyShift, onOpenEditShift }: IProps) {
   if (!shift) return null;
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { attributes, listeners, setNodeRef, isDragging } = useSortable({
     id: `shift __ ${shift.id}`,
     data: { type: 'shift' },

@@ -62,10 +62,9 @@ export default function ItemsGrid({ items, showNotification, category }: any) {
                     />
                   </Box>
                 </Grid>
-                {typeFormattedItems?.typesObj[type]?.map((item: any) => (
-                  <Grid item xs={6} sm={4} md={3}>
+                {typeFormattedItems?.typesObj[type]?.map((item: any, index: number) => (
+                  <Grid key={index} item xs={6} sm={4} md={3}>
                     <ItemButton
-                      key={item.id}
                       item={item}
                       containerStyle={{
                         backgroundColor:
@@ -96,10 +95,9 @@ export default function ItemsGrid({ items, showNotification, category }: any) {
                   />
                 </Box>
               </Grid>
-              {typeFormattedItems?.typesObj['Others']?.map((item: any) => (
-                <Grid item xs={6} sm={4} md={3}>
+              {typeFormattedItems?.typesObj['Others']?.map((item: any, index: number) => (
+                <Grid key={index} item xs={6} sm={4} md={3}>
                   <ItemButton
-                    key={item.id}
                     item={item}
                     containerStyle={{
                       backgroundColor:

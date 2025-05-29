@@ -32,6 +32,7 @@ export const BorderTableCell = styled(TableCell)<TableCellProps>`
   padding: 2px;
 `;
 
+// eslint-disable-next-line react/display-name
 export const ManifestPrint = forwardRef(
   ({ manifest, currentDate }: PropTypes, ref: any) => {
     if (!manifest || Object.keys(manifest).length === 0) {

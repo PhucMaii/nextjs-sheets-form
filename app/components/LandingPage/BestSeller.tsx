@@ -90,7 +90,7 @@ export default function BestSeller() {
               {bestSeller &&
                 bestSeller?.map((item: any, index: number) => {
                   return (
-                    <SwiperSlide>
+                    <SwiperSlide key={index}>
                       <ProductListing
                         key={index}
                         product={item}
@@ -129,7 +129,7 @@ export default function BestSeller() {
                 {promotion?.websiteItems &&
                   promotion?.websiteItems?.map((item: any, index: number) => {
                     return (
-                      <SwiperSlide>
+                      <SwiperSlide key={index}>
                         <ProductListing
                           key={index}
                           product={item}

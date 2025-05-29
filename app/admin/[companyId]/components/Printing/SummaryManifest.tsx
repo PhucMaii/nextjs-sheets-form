@@ -17,6 +17,7 @@ interface PropTypes {
   currentDate: string;
 }
 
+// eslint-disable-next-line react/display-name
 export const SummaryManifest = forwardRef(
   ({ manifest, currentDate }: PropTypes, ref: any) => {
     if (!manifest || Object.keys(manifest).length === 0) {

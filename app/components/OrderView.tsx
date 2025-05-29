@@ -747,9 +747,10 @@ const OrderView = ({
     return (
       <>
         {displayItems.length > 0 &&
-          displayItems.map((item: IItem | any) => {
+          displayItems.map((item: IItem | any, index: number) => {
             return (
               <Grid
+                key={index}
                 item
                 xs={6}
                 // sm={4}
@@ -825,6 +826,7 @@ const OrderView = ({
                   (item: IItem | any, index: number) => {
                     return (
                       <Grid
+                        key={index}
                         data-tour={index === 0 ? 'third-step' : ''}
                         item
                         xs={6}
