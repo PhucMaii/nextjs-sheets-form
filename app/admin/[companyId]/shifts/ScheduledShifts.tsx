@@ -97,13 +97,13 @@ export default function ScheduledShifts() {
     setScheduledShifts(data);
   };
 
-  const handleSaveAll = async (newShifts: IScheduledShift[] = []) => {
+  const handleSaveAll = async (newShifts: IScheduledShift[] | null = null) => {
     try {
       setIsSavingAll(true);
       const response = await axios.post(
         getAdminApiUrl(companyId, '/scheduled-shifts/save-all'),
         {
-          shifts: newShifts.length > 0 ? newShifts : scheduledShifts,
+          shifts: newShifts ? newShifts : scheduledShifts,
           startedAt: selectedWeek[0].toString(),
           endedAt: selectedWeek[1].toString(),
         },
@@ -201,6 +201,7 @@ export default function ScheduledShifts() {
             onClick={() => handleCopyLastWeek()}
             variant="outlined"
             color="primary"
+            disabled={scheduledShifts.length > 0}
           >
             Copy Last Week
           </LoadingButton>

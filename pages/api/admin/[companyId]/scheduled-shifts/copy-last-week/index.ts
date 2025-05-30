@@ -7,9 +7,8 @@ import {
 import prisma from '@/client';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import {
-  convertToPSTDate,
   formatDate,
-  formatDateStringInHoursOver12,
+  formatDateString,
   getTodayDate,
 } from '@/pages/api/utils/date';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
@@ -74,21 +73,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const formattedEndedAt = new Date(shift?.endedAt || '');
       formattedEndedAt.setDate(formattedEndedAt.getDate() + 7);
 
-      const pstStartedAt = convertToPSTDate(formattedStartedAt);
-      const pstEndedAt = convertToPSTDate(formattedEndedAt);
-
-      //   console.log({
-      //     formattedStartedAt: formatDateStringInHoursOver12(formattedStartedAt),
-      //     formattedEndedAt: formatDateStringInHoursOver12(formattedEndedAt),
-      //     startedAt: shift.startedAt,
-      //     endedAt: shift.endedAt,
-      //   });
+      // const pstStartedAt = convertToPSTDate(formattedStartedAt);
+      // const pstEndedAt = convertToPSTDate(formattedEndedAt);
 
       return {
         queryDate: YYYYMMDDFormat(formattedStartedAt),
         date: convertToDateStyleFull(formattedStartedAt),
-        startedAt: formatDateStringInHoursOver12(pstStartedAt),
-        endedAt: formatDateStringInHoursOver12(pstEndedAt),
+        startedAt: formatDateString(formattedStartedAt),
+        endedAt: formatDateString(formattedEndedAt),
         hours: shift.hours,
         cost:
           shift?.cost ||

@@ -18,7 +18,7 @@
     },
     {
       "path": "/api/push-notification/alert-clock-in",
-      "schedule": "0 * * * *"
+      "schedule": "*/30 * * * *"
     },
     {
       "path": "/api/cron/auto-clock-out",

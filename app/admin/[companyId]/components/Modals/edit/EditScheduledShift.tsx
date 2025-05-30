@@ -18,6 +18,7 @@ import { useParams } from 'next/navigation';
 import dayjs from 'dayjs';
 import { LoadingButton } from '@mui/lab';
 import { Trash2Icon } from 'lucide-react';
+import { formatDateString } from '@/pages/api/utils/date';
 
 interface IProps extends ModalProps {
   shift: IScheduledShift;
@@ -57,18 +58,22 @@ export default function EditScheduledShift({
   const handleDeleteShift = async () => {
     try {
       setIsDeleting(true);
-      const response = await axios.delete(
-        getAdminApiUrl(companyId, `/scheduled-shifts?id=${shift.id}`),
-      );
 
-      if (response.data.error) {
-        showNotification('error', response.data.error);
-        return;
+      console.log(Number(shift.id), 'shift.id');
+      if (Number(shift.id)) {
+        const response = await axios.delete(
+          getAdminApiUrl(companyId, `/scheduled-shifts?id=${shift.id}`),
+        );
+
+        if (response.data.error) {
+          showNotification('error', response.data.error);
+          return;
+        }
       }
 
       const newShifts = shifts.filter((baseShift) => baseShift.id !== shift.id);
       await refresh(newShifts);
-      showNotification('success', response.data.message);
+      showNotification('success', 'Shift deleted successfully');
       onClose();
     } catch (error) {
       console.log('Internal Server Error: ', error);
@@ -95,10 +100,12 @@ export default function EditScheduledShift({
           updatedShift: {
             ...updatedShift,
             hours: Math.round(hours * 100) / 100,
-            startedAt: dayjs(updatedShift?.startedAt).format(
-              'YYYY-MM-DD HH:mm:ss',
+            startedAt: formatDateString(
+              dayjs(updatedShift?.startedAt).format('YYYY-MM-DD HH:mm:ss'),
             ),
-            endedAt: dayjs(updatedShift?.endedAt).format('YYYY-MM-DD HH:mm:ss'),
+            endedAt: formatDateString(
+              dayjs(updatedShift?.endedAt).format('YYYY-MM-DD HH:mm:ss'),
+            ),
             date: new Date(updatedShift?.startedAt).toLocaleDateString(
               'en-US',
               {

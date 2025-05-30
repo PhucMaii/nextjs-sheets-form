@@ -30,7 +30,7 @@ import ShiftContainer from './ShiftContainer';
 import EditScheduledShift from '../Modals/edit/EditScheduledShift';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import dayjs from 'dayjs';
-import { getDaysOfThisWeek } from '@/pages/api/utils/date';
+import { formatDateString, getDaysOfThisWeek } from '@/pages/api/utils/date';
 
 interface IProps {
   employees: IEmployee[];
@@ -145,12 +145,16 @@ export default function ScheduledShiftTable({
 
       const newShifts = shifts.map((shift: any) => {
         if (shift.id === activeShift.id) {
-          const startedAt = dayjs(
-            `${overContainer} ${activeShift.startedAt.split(' ')[1]}`,
-          ).format('YYYY-MM-DD HH:mm:ss');
-          const endedAt = dayjs(
-            `${overContainer} ${activeShift.endedAt.split(' ')[1]}`,
-          ).format('YYYY-MM-DD HH:mm:ss');
+          const startedAt = formatDateString(
+            dayjs(
+              `${overContainer} ${activeShift.startedAt.split('  ')[1]}`,
+            ).format('YYYY-MM-DD HH:mm:ss'),
+          );
+          const endedAt = formatDateString(
+            dayjs(
+              `${overContainer} ${activeShift.endedAt.split('  ')[1]}`,
+            ).format('YYYY-MM-DD HH:mm:ss'),
+          );
 
           const hours = dayjs(endedAt).diff(startedAt, 'hours', true);
           const cost = hours * (activeShift.employee.hourlyRate || 0);

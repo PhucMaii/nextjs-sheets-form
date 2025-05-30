@@ -116,12 +116,20 @@ export const getTodayDate = (
 };
 
 export const formatDateString = (inputDate: Date | string) => {
+  let inputDateTypeDate: Date;
+  console.log({inputDate, type: typeof inputDate}, 'inputDate');
+  if (typeof inputDate === 'string') {
+    inputDateTypeDate = new Date(inputDate);
+  } else {
+    inputDateTypeDate = inputDate;
+  }
+
   const dateString = new Intl.DateTimeFormat('en-US', {
     timeZone: 'America/Los_Angeles',
     dateStyle: 'short',
     timeStyle: 'long',
     // timeStyle,
-  }).format(new Date(inputDate));
+  }).format(inputDateTypeDate);
 
   const date = dateString.split(',')[0];
   const dateSplitted = date.split('/');

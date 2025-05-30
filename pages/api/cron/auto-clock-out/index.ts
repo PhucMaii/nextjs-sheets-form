@@ -64,7 +64,7 @@ export default async function handler(
             id: shift.id,
           },
           data: {
-            endedAt: scheduledShift?.endedAt, // TODO: Change to shift session format ended at
+            endedAt: scheduledShift?.endedAt,
             hours,
             isActive: false,
             cost: hours * (shift?.employee?.hourlyRate || 1),

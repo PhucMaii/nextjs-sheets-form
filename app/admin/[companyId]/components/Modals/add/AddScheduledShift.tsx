@@ -14,6 +14,7 @@ import axios from 'axios';
 import { useParams } from 'next/navigation';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import { IScheduledShift } from '@/app/utils/type';
+import { formatDateString } from '@/pages/api/utils/date';
 
 interface IProps extends ModalProps {
   defaultEmployee?: string;
@@ -68,8 +69,12 @@ export default function AddScheduledShift({
         {
           scheduledShift: {
             ...newShift,
-            startedAt: newShift.startedAt.format('YYYY-MM-DD HH:mm:ss'),
-            endedAt: newShift.endedAt.format('YYYY-MM-DD HH:mm:ss'),
+            startedAt: formatDateString(
+              newShift.startedAt.format('YYYY-MM-DD HH:mm:ss'),
+            ),
+            endedAt: formatDateString(
+              newShift.endedAt.format('YYYY-MM-DD HH:mm:ss'),
+            ),
             companyId: Number(companyId),
             employeeId: selectedEmployeeData.id,
             employee: selectedEmployeeData,
