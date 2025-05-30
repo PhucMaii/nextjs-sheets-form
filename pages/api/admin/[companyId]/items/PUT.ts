@@ -59,6 +59,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         where: {
           name: updatedItem.name,
           categoryId: updatedItem.categoryId,
+          id: {
+            not: updatedItem.id,
+          },
         },
       });
 
@@ -133,7 +136,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       await prisma.item.updateMany({
         where: {
           inventoryItemId: existingItem.inventoryItemId,
-          id: {
+          categoryId: {
             not: websiteItemCategoryId
           }
         },

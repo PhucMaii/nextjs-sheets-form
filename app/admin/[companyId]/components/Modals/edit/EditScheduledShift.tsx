@@ -94,6 +94,11 @@ export default function EditScheduledShift({
         true,
       );
 
+      if (updatedShift?.startedAt?.isAfter(updatedShift?.endedAt)) {
+        showNotification('error', 'Start time must be before end time');
+        return;
+      }
+
       const response = await axios.put(
         getAdminApiUrl(companyId, '/scheduled-shifts'),
         {

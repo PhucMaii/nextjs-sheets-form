@@ -37,8 +37,8 @@ export default function AddScheduledShift({
 
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const [newShift, setNewShift] = useState<any>({
-    startedAt: defaultDate ? dayjs(defaultDate) : null,
-    endedAt: defaultDate ? dayjs(defaultDate).add(1, 'hour') : null,
+    startedAt: defaultDate ? dayjs(defaultDate).set('hour', 7) : null,
+    endedAt: defaultDate ? dayjs(defaultDate).set('hour', 15) : null,
     employeeId: null,
     role: WORKING_ROLE.DRIVER,
   });
@@ -52,8 +52,8 @@ export default function AddScheduledShift({
     if (defaultDate) {
       setNewShift({
         ...newShift,
-        startedAt: dayjs(defaultDate).hour(8),
-        endedAt: dayjs(defaultDate).hour(16),
+        startedAt: dayjs(defaultDate).hour(7),
+        endedAt: dayjs(defaultDate).hour(15),
       });
     }
   }, [defaultDate]);
@@ -61,6 +61,16 @@ export default function AddScheduledShift({
   const handleAddScheduledShift = async () => {
     try {
       setIsAdding(true);
+
+      if (!newShift.startedAt || !newShift.endedAt) {
+        showNotification('error', 'Please select start and end time');
+        return;
+      }
+
+      if (newShift.startedAt.isAfter(newShift.endedAt)) {
+        showNotification('error', 'Start time must be before end time');
+        return;
+      }
 
       const hours = newShift.endedAt.diff(newShift.startedAt, 'hours');
 

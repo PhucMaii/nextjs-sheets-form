@@ -22,5 +22,14 @@ export const minifyNumber = (num: number | null) => {
 export const formatTime = (time: string) => {
   if (!time) return '';
 
-  return time.split(' ')[1].slice(0, 5);
+  // If hour is one number, add a 0 in front
+  const hour = time.split('  ')[1].split(' ')[0].split(':')[0];
+  const minute = time.split('  ')[1].split(' ')[0].split(':')[1];
+  const ampm = time.split('  ')[1].split(' ')[1];
+
+  if (hour.length === 1) {
+    return '0' + hour + ':' + minute + ' ' + ampm;
+  }
+
+  return hour + ':' + minute + ' ' + ampm;
 };
