@@ -157,7 +157,7 @@ export default function ScheduledShiftTable({
           );
 
           const hours = dayjs(endedAt).diff(startedAt, 'hours', true);
-          const cost = hours * (activeShift.employee.hourlyRate || 0);
+          const cost = hours * (activeShift.employee.payRate || 0);
 
           return {
             ...shift,

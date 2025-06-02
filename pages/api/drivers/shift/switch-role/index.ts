@@ -78,7 +78,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       data: {
         endedAt: today.dateAndTime,
         hours: hours * 1, // to get the float type
-        cost: hours * (driver?.hourlyRate || 1),
+        cost: hours * (driver?.payRate || 1),
         isActive: false,
       },
     });

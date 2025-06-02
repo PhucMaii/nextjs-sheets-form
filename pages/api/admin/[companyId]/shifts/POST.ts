@@ -56,7 +56,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         endedAt,
         routeId,
         hours,
-        cost: hours * (existingDriver?.hourlyRate || 1),
+        cost: hours * (existingDriver?.payRate || 1),
         status: SHIFT_STATUS.UNPAID,
         role,
         companyId: Number(companyId),

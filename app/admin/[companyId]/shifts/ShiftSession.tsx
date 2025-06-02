@@ -89,7 +89,7 @@ export default function ShiftSession() {
           name: shift?.employee?.name || shift?.driver?.name,
           hours: shift.hours,
           shifts: 1,
-          hourlyRate: shift?.employee?.hourlyRate || shift?.driver?.hourlyRate,
+          payRate: shift?.employee?.payRate || shift?.driver?.payRate,
           total: shift.cost,
         });
       }

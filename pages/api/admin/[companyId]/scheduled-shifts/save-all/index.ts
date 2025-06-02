@@ -58,7 +58,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           createdBy: createdBy,
           assignedBy: createdBy,
           assignedAt: today.dateAndTime,
-          cost: shift?.cost || shift.hours * (shift?.employee?.hourlyRate || 0),
+          cost: shift?.cost || shift.hours * (shift?.employee?.payRate || 0),
         })),
       });
     }

@@ -49,7 +49,7 @@ export default function ScheduledShifts() {
     );
     const totalCost = scheduledShifts.reduce(
       (acc, shift) =>
-        acc + (shift.hours || 0) * (shift.employee?.hourlyRate || 0),
+        acc + (shift.hours || 0) * (shift.employee?.payRate || 0),
       0,
     );
     return {

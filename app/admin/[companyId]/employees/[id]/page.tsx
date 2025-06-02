@@ -22,6 +22,7 @@ import axios from 'axios';
 import useNotification from '@/hooks/useNotification';
 import { ArrowLeftIcon } from 'lucide-react';
 import { UserContext } from '@/app/context/UserContextAPI';
+import { PayrollType } from '@prisma/client';
 
 export default function EmployeeDetailPage() {
   const { user }: any = useContext(UserContext);
@@ -69,7 +70,7 @@ export default function EmployeeDetailPage() {
         updatedFields: {
           name: employee?.name,
           employeeCode: employee?.employeeCode,
-          hourlyRate: employee?.hourlyRate,
+          payRate: employee?.payRate,
           role: employee?.role,
         },
         pageViews,
@@ -153,7 +154,6 @@ export default function EmployeeDetailPage() {
           <Grid
             item
             xs={12}
-            md={6}
             sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
           >
             <Typography variant="h6" color={blueGrey[800]}>
@@ -174,6 +174,25 @@ export default function EmployeeDetailPage() {
             </Select>
           </Grid>
 
+          <Grid item xs={12} md={6} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Typography variant="h6" color={blueGrey[800]}>
+              Payroll Type
+            </Typography>
+            <Select
+              fullWidth
+              value={employee?.payrollType || ''}
+              onChange={(e) =>
+                setEmployee({ ...employee, payrollType: e.target.value })
+              }
+            >
+              {Object.values(PayrollType).map((payrollType) => (
+                <MenuItem key={payrollType} value={payrollType}>
+                  {payrollType}
+                </MenuItem>
+              ))}
+            </Select>
+          </Grid>
+
           <Grid
             item
             xs={12}
@@ -181,13 +200,13 @@ export default function EmployeeDetailPage() {
             sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
           >
             <Typography variant="h6" color={blueGrey[800]}>
-              Hourly Rate
+              Pay Rate
             </Typography>
             <TextField
               fullWidth
-              value={employee?.hourlyRate}
+              value={employee?.payRate}
               onChange={(e) =>
-                setEmployee({ ...employee, hourlyRate: +e.target.value })
+                setEmployee({ ...employee, payRate: +e.target.value })
               }
             />
           </Grid>

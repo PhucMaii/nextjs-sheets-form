@@ -27,7 +27,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
                     date: updatedShift.date,
                     queryDate: updatedShift.queryDate,
                     hours: updatedShift.hours,
-                    cost: updatedShift?.cost || updatedShift.hours * (updatedShift?.employee?.hourlyRate || 0),
+                    cost: updatedShift?.cost || updatedShift.hours * (updatedShift?.employee?.payRate || 0),
                     startedAt: updatedShift.startedAt,
                     endedAt: updatedShift.endedAt,
                     role: updatedShift.role,
@@ -55,7 +55,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             return res.status(404).json({ error: 'Shift not found' });
         }
 
-        const cost = updatedShift.hours * (shift?.employee?.hourlyRate || 0);
+        const cost = updatedShift.hours * (shift?.employee?.payRate || 0);
 
         const updatedScheduledShift = await prisma.scheduledShift.update({
             where: { id: updatedShift.id },

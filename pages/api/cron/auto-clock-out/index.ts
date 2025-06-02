@@ -67,7 +67,7 @@ export default async function handler(
             endedAt: scheduledShift?.endedAt,
             hours,
             isActive: false,
-            cost: hours * (shift?.employee?.hourlyRate || 1),
+            cost: hours * (shift?.employee?.payRate || 1),
           },
         });
       } else {
@@ -94,7 +94,7 @@ export default async function handler(
               endedAt: latestOrder.deliveredAt,
               hours,
               isActive: false,
-              cost: hours * (shift?.employee?.hourlyRate || 1),
+              cost: hours * (shift?.employee?.payRate || 1),
             },
           });
         } else {
@@ -107,7 +107,7 @@ export default async function handler(
               endedAt: today.dateAndTime,
               isActive: false,
               hours,
-              cost: hours * (shift?.employee?.hourlyRate || 1),
+              cost: hours * (shift?.employee?.payRate || 1),
             },
           });
         }

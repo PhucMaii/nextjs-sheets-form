@@ -20,7 +20,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const today = getTodayDate();
     const createdBy = await getCreatedBy(req, res, session?.user?.role);
 
-    const cost = scheduledShift.hours * scheduledShift.employee.hourlyRate;
+    const cost = scheduledShift.hours * scheduledShift.employee.payRate;
 
     const newShift = await prisma.scheduledShift.create({
       data: {

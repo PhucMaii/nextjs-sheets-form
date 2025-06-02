@@ -87,7 +87,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       }
 
       const cost =
-        (driver?.hourlyRate || 1) *
+        (driver?.payRate || 1) *
         (updatedFields?.hours || existingShift.hours);
       updatedFields.cost = cost;
     }

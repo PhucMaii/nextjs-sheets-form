@@ -32,7 +32,7 @@ export default function AddDriver({
   const [name, setName] = useState<string>('');
   const [employeeCode, setEmployeeCode] = useState<string>('');
   const [password, setPassword] = useState<string>('');
-  const [hourlyRate, setHourlyRate] = useState<number>(0);
+  const [payRate, setPayRate] = useState<number>(0);
 
   const handleAddDriver = async () => {
     try {
@@ -41,7 +41,7 @@ export default function AddDriver({
       const response = await axios.post(getAdminApiUrl(companyId, '/drivers'), {
         driverName: name.toUpperCase(),
         driverPassword: password,
-        hourlyRate,
+        payRate,
         employeeCode,
         role: EMPLOYEE_ROLE.DRIVER,
       });
@@ -133,14 +133,14 @@ export default function AddDriver({
           </Grid>
 
           <Grid item xs={12} md={6}>
-            <Typography>Hourly Rate:</Typography>
+            <Typography>Pay Rate:</Typography>
           </Grid>
           <Grid item xs={12} md={6}>
             <TextField
-              value={hourlyRate}
-              onChange={(e: any) => setHourlyRate(+e.target.value)}
-              label="Hourly Rate"
-              placeholder="Enter driver hourly rate..."
+              value={payRate}
+              onChange={(e: any) => setPayRate(+e.target.value)}
+              label="Pay Rate"
+              placeholder="Enter driver pay rate..."
               fullWidth
             />
           </Grid>

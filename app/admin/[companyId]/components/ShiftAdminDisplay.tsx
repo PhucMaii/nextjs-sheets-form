@@ -94,7 +94,7 @@ export default function ShiftAdminDisplay({
                 {shift?.hours !== null ? shift.hours?.toFixed(2) : 'Ongoing'}
               </Typography>
               <Typography variant="h6" fontWeight="regular">
-                Hourly Rate: ${shift?.employee?.hourlyRate}
+                Hourly Rate: ${shift?.employee?.payRate}
               </Typography>
             </Box>
             {shift?.isActive && (

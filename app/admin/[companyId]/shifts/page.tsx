@@ -22,6 +22,8 @@ export default function ShiftPage() {
       setTab('shifts');
     } else if (tabValue === 'schedule') {
       setTab('schedule');
+    } else if (tabValue === 'payroll') {
+      setTab('payroll');
     }
   }, [tabValue]);
 
@@ -32,6 +34,7 @@ export default function ShiftPage() {
       }}>
         <Tab label="Shifts" value="shifts" />  
         <Tab label="Schedule" value="schedule" />
+        <Tab label="Payroll" value="payroll" />
         {/* <Tab label="Payroll" value="payroll" /> */}
       </Tabs>
 

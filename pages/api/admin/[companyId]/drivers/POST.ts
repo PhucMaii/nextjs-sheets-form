@@ -7,7 +7,7 @@ interface IBody {
   employeeCode: string;
   driverName: string;
   driverPassword: string;
-  hourlyRate: number;
+  payRate: number;
   role: string;
 }
 
@@ -15,7 +15,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { employeeCode, driverName, driverPassword, hourlyRate, role }: IBody =
+    const { employeeCode, driverName, driverPassword, payRate, role }: IBody =
       req.body;
 
     const { companyId } = req.query;
@@ -61,7 +61,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         name: driverName,
         employeeCode: code,
         password: hashPassword,
-        hourlyRate,
+        payRate,
         // role: USER_ROLE.DRIVER,
         companyId: Number(companyId),
         role,

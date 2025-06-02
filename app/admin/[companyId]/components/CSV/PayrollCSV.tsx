@@ -13,7 +13,7 @@ const PayrollCSV = ({ driverData, style }: IProps) => {
     { label: 'Driver', key: 'name' },
     { label: 'Shifts', key: 'shifts' },
     { label: 'Hours', key: 'hours' },
-    { label: 'Hourly Rate ($)', key: 'hourlyRate' },
+    { label: 'Pay Rate ($)', key: 'payRate' },
     { label: 'Total ($)', key: 'total' },
   ];
 
@@ -21,7 +21,7 @@ const PayrollCSV = ({ driverData, style }: IProps) => {
     name: driver.name,
     shifts: driver.shifts,
     hours: driver.hours?.toFixed(2),
-    hourlyRate: driver.hourlyRate,
+    payRate: driver.payRate,
     total: driver.total?.toFixed(2),
   }));
 

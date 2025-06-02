@@ -1,4 +1,4 @@
-import { PayrollType, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 // const checkIsKorean = (text: string) => {
 //   // const koreanRange = /^[\uAC00-\uD7AF]+$/;
@@ -122,7 +122,7 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 async function main() {
   await prisma.employee.updateMany({
     data: {
-      payrollType: PayrollType.salary,      
+      payRate: 20,      
     },
   });
 }

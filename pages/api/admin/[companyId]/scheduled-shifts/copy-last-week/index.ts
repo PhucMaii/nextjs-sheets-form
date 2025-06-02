@@ -84,7 +84,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         hours: shift.hours,
         cost:
           shift?.cost ||
-          (shift?.hours || 0) * (shift?.employee?.hourlyRate || 0),
+          (shift?.hours || 0) * (shift?.employee?.payRate || 0),
         role: shift.role,
         assignedAt: today.dateAndTime,
         assignedBy: createdBy,

@@ -41,7 +41,7 @@ export default function EditDriver({
       const response = await axios.put(getAdminApiUrl(companyId, '/drivers'), {
         driverId: driver.id,
         updatedName: updatedDriver.name,
-        hourlyRate: updatedDriver.hourlyRate,
+        payRate: updatedDriver.payRate,
         employeeCode: updatedDriver.employeeCode,
         role: updatedDriver.role,
       });
@@ -123,11 +123,11 @@ export default function EditDriver({
             <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="subtitle1">Hourly Rate</Typography>
               <TextField
-                value={updatedDriver.hourlyRate}
+                value={updatedDriver.payRate}
                 onChange={(e: any) =>
                   setUpdatedDriver({
                     ...updatedDriver,
-                    hourlyRate: +e.target.value,
+                    payRate: +e.target.value,
                   })
                 }
                 // label="Name"

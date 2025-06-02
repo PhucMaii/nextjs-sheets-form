@@ -17,7 +17,6 @@ import { useParams } from 'next/navigation';
 import { grey } from '@mui/material/colors';
 import { UserContext } from '@/app/context/UserContextAPI';
 import { EMPLOYEE_ROLE } from '@/app/utils/enum';
-import { PayrollType } from '@prisma/client';
 
 interface IProps {
   drivers: IDriver[];
@@ -74,10 +73,7 @@ export default function DriverTable({
                   <TableCell>{driver?.role}</TableCell>
                   <TableCell>{driver.routes.length}</TableCell>
                   <TableCell>
-                    $
-                    {driver?.payrollType === PayrollType.hourly
-                      ? driver?.hourlyRate?.toFixed(2)
-                      : driver?.salary?.toFixed(2) || 0}
+                    ${driver?.payRate?.toFixed(2) || 0}
                   </TableCell>
                   <TableCell>
                     <Box display="flex" flexDirection="row" gap={1}>
