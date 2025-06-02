@@ -1,4 +1,5 @@
 import { UPDATE_OPTION } from '@/app/admin/[companyId]/components/Modals/edit/EditItem';
+import { websiteItemCategoryId } from '@/app/lib/constant';
 import { IItem } from '@/app/utils/type';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -58,6 +59,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         where: {
           name: updatedItem.name,
           categoryId: updatedItem.categoryId,
+          id: {
+            not: updatedItem.id,
+          },
         },
       });
 
@@ -76,11 +80,12 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       data: {
         name: updatedItem.name,
         price: updatedItem.price,
-        categoryId: updatedItem.categoryId,
         isShowDiscount: updatedItem?.isShowDiscount,
         prevPrice: updatedItem?.prevPrice,
         availability: updatedItem.availability,
         inventoryUnitId: updatedItem.inventoryUnitId,
+        image: updatedItem?.image,
+        isBestSeller: updatedItem.isBestSeller,
         // system do not allow user to update inventory item id in selling item
       },
     });
@@ -131,6 +136,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       await prisma.item.updateMany({
         where: {
           inventoryItemId: existingItem.inventoryItemId,
+          categoryId: {
+            not: websiteItemCategoryId
+          }
         },
         data: updatedData,
       });

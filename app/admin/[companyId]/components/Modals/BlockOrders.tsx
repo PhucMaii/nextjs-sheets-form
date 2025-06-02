@@ -9,6 +9,7 @@ import OrderDetails from './OrderDetails';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import axios from 'axios';
 import { USER_ROLE } from '@/app/utils/enum';
+import { useParams } from 'next/navigation';
 
 interface IProps extends ModalProps {
   orders: Order[];
@@ -27,6 +28,8 @@ export default function BlockOrders({
   endDate,
   role,
 }: IProps) {
+  const { companyId }: any = useParams();
+  
   const [isLoading, setIsLoading] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
@@ -42,6 +45,7 @@ export default function BlockOrders({
           endDate,
           userId: orders[0].userId,
           role,
+          companyId: Number(companyId),
         },
       );
 

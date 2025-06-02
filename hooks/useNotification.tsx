@@ -33,7 +33,7 @@ const useNotification = (anchorOrigin: any = null) => {
     <NotificationPopup
       notification={notification}
       onClose={closeNotification}
-      anchorOrigin={anchorOrigin || { vertical: 'bottom', horizontal: 'left' }}
+      anchorOrigin={anchorOrigin || { vertical: 'top', horizontal: 'center' }}
     />
   );
 

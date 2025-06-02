@@ -1,0 +1,272 @@
+import { stripe } from '@/app/lib/stripe';
+import { PrismaClient } from '@prisma/client';
+import { NextApiRequest, NextApiResponse } from 'next';
+// import { createOrder } from '../admin/orders/POST';
+import { convertCartItemsToOrderItems } from '../public/place-order';
+// import { getTodayDate } from '../utils/date';
+import { withGuestSessionGuard } from '../utils/withGuestSessionGuard';
+import { calculateShippingFee } from '@/app/utils/shipping';
+import { verifyDeliveryAddress } from '../utils/address';
+import { generateLatLng } from '../admin/[companyId]/clients/POST';
+import { gstRate, pstRate } from '@/app/lib/constant';
+// import { ORDER_STATUS } from '@/app/utils/enum';
+// import { generateCostAndProfit } from '../admin/orderedItems/single';
+
+export type CheckoutClientData = {
+  guestSessionId: string;
+  guestSessionSignature: string;
+  email: string;
+  name: string;
+  contactName: string;
+  contactNumber: string;
+  deliveryAddress: string;
+  note?: string;
+};
+
+interface IBody {
+  cartId: number;
+  deliveryDate: string;
+  clientData: CheckoutClientData;
+  note?: string;
+}
+
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  try {
+    if (req.method !== 'POST') {
+      return res.status(404).json({ error: 'Your method is not supported' });
+    }
+
+    const prisma = new PrismaClient();
+
+    // Only unregistered user are forced to checkout with provided information
+
+    const { cartId, deliveryDate, clientData, note }: IBody = req.body;
+
+    const cart: any = await prisma.cart.findUnique({
+      where: {
+        id: cartId,
+      },
+      include: {
+        items: {
+          include: {
+            item: {
+              include: {
+                inventoryItem: true,
+                inventoryUnit: true,
+              },
+            },
+          },
+        },
+        user: true,
+      },
+    });
+
+    if (!cart || !cart.items) {
+      return res.status(404).json({ error: 'Cart not found' });
+    }
+
+    if (cart.items.length === 0) {
+      return res.status(400).json({ error: 'Cart is empty' });
+    }
+
+    // If cart already had user -> place an order for user and send them to order successful page
+    // if (cart?.user) {
+    //   // Check if user already order for provided date
+    //   const existingOrder = await prisma.orders.findFirst({
+    //     where: {
+    //       userId: cart?.user?.id,
+    //       deliveryDate: deliveryDate,
+    //       status: {
+    //        not: ORDER_STATUS.VOID
+    //       }
+    //     },
+    //   });
+
+    //   if (existingOrder) {
+    //     return res.status(400).json({
+    //       error: 'You already have an order for ' + deliveryDate,
+    //     });
+    //   }
+
+    //   const formattedItems = convertCartItemsToOrderItems(cart.items);
+
+    //   // const { date, time } = getTodayDate();
+    //   const newOrder = createOrder(
+    //     cart.user,
+    //     formattedItems,
+    //     deliveryDate,
+    //     `Guest - ${cart.user.clientName}`,
+    //     cart?.note || '',
+    //   );
+
+    //   return res.status(200).json({
+    //     data: newOrder,
+    //     message: 'Place an order successfully',
+    //   });
+    // }
+
+    const addressLatAndLng = await generateLatLng(clientData.deliveryAddress);
+    const isAddressValid = verifyDeliveryAddress(
+      addressLatAndLng.latitude,
+      addressLatAndLng.longitude,
+    );
+    if (!isAddressValid) {
+      return res.status(404).json({
+        error: 'Delivery address is not valid',
+      });
+    }
+
+    // Check if user already order for provided date - NOT NOW because user can only place order when they are a pending userx
+    // const existingOrder = await prisma.orders.findFirst({
+    //   where: {
+    //     guestSessionId: clientData?.guestSessionId,
+    //     deliveryDate: deliveryDate,
+    //   },
+    // });
+
+    // if (existingOrder) {
+    //   return res.status(400).json({
+    //     error: 'You already ordered for ' + deliveryDate,
+    //   });
+    // }
+
+    // const distanceFromFactory = calculateDistance(
+    //   homeLat,
+    //   homeLng,
+    //   addressLatAndLng.latitude,
+    //   addressLatAndLng.longitude,
+    // );
+
+    const cartItems = convertCartItemsToOrderItems(cart.items);
+    // const totalProfit = calculateCartProfit(cartItems);
+    const totalRevenue = cartItems.reduce((acc: number, item: any) => {
+      return acc + item.price * item.quantity;
+    }, 0);
+
+    const shippingFee = calculateShippingFee(
+      isAddressValid.distance,
+      totalRevenue,
+    );
+    
+    const totalGST = cartItems.reduce((acc: number, item: any) => {
+      if (item?.inventoryItem?.hasGST) {
+        return acc + (item.price * item.quantity) * gstRate;
+      }
+
+      return acc;
+    }, 0) + (shippingFee * gstRate);
+
+
+    const totalPST = cartItems.reduce((acc: number, item: any) => {
+      if (item?.inventoryItem?.hasPST) {
+        return acc + (item.price * item.quantity) * pstRate;
+      }
+
+      return acc;
+    }, 0) + (shippingFee * pstRate);
+
+    // console.log(shippingFee, 'shipping fee');
+
+    const stripeSession: any = (await stripe.checkout.sessions.create({
+      success_url: `${process.env.NEXTAUTH_URL}/successful?type=payment`,
+      cancel_url: `${process.env.NEXTAUTH_URL}/cart`,
+      mode: 'payment',
+      billing_address_collection: 'auto',
+      customer_email: clientData.email,
+      currency: 'cad',
+      payment_intent_data: {
+        metadata: {
+          cartId: String(cartId),
+          deliveryDate: String(deliveryDate),
+          guestSessionId: String(cart?.guestSessionId) || '',
+          clientData: JSON.stringify(clientData),
+        },
+      },
+      line_items: [
+        ...cart.items.map((item: any) => ({
+          price_data: {
+            currency: 'cad',
+            product_data: {
+              name: item.item?.name || item.item?.inventoryItem?.name,
+              // Stripe will get error if empty string
+              ...(item?.option?.name && {
+                description: item?.option?.name,
+              }),
+              
+            },
+            unit_amount: Math.round(
+              (Number(item?.option?.price || item.item?.price)) * 100,
+            ),
+          },
+          quantity: item.quantity,
+        })),
+        // Add shipping fee as an additional line item
+        // If GST then add GST, if not then remove
+        {
+          price_data: {
+            currency: 'cad',
+            product_data: {
+              name: 'Shipping Fee',
+            },
+            unit_amount: Math.round(Number(shippingFee.toFixed(2)) * 100),
+          },
+          quantity: 1,
+        },
+        ...(totalGST > 0 ? [{
+          price_data: {
+            currency: 'cad',
+            product_data: { name: 'GST' },
+            unit_amount: Math.round(Number(totalGST) * 100),
+          },
+          quantity: 1,
+        }] : []),
+        ...(totalPST > 0 ? [{
+          price_data: {
+            currency: 'cad',
+            product_data: {
+              name: 'PST',  
+            },
+            unit_amount: Math.round(Number(totalPST) * 100),
+          },
+          quantity: 1,
+        }] : []),
+      ],
+      metadata: {
+        cartId: String(cartId),
+        deliveryDate: String(deliveryDate),
+        guestSessionId: String(cart?.guestSessionId) || '',
+        clientData: JSON.stringify({
+          ...clientData,
+          deliveryAddress: addressLatAndLng.fullName,
+        }),
+        shippingFee: String(shippingFee.toFixed(2)),
+        note: note || '',
+      },
+    })) as any;
+
+    return res.status(200).json({
+      url: stripeSession.url,
+      message: 'Get Stripe Session Successfully',
+    });
+  } catch (error: any) {
+    console.log('Internal Server Error: ', error);
+    return res.status(500).json({ error: 'Something went wrong' + error });
+  }
+};
+
+export default withGuestSessionGuard(handler);
+
+// const calculateCartProfit = async (items: any[]) => {
+//   // const orderItems = convertCartItemsToOrderItems(items);
+//   // console.log({orderItems, items}, 'order items');
+
+//   let profit = 0;
+//   for (const item of items) {
+//     // const cost = await generateCostAndProfit(item.id);
+//     profit += (item.price - item.inventoryUnit.unitPrice) * item.quantity;
+//   }
+
+//   console.log(profit);
+
+//   return profit;
+// };

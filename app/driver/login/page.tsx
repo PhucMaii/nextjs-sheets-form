@@ -167,7 +167,7 @@ export default function LoginPage() {
             </form>
           </Paper>
           <Box display="flex" justifyContent="flex-start">
-            <Link href="/auth/login">Sign in here as a client</Link>
+            <Link href="/account/login">Sign in here as a client</Link>
           </Box>
         </Box>
       </FadeIn>

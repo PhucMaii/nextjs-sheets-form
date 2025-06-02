@@ -20,9 +20,15 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
+    if (!existingUser) {
+      return res.status(404).json({
+        error: 'User Not Found',
+      });
+    }
+
     const items = await prisma.item.findMany({
       where: {
-        categoryId: existingUser?.categoryId,
+        categoryId: existingUser.categoryId,
       },
       include: {
         inventoryItem: {

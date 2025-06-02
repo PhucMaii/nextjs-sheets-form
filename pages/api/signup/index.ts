@@ -1,47 +1,101 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { PrismaClient } from '@prisma/client';
-import { hash } from 'bcryptjs';
+import emailHandler, { generateWelcomeEmail } from '../utils/email';
+import { signUpRequest } from '@/config/email';
+import { verifyDeliveryAddress } from '../utils/address';
+import { generateLatLng } from '../admin/[companyId]/clients/POST';
+import { createGuest } from '../public/create-guest';
+import { USER_CATEGORIZED } from '@/app/utils/enum';
 
-type UserForm = {
-  sheetName: string;
-  clientId: string;
-  password: string;
-};
+interface IBody {
+  name: string;
+  email: string;
+  contactNumber: string;
+  contactName: string;
+  deliveryAddress: string;
+  message: string;
+  guestSessionId: string;
+  guestSessionSignature: string;
+}
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  const prisma = new PrismaClient();
   if (req.method !== 'POST') {
     return res.status(500).json({ error: 'Only POST method allowed' });
   }
   try {
-    const userData: UserForm = req.body;
-    const existingUser = await prisma.user.findUnique({
-      where: {
-        clientId: userData.clientId,
-      },
-    });
+    const {
+      name,
+      email,
+      contactName,
+      contactNumber,
+      guestSessionId,
+      guestSessionSignature,
+      deliveryAddress,
+      message,
+    }: IBody = req.body;
+    console.log(req.body);
 
-    if (existingUser) {
-      return res.status(400).json({ error: 'Client ID Already Existed' });
+    // Verify address
+    const address = await generateLatLng(deliveryAddress);
+
+    if (!address.latitude || !address.longitude) {
+      return res.status(400).json({ error: 'Delivery Address is not valid' });
+    }
+    const isAddressValid = verifyDeliveryAddress(
+      address.latitude,
+      address.longitude,
+    );
+
+    if (!isAddressValid) {
+      return res
+        .status(400)
+        .json({ error: 'Sorry, we currently do not deliver to your area' });
     }
 
-    const password = await hash(userData.password, 12);
-    const newUser = await prisma.user.create({
-      data: {
-        sheetName: userData.sheetName,
-        clientId: userData.clientId,
-        password,
-      } as any,
+    // Create guest
+    const newGuest = await createGuest(1, {
+      clientName: name,
+      email,
+      guestSessionId,
+      guestSessionSignature: guestSessionSignature,
+      contactNumber,
+      contactName,
+      deliveryAddress,
+      type: USER_CATEGORIZED.PENDING,
     });
-    return res.status(201).json({
-      data: newUser,
-      message: `Register Successfully, Let's Log Back In`,
+
+    // Send Email to Admin
+    const template = signUpRequest({
+      name,
+      email,
+      contactNumber,
+      deliveryAddress,
+      message,
     });
-  } catch (error) {
+    await emailHandler(
+      'info@supremesprout.com',
+      'New Client Sign Up Request',
+      'New Client Sign Up Request',
+      template,
+    );
+
+    // Send Welcome Email To Client
+    const welcomeTemplate = generateWelcomeEmail(name);
+    await emailHandler(
+      email,
+      'Welcome to Supreme Sprouts',
+      'Supreme Sprouts Ltd',
+      welcomeTemplate,
+    );
+
+    return res.status(200).json({
+      data: newGuest,
+      message: 'Your Request has been sent successfully',
+    });
+  } catch (error: any) {
     console.log(error);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return res.status(500).json({ error: error.message });
   }
 }

@@ -6,7 +6,7 @@ import {
   FormLabel,
   IconButton,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useMultipleBoolean } from '../useMultipleBoolean';
 import AddUnit from '@/app/admin/[companyId]/components/Modals/add/AddUnit';
 import EditUnit from '@/app/admin/[companyId]/components/Modals/edit/EditUnit';
@@ -41,7 +41,9 @@ const useEditUnit = (
   }, [initialUnits]);
 
   useEffect(() => {
-    setSelectedUnit(initialSelectedUnit);
+    if (initialSelectedUnit !== selectedUnit) {
+      setSelectedUnit(initialSelectedUnit);
+    }
   }, [initialSelectedUnit]);
 
   const addUnit = (newUnit: IInventoryUnit) => {
@@ -165,45 +167,51 @@ const useEditUnit = (
     />
   );
 
-  const EditUnitModal = (
-    <EditUnit
-      open={editUnit.open}
-      onClose={() =>
-        setEditUnit((prevEditUnit: any) => ({ ...prevEditUnit, open: false }))
-      }
-      unit={editUnit.unit}
-      updateUnit={(updatedUnit: any) =>
-        updateUnit(updatedUnit, editUnit.unitIndex)
-      }
-    />
+  const EditUnitModal = useMemo(
+    () => (
+      <EditUnit
+        open={editUnit.open}
+        onClose={() =>
+          setEditUnit((prevEditUnit: any) => ({ ...prevEditUnit, open: false }))
+        }
+        unit={editUnit.unit}
+        updateUnit={(updatedUnit: any) =>
+          updateUnit(updatedUnit, editUnit.unitIndex)
+        }
+      />
+    ),
+    [editUnit],
   );
 
-  const UnitDisplay = (
-    <FormControl>
-      <Box display="flex" alignItems="center" gap={1}>
-        <FormLabel id="unit">Units</FormLabel>
-        <IconButton
-          onClick={() => onChangeAddUnitBoolean('open', true)}
-          disabled={units.length === 0 || role === USER_ROLE.DRIVER}
-        >
-          <AddIcon />
-        </IconButton>
-      </Box>
+  const UnitDisplay = useMemo(
+    () => (
+      <FormControl>
+        <Box display="flex" alignItems="center" gap={1}>
+          <FormLabel id="unit">Units</FormLabel>
+          <IconButton
+            onClick={() => onChangeAddUnitBoolean('open', true)}
+            disabled={units.length === 0 || role === USER_ROLE.DRIVER}
+          >
+            <AddIcon />
+          </IconButton>
+        </Box>
 
-      {units.length === 0 ? (
-        <ErrorComponent errorText="Please select an inventory item" />
-      ) : (
-        <UnitRadio
-          units={units}
-          onChange={(e: any) => setSelectedUnit(JSON.parse(e.target.value))}
-          value={JSON.stringify(selectedUnit)}
-          removeUnit={removeUnit}
-          setEditUnit={setEditUnit}
-          isShowPrice={isShowPrice}
-          role={role}
-        />
-      )}
-    </FormControl>
+        {units.length === 0 ? (
+          <ErrorComponent errorText="Please select an inventory item" />
+        ) : (
+          <UnitRadio
+            units={units}
+            onChange={(e: any) => setSelectedUnit(JSON.parse(e.target.value))}
+            value={JSON.stringify(selectedUnit)}
+            removeUnit={removeUnit}
+            setEditUnit={setEditUnit}
+            isShowPrice={isShowPrice}
+            role={role}
+          />
+        )}
+      </FormControl>
+    ),
+    [units, selectedUnit],
   );
 
   return {

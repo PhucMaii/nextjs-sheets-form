@@ -7,7 +7,9 @@ import { authOptions } from '@/pages/api/auth/[...nextauth]';
 interface IBody {
   fileKeyFront: string;
   fileKeyBack: string;
-  month: string;
+  month?: string;
+  startDate?: string;
+  endDate?: string;
   year: string;
   chequeNumber: string;
   amount: number;
@@ -24,6 +26,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       fileKeyFront,
       fileKeyBack,
       month,
+      startDate,
+      endDate,
       year,
       chequeNumber,
       amount,
@@ -51,7 +55,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       data: {
         fileKeyFront,
         fileKeyBack,
-        month,
+        month: month || null,
+        startDate: startDate || null,
+        endDate: endDate || null,
         year,
         chequeNumber,
         amount,

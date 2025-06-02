@@ -2,12 +2,8 @@ import {
   AlertColor,
   Box,
   Divider,
-  FormControl,
   Grid,
-  InputLabel,
-  MenuItem,
   Modal,
-  Select,
   TextField,
   Typography,
 } from '@mui/material';
@@ -16,17 +12,17 @@ import { ModalProps } from './type';
 import { BoxModal } from './styled';
 import ModalHead from '@/app/lib/ModalHead';
 import FileUpload from '../FileUpload';
-import { months } from '@/app/lib/constant';
 import axios from 'axios';
 import { getAdminApiUrl } from '@/app/utils/enum';
 import { UserType } from '@/app/utils/type';
 import DisplayFile from './DisplayFile';
 import { useParams } from 'next/navigation';
+import dayjs from 'dayjs';
+import DateRange from './DateRangeModal';
 
 interface IProps extends ModalProps {
   showNotification: (type: AlertColor, message: string) => void;
   year: string;
-  month: string;
   client: UserType | null;
 }
 
@@ -35,10 +31,12 @@ export default function UploadChequeModal({
   onClose,
   showNotification,
   year,
-  month,
   client,
 }: IProps) {
   const { companyId }: any = useParams();
+  const [isSelectRangeOpen, setIsSelectRangeOpen] = useState<boolean>(false);
+  // const [updatedDateRange, setUpdatedDateRange] = useState<any>([]);
+  // const [newDateRange, setNewDateRange] = useState<any>([]);
 
   const [cheque, setCheque] = useState<{ front: string; back: string }>({
     front: '',
@@ -47,7 +45,8 @@ export default function UploadChequeModal({
   const [chequeData, setChequeData] = useState<any>({
     chequeNumber: '',
     amount: 0,
-    month,
+    startDate: dayjs(new Date()).format('MM/DD/YYYY'),
+    endDate: dayjs(new Date()).format('MM/DD/YYYY'),
     year,
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -56,7 +55,8 @@ export default function UploadChequeModal({
     setChequeData({
       chequeNumber: '',
       amount: 0,
-      month,
+      startDate: dayjs(new Date()).format('MM/DD/YYYY'),
+      endDate: dayjs(new Date()).format('MM/DD/YYYY'),
       year,
     });
 
@@ -65,7 +65,7 @@ export default function UploadChequeModal({
       back: '',
     });
   }, [open]);
-
+  
   const handleUpload = async () => {
     console.log(client, 'client');
     if (!client) {
@@ -75,7 +75,8 @@ export default function UploadChequeModal({
     if (
       !cheque.front ||
       chequeData.amount === 0 ||
-      !chequeData.month ||
+      !chequeData.startDate ||
+      !chequeData.endDate ||
       !chequeData.year
     ) {
       showNotification('error', 'Please fill all required the fields');
@@ -87,6 +88,8 @@ export default function UploadChequeModal({
       const response = await axios.post(getAdminApiUrl(companyId, '/cheque'), {
         ...chequeData,
         userId: client.id,
+        startDate: chequeData.startDate ? dayjs(chequeData.startDate).format('MM/DD/YYYY') : null,
+        endDate: chequeData.endDate ? dayjs(chequeData.endDate).format('MM/DD/YYYY') : null,
         fileKeyFront: cheque.front,
         fileKeyBack: cheque.back,
       });
@@ -97,6 +100,7 @@ export default function UploadChequeModal({
       }
 
       showNotification('success', response.data.message);
+      onClose();
     } catch (error: any) {
       console.log('There was an error: ', error);
       showNotification('error', error?.response?.data?.error || error);
@@ -106,6 +110,19 @@ export default function UploadChequeModal({
   };
 
   return (
+    <>
+    <DateRange 
+    open={isSelectRangeOpen}
+    onClose={() => setIsSelectRangeOpen(false)}
+    dateRange={chequeData.startDate && chequeData.endDate ? [new Date(chequeData.startDate), new Date(chequeData.endDate)] : []}
+    setDateRange={(dateRange: any) => {
+      setChequeData({
+        ...chequeData,
+        startDate: dateRange[0],
+        endDate: dateRange[1],
+      });
+    }}
+    />
     <Modal open={open} onClose={onClose}>
       <BoxModal maxHeight="80vh" overflow="auto">
         <ModalHead
@@ -123,8 +140,8 @@ export default function UploadChequeModal({
           {cheque?.front && <DisplayFile fileKey={cheque.front} isCheque />}
           <FileUpload
             showNotification={showNotification}
-            fileName={`${month}-${year}-${client?.clientId}_front`}
-            uploadLocation={`cheques/${year}/${month}`}
+            fileName={`${dayjs(chequeData.startDate).format('MM/DD/YYYY')}-${year}-${client?.clientId}_front`}
+            uploadLocation={`cheques/${year}/${dayjs(chequeData.startDate).format('MM/DD/YYYY')}`}
             onUploadImageUI={(fileKey: string) => {
               setCheque({
                 ...cheque,
@@ -138,8 +155,8 @@ export default function UploadChequeModal({
           {cheque?.back && <DisplayFile fileKey={cheque.back} isCheque />}
           <FileUpload
             showNotification={showNotification}
-            fileName={`${month}-${year}-${client?.clientId}_back`}
-            uploadLocation={`cheques/${year}/${month}`}
+            fileName={`${dayjs(chequeData.endDate).format('MM/DD/YYYY')}-${year}-${client?.clientId}_back`}
+            uploadLocation={`cheques/${year}/${dayjs(chequeData.endDate).format('MM/DD/YYYY')}`}
             onUploadImageUI={(fileKey: string) => {
               setCheque({
                 ...cheque,
@@ -187,6 +204,30 @@ export default function UploadChequeModal({
           </Typography>
           <Grid container spacing={2} alignItems="center">
             <Grid item xs={6}>
+              <TextField
+                fullWidth
+                label="From"
+                value={
+                  chequeData.startDate
+                    ? new Date(chequeData.startDate).toDateString()
+                    : ''
+                }
+                onClick={() => setIsSelectRangeOpen(true)}
+              />
+            </Grid>
+            <Grid item xs={6} textAlign="right">
+              <TextField
+                fullWidth
+                label="To"
+                value={
+                  chequeData.endDate
+                    ? new Date(chequeData.endDate).toDateString()
+                    : ''
+                }
+                onClick={() => setIsSelectRangeOpen(true)}
+              />
+            </Grid>
+            {/* <Grid item xs={6}>
               <FormControl variant="outlined" fullWidth>
                 <InputLabel id="month-label">Month</InputLabel>
                 <Select
@@ -224,10 +265,11 @@ export default function UploadChequeModal({
                   });
                 }}
               />
-            </Grid>
+            </Grid> */}
           </Grid>
         </Box>
       </BoxModal>
     </Modal>
+    </>
   );
 }

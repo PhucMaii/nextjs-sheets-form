@@ -2,3 +2,29 @@
   display: block !important;
   flex-direction: column !important;
 }
+
+.fc-event {
+  border: none !important;
+}
+
+.fc-h-event {
+  background-color: transparent !important;
+  border-radius: 4px !important;
+  color: black !important;
+  padding: 4px !important;
+  font-weight: 600 !important;
+  border: none !important;
+  /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important; */
+  /* transition: all 0.3s ease !important; */
+  cursor: pointer !important;
+}
+
+.fc-event-main {
+  color: black !important;
+}
+
+.fc-event-main-frame {
+  background-color: #bfdbfe !important;
+  border: none !important;
+
+}

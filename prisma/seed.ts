@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-// import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 // const checkIsKorean = (text: string) => {
 //   // const koreanRange = /^[\uAC00-\uD7AF]+$/;
@@ -121,167 +120,11 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-  // const today = getTodayDate();
-  // await prisma.quote.updateMany({
+  // await prisma.scheduledShift.updateMany({
   //   data: {
-  //     companyId: 1,
-  //   }
+  //     status: ScheduledShiftStatus.PUBLISHED,
+  //   },
   // });
-
-  // await prisma.quoteItem.updateMany({
-  //   data: {
-  //     companyId: 1,
-  //   }
-  // });
-  
-  
-  // // Update all models with companyId to have companyId = 1
-  // const BATCH_SIZE = 99999; // Process 1000 records at a time
-
-  // // Process orderedItems in batches
-  // let processed = 0;
-  // let hasMore = true;
-
-  // while (hasMore) {
-  //   const batch = await prisma.orderedItems.findMany({
-  //     take: BATCH_SIZE,
-  //     skip: processed,
-  //     where: {
-  //       companyId: null,
-  //     },
-  //   });
-
-  //   if (batch.length === 0) {
-  //     hasMore = false;
-  //     continue;
-  //   }
-
-  //   const ids = batch.map((item) => item.id);
-  //   await prisma.orderedItems.updateMany({
-  //     where: {
-  //       id: {
-  //         in: ids,
-  //       },
-  //     },
-  //     data: { companyId: 1 },
-  //   });
-
-  //   processed += batch.length;
-  //   console.log(`Processed ${processed} records for orderedItems`);
-  // }
-
-  // // Update other models directly
-
-  // await prisma.user.updateMany({
-  //   data: { companyId: 1 },
-  // });
-
-  // await prisma.category.updateMany({
-  //   data: { companyId: 1 },
-  // });
-
-  
-
-  // await prisma.item.updateMany({
-  //   data: { companyId: 1 },
-  // });
-
-  // await prisma.orders.updateMany({
-  //   data: { companyId: 1 },
-  // });
-
-  // await prisma.scheduleOrders.updateMany({
-  //   data: { companyId: 1 },
-  // });
-
-  // await prisma.route.updateMany({
-  //   data: { companyId: 1 },
-  // });
-
-  // await prisma.announcement.updateMany({
-  //   data: { companyId: 1 },
-  // });
-
-  // await prisma.codBoard.updateMany({
-  //   data: { companyId: 1 },
-  // });
-
-  // await prisma.paymentMethod.updateMany({
-  //   data: { companyId: 1 },
-  // });
-
-  // await prisma.fixedTransaction.updateMany({
-  //   data: { companyId: 1 },
-  // });
-
-  // await prisma.expense.updateMany({
-  //   data: { companyId: 1 },
-  // });
-
-  // await prisma.vendor.updateMany({
-  //   data: { companyId: 1 },
-  // });
-
-  // await prisma.inventoryItem.updateMany({
-  //   data: { companyId: 1 },
-  // });
-
-  // await prisma.itemType.updateMany({
-  //   data: { companyId: 1 },
-  // });
-
-  // await prisma.vendorItem.updateMany({
-  //   data: { companyId: 1 },
-  // });
-
-  // await prisma.fifo.updateMany({
-  //   data: { companyId: 1 },
-  // });
-
-  // await prisma.inventoryUnit.updateMany({
-  //   data: { companyId: 1 },
-  // });
-
-  // await prisma.action.updateMany({
-  //   data: { companyId: 1 },
-  // });
-
-  // await prisma.cheque.updateMany({
-  //   data: { companyId: 1 },
-  // });
-
-  // await prisma.clientStatement.updateMany({
-  //   data: { companyId: 1 },
-  // });
-
-  // await prisma.promotion.updateMany({
-  //   data: { companyId: 1 },
-  // });
-
-  // await prisma.shiftSession.updateMany({
-  //   data: { companyId: 1 },
-  // });
-
-  // await prisma.pO.updateMany({
-  //   data: { companyId: 1 },
-  // });
-
-  // await prisma.lossReport.updateMany({
-  //   data: { companyId: 1 },
-  // });
-
-  // await prisma.pOItem.updateMany({
-  //   data: { companyId: 1 },
-  // });
-
-  // await prisma.dayRange.updateMany({
-  //   data: { companyId: 1 },
-  // });
-
-  // await prisma.route.updateMany({
-  //   data: { companyId: 1 },
-  // });
-
 }
 
 // async function main() {
@@ -302,7 +145,6 @@ async function main() {
 
 // }
 
-
 main()
   .then(() => prisma.$disconnect())
   .catch(async (error) => {
@@ -310,38 +152,3 @@ main()
     await prisma.$disconnect();
     // process.exit(1);
   });
-
-//{
-//   orderId: 34722,
-//   customAmount: {
-//     name: 'MEDIUM FIRM TOFU',
-//     price: 30,
-//     quantity: 2,
-//     units: [ [Object] ],
-//     inventoryUnit: {
-//       id: 120,
-//       vendorItemId: 96,
-//       unit: 'cases',
-//       unitPrice: 25,
-//       ratio: 1,
-//       createdAt: '18:06:10 2025-01-05',
-//       createdBy: 'Admin - Bao Bao'
-//     },
-//     isCustomAmount: true,
-//     inventoryItem: {
-//       id: 53,
-//       name: 'MEDIUM FIRM TOFU',
-//       hasPST: null,
-//       hasGST: null,
-//       createdAt: '09:58:44 2024-11-09',
-//       createdBy: 'Admin - Bao Bao',
-//       fifo: [Array],
-//       vendorItem: [Array],
-//       totalValue: 142.2,
-//       quantity: 6,
-//       stockStatus: 'Low Stock'
-//     },
-//     inventoryItemId: 53,
-//     inventoryUnitId: 120
-//   }
-// }

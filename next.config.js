@@ -4,7 +4,7 @@ const runtimeCaching = require('next-pwa/cache');
 
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true, // Improve performance,
+  swcMinify: true, // Improve performance
   experimental: {
     serverActions: {
       bodySizeLimit: '5mb',

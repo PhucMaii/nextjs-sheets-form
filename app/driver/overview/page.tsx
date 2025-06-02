@@ -34,13 +34,13 @@ export default function OverviewPage() {
   return (
     <Sidebar>
       {/* <LoadingModal open={isValidating} /> */}
-      <Typography variant="h5" fontWeight="bold">
+      <Typography variant="h6" fontWeight="bold">
         Welcome back, {orders?.data.employee.name || ''}
       </Typography>
-      <Typography variant="subtitle1">We wish you have a good day</Typography>
-      <Grid container spacing={2} my={2}>
+      <Typography variant="body2">We wish you have a good day!</Typography>
+      <Grid container spacing={2} my={1}>
         <Grid item xs={12}>
-          <Typography variant="h6">Today's overview</Typography>
+          <Typography variant="subtitle1">Today&apos;s overview</Typography>
         </Grid>
         <Grid item xs={12} md={6}>
           <OverviewCard
@@ -70,7 +70,7 @@ export default function OverviewPage() {
         />
       ) : orders?.data.deliveryOrders.length > 0 ? (
         <>
-          <Typography variant="h6" fontWeight="bold">
+          <Typography variant="subtitle1">
             Manifest
           </Typography>
           {orders?.data.manifest && (

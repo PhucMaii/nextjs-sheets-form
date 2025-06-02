@@ -60,7 +60,7 @@ export default function EditItemAvailability({
       const response = await axios.put(
         getAdminApiUrl(companyId, '/items/availability'),
         {
-          itemId: item.id,
+          item,
           availability: !item.availability,
         },
       );
@@ -129,7 +129,7 @@ export default function EditItemAvailability({
                 Update Current Category Only
               </Typography>
               <Typography variant="body2">
-                This option only affect item in current category only and won't
+                This option only affect item in current category only and won&aposl;t
                 affect other item with same name in other category.
               </Typography>
             </ShadowSectionStyled>

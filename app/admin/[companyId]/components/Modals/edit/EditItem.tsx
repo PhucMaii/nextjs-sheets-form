@@ -26,6 +26,9 @@ import { TrashIcon } from 'lucide-react';
 import DeleteModal from '../delete/DeleteModal';
 import AddOption from '../add/AddOption';
 import OptionsTable from '../../Tables/OptionsTable';
+import useImageGallery from '@/hooks/useImageGallery';
+import FileUpload from '../../FileUpload';
+import { websiteItemCategory } from '@/app/lib/constant';
 import { useParams } from 'next/navigation';
 
 interface IProps {
@@ -34,6 +37,7 @@ interface IProps {
   targetItem: IItem;
   showNotification: (type: AlertColor, message: string) => void;
   includedButton?: boolean;
+  isWebsiteItem?: boolean;
 }
 
 export enum UPDATE_OPTION {
@@ -41,7 +45,7 @@ export enum UPDATE_OPTION {
   ALL_ITEMS_SAME_NAME = 'all items same name',
 }
 
-const EditItem = ({ open, onClose, targetItem, showNotification }: IProps) => {
+const EditItem = ({ open, onClose, targetItem, showNotification, isWebsiteItem = false }: IProps) => {
   const { companyId }: any = useParams();
   const [isOpenDeleteModal, setIsOpenDeleteModal] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
@@ -50,6 +54,12 @@ const EditItem = ({ open, onClose, targetItem, showNotification }: IProps) => {
   const [updatedItem, setUpdatedItem] = useState<IItem>(targetItem);
   const [updateOption, setUpdateOption] = useState<UPDATE_OPTION>(
     UPDATE_OPTION.CURRENT_CATEGORY,
+  );
+
+  const { selectedImage, renderImageGallery } = useImageGallery(
+    'products',
+    targetItem?.image,
+    '100%',
   );
 
   useEffect(() => {
@@ -84,6 +94,7 @@ const EditItem = ({ open, onClose, targetItem, showNotification }: IProps) => {
   const updateItem = async () => {
     const newUpdatedItem = {
       ...updatedItem,
+      image: updatedItem?.image || selectedImage || null,
       name: updatedItem.name.toUpperCase(),
     };
 
@@ -98,7 +109,10 @@ const EditItem = ({ open, onClose, targetItem, showNotification }: IProps) => {
     setIsUpdating(true);
     try {
       const response = await axios.put(getAdminApiUrl(companyId, '/items'), {
-        updatedItem: newUpdatedItem,
+        updatedItem: {
+          ...newUpdatedItem,
+          image: selectedImage || newUpdatedItem?.image || null,
+        },
         updateOption,
         updatedFields: updatedField,
       });
@@ -168,7 +182,7 @@ const EditItem = ({ open, onClose, targetItem, showNotification }: IProps) => {
             buttonProps={{ loading: isUpdating }}
             onClose={onClose}
           />
-          <RadioGroup
+          {!isWebsiteItem && <RadioGroup
             row
             value={updateOption}
             onChange={(e) => setUpdateOption(e.target.value as UPDATE_OPTION)}
@@ -183,9 +197,25 @@ const EditItem = ({ open, onClose, targetItem, showNotification }: IProps) => {
               control={<Radio />}
               label="Same inventory item"
             />
-          </RadioGroup>
+          </RadioGroup>}
           <Divider sx={{ my: 2 }}>Price ($)</Divider>
           <Grid container rowGap={2} alignItems="center">
+            <Grid item xs={12} textAlign="right">
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={updatedItem.isBestSeller}
+                    onChange={(e) =>
+                      setUpdatedItem({
+                        ...updatedItem,
+                        isBestSeller: e.target.checked,
+                      })
+                    }
+                  />
+                }
+                label="Best Seller"
+              />
+            </Grid>
             {updatedItem?.options?.length === 0 ? (
               <>
                 <Grid item textAlign="right" xs={12}>
@@ -349,6 +379,28 @@ const EditItem = ({ open, onClose, targetItem, showNotification }: IProps) => {
                     }
                   />
                 </Box>
+              </Grid>
+            )}
+
+            {targetItem.categoryId === websiteItemCategory && (
+              <Grid item xs={12}>
+                <Typography>Select Image</Typography>
+                {renderImageGallery()}
+                <Divider>Or</Divider>
+
+                <Typography>Upload Image</Typography>
+                <FileUpload
+                  // item={promptedItem}
+                  showNotification={showNotification}
+                  onUploadImageUI={(fileKey: string) =>
+                    setUpdatedItem({
+                      ...updatedItem,
+                      image: fileKey,
+                    })
+                  }
+                  fileName={updatedItem.name + Date.now()}
+                  uploadLocation={`products/${updatedItem?.name}/`}
+                />
               </Grid>
             )}
 

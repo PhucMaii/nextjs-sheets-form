@@ -68,7 +68,7 @@ export default function LoginPage() {
         setIsLoading(false);
         setTimeout(() => {
           // if (userData.role === 'client') {
-            router.push('/');
+            router.push('/user/overview');
           // }
         }, 500);
       } catch (error: any) {

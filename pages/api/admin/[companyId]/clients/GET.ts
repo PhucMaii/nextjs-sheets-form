@@ -4,6 +4,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 interface QueryTypes {
   dayRoute?: string;
+  role?: USER_ROLE;
   companyId?: string;
 }
 
@@ -11,7 +12,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { dayRoute, companyId }: QueryTypes = req.query;
+    const { dayRoute, companyId, role }: QueryTypes = req.query;
 
     if (!companyId) {
       return res.status(404).json({
@@ -22,7 +23,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     // Get all clients
     const clientList = await prisma.user.findMany({
       where: {
-        role: USER_ROLE.CLIENT,
+        role: role || USER_ROLE.CLIENT,
         companyId: Number(companyId),
       },
       include: {

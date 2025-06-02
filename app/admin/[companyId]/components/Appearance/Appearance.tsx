@@ -781,6 +781,7 @@ export default function Appearance({ types, showNotification }: IProps) {
                         if (item?.name === 'Empty') {
                           return (
                             <SortableEmptyItem
+                              key={item.id}
                               item={item}
                               onClick={() => {
                                 setMoveItemProps({

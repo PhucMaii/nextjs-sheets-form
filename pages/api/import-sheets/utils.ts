@@ -246,7 +246,7 @@ export const overrideOrder = async (
 export const getCreatedBy = async (
   req: NextApiRequest,
   res: NextApiResponse,
-  createdByRole: USER_ROLE,
+  createdByRole: USER_ROLE | null = null,
 ) => {
   const prisma = new PrismaClient();
   const session: any = await getServerSession(req, res, authOptions);
@@ -265,9 +265,9 @@ export const getCreatedBy = async (
     });
 
     const capitalizeRole =
-      createdByRole === USER_ROLE.SUPER_ADMIN
+    driverCreate.role === USER_ROLE.SUPER_ADMIN
         ? 'S Admin'
-        : createdByRole.charAt(0).toUpperCase() + createdByRole.slice(1);
+        : driverCreate.role.charAt(0).toUpperCase() + driverCreate.role.slice(1);
     createdBy = `${capitalizeRole} - ${driverCreate.name}`;
   } else if (createdByRole === USER_ROLE.CLIENT) {
     const userCreate: any = await prisma.user.findUnique({

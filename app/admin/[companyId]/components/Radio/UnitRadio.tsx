@@ -1,4 +1,4 @@
-import {
+  import {
   Box,
   FormControlLabel,
   IconButton,
@@ -22,6 +22,7 @@ interface IProps {
   idValue?: boolean;
 }
 
+// eslint-disable-next-line react/display-name
 export default function UnitRadio({
   units,
   onChange,
@@ -36,7 +37,7 @@ export default function UnitRadio({
     <RadioGroup row name="unit" value={value} onChange={onChange}>
       {units.map((unit: any, index: number) => {
         return (
-          <Box display="flex" alignItems="center" mx={2} key={index}>
+          <Box key={index} display="flex" alignItems="center" mx={2}>
             <FormControlLabel
               value={idValue ? Number(unit.id) : JSON.stringify(unit)}
               control={<Radio />}

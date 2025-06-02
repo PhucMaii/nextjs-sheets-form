@@ -41,12 +41,12 @@ export const generateMinDate = () => {
   return minDate;
 };
 
-export const generateRecommendDate = () => {
+export const generateRecommendDate = (limitHour: number = limitOrderHour) => {
   // format initial date
   const dateObj = new Date();
   // if current hour is greater limit hour, then recommend the next day
   if (
-    dateObj.getHours() >= limitOrderHour ||
+    dateObj.getHours() >= limitHour ||
     (dateObj.getMonth() === 11 && dateObj.getDate() === 25) || // December 25th
     (dateObj.getMonth() === 0 && dateObj.getDate() === 1) // January 1st
   ) {
@@ -76,6 +76,22 @@ export const generateMonthRange = () => {
   lastDayOfThisMonth.setHours(23, 59, 59);
 
   return [firstDayOfThisMonth, lastDayOfThisMonth];
+};
+
+export const generateWeekRange = () => {
+  const today = new Date();
+  const week = today.getDay(); // 0 (Sunday) - 6 (Saturday)
+
+  const firstDayOfThisWeek = new Date(today);
+  const diff = today.getDate() - week + (week === 0 ? -6 : 1); // adjust for Sunday
+  firstDayOfThisWeek.setDate(diff);
+  firstDayOfThisWeek.setHours(0, 0, 0);
+
+  const lastDayOfThisWeek = new Date(firstDayOfThisWeek);
+  lastDayOfThisWeek.setDate(firstDayOfThisWeek.getDate() + 6);
+  lastDayOfThisWeek.setHours(23, 59, 59);
+
+  return [firstDayOfThisWeek, lastDayOfThisWeek];
 };
 
 export const generateListOfDateString = (
@@ -146,4 +162,10 @@ export const disableChristmasAndNewYear = (date: Dayjs) => {
 
 export const convertToMonthText = (month: number) => {
   return months[month];
+};
+
+export const convertToDateStyleFull = (date: Date) => {
+  return date.toLocaleDateString('en-US', {
+    dateStyle: 'full',
+  });
 };

@@ -10,7 +10,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const session: any = await getServerSession(req, res, authOptions);
 
-    console.log('session', session);
+    // console.log('session', session);
 
     if (!session) {
       return res.status(401).json({ error: 'You are not authenticated' });

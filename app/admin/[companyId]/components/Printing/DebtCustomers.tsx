@@ -7,6 +7,7 @@ import {
 } from '@mui/material';
 import React, { forwardRef, useMemo } from 'react';
 
+// eslint-disable-next-line react/display-name
 const DebtCustomers = forwardRef(({ debtCustomers }: any, ref: any) => {
   const sortedCustomers = useMemo(() => {
     if (!debtCustomers) {
@@ -56,3 +57,4 @@ const DebtCustomers = forwardRef(({ debtCustomers }: any, ref: any) => {
 });
 
 export default DebtCustomers;
+DebtCustomers.displayName = 'DebtCustomers';

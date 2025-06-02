@@ -26,6 +26,7 @@ model Company {
   vendors           Vendor[]
   routes            Route[]
   shiftSessions     ShiftSession[]
+  scheduledShifts   ScheduledShift[]
   inventoryItems    InventoryItem[]
   codBoards         CodBoard[]
   categories        Category[]
@@ -78,22 +79,23 @@ model AdminPage {
 }
 
 model Employee {
-  id           Int     @id @default(autoincrement())
-  name         String  @db.VarChar(255)
-  password     String  @db.VarChar(255)
-  hourlyRate   Float?
+  id              Int     @id @default(autoincrement())
+  name            String  @db.VarChar(255)
+  password        String  @db.VarChar(255)
+  hourlyRate      Float?
   employeeCode    String
-  email        String?
-  notification Json?
-  role         String?
-  companyId    Int
-  createdAt    String?
-  createdBy    String?
+  email           String?
+  notification     Json?
+  role            String?
+  companyId       Int
+  createdAt       String?
+  createdBy       String?
 
-  shiftSessions ShiftSession[]
-  routes        Route[]
-  CodBoard      CodBoard[]
-  adminPages     AdminPage[]
+  shiftSessions     ShiftSession[]
+  routes            Route[]
+  CodBoard          CodBoard[]
+  adminPages        AdminPage[]
+  scheduledShifts   ScheduledShift[]
 
   company Company @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
@@ -184,7 +186,6 @@ model QuoteItem {
 
   @@index([companyId])
   @@index([quoteId])
-
 }
 
 model Category {
@@ -670,8 +671,10 @@ model Cheque {
   companyId    Int?
   fileKeyFront String
   fileKeyBack  String?
-  month        String
+  month        String?
   year         String
+  startDate    String?
+  endDate      String?
   chequeNumber String?
   amount       Float
   createdAt    String
@@ -760,6 +763,31 @@ model Option {
   unit          InventoryUnit @relation(fields: [unitId], references: [id])
   item          Item          @relation(fields: [itemId], references: [id], onDelete: Cascade)
   inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
+}
+
+model ScheduledShift {
+  id            Int    @id @default(autoincrement())
+  companyId     Int
+  employeeId    Int
+  date          String
+  queryDate     String? // Use for query
+  startedAt     String
+  endedAt       String?
+  hours         Float?
+  cost          Float?
+  role          String
+  assignedAt    String?
+  assignedBy    String?
+  createdAt     String
+  createdBy     String
+  status        ScheduledShiftStatus?
+
+  company       Company     @relation(fields: [companyId], references: [id])
+  employee      Employee    @relation(fields: [employeeId], references: [id])
+
+  @@index([companyId])
+  @@index([employeeId])
+  @@index([queryDate])
 }
 
 model ShiftSession {
@@ -870,4 +898,9 @@ enum QuoteStatus {
   SENT
   ACCEPTED
   REJECTED
+}
+
+enum ScheduledShiftStatus {
+  PUBLISHED
+  UNPUBLISHED
 }

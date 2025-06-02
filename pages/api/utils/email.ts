@@ -4,7 +4,7 @@ import {
   yahooTransporter,
 } from './transporter';
 import { User } from '@prisma/client';
-import { generateOrderTemplate } from '@/config/email';
+import { generateOrderTemplate, TimFooter } from '@/config/email';
 import { UserType } from '@/app/utils/type';
 import InvoiceDocument from '@/app/admin/[companyId]/components/PDF/InvoiceDocument';
 import ReactPDF from '@react-pdf/renderer';
@@ -199,5 +199,76 @@ Unit 1 - 6420 Beresford Street Burnaby,
 British Columbia V5E 1B6, Canada
 if we are unable to collect it in person.
 Thank you for your cooperation.
+  `;
+};
+
+export const sendWelcomeEmail = async (guest: User) => {
+  if (!guest.email) {
+    return;
+  }
+
+  await emailHandler(
+    guest.email,
+    'Welcome to Supreme Sprouts',
+    'Supreme Sprouts Ltd',
+    generateWelcomeEmail(guest.clientName),
+  );
+};
+
+export const generateWelcomeEmail = (clientName: string) => {
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; color: #333;">
+      <h2 style="text-align: center; background-color: #5cb85c; color: white; padding: 10px; border-radius: 5px;">Welcome to Supreme Sprouts!</h2>
+
+      <p>Dear ${clientName},</p>
+
+      <p>We hope you're having a fantastic day! At <strong>Supreme Sprouts</strong>, we’re thrilled to welcome you and explore the opportunity of working together.</p>
+
+      <p>We take great pride in providing the highest quality vegetables to restaurants, markets, and supermarkets. By joining forces with us, you’ll have access to fresh, premium produce that helps you stand out and attract more customers.</p>
+
+      <p>Your dedication to excellence aligns perfectly with our values, and we believe this collaboration will lead to something truly impactful in the food industry.</p>
+
+      <p>Thank you for considering Supreme Sprouts as your partner. We're excited to have you as part of our growing family and will be reaching out shortly with more details on how we can work together effectively.</p>
+
+      <p>In the meantime, if you have any questions or need anything at all, don’t hesitate to reach out. We’re here to help.</p>
+
+      <p>Warm regards,</p>
+
+      ${TimFooter}
+    </div>
+  `;
+};
+
+
+export const generateApproveToBePartnerEmail = (
+  user: User
+) => {
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; color: #333;">
+      <h2 style="text-align: center;  background-color: #5cb85c; color: white; padding: 10px; border-radius: 5px;">Welcome to the Supreme Sprouts Family!</h2>
+      
+      <p>Dear ${user.clientName},</p>
+
+      <p>We’re excited to officially welcome you as a valued partner of <strong>Supreme Sprouts Ltd</strong>. Your partnership means a lot to us, and we’re looking forward to growing together!</p>
+
+      <p>To help you get started, we’ve created an account for you on our partner platform, where you can access to our wholesale price, easily place orders, manage your orders, and manage your profile.</p>
+
+      <h3>Your Login Credentials:</h3>
+      <ul style="line-height: 1.8;">
+        <li><strong>Client ID:</strong> ${user.clientId}</li>
+        <li><strong>Password:</strong> ${user?.contactNumber || 'welcomeToOurApp'}</li>
+        <li><strong>Login URL:</strong> <a href="https://supremesprouts.com/account/login" target="_blank">https://supremesprouts.com/account/login</a></li>
+      </ul>
+
+      <p>For security reasons, we recommend logging in and updating your password as soon as possible.</p>
+
+      <p>Should you have any questions or need assistance, our team is always here to help. We’re committed to making your experience with Supreme Sprouts seamless, efficient, and rewarding.</p>
+
+      <p>Once again, thank you for joining us. We’re proud to partner with you and can’t wait to support your growth with the freshest, most reliable produce available.</p>
+
+      <p>Warm regards,</p>
+
+      ${TimFooter}
+    </div>
   `;
 };

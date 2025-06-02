@@ -172,7 +172,7 @@ export default function Sidebar({ children }: IProps) {
         <Button
           onClick={() =>
             signOut({
-              callbackUrl: `https://www.supremesprouts.com/auth/login`,
+              callbackUrl: `https://www.supremesprouts.com/account/login`,
             })
           }
           variant="outlined"
@@ -274,10 +274,10 @@ export default function Sidebar({ children }: IProps) {
               // label="Sign out"
               onClick={() =>
                 signOut({
-                  callbackUrl: `https://www.supremesprouts.com/auth/login`,
+                  callbackUrl: `https://www.supremesprouts.com/account/login`,
                 })
               }
-              value={'/auth/login'}
+              value={'/account/login'}
               sx={{ minWidth: '30px' }}
               icon={
                 <LogoutIcon sx={{ color: blueGrey[800] }} fontSize="small" />

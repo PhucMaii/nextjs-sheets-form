@@ -1,16 +1,19 @@
 import { IItem } from '@/app/utils/type';
-import { AlertColor, Box, Grid, Paper, Typography } from '@mui/material';
-import React, { useMemo, useState } from 'react';
+import { AlertColor, Box, Chip, Grid, Paper, Typography } from '@mui/material';
+import React, { useEffect, useMemo, useState } from 'react';
 import EditItemAvailability from '../Modals/edit/EditItemAvailability';
 import DeleteModal from '../Modals/delete/DeleteModal';
 import EditItem from '../Modals/edit/EditItem';
 import { grey } from '@mui/material/colors';
+import { generateImgUrl } from '@/app/lib/s3';
+import { websiteItemCategory } from '@/app/lib/constant';
 
 interface IProps {
   item: IItem;
   handleDeleteItem: (targetItem: IItem) => Promise<void>;
   handleUpdateItem: (updatedItem: IItem) => Promise<void>;
   showNotification: (type: AlertColor, message: string) => void;
+  isWebsiteItem?: boolean;
 }
 
 export default function Item({
@@ -18,7 +21,19 @@ export default function Item({
   handleUpdateItem,
   handleDeleteItem,
   showNotification,
+  isWebsiteItem = false,
 }: IProps) {
+
+  const [img, setImg] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (item?.image || item?.inventoryItem?.image) {
+      generateImgUrl(item?.image || item?.inventoryItem?.image).then((img) => {
+        setImg(img);
+      }); 
+    }
+  }, [item]);
+
   const smallestOption = useMemo(() => {
     if (item?.options && item?.options.length > 0) {
       return item.options.reduce((prev, curr) =>
@@ -38,6 +53,7 @@ export default function Item({
         onClose={() => setIsOpenEditItem(false)}
         targetItem={item}
         showNotification={showNotification}
+        isWebsiteItem={isWebsiteItem}
       />
       <Paper
         elevation={0}
@@ -57,8 +73,31 @@ export default function Item({
               handleUpdateItem={handleUpdateItem}
             />
           </Grid>
-          <Grid item md={4}>
-            <Typography variant="subtitle1">{item.name}</Typography>
+          {item.categoryId === websiteItemCategory && (
+            <Grid item md={2}>
+              {img ? (
+                <img
+                  src={img}
+                  alt={item?.name}
+                  style={{ maxWidth: 100, height: 100, objectFit: 'contain' }}
+                />
+              ) : (
+                <img
+                  src="/images/not-found.png"
+                  alt={item?.name}
+                  style={{ maxWidth: 100, height: 100, objectFit: 'contain' }}
+                />
+              )}
+            </Grid>
+          )}
+          <Grid item md={2}>
+            <Box display="flex" alignItems="center" gap={2}>
+              <Typography variant="subtitle1">{item.name}</Typography>
+              {item?.isBestSeller && (
+                <Chip label="Best Seller" color="error" size="small" />
+              )}
+            </Box>
+
           </Grid>
           <Grid item md={2}>
             <Typography variant="subtitle1">

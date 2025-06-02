@@ -17,6 +17,7 @@ interface PropTypes {
   currentDate: string;
 }
 
+// eslint-disable-next-line react/display-name
 export const SummaryManifest = forwardRef(
   ({ manifest, currentDate }: PropTypes, ref: any) => {
     if (!manifest || Object.keys(manifest).length === 0) {
@@ -102,7 +103,7 @@ export const SummaryManifest = forwardRef(
                       <Table>
                         <TableHead>
                           <TableRow>
-                            <TableCell>Name - id</TableCell>
+                            <TableCell>Client</TableCell>
                             <TableCell>Note</TableCell>
                           </TableRow>
                         </TableHead>

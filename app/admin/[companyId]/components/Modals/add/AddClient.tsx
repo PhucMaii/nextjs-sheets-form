@@ -253,7 +253,7 @@ export default function AddClient({
                 <Select
                   size="small"
                   // key={newClient.categoryId}
-                  value={newClient.category.name} // Serialize the object
+                  value={newClient?.category?.name} // Serialize the object
                   onChange={(e) =>
                     handleOnChangeClient('category', e.target.value)
                   }

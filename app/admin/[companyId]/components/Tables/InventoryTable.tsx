@@ -301,12 +301,12 @@ const InventoryTable = ({
                   </TableCell>
                   <TableCell>
                     <Box display="flex" flexDirection="column" gap={3}>
-                      {item?.vendorItem?.map((vItem: any) => {
+                      {item?.vendorItem?.map((vItem: any, index: number) => {
                         const smallestUnit = vItem?.unit.find(
                           (unit: any) => unit?.ratio === 1,
                         );
                         return (
-                          <Typography>
+                          <Typography key={index}>
                             {vItem?.vendor?.name}{' '}
                             <strong>(${smallestUnit?.unitPrice})</strong>
                           </Typography>

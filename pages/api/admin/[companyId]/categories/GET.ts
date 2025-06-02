@@ -1,4 +1,5 @@
 // import { websiteItemCategoryId } from '@/app/lib/constant';
+import { websiteItemCategoryId } from '@/app/lib/constant';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -21,9 +22,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
               inventoryItemId: Number(inventoryItemId),
             },
           },
-          // id: {
-          //   not: websiteItemCategoryId,
-          // },
+          id: {
+            not: websiteItemCategoryId,
+          },
         },
         include: {
           users: true,
@@ -73,13 +74,13 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    // Get all categories
+    // Get all categories - not including website categories
     const categories = await prisma.category.findMany({
       where: {
         companyId: Number(companyId),
-        // id: {
-        //   not: websiteItemCategoryId,
-        // },
+        id: {
+          not: websiteItemCategoryId,
+        },
       },
       include: {
         users: true,

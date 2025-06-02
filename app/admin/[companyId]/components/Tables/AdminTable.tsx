@@ -46,7 +46,7 @@ export default function AdminTable({ admins, showNotification }: IProps) {
   };
 
   return (
-    <Paper>
+    <Paper sx={{ overflow: 'scroll' }}>
       <Table>
         <TableHead>
           <TableRow>

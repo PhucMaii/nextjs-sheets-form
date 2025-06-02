@@ -9,6 +9,7 @@ import PeopleIcon from '@mui/icons-material/People';
 // import MessageIcon from '@mui/icons-material/Message';
 import SettingsIcon from '@mui/icons-material/Settings';
 import KitchenIcon from '@mui/icons-material/Kitchen';
+import LanguageIcon from '@mui/icons-material/Language';
 import LocalMallIcon from '@mui/icons-material/LocalMall';
 import {
   ORDER_STATUS,
@@ -145,6 +146,7 @@ export const testAccountId = 223;
 export const TimLeAccountId = 240;
 export const clientMaxWidth = '1250px';
 export const websiteItemCategoryId = 334;
+export const websiteItemCategory = 334;
 
 export const sendChequeMsg = `
 * Please either send your payment by cheque 
@@ -293,10 +295,16 @@ export const adminTabs = {
       path: '/admin/[companyId]/order-layout',
     },
     {
-      id: 17,
+      name: 'Website',
+      icon: LanguageIcon,
+      path: '/admin/[companyId]/website',
+      id: 22,
+    },
+    {
       name: 'Promotions',
       icon: CampaignIcon,
       path: '/admin/[companyId]/promotions',
+      id: 17,
     },
     {
       id: 18,
@@ -367,27 +375,27 @@ export const clientTabs = [
   {
     name: 'Overview',
     icon: DashboardIcon,
-    path: '/',
+    path: '/user/overview',
   },
   {
     name: 'History',
     icon: HistoryIcon,
-    path: '/history',
+    path: '/user/history',
   },
   {
     name: 'Order',
     icon: AddBoxIcon,
-    path: '/order',
+    path: '/user/order',
   },
   {
     name: 'Statements',
     icon: DocumentScannerIcon,
-    path: '/statements',
+    path: '/user/statements',
   },
   {
     name: 'Account',
     icon: AccountCircleIcon,
-    path: '/account',
+    path: '/user/account',
   },
 ];
 
@@ -429,7 +437,7 @@ export const driverTabs = [
   // },
 ];
 
-export const settingsTabs = ['General', 'Announcement'];
+export const settingsTabs = ['General', 'Products', 'Announcement'];
 
 export const statusTabs = [
   {
@@ -497,6 +505,14 @@ export const transactionStatusList = [
   TRANSACTION_STATUS.UNPAID,
 ];
 
+export const rejectOrderReasons = [
+  'Item unavailable',
+  'Propose new delivery date',
+  'Suspicious or duplicate order',
+  'Customer requested cancellation',
+  'Other (specify)',
+]
+
 export const units = ['bags', 'g', 'kg', 'lbs', 'pcs', 'cases', 'cans'];
 
 export const userCategorizedColor: any = {
@@ -514,7 +530,7 @@ export const userCategorizedColor: any = {
   },
   None: {
     color: 'black',
-    backgroundColor: 'white',
+    backgroundColor: grey[200],
   },
   Inactive: {
     color: 'black',
@@ -522,6 +538,23 @@ export const userCategorizedColor: any = {
   },
 };
 
+export const deliveryCities = [
+  'Burnaby',
+  'Coquitlam',
+  'Delta',
+  'New Westminster',
+  'Richmond',
+  'Surrey',
+  'Vancouver',
+];
+
+export const homeLat = 49.216583;
+export const homeLng = -122.9702;
+export const maxDistance = 100; // in km
+
+export const maxWidth = '1500px'; // max width of the landing page
+
+export const guestCategoryId = 334;
 export const otherTypeId = 19;
 export const itemsEachRow = 2;
 export const testItemId = 10107;

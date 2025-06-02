@@ -5,6 +5,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 interface IBody {
   id: number;
   visibility: boolean;
+  isWebsite?: boolean;
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -15,12 +16,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const prisma = new PrismaClient();
 
-    const { id, visibility }: IBody = req.body;
+    const { id, visibility, isWebsite }: IBody = req.body;
 
     const existingPromotion = await prisma.promotion.findUnique({
       where: {
         id,
-        isWebsite: null,
+        isWebsite: isWebsite || null,
       },
     });
 

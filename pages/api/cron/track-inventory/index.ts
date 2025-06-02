@@ -37,146 +37,151 @@ export default async function handler(
     );
     const yesterdayString = YYYYMMDDFormat(yesterday);
 
-    // Check if action is taken already
-    const recordInventoryAction = await prisma.action.findFirst({
-      where: {
-        name: ACTION.RECORD_INVENTORY,
-        date: yesterdayString,
-        companyId: 1,
-      },
-    });
+    const companies = await prisma.company.findMany();
 
-    if (!recordInventoryAction) {
-      const inventoryItems = await prisma.inventoryItem.findMany({
+    for (const company of companies) {
+      // Check if action is taken already
+      const recordInventoryAction = await prisma.action.findFirst({
         where: {
-          companyId: 1,
+          name: ACTION.RECORD_INVENTORY,
+          date: yesterdayString,
+          companyId: company.id,
+        },
+      });
+  
+      if (!recordInventoryAction) {
+        const inventoryItems = await prisma.inventoryItem.findMany({
+          where: {
+            companyId: company.id,
+          },
+          include: {
+            fifo: true,
+          },
+        });
+  
+        let actionDescription: string = '';
+  
+        // Loop thru each item and added in fifo to retrieve correct left quantity
+        for (const item of inventoryItems) {
+          const qty = item.fifo.reduce((acc: number, fifo: Fifo) => {
+            return acc + fifo.quantity;
+          }, 0);
+  
+          actionDescription += `${item.name}: ${qty} ||`;
+        }
+  
+        const newAction = await prisma.action.create({
+          data: {
+            name: ACTION.RECORD_INVENTORY,
+            date: yesterdayString,
+            description: actionDescription,
+            createdAt: `${date.time} ${date.date}`,
+            companyId: company.id,
+          },
+        });
+  
+        console.log({ newAction, actionDescription, companyId: company.id });
+      }
+
+      // 2. Track Inventory
+      // Check in DB if the action is taken already
+      const action = await prisma.action.findFirst({
+        where: {
+          name: ACTION.TRACK_INVENTORY,
+          date: date.date,
+          companyId: company.id,
+        },
+      });
+  
+      // If yes, return
+      if (action && action.name === ACTION.TRACK_INVENTORY) {
+        console.log('Track Inventory Action Already Taken In Company: ', company.id);
+        continue;
+      }
+  
+      // Get all items that has been ordered today that quantity is greater than 0
+      const orderedItems = await prisma.orderedItems.findMany({
+        where: {
+          quantity: {
+            gt: 0,
+          },
+          companyId: company.id,
+          orderId: {
+            not: null, // Make sure the orderId is not null
+          },
+          inventoryItemId: {
+            not: null, // Make sure do not touch any custom amount
+          },
+          Orders: {
+            status: {
+              not: ORDER_STATUS.VOID, // Make sure the order is able to affect inventory
+            },
+            deliveryDate: date.date, // Only the selected date
+            isAffectInventory: true, // Make sure the order is able to affect inventory
+          },
         },
         include: {
+          inventoryItem: true,
+          inventoryUnit: true,
           fifo: true,
         },
       });
-
-      let actionDescription: string = '';
-
-      // Loop thru each item and added in fifo to retrieve correct left quantity
-      for (const item of inventoryItems) {
-        const qty = item.fifo.reduce((acc: number, fifo: Fifo) => {
-          return acc + fifo.quantity;
-        }, 0);
-
-        actionDescription += `${item.name}: ${qty} ||`;
+  
+      if (orderedItems.length === 0) {
+        return res.status(200).json({ message: 'No Items Ordered Today' });
       }
-
-      const newAction = await prisma.action.create({
+  
+      // Create a set of same items and quantity
+      const itemMap: ItemMap = orderedItems.reduce((acc: any, item: any) => {
+        if (!item.inventoryItemId || !item.inventoryUnitId) return acc; // Make sure again not touching the custom amount
+  
+        // If item has option, then set option
+        const itemUnit = item.inventoryUnit;
+  
+        // Set the quantity to ratio of 1
+        const quantityWithRatio1 = item.quantity * itemUnit.ratio;
+  
+        if (!acc[item.inventoryItemId]) {
+          console.log(item, 'item');
+          acc[item.inventoryItemId] = {
+            quantity: quantityWithRatio1,
+            inventoryItem: item.inventoryItem,
+            fifo: item.fifo,
+            inventoryUnit: itemUnit,
+          };
+        } else {
+          acc[item.inventoryItemId].quantity += quantityWithRatio1;
+        }
+        return acc;
+      }, {});
+  
+      let actionDescription: string = '';
+      // Loop through that item set, update inventory item quantity
+      for (const inventoryItem of Object.values(itemMap)) {
+        await subtractInventoryItem(
+          -1, // Force to subtract the inventory quantity
+          inventoryItem.fifo,
+          { ratio: 1 }, // Already calculate correct quantity above
+          inventoryItem.quantity,
+        );
+  
+        // Transform itemMap to a string
+        actionDescription += `${inventoryItem.inventoryItem.name}: ${inventoryItem.quantity} || `;
+      }
+  
+      // Flag the action as taken
+      await prisma.action.create({
         data: {
-          name: ACTION.RECORD_INVENTORY,
-          date: yesterdayString,
+          name: ACTION.TRACK_INVENTORY,
+          date: date.date,
           description: actionDescription,
           createdAt: `${date.time} ${date.date}`,
-          companyId: 1,
+          companyId: company.id,
         },
       });
-
-      console.log({ newAction, actionDescription });
     }
 
-    // 2. Track Inventory
-    // Check in DB if the action is taken already
-    const action = await prisma.action.findFirst({
-      where: {
-        name: ACTION.TRACK_INVENTORY,
-        date: date.date,
-        companyId: 1,
-      },
-    });
 
-    // If yes, return
-    if (action && action.name === ACTION.TRACK_INVENTORY) {
-      return res
-        .status(200)
-        .json({ message: 'Track Inventory Action Already Taken' });
-    }
-
-    // Get all items that has been ordered today that quantity is greater than 0
-    const orderedItems = await prisma.orderedItems.findMany({
-      where: {
-        quantity: {
-          gt: 0,
-        },
-        companyId: 1,
-        orderId: {
-          not: null, // Make sure the orderId is not null
-        },
-        inventoryItemId: {
-          not: null, // Make sure do not touch any custom amount
-        },
-        Orders: {
-          status: {
-            not: ORDER_STATUS.VOID, // Make sure the order is able to affect inventory
-          },
-          deliveryDate: date.date, // Only the selected date
-          isAffectInventory: true, // Make sure the order is able to affect inventory
-        },
-      },
-      include: {
-        inventoryItem: true,
-        inventoryUnit: true,
-        fifo: true,
-      },
-    });
-
-    if (orderedItems.length === 0) {
-      return res.status(200).json({ message: 'No Items Ordered Today' });
-    }
-
-    // Create a set of same items and quantity
-    const itemMap: ItemMap = orderedItems.reduce((acc: any, item: any) => {
-      if (!item.inventoryItemId || !item.inventoryUnitId) return acc; // Make sure again not touching the custom amount
-
-      // If item has option, then set option
-      const itemUnit = item.inventoryUnit;
-
-      // Set the quantity to ratio of 1
-      const quantityWithRatio1 = item.quantity * itemUnit.ratio;
-
-      if (!acc[item.inventoryItemId]) {
-        console.log(item, 'item');
-        acc[item.inventoryItemId] = {
-          quantity: quantityWithRatio1,
-          inventoryItem: item.inventoryItem,
-          fifo: item.fifo,
-          inventoryUnit: itemUnit,
-        };
-      } else {
-        acc[item.inventoryItemId].quantity += quantityWithRatio1;
-      }
-      return acc;
-    }, {});
-
-    let actionDescription: string = '';
-    // Loop through that item set, update inventory item quantity
-    for (const inventoryItem of Object.values(itemMap)) {
-      await subtractInventoryItem(
-        -1, // Force to subtract the inventory quantity
-        inventoryItem.fifo,
-        { ratio: 1 }, // Already calculate correct quantity above
-        inventoryItem.quantity,
-      );
-
-      // Transform itemMap to a string
-      actionDescription += `${inventoryItem.inventoryItem.name}: ${inventoryItem.quantity} || `;
-    }
-
-    // Flag the action as taken
-    await prisma.action.create({
-      data: {
-        name: ACTION.TRACK_INVENTORY,
-        date: date.date,
-        description: actionDescription,
-        createdAt: `${date.time} ${date.date}`,
-        companyId: 1,
-      },
-    });
     return res.status(200).json({ message: 'Track Inventory Successfully' });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);

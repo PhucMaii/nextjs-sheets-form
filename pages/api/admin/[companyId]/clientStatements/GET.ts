@@ -1,3 +1,4 @@
+import { USER_CATEGORIZED } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -22,6 +23,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       where: {
         month,
         companyId: Number(companyId),
+        user: {
+          type: {
+            not: USER_CATEGORIZED.INACTIVE
+          }
+        }
       },
     });
 

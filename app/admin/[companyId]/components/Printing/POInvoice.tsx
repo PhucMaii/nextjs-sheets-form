@@ -13,6 +13,7 @@ import {
 import { Box } from '@mui/material';
 import { forwardRef } from 'react';
 
+// eslint-disable-next-line react/display-name
 export const POInvoice = forwardRef(({ vendor, po }: any, ref: any) => {
   if (!vendor || !po) {
     return null;

@@ -312,7 +312,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     );
     return res.status(200).json({
       // overviewFormattedData,
-      message: 'Order Submitted Successfully',
+      message: 'Order Placed Successfully',
     });
   } catch (error: any) {
     console.log(error);

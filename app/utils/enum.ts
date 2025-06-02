@@ -17,6 +17,7 @@ export enum API_URL {
   SCHEDULED_ORDER = '/api/admin/scheduledOrders',
   ROUTES = '/api/admin/routes',
   ADMIN_DRIVERS = '/api/admin/drivers',
+  PUBLIC = '/api/public',
   DRIVER_ORDERS = '/api/drivers/orders',
 }
 
@@ -49,6 +50,7 @@ export enum ORDER_STATUS {
   DELIVERED = 'Fulfilled',
   INCOMPLETED = 'Unfulfilled',
   VOID = 'Void',
+  PENDING = 'Pending',
 }
 
 export enum PROMOTION_STATUS {
@@ -87,12 +89,14 @@ export enum PAYMENT_METHOD_TYPE {
 }
 
 export enum USER_ROLE {
+  PENDING = 'pending',
   CLIENT = 'client',
   ADMIN = 'admin',
   SUPER_ADMIN = 'super admin',
   DRIVER = 'driver',
   WAREHOUSE = 'warehouse',
   SYSTEM = 'system',
+  GUEST = 'guest',
 }
 
 export enum EMPLOYEE_ROLE {
@@ -140,6 +144,8 @@ export enum USER_CATEGORIZED {
   SILVER = 'Silver',
   BRONZE = 'Bronze',
   INACTIVE = 'Inactive',
+  PENDING = 'Pending',
+  GUEST = 'Guest',
   NONE = 'None',
 }
 
@@ -194,4 +200,8 @@ export enum QUOTE_STATUS {
   SENT = 'SENT',
   ACCEPTED = 'ACCEPTED',
   REJECTED = 'REJECTED',
+}
+export enum SCHEDULED_SHIFT_STATUS {
+  PUBLISHED = 'PUBLISHED',
+  UNPUBLISHED = 'UNPUBLISHED',
 }

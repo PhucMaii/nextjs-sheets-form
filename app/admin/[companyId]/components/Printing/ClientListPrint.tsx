@@ -48,4 +48,5 @@ const ClientListPrint = forwardRef(({ clients }: IProps, ref: any) => {
   );
 });
 
+ClientListPrint.displayName = 'ClientListPrint';
 export default ClientListPrint;

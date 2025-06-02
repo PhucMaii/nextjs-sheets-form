@@ -77,7 +77,7 @@ export default function ConfirmModal({
               variant="contained"
               color={color}
             >
-              Yes, I'm sure
+              Yes, I&apos;m sure
             </LoadingButton>
           </Grid>
         </Grid>

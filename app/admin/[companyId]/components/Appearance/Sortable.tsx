@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { IItem } from '@/app/utils/type';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -118,15 +119,16 @@ export const SortableItem = ({
   onOpenSwitchType: any;
   onRemove?: any;
 }) => {
-  if (!item) {
-    return;
-  }
   // const id = item?.id?.split(' - ')[1];
   const { attributes, listeners, setNodeRef, isDragging } = useSortable({
-    id: item.id,
+    id: item?.id,
     data: { type: 'item' },
   });
 
+  if (!item) {
+    return null;
+  }
+  
   const style = {
     transition: 'none',
     // transform: CSS.Transform.toString(transform),

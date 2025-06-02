@@ -13,7 +13,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import UploadChequeModal from '../components/Modals/UploadChequeModal';
 import { UserType } from '@/app/utils/type';
-import { months } from '@/app/lib/constant';
+// import { months } from '@/app/lib/constant';
 import { UploadIcon } from 'lucide-react';
 import { SWRFetchData } from '@/app/utils/db';
 import { getAdminApiUrl } from '@/app/utils/enum';
@@ -96,7 +96,7 @@ export default function ChequeTab({ client, showNotification }: IProps) {
         showNotification={showNotification}
         client={client}
         year={new Date().getFullYear().toString()}
-        month={months[new Date().getMonth()]}
+        // month={months[new Date().getMonth()]}
       />
       <TextField
         fullWidth
@@ -179,7 +179,9 @@ export default function ChequeTab({ client, showNotification }: IProps) {
                   <TableCell>{cheque.chequeNumber}</TableCell>
                   <TableCell>${cheque.amount}</TableCell>
                   <TableCell>
-                    {cheque.month} {cheque.year}
+                    {/* {cheque.month} {cheque.year} */}
+                    {cheque?.startDate || cheque?.month} -{' '}
+                    {cheque?.endDate || cheque?.year}
                   </TableCell>
                   <TableCell>{cheque.createdAt.toLocaleString()}</TableCell>
                 </TableRow>

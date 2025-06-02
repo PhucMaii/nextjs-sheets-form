@@ -116,12 +116,20 @@ export const getTodayDate = (
 };
 
 export const formatDateString = (inputDate: Date | string) => {
+  let inputDateTypeDate: Date;
+  console.log({inputDate, type: typeof inputDate}, 'inputDate');
+  if (typeof inputDate === 'string') {
+    inputDateTypeDate = new Date(inputDate);
+  } else {
+    inputDateTypeDate = inputDate;
+  }
+
   const dateString = new Intl.DateTimeFormat('en-US', {
     timeZone: 'America/Los_Angeles',
     dateStyle: 'short',
     timeStyle: 'long',
     // timeStyle,
-  }).format(new Date(inputDate));
+  }).format(inputDateTypeDate);
 
   const date = dateString.split(',')[0];
   const dateSplitted = date.split('/');
@@ -134,6 +142,31 @@ export const formatDateString = (inputDate: Date | string) => {
   const time = dateString.split(',')[1];
 
   return `${dateRes} ${time}`;
+};
+
+export const formatDateStringInHoursOver12 = (inputDate: Date) => {
+  const dateString = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Los_Angeles',
+    year: '2-digit',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+    // timeStyle,
+  }).format(new Date(inputDate));
+
+  const date = dateString.split(',')[0];
+  const dateSplitted = date.split('/');
+
+  const month = dateSplitted[0].padStart(2, '0');
+  const day = dateSplitted[1].padStart(2, '0');
+  const year = dateSplitted[2];
+
+  const dateRes = `20${year}-${month}-${day}`;
+  const time = dateString.split(', ')[1];
+
+  return `${dateRes} ${time}:00`;
 };
 
 export const checkOrderDeliveryDateValid = (deliveryDate: string) => {
@@ -194,3 +227,19 @@ export const formatDate = (date: string) => {
 
   return formattedDate;
 };
+
+export const getDaysOfThisWeek = (startedDate: string, endedDate: string) => {
+    const startDate = new Date(startedDate);
+    const endDate = new Date(endedDate);
+    const dates = [];
+
+    for (
+      let d = new Date(startDate);
+      d <= endDate;
+      d.setDate(d.getDate() + 1)
+    ) {
+      dates.push(d.toLocaleDateString('en-US', { dateStyle: 'full' }));
+    }
+
+    return dates;
+}

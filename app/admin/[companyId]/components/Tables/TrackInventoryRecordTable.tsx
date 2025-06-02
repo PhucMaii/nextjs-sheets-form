@@ -45,6 +45,7 @@ export default function TrackInventoryRecordTable({ actionData }: IProps) {
       return <TableRow {...props} />;
     },
 
+    // eslint-disable-next-line react/display-name
     TableBody: React.forwardRef<HTMLTableSectionElement>((props, ref) => (
       <TableBody ref={ref} {...props} />
     )),

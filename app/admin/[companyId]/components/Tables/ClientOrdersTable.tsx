@@ -34,6 +34,9 @@ import LockIcon from '@mui/icons-material/Lock';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import { grey } from '@mui/material/colors';
 import { useParams } from 'next/navigation';
+import ApproveOrder from '../Modals/ApproveOrder';
+import RejectOrder from '../Modals/RejectOrder';
+import QuickViewOrderedItems from '../Tooltip/QuickViewOrderedItems';
 
 interface PropTypes {
   clientOrders: Order[];
@@ -67,8 +70,14 @@ const ClientOrdersTable = ({
     open: false,
     order: clientOrders[0],
   });
-  // const [rowsPerPage, setRowsPerPage] = useState<number>(10);
-  // const [page, setPage] = useState<number>(0);
+  const [openApproveOrder, setOpenApproveOrder] = useState<any>({
+    open: false,
+    order: null,
+  });
+  const [openRejectOrder, setOpenRejectOrder] = useState<any>({
+    open: false,
+    order: null,
+  });
   const windowDimensions = useWindowDimensions();
   const { companyId }: any = useParams();
 
@@ -155,6 +164,9 @@ const ClientOrdersTable = ({
           Delivery Date
         </TableCell>
         <TableCell variant="head" style={{ width: 120 }}>
+          Items
+        </TableCell>
+        <TableCell variant="head" style={{ width: 120 }}>
           Total Bill
         </TableCell>
         <TableCell variant="head" style={{ width: 180 }}>
@@ -193,6 +205,31 @@ const ClientOrdersTable = ({
                 </IconButton>
               </Tooltip>
             )}
+
+            {
+              order.status === ORDER_STATUS.PENDING && (
+                <Box display="flex" gap={1} alignItems="center">
+                  <Button
+                    color="success"
+                    onClick={() => setOpenApproveOrder({
+                      open: true,
+                      order,
+                    })}
+                  >
+                    Approve
+                  </Button>
+                  <Button
+                    color="error"
+                    onClick={() => setOpenApproveOrder({
+                      open: true,
+                      order,
+                    })}
+                  >
+                    Reject
+                  </Button>
+                </Box>
+              )
+            }
           </Box>
         </TableCell>
         <TableCell padding="checkbox">
@@ -210,6 +247,9 @@ const ClientOrdersTable = ({
         <TableCell>{order.user.clientId}</TableCell>
         <TableCell>{order.user.clientName}</TableCell>
         <TableCell>{order.deliveryDate}</TableCell>
+        <TableCell>
+          <QuickViewOrderedItems order={order} isTable={true} placement="bottom-start" />
+        </TableCell>
         <TableCell>${order.totalPrice.toFixed(2)}</TableCell>
         <TableCell>
           <Select
@@ -303,6 +343,7 @@ const ClientOrdersTable = ({
         />
       );
     },
+    // eslint-disable-next-line react/display-name
     TableBody: React.forwardRef<HTMLTableSectionElement>((props, ref) => (
       <TableBody {...props} ref={ref} />
     )),
@@ -329,6 +370,25 @@ const ClientOrdersTable = ({
         }
         mutateOrders={mutateOrders}
         onUpdateOrderUI={onUpdateOrderUI}
+      />
+
+      <ApproveOrder
+        open={openApproveOrder.open}
+        onClose={() => setOpenApproveOrder({
+          open: false,
+          order: null,
+        })}
+        order={openApproveOrder?.order}
+        showNotification={showNotification}
+      />
+      <RejectOrder
+        open={openRejectOrder.open}
+        onClose={() => setOpenRejectOrder({
+          open: false,
+          order: null,
+        })}
+        order={openRejectOrder?.order}
+        showNotification={showNotification}
       />
       <LoadingModal open={isLoading} />
       <Paper

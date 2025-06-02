@@ -24,6 +24,7 @@ interface PropTypes {
   isPrintComplete?: boolean;
 }
 
+// eslint-disable-next-line react/display-name
 export const InvoicePrint = forwardRef(
   ({ client, orders, endDate, isPrintComplete }: PropTypes, ref: any) => {
     if (!client) {
@@ -46,6 +47,7 @@ export const InvoicePrint = forwardRef(
 
     console.log('invoice print');
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const { debtData, sortDebtKeys } = useApiDebtData(
       client.id,
       endMonth,

@@ -29,7 +29,6 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import AddIcon from '@mui/icons-material/Add';
 import QrCodeIcon from '@mui/icons-material/QrCode';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import ErrorComponent from '../components/ErrorComponent';
 import { DropdownItemContainer } from '../orders/styled';
 import SingleFieldUpdate, {
   SingleFieldUpdateProps,
@@ -40,6 +39,7 @@ import useNotification from '@/hooks/useNotification';
 import ClientListCSV from '../components/CSV/ClientListCSV';
 import { useRouter } from 'next/navigation';
 import AdminTable from '../components/Tables/AdminTable';
+import GuestTable from '../components/Tables/GuestTable';
 import { useParams } from 'next/navigation';
 
 export default function ClientsPage() {
@@ -74,7 +74,7 @@ export default function ClientsPage() {
       ? getAdminApiUrl(companyId, '/clients')
       : selectedTab === 1
         ? getAdminApiUrl(companyId, '')
-        : '',
+        : getAdminApiUrl(companyId, '/clients', 'role=guest'),
   );
   const [categories, mutateCategories] = SWRFetchData(
     getAdminApiUrl(companyId, '/categories'),
@@ -496,9 +496,9 @@ export default function ClientsPage() {
           />
         ) : selectedTab === 1 ? (
           <AdminTable admins={userList} showNotification={showNotification} />
-        ) : (
-          <ErrorComponent errorText="Coming Soon..." />
-        )}
+        ) : selectedTab === 2 ? (
+          <GuestTable guests={userList} showNotification={showNotification} />
+        ) : null}
       </ShadowSection>
       {/* </AuthenGuard> */}
     </Sidebar>

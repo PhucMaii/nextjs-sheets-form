@@ -28,8 +28,6 @@ export default function LoginAndRegisterGuard({ children }: any) {
   //   },
   // );
 
-  console.log({ session }, 'session');
-
   useEffect(() => {
     if (session?.user?.role === 'driver') {
       router.push('/driver/overview');
@@ -39,7 +37,7 @@ export default function LoginAndRegisterGuard({ children }: any) {
     ) {
       router.push(`/admin/${session?.user?.companyId}/orders`);
     } else if (session?.user?.role === 'client') {
-      router.push('/');
+      router.push('/user/overview');
     }
   }, [session]);
 

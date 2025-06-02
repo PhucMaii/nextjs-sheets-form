@@ -79,7 +79,7 @@ export default function DeleteModal({
                 onClick={handleClick}
                 loading={isLoading}
               >
-                Yes I'm sure
+                Yes I&apos;m sure
               </LoadingButton>
               <Button onClick={onClose} color="inherit" variant="outlined">
                 Cancel

@@ -31,21 +31,24 @@ const generateTaxNote = (item: Item) => {
   return '';
 };
 
+// eslint-disable-next-line react/display-name
 export const ComponentToPrint = forwardRef(
-  ({ order }: { order: Order | null }, ref: any) => {
+  ({ order }: { order: Order | null }, ref: any) => {    
+    const { companyId }: any = useParams();
+    
     if (!order) {
       return null;
     }
-
-    const { companyId }: any = useParams();
-
+    
     const [announcement] = SWRFetchData(
       getAdminApiUrl(companyId, '/announcement'),
     );
 
-    const total = generateOrderTotalPrice(order.items);
+    const total = generateOrderTotalPrice(order.items, order?.shippingFee);
 
-    const totalPrice = total?.subTotal + (total?.PST || 0) + (total?.GST || 0);
+    // const totalPrice = total?.subTotal + (total?.PST || 0) + (total?.GST || 0);
+    const GST = total?.GST || 0;
+    const PST = total?.PST || 0;
 
     const orderDetailsTemplate: any = [];
 
@@ -211,6 +214,21 @@ export const ComponentToPrint = forwardRef(
                     0}
                 </Typography>
               </Grid>
+
+                  {order?.shippingFee ? order.shippingFee > 0 && (
+                  <>
+                    <Grid item xs={6} textAlign="left">
+                      <Typography sx={{ fontSize: printFontSize - 5 }}>
+                        Shipping Fee
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6} textAlign="right">
+                      <Typography sx={{ fontSize: printFontSize - 5 }}>
+                        ${order?.shippingFee?.toFixed(2) || 0}
+                      </Typography>
+                    </Grid>
+                  </>
+                ) : null}
               <Grid item xs={6}>
                 <Typography sx={{ fontSize: printFontSize - 5 }}>
                   GST (5%):
@@ -218,7 +236,7 @@ export const ComponentToPrint = forwardRef(
               </Grid>
               <Grid item xs={6} textAlign="right">
                 <Typography sx={{ fontSize: printFontSize - 5 }}>
-                  ${total?.GST?.toFixed(2) || order?.GST?.toFixed(2) || 0}
+                  ${GST?.toFixed(2) || order?.GST?.toFixed(2) || 0}
                 </Typography>
               </Grid>
               <Grid item xs={6}>
@@ -228,7 +246,7 @@ export const ComponentToPrint = forwardRef(
               </Grid>
               <Grid item xs={6} textAlign="right">
                 <Typography sx={{ fontSize: printFontSize - 5 }}>
-                  ${total?.PST?.toFixed(2) || order?.PST?.toFixed(2) || 0}
+                  ${PST?.toFixed(2) || order?.PST?.toFixed(2) || 0}
                 </Typography>
               </Grid>
 
@@ -249,7 +267,7 @@ export const ComponentToPrint = forwardRef(
                   fontWeight="bold"
                 >
                   $
-                  {totalPrice?.toFixed(2) || order?.totalPrice?.toFixed(2) || 0}
+                  {total?.totalPrice?.toFixed(2) || order?.totalPrice?.toFixed(2) || 0}
                 </Typography>
               </Grid>
             </Grid>
@@ -317,3 +335,4 @@ export const ComponentToPrint = forwardRef(
     );
   },
 );
+ComponentToPrint.displayName = 'ComponentToPrint';
