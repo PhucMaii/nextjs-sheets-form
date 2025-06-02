@@ -8,6 +8,7 @@ import {
 import ShiftSession from './ShiftSession';
 import ScheduledShifts from './ScheduledShifts';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import Payroll from './Payroll';
 
 export default function ShiftPage() {
   const { companyId }: any = useParams();
@@ -40,6 +41,10 @@ export default function ShiftPage() {
 
       {tab === 'schedule' && (
         <ScheduledShifts />
+      )}
+
+      {tab === 'payroll' && (
+        <Payroll />
       )}
     </Sidebar>
   );

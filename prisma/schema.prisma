@@ -83,6 +83,8 @@ model Employee {
   name            String  @db.VarChar(255)
   password        String  @db.VarChar(255)
   hourlyRate      Float?
+  salary          Float?
+  payrollType     PayrollType?
   employeeCode    String
   email           String?
   notification     Json?
@@ -107,6 +109,7 @@ model Driver {
   hourlyRate   Float?
   notification Json?
   role         String?
+  payrollType  PayrollType?
 
   shiftSessions ShiftSession[]
   routes        Route[]
@@ -891,11 +894,17 @@ model Media {
 enum QuoteStatus {
   DRAFT
   SENT
-  ACCEPTED
+  CONVERTED
   REJECTED
 }
 
 enum ScheduledShiftStatus {
   PUBLISHED
   UNPUBLISHED
+}
+
+enum PayrollType {
+  daily
+  hourly
+  salary
 }
