@@ -89,6 +89,7 @@ model Employee {
   role            String?
   companyId       Int
   createdAt       String?
+  payrollType     PayrollType?
   createdBy       String?
 
   shiftSessions     ShiftSession[]
@@ -509,7 +510,7 @@ model Vendor {
 model InventoryItem {
   id            Int      @id @default(autoincrement())
   name          String
-  sku           String?  @unique
+  sku           String?
   supplierSku   String?
   createdAt     String
   createdBy     String
@@ -891,11 +892,17 @@ model Media {
 enum QuoteStatus {
   DRAFT
   SENT
-  ACCEPTED
+  CONVERTED
   REJECTED
 }
 
 enum ScheduledShiftStatus {
   PUBLISHED
   UNPUBLISHED
+}
+
+enum PayrollType {
+  hourly
+  daily
+  salary
 }
