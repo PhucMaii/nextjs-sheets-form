@@ -279,7 +279,7 @@ export default function OrderInReportPage({
       width="100%"
     >
       <Button
-        disabled={clientOrders.length === 0 || isFetching}
+        disabled={ clientValue?.clientName === 'All Clients' || clientOrders.length === 0 || isFetching}
         variant="outlined"
         onClick={(e) => {
           if (clientValue?.clientName === 'All Clients') {
@@ -529,7 +529,7 @@ export default function OrderInReportPage({
             onChange={(e) => setSearchKeywords(e.target.value)}
           />
         </Grid>
-        <Grid item md={2} textAlign="right">
+        <Grid item xs={2} textAlign="right">
           <Button
             disabled={clientOrders.length === 0}
             variant="outlined"
@@ -548,9 +548,11 @@ export default function OrderInReportPage({
             </Box>
           </Button>
         </Grid>
-        <Grid item md={2} textAlign="right">
-          {statementDropdown}
-        </Grid>
+       
+          <Grid item xs={2} textAlign="right">
+            {statementDropdown}
+          </Grid>
+      
       </Grid>
       {isFetching ? (
         <Box

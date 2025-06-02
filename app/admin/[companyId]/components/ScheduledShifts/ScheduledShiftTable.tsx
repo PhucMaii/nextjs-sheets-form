@@ -275,6 +275,7 @@ export default function ScheduledShiftTable({
                             borderRight: `1px solid ${grey[200]}`,
                             p: 1,
                             verticalAlign: 'top',
+                            minWidth: '250px',
                           }}
                         >
                           <ShiftContainer employee={employee} date={day}>

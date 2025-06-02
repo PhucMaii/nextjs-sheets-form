@@ -523,7 +523,7 @@ export const userCategorizedColor: any = {
   },
   None: {
     color: 'black',
-    backgroundColor: 'white',
+    backgroundColor: grey[200],
   },
   Inactive: {
     color: 'black',

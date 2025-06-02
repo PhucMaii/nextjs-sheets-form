@@ -13,6 +13,8 @@ import { useReactToPrint } from 'react-to-print';
 import { blue, grey } from '@mui/material/colors';
 import CheckIcon from '@mui/icons-material/Check';
 import { ClientStatementType } from '@/pages/api/admin/[companyId]/routes/GET';
+import { renderType } from '@/app/lib/render';
+import { USER_CATEGORIZED } from '@/app/utils/enum';
 
 interface IProps {
   client: ClientStatementType;
@@ -73,7 +75,11 @@ export default function ClientStatementRow({
           />
         </TableCell>
         <TableCell>
-          <Typography>{client.client.clientName}</Typography>
+          <Box display="flex" gap={1} alignItems="center">
+            <Typography>{client.client.clientName}</Typography>
+            {client?.client?.type &&
+              renderType(client?.client?.type || USER_CATEGORIZED.NONE)}
+          </Box>
         </TableCell>
         <TableCell>
           <Typography>{client.client.clientId}</Typography>
