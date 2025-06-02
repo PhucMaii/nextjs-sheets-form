@@ -1,4 +1,4 @@
-import { PrismaClient, ScheduledShiftStatus } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 // const checkIsKorean = (text: string) => {
 //   // const koreanRange = /^[\uAC00-\uD7AF]+$/;
@@ -120,11 +120,6 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-  await prisma.scheduledShift.updateMany({
-    data: {
-      status: ScheduledShiftStatus.PUBLISHED,
-    },
-  });
 }
 
 // async function main() {

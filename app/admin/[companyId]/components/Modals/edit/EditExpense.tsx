@@ -47,7 +47,8 @@ export default function EditExpense({
   const [adminsAndDriversRes] = SWRFetchData(
     getAdminApiUrl(companyId, '/adminsAndDrivers'),
   );
-
+  
+  console.log(updatedExpense);
   useEffect(() => {
     if (transaction) {
       setUpdatedExpense(transaction);

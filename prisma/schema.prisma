@@ -49,6 +49,7 @@ model Company {
   companyPages      CompanyPage[]
   quotes            Quote[]
   quoteItems        QuoteItem[]
+  payrolls          Payroll[]  
 }
 
 model PageView {
@@ -83,13 +84,14 @@ model Employee {
   name            String  @db.VarChar(255)
   password        String  @db.VarChar(255)
   hourlyRate      Float?
+  payRate         Float?
+  payrollType     PayrollType?
   employeeCode    String
   email           String?
   notification     Json?
   role            String?
   companyId       Int
   createdAt       String?
-  payrollType     PayrollType?
   createdBy       String?
 
   shiftSessions     ShiftSession[]
@@ -97,8 +99,24 @@ model Employee {
   CodBoard          CodBoard[]
   adminPages        AdminPage[]
   scheduledShifts   ScheduledShift[]
+  payrolls          Payroll[]
 
   company Company @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model Payroll {
+  id             Int    @id @default(autoincrement())
+  employeeId     Int
+  companyId      Int
+  hours          Float
+  total          Float
+  startDate      String
+  endDate        String
+  createdAt      String
+  createdBy      String
+
+  employee      Employee  @relation(fields: [employeeId], references: [id])
+  company       Company   @relation(fields: [companyId], references: [id])
 }
 
 model Driver {
@@ -108,6 +126,7 @@ model Driver {
   hourlyRate   Float?
   notification Json?
   role         String?
+  payrollType  PayrollType?
 
   shiftSessions ShiftSession[]
   routes        Route[]
@@ -903,6 +922,5 @@ enum ScheduledShiftStatus {
 
 enum PayrollType {
   hourly
-  daily
-  salary
+  monthly
 }
