@@ -2,7 +2,9 @@ import { getAdminApiUrl } from '@/app/utils/enum';
 import { IInventoryItem } from '@/app/utils/type';
 import {
   Autocomplete,
+  Box,
   Checkbox,
+  Chip,
   FormControlLabel,
   TextField,
 } from '@mui/material';
@@ -21,7 +23,7 @@ const useInventoryItems = () => {
   );
 
   console.log('re fetch inventory items');
-  
+
   useEffect(() => {
     fetchInventoryItems();
   }, []);
@@ -53,14 +55,14 @@ const useInventoryItems = () => {
         renderOption={(props, option, { selected }) => {
           const { key, ...optionProps } = props;
           return (
-            <li key={key} {...optionProps}>
+            <li key={key} {...optionProps} aria-disabled={selected}>
               <FormControlLabel
                 label={
                   option?.sku
                     ? `${option?.sku} | ${option?.name}`
                     : option?.name
                 }
-                control={<Checkbox checked={selected} />}
+                control={<Checkbox checked={selected} disabled={selected} />}
                 onClick={(e) => {
                   // e.stopPropagation();
                   e.preventDefault();
@@ -86,6 +88,23 @@ const useInventoryItems = () => {
             };
           });
           setSelectedInventoryItems(newSelectedInventoryItems);
+        }}
+        renderTags={(value) => {
+          console.log({ value });
+          return (
+            <Box display="flex" gap={0.5} alignItems="center" flexWrap="wrap">
+              {value.map((item: any) => {
+                return (
+                  <Chip
+                    key={item.id}
+                    label={item.name}
+                    disabled={true}
+                    sx={{ borderRadius: 1 }}
+                  />
+                );
+              })}
+            </Box>
+          );
         }}
         disableCloseOnSelect
         value={selectedInventoryItems}

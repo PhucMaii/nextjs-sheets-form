@@ -1,9 +1,9 @@
-import { generateQuoteTotal } from "@/app/utils/quote";
-import { getUserInfo } from "@/pages/api/utils/auth";
-import { getTodayDate } from "@/pages/api/utils/date";
-import { PrismaClient } from "@prisma/client";
-import { hash } from "bcryptjs";
-import { NextApiRequest, NextApiResponse } from "next";
+import { generateQuoteTotal } from '@/app/utils/quote';
+import { getCreatedBy } from '@/pages/api/import-sheets/utils';
+import { getTodayDate } from '@/pages/api/utils/date';
+import { PrismaClient } from '@prisma/client';
+import { hash } from 'bcryptjs';
+import { NextApiRequest, NextApiResponse } from 'next';
 
 const prisma = new PrismaClient();
 
@@ -19,10 +19,13 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         id: user.id,
       },
     });
+    
+    const today = getTodayDate();
+    const createdBy: any = await getCreatedBy(req, res);
 
     if (!quoteUser) {
       // Create new user
-      const password = await hash(user?.contactNumber || "N/A", 12);
+      const password = await hash(user?.contactNumber || 'N/A', 12);
       quoteUser = await prisma.user.create({
         data: {
           email: user.email,
@@ -32,15 +35,15 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           contactNumber: user.contactNumber,
           deliveryAddress: user.deliveryAddress,
           password: password,
+          createdAt: today.dateAndTime,
+          companyId: Number(companyId),
         },
       });
     }
 
     // Create Quote
     const quoteTotal = generateQuoteTotal(quoteItems);
-    
-    const today = getTodayDate();
-    const admin: any = await getUserInfo(req, res);
+
     const newQuote = await prisma.quote.create({
       data: {
         ...quote,
@@ -49,7 +52,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         PST: quoteTotal.pst,
         GST: quoteTotal.gst,
         subtotal: quoteTotal.subtotal,
-        createdBy: `Admin - ${admin?.clientName}`,
+        createdBy: createdBy,
         createdAt: today.dateAndTime,
         companyId: Number(companyId),
       },
@@ -67,16 +70,15 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       })),
     });
 
-
     // TODO: Send email to user with quote details
 
     return res.status(200).json({
-      message: "Quote created successfully",
+      message: 'Quote created successfully',
       quote: newQuote,
       quoteItems: newQuoteItems,
     });
   } catch (error) {
     console.log('Internal server error', error);
-    return res.status(500).json({ error: "Internal server error: " + error });
+    return res.status(500).json({ error: 'Internal server error: ' + error });
   }
 }

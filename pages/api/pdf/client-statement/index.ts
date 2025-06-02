@@ -1,6 +1,6 @@
 import { renderToStream } from '@react-pdf/renderer';
 import { NextApiRequest, NextApiResponse } from 'next';
-import InvoiceDocument from '../../../app/admin/[companyId]/components/PDF/InvoiceDocument';
+import InvoiceDocument from '../../../../app/admin/[companyId]/components/PDF/InvoiceDocument';
 import React from 'react';
 
 export default async function handler(

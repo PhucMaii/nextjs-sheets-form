@@ -18,6 +18,7 @@ import { useParams } from 'next/navigation';
 import useNotification from '@/hooks/useNotification';
 import { fetchApi } from '@/app/utils/db';
 import { getAdminApiUrl } from '@/app/utils/enum';
+import QuotesTable from '../components/Tables/QuotesTable';
 
 export default function QuoteClientPage() {
   const { companyId }: any = useParams();
@@ -90,6 +91,8 @@ export default function QuoteClientPage() {
             </Button>
           </Grid>
         </Grid>
+
+        <QuotesTable quotes={quotes} />
       </ShadowSection>
     </Sidebar>
   );

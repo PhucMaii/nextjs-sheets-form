@@ -116,7 +116,7 @@ export default function StatementPage() {
       month: fileName,
       isLoading: true,
     });
-    const response = await fetch('/api/generate-pdf', {
+    const response = await fetch('/api/pdf/client-statement', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

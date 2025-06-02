@@ -2,13 +2,7 @@
 
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import Sidebar from '../../components/Sidebar/Sidebar';
-import {
-  Box,
-  Grid,
-  IconButton,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Box, Grid, IconButton, TextField, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { ArrowLeftIcon, ClipboardPasteIcon } from 'lucide-react';
 import { ShadowSection } from '../../reports/styled';
@@ -66,8 +60,6 @@ export default function CreateQuotePage() {
   const { renderClientSearch, selectedClient, setSelectedClient } =
     useClients();
 
-  console.log('re render page');
-
   const { showNotification, NotificationComp } = useNotification();
 
   useEffect(() => {
@@ -111,7 +103,6 @@ export default function CreateQuotePage() {
           new Map(units.map((unit: any) => [unit.ratio, unit])).values(),
         );
 
-        console.log({ item: item?.inventoryUnit, units: uniqueUnits });
         return {
           ...inventoryItem,
           units: uniqueUnits,
@@ -132,30 +123,19 @@ export default function CreateQuotePage() {
     setSelectedInventoryItems(newSelectedInventoryItems);
   };
 
-  const onUpdateItem = useCallback(
-    (item: any) => {
-      const newSelectedItems = selectedItems.map((selectedItem) => {
-        if (selectedItem.id === item.id) {
-          return item;
-        }
+  const onUpdateItem = useCallback((item: any) => {
+    setSelectedItems((prevItems) =>
+      prevItems.map((selectedItem) =>
+        selectedItem.id === item.id ? item : selectedItem,
+      ),
+    );
+  }, []);
 
-        return selectedItem;
-      });
-
-      setSelectedItems(newSelectedItems);
-    },
-    [selectedItems],
-  );
-
-  const onRemoveItem = useCallback(
-    (item: any) => {
-      const newSelectedItems = selectedInventoryItems.filter(
-        (selectedItem) => selectedItem.id !== item.id,
-      );
-      setSelectedInventoryItems(newSelectedItems);
-    },
-    [selectedInventoryItems],
-  );
+  const onRemoveItem = useCallback((item: any) => {
+    setSelectedInventoryItems((prevItems) =>
+      prevItems.filter((selectedItem) => selectedItem.id !== item.id),
+    );
+  }, []);
 
   const onResetNewCustomer = () => {
     setClient({
@@ -169,6 +149,15 @@ export default function CreateQuotePage() {
   };
 
   const handleCreateQuote = async () => {
+    if (
+      !client.clientId ||
+      !client.clientName ||
+      !client.deliveryAddress
+    ) {
+      showNotification('error', 'Please fill in all required fields for client');
+      return;
+    }
+
     setIsLoading(true);
     try {
       const quoteItems = selectedItems.map((item) => {
@@ -233,7 +222,7 @@ export default function CreateQuotePage() {
           onClick={handleCreateQuote}
           loading={isLoading}
         >
-          + Create Draft
+          Mark as Draft
         </LoadingButton>
       </Box>
 
@@ -279,138 +268,6 @@ export default function CreateQuotePage() {
             onResetNewCustomer={onResetNewCustomer}
             setSelectedClient={setSelectedClient}
           />
-          {/* <ShadowSection display="flex" flexDirection="column" gap={2}>
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-            >
-              <Typography variant="body1" fontWeight="semibold">
-                Customer
-              </Typography>
-              {selectedClient && (
-                <Button color="primary" onClick={onResetNewCustomer}>
-                  New Customer
-                </Button>
-              )}
-            </Box>
-
-            {renderClientSearch()}
-
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
-                <Box display="flex" flexDirection="column" gap={1}>
-                  <Typography variant="body1" fontWeight="semibold">
-                    Client Id
-                  </Typography>
-                  {selectedClient ? (
-                    <Typography variant="body1">
-                      {selectedClient.clientId}
-                    </Typography>
-                  ) : (
-                    <TextField
-                      label="Client Id"
-                      value={client?.clientId}
-                      onChange={(e) => {
-                        setClient({
-                          ...client,
-                          clientId: e.target.value,
-                        });
-                      }}
-                    />
-                  )}
-                </Box>
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <Box display="flex" flexDirection="column" gap={1}>
-                  <Typography variant="body1" fontWeight="semibold">
-                    Client Name
-                  </Typography>
-                  {selectedClient ? (
-                    <Typography variant="body1">
-                      {selectedClient.clientName}
-                    </Typography>
-                  ) : (
-                    <TextField
-                      label="Client Name"
-                      value={client?.clientName}
-                      onChange={(e) => {
-                        setClient({
-                          ...client,
-                          clientName: e.target.value,
-                        });
-                      }}
-                    />
-                  )}
-                </Box>
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <Box display="flex" flexDirection="column" gap={1}>
-                  <Typography variant="body1" fontWeight="semibold">
-                    Email
-                  </Typography>
-                  {selectedClient ? (
-                    <Typography variant="body1">
-                      {selectedClient?.email || 'N/A'}
-                    </Typography>
-                  ) : (
-                    <TextField
-                      label="Email"
-                      value={client?.email}
-                      onChange={(e) => {
-                        setClient({
-                          ...client,
-                          email: e.target.value,
-                        });
-                      }}
-                    />
-                  )}
-                </Box>
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <Box display="flex" flexDirection="column" gap={1}>
-                  <Typography variant="body1" fontWeight="semibold">
-                    Contact Number
-                  </Typography>
-                  {selectedClient ? (
-                    <Typography variant="body1">
-                      {selectedClient?.contactNumber || 'N/A'}
-                    </Typography>
-                  ) : (
-                    <TextField
-                      label="Contact Number"
-                      value={client?.contactNumber}
-                      onChange={(e) => {
-                        setClient({
-                          ...client,
-                          contactNumber: e.target.value,
-                        });
-                      }}
-                    />
-                  )}
-                </Box>
-              </Grid>
-
-              <Grid item xs={12}>
-                <Box display="flex" flexDirection="column" gap={1}>
-                  <Typography variant="body1" fontWeight="semibold">
-                    Address
-                  </Typography>
-                  {selectedClient ? (
-                    <Typography variant="body1">
-                      {selectedClient?.deliveryAddress || 'N/A'}
-                    </Typography>
-                  ) : (
-                    <AutoCompleteAddress
-                      onDataReceived={(data) => {
-                        setAddress(data);
-                      }}
-                    />
-                  )}
-                </Box>
-              </Grid>
-            </Grid>
-          </ShadowSection> */}
 
           <ShadowSection display="flex" flexDirection="column" gap={2}>
             <Typography variant="body1" fontWeight="semibold">

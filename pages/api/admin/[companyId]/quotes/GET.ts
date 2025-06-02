@@ -13,7 +13,21 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                 id: Number(quoteId),
             },
             include: {
-                items: true,
+                items: {
+                    include: {
+                        inventoryItem: {
+                            include: {
+                                vendorItem: {
+                                    include: {
+                                        unit: true,
+                                    },
+                                },
+                            },
+                        },
+                        inventoryUnit: true,
+                    },
+                },
+                user: true,
             },
         });
 
@@ -21,9 +35,19 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             return res.status(404).json({ error: "Quote not found" });
         }
 
+        const formattedQuoteItem = quote.items.map((item) => {
+            return {
+                ...item,
+                units: item.inventoryItem.vendorItem.flatMap((vendorItem) => vendorItem.unit),
+            };
+        });
+
         return res.status(200).json({
             message: "Quote fetched successfully",
-            data: quote,
+            data: {
+                ...quote,
+                items: formattedQuoteItem,
+            },
         });
     }
 
@@ -32,7 +56,13 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             companyId: Number(companyId),
         },
         include: {
-            items: true,
+            items: {
+                include: {
+                    inventoryItem: true,
+                    inventoryUnit: true,
+                },
+            },
+            user: true,
         },
     });
 

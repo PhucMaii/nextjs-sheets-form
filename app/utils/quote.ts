@@ -1,4 +1,4 @@
-import { gstRate, pstRate } from "../lib/constant";
+import { gstRate, pstRate } from '../lib/constant';
 
 export const generateQuoteTotal = (quoteItems: any[]) => {
   const total = quoteItems.reduce((acc, item) => {
@@ -20,11 +20,11 @@ export const generateQuoteTotal = (quoteItems: any[]) => {
 
     acc.subtotal += item.price * item.quantity;
 
-    if (item?.hasPST) {
+    if (item?.hasPST || item?.inventoryItem?.hasPST) {
       acc.pst += item.price * item.quantity * pstRate;
     }
 
-    if (item?.hasGST) {
+    if (item?.hasGST || item?.inventoryItem?.hasGST) {
       acc.gst += item.price * item.quantity * gstRate;
     }
 
@@ -35,4 +35,3 @@ export const generateQuoteTotal = (quoteItems: any[]) => {
 
   return total;
 };
-

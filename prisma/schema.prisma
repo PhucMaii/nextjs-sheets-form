@@ -896,7 +896,7 @@ model Media {
 enum QuoteStatus {
   DRAFT
   SENT
-  ACCEPTED
+  CONVERTED
   REJECTED
 }
 

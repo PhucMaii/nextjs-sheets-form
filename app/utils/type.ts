@@ -23,6 +23,8 @@ import {
   POItem,
   PositionIndex,
   Promotion,
+  Quote,
+  QuoteItem,
   Route,
   ScheduledShift,
   ShiftSession,
@@ -347,4 +349,14 @@ export interface IScheduledShift extends ScheduledShift {
 export interface IEmployee extends Employee {
   scheduledShifts: IScheduledShift[];
   company: Company;
+}
+
+export interface IQuote extends Quote {
+  items: IQuoteItem[];
+  user: UserType;
+}
+
+export interface IQuoteItem extends QuoteItem {
+  inventoryItem: IInventoryItem;
+  inventoryUnit: IInventoryUnit;
 }

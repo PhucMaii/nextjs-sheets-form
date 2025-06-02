@@ -3,52 +3,101 @@ import { IconButton } from '@mui/material';
 import { InputAdornment, TextField, Typography } from '@mui/material';
 import { generateImgUrl } from '@/app/lib/s3';
 import { Grid } from '@mui/material';
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useEffect, useState, useCallback } from 'react';
 import { Trash2Icon } from 'lucide-react';
 import UnitRadio from './Radio/UnitRadio';
 
+interface QuoteItem {
+  id: string;
+  name: string;
+  inventoryItem?: {
+    name: string;
+    image?: string;
+    price?: number;
+    quantity?: number;
+    unit?: any;
+    units?: any[];
+  };
+  inventoryUnit?: any;
+  image?: string;
+  price: number;
+  quantity: number;
+  unit: any;
+  units: any[];
+}
+
 interface IProps {
-  item: any;
-  onUpdateItem: (item: any) => void;
-  onRemoveItem: (item: any) => void;
+  item: QuoteItem;
+  onUpdateItem: (item: QuoteItem) => void;
+  onRemoveItem: (item: QuoteItem) => void;
 }
 
 const QuoteItemRow = ({ item, onUpdateItem, onRemoveItem }: IProps) => {
   const [imgUrl, setImgUrl] = useState<string>('');
 
   useEffect(() => {
-    generateImgUrl(item.image).then((url) => setImgUrl(url));
-  }, [item.image]);
+    if (item?.image || item.inventoryItem?.image) {
+      generateImgUrl(item?.image || item.inventoryItem?.image || '').then(
+        (url) => setImgUrl(url),
+      );
+    }
+  }, [item.image, item.inventoryItem?.image]);
+
+  const handleUnitChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      onUpdateItem({ ...item, unit: JSON.parse(e.target.value) });
+    },
+    [item, onUpdateItem],
+  );
+
+  const handlePriceChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      onUpdateItem({ ...item, price: Number(e.target.value) });
+    },
+    [item, onUpdateItem],
+  );
+
+  const handleQuantityChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      onUpdateItem({ ...item, quantity: Number(e.target.value) });
+    },
+    [item, onUpdateItem],
+  );
+
+  const handleRemove = useCallback(() => {
+    onRemoveItem(item);
+  }, [item, onRemoveItem]);
 
   return (
     <>
       <Grid item xs={12} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        {item?.image && (
-          <img
-            src={imgUrl}
-            alt={item.name}
-            width={50}
-            height={50}
-            style={{ borderRadius: 4 }}
-          />
-        )}
-        <Typography sx={{ fontWeight: 'semibold' }}>{item.name}</Typography>
+        {item?.image ||
+          (item.inventoryItem?.image && (
+            <img
+              src={imgUrl}
+              alt={item.inventoryItem?.name || item.name}
+              width={50}
+              height={50}
+              style={{ borderRadius: 4 }}
+            />
+          ))}
+        <Typography sx={{ fontWeight: 'semibold' }}>
+          {item.inventoryItem?.name || item.name}
+        </Typography>
       </Grid>
       <Grid item xs={12}>
         <UnitRadio
-          value={JSON.stringify(item?.unit)}
-          units={item.units}
-          onChange={(e: any) =>
-            onUpdateItem({ ...item, unit: JSON.parse(e.target.value) })
-          }
+          value={JSON.stringify(item?.unit || item?.inventoryUnit)}
+          units={item.units || item.inventoryItem?.units || []}
+          onChange={handleUnitChange}
         />
       </Grid>
 
       <Grid item xs={5}>
         <TextField
-          value={item.price}
+          value={item.price || item.inventoryItem?.price}
           fullWidth
-          onChange={(e) => onUpdateItem({ ...item, price: e.target.value })}
+          onChange={handlePriceChange}
           type="number"
           InputProps={{
             startAdornment: <InputAdornment position="start">$</InputAdornment>,
@@ -58,17 +107,24 @@ const QuoteItemRow = ({ item, onUpdateItem, onRemoveItem }: IProps) => {
 
       <Grid item xs={5}>
         <TextField
-          value={item.quantity}
+          value={item.quantity || item.inventoryItem?.quantity}
           fullWidth
-          onChange={(e) => onUpdateItem({ ...item, quantity: e.target.value })}
+          onChange={handleQuantityChange}
+          type="number"
         />
       </Grid>
 
       <Grid item xs={2} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Typography sx={{ fontWeight: 'semibold' }}>
-          ${item.price * item.quantity}
+          $
+          {item.price
+            ? (item.price * item.quantity).toFixed(2)
+            : (
+                (item.inventoryItem?.price || 0) *
+                (item.inventoryItem?.quantity || 0)
+              ).toFixed(2)}
         </Typography>
-        <IconButton size="small" onClick={() => onRemoveItem(item)}>
+        <IconButton size="small" onClick={handleRemove}>
           <Trash2Icon style={{ width: 16, height: 16 }} />
         </IconButton>
       </Grid>
@@ -81,8 +137,12 @@ const QuoteItemRow = ({ item, onUpdateItem, onRemoveItem }: IProps) => {
 
 export default memo(QuoteItemRow, (prevProps, nextProps) => {
   return (
-    Object.is(prevProps.item, nextProps.item) &&
-    Object.is(prevProps.onUpdateItem, nextProps.onUpdateItem) &&
-    Object.is(prevProps.onRemoveItem, nextProps.onRemoveItem)
+    prevProps.item.id === nextProps.item.id &&
+    prevProps.item.price === nextProps.item.price &&
+    prevProps.item.quantity === nextProps.item.quantity &&
+    JSON.stringify(prevProps.item.unit) ===
+      JSON.stringify(nextProps.item.unit) &&
+    prevProps.onUpdateItem === nextProps.onUpdateItem &&
+    prevProps.onRemoveItem === nextProps.onRemoveItem
   );
 });
