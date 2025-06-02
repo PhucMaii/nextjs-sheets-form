@@ -83,8 +83,6 @@ export default function EditScheduledShift({
     }
   };
 
-  console.log(shifts, 'shifts');
-
   const handleUpdateShift = async () => {
     try {
       setIsUpdating(true);

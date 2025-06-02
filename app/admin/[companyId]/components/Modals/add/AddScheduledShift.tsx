@@ -92,7 +92,7 @@ export default function AddScheduledShift({
               dateStyle: 'full',
             }),
             queryDate: newShift.startedAt.format('MM/DD/YYYY'),
-            hours,
+            hours: Math.round(hours * 100) / 100,
           },
         },
       );

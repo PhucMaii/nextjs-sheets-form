@@ -38,7 +38,7 @@ import {
   successColor,
   warningColor,
 } from '../../theme/color';
-import { amber, brown, grey, orange } from '@mui/material/colors';
+import { amber, blue, brown, grey, orange } from '@mui/material/colors';
 import CampaignIcon from '@mui/icons-material/Campaign';
 import { AccessTime } from '@mui/icons-material';
 import ReportIcon from '@mui/icons-material/Report';
@@ -528,6 +528,17 @@ export const userCategorizedColor: any = {
   Inactive: {
     color: 'black',
     backgroundColor: grey[200],
+  },
+};
+
+export const shiftColors = {
+  Driver: {
+    color: 'black',
+    backgroundColor: blue[50]
+  },
+  'In Factory': {
+    color: 'black',
+    backgroundColor: orange[100],
   },
 };
 

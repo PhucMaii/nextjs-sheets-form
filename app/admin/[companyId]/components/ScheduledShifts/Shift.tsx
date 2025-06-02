@@ -1,3 +1,4 @@
+import { shiftColors } from '@/app/lib/constant';
 import { formatTime } from '@/app/utils/number';
 import { IScheduledShift } from '@/app/utils/type';
 import { useSortable } from '@dnd-kit/sortable';
@@ -53,7 +54,14 @@ export default function Shift({ shift, onCopyShift, onOpenEditShift }: IProps) {
         // alignItems="center"
         justifyContent="center"
         gap={0.2}
-        sx={{ backgroundColor: blue[50], py: 0.5, px: 0.5, borderRadius: 1 }}
+        sx={{
+          backgroundColor:
+            shiftColors[shift?.role as keyof typeof shiftColors]
+              ?.backgroundColor || blue[50],
+          py: 0.5,
+          px: 0.5,
+          borderRadius: 1,
+        }}
         onClick={onOpenEditShift}
       >
         <Box display="flex" justifyContent="space-between" width="100%">
