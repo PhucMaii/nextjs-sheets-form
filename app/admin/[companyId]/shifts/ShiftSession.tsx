@@ -17,7 +17,7 @@ import SelectDateRange from '../components/Select/SelectDateRange';
 import { ShadowSection } from '../reports/styled';
 import axios from 'axios';
 import useNotification from '@/hooks/useNotification';
-import { getAdminApiUrl, SHIFT_STATUS } from '@/app/utils/enum';
+import { getAdminApiUrl } from '@/app/utils/enum';
 import { SWRFetchData } from '@/app/utils/db';
 import { IShiftSession } from '@/app/utils/type';
 import ShiftAdminDisplay from '../components/ShiftAdminDisplay';
@@ -31,7 +31,7 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import PermContactCalendarIcon from '@mui/icons-material/PermContactCalendar';
 import ConfirmToPayShifts from '../components/Modals/ConfirmToPayShifts';
-import PayrollCSV from '../components/CSV/PayrollCSV';
+// import PayrollCSV from '../components/CSV/PayrollCSV';
 import { useParams } from 'next/navigation';
 
 export default function ShiftSession() {
@@ -62,41 +62,41 @@ export default function ShiftSession() {
     ),
   );
 
-  const driverDataReport = useMemo(() => {
-    if (selectedShifts.length === 0 && !shiftSessions?.data) {
-      return [];
-    }
+  // const driverDataReport = useMemo(() => {
+  //   if (selectedShifts.length === 0 && !shiftSessions?.data) {
+  //     return [];
+  //   }
 
-    const toCalculateShifts =
-      selectedShifts.length > 0 ? selectedShifts : shiftSessions?.data;
+  //   const toCalculateShifts =
+  //     selectedShifts.length > 0 ? selectedShifts : shiftSessions?.data;
 
-    const unpaidShifts = toCalculateShifts?.filter(
-      (shift: any) => shift.status === SHIFT_STATUS.UNPAID,
-    );
+  //   const unpaidShifts = toCalculateShifts?.filter(
+  //     (shift: any) => shift.status === SHIFT_STATUS.UNPAID,
+  //   );
 
-    return unpaidShifts.reduce((acc: any, shift: any) => {
-      const existedDriver = acc.find(
-        (driver: any) => driver.id === shift.employeeId,
-      );
+  //   return unpaidShifts.reduce((acc: any, shift: any) => {
+  //     const existedDriver = acc.find(
+  //       (driver: any) => driver.id === shift.employeeId,
+  //     );
 
-      if (existedDriver) {
-        existedDriver.hours += shift.hours;
-        existedDriver.shifts++;
-        existedDriver.total += shift.cost;
-      } else {
-        acc.push({
-          id: shift?.employeeId || shift?.driverId,
-          name: shift?.employee?.name || shift?.driver?.name,
-          hours: shift.hours,
-          shifts: 1,
-          payRate: shift?.employee?.payRate || shift?.driver?.payRate,
-          total: shift.cost,
-        });
-      }
+  //     if (existedDriver) {
+  //       existedDriver.hours += shift.hours;
+  //       existedDriver.shifts++;
+  //       existedDriver.total += shift.cost;
+  //     } else {
+  //       acc.push({
+  //         id: shift?.employeeId || shift?.driverId,
+  //         name: shift?.employee?.name || shift?.driver?.name,
+  //         hours: shift.hours,
+  //         shifts: 1,
+  //         payRate: shift?.employee?.payRate || shift?.driver?.payRate,
+  //         total: shift.cost,
+  //       });
+  //     }
 
-      return acc;
-    }, []);
-  }, [selectedShifts, shiftSessions]);
+  //     return acc;
+  //   }, []);
+  // }, [selectedShifts, shiftSessions]);
 
   const totalShifts = useMemo(() => {
     if (!shiftSessions?.data) {
@@ -328,7 +328,7 @@ export default function ShiftSession() {
             >
               Approve & Pay
             </Button>
-            <PayrollCSV driverData={driverDataReport} />
+            {/* <PayrollCSV driverData={driverDataReport} /> */}
             <Button
               onClick={() => setIsOpenAddShift(true)}
               variant="contained"

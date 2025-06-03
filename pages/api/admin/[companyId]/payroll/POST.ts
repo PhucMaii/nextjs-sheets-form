@@ -19,7 +19,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       endDate,
       yyyymmddStartDate,
       yyyymmddEndDate,
-      employeeIds,
+      employeeId,
     } = req.body;
 
     if (
@@ -29,7 +29,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       !endDate ||
       !yyyymmddStartDate ||
       !yyyymmddEndDate ||
-      !employeeIds
+      !employeeId
     ) {
       return res.status(400).json({ error: 'Missing required parameters' });
     }
@@ -38,7 +38,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     const today = getTodayDate();
 
-    const newPayrolls = employeeIds.map((employeeId: number) => ({
+    const newPayroll = {
       hours: Number(hours),
       total: Number(total),
       startDate: yyyymmddStartDate,
@@ -47,10 +47,10 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       createdAt: today.dateAndTime,
       createdBy,
       companyId: Number(companyId),
-    }));
+    };
 
-    const payroll = await prisma.payroll.createMany({
-      data: newPayrolls,
+    const payroll = await prisma.payroll.create({
+      data: newPayroll,
     });
 
     return res

@@ -1,13 +1,12 @@
 import { DateRange as DateRangeIcon } from '@mui/icons-material';
 import {
   Box,
-  Button,
   Grid,
   InputAdornment,
   OutlinedInput,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import useEmployee from '@/hooks/select/useEmployee';
 import DateRange from './Modals/DateRangeModal';
 import { ClockIcon } from 'lucide-react';
@@ -17,6 +16,7 @@ import { getAdminApiUrl } from '@/app/utils/enum';
 import { useParams } from 'next/navigation';
 import { LoadingButton } from '@mui/lab';
 import { YYYYMMDDFormat } from '@/app/utils/time';
+import { PayrollType } from '@prisma/client';
 
 interface IProps {
   startDate: Date;
@@ -39,15 +39,40 @@ export default function CreatePayroll({
   const [newPayroll, setNewPayroll] = useState<any>({
     hours: 0,
     total: 0,
-    employeeIds: [],
+    employeeId: -1,
   });
   const [dateRange, setDateRange] = useState<Date[]>([startDate, endDate]);
   const [isCreating, setIsCreating] = useState<boolean>(false);
-  const { renderMultipleEmployeeSearch, selectedEmployees } = useEmployee();
+  const { renderEmployeeSearch, selectedEmployeeData } = useEmployee();
+
+  useEffect(() => {
+    if (selectedEmployeeData) {
+      setNewPayroll((prevPayroll: any) => ({
+        ...prevPayroll,
+        total:
+          selectedEmployeeData.payrollType === PayrollType.monthly
+            ? selectedEmployeeData.payRate
+            : 0,
+        employeeId: selectedEmployeeData.id,
+      }));
+    }
+  }, [selectedEmployeeData]);
+
+  useEffect(() => {
+    if (
+      newPayroll.hours >= 0 &&
+      selectedEmployeeData?.payrollType === PayrollType.hourly
+    ) {
+      setNewPayroll({
+        ...newPayroll,
+        total: newPayroll.hours * selectedEmployeeData.payRate,
+      });
+    }
+  }, [newPayroll.hours, selectedEmployeeData]);
 
   const handleCreatePayroll = async () => {
     if (
-      selectedEmployees.length === 0 ||
+      !selectedEmployeeData ||
       newPayroll.hours === 0 ||
       newPayroll.total === 0
     ) {
@@ -64,7 +89,7 @@ export default function CreatePayroll({
         endDate: dateRange[1],
         yyyymmddStartDate: YYYYMMDDFormat(dateRange[0]),
         yyyymmddEndDate: YYYYMMDDFormat(dateRange[1]),
-        employeeIds: selectedEmployees.map((employee) => employee.id),
+        employeeId: newPayroll.employeeId,
       });
 
       if (response.data.error) {
@@ -99,7 +124,7 @@ export default function CreatePayroll({
             sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
           >
             <Typography>Employee</Typography>
-            {renderMultipleEmployeeSearch()}
+            {renderEmployeeSearch()}
           </Grid>
 
           <Grid

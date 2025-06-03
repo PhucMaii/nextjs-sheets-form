@@ -1,6 +1,8 @@
-import { Button, Dialog, DialogContent } from '@mui/material';
+import { Box, Button, Dialog, DialogContent, IconButton } from '@mui/material';
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import Calendar from 'react-calendar';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
 import 'react-calendar/dist/Calendar.css';
 
@@ -8,12 +10,16 @@ interface PropTypes {
   dateRange: any;
   setDateRange: Dispatch<SetStateAction<any>>;
   variant?: any;
+  style?: any;
+  navigation?: boolean;
 }
 
 export default function SelectDateRange({
   dateRange,
   setDateRange,
   variant,
+  style,
+  navigation,
 }: PropTypes) {
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
   const [isDateFullySelected, setIsDateFullySelected] =
@@ -51,6 +57,26 @@ export default function SelectDateRange({
     }
   };
 
+  const handleNextMonth = () => {
+    const nextStartDate = new Date(dateRange[0]);
+    nextStartDate.setMonth(nextStartDate.getMonth() + 1);
+
+    const nextEndDate = new Date(dateRange[1]);
+    nextEndDate.setMonth(nextEndDate.getMonth() + 1);
+
+    setDateRange([nextStartDate, nextEndDate]);
+  };
+
+  const handlePreviousMonth = () => {
+    const previousStartDate = new Date(dateRange[0]);
+    previousStartDate.setMonth(previousStartDate.getMonth() - 1);
+
+    const previousEndDate = new Date(dateRange[1]);
+    previousEndDate.setMonth(previousEndDate.getMonth() - 1);
+
+    setDateRange([previousStartDate, previousEndDate]);
+  };
+
   const renderDateRange = () => {
     if (
       !dateRange[0] ||
@@ -61,18 +87,35 @@ export default function SelectDateRange({
         <Button
           variant={variant ? variant : 'outlined'}
           onClick={handleDateOpen}
+          sx={style}
         >
-          Select Date Range
+          Select Date Range 
         </Button>
       );
     }
 
     return (
-      <Button variant={variant ? variant : 'outlined'} onClick={handleDateOpen}>
-        {dateRange[0] &&
-          dateRange[1] &&
-          `${dateRange[0]?.toDateString()} - ${dateRange[1]?.toDateString()}`}
-      </Button>
+      <Box>
+        {navigation && (
+          <IconButton onClick={handlePreviousMonth}>
+            <ArrowBackIosNewIcon fontSize="small" />
+          </IconButton>
+        )}
+        <Button
+          variant={variant ? variant : 'outlined'}
+          onClick={handleDateOpen}
+          sx={style}
+        >
+          {dateRange[0] &&
+            dateRange[1] &&
+            `${dateRange[0]?.toDateString()} - ${dateRange[1]?.toDateString()}`}
+        </Button>
+        {navigation && (
+          <IconButton onClick={handleNextMonth}>
+            <ArrowForwardIosIcon fontSize="small" />
+          </IconButton>
+        )}
+      </Box>
     );
   };
   return (

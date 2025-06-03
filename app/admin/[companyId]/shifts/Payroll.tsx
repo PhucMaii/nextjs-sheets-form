@@ -16,6 +16,8 @@ import useNotification from '@/hooks/useNotification';
 import { getAdminApiUrl } from '@/app/utils/enum';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
+import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
+import PayrollCSV from '../components/CSV/PayrollCSV';
 
 export default function Payroll() {
   const { companyId }: any = useParams();
@@ -23,6 +25,7 @@ export default function Payroll() {
   const [dateRange, setDateRange] = useState<any[]>(generateMonthRange());
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [payrolls, setPayrolls] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const { showNotification, NotificationComp } = useNotification();
 
@@ -34,6 +37,7 @@ export default function Payroll() {
 
   const fetchPayrolls = async () => {
     try {
+      setIsLoading(true);
       const response = await axios.get(
         getAdminApiUrl(
           companyId,
@@ -51,8 +55,48 @@ export default function Payroll() {
     } catch (error: any) {
       console.log('There was an error: ', error);
       showNotification('error', 'There was an error fetching the payrolls');
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  // const handleExport = async () => {
+  //   try {
+  //     setIsExporting(true);
+  //     const response = await fetch(
+  //       getAdminApiUrl(
+  //         companyId,
+  //         '/payroll/export',
+  //         `startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
+  //       ),
+  //       {
+  //         method: 'POST',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //         },
+  //         body: JSON.stringify({
+  //           yyyymmddStartDate: YYYYMMDDFormat(dateRange[0]),
+  //           yyyymmddEndDate: YYYYMMDDFormat(dateRange[1]),
+  //         }),
+  //       },
+  //     );
+
+  //     const blob = await response.blob();
+  //     const url = window.URL.createObjectURL(blob);
+  //     const a = document.createElement('a');
+  //     a.href = url;
+  //     a.download = `payroll-${YYYYMMDDFormat(dateRange[0])}-${YYYYMMDDFormat(dateRange[1])}.pdf`;
+  //     a.click();
+  //     window.URL.revokeObjectURL(url);
+
+  //     showNotification('success', 'Payroll exported successfully');
+  //   } catch (error: any) {
+  //     console.log('There was an error: ', error);
+  //   } finally {
+  //     setIsExporting(false);
+  //   }
+  // };
+
   return (
     <>
       {NotificationComp}
@@ -71,7 +115,18 @@ export default function Payroll() {
           alignItems="center"
         >
           <Typography variant="h6">Payroll</Typography>
-          <SelectDateRange dateRange={dateRange} setDateRange={setDateRange} />
+          <Box display="flex" flexDirection="row" gap={1} alignItems="center">
+            {/* <LoadingButton
+              loading={isExporting}
+              variant="outlined"
+              color="primary"
+              size="small"
+              onClick={handleExport}
+            >
+              Export
+            </LoadingButton> */}
+            <PayrollCSV payrolls={payrolls} />
+          </Box>
         </Box>
 
         <ShadowSection display="flex" flexDirection="column" gap={1}>
@@ -105,11 +160,31 @@ export default function Payroll() {
             </Button>
           </Box>
 
-          <PayrollTable
-            data={payrolls}
-            showNotification={showNotification}
-            refresh={fetchPayrolls}
-          />
+          <Box
+            display="flex"
+            flexDirection="row"
+            gap={1}
+            alignItems="center"
+            justifyContent="center"
+            sx={{ width: '100%' }}
+          >
+            <SelectDateRange
+              variant="standard"
+              dateRange={dateRange}
+              setDateRange={setDateRange}
+              navigation
+            />
+          </Box>
+
+          {isLoading ? (
+            <LoadingComponent />
+          ) : (
+            <PayrollTable
+              data={payrolls}
+              showNotification={showNotification}
+              refresh={fetchPayrolls}
+            />
+          )}
         </ShadowSection>
       </Box>
     </>

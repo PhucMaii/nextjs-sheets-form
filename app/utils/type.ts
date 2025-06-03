@@ -352,7 +352,7 @@ export interface IEmployee extends Employee {
 
 export interface IPayroll extends Payroll {
   employee: IEmployee;
-  shifts: number;
-  company: Company;
+  shifts?: number;
+  company?: Company;
 
 }

@@ -20,11 +20,15 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       formattedEndDate,
     );
 
+    console.log(listOfDateString);
+
     const payrolls = await prisma.payroll.findMany({
       where: {
         companyId: Number(companyId),
-        startDate: { in: listOfDateString },
-        endDate: { in: listOfDateString },
+        OR: [
+          { startDate: { in: listOfDateString } },
+          { endDate: { in: listOfDateString } },
+        ],
       },
       include: {
         employee: true,

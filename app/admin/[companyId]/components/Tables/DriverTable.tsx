@@ -44,7 +44,8 @@ export default function DriverTable({
             <TableCell>Employee Code</TableCell>
             <TableCell>Role</TableCell>
             <TableCell>Total Routes</TableCell>
-            <TableCell>Hourly Rate</TableCell>
+            <TableCell>Pay Rate ($)</TableCell>
+            <TableCell>Payroll Type</TableCell>
             <TableCell></TableCell>
           </TableRow>
         </TableHead>
@@ -74,6 +75,9 @@ export default function DriverTable({
                   <TableCell>{driver.routes.length}</TableCell>
                   <TableCell>
                     ${driver?.payRate?.toFixed(2) || 0}
+                  </TableCell>
+                  <TableCell>
+                    {driver?.payrollType}
                   </TableCell>
                   <TableCell>
                     <Box display="flex" flexDirection="row" gap={1}>

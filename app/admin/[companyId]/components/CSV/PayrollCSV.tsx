@@ -2,27 +2,31 @@ import { Box, Button, Typography } from '@mui/material';
 import React, { memo } from 'react';
 import { CSVLink } from 'react-csv';
 import { DownloadIcon } from 'lucide-react';
+import { IPayroll } from '@/app/utils/type';
+import { PayrollType } from '@prisma/client';
 
 interface IProps {
-  driverData: any[];
+  payrolls: IPayroll[];
   style?: any;
 }
 
-const PayrollCSV = ({ driverData, style }: IProps) => {
+const PayrollCSV = ({ payrolls, style }: IProps) => {
   const headers = [
     { label: 'Driver', key: 'name' },
-    { label: 'Shifts', key: 'shifts' },
+    { label: 'Role', key: 'role' },
     { label: 'Hours', key: 'hours' },
-    { label: 'Pay Rate ($)', key: 'payRate' },
+    { label: 'Hourly Rate ($)', key: 'hourlyRate' },
+    { label: 'Monthly Rate ($)', key: 'monthlyRate' },
     { label: 'Total ($)', key: 'total' },
   ];
 
-  const formattedData = driverData.map((driver) => ({
-    name: driver.name,
-    shifts: driver.shifts,
-    hours: driver.hours?.toFixed(2),
-    payRate: driver.payRate,
-    total: driver.total?.toFixed(2),
+  const formattedData = payrolls.map((payroll) => ({
+    name: payroll.employee.name,
+    role: payroll.employee.role,
+    hours: payroll.hours?.toFixed(2),
+    hourlyRate: payroll.employee.payrollType === PayrollType.hourly ? payroll.employee.payRate?.toFixed(2) || '0.00' : 'N/A',
+    monthlyRate: payroll.employee.payrollType === PayrollType.monthly ? payroll.employee.payRate?.toFixed(2) || '0.00' : 'N/A',
+    total: payroll.total?.toFixed(2),
   }));
 
   return (
@@ -45,5 +49,5 @@ const PayrollCSV = ({ driverData, style }: IProps) => {
 };
 
 export default memo(PayrollCSV, (prev, next) => {
-  return Object.is(prev.driverData, next.driverData);
+  return Object.is(prev.payrolls, next.payrolls);
 });

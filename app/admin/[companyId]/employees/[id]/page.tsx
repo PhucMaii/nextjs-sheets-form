@@ -72,6 +72,7 @@ export default function EmployeeDetailPage() {
           employeeCode: employee?.employeeCode,
           payRate: employee?.payRate,
           role: employee?.role,
+          payrollType: employee?.payrollType,
         },
         pageViews,
       });

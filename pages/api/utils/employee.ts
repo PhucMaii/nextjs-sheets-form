@@ -13,6 +13,10 @@ const getRole = (role: string, name: string) => {
         return 'S Admin - ' + name;
       }
 
+      if (role === USER_ROLE.WAREHOUSE) {
+        return 'Warehouse - ' + name;
+      }
+
       return name;
 };
 
@@ -27,6 +31,10 @@ const decodeRole = (role: string) => {
 
     if (role.includes('S Admin')) {
         return USER_ROLE.SUPER_ADMIN;
+    }
+
+    if (role.includes('Warehouse')) {
+        return USER_ROLE.WAREHOUSE;
     }
 
     return USER_ROLE.GUEST;

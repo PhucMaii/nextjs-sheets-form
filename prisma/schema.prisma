@@ -921,7 +921,6 @@ enum ScheduledShiftStatus {
 }
 
 enum PayrollType {
-  daily
   hourly
-  salary
+  monthly
 }

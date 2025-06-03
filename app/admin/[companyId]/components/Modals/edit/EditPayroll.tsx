@@ -16,7 +16,6 @@ import { generateMonthRange, YYYYMMDDFormat } from '@/app/utils/time';
 import { LoadingButton } from '@mui/lab';
 import { Trash2Icon } from 'lucide-react';
 import DateRange from '../DateRangeModal';
-import { fetchApi } from '@/app/utils/db';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import { getAdminApiUrl } from '@/app/utils/enum';
 import { useParams } from 'next/navigation';

@@ -47,8 +47,6 @@ export default function StatementPage() {
     return { title: `${month}/${year}`, totalPrice };
   }, [currentMonthOrders]);
 
-  console.log(prevStatements);
-
   const sortedLatestGroupOrders = useMemo(() => {
     if (!prevStatements) {
       return [];

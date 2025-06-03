@@ -1,5 +1,13 @@
 import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
-import { Autocomplete, Box, Checkbox, MenuItem, Select, TextField, Typography } from '@mui/material';
+import {
+  Autocomplete,
+  Box,
+  Checkbox,
+  MenuItem,
+  Select,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { getAdminApiUrl } from '@/app/utils/enum';
@@ -30,12 +38,14 @@ const useEmployee = (defaultEmployee?: string) => {
 
   useEffect(() => {
     if (selectedEmployee && allEmployees.length > 0) {
-      setSelectedEmployeeData(allEmployees.find((employee) => {
-        const role = decodeRole(selectedEmployee);
-        const name = selectedEmployee.split(' - ')[1];
+      setSelectedEmployeeData(
+        allEmployees.find((employee) => {
+          const role = decodeRole(selectedEmployee);
+          const name = selectedEmployee.split(' - ')[1];
 
-        return employee.role === role && employee.name === name;
-      }));
+          return employee.role === role && employee.name.includes(name);
+        }),
+      );
     }
   }, [selectedEmployee, allEmployees]);
 
@@ -57,7 +67,7 @@ const useEmployee = (defaultEmployee?: string) => {
     } catch (error: any) {
       console.log(error);
     }
-  }
+  };
 
   useEffect(() => {
     if (companyId) {
@@ -84,27 +94,30 @@ const useEmployee = (defaultEmployee?: string) => {
 
   const renderMultipleEmployeeSearch = () => {
     return (
-      <Autocomplete 
+      <Autocomplete
         multiple
         options={allEmployees}
         getOptionLabel={(option) => option.name}
         renderInput={(params) => <TextField {...params} />}
         renderOption={(props, option) => {
-          const isSelected = selectedEmployees.some((employee) => employee.id === option.id);
+          const isSelected = selectedEmployees.some(
+            (employee) => employee.id === option.id,
+          );
           return (
-          <MenuItem value={option.id} {...props}>
-            <Box display="flex" alignItems="center" gap={1}>
-              <Checkbox checked={isSelected} />
-              <Typography>{option.name}</Typography>
-            </Box>
-          </MenuItem>
-        )}}  
+            <MenuItem value={option.id} {...props}>
+              <Box display="flex" alignItems="center" gap={1}>
+                <Checkbox checked={isSelected} />
+                <Typography>{option.name}</Typography>
+              </Box>
+            </MenuItem>
+          );
+        }}
         value={selectedEmployees}
         onChange={(e, value) => setSelectedEmployees(value)}
         disableCloseOnSelect
       />
     );
-  }
+  };
 
   return {
     selectedEmployee,
