@@ -35,7 +35,11 @@ export default function Payroll() {
   const fetchPayrolls = async () => {
     try {
       const response = await axios.get(
-        getAdminApiUrl(companyId, '/payroll', `startDate=${dateRange[0]}&endDate=${dateRange[1]}`),
+        getAdminApiUrl(
+          companyId,
+          '/payroll',
+          `startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
+        ),
       );
 
       if (response.data.error) {
@@ -101,7 +105,11 @@ export default function Payroll() {
             </Button>
           </Box>
 
-          <PayrollTable data={payrolls}  />
+          <PayrollTable
+            data={payrolls}
+            showNotification={showNotification}
+            refresh={fetchPayrolls}
+          />
         </ShadowSection>
       </Box>
     </>

@@ -2,6 +2,8 @@ import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { NextApiRequest, NextApiResponse } from 'next';
 import GET from './GET';
 import POST from './POST';
+import PUT from './PUT';
+import DELETE from './DELETE';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -11,6 +13,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     if (req.method === 'POST') {
       return POST(req, res);
+    }
+
+    if (req.method === 'PUT') {
+      return PUT(req, res);
+    }
+
+    if (req.method === 'DELETE') {
+      return DELETE(req, res);
     }
 
     return res.status(405).json({ error: 'Method not allowed' });
