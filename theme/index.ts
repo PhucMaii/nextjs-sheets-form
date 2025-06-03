@@ -34,6 +34,11 @@ export function createTheme() {
           size: 'small', // Set default size to 'small'
         },
       },
+      MuiOutlinedInput: {
+        defaultProps: {
+          size: 'small', // Set default size to 'small'
+        },
+      },
       MuiSelect: {
         defaultProps: {
           size: 'small', // Default size for Select

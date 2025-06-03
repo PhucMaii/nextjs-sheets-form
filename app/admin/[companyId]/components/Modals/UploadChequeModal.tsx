@@ -19,6 +19,7 @@ import DisplayFile from './DisplayFile';
 import { useParams } from 'next/navigation';
 import dayjs from 'dayjs';
 import DateRange from './DateRangeModal';
+import { generateMonthRange } from '@/app/utils/time';
 
 interface IProps extends ModalProps {
   showNotification: (type: AlertColor, message: string) => void;
@@ -45,10 +46,10 @@ export default function UploadChequeModal({
   const [chequeData, setChequeData] = useState<any>({
     chequeNumber: '',
     amount: 0,
-    startDate: dayjs(new Date()).format('MM/DD/YYYY'),
-    endDate: dayjs(new Date()).format('MM/DD/YYYY'),
+    // dateRange: dateRange,
     year,
   });
+  const [dateRange, setDateRange] = useState<Date[]>(generateMonthRange());
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -65,7 +66,7 @@ export default function UploadChequeModal({
       back: '',
     });
   }, [open]);
-  
+
   const handleUpload = async () => {
     console.log(client, 'client');
     if (!client) {
@@ -88,8 +89,10 @@ export default function UploadChequeModal({
       const response = await axios.post(getAdminApiUrl(companyId, '/cheque'), {
         ...chequeData,
         userId: client.id,
-        startDate: chequeData.startDate ? dayjs(chequeData.startDate).format('MM/DD/YYYY') : null,
-        endDate: chequeData.endDate ? dayjs(chequeData.endDate).format('MM/DD/YYYY') : null,
+        startDate: dateRange[0]
+          ? dayjs(dateRange[0]).format('MM/DD/YYYY')
+          : null,
+        endDate: dateRange[1] ? dayjs(dateRange[1]).format('MM/DD/YYYY') : null,
         fileKeyFront: cheque.front,
         fileKeyBack: cheque.back,
       });
@@ -111,165 +114,112 @@ export default function UploadChequeModal({
 
   return (
     <>
-    <DateRange 
-    open={isSelectRangeOpen}
-    onClose={() => setIsSelectRangeOpen(false)}
-    dateRange={chequeData.startDate && chequeData.endDate ? [new Date(chequeData.startDate), new Date(chequeData.endDate)] : []}
-    setDateRange={(dateRange: any) => {
-      setChequeData({
-        ...chequeData,
-        startDate: dateRange[0],
-        endDate: dateRange[1],
-      });
-    }}
-    />
-    <Modal open={open} onClose={onClose}>
-      <BoxModal maxHeight="80vh" overflow="auto">
-        <ModalHead
-          heading="Upload Cheque"
-          buttonLabel="UPLOAD"
-          onClick={handleUpload}
-          buttonProps={{ loading: isLoading }}
-          onClose={onClose}
-        />
-
-        <Divider sx={{ my: 2 }} />
-
-        <Box display="flex" flexDirection="column" gap={2} mb={2}>
-          <Typography>Front of cheque</Typography>
-          {cheque?.front && <DisplayFile fileKey={cheque.front} isCheque />}
-          <FileUpload
-            showNotification={showNotification}
-            fileName={`${dayjs(chequeData.startDate).format('MM/DD/YYYY')}-${year}-${client?.clientId}_front`}
-            uploadLocation={`cheques/${year}/${dayjs(chequeData.startDate).format('MM/DD/YYYY')}`}
-            onUploadImageUI={(fileKey: string) => {
-              setCheque({
-                ...cheque,
-                front: fileKey,
-              });
-            }}
-            isCheque
+      <DateRange
+        open={isSelectRangeOpen}
+        onClose={() => setIsSelectRangeOpen(false)}
+        dateRange={dateRange}
+        setDateRange={setDateRange}
+      />
+      <Modal open={open} onClose={onClose}>
+        <BoxModal maxHeight="80vh" overflow="auto">
+          <ModalHead
+            heading="Upload Cheque"
+            buttonLabel="UPLOAD"
+            onClick={handleUpload}
+            buttonProps={{ loading: isLoading }}
+            onClose={onClose}
           />
 
-          <Typography>Back of cheque</Typography>
-          {cheque?.back && <DisplayFile fileKey={cheque.back} isCheque />}
-          <FileUpload
-            showNotification={showNotification}
-            fileName={`${dayjs(chequeData.endDate).format('MM/DD/YYYY')}-${year}-${client?.clientId}_back`}
-            uploadLocation={`cheques/${year}/${dayjs(chequeData.endDate).format('MM/DD/YYYY')}`}
-            onUploadImageUI={(fileKey: string) => {
-              setCheque({
-                ...cheque,
-                back: fileKey,
-              });
-            }}
-            isCheque
-          />
+          <Divider sx={{ my: 2 }} />
 
-          <Typography variant="h6" fontWeight="regular">
-            Cheque Number
-          </Typography>
-          <TextField
-            placeholder="Cheque Number"
-            variant="outlined"
-            size="small"
-            value={chequeData.chequeNumber}
-            onChange={(e) => {
-              setChequeData({
-                ...chequeData,
-                chequeNumber: e.target.value,
-              });
-            }}
-          />
+          <Box display="flex" flexDirection="column" gap={2} mb={2}>
+            <Typography>Front of cheque</Typography>
+            {cheque?.front && <DisplayFile fileKey={cheque.front} isCheque />}
+            <FileUpload
+              showNotification={showNotification}
+              fileName={`${dayjs(chequeData.startDate).format('MM/DD/YYYY')}-${year}-${client?.clientId}_front`}
+              uploadLocation={`cheques/${year}/${dayjs(chequeData.startDate).format('MM/DD/YYYY')}`}
+              onUploadImageUI={(fileKey: string) => {
+                setCheque({
+                  ...cheque,
+                  front: fileKey,
+                });
+              }}
+              isCheque
+            />
 
-          <Typography variant="h6" fontWeight="regular">
-            Amount ($)
-          </Typography>
-          <TextField
-            placeholder="Amount ($)"
-            variant="outlined"
-            size="small"
-            type="number"
-            value={chequeData.amount}
-            onChange={(e) => {
-              setChequeData({
-                ...chequeData,
-                amount: +e.target.value,
-              });
-            }}
-          />
+            <Typography>Back of cheque</Typography>
+            {cheque?.back && <DisplayFile fileKey={cheque.back} isCheque />}
+            <FileUpload
+              showNotification={showNotification}
+              fileName={`${dayjs(chequeData.endDate).format('MM/DD/YYYY')}-${year}-${client?.clientId}_back`}
+              uploadLocation={`cheques/${year}/${dayjs(chequeData.endDate).format('MM/DD/YYYY')}`}
+              onUploadImageUI={(fileKey: string) => {
+                setCheque({
+                  ...cheque,
+                  back: fileKey,
+                });
+              }}
+              isCheque
+            />
 
-          <Typography variant="h6" fontWeight="regular">
-            For:
-          </Typography>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={6}>
-              <TextField
-                fullWidth
-                label="From"
-                value={
-                  chequeData.startDate
-                    ? new Date(chequeData.startDate).toDateString()
-                    : ''
-                }
-                onClick={() => setIsSelectRangeOpen(true)}
-              />
-            </Grid>
-            <Grid item xs={6} textAlign="right">
-              <TextField
-                fullWidth
-                label="To"
-                value={
-                  chequeData.endDate
-                    ? new Date(chequeData.endDate).toDateString()
-                    : ''
-                }
-                onClick={() => setIsSelectRangeOpen(true)}
-              />
-            </Grid>
-            {/* <Grid item xs={6}>
-              <FormControl variant="outlined" fullWidth>
-                <InputLabel id="month-label">Month</InputLabel>
-                <Select
-                  labelId="month-label"
-                  label="Month"
-                  placeholder="Month"
+            <Typography variant="h6" fontWeight="regular">
+              Cheque Number
+            </Typography>
+            <TextField
+              placeholder="Cheque Number"
+              variant="outlined"
+              size="small"
+              value={chequeData.chequeNumber}
+              onChange={(e) => {
+                setChequeData({
+                  ...chequeData,
+                  chequeNumber: e.target.value,
+                });
+              }}
+            />
+
+            <Typography variant="h6" fontWeight="regular">
+              Amount ($)
+            </Typography>
+            <TextField
+              placeholder="Amount ($)"
+              variant="outlined"
+              size="small"
+              type="number"
+              value={chequeData.amount}
+              onChange={(e) => {
+                setChequeData({
+                  ...chequeData,
+                  amount: +e.target.value,
+                });
+              }}
+            />
+
+            <Typography variant="h6" fontWeight="regular">
+              For:
+            </Typography>
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs={6}>
+                <TextField
                   fullWidth
-                  value={chequeData.month}
-                  onChange={(e) => {
-                    setChequeData({
-                      ...chequeData,
-                      month: e.target.value,
-                    });
-                  }}
-                >
-                  {months.map((month) => (
-                    <MenuItem key={month} value={month}>
-                      {month}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+                  label="From"
+                  value={dateRange[0] ? dateRange[0].toDateString() : ''}
+                  onClick={() => setIsSelectRangeOpen(true)}
+                />
+              </Grid>
+              <Grid item xs={6} textAlign="right">
+                <TextField
+                  fullWidth
+                  label="To"
+                  value={dateRange[1] ? dateRange[1].toDateString() : ''}
+                  onClick={() => setIsSelectRangeOpen(true)}
+                />
+              </Grid>
             </Grid>
-            <Grid item xs={6}>
-              <TextField
-                placeholder="Year"
-                variant="outlined"
-                size="small"
-                fullWidth
-                value={chequeData.year}
-                onChange={(e) => {
-                  setChequeData({
-                    ...chequeData,
-                    year: e.target.value,
-                  });
-                }}
-              />
-            </Grid> */}
-          </Grid>
-        </Box>
-      </BoxModal>
-    </Modal>
+          </Box>
+        </BoxModal>
+      </Modal>
     </>
   );
 }

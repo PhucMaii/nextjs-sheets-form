@@ -19,6 +19,7 @@ import {
   LossReport,
   Option,
   PaymentMethod,
+  Payroll,
   PO,
   POItem,
   PositionIndex,
@@ -347,4 +348,11 @@ export interface IScheduledShift extends ScheduledShift {
 export interface IEmployee extends Employee {
   scheduledShifts: IScheduledShift[];
   company: Company;
+}
+
+export interface IPayroll extends Payroll {
+  employee: IEmployee;
+  shifts: number;
+  company: Company;
+
 }

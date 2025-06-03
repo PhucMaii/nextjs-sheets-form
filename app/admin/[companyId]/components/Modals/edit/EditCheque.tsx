@@ -24,6 +24,7 @@ import DisplayFile from '../DisplayFile';
 import { useParams } from 'next/navigation';
 import DateRange from '../DateRangeModal';
 import dayjs from 'dayjs';
+import { generateMonthRange } from '@/app/utils/time';
 
 interface IProps extends ModalProps {
   cheque: Cheque;
@@ -46,6 +47,7 @@ export default function EditCheque({
   });
   const [isSelectRangeOpen, setIsSelectRangeOpen] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [dateRange, setDateRange] = useState<Date[]>(generateMonthRange());
   const [updatedCheque, setUpdatedCheque] = useState<Cheque>({
     ...cheque,
   });
@@ -57,6 +59,12 @@ export default function EditCheque({
     setUpdatedCheque({
       ...cheque,
     });
+
+    if (cheque?.startDate && cheque?.endDate) {
+      setDateRange([new Date(cheque?.startDate), new Date(cheque?.endDate)]);
+    } else {
+      setDateRange(generateMonthRange());
+    }
   }, [cheque]);
 
   const handleSaveCheque = async () => {
@@ -65,8 +73,12 @@ export default function EditCheque({
       const response = await axios.put(getAdminApiUrl(companyId, '/cheque'), {
         updatedCheque: {
           ...updatedCheque,
-          startDate: updatedCheque.startDate ? dayjs(updatedCheque.startDate).format('MM/DD/YYYY') : null,
-          endDate: updatedCheque.endDate ? dayjs(updatedCheque.endDate).format('MM/DD/YYYY') : null,
+          startDate: dateRange[0]
+            ? dayjs(dateRange[0]).format('MM/DD/YYYY')
+            : null,
+          endDate: dateRange[1]
+            ? dayjs(dateRange[1]).format('MM/DD/YYYY')
+            : null,
         },
         id: cheque.id,
       });
@@ -108,14 +120,8 @@ export default function EditCheque({
       <DateRange
         open={isSelectRangeOpen}
         onClose={() => setIsSelectRangeOpen(false)}
-        dateRange={updatedCheque.startDate && updatedCheque.endDate ? [new Date(updatedCheque.startDate), new Date(updatedCheque.endDate)] : []}
-        setDateRange={(dateRange: any) => {
-          setUpdatedCheque({
-            ...updatedCheque,
-            startDate: dateRange[0],
-            endDate: dateRange[1],
-          });
-        }}
+        dateRange={dateRange}
+        setDateRange={setDateRange}
       />
       <DeleteModal
         open={deleteModalProps.open}
@@ -210,30 +216,22 @@ export default function EditCheque({
               For:
             </Typography>
             <Grid container spacing={2} alignItems="center">
-            <Grid item xs={6}>
-              <TextField
-                fullWidth
-                label="From"
-                value={
-                  updatedCheque.startDate
-                    ? new Date(updatedCheque.startDate).toDateString()
-                    : ''
-                }
-                onClick={() => setIsSelectRangeOpen(true)}
-              />
-            </Grid>
-            <Grid item xs={6} textAlign="right">
-              <TextField
-                fullWidth
-                label="To"
-                value={
-                  updatedCheque.endDate
-                    ? new Date(updatedCheque.endDate).toDateString()
-                    : ''
-                }
-                onClick={() => setIsSelectRangeOpen(true)}
-              />
-            </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  fullWidth
+                  label="From"
+                  value={dateRange[0] ? dateRange[0].toDateString() : ''}
+                  onClick={() => setIsSelectRangeOpen(true)}
+                />
+              </Grid>
+              <Grid item xs={6} textAlign="right">
+                <TextField
+                  fullWidth
+                  label="To"
+                  value={dateRange[1] ? dateRange[1].toDateString() : ''}
+                  onClick={() => setIsSelectRangeOpen(true)}
+                />
+              </Grid>
               {/* <Grid item xs={6}>
                 <FormControl variant="outlined" fullWidth>
                   <InputLabel id="month-label">Month</InputLabel>

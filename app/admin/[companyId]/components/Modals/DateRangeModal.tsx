@@ -26,6 +26,7 @@ export default function DateRange({
       dateRange[0].toDateString() !== dateRange[1].toDateString()
     ) {
       setIsDateFullySelected(true);
+      onClose();
     }
   }, [dateRange]);
 

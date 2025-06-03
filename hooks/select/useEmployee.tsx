@@ -1,5 +1,5 @@
 import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
-import { MenuItem, Select } from '@mui/material';
+import { Autocomplete, Box, Checkbox, MenuItem, Select, TextField, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { getAdminApiUrl } from '@/app/utils/enum';
@@ -13,6 +13,7 @@ const useEmployee = (defaultEmployee?: string) => {
   const [selectedEmployee, setSelectedEmployee] = useState<string>(
     defaultEmployee || '',
   );
+  const [selectedEmployees, setSelectedEmployees] = useState<any[]>([]);
   const [selectedEmployeeData, setSelectedEmployeeData] = useState<any>(null);
 
   useEffect(() => {
@@ -81,10 +82,37 @@ const useEmployee = (defaultEmployee?: string) => {
     );
   };
 
+  const renderMultipleEmployeeSearch = () => {
+    return (
+      <Autocomplete 
+        multiple
+        options={allEmployees}
+        getOptionLabel={(option) => option.name}
+        renderInput={(params) => <TextField {...params} />}
+        renderOption={(props, option) => {
+          const isSelected = selectedEmployees.some((employee) => employee.id === option.id);
+          return (
+          <MenuItem value={option.id} {...props}>
+            <Box display="flex" alignItems="center" gap={1}>
+              <Checkbox checked={isSelected} />
+              <Typography>{option.name}</Typography>
+            </Box>
+          </MenuItem>
+        )}}  
+        value={selectedEmployees}
+        onChange={(e, value) => setSelectedEmployees(value)}
+        disableCloseOnSelect
+      />
+    );
+  }
+
   return {
     selectedEmployee,
     renderEmployeeSearch,
     selectedEmployeeData,
+    renderMultipleEmployeeSearch,
+    selectedEmployees,
+    setSelectedEmployees,
   };
 };
 
