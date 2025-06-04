@@ -135,7 +135,7 @@ export default function ConvertPayroll({
 
   return (
     <Modal open={open} onClose={onClose}>
-      <BoxModal>
+      <BoxModal maxHeight="90vh" overflow="auto">
         <ModalHead
           heading="Convert To Transaction"
           buttonLabel="Convert"

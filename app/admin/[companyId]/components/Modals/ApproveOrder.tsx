@@ -52,7 +52,7 @@ export default function ApproveOrder({open, onClose, order, showNotification}: I
 
   return (
     <Modal open={open} onClose={onClose}>
-      <BoxModal>
+      <BoxModal maxHeight="90vh" overflow="auto">
         <ModalHead 
             heading="Approve Order"
             buttonLabel="Approve"

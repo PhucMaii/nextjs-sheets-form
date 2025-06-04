@@ -115,7 +115,7 @@ export default function EditPayroll({
         setDateRange={setPayrollDateRange}
       />
       <Modal open={open} onClose={onClose}>
-        <BoxModal>
+        <BoxModal maxHeight="90vh" overflow="auto">
           <ModalHead
             heading="Edit Payroll"
             buttonLabel="Save"

@@ -94,7 +94,7 @@ export default function EditPaymentMethod({
 
   return (
     <Modal open={open} onClose={onClose}>
-      <BoxModal>
+      <BoxModal maxHeight="90vh" overflow="auto">
         <ModalHead
           heading="Edit Payment Method"
           buttonLabel="EDIT"

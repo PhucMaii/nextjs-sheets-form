@@ -162,6 +162,8 @@ const EditStockPurchased = ({
     }
   }, [selectedVendorId, vendors]);
 
+  console.log(stockPurchased);
+
   useEffect(() => {
     if (stockPurchased) {
       setUpdatedExpense(stockPurchased);
@@ -271,9 +273,6 @@ const EditStockPurchased = ({
   };
 
   const calculateNewAmount = () => {
-    // const newAmount = purchasedItems.reduce((acc: number, item: any) => {
-    //   return acc + item.unit.unitPrice * item.quantity;
-    // }, 0);
     const total = purchasedItems.reduce((acc: any, item: any) => {
       if (!acc?.subTotal) {
         acc.subTotal = 0;
@@ -301,6 +300,22 @@ const EditStockPurchased = ({
     }, {});
 
     // setTotalAmount(newAmount);
+    if (purchasedItems.some((item: any) => !item.inventoryItemId)) {
+      setUpdatedExpense((prevState: any) => ({
+        ...prevState,
+        amount:
+          parseFloat(total.subTotal.toFixed(2)) +
+          (stockPurchased?.PST || 0) +
+          (stockPurchased?.GST || 0) -
+          (prevState?.discount || 0),
+        subTotal: parseFloat(total.subTotal.toFixed(2)),
+        GST: stockPurchased?.GST || 0,
+        PST: stockPurchased?.PST || 0,
+        discount: parseFloat(prevState?.discount?.toFixed(2)),
+      }));
+      return;
+    }
+
     setUpdatedExpense((prevState: any) => ({
       ...prevState,
       amount:
@@ -817,7 +832,7 @@ const EditStockPurchased = ({
                     placeholder="Enter epxense GST..."
                     fullWidth
                     type="number"
-                    value={updatedExpense?.GST || 0}
+                    value={updatedExpense?.GST || stockPurchased?.GST || 0}
                     onChange={(e) =>
                       setUpdatedExpense((prevState: any) => ({
                         ...prevState,

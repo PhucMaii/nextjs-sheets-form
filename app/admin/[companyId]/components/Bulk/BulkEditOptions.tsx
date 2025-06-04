@@ -142,7 +142,7 @@ export default function BulkEditOptions({
         noIncludeBulkAdd
       />
       <Modal open={open} onClose={onClose}>
-        <BoxModal>
+        <BoxModal maxHeight="90vh" overflow="auto">
           <ModalHead
             heading="Bulk Edit Options"
             buttonLabel="Save"

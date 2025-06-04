@@ -55,7 +55,7 @@ export default function AddOptionWarning({
 
   return (
     <Modal open={open} onClose={onClose}>
-      <BoxModal>
+      <BoxModal maxHeight="90vh" overflow="auto">
         <ModalHead
           heading="Add Option Warning"
           buttonLabel=""
