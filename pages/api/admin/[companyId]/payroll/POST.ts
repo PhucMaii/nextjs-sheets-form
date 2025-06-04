@@ -2,6 +2,7 @@ import { USER_ROLE } from '@/app/utils/enum';
 import prisma from '@/client';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { getTodayDate } from '@/pages/api/utils/date';
+import { PaymentStatus } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
@@ -47,6 +48,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       createdAt: today.dateAndTime,
       createdBy,
       companyId: Number(companyId),
+      status: PaymentStatus.Unpaid,
     };
 
     const payroll = await prisma.payroll.create({

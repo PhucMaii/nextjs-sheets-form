@@ -18,15 +18,18 @@ import axios from 'axios';
 import { useParams } from 'next/navigation';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import PayrollCSV from '../components/CSV/PayrollCSV';
+import { IPayroll } from '@/app/utils/type';
+import ConvertPayroll from '../components/Modals/ConvertPayroll';
 
 export default function Payroll() {
   const { companyId }: any = useParams();
   const [isOpenAddPayroll, setIsOpenAddPayroll] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [dateRange, setDateRange] = useState<any[]>(generateMonthRange());
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [payrolls, setPayrolls] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
+  const [selectedPayrolls, setSelectedPayrolls] = useState<IPayroll[]>([]);
+  const [isOpenConvertPayroll, setIsOpenConvertPayroll] = useState<boolean>(false);
   const { showNotification, NotificationComp } = useNotification();
 
   useEffect(() => {
@@ -60,43 +63,6 @@ export default function Payroll() {
     }
   };
 
-  // const handleExport = async () => {
-  //   try {
-  //     setIsExporting(true);
-  //     const response = await fetch(
-  //       getAdminApiUrl(
-  //         companyId,
-  //         '/payroll/export',
-  //         `startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
-  //       ),
-  //       {
-  //         method: 'POST',
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //         },
-  //         body: JSON.stringify({
-  //           yyyymmddStartDate: YYYYMMDDFormat(dateRange[0]),
-  //           yyyymmddEndDate: YYYYMMDDFormat(dateRange[1]),
-  //         }),
-  //       },
-  //     );
-
-  //     const blob = await response.blob();
-  //     const url = window.URL.createObjectURL(blob);
-  //     const a = document.createElement('a');
-  //     a.href = url;
-  //     a.download = `payroll-${YYYYMMDDFormat(dateRange[0])}-${YYYYMMDDFormat(dateRange[1])}.pdf`;
-  //     a.click();
-  //     window.URL.revokeObjectURL(url);
-
-  //     showNotification('success', 'Payroll exported successfully');
-  //   } catch (error: any) {
-  //     console.log('There was an error: ', error);
-  //   } finally {
-  //     setIsExporting(false);
-  //   }
-  // };
-
   return (
     <>
       {NotificationComp}
@@ -107,6 +73,12 @@ export default function Payroll() {
         refresh={fetchPayrolls}
         dateRange={dateRange}
       />
+      <ConvertPayroll 
+        open={isOpenConvertPayroll}
+        onClose={() => setIsOpenConvertPayroll(false)}
+        payrolls={selectedPayrolls}
+        showNotification={showNotification}
+      />
       <Box display="flex" flexDirection="column" gap={2}>
         <Box
           display="flex"
@@ -116,16 +88,16 @@ export default function Payroll() {
         >
           <Typography variant="h6">Payroll</Typography>
           <Box display="flex" flexDirection="row" gap={1} alignItems="center">
-            {/* <LoadingButton
-              loading={isExporting}
+            <Button
               variant="outlined"
               color="primary"
               size="small"
-              onClick={handleExport}
+              disabled={selectedPayrolls.length === 0}
+              onClick={() => setIsOpenConvertPayroll(true)}
             >
-              Export
-            </LoadingButton> */}
-            <PayrollCSV payrolls={payrolls} />
+              Convert to Transaction
+            </Button>
+            <PayrollCSV payrolls={selectedPayrolls || []} />
           </Box>
         </Box>
 
@@ -183,6 +155,8 @@ export default function Payroll() {
               data={payrolls}
               showNotification={showNotification}
               refresh={fetchPayrolls}
+              selectedPayrolls={selectedPayrolls}
+              setSelectedPayrolls={setSelectedPayrolls}
             />
           )}
         </ShadowSection>

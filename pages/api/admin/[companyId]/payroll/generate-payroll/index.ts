@@ -4,7 +4,7 @@ import prisma from '@/client';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { formatDate, getTodayDate } from '@/pages/api/utils/date';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
-import { PayrollType } from '@prisma/client';
+import { PaymentStatus, PayrollType } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IQuery {
@@ -84,6 +84,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         endDate: yyyymmddEndDate,
         createdAt: toady.dateAndTime,
         createdBy: createdBy,
+        status: PaymentStatus.Unpaid,
       };
     });
 

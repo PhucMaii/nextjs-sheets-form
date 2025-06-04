@@ -115,9 +115,11 @@ model Payroll {
   endDate        String
   createdAt      String
   createdBy      String
+  transactionId  Int?
 
   employee      Employee  @relation(fields: [employeeId], references: [id])
   company       Company   @relation(fields: [companyId], references: [id])
+  transaction   Expense? @relation(fields: [transactionId], references: [id])
 }
 
 model Driver {
@@ -496,6 +498,7 @@ model Expense {
   vendors          VendorExpense[]
   shifts           ShiftSession[]
   purchaseOrders   PO[]
+  payrolls         Payroll[]
   fixedTransaction FixedTransaction? @relation(fields: [fixedTransactionId], references: [id])
 }
 

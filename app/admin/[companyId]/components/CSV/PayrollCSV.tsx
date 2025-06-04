@@ -13,6 +13,7 @@ interface IProps {
 const PayrollCSV = ({ payrolls, style }: IProps) => {
   const headers = [
     { label: 'Driver', key: 'name' },
+    { label: 'From - To', key: 'from_to' },
     { label: 'Role', key: 'role' },
     { label: 'Hours', key: 'hours' },
     { label: 'Hourly Rate ($)', key: 'hourlyRate' },
@@ -22,6 +23,7 @@ const PayrollCSV = ({ payrolls, style }: IProps) => {
 
   const formattedData = payrolls.map((payroll) => ({
     name: payroll.employee.name,
+    from_to: `${payroll.startDate} - ${payroll.endDate}`,
     role: payroll.employee.role,
     hours: payroll.hours?.toFixed(2),
     hourlyRate: payroll.employee.payrollType === PayrollType.hourly ? payroll.employee.payRate?.toFixed(2) || '0.00' : 'N/A',

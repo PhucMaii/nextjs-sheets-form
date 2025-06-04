@@ -63,10 +63,10 @@ export default function CreatePayroll({
       newPayroll.hours >= 0 &&
       selectedEmployeeData?.payrollType === PayrollType.hourly
     ) {
-      setNewPayroll({
-        ...newPayroll,
-        total: newPayroll.hours * selectedEmployeeData.payRate,
-      });
+      setNewPayroll((prevPayroll: any) => ({
+        ...prevPayroll,
+        total: prevPayroll.hours * selectedEmployeeData.payRate,
+      }));
     }
   }, [newPayroll.hours, selectedEmployeeData]);
 
@@ -74,7 +74,8 @@ export default function CreatePayroll({
     if (
       !selectedEmployeeData ||
       newPayroll.hours === 0 ||
-      newPayroll.total === 0
+      newPayroll.total === 0 ||
+      newPayroll.employeeId < 1
     ) {
       showNotification('error', 'Please fill in all fields');
       return;
@@ -89,7 +90,7 @@ export default function CreatePayroll({
         endDate: dateRange[1],
         yyyymmddStartDate: YYYYMMDDFormat(dateRange[0]),
         yyyymmddEndDate: YYYYMMDDFormat(dateRange[1]),
-        employeeId: newPayroll.employeeId,
+        employeeId: selectedEmployeeData?.id || newPayroll.employeeId,
       });
 
       if (response.data.error) {

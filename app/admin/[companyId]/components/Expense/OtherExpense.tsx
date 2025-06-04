@@ -62,7 +62,7 @@ export default function OtherExpense({
       {/* GST and PST */}
       <Grid container spacing={2}>
         <Grid item xs={12}>
-          <Box display="flex" flexDirection="column" gap={2}>
+          <Box display="flex" flexDirection="column" gap={1}>
             <Typography variant="h6">Discount</Typography>
             <TextField
               placeholder="Discount"
@@ -74,7 +74,7 @@ export default function OtherExpense({
           </Box>
         </Grid>
         <Grid item xs={12}>
-          <Box display="flex" flexDirection="column" gap={2}>
+          <Box display="flex" flexDirection="column" gap={1}>
             <Typography variant="h6">Subtotal</Typography>
             <TextField
               label="Subtotal"
@@ -87,7 +87,7 @@ export default function OtherExpense({
           </Box>
         </Grid>
         <Grid item md={6} xs={12}>
-          <Box display="flex" flexDirection="column" gap={2}>
+          <Box display="flex" flexDirection="column" gap={1}>
             <Typography variant="h6">GST (5%)</Typography>
             <TextField
               placeholder="GST (5%)"
@@ -99,7 +99,7 @@ export default function OtherExpense({
           </Box>
         </Grid>
         <Grid item md={6} xs={12}>
-          <Box display="flex" flexDirection="column" gap={2}>
+          <Box display="flex" flexDirection="column" gap={1}>
             <Typography variant="h6">PST (7%)</Typography>
             <TextField
               placeholder="PST (7%)"
@@ -111,7 +111,7 @@ export default function OtherExpense({
           </Box>
         </Grid>
         <Grid item xs={12}>
-          <Box display="flex" flexDirection="column" gap={2}>
+          <Box display="flex" flexDirection="column" gap={1}>
             <Typography variant="h6">Total</Typography>
             <TextField
               placeholder="Total"
@@ -124,7 +124,7 @@ export default function OtherExpense({
         </Grid>
       </Grid>
 
-      <Box display="flex" flexDirection="column" gap={2}>
+      <Box display="flex" flexDirection="column" gap={1}>
         <Typography variant="h6">Description</Typography>
         <TextField
           multiline
@@ -134,7 +134,7 @@ export default function OtherExpense({
           onChange={(e) => onChangeNewExpense('description', e.target.value)}
         />
       </Box>
-      <Box display="flex" flexDirection="column" gap={2}>
+      <Box display="flex" flexDirection="column" gap={1}>
         <Typography variant="h6">Payment Method</Typography>
         {codBoardId ? (
           <Select
@@ -173,7 +173,7 @@ export default function OtherExpense({
           </Select>
         )}
       </Box>
-      <Box display="flex" flexDirection="column" gap={2}>
+      <Box display="flex" flexDirection="column" gap={1}>
         <Typography variant="h6">Spent By</Typography>
         <Select
           value={newExpense.spentBy}
@@ -192,7 +192,7 @@ export default function OtherExpense({
         </Select>
       </Box>
 
-      <Box display="flex" flexDirection="column" gap={2}>
+      <Box display="flex" flexDirection="column" gap={1}>
         <Typography variant="h6">Status</Typography>
         <SelectExpenseStatus
           value={newExpense.status}
