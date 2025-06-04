@@ -110,6 +110,7 @@ model Payroll {
   companyId      Int
   hours          Float
   total          Float
+  status         PaymentStatus?
   startDate      String
   endDate        String
   createdAt      String
@@ -923,4 +924,9 @@ enum ScheduledShiftStatus {
 enum PayrollType {
   hourly
   monthly
+}
+
+enum PaymentStatus {
+  Paid
+  Unpaid
 }
