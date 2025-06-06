@@ -89,6 +89,7 @@ export default function ChequeTab({ client, showNotification }: IProps) {
         }
         fileKeyFront={viewImgProps.fileKeyFront}
         fileKeyBack={viewImgProps.fileKeyBack}
+        isCheque
       />
       <UploadChequeModal
         open={isUploadChequeOpen}

@@ -4,10 +4,12 @@ import { generateImgUrl } from '@/app/lib/s3';
 import { ModalProps } from './Modals/type';
 import { grey } from '@mui/material/colors';
 import { XIcon } from 'lucide-react';
+import { getLoadUrl } from '@/app/lib/r2';
 
 interface IProps extends ModalProps {
   fileKeyFront: string;
   fileKeyBack?: string;
+  isCheque?: boolean;
 }
 
 export default function ViewImg({
@@ -15,20 +17,33 @@ export default function ViewImg({
   fileKeyBack,
   open,
   onClose,
+  isCheque,
 }: IProps) {
   const [urlFront, setUrlFront] = useState('');
   const [urlBack, setUrlBack] = useState('');
 
   useEffect(() => {
     const fetchUrl = async () => {
-      if (fileKeyFront) {
-        const urlFront = await generateImgUrl(fileKeyFront, true);
-        setUrlFront(urlFront);
-      }
+      if (isCheque) {
+        if (fileKeyFront) {
+          const urlFront = await getLoadUrl(fileKeyFront);
+          setUrlFront(urlFront);
+        }
+  
+        if (fileKeyBack) {
+          const urlBack = await getLoadUrl(fileKeyBack);
+          setUrlBack(urlBack);
+        }        
+      } else {
+        if (fileKeyFront) {
+          const urlFront = await generateImgUrl(fileKeyFront, true);
+          setUrlFront(urlFront);
+        }
 
-      if (fileKeyBack) {
-        const urlBack = await generateImgUrl(fileKeyBack, true);
-        setUrlBack(urlBack);
+        if (fileKeyBack) {
+          const urlBack = await generateImgUrl(fileKeyBack, true);
+          setUrlBack(urlBack);
+        }
       }
     };
     fetchUrl();

@@ -1,4 +1,5 @@
 'use client';
+import { uploadToR2 } from '@/app/lib/r2';
 import uploadToS3 from '@/app/lib/s3';
 import { AlertColor, Box, LinearProgress, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
@@ -42,12 +43,22 @@ export default function FileUpload({
 
       try {
         setIsUploading(true);
-        const data = await uploadToS3(
-          files,
-          fileName,
-          uploadLocation,
-          isCheque,
-        );
+        let data;
+        if (isCheque) {
+          data = await uploadToR2(
+            files,
+            fileName,
+            uploadLocation,
+            // isCheque,
+          );
+        } else {
+          data = await uploadToS3(
+            files,
+            fileName,
+            uploadLocation,
+          );
+        }
+        
         if (!data?.fileKey) {
           showNotification('error', 'Something went wrong');
           return;

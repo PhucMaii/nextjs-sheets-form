@@ -137,8 +137,8 @@ export default function UploadChequeModal({
             {cheque?.front && <DisplayFile fileKey={cheque.front} isCheque />}
             <FileUpload
               showNotification={showNotification}
-              fileName={`${dayjs(chequeData.startDate).format('MM/DD/YYYY')}-${year}-${client?.clientId}_front`}
-              uploadLocation={`cheques/${year}/${dayjs(chequeData.startDate).format('MM/DD/YYYY')}`}
+              fileName={`${dayjs(chequeData.startDate).format('MM-DD-YYYY')}-${year}-${client?.clientId}_front`}
+              uploadLocation={`cheques/${year}/${client?.clientId}/${dayjs(chequeData.startDate).format('MM-DD-YYYY')}`}
               onUploadImageUI={(fileKey: string) => {
                 setCheque({
                   ...cheque,
@@ -152,8 +152,8 @@ export default function UploadChequeModal({
             {cheque?.back && <DisplayFile fileKey={cheque.back} isCheque />}
             <FileUpload
               showNotification={showNotification}
-              fileName={`${dayjs(chequeData.endDate).format('MM/DD/YYYY')}-${year}-${client?.clientId}_back`}
-              uploadLocation={`cheques/${year}/${dayjs(chequeData.endDate).format('MM/DD/YYYY')}`}
+              fileName={`${dayjs(chequeData.endDate).format('MM-DD-YYYY')}-${year}-${client?.clientId}_back`}
+              uploadLocation={`cheques/${year}/${client?.clientId}/${dayjs(chequeData.endDate).format('MM-DD-YYYY')}`}
               onUploadImageUI={(fileKey: string) => {
                 setCheque({
                   ...cheque,
