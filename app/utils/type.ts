@@ -157,6 +157,7 @@ export interface IItem {
 
   image?: string;
   isBestSeller?: boolean;
+  qtyLeft?: number;
 }
 
 export interface OrderedItems {

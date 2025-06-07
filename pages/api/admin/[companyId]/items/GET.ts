@@ -1,4 +1,5 @@
 import { testItemId } from '@/app/lib/constant';
+import { calculateQtyLeft } from '@/pages/api/utils/items';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -41,6 +42,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
               vendorItem: {
                 include: {
                   unit: true,
+                  fifo: true,
                 },
               },
               type: true,
@@ -75,6 +77,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       //   { inventoryItem: { indexPos: 'asc' } }, // Then by indexPos
       // ],
 
+      // const qtyLeft = calculateQtyLeft(item);
+      // const itemWithQtyLeft = { ...item, qtyLeft };
+
       return res.status(200).json({ data: item });
     }
 
@@ -96,6 +101,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
               vendorItem: {
                 include: {
                   unit: true,
+                  fifo: true,
                 },
               },
               type: true,
@@ -133,8 +139,15 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         return a.inventoryItem.indexPos - b.inventoryItem.indexPos;
       });
 
+      const itemsWithQtyLeft = returnedItems.map((item: any) => {
+        const qtyLeft = calculateQtyLeft(item);
+        return { ...item, qtyLeft };
+      });
+
+      // console.log(itemsWithQtyLeft, 'ITEMS WITH QTY LEFT');
+
       return res.status(200).json({
-        data: returnedItems,
+        data: itemsWithQtyLeft,
         message: 'Fetch Items Successfully',
       });
     }
@@ -176,6 +189,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
               vendorItem: {
                 include: {
                   unit: true,
+                  fifo: true,
                 },
               },
               type: true,
@@ -197,8 +211,15 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         ],
       });
 
+      const itemsWithQtyLeft = items.map((item: any) => {
+        const qtyLeft = calculateQtyLeft(item);
+        return { ...item, qtyLeft };
+      });
+
+      // console.log(itemsWithQtyLeft, 'ITEMS WITH QTY LEFT');
+
       return res.status(200).json({
-        data: items,
+        data: itemsWithQtyLeft,
         message: 'Fetch Items Successfully',
       });
     }
@@ -221,6 +242,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
               vendorItem: {
                 include: {
                   unit: true,
+                  fifo: true,
                 },
               },
               type: true,

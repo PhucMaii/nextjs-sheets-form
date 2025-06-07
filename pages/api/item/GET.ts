@@ -3,6 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { testItemId } from '@/app/lib/constant';
+import { calculateQtyLeft } from '@/pages/api/utils/items';
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -43,6 +44,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                 itemType_category: true,
               },
             },
+            vendorItem: {
+              include: {
+                fifo: true,
+              },
+            },
           },
         },
         inventoryUnit: true,
@@ -77,8 +83,13 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       ],
     });
 
+    const itemsWithQtyLeft = items.map((item: any) => {
+      const qtyLeft = calculateQtyLeft(item);
+      return { ...item, qtyLeft };
+    });
+
     return res.status(200).json({
-      data: { items, clientName: existingUser?.clientName },
+      data: { items: itemsWithQtyLeft, clientName: existingUser?.clientName },
       message: 'Fetch Items Successfully',
     });
   } catch (error: any) {

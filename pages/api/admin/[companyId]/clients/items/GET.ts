@@ -1,3 +1,4 @@
+import { calculateQtyLeft } from '@/pages/api/utils/items';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -30,6 +31,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                 itemType_category: true,
               },
             },
+            vendorItem: {
+              include: {
+                fifo: true,
+              },
+            },
           },
         },
         inventoryUnit: true,
@@ -55,8 +61,13 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
+    const itemsWithQtyLeft = items.map((item: any) => {
+      const qtyLeft = calculateQtyLeft(item);
+      return { ...item, qtyLeft };
+    });
+
     return res.status(200).json({
-      data: items,
+      data: itemsWithQtyLeft,
       message: 'Fetch Items For Specific Client Successfully',
     });
   } catch (error: any) {

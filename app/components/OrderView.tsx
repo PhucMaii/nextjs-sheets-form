@@ -172,6 +172,7 @@ export const ItemButton = ({
   flexColOnDiscount?: boolean;
   onRemove?: any;
 }) => {
+  // console.log(item, 'ITEM');
   const options = useMemo(() => {
     if (!item?.options || item?.options.length === 0) return null;
     const lowestPriceOption = item?.options.sort(
@@ -280,6 +281,27 @@ export const ItemButton = ({
           gap={1}
           width="100%"
         >
+          {(item?.qtyLeft && item?.qtyLeft > 0 && item?.qtyLeft <= 3) ? (
+            <Box display="flex" justifyContent="flex-end">
+              <Box
+                sx={{
+                  backgroundColor: 'white',
+                  // color: 'black',
+                  width: 25,
+                  height: 25,
+                  // p: 0.5,
+                  borderRadius: '50%',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  opacity: 1,
+                  filter: 'brightness(100%)',
+                }}
+              >
+                <Typography variant="caption">{item.qtyLeft}</Typography>
+              </Box>
+            </Box>
+          ) : null}
           <Box
             display="flex"
             justifyContent="space-between"

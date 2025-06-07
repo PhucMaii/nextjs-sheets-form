@@ -4,7 +4,7 @@ import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent
 import axios from 'axios';
 import { API_URL, FLAG_ORDER_TYPE, USER_ROLE } from '@/app/utils/enum';
 import dayjs from 'dayjs';
-import { Box, Tab, Tabs } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import moment from 'moment';
 import { limitOrderHour } from '@/app/lib/constant';
 import { Order } from '@/app/admin/[companyId]/orders/page';
@@ -16,8 +16,8 @@ import NotificationPopup from '@/app/admin/[companyId]/components/Notification';
 import { useRouter } from 'next/navigation';
 import { TourProvider } from '@reactour/tour';
 import TourStartButton from './TourStartButton';
-import { grey } from '@mui/material/colors';
-import OldOrderVersion from './OldOrderVersion';
+// import { grey } from '@mui/material/colors';
+// import OldOrderVersion from './OldOrderVersion';
 import OverrideOrder from '../../components/Modals/OverrideOrder';
 
 const steps = [
@@ -47,7 +47,7 @@ const steps = [
 export default function OrderForm() {
   const [itemList, setItemList] = useState<any>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [tabIdx, setTabIdx] = useState<number>(0);
+  // const [tabIdx, setTabIdx] = useState<number>(0);
   const [overrideOrderProps, setOverrideOrderProps] = useState<any>({
     open: false,
     lastOrder: null,
@@ -216,7 +216,7 @@ export default function OrderForm() {
           }}
           anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         />
-
+        {/* 
         <Tabs
           variant="fullWidth"
           sx={{ backgroundColor: grey[50] }}
@@ -225,38 +225,41 @@ export default function OrderForm() {
         >
           <Tab value={0} label="New Version ✨" />
           <Tab value={1} label="Old Version 👴🏼" />
-        </Tabs>
+        </Tabs> */}
 
-        {tabIdx === 0 ? (
-          <Box display="flex" flexDirection="column" gap={2} width="100%">
-            <Box display="flex" justifyContent="flex-end">
-              <TourStartButton />
-            </Box>
-            <Box
-              sx={{
-                height: '80vh',
-                display: 'flex',
-                flexDirection: 'column',
-                // overflowY: 'auto',
-                pb: 3,
-              }}
-            >
-              <OrderView
-                onSubmit={onSubmit}
-                items={itemList}
-                purpose={ORDER_USAGE_PURPOSE.ORDER}
-                role={USER_ROLE.CLIENT}
-              />
-            </Box>
+        {/* {tabIdx === 0 ? ( */}
+        {/* <Box display="flex" justifyContent="center" alignItems="center"> */}
+          <Typography textAlign="center" variant="h5" fontWeight="medium">Order</Typography>
+        {/* </Box> */}
+        <Box display="flex" flexDirection="column" gap={2} width="100%">
+          <Box display="flex" justifyContent="flex-end">
+            <TourStartButton />
           </Box>
-        ) : (
-          <OldOrderVersion
-            onSubmit={onSubmit}
-            itemList={itemList}
-            setItemList={setItemList}
-            minDate={minDate}
-          />
-        )}
+          <Box
+            sx={{
+              height: '80vh',
+              display: 'flex',
+              flexDirection: 'column',
+              // overflowY: 'auto',
+              pb: 3,
+            }}
+          >
+            <OrderView
+              onSubmit={onSubmit}
+              items={itemList}
+              purpose={ORDER_USAGE_PURPOSE.ORDER}
+              role={USER_ROLE.CLIENT}
+            />
+          </Box>
+        </Box>
+        {/* // ) : (
+        //   <OldOrderVersion
+        //     onSubmit={onSubmit}
+        //     itemList={itemList}
+        //     setItemList={setItemList}
+        //     minDate={minDate}
+        //   />
+        // )} */}
       </Sidebar>
     </TourProvider>
   );
