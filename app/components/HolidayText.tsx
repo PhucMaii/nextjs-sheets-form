@@ -1,5 +1,5 @@
 import { Box, Typography } from '@mui/material';
-import { red } from '@mui/material/colors';
+import { red, yellow } from '@mui/material/colors';
 import React from 'react';
 
 export default function HolidayText() {
@@ -23,23 +23,20 @@ export default function HolidayText() {
           sx={{ color: 'white', lineHeight: 1.5 }}
           fontWeight="bold"
         >
-          🚧 Quick update in progress!
-          <br />
-          You may notice slight lag
-          {/* <strong
+          Price increase related to <br />
+          <strong
             style={{
               backgroundColor: yellow[800],
               padding: 1,
               borderRadius: 5,
             }}
           >
-            BASIL
-          </strong>{' '} */}
+            Sunrise Tofu Products
+          </strong>{' '} <br />
+          starting from June 30th
         </Typography>
         <Typography sx={{ color: 'white', textAlign: 'center' }}>
-        a quick refresh or tap Home should fix it.
-        <br />
-        Thank you! 💚
+          We truly appreciate <br /> your support and understanding! 💚
         </Typography>
       </Box>
     </Box>
