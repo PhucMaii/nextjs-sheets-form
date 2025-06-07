@@ -1,8 +1,9 @@
 import {
   S3Client,
-  PutObjectCommand,
+  // PutObjectCommand,
   ListObjectsV2Command,
   GetObjectCommand,
+  PutObjectCommand,
 } from '@aws-sdk/client-s3';
 
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
@@ -32,7 +33,6 @@ export default async function uploadToS3(
     }
 
     const fileKey = `${location}/${name}/${Date.now()}-${file.name.replace(/\s/g, '-')}`;
-    console.log(fileKey, 'fileKey');
 
     const params: any = {
       Bucket: isCheque
@@ -42,7 +42,6 @@ export default async function uploadToS3(
       Body: await file.arrayBuffer(),
       ContentType: file.type,
     };
-    console.log(params, 'params');
 
     const command = new PutObjectCommand(params);
     await s3.send(command);

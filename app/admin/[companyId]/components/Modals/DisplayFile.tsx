@@ -1,4 +1,4 @@
-import { getLoadUrl } from '@/app/lib/r2';
+// import { getLoadUrl } from '@/app/lib/r2';
 import { generateImgUrl } from '@/app/lib/s3';
 import React, { useState, useEffect } from 'react';
 
@@ -25,13 +25,8 @@ export default function DisplayFile({
 
   useEffect(() => {
     const fetchUrl = async () => {
-      if (isCheque) {
-        const url = await getLoadUrl(fileKey);
-        setUrl(url);
-      } else {
-        const url = await generateImgUrl(fileKey, isCheque);
-        setUrl(url);
-      }
+      const url = await generateImgUrl(fileKey, isCheque);
+      setUrl(url);
     };
     fetchUrl();
   }, [fileKey, isCheque]);

@@ -4,7 +4,7 @@ import { generateImgUrl } from '@/app/lib/s3';
 import { ModalProps } from './Modals/type';
 import { grey } from '@mui/material/colors';
 import { XIcon } from 'lucide-react';
-import { getLoadUrl } from '@/app/lib/r2';
+// import { getLoadUrl } from '@/app/lib/r2';
 
 interface IProps extends ModalProps {
   fileKeyFront: string;
@@ -24,27 +24,27 @@ export default function ViewImg({
 
   useEffect(() => {
     const fetchUrl = async () => {
-      if (isCheque) {
-        if (fileKeyFront) {
-          const urlFront = await getLoadUrl(fileKeyFront);
-          setUrlFront(urlFront);
-        }
+      // if (isCheque) {
+      //   if (fileKeyFront) {
+      //     const urlFront = await getLoadUrl(fileKeyFront);
+      //     setUrlFront(urlFront);
+      //   }
   
-        if (fileKeyBack) {
-          const urlBack = await getLoadUrl(fileKeyBack);
-          setUrlBack(urlBack);
-        }        
-      } else {
+      //   if (fileKeyBack) {
+      //     const urlBack = await getLoadUrl(fileKeyBack);
+      //     setUrlBack(urlBack);
+      //   }        
+      // } else {
         if (fileKeyFront) {
-          const urlFront = await generateImgUrl(fileKeyFront, true);
+          const urlFront = await generateImgUrl(fileKeyFront, isCheque);
           setUrlFront(urlFront);
         }
 
         if (fileKeyBack) {
-          const urlBack = await generateImgUrl(fileKeyBack, true);
+          const urlBack = await generateImgUrl(fileKeyBack, isCheque);
           setUrlBack(urlBack);
         }
-      }
+      // }
     };
     fetchUrl();
   }, [fileKeyFront, fileKeyBack]);

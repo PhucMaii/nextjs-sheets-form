@@ -38,6 +38,45 @@ export async function uploadToR2(file: File, name: string, location: string) {
   }
 }
 
+export async function uploadToR2Light(
+  file: File,
+  name: string,
+  location: string,
+) {
+  const fileKey = `${location}/${name}/${Date.now()}-${file.name.replace(/\s/g, '-')}`;
+
+  const uploadUrl = `https://pub-6dbcecc260434d6da02a3167f04a9891.r2.dev/${process.env.NEXT_PUBLIC_R2_BUCKET_NAME}/${fileKey}`;
+  console.log(uploadUrl, 'uploadUrl');
+  try {
+    const res = await fetch(uploadUrl, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': file.type,
+        // 'x-amz-acl': 'public-read', // optional depending on config
+      },
+      body: file,
+    });
+
+    if (!res.ok) throw new Error('Upload failed');
+
+    return { fileKey, fileName: file.name, name };
+  } catch (err) {
+    console.error('upload error', err);
+    throw err;
+  }
+}
+
+export async function getSignedUploadUrl(fileKey: string, contentType: string) {
+  const command = new PutObjectCommand({
+    Bucket: process.env.NEXT_PUBLIC_R2_BUCKET_NAME!,
+    Key: fileKey,
+    ContentType: contentType,
+  });
+
+  const url = await getSignedUrl(r2Client, command, { expiresIn: 300 }); // 5 min
+  return url;
+}
+
 export const getLoadUrl = async (fileKey: string) => {
   const command = new GetObjectCommand({
     Bucket: process.env.NEXT_PUBLIC_R2_BUCKET_NAME,
