@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   Divider,
+  FormControlLabel,
   Modal,
   Switch,
   TextField,
@@ -353,6 +354,18 @@ export default function EditInventory({
 
           <Divider sx={{ my: 2 }} />
 
+          <Box display="flex" justifyContent="flex-end" alignItems="center" my={2}>
+            <FormControlLabel
+              control={<Switch />}
+              label="Show Inventory Quantity"
+              sx={{ mr: 2 }}
+              labelPlacement="start"
+              checked={updatedItem?.isShowInventory}
+              onChange={(e: any) =>
+                setUpdatedItem({ ...updatedItem, isShowInventory: e.target.checked })
+              }
+            />
+          </Box>
           <Box display="flex" flexDirection="column" gap={3}>
             <Box
               display="flex"
@@ -375,7 +388,9 @@ export default function EditInventory({
                 variant="contained"
                 size="small"
                 onClick={() =>
-                  router.push(`/admin/${companyId}/inventory/bulk/selling-items/${inventoryItem.id}`)
+                  router.push(
+                    `/admin/${companyId}/inventory/bulk/selling-items/${inventoryItem.id}`,
+                  )
                 }
               >
                 <Box display="flex" alignItems="center">
@@ -384,47 +399,6 @@ export default function EditInventory({
                 </Box>
               </Button>
             </Box>
-
-            {/* <Box>
-              <Box display="flex" alignItems="center" gap={2}>
-                <Typography variant="h6">Appearance:</Typography>
-                <ItemButton
-                  item={{ ...updatedItem, price: 15.5 }}
-                  onClick={() => {}}
-                  style={{ width: 'fit-content', maxWidth: 300 }}
-                  containerStyle={{ backgroundColor: color.hex }}
-                />
-                <Box display="flex" gap={1} alignItems="center">
-                  {color.hex !== inventoryItem.color && (
-                    <Button
-                      onClick={() =>
-                        setColor(
-                          handleResetColor(inventoryItem.color || '#e3f2fd'),
-                        )
-                      }
-                    >
-                      Reset
-                    </Button>
-                  )}
-                  <IconButton
-                    color="primary"
-                    onClick={() => setIsEditColor(!isEditColor)}
-                  >
-                    {isEditColor ? <EditOffIcon /> : <EditIcon />}
-                  </IconButton>
-                </Box>
-              </Box>
-
-              {isEditColor && (
-                <ColorPicker
-                  height={100}
-                  color={color}
-                  onChange={(color: any) => setColor(color)}
-                  // hideAlpha
-                  hideInput={['hsv', 'rgb']}
-                />
-              )}
-            </Box> */}
             <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="h6">Tax</Typography>
               <Divider />

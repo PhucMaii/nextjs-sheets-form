@@ -112,12 +112,12 @@ export const SortableItem = ({
   item,
   dndMode,
   onOpenSwitchType,
-  onRemove,
+  // onRemove,
 }: {
   item: any;
   dndMode: boolean;
   onOpenSwitchType: any;
-  onRemove?: any;
+  // onRemove?: any;
 }) => {
   // const id = item?.id?.split(' - ')[1];
   const { attributes, listeners, setNodeRef, isDragging } = useSortable({
@@ -155,7 +155,7 @@ export const SortableItem = ({
           if (dndMode) return;
           onOpenSwitchType(item);
         }}
-        onRemove={onRemove}
+        // onRemove={onRemove}
       />
     </Grid>
   );
