@@ -24,7 +24,7 @@ import React, {
 } from 'react';
 import { IItem } from '../utils/type';
 import { infoBackground, primary } from '@/theme/color';
-import { blueGrey, grey, red } from '@mui/material/colors';
+import { blueGrey, grey, orange, red } from '@mui/material/colors';
 import { ShadowSection } from '../admin/[companyId]/reports/styled';
 import { SearchIcon, Trash2 } from 'lucide-react';
 import ErrorComponent from '../admin/[companyId]/components/ErrorComponent';
@@ -52,7 +52,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import EditOffIcon from '@mui/icons-material/EditOff';
 import { blackColor } from '@/theme/create-palette';
 import { Discount } from '@mui/icons-material';
-import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
+// import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import SetItemQuantity from './SetItemQuantity';
 import DisplayFile from '../admin/[companyId]/components/Modals/DisplayFile';
 import { generateOrderTotalPrice } from '@/pages/api/admin/[companyId]/orderedItems/PUT';
@@ -161,7 +161,7 @@ export const ItemButton = ({
   ref,
   disabled,
   flexColOnDiscount,
-  onRemove,
+  // onRemove,
 }: {
   item: IItem;
   onClick?: any;
@@ -170,7 +170,7 @@ export const ItemButton = ({
   ref?: any;
   disabled?: boolean;
   flexColOnDiscount?: boolean;
-  onRemove?: any;
+  // onRemove?: any;
 }) => {
   // console.log(item, 'ITEM');
   const options = useMemo(() => {
@@ -215,6 +215,29 @@ export const ItemButton = ({
       ref={ref}
       disabled={disabled || item?.availability === false}
     >
+      {item.inventoryItem?.isShowInventory &&
+      item?.qtyLeft &&
+      item?.qtyLeft > 0 &&
+      item?.qtyLeft <= 3 ? (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            zIndex: 100,
+            width: 'fit-content',
+            // height: '20px',
+            backgroundColor: orange[900],
+            color: 'white',
+            borderRadius: 1,
+            padding: '0 5px',
+          }}
+        >
+          <Typography variant="caption" sx={{ fontSize: 8, textTransform: 'none' }}>
+            Only {item.qtyLeft} left!
+          </Typography>
+        </Box>
+      ) : null}
       <Box
         display="flex"
         flexDirection="column"
@@ -273,44 +296,16 @@ export const ItemButton = ({
             }}
           />
         )}
+
         <Box
           display="flex"
-          // alignItems="flex-start"
-          flexDirection={'column'}
-          // justifyContent={flexColOnDiscount ? '' : 'space-between'}
-          gap={1}
-          width="100%"
+          flexDirection="column"
+          // alignItems="center"
         >
-          {(item?.qtyLeft && item?.qtyLeft > 0 && item?.qtyLeft <= 3) ? (
-            <Box display="flex" justifyContent="flex-end">
-              <Box
-                sx={{
-                  backgroundColor: 'white',
-                  // color: 'black',
-                  width: 25,
-                  height: 25,
-                  // p: 0.5,
-                  borderRadius: '50%',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  opacity: 1,
-                  filter: 'brightness(100%)',
-                }}
-              >
-                <Typography variant="caption">{item.qtyLeft}</Typography>
-              </Box>
-            </Box>
-          ) : null}
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Typography fontWeight="bold" textAlign="left" sx={{ zIndex: 1 }}>
-              {item.name}
-            </Typography>
-            {onRemove && (
+          <Typography fontWeight="bold" textAlign="left" sx={{ zIndex: 1 }}>
+            {item.name}
+          </Typography>
+          {/* {onRemove && (
               <IconButton
                 size="small"
                 onClick={(e) => {
@@ -321,7 +316,41 @@ export const ItemButton = ({
               >
                 <RemoveCircleIcon />
               </IconButton>
-            )}
+            )} */}
+          <Box
+            display="flex"
+            // alignItems="flex-start"
+            flexDirection={'column'}
+            // justifyContent={flexColOnDiscount ? '' : 'space-between'}
+            gap={1}
+            width="100%"
+          >
+            {/* {item.inventoryItem?.isShowInventory &&
+          item?.qtyLeft &&
+          item?.qtyLeft > 0 &&
+          item?.qtyLeft <= 3 ? (
+            // <Box display="flex" justifyContent="flex-end">
+              <Box
+                sx={{
+                  // backgroundColor: 'white',
+                  // color: 'black',
+                  // width: 25,
+                  // height: 25,
+                  // p: 0.5,
+                  // borderRadius: 1,
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  opacity: 1,
+                  filter: 'brightness(100%)',
+                  textTransform: 'none',
+                  color: grey[700],
+                }}
+              >
+                <Typography variant="caption">{item.qtyLeft} available</Typography>
+              </Box>
+            // </Box>
+          ) : null} */}
           </Box>
           {((item?.isShowDiscount && item?.prevPrice) ||
             options?.highestDiscount) && (
@@ -541,7 +570,7 @@ const OrderView = ({
 
   useEffect(() => {
     if (debouncedKeywords) {
-      const newItems = handleSearch(debouncedKeywords, items, ['name']);
+      const newItems = handleSearch(debouncedKeywords, items, ['name', 'inventoryItem.sku']);
       setDisplayItems(newItems);
     } else {
       setDisplayItems(items);

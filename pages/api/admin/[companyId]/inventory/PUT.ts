@@ -14,6 +14,7 @@ interface IBody {
   hasGST?: boolean;
   vendorItems: any[];
   updatedAt: string;
+  isShowInventory?: boolean;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
@@ -38,6 +39,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       hasGST,
       vendorItems,
       updatedAt,
+      isShowInventory,
     }: IBody = req.body;
 
     const existingInventoryItem = await prisma.inventoryItem.findUnique({
@@ -74,6 +76,17 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     if (sameNameInventoryItem) {
       return res.status(400).json({
         error: 'Inventory Item Already Exists',
+      });
+    }
+
+    if (existingInventoryItem?.isShowInventory !== isShowInventory) {
+      await prisma.inventoryItem.update({
+        where: {
+          id,
+        },
+        data: {
+          isShowInventory,
+        },
       });
     }
 
