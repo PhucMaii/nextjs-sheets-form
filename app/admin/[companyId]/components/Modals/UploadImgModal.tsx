@@ -1,4 +1,4 @@
-import { Divider, Modal, Typography } from '@mui/material';
+import { Divider, Modal } from '@mui/material';
 import React, { useState } from 'react';
 import { ModalProps } from './type';
 import { BoxModal } from './styled';

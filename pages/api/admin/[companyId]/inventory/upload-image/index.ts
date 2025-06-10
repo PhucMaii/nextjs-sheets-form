@@ -26,7 +26,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(404).json({ message: 'Inventory item not found' });
     }
 
-    const updatedItem = await prisma.inventoryItem.update({
+    await prisma.inventoryItem.update({
       where: { id: inventoryItemId },
       data: { image },
     });

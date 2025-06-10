@@ -12,8 +12,6 @@ import {
   Checkbox,
   Grid,
   Button,
-  FormControl,
-  InputLabel,
 } from '@mui/material';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import { useRouter } from 'next/navigation';
@@ -32,6 +30,7 @@ import UnitRadio from '../../components/Radio/UnitRadio';
 import { getUniqueUnitRatios } from '@/app/utils/array';
 import { UPDATE_OPTION } from '../../components/Modals/edit/EditItem';
 import { LoadingButton } from '@mui/lab';
+import VariantRow from './VariantRow';
 
 export default function ItemPage() {
   const { companyId, itemId }: any = useParams();
@@ -44,18 +43,15 @@ export default function ItemPage() {
   const [image, setImage] = useState<string | null>(null);
   const [isImgHovered, setIsImgHovered] = useState(false);
   const [updatedFields, setUpdatedFields] = useState<string[]>([]);
-  const [dataFetched, setDataFetched] = useState(false);
   const [loading, setLoading] = useState<any>({
     [UPDATE_OPTION.CURRENT_CATEGORY]: false,
     [UPDATE_OPTION.ALL_ITEMS_SAME_NAME]: false,
   });
+  const [variants, setVariants] = useState<any[]>([]);
 
   useEffect(() => {
-    if (itemId && !dataFetched) {
-      fetchItem();
-      setDataFetched(true);
-    }
-  }, [itemId, dataFetched]);
+    fetchItem();
+  }, []);
 
   useEffect(() => {
     if (item?.inventoryItem?.image) {
@@ -75,6 +71,8 @@ export default function ItemPage() {
     );
 
     const sellingUnits = getUniqueUnitRatios(inventoryUnits);
+
+    setVariants(data?.options || []);
 
     setItem((prev: any) => ({
       ...prev,
@@ -125,8 +123,7 @@ export default function ItemPage() {
 
   const handleUploadImage = async (image: string) => {
     try {
-      // console.log(data);
-      const data = await axios.post(
+      await axios.post(
         getAdminApiUrl(companyId, `/inventory/upload-image`),
         {
           image,
@@ -209,6 +206,16 @@ export default function ItemPage() {
     }
   };
 
+  const onChangeVariant = (variant: any) => {
+    const newOptions = item?.options?.map((option: any) => {
+      if (option.id === variant.id) {
+        return variant;
+      }
+      return option;
+    });
+    setItem((prev: any) => ({ ...prev, options: newOptions }));
+  };
+
   return (
     <Sidebar>
       {NotificationComp}
@@ -259,7 +266,7 @@ export default function ItemPage() {
             <Box display="flex" gap={0.5} alignItems="center">
               <Checkbox
                 checked={updatedFields.includes('name') || false}
-                onChange={(e) => onSelectToUpdateFields('name')}
+                onChange={() => onSelectToUpdateFields('name')}
               />
               <Typography variant="subtitle2" fontWeight={700}>
                 Name
@@ -273,188 +280,188 @@ export default function ItemPage() {
             />
           </ShadowSection>
 
-          <ShadowSection sx={{ mt: 1 }}>
-            <Box display="flex" gap={0.5} alignItems="center">
-              <Checkbox
-                checked={updatedFields.includes('price') || false}
-                onChange={(e) => onSelectToUpdateFields('price')}
-              />
-              <Typography variant="subtitle2" fontWeight={700}>
-                Pricing
-              </Typography>
-            </Box>
-            <Grid container spacing={1} alignItems="center" sx={{ mt: 1 }}>
-              <Grid item xs={12} md={6}>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  sx={{ width: '100%' }}
-                >
-                  <Typography variant="subtitle2">Price</Typography>
-                  <OutlinedInput
-                    fullWidth
-                    placeholder="Enter price"
-                    value={item?.price}
-                    onChange={(e) =>
-                      onUpdatePrice('price', Number(e.target.value))
-                    }
-                    type="number"
-                    sx={{ mt: 1 }}
-                    startAdornment={
-                      <InputAdornment position="start">$</InputAdornment>
-                    }
-                  />
-                </Box>
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <Box
-                  display="flex"
-                  flexDirection="column"
-                  sx={{ width: '100%' }}
-                >
-                  <Typography variant="subtitle2">Previous Price</Typography>
-                  <OutlinedInput
-                    fullWidth
-                    placeholder="Enter previous price"
-                    value={item?.prevPrice || 0}
-                    onChange={(e) =>
-                      setItem((prev: any) => ({
-                        ...prev,
-                        prevPrice: Number(e.target.value),
-                      }))
-                    }
-                    sx={{ mt: 1 }}
-                    startAdornment={
-                      <InputAdornment position="start">$</InputAdornment>
-                    }
-                    type="number"
-                  />
-                </Box>
-              </Grid>
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={item?.isShowDiscount || false}
+          {variants?.length === 0 && (
+            <ShadowSection sx={{ mt: 1 }}>
+              <Box display="flex" gap={0.5} alignItems="center">
+                <Checkbox
+                  checked={updatedFields.includes('price') || false}
+                  onChange={() => onSelectToUpdateFields('price')}
+                />
+                <Typography variant="subtitle2" fontWeight={700}>
+                  Pricing
+                </Typography>
+              </Box>
+              <Grid container spacing={1} alignItems="center" sx={{ mt: 1 }}>
+                <Grid item xs={12} md={6}>
+                  <Box
+                    display="flex"
+                    flexDirection="column"
+                    sx={{ width: '100%' }}
+                  >
+                    <Typography variant="subtitle2">Price</Typography>
+                    <OutlinedInput
+                      fullWidth
+                      placeholder="Enter price"
+                      value={item?.price}
+                      onChange={(e) =>
+                        onUpdatePrice('price', Number(e.target.value))
+                      }
+                      type="number"
+                      sx={{ mt: 1 }}
+                      startAdornment={
+                        <InputAdornment position="start">$</InputAdornment>
+                      }
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Box
+                    display="flex"
+                    flexDirection="column"
+                    sx={{ width: '100%' }}
+                  >
+                    <Typography variant="subtitle2">Previous Price</Typography>
+                    <OutlinedInput
+                      fullWidth
+                      placeholder="Enter previous price"
+                      value={item?.prevPrice || 0}
                       onChange={(e) =>
                         setItem((prev: any) => ({
                           ...prev,
-                          isShowDiscount: e.target.checked,
+                          prevPrice: Number(e.target.value),
                         }))
                       }
+                      sx={{ mt: 1 }}
+                      startAdornment={
+                        <InputAdornment position="start">$</InputAdornment>
+                      }
+                      type="number"
                     />
-                  }
-                  label="Show Discount"
-                  sx={{ mt: 1, px: '9px' }} // to be aligned with the checkbox
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <Divider sx={{ my: 1 }} />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Box display="flex" flexDirection="column">
-                  <Typography variant="subtitle2">Cost per item</Typography>
-                  <OutlinedInput
-                    fullWidth
-                    placeholder="Enter price"
-                    value={item?.costPerItem || 0}
-                    startAdornment={
-                      <InputAdornment position="start">$</InputAdornment>
+                  </Box>
+                </Grid>
+                <Grid item xs={12}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={item?.isShowDiscount || false}
+                        onChange={(e) =>
+                          setItem((prev: any) => ({
+                            ...prev,
+                            isShowDiscount: e.target.checked,
+                          }))
+                        }
+                      />
                     }
-                    type="number"
-                    sx={{ mt: 1 }}
+                    label="Show Discount"
+                    sx={{ mt: 1, px: '9px' }} // to be aligned with the checkbox
                   />
-                </Box>
+                </Grid>
+                <Grid item xs={12}>
+                  <Divider sx={{ my: 1 }} />
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <Box display="flex" flexDirection="column">
+                    <Typography variant="subtitle2">Cost per item</Typography>
+                    <OutlinedInput
+                      fullWidth
+                      placeholder="Enter price"
+                      value={item?.costPerItem || 0}
+                      startAdornment={
+                        <InputAdornment position="start">$</InputAdornment>
+                      }
+                      type="number"
+                      sx={{ mt: 1 }}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <Box display="flex" flexDirection="column">
+                    <Typography variant="subtitle2">Profit</Typography>
+                    <OutlinedInput
+                      fullWidth
+                      placeholder="Enter price"
+                      value={item?.profit || 0}
+                      onChange={(e) =>
+                        onUpdatePrice('profit', Number(e.target.value))
+                      }
+                      sx={{ mt: 1 }}
+                      startAdornment={
+                        <InputAdornment position="start">$</InputAdornment>
+                      }
+                      type="number"
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <Box display="flex" flexDirection="column">
+                    <Typography variant="subtitle2">Margin</Typography>
+                    <OutlinedInput
+                      fullWidth
+                      placeholder="Enter price"
+                      value={item?.margin || 0}
+                      onChange={(e) =>
+                        onUpdatePrice('margin', Number(e.target.value))
+                      }
+                      sx={{ mt: 1 }}
+                      startAdornment={
+                        <InputAdornment position="start">%</InputAdornment>
+                      }
+                      type="number"
+                    />
+                  </Box>
+                </Grid>
               </Grid>
-              <Grid item xs={12} md={4}>
-                <Box display="flex" flexDirection="column">
-                  <Typography variant="subtitle2">Profit</Typography>
-                  <OutlinedInput
-                    fullWidth
-                    placeholder="Enter price"
-                    value={item?.profit || 0}
-                    onChange={(e) =>
-                      onUpdatePrice('profit', Number(e.target.value))
-                    }
-                    sx={{ mt: 1 }}
-                    startAdornment={
-                      <InputAdornment position="start">$</InputAdornment>
-                    }
-                    type="number"
-                  />
-                </Box>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Box display="flex" flexDirection="column">
-                  <Typography variant="subtitle2">Margin</Typography>
-                  <OutlinedInput
-                    fullWidth
-                    placeholder="Enter price"
-                    value={item?.margin || 0}
-                    onChange={(e) =>
-                      onUpdatePrice('margin', Number(e.target.value))
-                    }
-                    sx={{ mt: 1 }}
-                    startAdornment={
-                      <InputAdornment position="start">%</InputAdornment>
-                    }
-                    type="number"
-                  />
-                </Box>
-              </Grid>
-            </Grid>
-          </ShadowSection>
+            </ShadowSection>
+          )}
 
           <ShadowSection sx={{ mt: 1 }}>
-            <Box display="flex" gap={0.5} alignItems="center">
+            <Box display="flex" gap={0.5} alignItems="center" sx={{ mb: 2 }}>
               <Checkbox
                 checked={updatedFields.includes('variants') || false}
-                onChange={(e) => onSelectToUpdateFields('variants')}
+                onChange={() => onSelectToUpdateFields('variants')}
               />
               <Typography variant="subtitle2" fontWeight={700}>
                 Variants
               </Typography>
             </Box>
 
-            <Box display="flex" gap={1} sx={{ mt: 1 }} flexDirection="column">
-              <Box display="flex" gap={1} alignItems="center">
-                <FormControl>
-                  <InputLabel>Variants</InputLabel>
-                <OutlinedInput
-                  fullWidth
-                  placeholder="Enter variant"
-                  value={item?.variants || []}
-                  label="Variants"
+            <Grid container alignItems="center" spacing={1}>
+              {variants?.map((option: any, index: number) => (
+                <VariantRow
+                  key={index}
+                  variant={option}
+                  item={item}
+                  onChangeVariant={onChangeVariant}
                 />
+              ))}
+            </Grid>
+          </ShadowSection>
 
-                </FormControl>
+          {variants?.length === 0 && (
+            <ShadowSection sx={{ mt: 1 }}>
+              <Box display="flex" gap={0.5} alignItems="center">
+                <Checkbox
+                  checked={updatedFields.includes('unit') || false}
+                  onChange={() => onSelectToUpdateFields('unit')}
+                />
+                <Typography variant="subtitle2" fontWeight={700}>
+                  Unit
+                </Typography>
               </Box>
-            </Box>
-          </ShadowSection>
 
-          <ShadowSection sx={{ mt: 1 }}>
-            <Box display="flex" gap={0.5} alignItems="center">
-              <Checkbox
-                checked={updatedFields.includes('unit') || false}
-                onChange={(e) => onSelectToUpdateFields('unit')}
+              <UnitRadio
+                units={item?.units || []}
+                value={JSON.stringify(item?.inventoryUnit || {})}
+                onChange={(e: any) =>
+                  setItem((prevState: any) => ({
+                    ...prevState,
+                    inventoryUnit: JSON.parse(e.target.value),
+                    inventoryUnitId: JSON.parse(e.target.value).id,
+                  }))
+                }
               />
-              <Typography variant="subtitle2" fontWeight={700}>
-                Unit
-              </Typography>
-            </Box>
-
-            <UnitRadio
-              units={item?.units || []}
-              value={JSON.stringify(item?.inventoryUnit || {})}
-              onChange={(e: any) =>
-                setItem((prevState: any) => ({
-                  ...prevState,
-                  inventoryUnit: JSON.parse(e.target.value),
-                  inventoryUnitId: JSON.parse(e.target.value).id,
-                }))
-              }
-            />
-          </ShadowSection>
+            </ShadowSection>
+          )}
 
           <ShadowSection sx={{ mt: 1 }}>
             <Typography variant="subtitle2" fontWeight={700}>

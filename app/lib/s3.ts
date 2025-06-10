@@ -87,7 +87,6 @@ export const getAllS3Images = async (folder: string = '') => {
         Prefix: folder,
       });
 
-      console.log(command, 'command');
 
       const response: any = await s3.send(command);
       const objects = response.Contents || [];
@@ -95,8 +94,6 @@ export const getAllS3Images = async (folder: string = '') => {
       const imageFiles = objects
         .map((obj: any) => obj.Key)
         .filter((key: string) => key.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i));
-
-      console.log(imageFiles, 'imageFiles');
 
       allImages.push(...imageFiles);
       continuationToken = response.NextContinuationToken;

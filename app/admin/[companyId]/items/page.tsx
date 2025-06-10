@@ -11,7 +11,7 @@ import { ShadowSection } from '../reports/styled';
 const ItemPage = () => {
   const { selectedInventoryItem, renderInventoryItemSearch } =
     useInventoryItems();
-  const { categories, selectedCategory, renderCategorySearch } = useCategory(
+  const { categories, renderCategorySearch } = useCategory(
     false,
     selectedInventoryItem?.listingCategories || [],
   );

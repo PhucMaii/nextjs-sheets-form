@@ -20,7 +20,6 @@ const useImageGallery = (
   useEffect(() => {
     const getImages = async () => {
       const images = await getAllS3Images(from);
-      console.log(images, 'images');
       setGalleryImages(images || []);
     };
 
