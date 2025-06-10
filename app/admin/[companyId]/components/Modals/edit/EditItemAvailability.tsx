@@ -91,7 +91,10 @@ export default function EditItemAvailability({
       <Switch
         checked={availability}
         onChange={() => setAvailability(!availability)}
-        onClick={() => setIsOpen(true)}
+        onClick={(e: any) => {
+          e.stopPropagation();
+          setIsOpen(true);
+        }}
       />
       <Modal open={isOpen}>
         <BoxModal
@@ -129,8 +132,8 @@ export default function EditItemAvailability({
                 Update Current Category Only
               </Typography>
               <Typography variant="body2">
-                This option only affect item in current category only and won&aposl;t
-                affect other item with same name in other category.
+                This option only affect item in current category only and
+                won&aposl;t affect other item with same name in other category.
               </Typography>
             </ShadowSectionStyled>
             <ShadowSectionStyled

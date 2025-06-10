@@ -7,6 +7,7 @@ import EditItem from '../Modals/edit/EditItem';
 import { grey } from '@mui/material/colors';
 import { generateImgUrl } from '@/app/lib/s3';
 import { websiteItemCategory } from '@/app/lib/constant';
+import { useParams, useRouter } from 'next/navigation';
 
 interface IProps {
   item: IItem;
@@ -23,14 +24,15 @@ export default function Item({
   showNotification,
   isWebsiteItem = false,
 }: IProps) {
-
+  const router = useRouter();
+  const { companyId }: any = useParams();
   const [img, setImg] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     if (item?.image || item?.inventoryItem?.image) {
       generateImgUrl(item?.image || item?.inventoryItem?.image).then((img) => {
         setImg(img);
-      }); 
+      });
     }
   }, [item]);
 
@@ -58,12 +60,10 @@ export default function Item({
       <Paper
         elevation={0}
         sx={{
-          py: 2,
+          py: 1.5,
           '&:hover': { cursor: 'pointer', backgroundColor: grey[50] },
         }}
-        onClick={() => {
-          setIsOpenEditItem(true);
-        }}
+        onClick={() => router.push(`/admin/${companyId}/items/${item.id}`)}
       >
         <Grid container alignItems="center" columnSpacing={1}>
           <Grid item lg={1} md={12}>
@@ -92,12 +92,13 @@ export default function Item({
           )}
           <Grid item md={2}>
             <Box display="flex" alignItems="center" gap={2}>
-              <Typography variant="subtitle1">{item.name}</Typography>
+              <Typography variant="subtitle2" fontWeight={700}>
+                {item.name}
+              </Typography>
               {item?.isBestSeller && (
                 <Chip label="Best Seller" color="error" size="small" />
               )}
             </Box>
-
           </Grid>
           <Grid item md={2}>
             <Typography variant="subtitle1">

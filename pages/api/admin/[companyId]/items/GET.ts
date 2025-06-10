@@ -45,12 +45,13 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                   fifo: true,
                 },
               },
+              fifo: true,
               type: true,
-              // type: {
-              //   include: {
-              //     itemType_category: true,
-              //   },
-              // },
+              item: {
+                include: {
+                  category: true,
+                },
+              },
             },
           },
           category: {
@@ -62,25 +63,41 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
               },
             },
           },
-          // category: {
-          //   include: {
-          //     itemType_category: {
-          //       include: {
-          //         itemType: true,
-          //       },
-          //     },
-          //   },
-          // },
         },
-      }); // orderBy: [
-      //   { inventoryItem: { type: { priority: 'asc' } } }, // Order by type priority first
-      //   { inventoryItem: { indexPos: 'asc' } }, // Then by indexPos
-      // ],
+      });
 
-      // const qtyLeft = calculateQtyLeft(item);
-      // const itemWithQtyLeft = { ...item, qtyLeft };
+      // Fetching listing categories
+      const sellingItemWithThisInventory = await prisma.item.findMany({
+        where: {
+          inventoryItemId: item?.inventoryItemId,
+        },
+        include: {
+          category: true,
+        },
+      });
+      
 
-      return res.status(200).json({ data: item });
+      const currentCost = item?.inventoryItem?.fifo[0]?.price || 0;
+      const profit = (item?.price || 0) - currentCost;
+      // Round to 2 decimal places
+
+      const margin = (profit / currentCost) * 100;
+      const formattedMargin = Math.round(margin * 100) / 100;
+
+      const sellignItemsWithProfit = sellingItemWithThisInventory.map((item: any) => {
+        const profit = (item?.price || 0) - currentCost;
+        return { ...item, profit };
+      });
+
+      return res.status(200).json({
+        data: {
+          ...item,
+          listingCategories: sellignItemsWithProfit,
+          costPerItem: currentCost,
+          profit,
+          margin: formattedMargin,
+        },
+      });
     }
 
     if (categoryId) {

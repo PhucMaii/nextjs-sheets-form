@@ -44,6 +44,11 @@ export function createTheme() {
           size: 'small', // Default size for Select
         },
       },
+      MuiSwitch: {
+        defaultProps: {
+          size: 'small', // Default size for Switch
+        },
+      },
       MuiListItemButton: {
         defaultProps: {
           dense: true, // Makes the ListItemButton smaller

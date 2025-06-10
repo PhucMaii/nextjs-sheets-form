@@ -59,6 +59,7 @@ const useInventoryItems = () => {
           });
         }}
         sx={{ width: 'auto' }}
+        size="small"
       />
     );
   };
