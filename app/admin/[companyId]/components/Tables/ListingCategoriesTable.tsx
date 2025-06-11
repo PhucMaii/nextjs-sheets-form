@@ -5,7 +5,6 @@ import {
   Table,
   TableCell,
   TableBody,
-  Typography,
 } from '@mui/material';
 import React from 'react';
 import { useParams, useRouter } from 'next/navigation';

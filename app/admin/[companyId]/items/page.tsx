@@ -28,7 +28,7 @@ const ItemPage = () => {
   const { companyId }: any = useParams();
   const { selectedInventoryItem, renderInventoryItemSearch } =
     useInventoryItems();
-  const { categories, fetchCategories, selectedCategory, renderCategorySearch, isLoading } =
+  const { categories, selectedCategory, renderCategorySearch, isLoading } =
     useCategory(false, selectedInventoryItem?.listingCategories || []);
 
   const { showNotification, NotificationComp } = useNotification();

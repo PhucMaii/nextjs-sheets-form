@@ -76,7 +76,7 @@ export default function ClientsPage() {
         ? getAdminApiUrl(companyId, '')
         : getAdminApiUrl(companyId, '/clients', 'role=guest'),
   );
-  const [categories, mutateCategories] = SWRFetchData(
+  const [categories] = SWRFetchData(
     getAdminApiUrl(companyId, '/categories'),
   );
 
@@ -366,7 +366,7 @@ export default function ClientsPage() {
         showNotification={showNotification}
         handleAddClientUI={onAddClientUI}
         mutateClients={mutateClients}
-        mutateCategories={mutateCategories}
+        // mutateCategories={mutateCategories}
       />
       <SingleFieldUpdate
         open={singleFieldUpdateProps.open}

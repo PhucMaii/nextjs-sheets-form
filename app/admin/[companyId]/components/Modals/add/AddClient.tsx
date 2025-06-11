@@ -28,7 +28,7 @@ import { useParams } from 'next/navigation';
 
 interface PropTypes extends ModalProps {
   categories: Category[];
-  mutateCategories: any;
+  // mutateCategories: any;
   showNotification: (type: AlertColor, message: string) => void;
   handleAddClientUI: (newClient: UserType) => void;
   mutateClients: any;
@@ -38,7 +38,7 @@ export default function AddClient({
   open,
   onClose,
   categories,
-  mutateCategories,
+  // mutateCategories,
   // subCategories,
   showNotification,
   handleAddClientUI,
