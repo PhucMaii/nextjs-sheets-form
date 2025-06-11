@@ -16,6 +16,7 @@ import { IEmployee, IScheduledShift } from '@/app/utils/type';
 import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
 import dayjs from 'dayjs';
+import { PayrollType } from '@prisma/client';
 
 export default function ScheduledShifts() {
   const { companyId }: any = useParams();
@@ -47,17 +48,38 @@ export default function ScheduledShifts() {
       (acc, shift) => acc + (shift.hours || 0),
       0,
     );
-    const totalCost = scheduledShifts.reduce(
-      (acc, shift) =>
-        acc + (shift.hours || 0) * (shift.employee?.payRate || 0),
+
+    const hourlyScheduledShifts = scheduledShifts.filter(
+      (shift) => shift.employee?.payrollType === PayrollType.hourly,
+    );
+    const salariedScheduledShifts = scheduledShifts.filter(
+      (shift) => shift.employee?.payrollType === PayrollType.monthly,
+    );
+    const salaryEmployeesInScheduledShifts = employees.filter(
+      (employee) =>
+        employee.payrollType === PayrollType.monthly &&
+        salariedScheduledShifts.some(
+          (shift) => shift.employee?.id === employee.id,
+        ),
+    );
+
+    const totalHourlyCost = hourlyScheduledShifts.reduce(
+      (acc, shift) => acc + (shift.hours || 0) * (shift.employee?.payRate || 0),
       0,
     );
+    const totalSalaryCost = salaryEmployeesInScheduledShifts.reduce(
+      (acc, employee) => acc + (employee?.payRate || 0),
+      0,
+    );
+
+    const totalCost = totalHourlyCost + totalSalaryCost;
+
     return {
       totalShifts: scheduledShifts.length,
       totalHours,
       totalCost,
     };
-  }, [scheduledShifts]);
+  }, [scheduledShifts, employees]);
 
   useEffect(() => {
     fetchEmployees();
@@ -137,8 +159,12 @@ export default function ScheduledShifts() {
   const handleCopyLastWeek = async () => {
     try {
       setIsCopyingLastWeek(true);
-      const lastWeekStartedDate = dayjs(selectedWeek[0]).subtract(7, 'day').toString();
-      const lastWeekEndedDate = dayjs(selectedWeek[1]).subtract(8, 'day').toString();
+      const lastWeekStartedDate = dayjs(selectedWeek[0])
+        .subtract(7, 'day')
+        .toString();
+      const lastWeekEndedDate = dayjs(selectedWeek[1])
+        .subtract(8, 'day')
+        .toString();
 
       const currentWeekStartedDate = dayjs(selectedWeek[0]).toString();
       const currentWeekEndedDate = dayjs(selectedWeek[1]).toString();
