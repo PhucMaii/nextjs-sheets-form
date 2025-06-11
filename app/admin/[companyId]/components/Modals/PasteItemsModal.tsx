@@ -18,10 +18,11 @@ import ErrorComponent from '../ErrorComponent';
 import axios from 'axios';
 import { getAdminApiUrl } from '@/app/utils/enum';
 import { useParams } from 'next/navigation';
+import { fetchApi } from '@/app/utils/db';
 interface IProps extends ModalProps {
   currentCategoryId: number;
   showNotification: (type: AlertColor, message: string) => void;
-  categories: ICategory[];
+  // categories: ICategory[];
 }
 
 export default function PasteItemsModal({
@@ -29,12 +30,13 @@ export default function PasteItemsModal({
   onClose,
   currentCategoryId,
   showNotification,
-  categories,
+  // categories,
 }: IProps) {
   const { companyId }: any = useParams();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [newItems, setNewItems] = useState<IItem[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<number>(-1);
+  const [categories, setCategories] = useState<ICategory[]>([]);
 
   // Find the selected category object based on selectedCategoryId
   const selectedCategory = useMemo(() => {
@@ -50,6 +52,15 @@ export default function PasteItemsModal({
       setNewItems(selectedCategory.items);
     }
   }, [selectedCategory]);
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    const data = await fetchApi(getAdminApiUrl(companyId, '/categories'));
+    setCategories(data);
+  };
 
   const handlePasteItems = async () => {
     setIsLoading(true);

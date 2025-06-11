@@ -49,7 +49,7 @@ export default function EditItemAvailability({
 
   const handleUpdateItemThisCategory = async () => {
     setIsUpdating(true);
-    await handleUpdateItem({ ...item, availability });
+    await handleUpdateItem({ ...item, availability: !item.availability });
     setIsUpdating(false);
     setIsOpen(false);
   };
@@ -93,6 +93,7 @@ export default function EditItemAvailability({
         onChange={() => setAvailability(!availability)}
         onClick={(e: any) => {
           e.stopPropagation();
+          e.preventDefault();
           setIsOpen(true);
         }}
       />

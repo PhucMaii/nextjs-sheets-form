@@ -149,7 +149,7 @@ export default function AddClient({
           onClose={() => setIsOpenAdCategory(false)}
           showNotification={showNotification}
           handleOnChangeClient={handleOnChangeClient}
-          mutateCategories={mutateCategories}
+          // mutateCategories={mutateCategories}
         />
         <ModalHead
           heading="Add Client"

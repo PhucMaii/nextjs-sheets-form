@@ -12,6 +12,7 @@ import {
   Checkbox,
   Grid,
   Button,
+  Skeleton,
 } from '@mui/material';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import { useRouter } from 'next/navigation';
@@ -31,6 +32,10 @@ import { getUniqueUnitRatios } from '@/app/utils/array';
 import { UPDATE_OPTION } from '../../components/Modals/edit/EditItem';
 import { LoadingButton } from '@mui/lab';
 import VariantRow from './VariantRow';
+import { grey } from '@mui/material/colors';
+import { InfoIcon } from 'lucide-react';
+import Link from 'next/link';
+import DeleteModal from '../../components/Modals/delete/DeleteModal';
 
 export default function ItemPage() {
   const { companyId, itemId }: any = useParams();
@@ -42,12 +47,14 @@ export default function ItemPage() {
   const [item, setItem] = useState<IItem | any>({});
   const [image, setImage] = useState<string | null>(null);
   const [isImgHovered, setIsImgHovered] = useState(false);
+  const [isFetching, setIsFetching] = useState<boolean>(true);
   const [updatedFields, setUpdatedFields] = useState<string[]>([]);
   const [loading, setLoading] = useState<any>({
     [UPDATE_OPTION.CURRENT_CATEGORY]: false,
     [UPDATE_OPTION.ALL_ITEMS_SAME_NAME]: false,
   });
   const [variants, setVariants] = useState<any[]>([]);
+  const [isOpenDeleteModal, setIsOpenDeleteModal] = useState<boolean>(false);
 
   useEffect(() => {
     fetchItem();
@@ -79,6 +86,8 @@ export default function ItemPage() {
       ...data,
       units: sellingUnits,
     }));
+
+    setIsFetching(false);
   };
 
   const onUpdatePrice = useCallback(
@@ -121,15 +130,33 @@ export default function ItemPage() {
     [item],
   );
 
+  const handleDeleteItem = async (targetItem: IItem) => {
+    try {
+      const response = await axios.delete(getAdminApiUrl(companyId, '/items'), {
+        data: { removedId: targetItem.id },
+      });
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+      router.push(
+        `/admin/${companyId}/items/category/${targetItem.categoryId}`,
+      );
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      showNotification('error', error.response.data.error);
+    }
+  };
+
   const handleUploadImage = async (image: string) => {
     try {
-      await axios.post(
-        getAdminApiUrl(companyId, `/inventory/upload-image`),
-        {
-          image,
-          inventoryItemId: item?.inventoryItemId,
-        },
-      );
+      await axios.post(getAdminApiUrl(companyId, `/inventory/upload-image`), {
+        image,
+        inventoryItemId: item?.inventoryItemId,
+      });
 
       generateImgUrl(image).then((img) => {
         setImage(img);
@@ -187,12 +214,15 @@ export default function ItemPage() {
         },
         updateOption,
         updatedFields: updatedFields,
+        options: variants,
       });
 
       if (response.data.error) {
         showNotification('error', response.data.error);
         return;
       }
+
+      await fetchItem();
 
       showNotification('success', response.data.message);
     } catch (error: any) {
@@ -206,14 +236,20 @@ export default function ItemPage() {
     }
   };
 
-  const onChangeVariant = (variant: any) => {
-    const newOptions = item?.options?.map((option: any) => {
-      if (option.id === variant.id) {
-        return variant;
-      }
-      return option;
-    });
-    setItem((prev: any) => ({ ...prev, options: newOptions }));
+  const onAddVariant = () => {
+    setVariants([
+      ...variants,
+      {
+        id: crypto.randomUUID(),
+        unit: item?.inventoryUnit || item?.inventoryUnits[0],
+        unitId: item?.inventoryUnit?.id || item?.inventoryUnits[0]?.id,
+        name: '',
+        price: 0,
+        prevPrice: 0,
+        isShowDiscount: false,
+        availability: true,
+      },
+    ]);
   };
 
   return (
@@ -224,6 +260,14 @@ export default function ItemPage() {
         onClose={() => setIsOpenUploadImgModal(false)}
         initialImage={image || ''}
         handleUploadImage={handleUploadImage}
+      />
+
+      <DeleteModal
+        open={isOpenDeleteModal}
+        handleCloseModal={() => setIsOpenDeleteModal(false)}
+        targetObj={item}
+        handleDelete={handleDeleteItem}
+        showTargetObj={item?.name}
       />
 
       <Box
@@ -241,6 +285,13 @@ export default function ItemPage() {
         </Box>
 
         <Box display="flex" gap={1} alignItems="center">
+          <Button
+            variant="outlined"
+            color="error"
+            onClick={() => setIsOpenDeleteModal(true)}
+          >
+            Delete
+          </Button>
           <LoadingButton
             variant="outlined"
             color="primary"
@@ -262,281 +313,363 @@ export default function ItemPage() {
 
       <Grid container spacing={1}>
         <Grid item xs={12} md={8}>
-          <ShadowSection>
-            <Box display="flex" gap={0.5} alignItems="center">
-              <Checkbox
-                checked={updatedFields.includes('name') || false}
-                onChange={() => onSelectToUpdateFields('name')}
-              />
-              <Typography variant="subtitle2" fontWeight={700}>
-                Name
-              </Typography>
-            </Box>
-            <OutlinedInput
-              fullWidth
-              placeholder="Enter name"
-              value={item?.name}
-              onChange={(e) => setItem({ ...item, name: e.target.value })}
-            />
-          </ShadowSection>
-
-          {variants?.length === 0 && (
-            <ShadowSection sx={{ mt: 1 }}>
-              <Box display="flex" gap={0.5} alignItems="center">
-                <Checkbox
-                  checked={updatedFields.includes('price') || false}
-                  onChange={() => onSelectToUpdateFields('price')}
+          <Box display="flex" flexDirection="column" gap={1}>
+            {isFetching ? (
+              <Skeleton variant="rectangular" height={100} />
+            ) : (
+              <ShadowSection>
+                <Box display="flex" gap={0.5} alignItems="center">
+                  <Checkbox
+                    checked={updatedFields.includes('name') || false}
+                    onChange={() => onSelectToUpdateFields('name')}
+                  />
+                  <Typography variant="subtitle2" fontWeight={700}>
+                    Name
+                  </Typography>
+                </Box>
+                <OutlinedInput
+                  fullWidth
+                  placeholder="Enter name"
+                  value={item?.name}
+                  onChange={(e) => setItem({ ...item, name: e.target.value })}
                 />
-                <Typography variant="subtitle2" fontWeight={700}>
-                  Pricing
-                </Typography>
-              </Box>
-              <Grid container spacing={1} alignItems="center" sx={{ mt: 1 }}>
-                <Grid item xs={12} md={6}>
-                  <Box
-                    display="flex"
-                    flexDirection="column"
-                    sx={{ width: '100%' }}
-                  >
-                    <Typography variant="subtitle2">Price</Typography>
-                    <OutlinedInput
-                      fullWidth
-                      placeholder="Enter price"
-                      value={item?.price}
-                      onChange={(e) =>
-                        onUpdatePrice('price', Number(e.target.value))
-                      }
-                      type="number"
+              </ShadowSection>
+            )}
+
+            {isFetching ? (
+              <Skeleton variant="rectangular" height={300} />
+            ) : (
+              <>
+                {variants?.length === 0 && (
+                  <ShadowSection sx={{ mt: 1 }}>
+                    <Box display="flex" gap={0.5} alignItems="center">
+                      <Checkbox
+                        checked={updatedFields.includes('price') || false}
+                        onChange={() => onSelectToUpdateFields('price')}
+                      />
+                      <Typography variant="subtitle2" fontWeight={700}>
+                        Pricing
+                      </Typography>
+                    </Box>
+                    <Grid
+                      container
+                      spacing={1}
+                      alignItems="center"
                       sx={{ mt: 1 }}
-                      startAdornment={
-                        <InputAdornment position="start">$</InputAdornment>
-                      }
-                    />
-                  </Box>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <Box
-                    display="flex"
-                    flexDirection="column"
-                    sx={{ width: '100%' }}
-                  >
-                    <Typography variant="subtitle2">Previous Price</Typography>
-                    <OutlinedInput
-                      fullWidth
-                      placeholder="Enter previous price"
-                      value={item?.prevPrice || 0}
-                      onChange={(e) =>
-                        setItem((prev: any) => ({
-                          ...prev,
-                          prevPrice: Number(e.target.value),
+                    >
+                      <Grid item xs={12} md={6}>
+                        <Box
+                          display="flex"
+                          flexDirection="column"
+                          sx={{ width: '100%' }}
+                        >
+                          <Typography variant="subtitle2">Price</Typography>
+                          <OutlinedInput
+                            fullWidth
+                            placeholder="Enter price"
+                            value={item?.price}
+                            onChange={(e) =>
+                              onUpdatePrice('price', Number(e.target.value))
+                            }
+                            type="number"
+                            sx={{ mt: 1 }}
+                            startAdornment={
+                              <InputAdornment position="start">
+                                $
+                              </InputAdornment>
+                            }
+                          />
+                        </Box>
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        <Box
+                          display="flex"
+                          flexDirection="column"
+                          sx={{ width: '100%' }}
+                        >
+                          <Typography variant="subtitle2">
+                            Previous Price
+                          </Typography>
+                          <OutlinedInput
+                            fullWidth
+                            placeholder="Enter previous price"
+                            value={item?.prevPrice || 0}
+                            onChange={(e) =>
+                              setItem((prev: any) => ({
+                                ...prev,
+                                prevPrice: Number(e.target.value),
+                              }))
+                            }
+                            sx={{ mt: 1 }}
+                            startAdornment={
+                              <InputAdornment position="start">
+                                $
+                              </InputAdornment>
+                            }
+                            type="number"
+                          />
+                        </Box>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={item?.isShowDiscount || false}
+                              onChange={(e) =>
+                                setItem((prev: any) => ({
+                                  ...prev,
+                                  isShowDiscount: e.target.checked,
+                                }))
+                              }
+                            />
+                          }
+                          label="Show Discount"
+                          sx={{ mt: 1, px: '9px' }} // to be aligned with the checkbox
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Divider sx={{ my: 1 }} />
+                      </Grid>
+                      <Grid item xs={12} md={4}>
+                        <Box display="flex" flexDirection="column">
+                          <Typography variant="subtitle2">
+                            Cost per item
+                          </Typography>
+                          <OutlinedInput
+                            fullWidth
+                            placeholder="Enter price"
+                            value={item?.costPerItem || 0}
+                            startAdornment={
+                              <InputAdornment position="start">
+                                $
+                              </InputAdornment>
+                            }
+                            type="number"
+                            sx={{ mt: 1 }}
+                          />
+                        </Box>
+                      </Grid>
+                      <Grid item xs={12} md={4}>
+                        <Box display="flex" flexDirection="column">
+                          <Typography variant="subtitle2">Profit</Typography>
+                          <OutlinedInput
+                            fullWidth
+                            placeholder="Enter price"
+                            value={item?.profit || 0}
+                            onChange={(e) =>
+                              onUpdatePrice('profit', Number(e.target.value))
+                            }
+                            sx={{ mt: 1 }}
+                            startAdornment={
+                              <InputAdornment position="start">
+                                $
+                              </InputAdornment>
+                            }
+                            type="number"
+                          />
+                        </Box>
+                      </Grid>
+                      <Grid item xs={12} md={4}>
+                        <Box display="flex" flexDirection="column">
+                          <Typography variant="subtitle2">Margin</Typography>
+                          <OutlinedInput
+                            fullWidth
+                            placeholder="Enter price"
+                            value={item?.margin || 0}
+                            onChange={(e) =>
+                              onUpdatePrice('margin', Number(e.target.value))
+                            }
+                            sx={{ mt: 1 }}
+                            startAdornment={
+                              <InputAdornment position="start">
+                                %
+                              </InputAdornment>
+                            }
+                            type="number"
+                          />
+                        </Box>
+                      </Grid>
+                    </Grid>
+                  </ShadowSection>
+                )}
+              </>
+            )}
+
+            {isFetching ? (
+              <Skeleton variant="rectangular" height={100} />
+            ) : (
+              <>
+                {variants?.length === 0 && (
+                  <ShadowSection sx={{ mt: 1 }}>
+                    <Box display="flex" gap={0.5} alignItems="center">
+                      <Checkbox
+                        checked={updatedFields.includes('unit') || false}
+                        onChange={() => onSelectToUpdateFields('unit')}
+                      />
+                      <Typography variant="subtitle2" fontWeight={700}>
+                        Unit
+                      </Typography>
+                    </Box>
+
+                    <UnitRadio
+                      units={item?.units || []}
+                      value={JSON.stringify(item?.inventoryUnit || {})}
+                      onChange={(e: any) =>
+                        setItem((prevState: any) => ({
+                          ...prevState,
+                          inventoryUnit: JSON.parse(e.target.value),
+                          inventoryUnitId: JSON.parse(e.target.value).id,
                         }))
                       }
-                      sx={{ mt: 1 }}
-                      startAdornment={
-                        <InputAdornment position="start">$</InputAdornment>
-                      }
-                      type="number"
                     />
-                  </Box>
-                </Grid>
-                <Grid item xs={12}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={item?.isShowDiscount || false}
-                        onChange={(e) =>
-                          setItem((prev: any) => ({
-                            ...prev,
-                            isShowDiscount: e.target.checked,
-                          }))
-                        }
+                  </ShadowSection>
+                )}
+              </>
+            )}
+
+            {isFetching ? (
+              <Skeleton variant="rectangular" height={100} />
+            ) : (
+              <ShadowSection sx={{ mt: 1 }}>
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  sx={{ mb: 1 }}
+                >
+                  <Box display="flex" gap={0.5} flexDirection="column">
+                    {/* <Checkbox
+                  checked={updatedFields.includes('variants') || false}
+                  onChange={() => onSelectToUpdateFields('variants')}
+                /> */}
+                    <Typography variant="subtitle2" fontWeight={700}>
+                      Variants
+                    </Typography>
+                    <Box display="flex" gap={0.5} alignItems="center">
+                      <InfoIcon
+                        style={{
+                          width: '16px',
+                          height: '16px',
+                          color: grey[600],
+                        }}
                       />
-                    }
-                    label="Show Discount"
-                    sx={{ mt: 1, px: '9px' }} // to be aligned with the checkbox
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <Divider sx={{ my: 1 }} />
-                </Grid>
-                <Grid item xs={12} md={4}>
-                  <Box display="flex" flexDirection="column">
-                    <Typography variant="subtitle2">Cost per item</Typography>
-                    <OutlinedInput
-                      fullWidth
-                      placeholder="Enter price"
-                      value={item?.costPerItem || 0}
-                      startAdornment={
-                        <InputAdornment position="start">$</InputAdornment>
-                      }
-                      type="number"
-                      sx={{ mt: 1 }}
-                    />
+                      <Typography variant="subtitle2" sx={{ color: grey[600] }}>
+                        Variants can only be bulk updated same inventory item at{' '}
+                        <Link
+                          href={`/admin/${companyId}/inventory/bulk/selling-items/${item?.inventoryItemId}`}
+                        >
+                          bulk edit page
+                        </Link>
+                      </Typography>
+                    </Box>
                   </Box>
-                </Grid>
-                <Grid item xs={12} md={4}>
-                  <Box display="flex" flexDirection="column">
-                    <Typography variant="subtitle2">Profit</Typography>
-                    <OutlinedInput
-                      fullWidth
-                      placeholder="Enter price"
-                      value={item?.profit || 0}
-                      onChange={(e) =>
-                        onUpdatePrice('profit', Number(e.target.value))
-                      }
-                      sx={{ mt: 1 }}
-                      startAdornment={
-                        <InputAdornment position="start">$</InputAdornment>
-                      }
-                      type="number"
+
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={onAddVariant}
+                  >
+                    + Add Variant
+                  </Button>
+                </Box>
+
+                <Grid container alignItems="center" spacing={1}>
+                  {variants?.map((option: any, index: number) => (
+                    <VariantRow
+                      key={index}
+                      variant={option}
+                      item={item}
+                      setVariants={setVariants}
+                      variants={variants}
                     />
-                  </Box>
+                  ))}
                 </Grid>
-                <Grid item xs={12} md={4}>
-                  <Box display="flex" flexDirection="column">
-                    <Typography variant="subtitle2">Margin</Typography>
-                    <OutlinedInput
-                      fullWidth
-                      placeholder="Enter price"
-                      value={item?.margin || 0}
-                      onChange={(e) =>
-                        onUpdatePrice('margin', Number(e.target.value))
-                      }
-                      sx={{ mt: 1 }}
-                      startAdornment={
-                        <InputAdornment position="start">%</InputAdornment>
-                      }
-                      type="number"
-                    />
-                  </Box>
-                </Grid>
-              </Grid>
-            </ShadowSection>
-          )}
+              </ShadowSection>
+            )}
 
-          <ShadowSection sx={{ mt: 1 }}>
-            <Box display="flex" gap={0.5} alignItems="center" sx={{ mb: 2 }}>
-              <Checkbox
-                checked={updatedFields.includes('variants') || false}
-                onChange={() => onSelectToUpdateFields('variants')}
-              />
-              <Typography variant="subtitle2" fontWeight={700}>
-                Variants
-              </Typography>
-            </Box>
-
-            <Grid container alignItems="center" spacing={1}>
-              {variants?.map((option: any, index: number) => (
-                <VariantRow
-                  key={index}
-                  variant={option}
-                  item={item}
-                  onChangeVariant={onChangeVariant}
-                />
-              ))}
-            </Grid>
-          </ShadowSection>
-
-          {variants?.length === 0 && (
-            <ShadowSection sx={{ mt: 1 }}>
-              <Box display="flex" gap={0.5} alignItems="center">
-                <Checkbox
-                  checked={updatedFields.includes('unit') || false}
-                  onChange={() => onSelectToUpdateFields('unit')}
-                />
+            {isFetching ? (
+              <Skeleton variant="rectangular" height={400} />
+            ) : (
+              <ShadowSection sx={{ mt: 1 }}>
                 <Typography variant="subtitle2" fontWeight={700}>
-                  Unit
+                  Listing Categories ({item?.listingCategories?.length || 0})
                 </Typography>
-              </Box>
 
-              <UnitRadio
-                units={item?.units || []}
-                value={JSON.stringify(item?.inventoryUnit || {})}
-                onChange={(e: any) =>
-                  setItem((prevState: any) => ({
-                    ...prevState,
-                    inventoryUnit: JSON.parse(e.target.value),
-                    inventoryUnitId: JSON.parse(e.target.value).id,
-                  }))
-                }
-              />
-            </ShadowSection>
-          )}
-
-          <ShadowSection sx={{ mt: 1 }}>
-            <Typography variant="subtitle2" fontWeight={700}>
-              Listing Categories ({item?.listingCategories?.length || 0})
-            </Typography>
-
-            <ListingCategoriesTable
-              listingCategories={item?.listingCategories || []}
-            />
-          </ShadowSection>
+                <ListingCategoriesTable
+                  listingCategories={item?.listingCategories || []}
+                />
+              </ShadowSection>
+            )}
+          </Box>
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <ShadowSection>
-            <Box display="flex" flexDirection="column" gap={1}>
-              <Typography variant="subtitle2" fontWeight={700}>
-                Inventory Item
-              </Typography>
+          {isFetching ? (
+            <Skeleton variant="rectangular" height={400} />
+          ) : (
+            <ShadowSection>
+              <Box display="flex" flexDirection="column" gap={1}>
+                <Typography variant="subtitle2" fontWeight={700}>
+                  Inventory Item
+                </Typography>
 
-              <Typography variant="h5" fontWeight={500}>
-                {item?.inventoryItem?.sku
-                  ? `${item?.inventoryItem?.sku} | `
-                  : ''}
-                {item?.inventoryItem?.name || 'N/A'}
-              </Typography>
-            </Box>
-            <ItemButton
-              item={item}
-              onClick={() => {}}
-              style={{ width: '50%', minWidth: '150px' }}
-            />
-            <Box display="flex" flexDirection="column" gap={1}>
-              <Typography variant="subtitle2" fontWeight={700}>
-                Image
-              </Typography>
-
-              <Box
-                sx={{
-                  position: 'relative',
-                  '&:hover': {
-                    cursor: 'pointer',
-                  },
-                }}
-                onMouseOver={() => setIsImgHovered(true)}
-                onMouseLeave={() => setIsImgHovered(false)}
-              >
-                {isImgHovered && (
-                  <Button
-                    sx={{
-                      position: 'absolute',
-                      top: '50%',
-                      left: '50%',
-                      transform: 'translate(-50%, -50%)',
-                      zIndex: 100,
-                    }}
-                    variant="contained"
-                    color="primary"
-                    onClick={() => setIsOpenUploadImgModal(true)}
-                  >
-                    Upload Image
-                  </Button>
-                )}
-                <img
-                  src={image || ''}
-                  alt="Inventory Item"
-                  style={{
-                    width: '100%',
-                    height: 'auto',
-                    opacity: isImgHovered ? 0.5 : 1,
-                    filter: isImgHovered ? 'blur(2px)' : 'none',
-                  }}
-                />
+                <Typography variant="h5" fontWeight={500}>
+                  {item?.inventoryItem?.sku
+                    ? `${item?.inventoryItem?.sku} | `
+                    : ''}
+                  {item?.inventoryItem?.name || 'N/A'}
+                </Typography>
               </Box>
-            </Box>
-          </ShadowSection>
+              <ItemButton
+                item={item}
+                onClick={() => {}}
+                style={{ width: '50%', minWidth: '150px' }}
+              />
+              <Box display="flex" flexDirection="column" gap={1}>
+                <Typography variant="subtitle2" fontWeight={700}>
+                  Image
+                </Typography>
+
+                <Box
+                  sx={{
+                    position: 'relative',
+                    '&:hover': {
+                      cursor: 'pointer',
+                    },
+                  }}
+                  onMouseOver={() => setIsImgHovered(true)}
+                  onMouseLeave={() => setIsImgHovered(false)}
+                >
+                  {isImgHovered && (
+                    <Button
+                      sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        zIndex: 100,
+                      }}
+                      variant="contained"
+                      color="primary"
+                      onClick={() => setIsOpenUploadImgModal(true)}
+                    >
+                      Upload Image
+                    </Button>
+                  )}
+                  <img
+                    src={image || ''}
+                    alt="Inventory Item"
+                    style={{
+                      width: '100%',
+                      height: 'auto',
+                      opacity: isImgHovered ? 0.5 : 1,
+                      filter: isImgHovered ? 'blur(2px)' : 'none',
+                    }}
+                  />
+                </Box>
+              </Box>
+            </ShadowSection>
+          )}
         </Grid>
       </Grid>
     </Sidebar>

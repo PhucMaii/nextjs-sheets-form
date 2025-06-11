@@ -5,6 +5,7 @@ import {
   Table,
   TableCell,
   TableBody,
+  Typography,
 } from '@mui/material';
 import React from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -61,8 +62,16 @@ export default function ListingCategoriesTable({ listingCategories }: IProps) {
               >
                 {item?.name}
               </TableCell>
-              <TableCell>${item?.price.toFixed(2)}</TableCell>
-              <TableCell>${item?.profit.toFixed(2)}</TableCell>
+              <TableCell>
+                {item?.options && item.options.length > 0
+                  ? `From $${item?.options?.reduce((acc: number, option: any) => (option.price < acc ? option.price : acc), Infinity).toFixed(2)}`
+                  : `$${item.price.toFixed(2)}`}
+              </TableCell>
+              <TableCell>
+                {item?.options && item.options.length > 0
+                  ? 'Variable'
+                  : `$${item?.profit?.toFixed(2)}`}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

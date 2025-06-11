@@ -1,13 +1,18 @@
 import { UPDATE_OPTION } from '@/app/admin/[companyId]/components/Modals/edit/EditItem';
 import { websiteItemCategoryId } from '@/app/lib/constant';
-import { IItem } from '@/app/utils/type';
+import { USER_ROLE } from '@/app/utils/enum';
+import { IItem, IOption } from '@/app/utils/type';
+import { getCreatedBy } from '@/pages/api/import-sheets/utils';
+import { getTodayDate } from '@/pages/api/utils/date';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { updateAllScheduleOrderItemsForOption } from '../options/PUT';
 
 interface IBody {
-  updatedItem: IItem;
+  updatedItem: IItem | any;
   updateOption: UPDATE_OPTION;
   updatedFields: string[];
+  options: IOption[];
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
@@ -18,6 +23,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       updatedItem,
       updateOption = UPDATE_OPTION.CURRENT_CATEGORY,
       updatedFields = [],
+      options,
     }: IBody = req.body;
 
     if (
@@ -137,8 +143,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         where: {
           inventoryItemId: existingItem.inventoryItemId,
           categoryId: {
-            not: websiteItemCategoryId
-          }
+            not: websiteItemCategoryId,
+          },
         },
         data: updatedData,
       });
@@ -156,6 +162,103 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       return res.status(500).json({
         error: responseUpdate.error,
       });
+    }
+
+    if (options) {
+      if (options.length === 0) {
+        await prisma.option.deleteMany({
+          where: {
+            itemId: updatedItem.id,
+          },
+        });
+      } else {
+        // Get existing options
+        const existingOptions = await prisma.option.findMany({
+          where: {
+            itemId: updatedItem.id,
+          },
+          include: {
+            unit: true,
+            item: true,
+          },
+        });
+
+        const deletedOptions = existingOptions.filter(
+          (option) => !options.some((o) => o.id === option.id),
+        );
+
+        await prisma.option.deleteMany({
+          where: {
+            id: {
+              in: deletedOptions.map((option) => option.id),
+            },
+          },
+        });
+
+        if (updateOption !== UPDATE_OPTION.ALL_ITEMS_SAME_NAME) {
+          const today = getTodayDate();
+          const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
+
+          const updatedOptions = options.map(async (option) => {
+            const existingOption = existingOptions.find(
+              (o) => o.id === option.id,
+            );
+            if (existingOption) {
+              return prisma.option.update({
+                where: {
+                  id: existingOption.id,
+                },
+                data: {
+                  name: option.name,
+                  price: option.price,
+                  unitId: option.unitId,
+                  prevPrice: option.prevPrice,
+                  isShowDiscount: option.isShowDiscount,
+                },
+              });
+            } else {
+              return prisma.option.create({
+                data: {
+                  name: option.name,
+                  price: option.price,
+                  prevPrice: option.prevPrice,
+                  isShowDiscount: option.isShowDiscount,
+                  availability: option.availability,
+                  unitId: option.unitId,
+                  inventoryItemId: updatedItem.inventoryItemId,
+                  itemId: updatedItem.id,
+                  createdBy,
+                  createdAt: today.dateAndTime,
+                },
+              });
+            }
+          });
+
+          await Promise.all(updatedOptions);
+
+          const justUpdatedOptions = await prisma.option.findMany({
+            where: {
+              itemId: updatedItem.id,
+            },
+          });
+
+          const updatedScheduleOrderItemPromises = justUpdatedOptions.map(
+            (option) => {
+              const oldOption = existingOptions.find((o) => o.id === option.id);
+              if (oldOption) {
+                return updateAllScheduleOrderItemsForOption(
+                  oldOption,
+                  option,
+                  updatedItem.categoryId,
+                  true,
+                );
+              }
+            },
+          );
+
+          await Promise.all(updatedScheduleOrderItemPromises);
+        }
+      }
     }
 
     return res.status(200).json({

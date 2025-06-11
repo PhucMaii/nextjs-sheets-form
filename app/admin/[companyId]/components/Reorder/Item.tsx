@@ -66,7 +66,7 @@ export default function Item({
         onClick={() => router.push(`/admin/${companyId}/items/${item.id}`)}
       >
         <Grid container alignItems="center" columnSpacing={1}>
-          <Grid item lg={1} md={12}>
+          <Grid item lg={1} md={12} onClick={(e) => e.stopPropagation()}>
             <EditItemAvailability
               item={item}
               showNotification={showNotification}
@@ -107,7 +107,7 @@ export default function Item({
                 : `$${item.price.toFixed(2)}`}
             </Typography>
           </Grid>
-          <Grid item md={3} xs={12}>
+          <Grid item md={3} xs={12} onClick={(e) => e.stopPropagation()}>
             <Box display="flex" gap={1}>
               <DeleteModal
                 targetObj={item}

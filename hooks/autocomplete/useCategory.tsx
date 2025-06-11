@@ -11,6 +11,7 @@ export const useCategory = (isDisplayFull: boolean, listingCategories: any[]) =>
 
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [displayCategories, setDisplayCategories] = useState<ICategory[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedCategory, setSelectedCategory] = useState<ICategory | null>(
     null,
   );
@@ -33,6 +34,7 @@ export const useCategory = (isDisplayFull: boolean, listingCategories: any[]) =>
   const fetchCategories = async () => {
     const categories = await fetchApi(getAdminApiUrl(companyId, '/categories'));
     setCategories(categories);
+    setIsLoading(false);
   };
 
   const renderCategorySearch = () => {
@@ -64,5 +66,7 @@ export const useCategory = (isDisplayFull: boolean, listingCategories: any[]) =>
     selectedCategory,
     setSelectedCategory,
     renderCategorySearch,
+    isLoading,
+    fetchCategories,
   };
 };

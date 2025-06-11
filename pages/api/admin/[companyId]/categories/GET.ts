@@ -5,14 +5,62 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IQuery {
   inventoryItemId?: string;
+  categoryId?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { inventoryItemId } = req.query as IQuery;
+    const { inventoryItemId, categoryId } = req.query as IQuery;
     const { companyId } = req.query;
+
+    if (categoryId) {
+      const category = await prisma.category.findUnique({
+        where: { id: Number(categoryId) },
+        include: {
+          users: true,
+          items: {
+            include: {
+              options: {
+                include: {
+                  unit: true,
+                  item: true,
+                },
+              },
+              inventoryItem: {
+                include: {
+                  type: {
+                    include: {
+                      itemType_category: true,
+                    },
+                  },
+                },
+              },
+              category: {
+                include: {
+                  itemType_category: {
+                    include: {
+                      itemType: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          itemType_category: {
+            include: {
+              itemType: true,
+            },
+          },
+        },
+      });
+
+      return res.status(200).json({
+        data: category,
+        message: 'Fetch Category Successfully',
+      });
+    }
 
     if (inventoryItemId) {
       const categories = await prisma.category.findMany({

@@ -1,16 +1,17 @@
 import { AlertColor, Divider, Modal, TextField } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
 import axios from 'axios';
 import { getAdminApiUrl } from '@/app/utils/enum';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 
 interface IProps extends ModalProps {
   showNotification: (type: AlertColor, message: string) => void;
   handleOnChangeClient?: any;
-  mutateCategories: any;
+  // mutateCategories: any;
+  isNavigateToCategory?: boolean;
 }
 
 export default function AddCategory({
@@ -18,11 +19,20 @@ export default function AddCategory({
   onClose,
   showNotification,
   handleOnChangeClient,
-  mutateCategories,
+  // mutateCategories,
+  isNavigateToCategory,
 }: IProps) {
   const { companyId }: any = useParams();
   const [isCreating, setIsCreating] = useState<boolean>(false);
   const [newCategoryName, setNewCategoryName] = useState<string>('');
+
+  const router = useRouter();
+
+  useEffect(() => {
+    if (open) {
+      setNewCategoryName('');
+    }
+  }, [open]);
 
   const handleCreateNewCategory = async () => {
     setIsCreating(true);
@@ -43,10 +53,15 @@ export default function AddCategory({
       if (handleOnChangeClient) {
         handleOnChangeClient('category', response.data.data);
       }
-      mutateCategories();
+      // mutateCategories();
+
+      if (isNavigateToCategory) {
+        router.push(`/admin/${companyId}/items/category/${response.data.data.id}`);
+      }
 
       showNotification('success', response.data.message);
       setIsCreating(false);
+      onClose();
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
       showNotification(

@@ -14,15 +14,36 @@ import { Trash2Icon } from 'lucide-react';
 
 interface VariantRowProps {
   variant: any;
+  setVariants: (variants: any[]) => void;
+  variants: any[];
   item: any;
-  onChangeVariant: (variant: any) => void;
+  // onChangeVariant: (variant: any) => void;
 }
 
 export default function VariantRow({
   variant,
   item,
-  onChangeVariant,
+  variants,
+  setVariants,
 }: VariantRowProps) {
+
+  const onChangeVariant = (variant: any) => {
+    const newOptions = variants.map((option: any) => {
+      if (option.id === variant.id) {
+        return variant;
+      }
+      return option;
+    });
+
+    setVariants(newOptions);
+  };
+
+  const onRemoveVariant = () => {
+    console.log('onRemoveVariant', variants);
+    const newOptions = variants.filter((option: any) => option.id !== variant.id);
+    setVariants(newOptions);
+  };
+
   return (
     <>
       <Grid item xs={12} md={2.8}>
@@ -98,7 +119,7 @@ export default function VariantRow({
         />
       </Grid>
       <Grid item xs={12} md={0.8}>
-        <IconButton sx={{ width: '100%', height: '100%' }}>
+        <IconButton onClick={onRemoveVariant}>
           <Trash2Icon style={{ width: '20px' }} />
         </IconButton>
       </Grid>

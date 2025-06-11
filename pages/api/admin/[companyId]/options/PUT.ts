@@ -154,7 +154,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-const updateAllScheduleOrderItemsForOption = async (
+export const updateAllScheduleOrderItemsForOption = async (
   oldOption: any,
   updatedOption: any,
   categoryId: number,

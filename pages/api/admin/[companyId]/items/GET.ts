@@ -73,21 +73,30 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
         include: {
           category: true,
+          options: true,
         },
       });
-      
 
       const currentCost = item?.inventoryItem?.fifo[0]?.price || 0;
-      const profit = (item?.price || 0) - currentCost;
+
+      const itemPrice =
+        item?.options?.reduce(
+          (acc: number, option: any) => acc + option.price,
+          0,
+        ) || item?.price;
+      const profit = (itemPrice || 0) - currentCost;
       // Round to 2 decimal places
 
       const margin = (profit / currentCost) * 100;
       const formattedMargin = Math.round(margin * 100) / 100;
 
-      const sellignItemsWithProfit = sellingItemWithThisInventory.map((item: any) => {
-        const profit = (item?.price || 0) - currentCost;
-        return { ...item, profit };
-      });
+      const sellignItemsWithProfit = sellingItemWithThisInventory.map(
+        (item: any) => {
+          const itemPrice = item?.price;
+          const profit = (itemPrice || 0) - currentCost;
+          return { ...item, profit };
+        },
+      );
 
       return res.status(200).json({
         data: {

@@ -5,7 +5,7 @@ import { ICategory, IItem } from '@/app/utils/type';
 import { getAdminApiUrl } from '@/app/utils/enum';
 import EditIcon from '@mui/icons-material/Edit';
 import AddBoxIcon from '@mui/icons-material/AddBox';
-import { SWRFetchData } from '@/app/utils/db';
+import { fetchApi, SWRFetchData } from '@/app/utils/db';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import {
   Box,
@@ -13,6 +13,7 @@ import {
   Divider,
   Grid,
   IconButton,
+  Skeleton,
   TextField,
   Typography,
 } from '@mui/material';
@@ -61,53 +62,40 @@ export default function ItemPage() {
   const { showNotification, NotificationComp } = useNotification();
 
   // Data Fetching
-  const [categories, mutateCategories] = SWRFetchData(
-    getAdminApiUrl(companyId, '/categories'),
-  );
-  const [currentCategory, setCurrentCategory] = useState<ICategory>(
-    categories?.data.find(
-      (category: ICategory) => category.id === Number(categoryId),
-    ) || categories?.data[0],
-  );
+  // const [categories, mutateCategories] = SWRFetchData(
+  //   getAdminApiUrl(companyId, '/categories'),
+  // );
+  const [currentCategory, setCurrentCategory] = useState<ICategory | null>(null);
+    // categories?.data.find(
+    //   (category: ICategory) => category.id === Number(categoryId),
+    // )
+  // );
   const [itemsResponse, mutateItems, isInitializing] = SWRFetchData(
     currentCategory
-      ? getAdminApiUrl(companyId, `/items?categoryId=${currentCategory?.id}`)
+      ? getAdminApiUrl(companyId, `/items?categoryId=${categoryId}`)
       : '',
   );
 
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
+
   // useEffect(() => {
   //   if (categories?.data.length > 0 && !currentCategory) {
-  //     setCurrentCategory(categories?.data[0]);
-  //   }
-
-  //   if (categories?.data.length > 0 && currentCategory) {
-  //     let targetIndex = 0;
-  //     categories?.data.forEach((category: Category, index: number) => {
-  //       if (category.id === currentCategory.id) {
-  //         targetIndex = index;
-  //         return;
-  //       }
-  //     });
-  //     setCurrentCategory(categories?.data[targetIndex]);
+  //     const selectedCategory =
+  //       categories?.data.find(
+  //         (category: ICategory) => category.id === Number(categoryId),
+  //       ) || categories?.data[0];
+  //     setCurrentCategory(selectedCategory);
   //   }
   // }, [categories]);
 
   useEffect(() => {
-    if (categories?.data.length > 0 && !currentCategory) {
-      const selectedCategory =
-        categories?.data.find(
-          (category: ICategory) => category.id === Number(categoryId),
-        ) || categories?.data[0];
-      setCurrentCategory(selectedCategory);
-    }
-  }, [categories]);
+    fetchCurrentCategory();
+  }, []);
 
   useEffect(() => {
     if (
       itemsResponse &&
-      categories?.data.length > 0 &&
       currentCategory &&
       !isInitializing
     ) {
@@ -116,7 +104,7 @@ export default function ItemPage() {
     } else if (!itemsResponse && isInitializing) {
       setIsFetching(true);
     }
-  }, [categories, currentCategory, itemsResponse]);
+  }, [currentCategory, itemsResponse]);
 
   useEffect(() => {
     if (debouncedKeywords) {
@@ -138,7 +126,7 @@ export default function ItemPage() {
   const checkIsNewItemValid = (newItem: IItem) => {
     if (
       newItem.name.trim() === '' ||
-      newItem.price < 0 ||
+    newItem.price < 0 ||
       !newItem.categoryId ||
       !newItem.inventoryItemId ||
       newItem.inventoryItemId < 1
@@ -147,6 +135,11 @@ export default function ItemPage() {
       return false;
     }
     return true;
+  };
+
+  const fetchCurrentCategory = async () => {
+    const data = await fetchApi(getAdminApiUrl(companyId, `/categories?categoryId=${categoryId}`));
+    setCurrentCategory(data);
   };
 
   const initializeItems = () => {
@@ -201,7 +194,9 @@ export default function ItemPage() {
         return;
       }
 
-      mutateCategories();
+      // mutateCategories();
+
+      router.push(`/admin/${companyId}/items`);
       showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('There was an error: ', error);
@@ -252,7 +247,7 @@ export default function ItemPage() {
         getAdminApiUrl(companyId, '/categories'),
         {
           updatedCategory: {
-            id: currentCategory.id,
+            id: currentCategory?.id,
             name: newName,
           },
         },
@@ -263,7 +258,8 @@ export default function ItemPage() {
         return;
       }
 
-      mutateCategories();
+      // mutateCategories();
+      await fetchCurrentCategory();
 
       showNotification('success', response.data.message);
     } catch (error: any) {
@@ -313,7 +309,7 @@ export default function ItemPage() {
     <Sidebar noMargin>
       <AddCategory
         showNotification={showNotification}
-        mutateCategories={mutateCategories}
+        // mutateCategories={mutateCategories}
         open={isOpenAddCategory}
         onClose={() => setIsOpenAddCategory(false)}
       />
@@ -330,7 +326,7 @@ export default function ItemPage() {
       <AddItem
         open={open.isAddItemOpen}
         onClose={() => setOpen('isAddItemOpen', false)}
-        categoryId={currentCategory?.id}
+        categoryId={currentCategory?.id || 0}
         addItem={handleAddItem}
         showNotification={showNotification}
       />
@@ -344,7 +340,7 @@ export default function ItemPage() {
         open={open.isEditCategory}
         onClose={() => setOpen('isEditCategory', false)}
         updateCategory={handleUpdateCategoryName}
-        currentName={currentCategory?.name}
+        currentName={currentCategory?.name || ''}
       />
 
       {/* <div style={{ display: 'none' }}>
@@ -356,59 +352,62 @@ export default function ItemPage() {
       </div> */}
       {NotificationComp}
       <PasteItemsModal
-        currentCategoryId={currentCategory?.id}
+        currentCategoryId={currentCategory?.id || 0}
         open={open.isPasteModalOpen}
         onClose={() => setOpen('isPasteModalOpen', false)}
         showNotification={showNotification}
-        categories={categories?.data || []}
       />
-      <Grid container alignItems="center">
-        <Grid item xs={12} md={10}>
-          <Box display="flex" gap={1} alignItems="center">
-            <IconButton onClick={() => router.back()}>
-              <ArrowBackIosNewIcon />
-            </IconButton>
-            <Typography variant="h6" color={blueGrey[800]}>
-              {currentCategory?.name} ( {currentCategory?.users?.length} clients
-              )
-            </Typography>
-            <IconButton onClick={() => setOpen('isShowingClients', true)}>
-              <InfoIcon />
-            </IconButton>
-            <IconButton onClick={() => setOpen('isEditCategory', true)}>
-              <EditIcon />
-            </IconButton>
-          </Box>
-        </Grid>
-        <Grid
-          item
-          xs={12}
-          md={2}
-          textAlign="right"
-          display="flex"
-          gap={1}
-          alignItems="center"
-        >
-          <Button
-            variant="outlined"
-            onClick={() =>
-              router.push(
-                `/admin/${companyId}/items/export/${currentCategory?.id}`,
-              )
-            }
+      {isFetching ? (
+        <Skeleton variant="rectangular" height={50} />
+      ) : (
+        <Grid container alignItems="center">
+          <Grid item xs={12} md={10}>
+            <Box display="flex" gap={1} alignItems="center">
+              <IconButton onClick={() => router.back()}>
+                <ArrowBackIosNewIcon />
+              </IconButton>
+              <Typography variant="h6" color={blueGrey[800]}>
+                {currentCategory?.name} ( {currentCategory?.users?.length}{' '}
+                clients )
+              </Typography>
+              <IconButton onClick={() => setOpen('isShowingClients', true)}>
+                <InfoIcon />
+              </IconButton>
+              <IconButton onClick={() => setOpen('isEditCategory', true)}>
+                <EditIcon />
+              </IconButton>
+            </Box>
+          </Grid>
+          <Grid
+            item
+            xs={12}
+            md={2}
+            textAlign="right"
+            display="flex"
+            gap={1}
+            alignItems="center"
           >
-            Export
-          </Button>
-          <Button
-            disabled={!currentCategory}
-            color="error"
-            variant="outlined"
-            onClick={() => setOpen('isDeleteModalOpen', true)}
-          >
-            Delete
-          </Button>
+            <Button
+              variant="outlined"
+              onClick={() =>
+                router.push(
+                  `/admin/${companyId}/items/export/${currentCategory?.id}`,
+                )
+              }
+            >
+              Export
+            </Button>
+            <Button
+              disabled={!currentCategory}
+              color="error"
+              variant="outlined"
+              onClick={() => setOpen('isDeleteModalOpen', true)}
+            >
+              Delete
+            </Button>
+          </Grid>
         </Grid>
-      </Grid>
+      )}
       <ShadowSection sx={{ mt: 2, mx: 1 }}>
         <Grid container alignItems="center" spacing={1}>
           <Grid item xs={12} md={10.5}>
@@ -451,7 +450,7 @@ export default function ItemPage() {
             </Grid> */}
         </Grid>
         {isFetching ? (
-          <SplashScreen />
+          <Skeleton variant="rectangular" height={200} />
         ) : (
           // <Reorder.Group
           //   values={items}
