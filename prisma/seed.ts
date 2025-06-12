@@ -120,9 +120,13 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-  await prisma.employee.updateMany({
+  await prisma.action.create({
     data: {
-      payrollType: PayrollType.monthly,
+      name: 'Track Inventory',
+      date: '06/11/2025',
+      description: 'No Items Ordered Today',
+      createdAt: '06/11/2025 12:00:00',
+      companyId: 2,
     },
   });
 }
