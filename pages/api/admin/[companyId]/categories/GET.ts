@@ -1,5 +1,6 @@
 // import { websiteItemCategoryId } from '@/app/lib/constant';
 import { websiteItemCategoryId } from '@/app/lib/constant';
+import { calculateQtyLeft } from '@/pages/api/utils/items';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -56,8 +57,68 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
       });
 
+      const items = await prisma.item.findMany({
+        where: {
+          categoryId: Number(categoryId),
+        },
+        include: {
+          options: {
+            include: {
+              unit: true,
+              item: true,
+            },
+          },
+          inventoryUnit: true,
+          inventoryItem: {
+            include: {
+              vendorItem: {
+                include: {
+                  unit: true,
+                  fifo: true,
+                },
+              },
+              type: true,
+              // type: {
+              //   include: {
+              //     itemType_category: true,
+              //   },
+              // },
+            },
+          },
+          category: {
+            include: {
+              itemType_category: {
+                include: {
+                  itemType: true,
+                },
+              },
+            },
+          },
+        },
+        // orderBy: [
+        //   { inventoryItem: { type: { priority: 'asc' } } }, // Order by type priority first
+        //   { inventoryItem: { indexPos: 'asc' } }, // Then by indexPos
+        // ],
+      });
+
+      const returnedItems = items.sort((a: any, b: any) => {
+        const typePriorityDiff =
+          a?.inventoryItem?.type?.priority - b?.inventoryItem?.type?.priority;
+
+        if (typePriorityDiff !== 0) {
+          return typePriorityDiff;
+        }
+
+        return a.inventoryItem.indexPos - b.inventoryItem.indexPos;
+      });
+
+      const itemsWithQtyLeft = returnedItems.map((item: any) => {
+        const qtyLeft = calculateQtyLeft(item);
+        return { ...item, qtyLeft };
+      });
+
       return res.status(200).json({
-        data: category,
+        data: { ...category, items: itemsWithQtyLeft },
         message: 'Fetch Category Successfully',
       });
     }

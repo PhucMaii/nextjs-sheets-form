@@ -78,6 +78,7 @@ export default function Payroll() {
         onClose={() => setIsOpenConvertPayroll(false)}
         payrolls={selectedPayrolls}
         showNotification={showNotification}
+        refetchPayrolls={fetchPayrolls}
       />
       <Box display="flex" flexDirection="column" gap={2}>
         <Box

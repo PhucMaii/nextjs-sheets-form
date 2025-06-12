@@ -570,7 +570,7 @@ const OrderView = ({
 
   useEffect(() => {
     if (debouncedKeywords) {
-      const newItems = handleSearch(debouncedKeywords, items, ['name']);
+      const newItems = handleSearch(debouncedKeywords, items, ['name', 'inventoryItem.sku']);
       setDisplayItems(newItems);
     } else {
       setDisplayItems(items);

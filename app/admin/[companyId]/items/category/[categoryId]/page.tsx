@@ -5,7 +5,7 @@ import { ICategory, IItem } from '@/app/utils/type';
 import { getAdminApiUrl } from '@/app/utils/enum';
 import EditIcon from '@mui/icons-material/Edit';
 import AddBoxIcon from '@mui/icons-material/AddBox';
-import { fetchApi, SWRFetchData } from '@/app/utils/db';
+import { fetchApi } from '@/app/utils/db';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import {
   Box,
@@ -69,11 +69,11 @@ export default function ItemPage() {
     //   (category: ICategory) => category.id === Number(categoryId),
     // )
   // );
-  const [itemsResponse, mutateItems, isInitializing] = SWRFetchData(
-    currentCategory
-      ? getAdminApiUrl(companyId, `/items?categoryId=${categoryId}`)
-      : '',
-  );
+  // const [itemsResponse, mutateItems, isInitializing] = SWRFetchData(
+  //   currentCategory
+  //     ? getAdminApiUrl(companyId, `/items?categoryId=${categoryId}`)
+  //     : '',
+  // );
 
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
@@ -92,18 +92,18 @@ export default function ItemPage() {
     fetchCurrentCategory();
   }, []);
 
-  useEffect(() => {
-    if (
-      itemsResponse &&
-      currentCategory &&
-      !isInitializing
-    ) {
-      initializeItems();
-      setSearchKeywords('');
-    } else if (!itemsResponse && isInitializing) {
-      setIsFetching(true);
-    }
-  }, [currentCategory, itemsResponse]);
+  // useEffect(() => {
+  //   if (
+  //     itemsResponse &&
+  //     currentCategory &&
+  //     !isInitializing
+  //   ) {
+  //     initializeItems();
+  //     setSearchKeywords('');
+  //   } else if (!itemsResponse && isInitializing) {
+  //     setIsFetching(true);
+  //   }
+  // }, [currentCategory,]);
 
   useEffect(() => {
     if (debouncedKeywords) {
@@ -139,13 +139,17 @@ export default function ItemPage() {
   const fetchCurrentCategory = async () => {
     const data = await fetchApi(getAdminApiUrl(companyId, `/categories?categoryId=${categoryId}`));
     setCurrentCategory(data);
-  };
-
-  const initializeItems = () => {
-    setItems(itemsResponse?.data);
-    setBaseItems(itemsResponse?.data);
+    setItems(data.items);
+    setBaseItems(data.items);
+    // setSearchKeywords('');
     setIsFetching(false);
   };
+
+  // const initializeItems = () => {
+  //   setItems(itemsResponse?.data);
+  //   setBaseItems(itemsResponse?.data);
+  //   setIsFetching(false);
+  // };
 
   const handleAddItem = async (
     newItem: IItem,
@@ -170,7 +174,8 @@ export default function ItemPage() {
       }
 
       // Update Real Data
-      mutateItems();
+      // mutateItems();
+      fetchCurrentCategory();
 
       showNotification('success', response.data.message);
     } catch (error: any) {
@@ -218,8 +223,8 @@ export default function ItemPage() {
       handleDeleteItemUI(targetItem);
 
       // Update Real Data
-      mutateItems();
-
+      // mutateItems();
+      await fetchCurrentCategory();
       showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('There was an error: ', error);
@@ -285,8 +290,8 @@ export default function ItemPage() {
       }
 
       // Update Real Data
-      mutateItems();
-
+      // mutateItems();
+      await fetchCurrentCategory();
       showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('There was an error: ', error);

@@ -16,6 +16,7 @@ import { mainPaymentMethodId, months } from '@/app/lib/constant';
 interface IProps extends ModalProps {
   showNotification: ShowNotificationType;
   payrolls: IPayroll[];
+  refetchPayrolls: () => Promise<void>;
 }
 
 export default function ConvertPayroll({
@@ -23,6 +24,7 @@ export default function ConvertPayroll({
   onClose,
   showNotification,
   payrolls,
+  refetchPayrolls,
 }: IProps) {
   const { companyId }: any = useParams();
   const [paymentMethods, setPaymentMethods] = useState<IPaymentMethod[]>([]);
@@ -125,6 +127,7 @@ export default function ConvertPayroll({
         return;
       }
 
+      await refetchPayrolls();
       showNotification('success', response.data.message);
       onClose();
     } catch (error: any) {

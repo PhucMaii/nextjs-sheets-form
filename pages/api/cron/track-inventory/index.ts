@@ -128,7 +128,17 @@ export default async function handler(
       });
   
       if (orderedItems.length === 0) {
-        return res.status(200).json({ message: 'No Items Ordered Today' });
+        console.log('No Items Ordered Today In Company: ', company.id);
+        await prisma.action.create({
+          data: {
+            name: ACTION.TRACK_INVENTORY,
+            date: date.date,
+            description: 'No Items Ordered Today',
+            createdAt: `${date.time} ${date.date}`,
+            companyId: company.id,
+          },
+        });
+        continue;
       }
   
       // Create a set of same items and quantity
