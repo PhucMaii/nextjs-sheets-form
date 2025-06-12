@@ -296,6 +296,7 @@ model Orders {
   deliveryDate      String
   note              String
   status            String
+  paymentStatus     PaymentStatus?
   userId            Int
   totalPrice        Float
   isReplacement     Boolean?
@@ -317,14 +318,38 @@ model Orders {
   insertedAt        String?
   insertedBy        String?
   companyId         Int?
+  hasSubtractInventory      Boolean?
+
+  items             OrderedItems[]
+  timeline          OrderTimeline?  @relation("OrderTimeline")
+
   user              User?          @relation(fields: [userId], references: [id])
   company           Company?       @relation(fields: [companyId], references: [id])
-  items             OrderedItems[]
   CodBoard          CodBoard?      @relation(fields: [codBoardId], references: [id])
 
   @@index([deliveryDate, status])
   @@index([userId])
   @@index([companyId])
+}
+
+model OrderTimeline {
+  id        Int            @id @default(autoincrement())
+  orderId   Int             @unique
+  actions   OrderAction[]  
+
+  order     Orders         @relation("OrderTimeline", fields: [orderId], references: [id])
+}
+
+model OrderAction {
+  id            Int           @id  @default(autoincrement())
+  timelineId    Int
+  comment       String
+  createdAt     String
+  createdBy     String
+  posIndex         Int
+
+  timeline     OrderTimeline    @relation(fields: [timelineId], references: [id])
+
 }
 
 model UserPreference {
