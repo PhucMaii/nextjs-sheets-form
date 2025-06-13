@@ -11,6 +11,7 @@ import DeleteModal from './delete/DeleteModal';
 import OrderView, { ORDER_USAGE_PURPOSE } from '@/app/components/OrderView';
 import { onUpdateOrder } from '@/app/utils/orders';
 import { useParams } from 'next/navigation';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 interface IProps extends ModalProps {
   order: Order;
   hideButton?: boolean;
@@ -25,6 +26,26 @@ const OrderDetails = ({
   hideButton,
 }: IProps) => {
   const { companyId }: any = useParams();
+  const queryClient = useQueryClient();
+
+  const { mutateAsync } = useMutation({
+    mutationKey: ['order', order.id],
+    mutationFn: async (orderParam: any) => {
+      const response = await onUpdateOrder(companyId, order.id, orderParam);
+      if (response?.data?.error) {
+        throw new Error(response.data.error);
+      }
+      showNotification('success', response.data.message);
+      return response.data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['order', order.id] });
+      onClose();
+    },
+    onError: (error: any) => {
+      showNotification('error', error?.message || 'Failed to update order');
+    },
+  });
 
   const [isOpenEditNote, setIsOpenEditNote] = useState<boolean>(false);
   const [isOpenClearNote, setIsOpenClearNote] = useState<boolean>(false);
@@ -58,64 +79,6 @@ const OrderDetails = ({
       console.log('Fail to fetch client items: ', error);
     }
   };
-
-  // console.log('Fetching items for categoryId:', order?.user?.categoryId);
-  // console.log('Client items response:', clientItems);
-
-  // useEffect(() => {
-  //   if (order.items) {
-  //     setItems(order.items);
-  //   }
-
-  //   // setUpdatedNote(order?.note || '');
-  // }, [order]);
-  // useEffect(() => {
-  //   if (clientItems?.data && order.items) {
-  //     const newBaseItems = clientItems?.data.map((item: Item) => {
-  //       const isExistedInOrder = order.items.find(
-  //         (orderItem: OrderedItems) => orderItem.name === item.name,
-  //       );
-
-  //       if (isExistedInOrder) {
-  //         return isExistedInOrder;
-  //       }
-
-  //       return {
-  //         ...item,
-  //         id: 0,
-  //         quantity: 0,
-  //         itemId: item.id,
-  //         orderId: order.id,
-  //       };
-  //     });
-
-  //     setBaseItems(newBaseItems);
-  //   }
-  // }, [order, clientItems]);
-
-  // useEffect(() => {
-  //   if (debounceKeywords) {
-  //     const newBaseItems = baseItems.filter((item: Item) => {
-  //       return item.name.toLowerCase().includes(debounceKeywords.toLowerCase());
-  //     });
-
-  //     setItems(newBaseItems);
-  //   } else {
-  //     setItems(order?.items || []);
-  //   }
-  // }, [debounceKeywords, baseItems]);
-
-  // const handlePrinting = useReactToPrint({
-  //   content: () => billPrintRef.current,
-  // });
-
-  // const totalQuantity = useMemo(() => {
-  //   const quantity = order.items.reduce((acc: number, cV: any) => {
-  //     return acc + cV.quantity;
-  //   }, 0);
-
-  //   return quantity;
-  // }, [order]);
 
   const onClearNote = async (selectedOrder: Order) => {
     try {
@@ -157,22 +120,6 @@ const OrderDetails = ({
       showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('Fail to update note: ', error);
-      showNotification('error', error?.response?.data?.error || error);
-    }
-  };
-
-  const handleUpdateOrder = async (orderParam: any) => {
-    try {
-      const response = await onUpdateOrder(companyId, order.id, orderParam);
-
-      if (response?.data?.error) {
-        showNotification('error', response.data.error);
-        return;
-      }
-
-      showNotification('success', response.data.message);
-    } catch (error: any) {
-      console.log('Fail to update order: ', error);
       showNotification('error', error?.response?.data?.error || error);
     }
   };
@@ -222,7 +169,7 @@ const OrderDetails = ({
             defaultOrderedItems={order?.items}
             items={clientItems || []}
             isModal
-            onSubmit={handleUpdateOrder}
+            onSubmit={(order: any) => mutateAsync(order)}
             role={USER_ROLE.ADMIN}
             clientName={order?.user?.clientName || ''}
             purpose={ORDER_USAGE_PURPOSE.ITEM}

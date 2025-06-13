@@ -1,5 +1,5 @@
 import { EMPLOYEE_ROLE, ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
-import { PrismaClient, User } from '@prisma/client';
+import { PaymentStatus, PrismaClient, User } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { OrderedItems, UserType } from '@/app/utils/type';
 import { sendEmail } from '@/pages/api/utils/email';
@@ -328,6 +328,7 @@ export const createOrder = async (
         orderTime: `${date} ${time}`,
         createdBy,
         companyId,
+        paymentStatus: PaymentStatus.Unpaid,
       },
     });
 

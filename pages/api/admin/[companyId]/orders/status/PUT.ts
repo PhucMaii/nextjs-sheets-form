@@ -1,22 +1,39 @@
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
-import { OrderedItems, PrismaClient } from '@prisma/client';
+import { OrderedItems, PaymentStatus, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import {
   restockInventoryItem,
   subtractInventoryItem,
 } from '../../orderedItems/single';
 
+interface IBody {
+  id: number;
+  status?: string;
+  paymentStatus?: PaymentStatus;
+  updatedOrderIds?: number[];
+}
+
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   const prisma = new PrismaClient();
   try {
-    const { id, status, updatedOrderIds } = req.body as any;
+    const { id, status, paymentStatus, updatedOrderIds } = req.body as IBody;
 
     const session: any = await getServerSession(req, res, authOptions);
     const adminCreate: any = session?.user;
 
     const updateTime = new Date();
+
+    const updateData: any = {}
+
+    if (status) {
+      updateData.status = status;
+      updateData.isVoid = false;
+    }
+    if (paymentStatus) {
+      updateData.paymentStatus = paymentStatus;
+    }
     if (id) {
       const existingOrder = await prisma.orders.findUnique({
         where: {
@@ -29,16 +46,16 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           error: 'Order Not Found',
         });
       }
+      
 
       const updatedOrder = await prisma.orders.update({
         where: {
           id,
         },
         data: {
-          status,
+          ...updateData,
           updatedBy: `Admin - ${adminCreate.name}`,
           updateTime,
-          isVoid: false,
         },
         include: {
           items: {
@@ -132,8 +149,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         },
       },
       data: {
-        status,
-        isVoid: false,
+        ...updateData,
+        updatedBy: `Admin - ${adminCreate.name}`,
+        updateTime,
       },
     });
 

@@ -5,6 +5,7 @@ import { normalizeDate } from '@/pages/api/utils/date';
 import { days } from '@/app/lib/constant';
 
 interface RequestQuery {
+  orderId?: string;
   date?: string;
   status?: ORDER_STATUS;
   companyId?: string;
@@ -15,11 +16,36 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { date, status, companyId } = req.query as RequestQuery;
+    const { orderId, date, status, companyId } = req.query as RequestQuery;
 
     if (!companyId) {
       return res.status(400).json({
         error: 'Company ID is required',
+      });
+    }
+
+    if (orderId) {
+      const order = await prisma.orders.findUnique({
+        where: { id: Number(orderId) },
+        include: {
+          user: {
+            include: {
+              category: true,
+            },
+          },
+          items: {
+            include: {
+              inventoryItem: true,
+              inventoryUnit: true,
+              fifo: true,
+            },
+          },
+        },
+      });
+
+      return res.status(200).json({
+        message: 'Fetch Order Successfully',
+        data: order,
       });
     }
 

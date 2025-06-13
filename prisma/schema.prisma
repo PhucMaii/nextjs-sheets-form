@@ -343,6 +343,7 @@ model OrderTimeline {
 model OrderAction {
   id            Int           @id  @default(autoincrement())
   timelineId    Int
+  title         String
   comment       String
   createdAt     String
   createdBy     String

@@ -37,6 +37,7 @@ import { useParams } from 'next/navigation';
 import ApproveOrder from '../Modals/ApproveOrder';
 import RejectOrder from '../Modals/RejectOrder';
 import QuickViewOrderedItems from '../Tooltip/QuickViewOrderedItems';
+import { PaymentStatus } from '@prisma/client';
 
 interface PropTypes {
   clientOrders: Order[];
@@ -81,14 +82,25 @@ const ClientOrdersTable = ({
   const windowDimensions = useWindowDimensions();
   const { companyId }: any = useParams();
 
-  const updateStatus = async (order: Order, updatedStatus: ORDER_STATUS) => {
+  const updateStatus = async (
+    order: Order,
+    updatedStatus: ORDER_STATUS | PaymentStatus,
+    type: 'fulfillment' | 'payment',
+  ) => {
     try {
       setIsLoading(true);
+      const updateData: any = {};
+      if (type === 'fulfillment') {
+        updateData.status = updatedStatus;
+      } else if (type === 'payment') {
+        updateData.paymentStatus = updatedStatus;
+      }
+
       const response = await axios.put(
         getAdminApiUrl(companyId, '/orders/status'),
         {
           id: order.id,
-          status: updatedStatus,
+          ...updateData,
         },
       );
 
@@ -170,7 +182,10 @@ const ClientOrdersTable = ({
           Total Bill
         </TableCell>
         <TableCell variant="head" style={{ width: 180 }}>
-          Status
+          Fulfillment Status
+        </TableCell>
+        <TableCell variant="head" style={{ width: 180 }}>
+          Payment Status
         </TableCell>
         <TableCell variant="head" style={{ width: 120 }}></TableCell>
       </TableRow>
@@ -206,30 +221,32 @@ const ClientOrdersTable = ({
               </Tooltip>
             )}
 
-            {
-              order.status === ORDER_STATUS.PENDING && (
-                <Box display="flex" gap={1} alignItems="center">
-                  <Button
-                    color="success"
-                    onClick={() => setOpenApproveOrder({
+            {order.status === ORDER_STATUS.PENDING && (
+              <Box display="flex" gap={1} alignItems="center">
+                <Button
+                  color="success"
+                  onClick={() =>
+                    setOpenApproveOrder({
                       open: true,
                       order,
-                    })}
-                  >
-                    Approve
-                  </Button>
-                  <Button
-                    color="error"
-                    onClick={() => setOpenApproveOrder({
+                    })
+                  }
+                >
+                  Approve
+                </Button>
+                <Button
+                  color="error"
+                  onClick={() =>
+                    setOpenApproveOrder({
                       open: true,
                       order,
-                    })}
-                  >
-                    Reject
-                  </Button>
-                </Box>
-              )
-            }
+                    })
+                  }
+                >
+                  Reject
+                </Button>
+              </Box>
+            )}
           </Box>
         </TableCell>
         <TableCell padding="checkbox">
@@ -248,7 +265,11 @@ const ClientOrdersTable = ({
         <TableCell>{order.user.clientName}</TableCell>
         <TableCell>{order.deliveryDate}</TableCell>
         <TableCell>
-          <QuickViewOrderedItems order={order} isTable={true} placement="bottom-start" />
+          <QuickViewOrderedItems
+            order={order}
+            isTable={true}
+            placement="bottom-start"
+          />
         </TableCell>
         <TableCell>${order.totalPrice.toFixed(2)}</TableCell>
         <TableCell>
@@ -257,7 +278,11 @@ const ClientOrdersTable = ({
             onChange={(e) => {
               e.stopPropagation();
               e.preventDefault();
-              updateStatus(order, e.target.value as ORDER_STATUS);
+              updateStatus(
+                order,
+                e.target.value as ORDER_STATUS,
+                'fulfillment',
+              );
             }}
             onClick={(e) => {
               e.stopPropagation();
@@ -266,17 +291,40 @@ const ClientOrdersTable = ({
             size="small"
             // disabled={order?.type === TYPE.LOCKED}
           >
-            <MenuItem value={ORDER_STATUS.COMPLETED}>
-              <StatusText text={ORDER_STATUS.COMPLETED} type="success" />
+            <MenuItem value={ORDER_STATUS.INCOMPLETED}>
+              <StatusText text={ORDER_STATUS.INCOMPLETED} type="warning" />
             </MenuItem>
             <MenuItem value={ORDER_STATUS.DELIVERED}>
               <StatusText text={ORDER_STATUS.DELIVERED} type="info" />
             </MenuItem>
-            <MenuItem value={ORDER_STATUS.INCOMPLETED}>
-              <StatusText text={ORDER_STATUS.INCOMPLETED} type="warning" />
-            </MenuItem>
             <MenuItem value={ORDER_STATUS.VOID}>
               <StatusText text={ORDER_STATUS.VOID} type="error" />
+            </MenuItem>
+          </Select>
+        </TableCell>
+        <TableCell>
+          <Select
+            value={order?.paymentStatus || 'N/A'}
+            onChange={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              updateStatus(order, e.target.value as PaymentStatus, 'payment');
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }}
+            size="small"
+            // disabled={order?.type === TYPE.LOCKED}
+          >
+            <MenuItem value={'N/A'}>
+              <StatusText text={'N/A'} type="grey" />
+            </MenuItem>
+            <MenuItem value={PaymentStatus.Paid}>
+              <StatusText text={PaymentStatus.Paid} type="success" />
+            </MenuItem>
+            <MenuItem value={PaymentStatus.Unpaid}>
+              <StatusText text={PaymentStatus.Unpaid} type="error" />
             </MenuItem>
           </Select>
         </TableCell>
@@ -374,19 +422,23 @@ const ClientOrdersTable = ({
 
       <ApproveOrder
         open={openApproveOrder.open}
-        onClose={() => setOpenApproveOrder({
-          open: false,
-          order: null,
-        })}
+        onClose={() =>
+          setOpenApproveOrder({
+            open: false,
+            order: null,
+          })
+        }
         order={openApproveOrder?.order}
         showNotification={showNotification}
       />
       <RejectOrder
         open={openRejectOrder.open}
-        onClose={() => setOpenRejectOrder({
-          open: false,
-          order: null,
-        })}
+        onClose={() =>
+          setOpenRejectOrder({
+            open: false,
+            order: null,
+          })
+        }
         order={openRejectOrder?.order}
         showNotification={showNotification}
       />

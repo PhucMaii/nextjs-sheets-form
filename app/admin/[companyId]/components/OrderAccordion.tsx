@@ -8,6 +8,7 @@ import {
   FormControlLabel,
   Grid,
   IconButton,
+  ListSubheader,
   Menu,
   MenuItem,
   Switch,
@@ -48,13 +49,14 @@ import LockIcon from '@mui/icons-material/Lock';
 import { renderType } from '@/app/lib/render';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import ApproveGuest from './Modals/ApproveGuest';
 import QuickViewOrderedItems from './Tooltip/QuickViewOrderedItems';
 
 import { ShowNotificationType } from '@/hooks/useNotification';
 import ApproveOrder from './Modals/ApproveOrder';
 import RejectOrder from './Modals/RejectOrder';
+import { PaymentStatus } from '@prisma/client';
 interface PropTypes {
   order: Order;
   showNotification?: ShowNotificationType;
@@ -86,7 +88,7 @@ const OrderAccordion = ({
 }: PropTypes) => {
   // console.log(order, 'order in accordion');
   const { companyId }: any = useParams();
-
+  const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<any>(null);
   const [isEditDateOpen, setIsEditDateOpen] = useState<boolean>(false);
   const [isClientModalOpen, setIsClientModalOpen] = useState<boolean>(false);
@@ -184,7 +186,11 @@ const OrderAccordion = ({
     content: () => componentRef.current,
   });
 
-  const handleChangeStatus = async (e: any, status: ORDER_STATUS) => {
+  const handleChangeStatus = async (
+    e: any,
+    status: ORDER_STATUS | PaymentStatus,
+    type: 'fulfillment' | 'payment',
+  ) => {
     if (!showNotification) {
       return;
     }
@@ -192,11 +198,19 @@ const OrderAccordion = ({
     e.stopPropagation();
     try {
       setIsMarkButtonDisabled(true);
+
+      const updateData: any = {};
+
+      if (type === 'fulfillment') {
+        updateData.status = status;
+      } else if (type === 'payment') {
+        updateData.paymentStatus = status;
+      }
       const response = await axios.put(
         getAdminApiUrl(companyId, '/orders/status'),
         {
           ...order,
-          status,
+          ...updateData,
         },
       );
 
@@ -346,20 +360,14 @@ const OrderAccordion = ({
         </MenuItem>
 
         <Divider />
-
+        <ListSubheader>Fullfilment Status</ListSubheader>
         <MenuItem
           disabled={
             isMarkButtonDisabled || order.status === ORDER_STATUS.COMPLETED
           }
-          onClick={(e) => handleChangeStatus(e, ORDER_STATUS.COMPLETED)}
-        >
-          Mark as paid
-        </MenuItem>
-        <MenuItem
-          disabled={
-            isMarkButtonDisabled || order.status === ORDER_STATUS.COMPLETED
+          onClick={(e) =>
+            handleChangeStatus(e, ORDER_STATUS.DELIVERED, 'fulfillment')
           }
-          onClick={(e) => handleChangeStatus(e, ORDER_STATUS.DELIVERED)}
         >
           Mark as fulfilled
         </MenuItem>
@@ -367,15 +375,40 @@ const OrderAccordion = ({
           disabled={
             isMarkButtonDisabled || order.status === ORDER_STATUS.INCOMPLETED
           }
-          onClick={(e) => handleChangeStatus(e, ORDER_STATUS.INCOMPLETED)}
+          onClick={(e) =>
+            handleChangeStatus(e, ORDER_STATUS.INCOMPLETED, 'fulfillment')
+          }
         >
           Mark as unfulfilled
         </MenuItem>
         <MenuItem
           disabled={isMarkButtonDisabled || order.status === ORDER_STATUS.VOID}
-          onClick={(e) => handleChangeStatus(e, ORDER_STATUS.VOID)}
+          onClick={(e) =>
+            handleChangeStatus(e, ORDER_STATUS.VOID, 'fulfillment')
+          }
         >
           Mark as void
+      </MenuItem>
+
+        <Divider />
+
+        <ListSubheader>Payment Status</ListSubheader>
+
+        <MenuItem
+          disabled={
+            isMarkButtonDisabled || order.status === ORDER_STATUS.COMPLETED
+          }
+          onClick={(e) => handleChangeStatus(e, PaymentStatus.Paid, 'payment')}
+        >
+          Mark as paid
+        </MenuItem>
+        <MenuItem
+          disabled={isMarkButtonDisabled || order.status === ORDER_STATUS.VOID}
+          onClick={(e) =>
+            handleChangeStatus(e, PaymentStatus.Unpaid, 'payment')
+          }
+        >
+          Mark as unpaid
         </MenuItem>
       </Menu>
     </>
@@ -533,22 +566,41 @@ const OrderAccordion = ({
                   >
                     Approve
                   </Button>
-                  <Button variant="contained" color="error" onClick={() => setIsRejectOrderOpen(true)}>
+                  <Button
+                    variant="contained"
+                    color="error"
+                    onClick={() => setIsRejectOrderOpen(true)}
+                  >
                     Reject
                   </Button>
                 </Box>
               )}
-              {order?.status !== ORDER_STATUS.PENDING && order?.profit
-                ? order.profit > 0 && (
-                    <StatusText
-                      text={`Profit: $${order.profit.toFixed(2)}`}
-                      type={'success'}
-                      icon={
-                        <AttachMoneyIcon color="success" fontSize="small" />
-                      }
-                    />
-                  )
-                : null}
+              <Box display="flex" gap={1} alignItems="center">
+                {order?.paymentStatus === PaymentStatus.Unpaid ? (
+                  <StatusText
+                    text={`Unpaid`}
+                    type={'error'}
+                    icon={<AttachMoneyIcon color="error" fontSize="small" />}
+                  />
+                ) : order?.paymentStatus === PaymentStatus.Paid ? (
+                  <StatusText
+                    text={`Paid`}
+                    type={'success'}
+                    icon={<AttachMoneyIcon color="success" fontSize="small" />}
+                  />
+                ) : null}
+                {order?.status !== ORDER_STATUS.PENDING && order?.profit
+                  ? order.profit > 0 && (
+                      <StatusText
+                        text={`Profit: $${order.profit.toFixed(2)}`}
+                        type={'success'}
+                        icon={
+                          <AttachMoneyIcon color="success" fontSize="small" />
+                        }
+                      />
+                    )
+                  : null}
+              </Box>
               {showNotification ? actions : null}
             </Box>
           </Grid>
@@ -565,9 +617,11 @@ const OrderAccordion = ({
               <IconButton
                 onClick={() => {
                   if (handleOpenDetails) {
-                    handleOpenDetails();
+                    router.push(`/admin/${companyId}/orders/${order.id}`);
+                    // handleOpenDetails();
                   } else {
-                    setIsOpenDetails(true);
+                    // setIsOpenDetails(true);
+                    router.push(`/admin/${companyId}/orders/${order.id}`);
                   }
                 }}
                 // disabled={order?.type === TYPE.LOCKED}
@@ -749,7 +803,6 @@ const OrderAccordion = ({
                 </Typography>
               </Box>
             </HtmlTooltip> */}
-
           </Grid>
           {!mdDown && (
             <Grid item xs={4}>

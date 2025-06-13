@@ -33,13 +33,13 @@ const generateTaxNote = (item: Item) => {
 
 // eslint-disable-next-line react/display-name
 export const ComponentToPrint = forwardRef(
-  ({ order }: { order: Order | null }, ref: any) => {    
+  ({ order }: { order: Order | null }, ref: any) => {
     const { companyId }: any = useParams();
-    
+
     if (!order) {
       return null;
     }
-    
+
     const [announcement] = SWRFetchData(
       getAdminApiUrl(companyId, '/announcement'),
     );
@@ -108,7 +108,9 @@ export const ComponentToPrint = forwardRef(
                     </Typography>
                   )} */}
                 <Typography fontWeight="bold">
-                  ${item.totalPrice?.toFixed(2)}
+                  $
+                  {item.totalPrice?.toFixed(2) ||
+                    (item.quantity * item.price).toFixed(2)}
                 </Typography>
                 {/* <Typography>{generateTaxNote(item)}</Typography> */}
                 <Typography sx={{ fontWeight: 'semibold' }}>
@@ -215,20 +217,22 @@ export const ComponentToPrint = forwardRef(
                 </Typography>
               </Grid>
 
-                  {order?.shippingFee ? order.shippingFee > 0 && (
-                  <>
-                    <Grid item xs={6} textAlign="left">
-                      <Typography sx={{ fontSize: printFontSize - 5 }}>
-                        Shipping Fee
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={6} textAlign="right">
-                      <Typography sx={{ fontSize: printFontSize - 5 }}>
-                        ${order?.shippingFee?.toFixed(2) || 0}
-                      </Typography>
-                    </Grid>
-                  </>
-                ) : null}
+              {order?.shippingFee
+                ? order.shippingFee > 0 && (
+                    <>
+                      <Grid item xs={6} textAlign="left">
+                        <Typography sx={{ fontSize: printFontSize - 5 }}>
+                          Shipping Fee
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6} textAlign="right">
+                        <Typography sx={{ fontSize: printFontSize - 5 }}>
+                          ${order?.shippingFee?.toFixed(2) || 0}
+                        </Typography>
+                      </Grid>
+                    </>
+                  )
+                : null}
               <Grid item xs={6}>
                 <Typography sx={{ fontSize: printFontSize - 5 }}>
                   GST (5%):
@@ -267,7 +271,9 @@ export const ComponentToPrint = forwardRef(
                   fontWeight="bold"
                 >
                   $
-                  {total?.totalPrice?.toFixed(2) || order?.totalPrice?.toFixed(2) || 0}
+                  {total?.totalPrice?.toFixed(2) ||
+                    order?.totalPrice?.toFixed(2) ||
+                    0}
                 </Typography>
               </Grid>
             </Grid>

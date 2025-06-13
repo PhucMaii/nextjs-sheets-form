@@ -10,10 +10,13 @@ import { store } from '@/state/store';
 import { DragDropProvider } from '@dnd-kit/react';
 import registerSW from './registerSW';
 import { Toaster } from 'react-hot-toast';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 type Props = {
   children?: React.ReactNode;
 };
+
+const queryClient = new QueryClient();
 
 export const Providers = ({ children }: Props) => {
   useEffect(() => {
@@ -23,17 +26,19 @@ export const Providers = ({ children }: Props) => {
   return (
     <SessionProvider>
       <AuthenGuard>
-        <DragDropProvider>
-          <Provider store={store}>
-            <SWRConfig
-              value={{
-                fetcher: (url: string) => axios.get(url).then((r) => r.data),
-              }}
-            >
-              <MaintenanceProvider>{children}</MaintenanceProvider>
-            </SWRConfig>
-          </Provider>
-        </DragDropProvider>
+        <QueryClientProvider client={queryClient}>
+          <DragDropProvider>
+            <Provider store={store}>
+              <SWRConfig
+                value={{
+                  fetcher: (url: string) => axios.get(url).then((r) => r.data),
+                }}
+              >
+                <MaintenanceProvider>{children}</MaintenanceProvider>
+              </SWRConfig>
+            </Provider>
+          </DragDropProvider>
+        </QueryClientProvider>
       </AuthenGuard>
       <Toaster />
     </SessionProvider>

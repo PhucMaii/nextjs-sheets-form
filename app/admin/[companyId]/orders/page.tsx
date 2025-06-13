@@ -66,6 +66,7 @@ import LoadingModal from '../components/Modals/LoadingModal';
 import { MemoizedAllPrint } from '../components/Printing/AllPrint';
 import { useParams } from 'next/navigation';
 import DeleteModal from '../components/Modals/delete/DeleteModal';
+import { PaymentStatus } from '@prisma/client';
 
 interface Category {
   id: number;
@@ -129,6 +130,7 @@ export interface Order {
   profit?: number;
   shippingFee?: number;
   hasSubtractInventory?: boolean;
+  paymentStatus?: PaymentStatus;
 }
 
 const orderPerPage = 10;

@@ -5,7 +5,7 @@ import {
 } from '@/pages/api/admin/[companyId]/orderedItems/single';
 import { getDriverInfo } from '@/pages/api/utils/auth';
 import { getTodayDate } from '@/pages/api/utils/date';
-import { OrderedItems, PrismaClient } from '@prisma/client';
+import { OrderedItems, PaymentStatus, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IBody {
@@ -50,12 +50,28 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       deliveredAt = existingOrder?.deliveredAt || null;
     }
 
+    const statusUpdateData: any = {};
+
+    if (updatedStatus === ORDER_STATUS.COMPLETED) {
+      statusUpdateData.status = ORDER_STATUS.DELIVERED;
+      statusUpdateData.paymentStatus = PaymentStatus.Paid;
+    } else if (updatedStatus === ORDER_STATUS.INCOMPLETED) {
+      statusUpdateData.status = updatedStatus;
+      statusUpdateData.paymentStatus = PaymentStatus.Unpaid;
+    } else if (updatedStatus === ORDER_STATUS.VOID) {
+      statusUpdateData.status = updatedStatus;
+      statusUpdateData.paymentStatus = PaymentStatus.Unpaid;
+    } else if (updatedStatus === ORDER_STATUS.DELIVERED) {
+      statusUpdateData.status = updatedStatus;
+      statusUpdateData.paymentStatus = PaymentStatus.Unpaid;
+    }
+
     const updatedOrder = await prisma.orders.update({
       where: {
         id: existingOrder.id,
       },
       data: {
-        status: updatedStatus,
+        ...statusUpdateData,
         updatedBy,
         updateTime: new Date(`${date} ${time}`),
         deliveredBy:
