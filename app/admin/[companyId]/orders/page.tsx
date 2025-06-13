@@ -128,6 +128,7 @@ export interface Order {
   cost?: number;
   profit?: number;
   shippingFee?: number;
+  hasSubtractInventory?: boolean;
 }
 
 const orderPerPage = 10;
@@ -149,7 +150,7 @@ export default function Orders() {
 
   const [isAddOrderOpen, setIsAddOrderOpen] = useState<boolean>(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
-  
+
   const [filterOptions, setFilterOptions] = useState<PAYMENT_TYPE[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isExecutingAction, setIsExecutingAction] = useState<boolean>(false);
@@ -832,7 +833,7 @@ export default function Orders() {
           ref={componentRef}
         />
       </div>
-      <DeleteModal 
+      <DeleteModal
         open={isDeleteModalOpen}
         handleCloseModal={() => setIsDeleteModalOpen(false)}
         targetObj={selectedOrders}

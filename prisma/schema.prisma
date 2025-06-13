@@ -291,34 +291,34 @@ model OrderedItems {
 }
 
 model Orders {
-  id                Int            @id @default(autoincrement())
-  orderTime         String
-  deliveryDate      String
-  note              String
-  status            String
-  paymentStatus     PaymentStatus?
-  userId            Int
-  totalPrice        Float
-  isReplacement     Boolean?
-  isVoid            Boolean?
-  updateTime        DateTime?
-  createdBy         String?
-  updatedBy         String?
-  codBoardId        Int?
-  GST               Float?
-  PST               Float?
-  subTotal          Float?
-  discount          Float?
-  isAffectInventory Boolean?
-  shippingFee       Float?
-  type              String?
-  deliveredBy       String?
-  deliveredAt       String?
-  addedToCODBy      String?
-  insertedAt        String?
-  insertedBy        String?
-  companyId         Int?
-  hasSubtractInventory      Boolean?
+  id                     Int            @id @default(autoincrement())
+  orderTime              String
+  deliveryDate           String
+  note                   String
+  status                 String
+  paymentStatus          PaymentStatus?
+  userId                 Int
+  totalPrice             Float
+  isReplacement          Boolean?
+  isVoid                 Boolean?
+  updateTime             DateTime?
+  createdBy              String?
+  updatedBy              String?
+  codBoardId             Int?
+  GST                    Float?
+  PST                    Float?
+  subTotal               Float?
+  discount               Float?
+  isAffectInventory      Boolean?
+  shippingFee            Float?
+  type                   String?
+  deliveredBy            String?
+  deliveredAt            String?
+  addedToCODBy           String?
+  insertedAt             String?
+  insertedBy             String?
+  companyId              Int?
+  hasSubtractInventory   Boolean?
 
   items             OrderedItems[]
   timeline          OrderTimeline?  @relation("OrderTimeline")
