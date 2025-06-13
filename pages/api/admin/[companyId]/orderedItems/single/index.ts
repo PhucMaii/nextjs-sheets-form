@@ -303,6 +303,14 @@ export const updateSingleInventoryItem = async (
       },
     });
 
+    // Mark the order hasSubtractInventory to true
+    await prisma.orders.update({
+      where: {
+        id: orderId,
+      },
+      data: { hasSubtractInventory: true },
+    });
+
     const targetVendorItem = await prisma.vendorItem.findUnique({
       where: {
         id: fifo.vendorItemId,

@@ -13,12 +13,14 @@ interface BodyPropTypes {
   deliveryDate?: string;
   status?: ORDER_STATUS;
   note?: string;
+  isAffectInventory?: boolean;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
-    const { orderId, deliveryDate, status, note } = req.body as BodyPropTypes;
+    const { orderId, deliveryDate, status, note, isAffectInventory } =
+      req.body as BodyPropTypes;
 
     const updateData: any = {};
     if (deliveryDate) {
@@ -75,6 +77,23 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         },
       },
     });
+
+    if (
+      isAffectInventory &&
+      updateData.deliveryDate &&
+      !updatedOrder.hasSubtractInventory
+    ) {
+      for (const item of updatedOrder.items) {
+        if (item?.fifo && item?.inventoryUnit) {
+          await subtractInventoryItem(
+            orderId,
+            item.fifo,
+            item.inventoryUnit,
+            item.quantity,
+          );
+        }
+      }
+    }
 
     // Update Inventory Item
     // From other status to VOID -> Inventory Item get restock
