@@ -1,10 +1,13 @@
 import {
   AlertColor,
   Box,
+  Checkbox,
   Divider,
   FormControl,
+  FormControlLabel,
   LinearProgress,
   Modal,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
@@ -26,6 +29,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LoadingButton } from '@mui/lab';
 import { pusherClient } from '@/app/pusher';
 import { useParams } from 'next/navigation';
+import { InfoIcon } from 'lucide-react';
 // import { checkIsPreOrderQualified } from '@/app/utils/orders';
 
 interface PropTypes extends ModalProps {
@@ -52,7 +56,7 @@ export default function EditDeliveryDate({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
   const [createdOrders, setCreatedOrders] = useState<Order[]>([]);
-
+  const [isAffectInventory, setIsAffectInventory] = useState<boolean>(false);
   const [updatedDate, setUpdatedDate] = useState<string>(() => {
     if (order) {
       return order.deliveryDate;
@@ -80,6 +84,19 @@ export default function EditDeliveryDate({
       pusherClient?.unsubscribe(`admin-schedule-order-${companyId}`);
     };
   }, []);
+  useEffect(() => {
+    // If updated date is before order.deliveryDate and hasSubtractInventory is false, set isAffectInventory to true
+    if (
+      order &&
+      new Date(updatedDate).getTime() <
+        new Date(order?.deliveryDate).getTime() &&
+      !order?.hasSubtractInventory
+    ) {
+      setIsAffectInventory(true);
+    } else {
+      setIsAffectInventory(false);
+    }
+  }, [order, updatedDate]);
 
   useEffect(() => {
     if (scheduleOrderList && scheduleOrderList.length > 0) {
@@ -147,7 +164,10 @@ export default function EditDeliveryDate({
       //   setProgress((orderIndex + 1 / scheduleOrderList.length) * 100);
       // }
 
-      const response = await axios.post(getAdminApiUrl(companyId, '/orders'), submittedData);
+      const response = await axios.post(
+        getAdminApiUrl(companyId, '/orders'),
+        submittedData,
+      );
       if (response.data.error) {
         setIsLoading(false);
         showNotification('error', response.data.error);
@@ -172,6 +192,7 @@ export default function EditDeliveryDate({
       const response = await axios.put(getAdminApiUrl(companyId, '/orders'), {
         orderId: order.id,
         deliveryDate: updatedDate,
+        isAffectInventory,
       });
 
       if (response.data.error) {
@@ -225,6 +246,27 @@ export default function EditDeliveryDate({
         </Box>
         <Divider />
         <Box display="flex" flexDirection="column" gap={1}>
+          {!isPreOrder && (
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="flex-end"
+            >
+              <Tooltip title="Inventory will be subtracted if checked">
+                <InfoIcon size={16} />
+              </Tooltip>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={isAffectInventory}
+                    onChange={(e) => setIsAffectInventory(e.target.checked)}
+                  />
+                }
+                labelPlacement="start"
+                label="Affect Inventory"
+              />
+            </Box>
+          )}
           <FormControl fullWidth>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker

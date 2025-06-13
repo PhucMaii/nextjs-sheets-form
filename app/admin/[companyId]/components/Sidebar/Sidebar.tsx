@@ -71,25 +71,25 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
   const { companyId }: any = useParams();
 
   // WILL BE REMOVED AFTER FEW DAYS
-  const [noCompanyOrders] = SWRFetchData(
-    getAdminApiUrl(companyId, '/orders/no-company'),
-  );
+  // const [noCompanyOrders] = SWRFetchData(
+  //   getAdminApiUrl(companyId, '/orders/no-company'),
+  // );
 
-  const convertNoCompanyOrders = async () => {
-    try {
-      setIsConverting(true);
-      const response = await axios.put(
-        getAdminApiUrl(companyId, '/orders/no-company'),
-        {
-          orderIds: noCompanyOrders.data.map((order: any) => order.id),
-        },
-      );
-    } catch (error: any) {
-      console.error('Internal Server Error: ', error);
-    } finally {
-      setIsConverting(false);
-    }
-  };
+  // const convertNoCompanyOrders = async () => {
+  //   try {
+  //     setIsConverting(true);
+  //     const response = await axios.put(
+  //       getAdminApiUrl(companyId, '/orders/no-company'),
+  //       {
+  //         orderIds: noCompanyOrders.data.map((order: any) => order.id),
+  //       },
+  //     );
+  //   } catch (error: any) {
+  //     console.error('Internal Server Error: ', error);
+  //   } finally {
+  //     setIsConverting(false);
+  //   }
+  // };
 
   const singlePrintRef: any = useRef();
 
@@ -210,7 +210,7 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
         component="nav"
         aria-labelledby="nested-list-subheader"
       >
-        {noCompanyOrders && noCompanyOrders?.data?.length > 0 && (
+        {/* {noCompanyOrders && noCompanyOrders?.data?.length > 0 && (
           <Toolbar
             sx={{ mt: 2, backgroundColor: grey[100], p: 2, borderRadius: 1 }}
           >
@@ -236,7 +236,7 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
               </LoadingButton>
             </Box>
           </Toolbar>
-        )}
+        )} */}
         {/* {bugOrders && bugOrders?.data?.length > 0 && (
           <Toolbar sx={{ mt: 2 }}>
             <Box display="flex" flexDirection="column" rowGap={2}>
