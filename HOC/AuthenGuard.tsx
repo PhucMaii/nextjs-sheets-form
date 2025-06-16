@@ -51,7 +51,7 @@ export default function AuthenGuard({ children }: any) {
       router.push(`/admin/${session?.user.companyId}/orders`);
     } else if (
       session?.user &&
-      session?.user.role === USER_ROLE.DRIVER &&
+      (session?.user.role === USER_ROLE.DRIVER || session?.user.role === USER_ROLE.WAREHOUSE) &&
       !pathname?.startsWith('/driver')
     ) {
       router.push('/driver/overview');

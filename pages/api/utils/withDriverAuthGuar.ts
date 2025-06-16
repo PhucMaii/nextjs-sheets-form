@@ -24,7 +24,9 @@ const withDriverAuthGuard =
       const existingDriver = await prisma.employee.findUnique({
         where: {
           id: Number(session.user.id),
-          role: USER_ROLE.DRIVER,
+          role: {
+            in: [USER_ROLE.DRIVER, USER_ROLE.WAREHOUSE],
+          },
         },
       });
 

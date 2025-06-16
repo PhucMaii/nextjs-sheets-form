@@ -29,7 +29,7 @@ export default function LoginAndRegisterGuard({ children }: any) {
   // );
 
   useEffect(() => {
-    if (session?.user?.role === 'driver') {
+    if (session?.user?.role === 'driver' || session?.user?.role === 'warehouse') {
       router.push('/driver/overview');
     } else if (
       session?.user?.role === 'admin' ||
