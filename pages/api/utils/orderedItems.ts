@@ -3,6 +3,7 @@ import { checkOrderValidToAffectInventory } from './order';
 import { getTodayDate, sortByDeliveryDate } from './date';
 import { getAllUnitsByInventoryItemId } from './units';
 import { checkAndUpdateUnits } from '../admin/[companyId]/inventory/expenses/POST';
+import { recordAction } from './timeline';
 
 export const createOrderedItems = async (
   companyId: number,
@@ -318,38 +319,16 @@ export const createOrderedItems = async (
   }
 
   // Record actions
-  let existingTimeline = await prisma.orderTimeline.findFirst({
-    where: {
-      orderId: order.id,
-    },
-    include: {
-      actions: true,
-    },
-  });
-
-  if (!existingTimeline) {
-    existingTimeline = await prisma.orderTimeline.create({
-      data: {
-        orderId: order.id,
-      },
-      include: {
-        actions: true,
-      }
-    });
-  }
-
-  const today = getTodayDate();
-  const totalQty = newOrderedItems.reduce((acc, item) => acc + item.quantity, 0);
-  await prisma.orderAction.create({
-    data: {
-      timelineId: existingTimeline.id,
-      title: `Subtract ${totalQty} items from inventory`,
-      comment,
-      createdBy,
-      posIndex: existingTimeline.actions.length + 1,
-      createdAt: today.dateAndTime,
-    },
-  });
+  const totalQty = newOrderedItems.reduce(
+    (acc, item) => acc + item.quantity,
+    0,
+  );
+  await recordAction(
+    order.id,
+    `Subtract ${totalQty} items from inventory`,
+    createdBy,
+    comment,
+  );
 
   await prisma.orderedItems.createMany({
     data: newOrderedItems,

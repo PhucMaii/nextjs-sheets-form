@@ -13,6 +13,7 @@ import { getDriverInfo } from '@/pages/api/utils/auth';
 import { getTodayDate } from '@/pages/api/utils/date';
 import { formatItemsWithTotalPrice } from '@/pages/api/utils/order';
 import { createOrderedItems } from '@/pages/api/utils/orderedItems';
+import { recordAction } from '@/pages/api/utils/timeline';
 import withDriverAuthGuard from '@/pages/api/utils/withDriverAuthGuar';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -77,6 +78,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       updatedItems,
     );
 
+    const actionRecord: any = {
+      create: [],
+      update: [],
+      delete: [],
+    };
+
     for (const item of newItems) {
       // Check item categorize to create, update or delete
 
@@ -87,6 +94,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           existingOrder,
           [item],
         );
+        actionRecord.create.push(item);
         continue;
       } else if (item.type === ITEM_CATEGORIZED.REMAIN) {
         // REMAIN
@@ -99,6 +107,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
               id: item.id,
             },
           });
+
+          actionRecord.delete.push(item);
 
           await restockInventoryItem(
             item.orderId,
@@ -130,6 +140,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           },
         });
 
+        actionRecord.update.push(item);
+
         // Inventory Update
         if (
           item?.fifo &&
@@ -150,11 +162,27 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // Get admin update info
     const driverUpdate: any = await getDriverInfo(req, res);
-    // await updateOrderTotalPrice(
-    //   orderId,
-    //   newTotalPrice,
-    //   `Admin - ${adminUpdate.clientName}`,
-    // );
+
+    // Record actions
+    const createdBy = `Driver - ${driverUpdate?.name}`;
+    let comment = '';
+
+    if (actionRecord.create.length > 0) {
+      comment += `### Create\n ${actionRecord.create.map((item: any) => `x${item.quantity} ${item.name}`).join('\n')}\n`;
+    }
+    if (actionRecord.update.length > 0) {
+      comment += `### Update\n ${actionRecord.update.map((item: any) => `x${item.quantity} ${item.name}`).join('\n')}\n`;
+    }
+    if (actionRecord.delete.length > 0) {
+      comment += `### Remove\n ${actionRecord.delete.map((item: any) => `x${item.quantity} ${item.name}`).join('\n')}\n`;
+    }
+
+    await recordAction(
+      orderId,
+      `${createdBy} edited this order`,
+      createdBy,
+      comment,
+    );
 
     const orderedItems = await prisma.orderedItems.findMany({
       where: {

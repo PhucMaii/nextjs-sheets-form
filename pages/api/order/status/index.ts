@@ -1,4 +1,4 @@
-import { ORDER_STATUS } from '@/app/utils/enum';
+import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { pusherServer } from '@/app/pusher';
@@ -8,6 +8,9 @@ import { generateOrderTemplate } from '@/config/email';
 import emailHandler from '@/pages/api/utils/email';
 import { restockInventoryItem } from '@/pages/api/admin/[companyId]/orderedItems/single';
 import { testAccountId } from '@/app/lib/constant';
+import { getTimeline, recordAction } from '@/pages/api/utils/timeline';
+import { getCreatedBy } from '@/pages/api/import-sheets/utils';
+import { getTodayDate } from '@/pages/api/utils/date';
 
 interface BodyTypes {
   orderId: number;
@@ -86,6 +89,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
+    // Record actions
+    const createdBy = await getCreatedBy(req, res, USER_ROLE.CLIENT);
+    await recordAction(
+      orderId,
+      `${createdBy} updated order status: ${existingOrder.status} -> ${updatedStatus}`,
+      createdBy,
+    );
+
     let total = 0;
     const itemList: any = [];
     const orderDetails: any = {};
@@ -162,14 +173,18 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       htmlTemplate,
     );
 
-    await pusherServer?.trigger(`void-order-${existingUser.companyId}`, 'incoming-order', {
-      ...existingUser,
-      ...existingOrder,
-      items: itemList,
-      totalPrice: total,
-      category: userCategory,
-      isVoid: true,
-    });
+    await pusherServer?.trigger(
+      `void-order-${existingUser.companyId}`,
+      'incoming-order',
+      {
+        ...existingUser,
+        ...existingOrder,
+        items: itemList,
+        totalPrice: total,
+        category: userCategory,
+        isVoid: true,
+      },
+    );
 
     return res.status(200).json({
       data: updatedOrder,

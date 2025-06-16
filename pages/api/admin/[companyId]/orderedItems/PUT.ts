@@ -10,6 +10,7 @@ import { formatItemsWithTotalPrice } from '@/pages/api/utils/order';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
+import { getTimeline, recordAction } from '@/pages/api/utils/timeline';
 
 export enum ITEM_CATEGORIZED {
   REMAIN = 'remain',
@@ -185,28 +186,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
     const today = getTodayDate();
 
-    // Get existing timeline
-    let existingTimeline = await prisma.orderTimeline.findFirst({
-      where: {
-        orderId,
-      },
-      include: {
-        actions: true,
-      },
-    });
-
-    if (!existingTimeline) {
-      existingTimeline = await prisma.orderTimeline.create({
-        data: {
-          orderId,
-        },
-        include: {
-          actions: true,
-        },
-      });
-    }
-
     let comment = '';
+
     if (actionRecord.create.length > 0) {
       comment += `### Create\n ${actionRecord.create.map((item: any) => `x${item.quantity} ${item.name}`).join('\n')}\n`;
     }
@@ -217,18 +198,12 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       comment += `### Remove\n ${actionRecord.delete.map((item: any) => `x${item.quantity} ${item.name}`).join('\n')}\n`;
     }
 
-    // Edit item action record
-    await prisma.orderAction.create({
-      data: {
-        timelineId: existingTimeline.id,
-        title: `${createdBy} edited this order`,
-        // If there are items in create, update, delete, then show create, update, delete with the item name and quantity
-        comment,
-        createdAt: today.dateAndTime,
-        createdBy: createdBy,
-        posIndex: existingTimeline.actions.length + 1,
-      },
-    });
+    await recordAction(
+      orderId,
+      `${createdBy} edited this order`,
+      createdBy,
+      comment,
+    );
 
     // Get admin update info
     const session: any = await getServerSession(req, res, authOptions);
@@ -300,16 +275,12 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         comment += `### Note\n${note}\n`;
       }
       // Create order action of update delivery date
-      await prisma.orderAction.create({
-        data: {
-          timelineId: existingTimeline.id,
-          title: `${createdBy} edited this order`,
-          comment,
-          createdAt: today.dateAndTime,
-          createdBy: createdBy,
-          posIndex: existingTimeline.actions.length + 1,
-        },
-      });
+      await recordAction(
+        orderId,
+        `${createdBy} edited this order`,
+        createdBy,
+        comment,
+      );
     }
 
     const formattedItems = formatItemsWithTotalPrice(orderUpdated?.items);

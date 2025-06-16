@@ -5,6 +5,7 @@ import {
 } from '@/pages/api/admin/[companyId]/orderedItems/single';
 import { getDriverInfo } from '@/pages/api/utils/auth';
 import { getTodayDate } from '@/pages/api/utils/date';
+import { recordAction } from '@/pages/api/utils/timeline';
 import { OrderedItems, PaymentStatus, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -51,6 +52,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const statusUpdateData: any = {};
+    const createdBy = `Driver - ${driverUpdate.name}`;
+    let title = ''; // Comment for action record
 
     if (updatedStatus === ORDER_STATUS.COMPLETED) {
       statusUpdateData.status = ORDER_STATUS.DELIVERED;
@@ -65,6 +68,16 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       statusUpdateData.status = updatedStatus;
       statusUpdateData.paymentStatus = PaymentStatus.Unpaid;
     }
+
+    if (statusUpdateData.status !== existingOrder.status) {
+      title += `Driver - ${driverUpdate.name} updated order status: ${existingOrder.status} -> ${updatedStatus}\n`;
+    }
+
+    if (statusUpdateData.paymentStatus !== existingOrder.paymentStatus) {
+      title += `and updated payment status: ${existingOrder.paymentStatus} -> ${statusUpdateData.paymentStatus}`;
+    }
+
+    await recordAction(existingOrder.id, title, createdBy);
 
     const updatedOrder = await prisma.orders.update({
       where: {
