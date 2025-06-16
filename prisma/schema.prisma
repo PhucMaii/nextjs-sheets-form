@@ -337,19 +337,19 @@ model OrderTimeline {
   orderId   Int             @unique
   actions   OrderAction[]  
 
-  order     Orders         @relation("OrderTimeline", fields: [orderId], references: [id])
+  order     Orders         @relation("OrderTimeline", fields: [orderId], references: [id], onDelete: Cascade)
 }
 
 model OrderAction {
   id            Int           @id  @default(autoincrement())
   timelineId    Int
-  title         String
-  comment       String
+  title         String 
+  comment       String?
   createdAt     String
   createdBy     String
   posIndex         Int
 
-  timeline     OrderTimeline    @relation(fields: [timelineId], references: [id])
+  timeline     OrderTimeline    @relation(fields: [timelineId], references: [id], onDelete: Cascade)
 
 }
 

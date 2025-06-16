@@ -26,7 +26,7 @@ import {
 } from '@/app/utils/enum';
 import axios from 'axios';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
-import { IItem, IRoutes } from '@/app/utils/type';
+import { IItem, IOrderTimeline, IRoutes } from '@/app/utils/type';
 import { getWCODDay, YYYYMMDDFormat } from '@/app/utils/time';
 import { pusherClient } from '@/app/pusher';
 import OrderAccordion from '../components/OrderAccordion';
@@ -131,6 +131,7 @@ export interface Order {
   shippingFee?: number;
   hasSubtractInventory?: boolean;
   paymentStatus?: PaymentStatus;
+  timeline?: IOrderTimeline;
 }
 
 const orderPerPage = 10;

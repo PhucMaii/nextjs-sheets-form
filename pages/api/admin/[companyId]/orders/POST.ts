@@ -1,4 +1,8 @@
-import { EMPLOYEE_ROLE, ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
+import {
+  EMPLOYEE_ROLE,
+  ORDER_STATUS,
+  USER_CATEGORIZED,
+} from '@/app/utils/enum';
 import { PaymentStatus, PrismaClient, User } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { OrderedItems, UserType } from '@/app/utils/type';
@@ -139,9 +143,13 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         );
 
         if (existingOrder) {
-          await pusherServer?.trigger(`admin-schedule-order-${companyId}`, 'pre-order', {
-            id: existingOrder?.id,
-          });
+          await pusherServer?.trigger(
+            `admin-schedule-order-${companyId}`,
+            'pre-order',
+            {
+              id: existingOrder?.id,
+            },
+          );
           console.log({
             alreadyOrder: {
               id: scheduleOrder.id,
@@ -155,9 +163,13 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
         // Check if user is inactive
         if (scheduleOrder?.user?.type === USER_CATEGORIZED.INACTIVE) {
-          await pusherServer?.trigger(`admin-schedule-order-${companyId}`, 'pre-order', {
-            id: returnOrder?.id,
-          });
+          await pusherServer?.trigger(
+            `admin-schedule-order-${companyId}`,
+            'pre-order',
+            {
+              id: returnOrder?.id,
+            },
+          );
           console.log({
             inactiveOrder: {
               id: scheduleOrder.id,
@@ -199,9 +211,13 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         }
 
         if (trackIndex <= unavailableRanges.length - 1) {
-          await pusherServer?.trigger(`admin-schedule-order-${companyId}`, 'pre-order', {
-            id: returnOrder?.id,
-          });
+          await pusherServer?.trigger(
+            `admin-schedule-order-${companyId}`,
+            'pre-order',
+            {
+              id: returnOrder?.id,
+            },
+          );
           console.log({
             duringBlocking: {
               id: scheduleOrder.id,
@@ -213,7 +229,10 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           continue;
         }
 
-        const role = session?.user?.role === EMPLOYEE_ROLE.SUPER_ADMIN ? 'S Admin' : 'Admin';
+        const role =
+          session?.user?.role === EMPLOYEE_ROLE.SUPER_ADMIN
+            ? 'S Admin'
+            : 'Admin';
 
         const newOrder: any = await createOrder(
           Number(companyId),
@@ -233,9 +252,13 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         );
         updatedOrderList.push(newOrder);
 
-        await pusherServer?.trigger(`admin-schedule-order-${companyId}`, 'pre-order', {
-          id: newOrder?.id,
-        });
+        await pusherServer?.trigger(
+          `admin-schedule-order-${companyId}`,
+          'pre-order',
+          {
+            id: newOrder?.id,
+          },
+        );
         console.log({
           successful: {
             id: scheduleOrder.id,
@@ -332,7 +355,48 @@ export const createOrder = async (
       },
     });
 
-    await createOrderedItems(companyId, newOrder, items, createdBy);
+    // Add timeline for order
+    const newTimeline = await prisma.orderTimeline.create({
+      data: {
+        orderId: newOrder.id,
+      },
+    });
+
+    // Add actions
+    await prisma.orderAction.create({
+      data: {
+        timelineId: newTimeline.id,
+        title: `${createdBy} created this order for ${deliveryDate}`,
+        createdAt: `${date} ${time}`,
+        createdBy,
+        posIndex: 1,
+      },
+    });
+
+    const newOrderedItems = await createOrderedItems(
+      companyId,
+      newOrder,
+      items,
+      createdBy,
+    );
+    console.log(newOrderedItems);
+
+    let comment = '### Items\n';
+    for (const item of newOrderedItems) {
+      comment += `x${item.quantity} ${item.name}\n`;
+    }
+
+    // Add actions
+    await prisma.orderAction.create({
+      data: {
+        timelineId: newTimeline.id,
+        title: `There were ${items.length} items added to the order`,
+        comment,
+        createdAt: `${date} ${time}`,
+        createdBy,
+        posIndex: 2,
+      },
+    });
 
     const updatedOrder = await prisma.orders.findUnique({
       where: {

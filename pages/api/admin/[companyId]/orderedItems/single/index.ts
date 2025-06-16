@@ -242,6 +242,7 @@ export const updateSingleInventoryItem = async (
   newQuantity: number,
   previousQuantity: number,
   previousUnit: InventoryUnit | any = null,
+  // type: 'subtract' | 'restock' | null = null,`
 ) => {
   try {
     const prisma = new PrismaClient();
@@ -276,6 +277,9 @@ export const updateSingleInventoryItem = async (
       where: {
         id: fifo.id,
       },
+      include: {
+        inventoryItem: true,
+      },
     });
 
     if (!lastUpdatedFifo) {
@@ -300,6 +304,46 @@ export const updateSingleInventoryItem = async (
       },
       data: {
         quantity: updatedQuantity,
+      },
+    });
+
+    // Add action of update inventory item
+    let existingTimeline = await prisma.orderTimeline.findFirst({
+      where: {
+        orderId,
+      },
+      include: {
+        actions: true,
+      },
+    });
+
+    if (!existingTimeline) {
+      existingTimeline = await prisma.orderTimeline.create({
+        data: {
+          orderId,
+        },
+        include: {
+          actions: true,
+        },
+      });
+    }
+
+    const today = getTodayDate();
+
+    // const quantity = updatedQuantity > lastUpdatedFifo.quantity ? previousQuantity : newQuantity;
+
+    const difference = Math.abs(updatedQuantity - lastUpdatedFifo.quantity);
+
+    await prisma.orderAction.create({
+      data: {
+        timelineId: existingTimeline.id,
+        title:
+          updatedQuantity > lastUpdatedFifo.quantity
+            ? `Restock ${difference} ${lastUpdatedFifo.inventoryItem.name} to inventory`
+            : `Subtract ${difference} ${lastUpdatedFifo.inventoryItem.name} from inventory`,
+        createdAt: today.dateAndTime,
+        createdBy: 'Admin',
+        posIndex: existingTimeline.actions.length + 1,
       },
     });
 
@@ -342,7 +386,15 @@ export const restockInventoryItem = async (
   restockQuantity: number,
 ) => {
   try {
-    await updateSingleInventoryItem(orderId, fifo, unit, 0, restockQuantity);
+    await updateSingleInventoryItem(
+      orderId,
+      fifo,
+      unit,
+      0,
+      restockQuantity,
+      null,
+      // 'restock',
+    );
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
   }
@@ -355,7 +407,15 @@ export const subtractInventoryItem = async (
   subtractedQuantity: number,
 ) => {
   try {
-    await updateSingleInventoryItem(orderId, fifo, unit, subtractedQuantity, 0);
+    await updateSingleInventoryItem(
+      orderId,
+      fifo,
+      unit,
+      subtractedQuantity,
+      0,
+      null,
+      // 'subtract',
+    );
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
   }

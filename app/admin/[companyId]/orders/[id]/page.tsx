@@ -405,31 +405,46 @@ const OrderDetailsPage = () => {
 
                 <OrderedItemsTable items={order?.items || []} />
               </Box>
-              {order?.status === ORDER_STATUS.INCOMPLETED && <Box
-                display="flex"
-                gap={1}
-                alignItems="center"
-                justifyContent="flex-end"
-                mt={1}
-              >
-                <Button variant="contained" color="primary">
-                  <Box display="flex" gap={1} alignItems="center">
-                    <TruckIcon size={16} style={{ color: 'white' }} />
-                    <Typography variant="subtitle2" fontWeight={700}>
-                      Fulfill Items
-                    </Typography>
-                  </Box>
-                </Button>
-              </Box>}
+              {order?.status === ORDER_STATUS.INCOMPLETED && (
+                <Box
+                  display="flex"
+                  gap={1}
+                  alignItems="center"
+                  justifyContent="flex-end"
+                  mt={1}
+                >
+                  <Button variant="contained" color="primary">
+                    <Box display="flex" gap={1} alignItems="center">
+                      <TruckIcon size={16} style={{ color: 'white' }} />
+                      <Typography variant="subtitle2" fontWeight={700}>
+                        Fulfill Items
+                      </Typography>
+                    </Box>
+                  </Button>
+                </Box>
+              )}
             </ShadowSection>
           )}
 
           {isLoading ? (
             <Skeleton variant="rectangular" height={200} />
           ) : (
-            <ShadowSection>
-              <OrderTimeline />
-            </ShadowSection>
+            // <ShadowSection>
+            <>
+              <Typography variant="subtitle2" fontWeight={700}>
+                Order Timeline
+              </Typography>
+              <Box
+                display="flex"
+                justifyContent="flex-start"
+                width="100%"
+                gap={1}
+                mt={1}
+              >
+                <OrderTimeline timeline={order?.timeline || null} />
+              </Box>
+            </>
+            // </ShadowSection>
           )}
         </Grid>
         <Grid
@@ -556,22 +571,24 @@ const OrderDetailsPage = () => {
                   </Box>
                 </Box>
               </Box>
-              {order?.paymentStatus === PaymentStatus.Unpaid && <Box
-                display="flex"
-                gap={1}
-                alignItems="center"
-                justifyContent="flex-end"
-                mt={1}
-              >
-                <Button variant="contained" color="success">
-                  <Box display="flex" gap={1} alignItems="center">
-                    <HandCoinsIcon size={16} style={{ color: 'white' }} />
-                    <Typography variant="subtitle2" fontWeight={700}>
-                      Collect Payment
-                    </Typography>
-                  </Box>
-                </Button>
-              </Box>}
+              {order?.paymentStatus === PaymentStatus.Unpaid && (
+                <Box
+                  display="flex"
+                  gap={1}
+                  alignItems="center"
+                  justifyContent="flex-end"
+                  mt={1}
+                >
+                  <Button variant="contained" color="success">
+                    <Box display="flex" gap={1} alignItems="center">
+                      <HandCoinsIcon size={16} style={{ color: 'white' }} />
+                      <Typography variant="subtitle2" fontWeight={700}>
+                        Collect Payment
+                      </Typography>
+                    </Box>
+                  </Button>
+                </Box>
+              )}
             </ShadowSection>
           )}
 

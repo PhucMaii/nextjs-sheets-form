@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Order } from '../admin/[companyId]/orders/page';
 import { USER_CATEGORIZED } from './enum';
-import { ScheduledOrder } from './type';
+import { IItem, ScheduledOrder } from './type';
 import { Dispatch, SetStateAction } from 'react';
 import { getAdminApiUrl } from '@/app/utils/enum';
 
@@ -150,4 +150,37 @@ export const onUpdateOrder = async (
     console.log('There was an error: ', error);
     throw new Error('There was an error: ' + error?.response?.data?.error);
   }
+};
+
+export const generateOrderTotalPrice = (
+  items: IItem[],
+  shippingFee?: number,
+) => {
+  let subTotal = 0;
+  let GST = 0;
+  let PST = 0;
+  let discount = 0;
+
+  items.forEach((item) => {
+    const itemTotal = item.totalPrice || (item?.quantity || 0) * item.price;
+    subTotal += itemTotal;
+
+    if (item?.inventoryItem?.hasGST) {
+      GST += itemTotal * 0.05;
+    }
+    if (item?.inventoryItem?.hasPST) {
+      PST += itemTotal * 0.07;
+    }
+    if (item?.isShowDiscount && item?.prevPrice) {
+      discount += (item.prevPrice - item.price) * (item?.quantity || 0);
+    }
+  });
+
+  return {
+    subTotal,
+    GST,
+    PST,
+    discount,
+    totalPrice: subTotal + GST + PST + (shippingFee || 0) - discount,
+  };
 };

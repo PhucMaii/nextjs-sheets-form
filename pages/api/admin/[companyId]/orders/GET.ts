@@ -40,12 +40,37 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
               fifo: true,
             },
           },
+          timeline: {
+            include: {
+              actions: {
+                orderBy: {
+                  posIndex: 'desc',
+                }
+              },
+            },
+          },
         },
       });
 
+      // Group actions by date
+      const groupedActions = order?.timeline?.actions.reduce((acc: any, action: any) => {
+        const date = action.createdAt.split(' ')[0];
+        if (!acc[date]) {
+          acc[date] = [];
+        }
+        acc[date].push(action);
+        return acc;
+      }, {});
+
       return res.status(200).json({
         message: 'Fetch Order Successfully',
-        data: order,
+        data: {
+          ...order,
+          timeline: {
+            ...order?.timeline,
+            groupedActions,
+          },
+        },
       });
     }
 

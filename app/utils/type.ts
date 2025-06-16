@@ -18,6 +18,8 @@ import {
   ItemType_Category,
   LossReport,
   Option,
+  OrderAction,
+  OrderTimeline,
   PaymentMethod,
   Payroll,
   PO,
@@ -158,6 +160,7 @@ export interface IItem {
   image?: string;
   isBestSeller?: boolean;
   qtyLeft?: number;
+  totalPrice?: number;
 }
 
 export interface OrderedItems {
@@ -356,4 +359,15 @@ export interface IPayroll extends Payroll {
   shifts?: number;
   company?: Company;
 
+}
+
+export interface IOrderTimeline extends OrderTimeline {
+  actions: IOrderAction[];
+  groupedActions: {
+    [key: string]: IOrderAction[];
+  };
+}
+
+export interface IOrderAction extends OrderAction {
+  order: Order;
 }

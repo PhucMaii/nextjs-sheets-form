@@ -55,7 +55,7 @@ import { Discount } from '@mui/icons-material';
 // import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import SetItemQuantity from './SetItemQuantity';
 import DisplayFile from '../admin/[companyId]/components/Modals/DisplayFile';
-import { generateOrderTotalPrice } from '@/pages/api/admin/[companyId]/orderedItems/PUT';
+import { generateOrderTotalPrice } from '@/app/utils/orders';
 import { useParams } from 'next/navigation';
 
 export const WhiteSpace = () => {

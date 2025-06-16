@@ -1,17 +1,18 @@
-import { ORDER_STATUS } from '@/app/utils/enum';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import {
-  restockInventoryItem,
+  // restockInventoryItem,
   subtractInventoryItem,
 } from '../orderedItems/single';
+import { USER_ROLE } from '@/app/utils/enum';
+import { getCreatedBy } from '@/pages/api/import-sheets/utils';
+import { getTodayDate } from '@/pages/api/utils/date';
 
 interface BodyPropTypes {
   orderId: number;
   deliveryDate?: string;
-  status?: ORDER_STATUS;
   note?: string;
   isAffectInventory?: boolean;
 }
@@ -19,27 +20,8 @@ interface BodyPropTypes {
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
-    const { orderId, deliveryDate, status, note, isAffectInventory } =
+    const { orderId, deliveryDate, note, isAffectInventory } =
       req.body as BodyPropTypes;
-
-    const updateData: any = {};
-    if (deliveryDate) {
-      updateData.deliveryDate = deliveryDate;
-    }
-
-    if (status) {
-      updateData.status = status;
-    }
-
-    if (note) {
-      updateData.note = note;
-    }
-
-    if (Object.keys(updateData).length === 0) {
-      return res.status(400).json({
-        error: 'No Data To Update',
-      });
-    }
 
     const existingOrder = await prisma.orders.findUnique({
       where: {
@@ -50,6 +32,24 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     if (!existingOrder) {
       return res.status(404).json({
         error: 'No Order Found',
+      });
+    }
+
+    const updateData: any = {};
+    let comment: string = ''; // Comment of order action
+    if (deliveryDate) {
+      updateData.deliveryDate = deliveryDate;
+      comment += `Delivery date\n${existingOrder.deliveryDate} -> ${deliveryDate}\n`;
+    }
+
+    if (note) {
+      updateData.note = note;
+      comment += `Note\n${note}\n`;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({
+        error: 'No Data To Update',
       });
     }
 
@@ -78,6 +78,41 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
+    let existingTimeline = await prisma.orderTimeline.findFirst({
+      where: {
+        orderId,
+      },
+      include: {
+        actions: true,
+      },
+    });
+
+    if (!existingTimeline) {
+      existingTimeline = await prisma.orderTimeline.create({
+        data: {
+          orderId,
+        },
+        include: {
+          actions: true,
+        },
+      });
+    }
+
+    const today = getTodayDate();
+    const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
+
+    // Create order action of update delivery date
+    await prisma.orderAction.create({
+      data: {
+        timelineId: existingTimeline.id,
+        title: `${createdBy} edited this order`,
+        comment,
+        createdAt: today.dateAndTime,
+        createdBy: createdBy,
+        posIndex: existingTimeline.actions.length + 1,
+      },
+    });
+
     if (
       isAffectInventory &&
       updateData.deliveryDate &&
@@ -97,38 +132,38 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     // Update Inventory Item
     // From other status to VOID -> Inventory Item get restock
-    if (
-      existingOrder.status !== ORDER_STATUS.VOID &&
-      updatedOrder.status === ORDER_STATUS.VOID
-    ) {
-      for (const item of updatedOrder.items) {
-        if (item?.fifo && item?.inventoryUnit) {
-          await restockInventoryItem(
-            orderId,
-            item.fifo,
-            item.inventoryUnit,
-            item.quantity,
-          );
-        }
-      }
-    }
+    // if (
+    //   existingOrder.status !== ORDER_STATUS.VOID &&
+    //   updatedOrder.status === ORDER_STATUS.VOID
+    // ) {
+    //   for (const item of updatedOrder.items) {
+    //     if (item?.fifo && item?.inventoryUnit) {
+    //       await restockInventoryItem(
+    //         orderId,
+    //         item.fifo,
+    //         item.inventoryUnit,
+    //         item.quantity,
+    //       );
+    //     }
+    //   }
+    // }
 
-    // From VOID to other status -> Inventory Item Stock Is Subtracted
-    if (
-      existingOrder.status === ORDER_STATUS.VOID &&
-      updatedOrder.status !== ORDER_STATUS.VOID
-    ) {
-      for (const item of updatedOrder.items) {
-        if (item?.fifo && item?.inventoryUnit) {
-          await subtractInventoryItem(
-            orderId,
-            item.fifo,
-            item.inventoryUnit,
-            item.quantity,
-          );
-        }
-      }
-    }
+    // // From VOID to other status -> Inventory Item Stock Is Subtracted
+    // if (
+    //   existingOrder.status === ORDER_STATUS.VOID &&
+    //   updatedOrder.status !== ORDER_STATUS.VOID
+    // ) {
+    //   for (const item of updatedOrder.items) {
+    //     if (item?.fifo && item?.inventoryUnit) {
+    //       await subtractInventoryItem(
+    //         orderId,
+    //         item.fifo,
+    //         item.inventoryUnit,
+    //         item.quantity,
+    //       );
+    //     }
+    //   }
+    // }
 
     return res.status(200).json({
       data: updatedOrder,

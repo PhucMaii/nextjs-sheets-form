@@ -41,14 +41,13 @@ export const createOrderedItems = async (
     order.deliveryDate,
   );
 
+  let comment = '### Items\n'; // Comment of order action
   const newOrderedItems = [];
   const allDeletedFifoIds = [];
   for (const item of items) {
     const targetedItem = inventoryItems.find(
       (inventoryItem) => inventoryItem.id === item.inventoryItemId,
     );
-
-    // console.log(item, 'item');
 
     // Custom Amount Not Link With Inventory
     if (!targetedItem && item.isCustomAmount) {
@@ -106,24 +105,26 @@ export const createOrderedItems = async (
     // console.log({ targetedItem, item }, 'targetedItem');
     // CASE 1:Check if vendor item has no batch
     if (targetedItem.fifo.length === 0) {
-      const newFifo = await prisma.fifo.create({
-        data: {
-          inventoryItemId: targetedItem.id,
-          vendorItemId: targetedItem.vendorItem[0].id,
-          quantity: isValidToCheckInventory
-            ? -(item.quantity * (itemUnit?.ratio || 1)) // quantity * ratio
-            : 0,
-          createdAt: order.orderTime,
-          createdBy: order?.createdBy || '',
-          companyId,
-        },
-        include: {
-          vendorItem: true,
-        },
-      });
-
-      // Update vendor item quantity
       if (isValidToCheckInventory) {
+        const newFifo = await prisma.fifo.create({
+          data: {
+            inventoryItemId: targetedItem.id,
+            vendorItemId: targetedItem.vendorItem[0].id,
+            quantity: isValidToCheckInventory
+              ? -(item.quantity * (itemUnit?.ratio || 1)) // quantity * ratio
+              : 0,
+            createdAt: order.orderTime,
+            createdBy: order?.createdBy || '',
+            companyId,
+          },
+          include: {
+            vendorItem: true,
+          },
+        });
+
+        comment += `x${item.quantity} ${item.name}\n`;
+
+        // Update vendor item quantity
         await prisma.vendorItem.update({
           where: {
             id: targetedItem.vendorItem[0].id,
@@ -132,34 +133,34 @@ export const createOrderedItems = async (
             quantity: -item.quantity * (itemUnit?.ratio || 1),
           },
         });
+
+        // const unitRatioOf1 = targetedItem.vendorItem[0].unit.find((unit) => {
+        //   return unit.ratio === 1;
+        // });
+
+        // Because there is no batch, calculate profit based on unitPrice
+        newOrderedItems.push({
+          orderId: order.id,
+          fifoId: newFifo.id,
+          // optionId: item?.optionId || null,
+          option: {
+            name: item?.option?.name || '',
+            price: item?.option?.price || 0,
+            ratio: itemUnit?.ratio || 1,
+            prevPrice: item?.option?.prevPrice,
+            isShowDiscount: item?.option?.isShowDiscount,
+          },
+          cost: itemUnit?.unitPrice || 0,
+          profit: item.price - (itemUnit?.unitPrice || 0),
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          inventoryUnitId: unitId,
+          inventoryItemId: item.inventoryItemId,
+          isCustomAmount: item?.isCustomAmount || false,
+          companyId,
+        });
       }
-
-      // const unitRatioOf1 = targetedItem.vendorItem[0].unit.find((unit) => {
-      //   return unit.ratio === 1;
-      // });
-
-      // Because there is no batch, calculate profit based on unitPrice
-      newOrderedItems.push({
-        orderId: order.id,
-        fifoId: newFifo.id,
-        // optionId: item?.optionId || null,
-        option: {
-          name: item?.option?.name || '',
-          price: item?.option?.price || 0,
-          ratio: itemUnit?.ratio || 1,
-          prevPrice: item?.option?.prevPrice,
-          isShowDiscount: item?.option?.isShowDiscount,
-        },
-        cost: itemUnit?.unitPrice || 0,
-        profit: item.price - (itemUnit?.unitPrice || 0),
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity,
-        inventoryUnitId: unitId,
-        inventoryItemId: item.inventoryItemId,
-        isCustomAmount: item?.isCustomAmount || false,
-        companyId,
-      });
     } else {
       // CASE 2: Check if vendor item has batch
       // STEP 2: Get and Sorted from latest date all FIFO from inventory item
@@ -203,6 +204,8 @@ export const createOrderedItems = async (
             quantity: sortedFifo[fifoIndex].quantity - itemQuantity,
           },
         });
+
+        comment += `x${item.quantity} ${item.name}\n`;
 
         // STEP 5: vendorItem.quantity - (item.quantity * item.inventoryUnit.ratio)
         // Update Vendor Item Quantity
@@ -313,6 +316,40 @@ export const createOrderedItems = async (
       });
     }
   }
+
+  // Record actions
+  let existingTimeline = await prisma.orderTimeline.findFirst({
+    where: {
+      orderId: order.id,
+    },
+    include: {
+      actions: true,
+    },
+  });
+
+  if (!existingTimeline) {
+    existingTimeline = await prisma.orderTimeline.create({
+      data: {
+        orderId: order.id,
+      },
+      include: {
+        actions: true,
+      }
+    });
+  }
+
+  const today = getTodayDate();
+  const totalQty = newOrderedItems.reduce((acc, item) => acc + item.quantity, 0);
+  await prisma.orderAction.create({
+    data: {
+      timelineId: existingTimeline.id,
+      title: `Subtract ${totalQty} items from inventory`,
+      comment,
+      createdBy,
+      posIndex: existingTimeline.actions.length + 1,
+      createdAt: today.dateAndTime,
+    },
+  });
 
   await prisma.orderedItems.createMany({
     data: newOrderedItems,

@@ -1,20 +1,127 @@
-import { Timeline, TimelineItem, TimelineSeparator, TimelineDot, TimelineContent } from '@mui/lab'
-import { Typography } from '@mui/material'
-import React from 'react'
+import {
+  Timeline,
+  TimelineItem,
+  TimelineSeparator,
+  TimelineDot,
+  TimelineContent,
+  TimelineConnector,
+  TimelineOppositeContent,
+} from '@mui/lab';
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Typography,
+} from '@mui/material';
+import { IOrderAction, IOrderTimeline } from '@/app/utils/type';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import React from 'react';
+import { grey } from '@mui/material/colors';
+import ReactMarkdown from 'react-markdown';
+import '../../../../../styles/react-markdown.css';
 
-export default function OrderTimeline() {
+interface IProps {
+  timeline: IOrderTimeline | null;
+}
+
+export default function OrderTimeline({ timeline }: IProps) {
   return (
-    <Timeline>
-      <TimelineItem>
-        <TimelineSeparator>
-          <TimelineDot />
-        </TimelineSeparator>
-        <TimelineContent>
-          <Typography variant="body1">
-            Order Placed
+    <Timeline sx={{ width: '100%' }}>
+      {Object.keys(timeline?.groupedActions || {}).map((date) => (
+        <>
+          <Typography variant="subtitle2" sx={{ color: grey[700] }} key={date}>
+            {new Date(date).toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+            })}
           </Typography>
-        </TimelineContent>
-      </TimelineItem>
+          <Timeline>
+            {timeline?.groupedActions[date].map((action: IOrderAction) => {
+              if (!action.comment) {
+                return (
+                  <TimelineItem key={action.id}>
+                    <TimelineOppositeContent style={{ flex: 0.1 }}>
+                      <Typography variant="caption" color={grey[700]}>
+                        {new Date(action.createdAt).toLocaleTimeString(
+                          'en-US',
+                          {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          },
+                        )}
+                      </Typography>
+                    </TimelineOppositeContent>
+                    <TimelineSeparator>
+                      <TimelineDot
+                        style={{
+                          borderRadius: '0',
+                          backgroundColor: grey[800],
+                        }}
+                      />
+                      <TimelineConnector />
+                    </TimelineSeparator>
+                    <TimelineContent>
+                      <Box
+                        sx={{
+                          // backgroundColor: grey[100],
+                          // padding: 1,
+                          borderRadius: 1,
+                        }}
+                      >
+                        <Typography variant="subtitle1">
+                          {action.title}
+                        </Typography>
+                      </Box>
+                    </TimelineContent>
+                  </TimelineItem>
+                );
+              }
+              return (
+                <TimelineItem key={action.id}>
+                  <TimelineOppositeContent style={{ flex: 0.1 }}>
+                    <Typography variant="caption" color={grey[700]}>
+                      {new Date(action.createdAt).toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </Typography>
+                  </TimelineOppositeContent>
+                  <TimelineSeparator>
+                    <TimelineDot
+                      style={{
+                        borderRadius: '0',
+                        backgroundColor: grey[800],
+                      }}
+                    />
+                    <TimelineConnector />
+                  </TimelineSeparator>
+                  <TimelineContent>
+                    <Accordion>
+                      <AccordionSummary
+                        expandIcon={
+                          action.comment ? <ExpandMoreIcon /> : undefined
+                        }
+                      >
+                        <Typography variant="subtitle1">
+                          {action.title}
+                        </Typography>
+                      </AccordionSummary>
+                      {action.comment && (
+                        <AccordionDetails>
+                          <div className="reactMarkDown">
+                            <ReactMarkdown>{action.comment}</ReactMarkdown>
+                          </div>
+                        </AccordionDetails>
+                      )}
+                    </Accordion>
+                  </TimelineContent>
+                </TimelineItem>
+              );
+            })}
+          </Timeline>
+        </>
+      ))}
     </Timeline>
-  )
+  );
 }

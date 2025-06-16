@@ -15,7 +15,7 @@ import './print.css';
 import { SWRFetchData } from '@/app/utils/db';
 import { getAdminApiUrl } from '@/app/utils/enum';
 import { header } from '@/app/lib/print';
-import { generateOrderTotalPrice } from '@/pages/api/admin/[companyId]/orderedItems/PUT';
+import { generateOrderTotalPrice } from '@/app/utils/orders';
 import { useParams } from 'next/navigation';
 
 export const printFontSize = 28;

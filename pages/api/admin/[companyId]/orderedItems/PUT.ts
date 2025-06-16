@@ -3,12 +3,13 @@ import { Orders, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { restockInventoryItem, updateSingleInventoryItem } from './single';
 import { gstRate, pstRate } from '@/app/lib/constant';
-import { ORDER_STATUS } from '@/app/utils/enum';
+import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
 import { createOrderedItems } from '@/pages/api/utils/orderedItems';
 import { getTodayDate } from '@/pages/api/utils/date';
 import { formatItemsWithTotalPrice } from '@/pages/api/utils/order';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
+import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 
 export enum ITEM_CATEGORIZED {
   REMAIN = 'remain',
@@ -101,12 +102,19 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       updatedItems,
     );
 
+    const actionRecord: any = {
+      create: [],
+      update: [],
+      delete: [],
+    };
+
     for (const item of newItems) {
       // Check item categorize to create, update or delete
 
       // CREATE
       if (item.type === ITEM_CATEGORIZED.CREATE) {
         await createOrderedItems(Number(companyId), existingOrder, [item]);
+        actionRecord.create.push(item);
         continue;
       } else if (item.type === ITEM_CATEGORIZED.REMAIN) {
         // REMAIN
@@ -118,6 +126,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             id: item.id,
           },
         });
+
+        actionRecord.delete.push(item);
 
         if (item?.fifo && item?.inventoryUnit) {
           await restockInventoryItem(
@@ -137,6 +147,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         const cost =
           (item?.cost / (item?.inventoryUnit?.ratio || 1)) *
           (item?.inventoryUnit?.ratio || 1);
+
+        actionRecord.update.push(item);
 
         await prisma.orderedItems.update({
           where: {
@@ -169,6 +181,54 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         }
       }
     }
+
+    const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
+    const today = getTodayDate();
+
+    // Get existing timeline
+    let existingTimeline = await prisma.orderTimeline.findFirst({
+      where: {
+        orderId,
+      },
+      include: {
+        actions: true,
+      },
+    });
+
+    if (!existingTimeline) {
+      existingTimeline = await prisma.orderTimeline.create({
+        data: {
+          orderId,
+        },
+        include: {
+          actions: true,
+        },
+      });
+    }
+
+    let comment = '';
+    if (actionRecord.create.length > 0) {
+      comment += `### Create\n ${actionRecord.create.map((item: any) => `x${item.quantity} ${item.name}`).join('\n')}\n`;
+    }
+    if (actionRecord.update.length > 0) {
+      comment += `### Update\n ${actionRecord.update.map((item: any) => `x${item.quantity} ${item.name}`).join('\n')}\n`;
+    }
+    if (actionRecord.delete.length > 0) {
+      comment += `### Remove\n ${actionRecord.delete.map((item: any) => `x${item.quantity} ${item.name}`).join('\n')}\n`;
+    }
+
+    // Edit item action record
+    await prisma.orderAction.create({
+      data: {
+        timelineId: existingTimeline.id,
+        title: `${createdBy} edited this order`,
+        // If there are items in create, update, delete, then show create, update, delete with the item name and quantity
+        comment,
+        createdAt: today.dateAndTime,
+        createdBy: createdBy,
+        posIndex: existingTimeline.actions.length + 1,
+      },
+    });
 
     // Get admin update info
     const session: any = await getServerSession(req, res, authOptions);
@@ -225,6 +285,32 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         },
       },
     });
+
+    if (
+      deliveryDate !== existingOrder.deliveryDate ||
+      note !== existingOrder.note
+    ) {
+      let comment: string = '';
+
+      if (deliveryDate !== existingOrder.deliveryDate) {
+        comment += `### Delivery date\n${existingOrder.deliveryDate} -> ${deliveryDate}\n`;
+      }
+
+      if (note !== existingOrder.note) {
+        comment += `### Note\n${note}\n`;
+      }
+      // Create order action of update delivery date
+      await prisma.orderAction.create({
+        data: {
+          timelineId: existingTimeline.id,
+          title: `${createdBy} edited this order`,
+          comment,
+          createdAt: today.dateAndTime,
+          createdBy: createdBy,
+          posIndex: existingTimeline.actions.length + 1,
+        },
+      });
+    }
 
     const formattedItems = formatItemsWithTotalPrice(orderUpdated?.items);
 
@@ -317,7 +403,10 @@ export const categorizeUpdatedItems = (
   return [...newItems, ...deletedItems];
 };
 
-export const generateOrderTotalPrice = (listOfItems: any[], shippingFee: number = 0) => {
+export const generateOrderTotalPrice = (
+  listOfItems: any[],
+  shippingFee: number = 0,
+) => {
   try {
     const total = listOfItems.reduce((acc: any, item: any) => {
       if (!acc?.subTotal) {
@@ -361,7 +450,7 @@ export const generateOrderTotalPrice = (listOfItems: any[], shippingFee: number 
 
       return acc;
     }, {});
-    
+
     if (shippingFee > 0) {
       total.PST += shippingFee * pstRate;
       total.GST += shippingFee * gstRate;
