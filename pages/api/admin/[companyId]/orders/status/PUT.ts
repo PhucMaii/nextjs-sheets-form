@@ -1,4 +1,4 @@
-import { ORDER_STATUS } from '@/app/utils/enum';
+import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { OrderedItems, PaymentStatus, PrismaClient } from '@prisma/client';
@@ -7,6 +7,9 @@ import {
   restockInventoryItem,
   subtractInventoryItem,
 } from '../../orderedItems/single';
+import { getTimeline } from '@/pages/api/utils/timeline';
+import { getTodayDate } from '@/pages/api/utils/date';
+import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 
 interface IBody {
   id: number;
@@ -19,13 +22,14 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   const prisma = new PrismaClient();
   try {
     const { id, status, paymentStatus, updatedOrderIds } = req.body as IBody;
+    console.log({ status, paymentStatus });
 
     const session: any = await getServerSession(req, res, authOptions);
     const adminCreate: any = session?.user;
 
     const updateTime = new Date();
 
-    const updateData: any = {}
+    const updateData: any = {};
 
     if (status) {
       updateData.status = status;
@@ -34,6 +38,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     if (paymentStatus) {
       updateData.paymentStatus = paymentStatus;
     }
+
+    const today = getTodayDate();
+    const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
+
     if (id) {
       const existingOrder = await prisma.orders.findUnique({
         where: {
@@ -46,7 +54,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           error: 'Order Not Found',
         });
       }
-      
 
       const updatedOrder = await prisma.orders.update({
         where: {
@@ -64,6 +71,26 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
               inventoryUnit: true,
             },
           },
+        },
+      });
+
+      // Record actions
+      const existingTimeline = await getTimeline(id);
+
+      let title = '';
+      if (updateData.status !== existingOrder.status) {
+        title = `status: ${existingOrder.status} -> ${updateData.status}`;
+      } else if (updateData.paymentStatus !== existingOrder.paymentStatus) {
+        title = `payment status: ${existingOrder.paymentStatus} -> ${updateData.paymentStatus}`;
+      }
+
+      await prisma.orderAction.create({
+        data: {
+          timelineId: existingTimeline.id,
+          title: `${createdBy} updated order ${title}`,
+          createdAt: today.dateAndTime,
+          createdBy,
+          posIndex: existingTimeline.actions.length + 1,
         },
       });
 
@@ -167,6 +194,26 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           continue;
         }
 
+        // Record actions
+        const existingTimeline = await getTimeline(order.id);
+
+        let title = '';
+        if (updateData.status !== order.status) {
+          title = `status: ${order.status} -> ${updateData.status}`;
+        } else if (updateData.paymentStatus !== order.paymentStatus) {
+          title = `payment status: ${order.paymentStatus} -> ${updateData.paymentStatus}`;
+        }
+
+        await prisma.orderAction.create({
+          data: {
+            timelineId: existingTimeline.id,
+            title: `${createdBy} updated order ${title}`,
+            createdAt: today.dateAndTime,
+            createdBy,
+            posIndex: existingTimeline.actions.length + 1,
+          },
+        });
+
         for (const item of order.items) {
           if (item.quantity === 0) {
             continue;
@@ -175,7 +222,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             continue;
           }
 
-          // await updateSingleInventoryItem(item.inventoryItemId, 0, item.quantity);
           await restockInventoryItem(
             order.id,
             item.fifo,
@@ -197,6 +243,26 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         if (order.status !== ORDER_STATUS.VOID) {
           continue;
         }
+
+        // Record actions
+        const existingTimeline = await getTimeline(order.id);
+
+        let title = '';
+        if (updateData.status !== order.status) {
+          title = `status: ${order.status} -> ${updateData.status}`;
+        } else if (updateData.paymentStatus !== order.paymentStatus) {
+          title = `payment status: ${order.paymentStatus} -> ${updateData.paymentStatus}`;
+        }
+
+        await prisma.orderAction.create({
+          data: {
+            timelineId: existingTimeline.id,
+            title: `${createdBy} updated order ${title}`,
+            createdAt: today.dateAndTime,
+            createdBy,
+            posIndex: existingTimeline.actions.length + 1,
+          },
+        });
 
         for (const item of order.items) {
           if (item.quantity === 0) {
