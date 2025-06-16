@@ -329,7 +329,6 @@ export const updateSingleInventoryItem = async (
     }
 
     const today = getTodayDate();
-
     // const quantity = updatedQuantity > lastUpdatedFifo.quantity ? previousQuantity : newQuantity;
 
     const difference = Math.abs(updatedQuantity - lastUpdatedFifo.quantity);
@@ -342,7 +341,7 @@ export const updateSingleInventoryItem = async (
             ? `Restock ${difference} ${lastUpdatedFifo.inventoryItem.name} to inventory`
             : `Subtract ${difference} ${lastUpdatedFifo.inventoryItem.name} from inventory`,
         createdAt: today.dateAndTime,
-        createdBy: 'Admin',
+        createdBy: `System updateSingleInventoryItem`,
         posIndex: existingTimeline.actions.length + 1,
       },
     });
