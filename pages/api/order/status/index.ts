@@ -8,9 +8,8 @@ import { generateOrderTemplate } from '@/config/email';
 import emailHandler from '@/pages/api/utils/email';
 import { restockInventoryItem } from '@/pages/api/admin/[companyId]/orderedItems/single';
 import { testAccountId } from '@/app/lib/constant';
-import { getTimeline, recordAction } from '@/pages/api/utils/timeline';
+import { recordAction } from '@/pages/api/utils/timeline';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
-import { getTodayDate } from '@/pages/api/utils/date';
 
 interface BodyTypes {
   orderId: number;

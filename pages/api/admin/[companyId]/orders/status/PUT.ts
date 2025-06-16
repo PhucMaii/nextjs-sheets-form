@@ -7,8 +7,7 @@ import {
   restockInventoryItem,
   subtractInventoryItem,
 } from '../../orderedItems/single';
-import { getTimeline, recordAction } from '@/pages/api/utils/timeline';
-import { getTodayDate } from '@/pages/api/utils/date';
+import { recordAction } from '@/pages/api/utils/timeline';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 
 interface IBody {
@@ -39,7 +38,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       updateData.paymentStatus = paymentStatus;
     }
 
-    const today = getTodayDate();
     const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
 
     if (id) {
