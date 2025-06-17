@@ -388,7 +388,7 @@ const OrderAccordion = ({
           }
         >
           Mark as void
-      </MenuItem>
+        </MenuItem>
 
         <Divider />
 
@@ -612,8 +612,15 @@ const OrderAccordion = ({
               display="flex"
               justifyContent="flex-end"
               alignItems="center"
-              gap={2}
+              // gap={1}
             >
+              <IconButton
+                onClick={() => {
+                  setIsOpenDetails(true);
+                }}
+              >
+                <EditIcon color="primary" fontSize="small" />
+              </IconButton>
               <IconButton
                 onClick={() => {
                   if (handleOpenDetails) {
@@ -626,7 +633,7 @@ const OrderAccordion = ({
                 }}
                 // disabled={order?.type === TYPE.LOCKED}
               >
-                <PreviewIcon color="primary" />
+                <PreviewIcon color="primary" fontSize="small" />
               </IconButton>
             </Box>
           </Grid>

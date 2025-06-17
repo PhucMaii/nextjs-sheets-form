@@ -189,13 +189,13 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     let comment = '';
 
     if (actionRecord.create.length > 0) {
-      comment += `### Create\n ${actionRecord.create.map((item: any) => `x${item.quantity} ${item.name}`).join('\n')}\n`;
+      comment += `### Create\n ${actionRecord.create.map((item: any) => `x${item.quantity} ${item.name} ($${item.price})`).join('\n')}\n`;
     }
     if (actionRecord.update.length > 0) {
-      comment += `### Update\n ${actionRecord.update.map((item: any) => `x${item.quantity} ${item.name}`).join('\n')}\n`;
+      comment += `### Update\n ${actionRecord.update.map((item: any) => `x${item.quantity} ${item.name} ($${item.price})`).join('\n')}\n`;
     }
     if (actionRecord.delete.length > 0) {
-      comment += `### Remove\n ${actionRecord.delete.map((item: any) => `x${item.quantity} ${item.name}`).join('\n')}\n`;
+      comment += `### Remove\n ${actionRecord.delete.map((item: any) => `x${item.quantity} ${item.name} ($${item.price})`).join('\n')}\n`;
     }
 
     await recordAction(

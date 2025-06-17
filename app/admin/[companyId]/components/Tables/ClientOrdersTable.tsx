@@ -33,7 +33,7 @@ import { renderType } from '@/app/lib/render';
 import LockIcon from '@mui/icons-material/Lock';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import { grey } from '@mui/material/colors';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import ApproveOrder from '../Modals/ApproveOrder';
 import RejectOrder from '../Modals/RejectOrder';
 import QuickViewOrderedItems from '../Tooltip/QuickViewOrderedItems';
@@ -79,8 +79,10 @@ const ClientOrdersTable = ({
     open: false,
     order: null,
   });
+
   const windowDimensions = useWindowDimensions();
   const { companyId }: any = useParams();
+  const router = useRouter();
 
   const updateStatus = async (
     order: Order,
@@ -384,7 +386,8 @@ const ClientOrdersTable = ({
           sx={{ cursor: 'pointer', '&:hover': { backgroundColor: grey[50] } }}
           onClick={() => {
             // if (item?.type === TYPE.LOCKED) return;
-            setOpenEdit(() => ({ order: item, open: true }));
+            // setOpenEdit(() => ({ order: item, open: true }));
+            router.push(`/admin/${companyId}/orders/${item.id}`);
           }}
           // disabled={item?.type === TYPE.LOCKED}
           {...props}

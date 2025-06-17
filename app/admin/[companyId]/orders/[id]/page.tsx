@@ -1,5 +1,5 @@
 'use client';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import {
   Box,
@@ -11,8 +11,10 @@ import {
   ListSubheader,
   Menu,
   MenuItem,
+  OutlinedInput,
   Skeleton,
   Switch,
+  TextareaAutosize,
   Typography,
 } from '@mui/material';
 import { ShadowSection } from '../../reports/styled';
@@ -36,6 +38,7 @@ import LoadingModal from '../../components/Modals/LoadingModal';
 import DeleteModal from '../../components/Modals/delete/DeleteModal';
 import { PaymentStatus } from '@prisma/client';
 import { HandCoinsIcon, TruckIcon } from 'lucide-react';
+import { LoadingButton } from '@mui/lab';
 
 const OrderDetailsPage = () => {
   const { id, companyId }: any = useParams();
@@ -85,10 +88,18 @@ const OrderDetailsPage = () => {
   });
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [notes, setNotes] = useState<string>('');
   const [isOpenOrderDetails, setIsOpenOrderDetails] = useState<boolean>(false);
   const [isOpenDeleteModal, setIsOpenDeleteModal] = useState<boolean>(false);
+  const [isUpdatingNotes, setIsUpdatingNotes] = useState<boolean>(false);
   const [isMarking, setIsMarking] = useState<boolean>(false);
   const printRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (order) {
+      setNotes(order.note || '');
+    }
+  }, [order]);
 
   const statusText = {
     text: order?.status,
@@ -170,6 +181,35 @@ const OrderDetailsPage = () => {
       showNotification('error', 'Fail to delete order: ' + error);
     }
   };
+
+  const { mutateAsync: updateNotes } = useMutation({
+    mutationKey: ['order', Number(id), 'notes'],
+    mutationFn: async (notes: string) => {
+      setIsUpdatingNotes(true);
+      const response = await axios.put(
+        getAdminApiUrl(companyId, '/orders/notes'),
+        {
+          notes,
+          orderId: Number(id),
+        },
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+      return response.data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['order', Number(id)] });
+      setIsUpdatingNotes(false);
+    },
+    onError: () => {
+      setIsUpdatingNotes(false);
+    },
+  });
 
   const moreActions = (
     <>
@@ -413,7 +453,16 @@ const OrderDetailsPage = () => {
                   justifyContent="flex-end"
                   mt={1}
                 >
-                  <Button variant="contained" color="primary">
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => {
+                      handleUpdateStatus({
+                        status: ORDER_STATUS.DELIVERED,
+                        type: 'fulfillment',
+                      });
+                    }}
+                  >
                     <Box display="flex" gap={1} alignItems="center">
                       <TruckIcon size={16} style={{ color: 'white' }} />
                       <Typography variant="subtitle2" fontWeight={700}>
@@ -426,33 +475,6 @@ const OrderDetailsPage = () => {
             </ShadowSection>
           )}
 
-          {isLoading ? (
-            <Skeleton variant="rectangular" height={200} />
-          ) : (
-            // <ShadowSection>
-            <>
-              <Typography variant="subtitle2" fontWeight={700}>
-                Order Timeline
-              </Typography>
-              <Box
-                display="flex"
-                justifyContent="flex-start"
-                width="100%"
-                gap={1}
-                mt={1}
-              >
-                <OrderTimeline timeline={order?.timeline || null} />
-              </Box>
-            </>
-            // </ShadowSection>
-          )}
-        </Grid>
-        <Grid
-          item
-          xs={12}
-          md={4}
-          sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
-        >
           {isLoading ? (
             <Skeleton variant="rectangular" height={300} />
           ) : (
@@ -579,7 +601,16 @@ const OrderDetailsPage = () => {
                   justifyContent="flex-end"
                   mt={1}
                 >
-                  <Button variant="contained" color="success">
+                  <Button
+                    variant="contained"
+                    color="success"
+                    onClick={() => {
+                      handleUpdateStatus({
+                        status: PaymentStatus.Paid,
+                        type: 'payment',
+                      });
+                    }}
+                  >
                     <Box display="flex" gap={1} alignItems="center">
                       <HandCoinsIcon size={16} style={{ color: 'white' }} />
                       <Typography variant="subtitle2" fontWeight={700}>
@@ -589,6 +620,66 @@ const OrderDetailsPage = () => {
                   </Button>
                 </Box>
               )}
+            </ShadowSection>
+          )}
+
+          {isLoading ? (
+            <Skeleton variant="rectangular" height={200} />
+          ) : (
+            // <ShadowSection>
+            <>
+              <Typography variant="subtitle2" fontWeight={700}>
+                Order Timeline
+              </Typography>
+              <Box
+                display="flex"
+                justifyContent="flex-start"
+                width="100%"
+                gap={1}
+                mt={1}
+              >
+                <OrderTimeline timeline={order?.timeline || null} />
+              </Box>
+            </>
+            // </ShadowSection>
+          )}
+        </Grid>
+        <Grid
+          item
+          xs={12}
+          md={4}
+          sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
+        >
+          {isLoading ? (
+            <Skeleton variant="rectangular" height={100} />
+          ) : (
+            <ShadowSection display="flex" flexDirection="column" gap={1}>
+              <Typography variant="subtitle2" fontWeight={700}>
+                Notes
+              </Typography>
+
+              <OutlinedInput
+                multiline
+                rows={4}
+                value={notes || ''}
+                onChange={(e) => {
+                  setNotes(e.target.value);
+                }}
+                placeholder="Add notes here..."
+              />
+
+              <Box display="flex" gap={1} justifyContent="flex-end">
+                <LoadingButton
+                  variant="contained"
+                  color="primary"
+                  onClick={() => {
+                    updateNotes(notes);
+                  }}
+                  loading={isUpdatingNotes}
+                >
+                  Update
+                </LoadingButton>
+              </Box>
             </ShadowSection>
           )}
 
