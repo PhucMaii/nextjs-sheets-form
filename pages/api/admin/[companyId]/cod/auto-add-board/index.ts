@@ -10,6 +10,7 @@ import {
   getTodayDate,
   normalizeDate,
 } from '@/pages/api/utils/date';
+import { recordAction } from '@/pages/api/utils/timeline';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { PrismaClient, User } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -54,6 +55,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
       include: {
         orders: true,
+        employee: true,
       },
     });
 
@@ -192,6 +194,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       where: {
         date: todayString,
         companyId: Number(companyId),
+      },
+      include: {
+        employee: true,
       },
     });
 
@@ -360,6 +365,15 @@ export const insertOrdersToSelectedBoards = async (
         insertedBy: user.clientName,
       },
     });
+
+    // loop through noRouteOrderIds and record action
+    for (const orderId of noRouteOrderIds) {
+      await recordAction(
+        orderId,
+        'System',
+        `Order ${orderId} added to no route board with id of #${noRouteBoard.id} for ${date}`,
+      );
+    }
   }
 
   for (const board of selectedBoards) {
@@ -430,5 +444,15 @@ export const insertOrdersToSelectedBoards = async (
         insertedBy: user.clientName,
       },
     });
+
+    // loop through orderIds and record action
+    for (const orderId of orderIds) {
+      await recordAction(
+        orderId,
+        'System',
+        `Order ${orderId} added to board with id of #${board.id} for ${date}`,
+        `### Board: ${board?.id}\n### Route: ${board?.employee?.name}`,
+      );
+    }
   }
 };

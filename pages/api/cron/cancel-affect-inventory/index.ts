@@ -3,6 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate } from '@/pages/api/utils/date';
 import { ACTION, USER_ROLE } from '@/app/utils/enum';
 import { YYYYMMDDFormat } from '@/app/utils/time';
+import { recordAction } from '../../utils/timeline';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const authHeader = req.headers.authorization;
@@ -37,7 +38,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const threeDaysAgoString = YYYYMMDDFormat(threeDaysAgo);
 
-    console.log(threeDaysAgoString);
     // Set orders on that day no affect inventory
     await prisma.orders.updateMany({
       where: {
@@ -48,6 +48,22 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         isAffectInventory: false,
       },
     });
+
+    // Record action
+    const ordersAffected = await prisma.orders.findMany({
+      where: {
+        deliveryDate: threeDaysAgoString,
+        companyId: 1,
+      },
+    });
+
+    for (const order of ordersAffected) {
+      await recordAction(
+        order.id,
+        'System',
+        `Cancel affect inventory for order ${order.id} automatically`,
+      );
+    }
 
     await prisma.action.create({
       data: {

@@ -179,8 +179,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     await recordAction(
       orderId,
-      `${createdBy} edited this order`,
       createdBy,
+      `${createdBy} edited this order`,
       comment,
     );
 

@@ -1,8 +1,7 @@
-import { API_URL, USER_ROLE } from '@/app/utils/enum';
+import { USER_ROLE } from '@/app/utils/enum';
 import prisma from '@/client';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { recordAction } from '@/pages/api/utils/timeline';
-import { C } from '@fullcalendar/core/internal-common';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IBody {
@@ -12,7 +11,6 @@ interface IBody {
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { companyId } = req.query;
     const { notes, orderId } = req.body as IBody;
 
     const existingOrder = await prisma.orders.findUnique({
@@ -36,8 +34,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
     await recordAction(
       existingOrder.id,
-      `${createdBy} updated notes for order ${existingOrder.id}`,
       createdBy,
+      `${createdBy} updated notes for order ${existingOrder.id}`,
       `### Note: ${existingOrder.note} -> ${notes}`,
     );
 

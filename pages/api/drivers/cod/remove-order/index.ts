@@ -1,3 +1,6 @@
+import { USER_ROLE } from '@/app/utils/enum';
+import { getCreatedBy } from '@/pages/api/import-sheets/utils';
+import { recordAction } from '@/pages/api/utils/timeline';
 import withDriverAuthGuard from '@/pages/api/utils/withDriverAuthGuar';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -24,6 +27,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       where: {
         id: Number(orderId),
       },
+      include: {
+        CodBoard: {
+          include: {
+            employee: true,
+          },
+        },
+      },
     });
 
     if (!existingOrder) {
@@ -38,6 +48,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         codBoardId: null,
       },
     });
+
+    // Record action
+    const createdBy = await getCreatedBy(req, res, USER_ROLE.DRIVER);
+    await recordAction(
+      Number(orderId),
+      createdBy,
+      `${createdBy} removed order ${orderId} from COD board of #${existingOrder?.CodBoard?.employee?.name}`,
+      `### Board: ${existingOrder?.CodBoard?.id}\n### Route: ${existingOrder?.CodBoard?.employee?.name}\n### Date: ${existingOrder?.CodBoard?.date}`,
+    );
 
     return res.status(200).json({ message: 'Remove Order Successfully' });
   } catch (error: any) {

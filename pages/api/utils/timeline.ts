@@ -25,7 +25,7 @@ export const getTimeline = async (orderId: number) => {
   return timeline;
 };
 
-export const recordAction = async (orderId: number, title: string, createdBy: string, comment: string = '') => {
+export const recordAction = async (orderId: number, createdBy: string, title: string, comment: string = '') => {
   const existingTimeline = await getTimeline(orderId);
   const today = getTodayDate();
 

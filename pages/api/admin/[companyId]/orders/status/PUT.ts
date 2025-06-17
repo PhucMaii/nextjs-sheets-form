@@ -82,8 +82,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
       await recordAction(
         id,
-        `${createdBy} updated order ${title}`,
         createdBy,
+        `${createdBy} updated order ${title}`,
       );
 
       const newItems = updatedOrder.items.map((item: OrderedItems) => {
@@ -196,8 +196,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
         await recordAction(
           order.id,
-          `${createdBy} updated order ${title}`,
           createdBy,
+          `${createdBy} updated order ${title}`,
         );
 
         for (const item of order.items) {
@@ -241,8 +241,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
         await recordAction(
           order.id,
-          `${createdBy} updated order ${title}`,
           createdBy,
+          `${createdBy} updated order ${title}`,
         );
 
         for (const item of order.items) {

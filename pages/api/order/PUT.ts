@@ -166,7 +166,12 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       comment += `### Remove\n ${actionRecord.delete.map((item: any) => `x${item.quantity} ${item.name}`).join('\n')}\n`;
     }
 
-    await recordAction(userLastOrder.id, `Client - ${existingUser.clientId} edited order`, existingUser.clientId, comment);
+    await recordAction(
+      userLastOrder.id,
+      `Client - ${existingUser.clientId}`,
+      `Client - ${existingUser.clientId} edited order`,
+      comment,
+    );
 
     const updatedOrderedItems = await prisma.orderedItems.findMany({
       where: {

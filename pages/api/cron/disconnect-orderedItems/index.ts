@@ -3,6 +3,7 @@ import { getTodayDate } from '@/pages/api/utils/date';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import { PrismaClient } from '@prisma/client';
 import { ACTION, TYPE, USER_ROLE } from '@/app/utils/enum';
+import { recordAction } from '../../utils/timeline';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const authHeader = req.headers.authorization;
@@ -61,6 +62,22 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         type: TYPE.LOCKED,
       },
     });
+
+    // Record action
+    const ordersDisconnected = await prisma.orders.findMany({
+      where: {
+        deliveryDate: threeMonthsAgoString,
+        companyId: 1,
+      },
+    });
+
+    for (const order of ordersDisconnected) {
+      await recordAction(
+        order.id,
+        'System',
+        `Lock order automatically to keep data integrity`,
+      );
+    }
 
     // Push action
     await prisma.action.create({

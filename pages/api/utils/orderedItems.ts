@@ -325,8 +325,8 @@ export const createOrderedItems = async (
   );
   await recordAction(
     order.id,
-    `Subtract ${totalQty} items from inventory`,
     createdBy,
+    `Subtract ${totalQty} items from inventory`,
     comment,
   );
 

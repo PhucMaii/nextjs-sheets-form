@@ -72,6 +72,9 @@ export default async function handler(req: any, res: any) {
         companyId: 1,
         date: date,
       },
+      include: {
+        employee: true,
+      },
     });
 
     const dateOrders: any = await prisma.orders.findMany({

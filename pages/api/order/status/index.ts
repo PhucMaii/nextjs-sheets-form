@@ -92,8 +92,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const createdBy = await getCreatedBy(req, res, USER_ROLE.CLIENT);
     await recordAction(
       orderId,
-      `${createdBy} updated order status: ${existingOrder.status} -> ${updatedStatus}`,
       createdBy,
+      `${createdBy} updated order status: ${existingOrder.status} -> ${updatedStatus}`,
     );
 
     let total = 0;

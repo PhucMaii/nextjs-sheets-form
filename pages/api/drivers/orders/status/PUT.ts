@@ -77,7 +77,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       title += `and updated payment status: ${existingOrder.paymentStatus} -> ${statusUpdateData.paymentStatus}`;
     }
 
-    await recordAction(existingOrder.id, title, createdBy);
+    await recordAction(existingOrder.id, createdBy, title);
 
     const updatedOrder = await prisma.orders.update({
       where: {

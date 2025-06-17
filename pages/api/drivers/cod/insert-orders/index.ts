@@ -1,5 +1,7 @@
 import { Order } from '@/app/admin/[companyId]/orders/page';
-import { getDriverInfo } from '@/pages/api/utils/auth';
+import { getCreatedBy } from '@/pages/api/import-sheets/utils';
+import { USER_ROLE } from '@/app/utils/enum';
+import { recordAction } from '@/pages/api/utils/timeline';
 import withDriverAuthGuard from '@/pages/api/utils/withDriverAuthGuar';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -19,6 +21,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       where: {
         id: boardId,
       },
+      include: {
+        employee: true,
+      },
     });
 
     if (!existingBoard) {
@@ -28,8 +33,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     const orderIdList = orders.map((order: Order) => order.id);
-
-    const driver: any = await getDriverInfo(req, res);
+    const createdBy = await getCreatedBy(req, res, USER_ROLE.DRIVER);
 
     const updatedOrders = await prisma.orders.updateMany({
       where: {
@@ -39,9 +43,20 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
       data: {
         codBoardId: boardId,
-        addedToCODBy: `Driver - ${driver?.name}`,
+        addedToCODBy: createdBy,
       },
     });
+
+    // Record action
+
+    for (const order of orders) {
+      await recordAction(
+        order.id,
+        createdBy,
+        `${createdBy} inserted order ${order.id} to COD board of #${existingBoard?.employee?.name}`,
+        `### Board: ${existingBoard?.id}\n### Route: ${existingBoard?.employee?.name}\n### Date: ${existingBoard?.date}`,
+      );
+    }
 
     return res.status(200).json({
       message: 'Insert Order Successfully',

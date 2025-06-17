@@ -1,3 +1,6 @@
+import { getCreatedBy } from '@/pages/api/import-sheets/utils';
+import { USER_ROLE } from '@/app/utils/enum';
+import { recordAction } from '@/pages/api/utils/timeline';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -30,6 +33,15 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         isAffectInventory,
       },
     });
+
+    // Record action
+    const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
+    await recordAction(
+      id,
+      'System',
+      `${createdBy} updated isAffectInventory for order ${id}`,
+      `### Affect Inventory\n${updatedOrder?.isAffectInventory} -> ${isAffectInventory}`,
+    );
 
     return res.status(200).json({ message: 'Order Updated Successfully' });
   } catch (error: any) {

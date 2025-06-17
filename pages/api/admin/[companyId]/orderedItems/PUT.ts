@@ -10,7 +10,7 @@ import { formatItemsWithTotalPrice } from '@/pages/api/utils/order';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
-import { getTimeline, recordAction } from '@/pages/api/utils/timeline';
+import { recordAction } from '@/pages/api/utils/timeline';
 
 export enum ITEM_CATEGORIZED {
   REMAIN = 'remain',
@@ -200,8 +200,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     await recordAction(
       orderId,
-      `${createdBy} edited this order`,
       createdBy,
+      `${createdBy} edited this order`,
       comment,
     );
 
@@ -277,8 +277,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       // Create order action of update delivery date
       await recordAction(
         orderId,
-        `${createdBy} edited this order`,
         createdBy,
+        `${createdBy} edited this order`,
         comment,
       );
     }

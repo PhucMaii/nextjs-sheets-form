@@ -1,4 +1,7 @@
 import { Order } from '@/app/admin/[companyId]/orders/page';
+import { USER_ROLE } from '@/app/utils/enum';
+import { getCreatedBy } from '@/pages/api/import-sheets/utils';
+import { recordAction } from '@/pages/api/utils/timeline';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -32,6 +35,26 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         codBoardId: boardId,
       },
     });
+
+    const board = await prisma.codBoard.findUnique({
+      where: {
+        id: boardId,
+      },
+      include: {
+        employee: true,
+      },
+    });
+
+    // loop through orderIdList and record action
+    const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
+    for (const orderId of orderIdList) {
+      await recordAction(
+        orderId,
+        createdBy,
+        `${createdBy} added order ${orderId} to board ${boardId} manually`,
+        `### Board: ${boardId}\n### Route: ${board?.employee?.name}`,
+      );
+    }
 
     return res.status(200).json({
       message: 'Insert Successfully',

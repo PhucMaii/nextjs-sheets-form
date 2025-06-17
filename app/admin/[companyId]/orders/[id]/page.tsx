@@ -14,7 +14,6 @@ import {
   OutlinedInput,
   Skeleton,
   Switch,
-  TextareaAutosize,
   Typography,
 } from '@mui/material';
 import { ShadowSection } from '../../reports/styled';
