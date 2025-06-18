@@ -6,6 +6,7 @@ import {
   FormControlLabel,
   Grid,
   IconButton,
+  ListSubheader,
   Menu,
   MenuItem,
   TextField,
@@ -57,6 +58,8 @@ import useNotification from '@/hooks/useNotification';
 import StatusText from '../StatusText';
 import { InfoIcon } from 'lucide-react';
 import { useParams } from 'next/navigation';
+import { PaymentStatus } from '@prisma/client';
+import { MoneyOffOutlined } from '@mui/icons-material';
 
 interface IProps {
   boardData: IBoard;
@@ -226,7 +229,7 @@ export default function CODBoardDetails({
   //   }
   // };
 
-  const handleUpdateStatus = async (status: ORDER_STATUS): Promise<void> => {
+  const handleUpdateStatus = async (status: ORDER_STATUS | PaymentStatus, type: 'fulfill' | 'payment' = 'fulfill'): Promise<void> => {
     setIsUpdating(true);
     if (selectedOrders.length === 0) {
       showNotification('error', 'Please select at least one order');
@@ -234,7 +237,7 @@ export default function CODBoardDetails({
     }
 
     try {
-      await updateStatus(companyId, status, selectedOrders, showNotification);
+      await updateStatus(companyId, status, selectedOrders, showNotification, type);
       mutateBoard();
       setIsUpdating(false);
     } catch (error: any) {
@@ -300,17 +303,8 @@ export default function CODBoardDetails({
             <Typography>Remove orders</Typography>
           </DropdownItemContainer>
         </MenuItem>
-        <MenuItem
-          onClick={() => {
-            handleUpdateStatus(ORDER_STATUS.COMPLETED);
-          }}
-          disabled={selectedOrders.length === 0}
-        >
-          <DropdownItemContainer display="flex" gap={2}>
-            <CheckCircleIcon sx={{ color: successColor }} />
-            <Typography>Mark as paid</Typography>
-          </DropdownItemContainer>
-        </MenuItem>
+        <Divider />
+        <ListSubheader>Fulfillment Status</ListSubheader>
         <MenuItem
           onClick={() => {
             handleUpdateStatus(ORDER_STATUS.DELIVERED);
@@ -342,6 +336,30 @@ export default function CODBoardDetails({
           <DropdownItemContainer display="flex" gap={2}>
             <BlockIcon sx={{ color: errorColor }} />
             <Typography>Mark as void</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        <Divider />
+        <ListSubheader>Payment Status</ListSubheader>
+        <MenuItem
+          onClick={() => {
+            handleUpdateStatus(PaymentStatus.Paid, 'payment');
+          }}
+          disabled={selectedOrders.length === 0}
+        >
+          <DropdownItemContainer display="flex" gap={2}>
+            <CheckCircleIcon sx={{ color: successColor }} />
+            <Typography>Mark as paid</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleUpdateStatus(PaymentStatus.Unpaid, 'payment');
+          }}
+          disabled={selectedOrders.length === 0}
+        >
+          <DropdownItemContainer display="flex" gap={2}>
+            <MoneyOffOutlined sx={{ color: errorColor }} />
+            <Typography>Mark as unpaid</Typography>
           </DropdownItemContainer>
         </MenuItem>
       </Menu>

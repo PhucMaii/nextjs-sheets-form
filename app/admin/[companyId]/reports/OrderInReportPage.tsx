@@ -5,6 +5,7 @@ import {
   CircularProgress,
   Divider,
   Grid,
+  ListSubheader,
   Menu,
   MenuItem,
   TextField,
@@ -35,7 +36,11 @@ import {
 } from '@/theme/color';
 import EditEmail from '../components/Modals/edit/EditEmail';
 import LoadingModal from '../components/Modals/LoadingModal';
-import { onSelectAllOrders, onSelectOrders } from '@/app/utils/orders';
+import {
+  onSelectAllOrders,
+  onSelectOrders,
+  updateStatus,
+} from '@/app/utils/orders';
 import BillPrintModal from '../components/Modals/BillPrintModal';
 import RouteStatement from '../components/Modals/RouteStatement';
 import { SWRFetchData } from '@/app/utils/db';
@@ -46,6 +51,8 @@ import { WeeklyStatement } from '../components/Printing/WeeklyStatement';
 import { MemoizedAllPrint } from '../components/Printing/AllPrint';
 import UploadChequeModal from '../components/Modals/UploadChequeModal';
 import { useParams } from 'next/navigation';
+import { PaymentStatus } from '@prisma/client';
+import { MoneyOffOutlined } from '@mui/icons-material';
 
 export default function OrderInReportPage({
   clientOrders,
@@ -208,27 +215,35 @@ export default function OrderInReportPage({
     }
   };
 
-  const handleUpdateStatus = async (status: ORDER_STATUS): Promise<void> => {
+  const handleUpdateStatus = async (
+    status: ORDER_STATUS | PaymentStatus,
+    type: 'fulfill' | 'payment' = 'fulfill',
+  ): Promise<void> => {
     setIsLoading(true);
 
-    const updatedOrderIds = selectedOrders.map((order: Order) => {
-      return order.id;
-    });
     try {
-      const response = await axios.put(
-        getAdminApiUrl(companyId, '/orders/status'),
-        {
-          status,
-          updatedOrderIds,
-        },
+      // const response = await axios.put(
+      //   getAdminApiUrl(companyId, '/orders/status'),
+      //   {
+      //     status,
+      //     updatedOrderIds,
+      //   },
+      // );
+      await updateStatus(
+        companyId,
+        status,
+        selectedOrders,
+        showNotification,
+        type,
       );
 
-      showNotification('success', response.data.message);
       setIsLoading(false);
 
       if (
-        status === ORDER_STATUS.COMPLETED &&
-        clientValue.preference.paymentType === PAYMENT_TYPE.MONTHLY
+        status === PaymentStatus.Paid &&
+        clientValue?.clientName !== 'All Clients' &&
+        clientValue?.preference?.paymentType === PAYMENT_TYPE.MONTHLY &&
+        type === 'payment'
       ) {
         setIsOpenUploadCheque(true);
       }
@@ -393,17 +408,7 @@ export default function OrderInReportPage({
           'aria-labelledby': 'basic-button',
         }}
       >
-        <MenuItem
-          onClick={() => {
-            handleUpdateStatus(ORDER_STATUS.COMPLETED);
-            handleCloseActionsAnchor();
-          }}
-        >
-          <DropdownItemContainer display="flex" gap={2}>
-            <CheckCircleIcon sx={{ color: successColor }} />
-            <Typography>Mark as paid</Typography>
-          </DropdownItemContainer>
-        </MenuItem>
+        <ListSubheader>Fulfillment Status</ListSubheader>
         <MenuItem
           onClick={() => {
             handleUpdateStatus(ORDER_STATUS.DELIVERED);
@@ -446,6 +451,30 @@ export default function OrderInReportPage({
           <DropdownItemContainer display="flex" gap={2}>
             <DeleteIcon sx={{ color: errorColor }} />
             <Typography>Delete</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        <Divider />
+        <ListSubheader>Payment Status</ListSubheader>
+        <MenuItem
+          onClick={() => {
+            handleUpdateStatus(PaymentStatus.Paid, 'payment');
+            handleCloseActionsAnchor();
+          }}
+        >
+          <DropdownItemContainer display="flex" gap={2}>
+            <CheckCircleIcon sx={{ color: successColor }} />
+            <Typography>Mark as paid</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleUpdateStatus(PaymentStatus.Unpaid, 'payment');
+            handleCloseActionsAnchor();
+          }}
+        >
+          <DropdownItemContainer display="flex" gap={2}>
+            <MoneyOffOutlined sx={{ color: errorColor }} />
+            <Typography>Mark as unpaid</Typography>
           </DropdownItemContainer>
         </MenuItem>
       </Menu>
@@ -556,7 +585,6 @@ export default function OrderInReportPage({
         <Grid item xs={6} md={2} textAlign="right">
           {statementDropdown}
         </Grid>
-      
       </Grid>
       {isFetching ? (
         <Box

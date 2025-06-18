@@ -1,5 +1,6 @@
 import { Order } from '@/app/admin/[companyId]/orders/page';
 import { ORDER_STATUS } from '@/app/utils/enum';
+import { PaymentStatus } from '@prisma/client';
 import { useMemo } from 'react';
 
 export const filterOrderByStatus = (
@@ -13,10 +14,11 @@ export const filterOrderByStatus = (
   return filteredOrders;
 };
 
-const useFilterOrders = (orders: Order[], statuses: ORDER_STATUS[]) => {
+const useFilterOrders = (orders: Order[], statuses: ORDER_STATUS[] | PaymentStatus[] | any, type: 'fulfill' | 'payment' = 'fulfill') => {
   const filteredOrders = useMemo(() => {
     return orders?.filter((order: Order) => {
-      return statuses.includes(order.status);
+      const queryStatus: any = type === 'fulfill' ? order.status : order.paymentStatus;
+      return statuses.includes(queryStatus);
     });
   }, [orders]);
 

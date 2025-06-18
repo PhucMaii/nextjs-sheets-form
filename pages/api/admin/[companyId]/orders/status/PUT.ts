@@ -74,9 +74,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
       // Record actions
       let title = '';
-      if (updateData.status !== existingOrder.status) {
+      if (updateData.status && updateData.status !== existingOrder.status) {
         title = `status: ${existingOrder.status} -> ${updateData.status}`;
-      } else if (updateData.paymentStatus !== existingOrder.paymentStatus) {
+      } else if (updateData.paymentStatus && updateData.paymentStatus !== existingOrder.paymentStatus) {
         title = `payment status: ${existingOrder.paymentStatus} -> ${updateData.paymentStatus}`;
       }
 

@@ -120,7 +120,7 @@ export default function CodBoard() {
       setLoading('isCheckingAutoAddBoard', false);
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
-      showNotification('error', error.response.data.error);
+      // showNotification('error', error.response.data.error);
 
       setLoading('isCheckingAutoAddBoard', false);
     }

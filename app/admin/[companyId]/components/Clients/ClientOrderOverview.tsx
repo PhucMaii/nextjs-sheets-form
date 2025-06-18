@@ -5,8 +5,8 @@ import { primary } from '@/theme/color';
 import PriceChangeIcon from '@mui/icons-material/PriceChange';
 import MoneyOffIcon from '@mui/icons-material/MoneyOff';
 import PaidIcon from '@mui/icons-material/Paid';
-import { ORDER_STATUS } from '@/app/utils/enum';
 import useFilterOrders from '@/hooks/useFilterOrders';
+import { PaymentStatus } from '@prisma/client';
 
 interface IProps {
   clientOrders: any;
@@ -44,9 +44,8 @@ export default function ClientOrderOverview({
   }, [clientOrders, startDate, endDate]);
 
   const unpaidOrders = useFilterOrders(clientOrders, [
-    ORDER_STATUS.INCOMPLETED,
-    ORDER_STATUS.DELIVERED,
-  ]);
+    PaymentStatus.Unpaid,
+  ], 'payment');
 
   const unpaidAmount = useMemo(() => {
     return unpaidOrders.reduce((acc: number, order: any) => {

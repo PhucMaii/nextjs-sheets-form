@@ -10,15 +10,25 @@ export const updateStatus = async (
   status: string,
   selectedOrders: Order[],
   showNotification: any,
+  type: 'fulfill' | 'payment' = 'fulfill',
 ) => {
   try {
     const orderIds = selectedOrders.map((order: Order) => {
       return order.id;
     });
+
+    const updatedData: any = {};
+
+    if (type === 'payment') {
+      updatedData.paymentStatus = status;
+    } else {
+      updatedData.status = status;
+    }
+
     const response = await axios.put(
       getAdminApiUrl(companyId, '/orders/status'),
       {
-        status,
+        ...updatedData,
         updatedOrderIds: orderIds,
       },
     );
@@ -29,6 +39,7 @@ export const updateStatus = async (
     }
 
     showNotification('success', response.data.message);
+    return response;
   } catch (error: any) {
     console.log('Fail to mark all as completed: ', error);
     showNotification(

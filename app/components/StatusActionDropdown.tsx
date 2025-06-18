@@ -2,13 +2,14 @@ import {
   AlertColor,
   Box,
   Button,
+  Divider,
   Menu,
   MenuItem,
   Typography,
 } from '@mui/material';
 import React, { useState } from 'react';
 import { DropdownItemContainer } from '../admin/[companyId]/orders/styled';
-import { ORDER_STATUS, getAdminApiUrl } from '../utils/enum';
+import { ORDER_STATUS } from '../utils/enum';
 import {
   errorColor,
   infoColor,
@@ -21,8 +22,9 @@ import PendingIcon from '@mui/icons-material/Pending';
 import BlockIcon from '@mui/icons-material/Block';
 import { Order } from '../admin/[companyId]/orders/page';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import axios from 'axios';
 import { useParams } from 'next/navigation';
+import { PaymentStatus } from '@prisma/client';
+import { updateStatus } from '../utils/orders';
 // import LoadingModal from '../admin/components/Modals/LoadingModal';
 
 interface ActionProps {
@@ -60,22 +62,12 @@ export default function StatusActionDropdown({
     setActionButtonAnchor(null);
   };
 
-  const onUpdateStatus = async (status: ORDER_STATUS): Promise<void> => {
+  const onUpdateStatus = async (status: ORDER_STATUS | PaymentStatus, type: 'fulfill' | 'payment' = 'fulfill'): Promise<void> => {
     setIsLoading(true);
 
-    const updatedOrderIds = selectedOrders.map((order: Order) => {
-      return order.id;
-    });
     try {
-      const response = await axios.put(
-        getAdminApiUrl(companyId, '/orders/status'),
-        {
-          status,
-          updatedOrderIds,
-        },
-      );
+      await updateStatus(companyId, status, selectedOrders, showNotification, type);
 
-      showNotification('success', response.data.message);
       setIsLoading(false);
     } catch (error: any) {
       console.log('Fail to mark all as completed: ', error);
@@ -121,7 +113,7 @@ export default function StatusActionDropdown({
         >
           <MenuItem
             onClick={() => {
-              onUpdateStatus(ORDER_STATUS.COMPLETED);
+              onUpdateStatus(PaymentStatus.Paid, 'payment');
               onCloseActionAnchor();
             }}
           >
@@ -130,6 +122,18 @@ export default function StatusActionDropdown({
               <Typography>Mark as paid</Typography>
             </DropdownItemContainer>
           </MenuItem>
+          <MenuItem
+            onClick={() => {
+              onUpdateStatus(PaymentStatus.Unpaid, 'payment');
+              onCloseActionAnchor();
+            }}
+          >
+            <DropdownItemContainer display="flex" gap={2}>
+              <BlockIcon sx={{ color: errorColor }} />
+              <Typography>Mark as unpaid</Typography>
+            </DropdownItemContainer>
+          </MenuItem>
+          <Divider />
           <MenuItem
             onClick={() => {
               onUpdateStatus(ORDER_STATUS.DELIVERED);

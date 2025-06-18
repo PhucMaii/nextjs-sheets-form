@@ -5,10 +5,12 @@ import {
   Box,
   Button,
   Checkbox,
+  Divider,
   Fab,
   FormControlLabel,
   Grid,
   IconButton,
+  ListSubheader,
   Menu,
   MenuItem,
   Pagination,
@@ -67,6 +69,7 @@ import { MemoizedAllPrint } from '../components/Printing/AllPrint';
 import { useParams } from 'next/navigation';
 import DeleteModal from '../components/Modals/delete/DeleteModal';
 import { PaymentStatus } from '@prisma/client';
+import { MoneyOffOutlined } from '@mui/icons-material';
 
 interface Category {
   id: number;
@@ -147,7 +150,7 @@ export default function Orders() {
   const [baseOrderData, setBaseOrderData] = useState<Order[]>([]);
   const [currentRoute, setCurrentRoute] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [currentStatus, setCurrentStatus] = useState<ORDER_STATUS>(
+  const [currentStatus, setCurrentStatus] = useState<ORDER_STATUS | PaymentStatus>(
     ORDER_STATUS.NONE,
   );
 
@@ -482,10 +485,10 @@ export default function Orders() {
   //   setBaseOrderData(newOrderData);
   // };
 
-  const handleUpdateStatus = async (status: ORDER_STATUS): Promise<void> => {
+  const handleUpdateStatus = async (status: ORDER_STATUS | PaymentStatus, type: 'fulfill' | 'payment' = 'fulfill'): Promise<void> => {
     setIsExecutingAction(true);
     try {
-      await updateStatus(companyId, status, selectedOrders, showNotification);
+      await updateStatus(companyId, status, selectedOrders, showNotification, type);
       mutate();
 
       setIsExecutingAction(false);
@@ -610,6 +613,8 @@ export default function Orders() {
             <Typography>Delete</Typography>
           </DropdownItemContainer>
         </MenuItem>
+        <Divider />
+        <ListSubheader>Fulfillment Status</ListSubheader>
         <MenuItem
           onClick={() => {
             handleUpdateStatus(ORDER_STATUS.INCOMPLETED);
@@ -636,18 +641,6 @@ export default function Orders() {
         </MenuItem>
         <MenuItem
           onClick={() => {
-            handleUpdateStatus(ORDER_STATUS.COMPLETED);
-            handleCloseAnchor();
-          }}
-          disabled={currentStatus === ORDER_STATUS.COMPLETED}
-        >
-          <DropdownItemContainer display="flex" gap={2}>
-            <CheckCircleIcon sx={{ color: successColor }} />
-            <Typography>Mark as paid</Typography>
-          </DropdownItemContainer>
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
             handleUpdateStatus(ORDER_STATUS.VOID);
             handleCloseAnchor();
           }}
@@ -656,6 +649,32 @@ export default function Orders() {
           <DropdownItemContainer display="flex" gap={2}>
             <BlockIcon sx={{ color: errorColor }} />
             <Typography>Mark as void</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        <Divider />
+        <ListSubheader>Payment Status</ListSubheader>
+        <MenuItem
+          onClick={() => {
+            handleUpdateStatus(PaymentStatus.Paid, 'payment');
+            handleCloseAnchor();
+          }}
+          disabled={currentStatus === PaymentStatus.Paid}
+        >
+          <DropdownItemContainer display="flex" gap={2}>
+            <CheckCircleIcon sx={{ color: successColor }} />
+            <Typography>Mark as paid</Typography>
+          </DropdownItemContainer>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleUpdateStatus(PaymentStatus.Unpaid, 'payment');
+            handleCloseAnchor();
+          }}
+          disabled={currentStatus === PaymentStatus.Unpaid}
+        >
+          <DropdownItemContainer display="flex" gap={2}>
+            <MoneyOffOutlined sx={{ color: errorColor }} />
+            <Typography>Mark as unpaid</Typography>
           </DropdownItemContainer>
         </MenuItem>
       </Menu>

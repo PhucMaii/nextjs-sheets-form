@@ -10,6 +10,7 @@ import {
   successColor,
   warningColor,
 } from '@/theme/color';
+import { PaymentStatus } from '@prisma/client';
 
 interface IProps {
   orders: any;
@@ -17,7 +18,7 @@ interface IProps {
 
 export default function ClientOrderSummary({ orders }: IProps) {
   const incompletedOrders = useFilterOrders(orders, [ORDER_STATUS.INCOMPLETED]);
-  const completedOrders = useFilterOrders(orders, [ORDER_STATUS.COMPLETED]);
+  const completedOrders = useFilterOrders(orders, [PaymentStatus.Paid], 'payment');
   const deliveredOrders = useFilterOrders(orders, [ORDER_STATUS.DELIVERED]);
   const voidedOrders = useFilterOrders(orders, [ORDER_STATUS.VOID]);
 

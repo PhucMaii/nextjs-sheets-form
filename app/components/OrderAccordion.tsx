@@ -29,6 +29,7 @@ import EditOrder from './Modals/EditOrder';
 import DeleteModal from './Modals/DeleteModal';
 import SellIcon from '@mui/icons-material/Sell';
 import { useDiscount } from '@/hooks/useDiscount';
+import { PaymentStatus } from '@prisma/client';
 
 interface PropTypes {
   handleDeleteOrder?: (orderId: number) => void;
@@ -123,6 +124,16 @@ export default function OrderAccordion({
                     </IconButton>
                   </Box>
                 )}
+                {order?.paymentStatus && !isEdit ? (
+                  <StatusText
+                    text={order?.paymentStatus}
+                    type={
+                      order?.paymentStatus === PaymentStatus.Paid
+                        ? 'success'
+                        : 'error'
+                    }
+                  />
+                ) : null}
               </Box>
             </Grid>
             <Grid item xs={12} md={2} sx={{ mr: 2 }}>

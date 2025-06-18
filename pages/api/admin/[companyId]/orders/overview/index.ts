@@ -11,7 +11,7 @@ import {
   revenueGroupByDeliveryDate,
 } from '@/pages/api/utils/overview';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
-import { PrismaClient } from '@prisma/client';
+import { PaymentStatus, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { calculateOrderProfit } from '../GET';
 
@@ -138,9 +138,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return acc + order.totalPrice;
     }, 0);
     const ongoingOrders = sortedThisMonthOrders.filter((order: any) => {
-      return order.status !== ORDER_STATUS.COMPLETED;
+      return order.status !== ORDER_STATUS.COMPLETED && order.status !== ORDER_STATUS.VOID;
     });
-    const unpaidAmount = ongoingOrders.reduce((acc: number, order: any) => {
+    const unpaidOrders = sortedThisMonthOrders.filter((order: any) => {
+      return order?.paymentStatus === PaymentStatus.Unpaid;
+    });
+    const unpaidAmount = unpaidOrders.reduce((acc: number, order: any) => {
       return acc + order.totalPrice;
     }, 0);
 
