@@ -323,12 +323,15 @@ export const createOrderedItems = async (
     (acc, item) => acc + item.quantity,
     0,
   );
-  await recordAction(
-    order.id,
-    createdBy,
-    `Subtract ${totalQty} items from inventory`,
-    comment,
-  );
+  
+  if (isValidToCheckInventory && comment) {
+    await recordAction(
+      order.id,
+      createdBy,
+      `Subtract ${totalQty} items from inventory`,
+      comment,
+    );
+  }
 
   await prisma.orderedItems.createMany({
     data: newOrderedItems,
