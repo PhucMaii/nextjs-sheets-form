@@ -1,4 +1,4 @@
-import { PayrollType, PrismaClient } from '@prisma/client';
+import { PaymentStatus, PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 // const checkIsKorean = (text: string) => {
 //   // const koreanRange = /^[\uAC00-\uD7AF]+$/;
@@ -120,13 +120,14 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-  await prisma.action.create({
+  await prisma.orders.updateMany({
+    where: {
+      status: {
+        in: ['Fulfilled', 'Unfulfilled', 'Void'],
+      },
+    },
     data: {
-      name: 'Track Inventory',
-      date: '06/11/2025',
-      description: 'No Items Ordered Today',
-      createdAt: '06/11/2025 12:00:00',
-      companyId: 2,
+      paymentStatus: PaymentStatus.Unpaid,
     },
   });
 }

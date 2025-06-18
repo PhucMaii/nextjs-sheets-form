@@ -349,7 +349,9 @@ const ClientOrdersTable = ({
             </Button>
             <Button
               // disabled={order?.type === TYPE.LOCKED}
-              onClick={() => {
+              onClick={(e: any) => {
+                e.stopPropagation();
+                e.preventDefault();
                 setOpenEdit(() => ({ order, open: true }));
               }}
             >

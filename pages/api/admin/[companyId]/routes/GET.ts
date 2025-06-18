@@ -1,6 +1,6 @@
 import { ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
 import { generateListOfDateString } from '@/app/utils/time';
-import { PrismaClient, Route } from '@prisma/client';
+import { PaymentStatus, PrismaClient, Route } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { normalizeDate } from '@/pages/api/utils/date';
 import { UserType } from '@/app/utils/type';
@@ -95,7 +95,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           );
 
           const completedOrders = userOrders.filter(
-            (order: any) => order.status === ORDER_STATUS.COMPLETED,
+            (order: any) => order.paymentStatus === PaymentStatus.Paid,
           );
           const voidOrders = userOrders.filter(
             (order: any) => order.status === ORDER_STATUS.VOID,
