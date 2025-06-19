@@ -33,9 +33,19 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     if (status) {
       updateData.status = status;
       updateData.isVoid = false;
+      if (status === ORDER_STATUS.VOID) {
+        updateData.paymentStatus = PaymentStatus.Unpaid;
+      }
     }
     if (paymentStatus) {
       updateData.paymentStatus = paymentStatus;
+      if (paymentStatus === PaymentStatus.Paid) {
+        updateData.status = ORDER_STATUS.DELIVERED;
+      }
+
+      if (paymentStatus === PaymentStatus.Unpaid) {
+        updateData.status = ORDER_STATUS.INCOMPLETED;
+      }
     }
 
     const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
