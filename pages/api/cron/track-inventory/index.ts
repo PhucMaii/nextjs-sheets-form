@@ -48,7 +48,7 @@ export default async function handler(
           companyId: company.id,
         },
       });
-  
+
       if (!recordInventoryAction) {
         const inventoryItems = await prisma.inventoryItem.findMany({
           where: {
@@ -58,18 +58,18 @@ export default async function handler(
             fifo: true,
           },
         });
-  
+
         let actionDescription: string = '';
-  
+
         // Loop thru each item and added in fifo to retrieve correct left quantity
         for (const item of inventoryItems) {
           const qty = item.fifo.reduce((acc: number, fifo: Fifo) => {
             return acc + fifo.quantity;
           }, 0);
-  
+
           actionDescription += `${item.name}: ${qty} ||`;
         }
-  
+
         const newAction = await prisma.action.create({
           data: {
             name: ACTION.RECORD_INVENTORY,
@@ -79,7 +79,7 @@ export default async function handler(
             companyId: company.id,
           },
         });
-  
+
         console.log({ newAction, actionDescription, companyId: company.id });
       }
 
@@ -92,13 +92,16 @@ export default async function handler(
           companyId: company.id,
         },
       });
-  
+
       // If yes, return
       if (action && action.name === ACTION.TRACK_INVENTORY) {
-        console.log('Track Inventory Action Already Taken In Company: ', company.id);
+        console.log(
+          'Track Inventory Action Already Taken In Company: ',
+          company.id,
+        );
         continue;
       }
-  
+
       // Get all items that has been ordered today that quantity is greater than 0
       const orderedItems = await prisma.orderedItems.findMany({
         where: {
@@ -126,7 +129,7 @@ export default async function handler(
           fifo: true,
         },
       });
-  
+
       if (orderedItems.length === 0) {
         console.log('No Items Ordered Today In Company: ', company.id);
         await prisma.action.create({
@@ -140,17 +143,17 @@ export default async function handler(
         });
         continue;
       }
-  
+
       // Create a set of same items and quantity
       const itemMap: ItemMap = orderedItems.reduce((acc: any, item: any) => {
         if (!item.inventoryItemId || !item.inventoryUnitId) return acc; // Make sure again not touching the custom amount
-  
+
         // If item has option, then set option
         const itemUnit = item.inventoryUnit;
-  
+
         // Set the quantity to ratio of 1
         const quantityWithRatio1 = item.quantity * itemUnit.ratio;
-  
+
         if (!acc[item.inventoryItemId]) {
           console.log(item, 'item');
           acc[item.inventoryItemId] = {
@@ -158,13 +161,24 @@ export default async function handler(
             inventoryItem: item.inventoryItem,
             fifo: item.fifo,
             inventoryUnit: itemUnit,
+            orderId: item.orderId,
           };
         } else {
           acc[item.inventoryItemId].quantity += quantityWithRatio1;
         }
         return acc;
       }, {});
-  
+
+      // Flag the action as taken
+      const newAction = await prisma.action.create({
+        data: {
+          name: ACTION.TRACK_INVENTORY,
+          date: date.date,
+          description: 'Track Inventory In Progress',
+          createdAt: `${date.time} ${date.date}`,
+          companyId: company.id,
+        },
+      });
       let actionDescription: string = '';
       // Loop through that item set, update inventory item quantity
       for (const inventoryItem of Object.values(itemMap)) {
@@ -174,23 +188,21 @@ export default async function handler(
           { ratio: 1 }, // Already calculate correct quantity above
           inventoryItem.quantity,
         );
-  
+
         // Transform itemMap to a string
         actionDescription += `${inventoryItem.inventoryItem.name}: ${inventoryItem.quantity} || `;
       }
-  
+
       // Flag the action as taken
-      await prisma.action.create({
+      await prisma.action.update({
+        where: {
+          id: newAction.id,
+        },
         data: {
-          name: ACTION.TRACK_INVENTORY,
-          date: date.date,
           description: actionDescription,
-          createdAt: `${date.time} ${date.date}`,
-          companyId: company.id,
         },
       });
     }
-
 
     return res.status(200).json({ message: 'Track Inventory Successfully' });
   } catch (error: any) {

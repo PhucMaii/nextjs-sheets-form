@@ -31,6 +31,7 @@ export default function ConfirmModal({
       await handleSubmit();
       setIsLoading(false);
       showNotification('success', 'Action Completed Successfully');
+      onClose();
     } catch (error: any) {
       console.log('Fail to confirm: ', error);
       setIsLoading(false);

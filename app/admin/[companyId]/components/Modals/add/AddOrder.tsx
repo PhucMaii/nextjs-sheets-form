@@ -188,7 +188,10 @@ export default function AddOrder({
       <ConfirmModal
         open={isOpenConfirmModal}
         onClose={() => setIsOpenConfirmModal(false)}
-        handleSubmit={async () => await addOrder(cachedOrder, true, true)}
+        handleSubmit={async () => {
+          await addOrder(cachedOrder, true, true);
+          onClose();
+        }}
         title="This client already order for selected date, are you sure to create new order?"
         showNotification={showNotification}
       />

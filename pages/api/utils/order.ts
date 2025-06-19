@@ -28,16 +28,20 @@ export const checkOrderValidToAffectInventory = async (
     const normalizedToday = normalizeDate(new Date(date));
     const normalizedOrderDate = normalizeDate(new Date(deliveryDate));
 
+    // If in the future -> not valid
     if (normalizedOrderDate.getTime() > normalizedToday.getTime()) {
       return false;
     }
 
-    // If same date
+    // If same date 
+      // If morning -> check if track inventory action is taken
+      // If afternoon -> auto true
     if (normalizedOrderDate.getTime() === normalizedToday.getTime()) {
       if (currentTime.includes('AM')) {
         // const hour = currentTime.split(':')[0];
+        // const trackInventoryHour = 6;
 
-        // if (Number(hour) < trackInventoryHour || Number(hour) === 12) {
+        // if (Number(hour) < trackInventoryHour|| Number(hour) === 12) {
         //   return false;
         // }
 
