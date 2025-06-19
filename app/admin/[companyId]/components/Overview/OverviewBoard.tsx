@@ -12,6 +12,7 @@ import { ORDER_STATUS } from '@/app/utils/enum';
 import { Order } from '../../orders/page';
 import useFilterOrders from '@/hooks/useFilterOrders';
 import PaidIcon from '@mui/icons-material/Paid';
+import { PaymentStatus } from '@prisma/client';
 
 export default function OverviewBoard({ boardData }: { boardData: IBoard }) {
   const orderWithoutVOID = useFilterOrders(boardData.orders, [
@@ -36,8 +37,8 @@ export default function OverviewBoard({ boardData }: { boardData: IBoard }) {
   );
 
   const collectedOrders = useFilterOrders(boardData.orders, [
-    ORDER_STATUS.COMPLETED,
-  ]);
+    PaymentStatus.Paid,
+  ], 'payment');
 
   return (
     <Grid container spacing={2}>

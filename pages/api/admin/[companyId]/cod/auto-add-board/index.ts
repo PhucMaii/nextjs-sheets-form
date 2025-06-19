@@ -411,11 +411,7 @@ export const insertOrdersToSelectedBoards = async (
           },
           companyId,
           status: {
-            in: [
-              ORDER_STATUS.DELIVERED,
-              ORDER_STATUS.INCOMPLETED,
-              ORDER_STATUS.COMPLETED,
-            ],
+            not: ORDER_STATUS.VOID,
           },
         },
         include: {

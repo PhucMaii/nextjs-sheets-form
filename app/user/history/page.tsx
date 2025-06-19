@@ -41,6 +41,7 @@ import OverviewCard from '@/app/admin/[companyId]/components/OverviewCard/Overvi
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import SelectDateRange from '@/app/admin/[companyId]/components/Select/SelectDateRange';
 import OrderAccordion from '@/app/admin/[companyId]/components/OrderAccordion';
+import { PaymentStatus } from '@prisma/client';
 
 const totalYPosition = 250;
 export default function HistoryPage() {
@@ -104,9 +105,13 @@ export default function HistoryPage() {
     }
   }, [debouncedKeywords, baseClientOrders]);
 
-  const filterOrder = (status: ORDER_STATUS) => {
+  const filterOrder = (status: ORDER_STATUS | PaymentStatus, type: 'fulfillment' | 'payment') => {
     const newClientOrders = baseClientOrders.filter((order: Order) => {
-      return order.status === status;
+      if (type === 'fulfillment') {
+        return order.status === status;
+      } else {
+        return order.paymentStatus === status;
+      }
     });
 
     setFilterOptions(status);
@@ -172,14 +177,14 @@ export default function HistoryPage() {
         </MenuItem>
         <MenuItem
           onClick={() => {
-            filterOrder(ORDER_STATUS.COMPLETED);
+            filterOrder(PaymentStatus.Paid, 'payment');
             handleCloseAnchor();
           }}
         >
           <DropdownItemContainer
             display="flex"
             gap={2}
-            isSelected={filterOptions === ORDER_STATUS.COMPLETED}
+            isSelected={filterOptions === PaymentStatus.Paid}
           >
             <CheckCircleIcon sx={{ color: successColor }} />
             <Typography>Paid orders</Typography>
@@ -187,7 +192,7 @@ export default function HistoryPage() {
         </MenuItem>
         <MenuItem
           onClick={() => {
-            filterOrder(ORDER_STATUS.DELIVERED);
+            filterOrder(ORDER_STATUS.DELIVERED, 'fulfillment');
             handleCloseAnchor();
           }}
         >
@@ -202,7 +207,7 @@ export default function HistoryPage() {
         </MenuItem>
         <MenuItem
           onClick={() => {
-            filterOrder(ORDER_STATUS.INCOMPLETED);
+            filterOrder(ORDER_STATUS.INCOMPLETED, 'fulfillment');
             handleCloseAnchor();
           }}
         >
@@ -217,7 +222,7 @@ export default function HistoryPage() {
         </MenuItem>
         <MenuItem
           onClick={() => {
-            filterOrder(ORDER_STATUS.VOID);
+            filterOrder(ORDER_STATUS.VOID, 'fulfillment');
             handleCloseAnchor();
           }}
         >

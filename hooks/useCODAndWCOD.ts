@@ -2,6 +2,7 @@ import { Order } from '@/app/admin/[companyId]/orders/page';
 import { fetchWcodOrders } from '@/app/utils/db';
 import { ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
 import { getWCODDay } from '@/app/utils/time';
+import { PaymentStatus } from '@prisma/client';
 import { useParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -43,7 +44,7 @@ const useCODAndWCOD = (orderList: Order[], selectedDate: string) => {
         (order?.user?.preference?.paymentType === PAYMENT_TYPE.COD ||
           order?.user?.preference?.paymentType === wcodDay) &&
         order.status !== ORDER_STATUS.VOID &&
-        order.status !== ORDER_STATUS.COMPLETED
+        order.paymentStatus === PaymentStatus.Unpaid
       );
     });
   }, [orderList, wcod]);
@@ -67,7 +68,7 @@ const useCODAndWCOD = (orderList: Order[], selectedDate: string) => {
       return (
         (order?.user?.preference?.paymentType === PAYMENT_TYPE.COD ||
           order?.user?.preference?.paymentType === wcodDay) &&
-        order.status === ORDER_STATUS.COMPLETED
+        order.paymentStatus === PaymentStatus.Paid
       );
     });
   }, [orderList, wcod]);

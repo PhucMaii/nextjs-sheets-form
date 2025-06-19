@@ -1,6 +1,5 @@
 import {
   S3Client,
-  // PutObjectCommand,
   ListObjectsV2Command,
   GetObjectCommand,
   PutObjectCommand,
@@ -86,7 +85,6 @@ export const getAllS3Images = async (folder: string = '') => {
         ContinuationToken: continuationToken,
         Prefix: folder,
       });
-
 
       const response: any = await s3.send(command);
       const objects = response.Contents || [];

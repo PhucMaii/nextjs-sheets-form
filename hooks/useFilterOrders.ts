@@ -5,10 +5,15 @@ import { useMemo } from 'react';
 
 export const filterOrderByStatus = (
   orderList: Order[],
-  statuses: ORDER_STATUS[],
+  statuses: ORDER_STATUS[] | PaymentStatus[] | any,
+  type: 'fulfillment' | 'payment' = 'fulfillment'
 ) => {
   const filteredOrders = orderList.filter((order: Order) => {
-    return statuses.includes(order.status);
+    if (type === 'fulfillment') {
+      return statuses.includes(order.status);
+    } else {
+      return statuses.includes(order.paymentStatus);
+    }
   });
 
   return filteredOrders;

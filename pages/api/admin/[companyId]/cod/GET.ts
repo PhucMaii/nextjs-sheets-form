@@ -1,6 +1,6 @@
 import { findCombinations } from '@/app/utils/array';
 import { COD_STATUS, ORDER_STATUS } from '@/app/utils/enum';
-import { OrderedItems, Orders, PrismaClient } from '@prisma/client';
+import { OrderedItems, Orders, PaymentStatus, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { generateListOfDateString } from '@/app/utils/time';
 import { IBoard } from '@/app/utils/type';
@@ -101,10 +101,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
       const uncollectedOrders = boardOrdersWithTotalPriceItems.filter(
         (order: Orders) => {
-          return (
-            order.status !== ORDER_STATUS.COMPLETED &&
-            order.status !== ORDER_STATUS.VOID
-          );
+          return order.paymentStatus === PaymentStatus.Unpaid;
         },
       );
 
@@ -437,10 +434,7 @@ const formatBoards = (boards: any) => {
 
 const getCODData = (orders: Orders[]) => {
   const uncollectedOrders = orders.filter((order: Orders) => {
-    return (
-      order.status !== ORDER_STATUS.COMPLETED &&
-      order.status !== ORDER_STATUS.VOID
-    );
+    return order.paymentStatus === PaymentStatus.Unpaid;
   });
 
   const uncollectedAmount = uncollectedOrders.reduce(
@@ -451,7 +445,7 @@ const getCODData = (orders: Orders[]) => {
   );
 
   const collectedOrders = orders.filter((order: Orders) => {
-    return order.status === ORDER_STATUS.COMPLETED;
+    return order.paymentStatus === PaymentStatus.Paid;
   });
 
   const collectedAmount = collectedOrders.reduce(

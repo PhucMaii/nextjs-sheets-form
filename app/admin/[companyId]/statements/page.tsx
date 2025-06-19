@@ -104,10 +104,10 @@ export default function StatementsPage() {
   }, [selectedRouteId]);
 
   useEffect(() => {
-    if (debouncedKeywords) {
+    if (debouncedKeywords && routes?.formattedClientOrders[selectedRouteId]) {
       const newDisplayClients = routes?.formattedClientOrders[
         selectedRouteId
-      ].filter((client: ClientStatementType) => {
+      ]?.filter((client: ClientStatementType) => {
         return (
           client.client.clientName
             .toLowerCase()

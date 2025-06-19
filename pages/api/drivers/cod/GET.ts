@@ -93,11 +93,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         companyId: currentDriver.companyId,
         deliveryDate: date,
         status: {
-          in: [
-            ORDER_STATUS.INCOMPLETED,
-            ORDER_STATUS.DELIVERED,
-            ORDER_STATUS.COMPLETED,
-          ],
+          not: ORDER_STATUS.VOID,
         },
         userId: {
           in: userIds,
@@ -136,11 +132,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           in: wcod7days,
         },
         status: {
-          in: [
-            ORDER_STATUS.INCOMPLETED,
-            ORDER_STATUS.DELIVERED,
-            ORDER_STATUS.COMPLETED,
-          ],
+          not: ORDER_STATUS.VOID,
         },
         userId: {
           in: userIds,

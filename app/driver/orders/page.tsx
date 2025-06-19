@@ -33,6 +33,7 @@ import { SWRFetchData } from '@/app/utils/db';
 import useNotification from '@/hooks/useNotification';
 import InsertOrderToCodBoard from '@/app/admin/[companyId]/components/Modals/add/InsertOrderToCodBoard';
 import SwitchRole from '../components/Modals/SwitchRole';
+import { PaymentStatus } from '@prisma/client';
 
 function CircularProgressWithLabel(props: any) {
   const value = Math.round((props.currentValue / props.basedValue) * 100);
@@ -121,21 +122,6 @@ export default function OrdersPage() {
     setVirtuosoHeight(windowDimensions.height - totalYPosition);
   }, []);
 
-  // useEffect(() => {
-  //   if (ordersResponse) {
-  //     const unfulfilledOrders = filterOrderByStatus(
-  //       ordersResponse?.data.deliveryOrders,
-  //       currentTab === 'Today'
-  //         ? ORDER_STATUS.INCOMPLETED
-  //         : ORDER_STATUS.COMPLETED,
-  //     );
-
-  //     // if (unfulfilledOrders.length === 0) {
-  //     //   setIsOpenSwitchRole(true);
-  //     // }
-  //   }
-  // }, [ordersResponse]);
-
   // Handle loading
   useEffect(() => {
     if (isValidating && !ordersResponse) {
@@ -172,7 +158,7 @@ export default function OrdersPage() {
     }
 
     const codCollected = orders.reduce((acc: number, order: Order) => {
-      if (order.status === ORDER_STATUS.COMPLETED) {
+      if (order.paymentStatus === PaymentStatus.Paid) {
         return acc + order.totalPrice;
       }
 
@@ -205,9 +191,17 @@ export default function OrdersPage() {
     return amount.toFixed(2);
   }, [orders]);
 
-  const filterOrderByStatus = (orderList: Order[], status: ORDER_STATUS) => {
+  const filterOrderByStatus = (
+    orderList: Order[],
+    status: ORDER_STATUS | PaymentStatus,
+    type: 'fulfillment' | 'payment',
+  ) => {
     const filteredOrders = orderList.filter((order: Order) => {
-      return order.status === status;
+      if (type === 'fulfillment') {
+        return order.status === status;
+      } else {
+        return order.paymentStatus === status;
+      }
     });
 
     return filteredOrders;
@@ -232,9 +226,8 @@ export default function OrdersPage() {
       setOrders(ordersResponse?.data.deliveryOrders);
       const newOrders = filterOrderByStatus(
         ordersResponse?.data.deliveryOrders,
-        currentTab === 'Today'
-          ? ORDER_STATUS.INCOMPLETED
-          : ORDER_STATUS.COMPLETED,
+        currentTab === 'Today' ? ORDER_STATUS.INCOMPLETED : PaymentStatus.Paid,
+        currentTab === 'Today' ? 'fulfillment' : 'payment',
       );
       setDisplayOrders(newOrders);
     }

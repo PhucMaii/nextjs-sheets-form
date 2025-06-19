@@ -24,6 +24,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import EditCashInput from '../Modals/edit/EditCashInput';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import ShowExpenses from '../Modals/ShowExpenses';
+import { PaymentStatus } from '@prisma/client';
 
 interface IProps {
   boardData: IBoard;
@@ -74,8 +75,8 @@ export default function CODBoardSummary({
   );
 
   const collectedOrders = useFilterOrders(boardData.orders, [
-    ORDER_STATUS.COMPLETED,
-  ]);
+    PaymentStatus.Paid,
+  ], 'payment');
 
   const collectedAmount = collectedOrders.reduce(
     (acc: number, order: Order) => {

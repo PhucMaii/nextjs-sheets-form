@@ -1,6 +1,6 @@
-import { Orders, PrismaClient } from '@prisma/client';
+import { Orders, PaymentStatus, PrismaClient } from '@prisma/client';
 import { getTodayDate, normalizeDate } from './date';
-import { ACTION, ORDER_STATUS } from '@/app/utils/enum';
+import { ACTION } from '@/app/utils/enum';
 import { generateListOfDateString, generateMonthRange } from '@/app/utils/time';
 
 export const formatItemsWithTotalPrice = (items: any[]) => {
@@ -76,9 +76,7 @@ export const getOverdueOrders = async (userId: number) => {
     const incompletedOrders: any = await prisma.orders.findMany({
       where: {
         userId,
-        status: {
-          in: [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED],
-        },
+        paymentStatus: PaymentStatus.Unpaid,
         deliveryDate: {
           notIn: currentMonthListOfDateString,
         },

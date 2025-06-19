@@ -386,11 +386,15 @@ export const createOrder = async (
       comment += `x${item.quantity} ${item.name}\n`;
     }
 
+    const totalItems = newOrderedItems.reduce((acc: number, item: any) => {
+      return acc + item.quantity;
+    }, 0);
+
     // Add actions
     await prisma.orderAction.create({
       data: {
         timelineId: newTimeline.id,
-        title: `There were ${items.length} items added to the order`,
+        title: `There were ${totalItems} items added to the order`,
         comment,
         createdAt: `${date} ${time}`,
         createdBy,

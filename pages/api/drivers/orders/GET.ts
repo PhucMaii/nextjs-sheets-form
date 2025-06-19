@@ -70,11 +70,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       where: {
         deliveryDate,
         status: {
-          in: [
-            ORDER_STATUS.INCOMPLETED,
-            ORDER_STATUS.DELIVERED,
-            ORDER_STATUS.COMPLETED,
-          ],
+          not: ORDER_STATUS.VOID,
         },
         userId: {
           in: userIds,

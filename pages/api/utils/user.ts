@@ -33,11 +33,7 @@ export const categorizeUser = async (userId: number) => {
           in: listOfDateString,
         },
         status: {
-          in: [
-            ORDER_STATUS.COMPLETED,
-            ORDER_STATUS.DELIVERED,
-            ORDER_STATUS.INCOMPLETED,
-          ],
+          not: ORDER_STATUS.VOID,
         },
       },
     });

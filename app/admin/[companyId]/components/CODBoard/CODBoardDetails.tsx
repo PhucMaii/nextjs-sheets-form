@@ -174,10 +174,10 @@ export default function CODBoardDetails({
     }
   };
 
-  const filterOrders = (status: ORDER_STATUS) => {
+  const filterOrders = (status: ORDER_STATUS | PaymentStatus, type: 'fulfillment' | 'payment') => {
     const newOrderList = filterOrderByStatus(boardResponse?.data?.orders, [
       status,
-    ]);
+    ], type);
     setOrders(newOrderList);
   };
 
@@ -396,17 +396,17 @@ export default function CODBoardDetails({
         </MenuItem>
         <MenuItem
           onClick={() => {
-            filterOrders(ORDER_STATUS.COMPLETED);
+            filterOrders(PaymentStatus.Paid, 'payment');
           }}
         >
           <DropdownItemContainer display="flex" gap={2}>
             <CheckCircleIcon sx={{ color: successColor }} />
-            <Typography>{ORDER_STATUS.COMPLETED}</Typography>
+            <Typography>{PaymentStatus.Paid}</Typography>
           </DropdownItemContainer>
         </MenuItem>
         <MenuItem
           onClick={() => {
-            filterOrders(ORDER_STATUS.DELIVERED);
+            filterOrders(ORDER_STATUS.DELIVERED, 'fulfillment');
           }}
         >
           <DropdownItemContainer display="flex" gap={2}>
@@ -416,7 +416,7 @@ export default function CODBoardDetails({
         </MenuItem>
         <MenuItem
           onClick={() => {
-            filterOrders(ORDER_STATUS.INCOMPLETED);
+            filterOrders(ORDER_STATUS.INCOMPLETED, 'fulfillment');
           }}
         >
           <DropdownItemContainer display="flex" gap={2}>
@@ -426,7 +426,7 @@ export default function CODBoardDetails({
         </MenuItem>
         <MenuItem
           onClick={() => {
-            filterOrders(ORDER_STATUS.VOID);
+            filterOrders(ORDER_STATUS.VOID, 'fulfillment');
           }}
         >
           <DropdownItemContainer display="flex" gap={2}>

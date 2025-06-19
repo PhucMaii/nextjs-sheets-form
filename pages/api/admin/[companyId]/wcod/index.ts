@@ -42,11 +42,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           in: dayList,
         },
         status: {
-          in: [
-            ORDER_STATUS.DELIVERED,
-            ORDER_STATUS.INCOMPLETED,
-            ORDER_STATUS.COMPLETED,
-          ],
+          not: ORDER_STATUS.VOID,
         },
         companyId: Number(companyId),
       },

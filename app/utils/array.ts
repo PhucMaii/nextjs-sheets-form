@@ -1,4 +1,4 @@
-import { UserRoute } from '@prisma/client';
+import { PaymentStatus, UserRoute } from '@prisma/client';
 import { Order } from '../admin/[companyId]/orders/page';
 import { fetchWcodOrders } from './db';
 import { ORDER_STATUS, PAYMENT_TYPE } from './enum';
@@ -110,7 +110,7 @@ export const getCODData = async (
     return (
       (order?.user?.preference?.paymentType === PAYMENT_TYPE.COD ||
         order?.user?.preference?.paymentType === wcodDay) &&
-      order.status === ORDER_STATUS.COMPLETED
+      order.paymentStatus === PaymentStatus.Paid
     );
   });
 

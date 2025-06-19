@@ -92,11 +92,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       where: {
         companyId: Number(companyId),
         status: {
-          in: [
-            ORDER_STATUS.COMPLETED,
-            ORDER_STATUS.DELIVERED,
-            ORDER_STATUS.INCOMPLETED,
-          ],
+          not: ORDER_STATUS.VOID,
         },
         deliveryDate: {
           in: datesInRange,

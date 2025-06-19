@@ -98,11 +98,7 @@ export const getLastMonthRevenue = async (
     where: {
       companyId,
       status: {
-        in: [
-          ORDER_STATUS.COMPLETED,
-          ORDER_STATUS.DELIVERED,
-          ORDER_STATUS.INCOMPLETED,
-        ],
+        not: ORDER_STATUS.VOID,
       },
       deliveryDate: {
         in: datesInRange,

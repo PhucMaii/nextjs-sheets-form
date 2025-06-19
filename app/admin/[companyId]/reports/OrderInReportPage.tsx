@@ -185,7 +185,7 @@ export default function OrderInReportPage({
 
     // update completed order list
     const newUnpaidOrders = newBaseOrderList.filter((order: Order) => {
-      return order.status === ORDER_STATUS.COMPLETED;
+      return order.paymentStatus === PaymentStatus.Unpaid;
     });
 
     setBaseClientOrders(newBaseOrderList);

@@ -97,11 +97,7 @@ const getClientsPreOrderInfo = async (
         },
         deliveryDate,
         status: {
-          in: [
-            ORDER_STATUS.INCOMPLETED,
-            ORDER_STATUS.DELIVERED,
-            ORDER_STATUS.COMPLETED,
-          ],
+          not: ORDER_STATUS.VOID,
         },
       },
     });

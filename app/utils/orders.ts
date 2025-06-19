@@ -192,6 +192,6 @@ export const generateOrderTotalPrice = (
     GST,
     PST,
     discount,
-    totalPrice: subTotal + GST + PST + (shippingFee || 0) - discount,
+    totalPrice: subTotal + GST + PST + (shippingFee || 0),
   };
 };
