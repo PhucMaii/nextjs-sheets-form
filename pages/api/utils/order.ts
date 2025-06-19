@@ -1,6 +1,6 @@
 import { Orders, PaymentStatus, PrismaClient } from '@prisma/client';
 import { getTodayDate, normalizeDate } from './date';
-import { ACTION } from '@/app/utils/enum';
+import { ACTION, ORDER_STATUS } from '@/app/utils/enum';
 import { generateListOfDateString, generateMonthRange } from '@/app/utils/time';
 
 export const formatItemsWithTotalPrice = (items: any[]) => {
@@ -77,6 +77,9 @@ export const getOverdueOrders = async (userId: number) => {
       where: {
         userId,
         paymentStatus: PaymentStatus.Unpaid,
+        status: {
+          not: ORDER_STATUS.VOID
+        },
         deliveryDate: {
           notIn: currentMonthListOfDateString,
         },
