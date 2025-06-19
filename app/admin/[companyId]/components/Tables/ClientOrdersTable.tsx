@@ -157,7 +157,7 @@ const ClientOrdersTable = ({
   function fixedHeaderContent() {
     return (
       <TableRow>
-        <TableCell style={{ width: 100 }}></TableCell>
+        <TableCell style={{ width: 150 }}></TableCell>
         <TableCell padding="checkbox" variant="head">
           <Checkbox
             checked={selectedOrders.length === clientOrders.length}
@@ -200,7 +200,7 @@ const ClientOrdersTable = ({
     );
     return (
       <>
-        <TableCell>
+        <TableCell style={{ width: 150 }}>
           <Box display="flex" gap={1} alignItems="center">
             {order?.type === TYPE.LOCKED ? (
               <StatusText
