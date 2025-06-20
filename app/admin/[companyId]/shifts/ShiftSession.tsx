@@ -321,13 +321,13 @@ export default function ShiftSession() {
           <Typography sx={{ my: 2 }}>All Shifts</Typography>
 
           <Box display="flex" alignItems="center" gap={1}>
-            <Button
+            {/* <Button
               onClick={() => setConfirmToPayProps({ open: true })}
               disabled={selectedShifts.length === 0}
               variant="outlined"
             >
               Approve & Pay
-            </Button>
+            </Button> */}
             {/* <PayrollCSV driverData={driverDataReport} /> */}
             <Button
               onClick={() => setIsOpenAddShift(true)}

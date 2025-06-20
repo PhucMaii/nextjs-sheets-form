@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PayrollType, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { calculateHours } from '@/pages/api/drivers/shift/clock-out';
 import { WORKING_ROLE } from '@/app/utils/enum';
@@ -87,8 +87,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       }
 
       const cost =
-        (driver?.payRate || 1) *
-        (updatedFields?.hours || existingShift.hours);
+        driver.payrollType === PayrollType.hourly
+          ? (driver?.payRate || 1) *
+            (updatedFields?.hours || existingShift.hours)
+          : 0;
       updatedFields.cost = cost;
     }
 

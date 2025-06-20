@@ -1,4 +1,4 @@
-import { PaymentStatus, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 // const checkIsKorean = (text: string) => {
 //   // const koreanRange = /^[\uAC00-\uD7AF]+$/;
@@ -120,16 +120,16 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-  await prisma.orders.updateMany({
-    where: {
-      status: {
-        in: ['Fulfilled', 'Unfulfilled', 'Void'],
-      },
-    },
-    data: {
-      paymentStatus: PaymentStatus.Unpaid,
-    },
-  });
+  // const monthlyDrivers = await prisma.shiftSession.updateMany({
+  //   where: {
+  //     employee: {
+  //       payrollType: PayrollType.monthly,
+  //     },
+  //   },
+  //   data: {
+  //     cost: 0,
+  //   },
+  // });
 }
 
 // async function main() {

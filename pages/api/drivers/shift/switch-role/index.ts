@@ -5,7 +5,7 @@ import {
   convertDeliveryDateStringToDate,
   getTodayDate,
 } from '@/pages/api/utils/date';
-import { PrismaClient, Route } from '@prisma/client';
+import { PayrollType, PrismaClient, Route } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { calculateHours } from '../clock-out';
 import withDriverAuthGuard from '@/pages/api/utils/withDriverAuthGuar';
@@ -70,7 +70,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // If user has clocked in -> switch role
     // End the current shift
     const hours = calculateHours(currentShift.startedAt, today.dateAndTime);
-
+    const cost =
+      driver.payrollType === PayrollType.hourly
+        ? hours * (driver?.payRate || 1)
+        : 0;
+        
     const updatedShiftSession = await prisma.shiftSession.update({
       where: {
         id: currentShift.id,
@@ -78,7 +82,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       data: {
         endedAt: today.dateAndTime,
         hours: hours * 1, // to get the float type
-        cost: hours * (driver?.payRate || 1),
+        cost: cost,
         isActive: false,
       },
     });

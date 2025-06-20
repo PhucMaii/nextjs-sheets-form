@@ -3,7 +3,8 @@ import { Box, Checkbox, Divider, Grid, Typography } from '@mui/material';
 import React, { useMemo } from 'react';
 import StatusText from './StatusText';
 import AccessAlarmIcon from '@mui/icons-material/AccessAlarm';
-import { SHIFT_STATUS } from '@/app/utils/enum';
+// import { SHIFT_STATUS } from '@/app/utils/enum';
+import { capitalize } from 'lodash';
 
 interface IProps {
   shift: IShiftSession;
@@ -40,8 +41,8 @@ export default function ShiftAdminDisplay({
   }, [shift]);
 
   return (
-    <Grid container alignItems="stretch" spacing={1}>
-      <Grid item xs={12}>
+    <Grid container alignItems="stretch" spacing={0.5}>
+      {/* <Grid item xs={12}>
         <Checkbox
           checked={isSelected}
           onChange={onSelect}
@@ -49,8 +50,23 @@ export default function ShiftAdminDisplay({
             e.stopPropagation();
           }}
         />
-      </Grid>
+      </Grid> */}
       <Grid item xs={6} md={8} gap={1}>
+        <Checkbox
+          checked={isSelected}
+          onChange={onSelect}
+          onClick={(e: any) => {
+            e.stopPropagation();
+          }}
+          sx={{
+            p: 0,
+            m: 0,
+            '& .MuiCheckbox-root': {
+              p: 0,
+              m: 0,
+            },
+          }}
+        />
         <Box
           display="flex"
           flexDirection="column"
@@ -58,10 +74,10 @@ export default function ShiftAdminDisplay({
           justifyContent="center"
           height="100%"
         >
-          <StatusText
+          {/* <StatusText
             text={shift?.status || ''}
             type={shift?.status === SHIFT_STATUS.UNPAID ? 'error' : 'success'}
-          />
+          /> */}
           <Typography variant="h6" fontWeight="semibold">
             {shift?.employee?.name}
           </Typography>
@@ -94,7 +110,8 @@ export default function ShiftAdminDisplay({
                 {shift?.hours !== null ? shift.hours?.toFixed(2) : 'Ongoing'}
               </Typography>
               <Typography variant="h6" fontWeight="regular">
-                Hourly Rate: ${shift?.employee?.payRate}
+                {capitalize(shift?.employee?.payrollType as string)} Rate: $
+                {shift?.employee?.payRate}
               </Typography>
             </Box>
             {shift?.isActive && (
@@ -107,7 +124,10 @@ export default function ShiftAdminDisplay({
           </Box>
           <Divider />
           <Typography variant="h5">
-            Total: ${shift?.cost?.toFixed(2) || 0}
+            Total: $
+            {!shift?.cost || shift?.cost === 0
+              ? 'N/A'
+              : shift?.cost?.toFixed(2)}
           </Typography>
         </Box>
       </Grid>

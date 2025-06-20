@@ -1,5 +1,5 @@
-import StatusText from '@/app/admin/[companyId]/components/StatusText';
-import { SHIFT_STATUS } from '@/app/utils/enum';
+// import StatusText from '@/app/admin/[companyId]/components/StatusText';
+// import { SHIFT_STATUS } from '@/app/utils/enum';
 import { IShiftSession } from '@/app/utils/type';
 import { Box, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
@@ -45,10 +45,10 @@ export default function ShiftSummary({ shift }: IProps) {
   return (
     <Box display="flex" alignItems="center" justifyContent="space-between">
       <Box display="flex" flexDirection="column" gap={1}>
-        <StatusText
+        {/* <StatusText
           text={shift?.status || ''}
           type={shift?.status === SHIFT_STATUS.PAID ? 'success' : 'error'}
-        />
+        /> */}
         <Typography variant="h6">{displayDate}</Typography>
         <Typography variant="body2" sx={{ color: grey[700] }}>
           {shift?.route?.name ? shift?.route?.name : shift?.role}

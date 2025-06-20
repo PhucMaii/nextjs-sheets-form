@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PayrollType, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { SHIFT_STATUS, USER_ROLE, WORKING_ROLE } from '@/app/utils/enum';
 import { calculateHours } from '@/pages/api/drivers/shift/clock-out';
@@ -47,6 +47,10 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       hours,
     });
 
+    const cost =
+      existingDriver.payrollType === PayrollType.hourly
+        ? hours * (existingDriver?.payRate || 1)
+        : 0;
     const newShift = await prisma.shiftSession.create({
       data: {
         driverId,
@@ -56,7 +60,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         endedAt,
         routeId,
         hours,
-        cost: hours * (existingDriver?.payRate || 1),
+        cost: cost,
         status: SHIFT_STATUS.UNPAID,
         role,
         companyId: Number(companyId),

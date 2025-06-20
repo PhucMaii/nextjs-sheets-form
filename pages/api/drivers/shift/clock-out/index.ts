@@ -1,7 +1,7 @@
 import { getDriverInfo } from '@/pages/api/utils/auth';
 import { getTodayDate } from '@/pages/api/utils/date';
 import withDriverAuthGuard from '@/pages/api/utils/withDriverAuthGuar';
-import { PrismaClient } from '@prisma/client';
+import { PayrollType, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -32,6 +32,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const hours = calculateHours(shiftSession.startedAt, today.dateAndTime);
 
+    const cost =
+      driver.payrollType === PayrollType.hourly
+        ? hours * (driver?.payRate || 1)
+        : 0;
+
     const updatedShiftSession = await prisma.shiftSession.update({
       where: {
         id: shiftSession.id,
@@ -39,7 +44,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       data: {
         endedAt: today.dateAndTime,
         hours: hours * 1, // to get the float type
-        cost: hours * (driver?.payRate || 1),
+        cost: cost,
         isActive: false,
       },
     });

@@ -10,6 +10,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ShiftSummary from '../components/ShiftSummary';
 import { generateMonthRange } from '@/app/utils/time';
 import SelectDateRange from '@/app/admin/[companyId]/components/Select/SelectDateRange';
+import { PayrollType } from '@prisma/client';
 
 export default function HistoryShifts() {
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
@@ -33,9 +34,15 @@ export default function HistoryShifts() {
       return acc + shift.hours;
     }, 0);
 
-    const estEarnings = shifts?.reduce((acc: number, shift: any) => {
-      return acc + shift.cost;
-    }, 0);
+    let estEarnings = 0;
+
+    if (shifts[0]?.employee?.payrollType === PayrollType.hourly) {
+      estEarnings = shifts?.reduce((acc: number, shift: any) => {
+        return acc + shift.cost;
+      }, 0);
+    } else {
+      estEarnings = shifts[0]?.employee?.payRate || 0;
+    }
 
     return {
       totalHours: totalHours.toFixed(2),
