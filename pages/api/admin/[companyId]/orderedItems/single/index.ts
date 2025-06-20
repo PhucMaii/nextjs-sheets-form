@@ -12,6 +12,7 @@ import { createOrderedItems } from '@/pages/api/utils/orderedItems';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
+import { recordAction } from '@/pages/api/utils/timeline';
 
 interface IBody {
   id: number;
@@ -308,51 +309,24 @@ export const updateSingleInventoryItem = async (
     });
 
     // Add action of update inventory item
-    let existingTimeline = await prisma.orderTimeline.findFirst({
-      where: {
-        orderId,
-      },
-      include: {
-        actions: true,
-      },
-    });
+    if (orderId > 0) {
+      const difference = Math.abs(updatedQuantity - lastUpdatedFifo.quantity);
 
-    if (!existingTimeline) {
-      existingTimeline = await prisma.orderTimeline.create({
-        data: {
-          orderId,
+      await recordAction(
+        orderId,
+        `System updateSingleInventoryItem`,
+        updatedQuantity > lastUpdatedFifo.quantity
+          ? `Restock ${difference} ${lastUpdatedFifo.inventoryItem.name} to inventory`
+          : `Subtract ${difference} ${lastUpdatedFifo.inventoryItem.name} from inventory`,
+      );
+      // Mark the order hasSubtractInventory to true
+      await prisma.orders.update({
+        where: {
+          id: orderId,
         },
-        include: {
-          actions: true,
-        },
+        data: { hasSubtractInventory: true },
       });
     }
-
-    const today = getTodayDate();
-    // const quantity = updatedQuantity > lastUpdatedFifo.quantity ? previousQuantity : newQuantity;
-
-    const difference = Math.abs(updatedQuantity - lastUpdatedFifo.quantity);
-
-    await prisma.orderAction.create({
-      data: {
-        timelineId: existingTimeline.id,
-        title:
-          updatedQuantity > lastUpdatedFifo.quantity
-            ? `Restock ${difference} ${lastUpdatedFifo.inventoryItem.name} to inventory`
-            : `Subtract ${difference} ${lastUpdatedFifo.inventoryItem.name} from inventory`,
-        createdAt: today.dateAndTime,
-        createdBy: `System updateSingleInventoryItem`,
-        posIndex: existingTimeline.actions.length + 1,
-      },
-    });
-
-    // Mark the order hasSubtractInventory to true
-    await prisma.orders.update({
-      where: {
-        id: orderId,
-      },
-      data: { hasSubtractInventory: true },
-    });
 
     const targetVendorItem = await prisma.vendorItem.findUnique({
       where: {
