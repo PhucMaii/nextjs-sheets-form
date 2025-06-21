@@ -4,6 +4,7 @@ import { getTodayDate } from '@/pages/api/utils/date';
 import { ACTION, ORDER_STATUS } from '@/app/utils/enum';
 import { subtractInventoryItem } from '@/pages/api/admin/[companyId]/orderedItems/single';
 import { YYYYMMDDFormat } from '@/app/utils/time';
+import { recordAction } from '../../utils/timeline';
 
 interface ItemMap {
   [key: string]: {
@@ -145,7 +146,7 @@ export default async function handler(
       }
 
       // Create a set of same items and quantity
-      const itemMap: ItemMap = orderedItems.reduce((acc: any, item: any) => {
+      const itemMap: ItemMap = orderedItems.reduce(async (acc: any, item: any) => {
         if (!item.inventoryItemId || !item.inventoryUnitId) return acc; // Make sure again not touching the custom amount
 
         // If item has option, then set option
@@ -161,13 +162,17 @@ export default async function handler(
             inventoryItem: item.inventoryItem,
             fifo: item.fifo,
             inventoryUnit: itemUnit,
-            orderId: item.orderId,
           };
         } else {
           acc[item.inventoryItemId].quantity += quantityWithRatio1;
         }
+
+        await recordAction(item.orderId, 'System', `Subtract ${item.quantity} ${item.name} from inventory during auto track inventory`);
+        
         return acc;
       }, {});
+
+
 
       // Flag the action as taken
       const newAction = await prisma.action.create({

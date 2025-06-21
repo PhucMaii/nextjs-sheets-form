@@ -30,6 +30,8 @@ import { renderType } from '@/app/lib/render';
 import { grey } from '@mui/material/colors';
 import PendingIcon from '@mui/icons-material/Pending';
 import InfoIcon from '@mui/icons-material/Info';
+import { PaymentStatus } from '@prisma/client';
+import { AttachMoney, MoneyOffOutlined } from '@mui/icons-material';
 
 interface IProps {
   order: Order;
@@ -147,7 +149,7 @@ export default function OrderComponent({
         />
       )}
       <Grid container alignItems="center" spacing={1}>
-        {!isDateToday && (
+        {/* {!isDateToday && (
           <Grid item xs={12}>
             <Box display="flex" justifyContent="flex-end">
               <StatusText
@@ -157,14 +159,46 @@ export default function OrderComponent({
               />
             </Box>
           </Grid>
-        )}
+        )} */}
+        <Grid item xs={12}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" gap={1}>
+            <StatusText
+              text={order?.paymentStatus}
+              type={
+                order?.paymentStatus === PaymentStatus.Paid
+                  ? COLOR_TYPE.SUCCESS
+                  : COLOR_TYPE.ERROR
+              }
+              icon={
+                order?.paymentStatus === PaymentStatus.Paid ? (
+                  <AttachMoney color="success" sx={{ fontSize: 16 }} />
+                ) : (
+                  <MoneyOffOutlined color="error" sx={{ fontSize: 16 }} />
+                )
+              }
+            />
+
+            {
+              !isDateToday && (
+                <StatusText
+                  text="Date Difference"
+                  type="info"
+                  icon={<InfoIcon />}
+                />
+              )
+            }
+  
+          </Box>
+        </Grid>
         <Grid item xs={1}>
           <IconButton onClick={() => setIsOpenDetails(true)}>
             <PreviewIcon color="primary" />
           </IconButton>
         </Grid>
         <Grid item xs={5}>
-          <StatusText text={statusText.text} type={statusText.type} />
+          <Box display="flex" alignItems="center" gap={1}>
+            <StatusText text={statusText.text} type={statusText.type} />
+          </Box>
         </Grid>
         <Grid item xs={6} textAlign="right">
           <Box
@@ -225,7 +259,7 @@ export default function OrderComponent({
                 <LocalShippingIcon />
               </Fab>
             )}
-            {order.status !== ORDER_STATUS.COMPLETED && (
+            {order?.paymentStatus !== PaymentStatus.Paid && (
               <Fab
                 sx={{ zIndex: 0 }}
                 onClick={() =>

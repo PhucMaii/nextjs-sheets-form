@@ -70,7 +70,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     }
 
     if (statusUpdateData.status !== existingOrder.status) {
-      title += `Driver - ${driverUpdate.name} updated order status: ${existingOrder.status} -> ${updatedStatus}\n`;
+      title += `Driver - ${driverUpdate.name} updated order status: ${existingOrder.status} -> ${statusUpdateData.status}\n`;
     }
 
     if (statusUpdateData.paymentStatus !== existingOrder.paymentStatus) {
@@ -79,6 +79,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     await recordAction(existingOrder.id, createdBy, title);
 
+    console.log(statusUpdateData, 'statusUpdateData');
     const updatedOrder = await prisma.orders.update({
       where: {
         id: existingOrder.id,
