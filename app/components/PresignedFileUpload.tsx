@@ -53,8 +53,8 @@ export const PresignedFileUpload: React.FC<PresignedFileUploadProps> = ({
         throw new Error(errorData.error || 'Failed to generate presigned URL')
       }
 
-      const { presignedUrl } = await response.json()
-      return presignedUrl
+      const { presignedUrl, fileKey } = await response.json()
+      return { presignedUrl, fileKey }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to generate presigned URL'
       console.error('Error generating presigned URL:', error)
@@ -71,11 +71,12 @@ export const PresignedFileUpload: React.FC<PresignedFileUploadProps> = ({
       
       const files = [];
       for (const file of acceptedFiles) {
-        const presignedUrl = await generatePresignedUrl(file)
-        const fileData = await uploadFile(file, presignedUrl)
+        const { presignedUrl, fileKey } = await generatePresignedUrl(file)
+        console.log('Generated presigned URL with fileKey:', fileKey);
+        await uploadFile(file, presignedUrl, fileKey)
         files.push({
-            fileKey: fileData.fileKey,
-            fileName: fileData.fileName,
+            fileKey: fileKey,
+            fileName: file.name,
         });
       }
 

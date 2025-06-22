@@ -53,8 +53,8 @@ export default function UploadChequeModal({
     setChequeData({
       chequeNumber: '',
       amount: 0,
-      startDate: dayjs(new Date()).format('MM/DD/YYYY'),
-      endDate: dayjs(new Date()).format('MM/DD/YYYY'),
+      startDate: dayjs(new Date()).format('MM-DD-YYYY'),
+      endDate: dayjs(new Date()).format('MM-DD-YYYY'),
       year,
     });
 
@@ -109,6 +109,7 @@ export default function UploadChequeModal({
   };
 
   const handleFrontUploadComplete = (uploadedFiles: Array<{ fileKey: string; fileName: string }>) => {
+    console.log('Front upload complete:', uploadedFiles);
     if (uploadedFiles.length > 0) {
       setCheque(prev => ({
         ...prev,
@@ -119,6 +120,7 @@ export default function UploadChequeModal({
   };
 
   const handleBackUploadComplete = (uploadedFiles: Array<{ fileKey: string; fileName: string }>) => {
+    console.log('Back upload complete:', uploadedFiles);
     if (uploadedFiles.length > 0) {
       setCheque(prev => ({
         ...prev,
@@ -131,6 +133,8 @@ export default function UploadChequeModal({
   const handleUploadError = (error: string) => {
     showNotification('error', error);
   };
+
+  console.log(cheque, 'cheque');
 
   return (
     <>
@@ -156,7 +160,7 @@ export default function UploadChequeModal({
             <Typography>Front of cheque</Typography>
             {cheque?.front && <DisplayFile fileKey={cheque.front} isCheque />}
             <PresignedFileUpload
-              location={`cheques/${year}/${client?.clientId}/${dayjs(chequeData.startDate).format('MM-DD-YYYY')}`}
+              location={`cheques/${year}/${client?.clientId}/${dateRange[0] ? dayjs(dateRange[0]).format('MM-DD-YYYY') : dayjs(new Date()).format('MM-DD-YYYY')}`}
               isCheque={true}
               maxFiles={1}
               maxSize={10 * 1024 * 1024} // 10MB
@@ -169,7 +173,7 @@ export default function UploadChequeModal({
             <Typography>Back of cheque</Typography>
             {cheque?.back && <DisplayFile fileKey={cheque.back} isCheque />}
             <PresignedFileUpload
-              location={`cheques/${year}/${client?.clientId}/${dayjs(chequeData.endDate).format('MM-DD-YYYY')}`}
+              location={`cheques/${year}/${client?.clientId}/${dateRange[1] ? dayjs(dateRange[1]).format('MM-DD-YYYY') : dayjs(new Date()).format('MM-DD-YYYY')}`}
               isCheque={true}
               maxFiles={1}
               maxSize={10 * 1024 * 1024} // 10MB

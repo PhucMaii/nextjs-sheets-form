@@ -1,6 +1,7 @@
 // import { getLoadUrl } from '@/app/lib/r2';
 import { generateImgUrl } from '@/app/lib/s3';
 import React, { useState, useEffect } from 'react';
+import { Box, Typography, CircularProgress } from '@mui/material';
 
 interface IProps {
   fileKey: string;
@@ -22,14 +23,74 @@ export default function DisplayFile({
   style,
 }: IProps) {
   const [url, setUrl] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUrl = async () => {
-      const url = await generateImgUrl(fileKey, isCheque);
-      setUrl(url);
+      console.log('DisplayFile: fileKey =', fileKey, 'isCheque =', isCheque);
+      
+      if (!fileKey) {
+        setError('No file key provided');
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        setError(null);
+        const url = await generateImgUrl(fileKey, isCheque);
+        console.log('DisplayFile: Generated URL =', url);
+        setUrl(url);
+      } catch (err) {
+        console.error('Failed to generate image URL:', err);
+        setError('Failed to load image');
+        setUrl('');
+      } finally {
+        setIsLoading(false);
+      }
     };
     fetchUrl();
   }, [fileKey, isCheque]);
+
+  if (isLoading) {
+    return (
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        sx={{
+          width: width || '100px',
+          height: height || '100px',
+          border: '1px dashed #ccc',
+          borderRadius: 1,
+        }}
+      >
+        <CircularProgress size={20} />
+      </Box>
+    );
+  }
+
+  if (error || !url) {
+    return (
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        sx={{
+          width: width || '100px',
+          height: height || '100px',
+          border: '1px dashed #ccc',
+          borderRadius: 1,
+          backgroundColor: '#f5f5f5',
+        }}
+      >
+        <Typography variant="caption" color="text.secondary" textAlign="center">
+          {error || 'Image not found'}
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <>
@@ -45,6 +106,7 @@ export default function DisplayFile({
             ...style,
           }}
           onClick={onClick}
+          onError={() => setError('Failed to load image')}
         />
       )}
     </>

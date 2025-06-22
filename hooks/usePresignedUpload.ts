@@ -16,6 +16,7 @@ interface UsePresignedUploadReturn extends UploadState {
   uploadFile: (
     file: File,
     presignedUrl: string,
+    fileKey: string,
     useFetch?: boolean,
   ) => Promise<{ fileKey: string; fileName: string; presignedUrl: string }>;
   resetUpload: () => void;
@@ -39,6 +40,7 @@ export const usePresignedUpload = (): UsePresignedUploadReturn => {
     async (
       file: File,
       presignedUrl: string,
+      fileKey: string,
       useFetch: boolean = false,
     ): Promise<{ fileKey: string; fileName: string; presignedUrl: string }> => {
       setState((prev) => ({
@@ -62,6 +64,8 @@ export const usePresignedUpload = (): UsePresignedUploadReturn => {
           await uploadFileWithPresignedUrl(file, presignedUrl, onProgress);
         }
 
+        // replace all spaces with hyphens
+        const fileNameWithHyphes = file.name.replace(/\s+/g, '-');
         setState((prev) => ({
           ...prev,
           isUploading: false,
@@ -69,16 +73,16 @@ export const usePresignedUpload = (): UsePresignedUploadReturn => {
           uploadedFiles: [
             ...prev.uploadedFiles,
             {
-              fileKey: `${Date.now()}-${file.name}`,
-              fileName: file.name,
+              fileKey,
+              fileName: fileNameWithHyphes,
               presignedUrl,
             },
           ],
         }));
 
         return {
-          fileKey: `${Date.now()}-${file.name}`,
-          fileName: file.name,
+          fileKey,
+          fileName: fileNameWithHyphes,
           presignedUrl,
         };
       } catch (error) {
@@ -109,8 +113,6 @@ export const usePresignedUpload = (): UsePresignedUploadReturn => {
       error: null,
     }));
   }, []);
-
-  console.log(state, 'state');
 
   return {
     ...state,
