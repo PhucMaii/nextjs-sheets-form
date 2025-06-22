@@ -12,18 +12,20 @@ interface PresignedFileUploadProps {
   acceptedFileTypes?: string[]
   onUploadComplete?: (uploadedFiles: Array<{ fileKey: string; fileName: string }>) => void
   onUploadError?: (error: string) => void
-  className?: string
+  className?: string;
+  isUploaded?: boolean;
 }
 
 export const PresignedFileUpload: React.FC<PresignedFileUploadProps> = ({
   location,
   isCheque = false,
-  maxFiles = 5,
+  maxFiles = 1,
   maxSize = 10 * 1024 * 1024, // 10MB
-  acceptedFileTypes = ['image/*', 'application/pdf', 'text/*'],
+  acceptedFileTypes = ['image/*', 'application/pdf'],
   onUploadComplete,
   onUploadError,
   className = '',
+  isUploaded = false,
 }) => {
   const [isGeneratingUrl, setIsGeneratingUrl] = useState(false)
   const { isUploading, progress, error, uploadedFiles, uploadFile, resetUpload, clearError } =
@@ -79,12 +81,6 @@ export const PresignedFileUpload: React.FC<PresignedFileUploadProps> = ({
             fileName: file.name,
         });
       }
-
-    //   const uploadedFileData = .map(({ fileKey, fileName }) => ({
-    //     fileKey,
-    //     fileName,
-    //   }))
-    console.log(files, 'files');
       
       onUploadComplete?.(files as any)
     } catch (error) {
@@ -109,7 +105,10 @@ export const PresignedFileUpload: React.FC<PresignedFileUploadProps> = ({
       acc[type] = []
       return acc
     }, {} as Record<string, string[]>),
-  })
+    disabled: isUploaded,
+  });
+
+  console.log(uploadedFiles, 'uploadedFiles');
 
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes'
@@ -125,17 +124,27 @@ export const PresignedFileUpload: React.FC<PresignedFileUploadProps> = ({
       <div
         {...getRootProps()}
         className={`
-          border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors
-          ${isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}
+          border-2 border-dashed rounded-lg p-8 text-center transition-colors
+          ${isUploaded 
+            ? 'border-gray-200 bg-gray-50 cursor-not-allowed' 
+            : isDragActive 
+              ? 'border-blue-500 bg-blue-50 cursor-pointer' 
+              : 'border-gray-300 hover:border-gray-400 cursor-pointer'
+          }
           ${(isUploading || isGeneratingUrl) ? 'opacity-50 cursor-not-allowed' : ''}
         `}
       >
-        <input {...getInputProps()} />
+        <input {...getInputProps()} disabled={isUploaded || isUploading || isGeneratingUrl} />
         
         <div className="space-y-4">
           <div className="text-6xl text-gray-400">📁</div>
           
-          {isDragActive ? (
+          {isUploaded ? (
+            <div>
+              <p className="text-lg font-medium text-gray-500">Files already uploaded</p>
+              <p className="text-sm text-gray-400 mt-2">Upload is complete</p>
+            </div>
+          ) : isDragActive ? (
             <p className="text-lg font-medium text-blue-600">Drop the files here...</p>
           ) : (
             <div>

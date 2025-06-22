@@ -168,6 +168,7 @@ export default function UploadChequeModal({
               onUploadComplete={handleFrontUploadComplete}
               onUploadError={handleUploadError}
               className="mb-4"
+              // isUploaded={!!cheque.front}
             />
 
             <Typography>Back of cheque</Typography>
@@ -181,6 +182,7 @@ export default function UploadChequeModal({
               onUploadComplete={handleBackUploadComplete}
               onUploadError={handleUploadError}
               className="mb-4"
+              // isUploaded={!!cheque.back}
             />
 
             <Typography variant="h6" fontWeight="regular">

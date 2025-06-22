@@ -32,6 +32,7 @@ import PendingIcon from '@mui/icons-material/Pending';
 import InfoIcon from '@mui/icons-material/Info';
 import { PaymentStatus } from '@prisma/client';
 import { AttachMoney, MoneyOffOutlined } from '@mui/icons-material';
+import ConfirmDelivery from './Modals/ConfirmDelivery';
 
 interface IProps {
   order: Order;
@@ -62,7 +63,7 @@ export default function OrderComponent({
   const [isOpenDetails, setIsOpenDetails] = useState<boolean>(false);
   const [isOpenClientDetails, setIsOpenClientDetails] =
     useState<boolean>(false);
-
+  const [isOpenConfirmDelivery, setIsOpenConfirmDelivery] = useState<boolean>(false);
   const isDateToday = useMemo(() => {
     const today = new Date();
     const deliveryDate = new Date(order.deliveryDate);
@@ -139,6 +140,11 @@ export default function OrderComponent({
         color={confirmModalProps.color}
         updatedStatus={confirmModalProps.updatedStatus}
         orderId={order.id}
+      />
+      <ConfirmDelivery 
+        open={isOpenConfirmDelivery}
+        onClose={() => setIsOpenConfirmDelivery(false)}
+        order={order}
       />
       {isOpenDetails && (
         <OrderDetails
@@ -245,14 +251,7 @@ export default function OrderComponent({
             {order.status !== ORDER_STATUS.DELIVERED && (
               <Fab
                 sx={{ zIndex: 0 }}
-                onClick={() =>
-                  setConfirmModalProps({
-                    on: true,
-                    heading: `Have you delivered order for ${order.clientName}`,
-                    color: 'primary',
-                    updatedStatus: ORDER_STATUS.DELIVERED,
-                  })
-                }
+                onClick={() => setIsOpenConfirmDelivery(true)}
                 color="primary"
                 size="small"
               >

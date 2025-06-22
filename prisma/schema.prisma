@@ -49,7 +49,8 @@ model Company {
   companyPages      CompanyPage[]
   quotes            Quote[]
   quoteItems        QuoteItem[]
-  payrolls          Payroll[]  
+  payrolls          Payroll[]
+  deliveries        Delivery[]
 }
 
 model PageView {
@@ -100,6 +101,7 @@ model Employee {
   adminPages        AdminPage[]
   scheduledShifts   ScheduledShift[]
   payrolls          Payroll[]
+  deliveries        Delivery[]
 
   company Company @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
@@ -320,6 +322,8 @@ model Orders {
   companyId              Int?
   hasSubtractInventory   Boolean?
 
+  delivery          Delivery? @relation("OrderDelivery")
+
   items             OrderedItems[]
   timeline          OrderTimeline?  @relation("OrderTimeline")
 
@@ -330,6 +334,26 @@ model Orders {
   @@index([deliveryDate, status])
   @@index([userId])
   @@index([companyId])
+}
+
+model Delivery {
+  id            Int           @id @default(autoincrement())
+  orderId       Int @unique
+  employeeId    Int
+  deliveredAt   String
+  companyId     Int?
+  
+  medias               Media[]
+
+  // Relations
+  order     Orders    @relation("OrderDelivery", fields: [orderId], references: [id], onDelete: Cascade)
+  employee  Employee  @relation(fields: [employeeId], references: [id])
+  company   Company?  @relation(fields: [companyId], references: [id])
+  
+  @@index([orderId])
+  @@index([employeeId])
+  @@index([companyId])
+  @@index([deliveredAt])
 }
 
 model OrderTimeline {
@@ -935,8 +959,10 @@ model Media {
   createdAt    String
   createdBy    String
   lossReportId Int?
+  deliveryId   Int?
 
   lossReport LossReport? @relation(fields: [lossReportId], references: [id], onDelete: Cascade)
+  delivery   Delivery?   @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
 }
 
 enum QuoteStatus {

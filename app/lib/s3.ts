@@ -56,25 +56,16 @@ export const generateImgUrl = async (
   fileKey: string,
   isCheque: boolean = false,
 ) => {
-  console.log('generateImgUrl called with:', { fileKey, isCheque });
-  console.log('Environment variables:', {
-    NEXT_PUBLIC_S3_BUCKET_NAME: process.env.NEXT_PUBLIC_S3_BUCKET_NAME,
-    NEXT_PUBLIC_S3_BUCKET_NAME_CHEQUE:
-      process.env.NEXT_PUBLIC_S3_BUCKET_NAME_CHEQUE,
-  });
-
   if (!fileKey) return '';
 
   try {
     if (isCheque) {
-      console.log('Generating signed URL for cheque file:', fileKey);
       const command = new GetObjectCommand({
         Bucket: process.env.NEXT_PUBLIC_S3_BUCKET_NAME_CHEQUE,
         Key: fileKey,
       });
 
       const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
-      console.log({ signedUrl, fileKey }, 'signedUrl');
       return signedUrl;
     }
 
@@ -85,7 +76,7 @@ export const generateImgUrl = async (
     }.s3.us-west-2.amazonaws.com/${fileKey}`;
   } catch (error) {
     console.error('Fail to get image from S3: ', error);
-    return '';
+    return '/images/not-found.png';
   }
 };
 
