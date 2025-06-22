@@ -63,9 +63,8 @@ export default function CODBoardSummary({
   }, [boardData]);
 
   const uncollectedOrders = useFilterOrders(boardData.orders, [
-    ORDER_STATUS.INCOMPLETED,
-    ORDER_STATUS.DELIVERED,
-  ]);
+    PaymentStatus.Unpaid
+  ], 'payment');
 
   const uncollectedAmount = uncollectedOrders.reduce(
     (acc: number, order: Order) => {

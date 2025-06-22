@@ -25,9 +25,8 @@ export default function OverviewBoard({ boardData }: { boardData: IBoard }) {
   }, 0);
 
   const uncollectedOrders = useFilterOrders(boardData.orders, [
-    ORDER_STATUS.INCOMPLETED,
-    ORDER_STATUS.DELIVERED,
-  ]);
+    PaymentStatus.Unpaid
+  ], 'payment');
 
   const uncollectedAmount = uncollectedOrders.reduce(
     (acc: number, order: Order) => {
