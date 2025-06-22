@@ -63,6 +63,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         });
       }
 
+      console.log(updateData, 'updateData');
+
       const updatedOrder = await prisma.orders.update({
         where: {
           id,

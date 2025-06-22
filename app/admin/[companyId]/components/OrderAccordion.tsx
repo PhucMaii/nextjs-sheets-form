@@ -203,8 +203,10 @@ const OrderAccordion = ({
 
       if (type === 'fulfillment') {
         updateData.status = status;
+        updateData.paymentStatus = null;
       } else if (type === 'payment') {
         updateData.paymentStatus = status;
+        updateData.status = null;
       }
       const response = await axios.put(
         getAdminApiUrl(companyId, '/orders/status'),
