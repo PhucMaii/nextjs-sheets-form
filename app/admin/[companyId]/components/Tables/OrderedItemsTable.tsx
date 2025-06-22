@@ -5,17 +5,19 @@ import {
   TableCell,
   TableHead,
   TableBody,
+  TableContainer,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { gstRate, pstRate } from '@/app/lib/constant';
 import { generateImgUrl } from '@/app/lib/s3';
 
 const OrderedItemRow = ({ item }: { item: OrderedItems }) => {
-  const [img, setImg] = useState<string>('');
+  const [img, setImg] = useState<string>('/images/not-found.png');
 
   useEffect(() => {
     if (item.inventoryItem.image) {
       generateImgUrl(item.inventoryItem.image).then((url) => {
+        console.log(url, 'url');
         setImg(url);
       });
     }
@@ -24,7 +26,7 @@ const OrderedItemRow = ({ item }: { item: OrderedItems }) => {
     <TableRow>
       <TableCell sx={{ py: 0.5, px: 0 }}>
         <img
-          src={img}
+          src={img ? img : '/images/not-found.png'}
           alt={item.inventoryItem.name}
           width={100}
           height={100}
@@ -52,6 +54,7 @@ interface IProps {
 
 const OrderedItemsTable = ({ items }: IProps) => {
   return (
+    <TableContainer sx={{width: '100%', overflow: 'scroll'}}>
     <Table>
       <TableHead>
         <TableRow>
@@ -70,6 +73,7 @@ const OrderedItemsTable = ({ items }: IProps) => {
         ))}
       </TableBody>
     </Table>
+    </TableContainer>
   );
 };
 

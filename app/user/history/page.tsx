@@ -40,8 +40,9 @@ import { filterDateRangeOrders } from '@/pages/api/utils/date';
 import OverviewCard from '@/app/admin/[companyId]/components/OverviewCard/OverviewCard';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import SelectDateRange from '@/app/admin/[companyId]/components/Select/SelectDateRange';
-import OrderAccordion from '@/app/admin/[companyId]/components/OrderAccordion';
+// import OrderAccordion from '@/app/admin/[companyId]/components/OrderAccordion';
 import { PaymentStatus } from '@prisma/client';
+import OrderAccordion from '@/app/components/OrderAccordion';
 
 const totalYPosition = 250;
 export default function HistoryPage() {
@@ -313,6 +314,7 @@ export default function HistoryPage() {
               style={{ height: virtuosoHeight }}
               data={clientOrders}
               itemContent={(index: number, order: Order) => (
+                // <OrderAccordion key={index} order={order} />
                 <OrderAccordion key={index} order={order} />
               )}
             />
