@@ -11,7 +11,6 @@ import React, { useEffect, useState } from 'react';
 import { ModalProps } from './type';
 import { BoxModal } from './styled';
 import ModalHead from '@/app/lib/ModalHead';
-import FileUpload from '../FileUpload';
 import axios from 'axios';
 import { getAdminApiUrl } from '@/app/utils/enum';
 import { UserType } from '@/app/utils/type';
@@ -20,6 +19,7 @@ import { useParams } from 'next/navigation';
 import dayjs from 'dayjs';
 import DateRange from './DateRangeModal';
 import { generateMonthRange } from '@/app/utils/time';
+import { PresignedFileUpload } from '@/app/components/PresignedFileUpload';
 
 interface IProps extends ModalProps {
   showNotification: (type: AlertColor, message: string) => void;
@@ -36,8 +36,6 @@ export default function UploadChequeModal({
 }: IProps) {
   const { companyId }: any = useParams();
   const [isSelectRangeOpen, setIsSelectRangeOpen] = useState<boolean>(false);
-  // const [updatedDateRange, setUpdatedDateRange] = useState<any>([]);
-  // const [newDateRange, setNewDateRange] = useState<any>([]);
 
   const [cheque, setCheque] = useState<{ front: string; back: string }>({
     front: '',
@@ -46,7 +44,6 @@ export default function UploadChequeModal({
   const [chequeData, setChequeData] = useState<any>({
     chequeNumber: '',
     amount: 0,
-    // dateRange: dateRange,
     year,
   });
   const [dateRange, setDateRange] = useState<Date[]>(generateMonthRange());
@@ -68,17 +65,16 @@ export default function UploadChequeModal({
   }, [open]);
 
   const handleUpload = async () => {
-    console.log(client, 'client');
     if (!client) {
       showNotification('error', 'Please select a client');
       return;
     }
+
     if (
       !cheque.front ||
       chequeData.amount === 0 ||
       !chequeData.startDate ||
-      !chequeData.endDate ||
-      !chequeData.year
+      !chequeData.endDate
     ) {
       showNotification('error', 'Please fill all required the fields');
       return;
@@ -112,6 +108,30 @@ export default function UploadChequeModal({
     }
   };
 
+  const handleFrontUploadComplete = (uploadedFiles: Array<{ fileKey: string; fileName: string }>) => {
+    if (uploadedFiles.length > 0) {
+      setCheque(prev => ({
+        ...prev,
+        front: uploadedFiles[0].fileKey,
+      }));
+      showNotification('success', 'Front cheque uploaded successfully');
+    }
+  };
+
+  const handleBackUploadComplete = (uploadedFiles: Array<{ fileKey: string; fileName: string }>) => {
+    if (uploadedFiles.length > 0) {
+      setCheque(prev => ({
+        ...prev,
+        back: uploadedFiles[0].fileKey,
+      }));
+      showNotification('success', 'Back cheque uploaded successfully');
+    }
+  };
+
+  const handleUploadError = (error: string) => {
+    showNotification('error', error);
+  };
+
   return (
     <>
       <DateRange
@@ -135,32 +155,28 @@ export default function UploadChequeModal({
           <Box display="flex" flexDirection="column" gap={2} mb={2}>
             <Typography>Front of cheque</Typography>
             {cheque?.front && <DisplayFile fileKey={cheque.front} isCheque />}
-            <FileUpload
-              showNotification={showNotification}
-              fileName={`${dayjs(chequeData.startDate).format('MM-DD-YYYY')}-${year}-${client?.clientId}_front`}
-              uploadLocation={`cheques/${year}/${client?.clientId}/${dayjs(chequeData.startDate).format('MM-DD-YYYY')}`}
-              onUploadImageUI={(fileKey: string) => {
-                setCheque({
-                  ...cheque,
-                  front: fileKey,
-                });
-              }}
-              isCheque
+            <PresignedFileUpload
+              location={`cheques/${year}/${client?.clientId}/${dayjs(chequeData.startDate).format('MM-DD-YYYY')}`}
+              isCheque={true}
+              maxFiles={1}
+              maxSize={10 * 1024 * 1024} // 10MB
+              acceptedFileTypes={['image/*', 'application/pdf']}
+              onUploadComplete={handleFrontUploadComplete}
+              onUploadError={handleUploadError}
+              className="mb-4"
             />
 
             <Typography>Back of cheque</Typography>
             {cheque?.back && <DisplayFile fileKey={cheque.back} isCheque />}
-            <FileUpload
-              showNotification={showNotification}
-              fileName={`${dayjs(chequeData.endDate).format('MM-DD-YYYY')}-${year}-${client?.clientId}_back`}
-              uploadLocation={`cheques/${year}/${client?.clientId}/${dayjs(chequeData.endDate).format('MM-DD-YYYY')}`}
-              onUploadImageUI={(fileKey: string) => {
-                setCheque({
-                  ...cheque,
-                  back: fileKey,
-                });
-              }}
-              isCheque
+            <PresignedFileUpload
+              location={`cheques/${year}/${client?.clientId}/${dayjs(chequeData.endDate).format('MM-DD-YYYY')}`}
+              isCheque={true}
+              maxFiles={1}
+              maxSize={10 * 1024 * 1024} // 10MB
+              acceptedFileTypes={['image/*', 'application/pdf']}
+              onUploadComplete={handleBackUploadComplete}
+              onUploadError={handleUploadError}
+              className="mb-4"
             />
 
             <Typography variant="h6" fontWeight="regular">
