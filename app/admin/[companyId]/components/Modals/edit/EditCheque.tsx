@@ -12,8 +12,6 @@ import { ModalProps } from '../type';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
 import { Cheque } from '@prisma/client';
-import FileUpload from '../../FileUpload';
-import { days } from '@/app/lib/constant';
 import { UserType } from '@/app/utils/type';
 import { LoadingButton } from '@mui/lab';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -25,6 +23,7 @@ import { useParams } from 'next/navigation';
 import DateRange from '../DateRangeModal';
 import dayjs from 'dayjs';
 import { generateMonthRange } from '@/app/utils/time';
+import { PresignedFileUpload } from '@/app/components/PresignedFileUpload';
 
 interface IProps extends ModalProps {
   cheque: Cheque;
@@ -52,7 +51,7 @@ export default function EditCheque({
     ...cheque,
   });
 
-  const month = days[new Date().getMonth()];
+  // const month = days[new Date().getMonth()];
   const year = new Date().getFullYear();
 
   useEffect(() => {
@@ -149,7 +148,7 @@ export default function EditCheque({
             {updatedCheque?.fileKeyFront && (
               <DisplayFile fileKey={updatedCheque.fileKeyFront} isCheque />
             )}
-            <FileUpload
+            {/* <FileUpload
               showNotification={showNotification}
               fileName={`${month}-${year}-${client?.clientId}_front`}
               uploadLocation={`cheques/${year}/${month}`}
@@ -160,23 +159,51 @@ export default function EditCheque({
                 });
               }}
               isCheque
+            /> */}
+            <PresignedFileUpload
+              location={`cheques/${year}/${client?.clientId}/${dateRange[0] ? dayjs(dateRange[0]).format('MM-DD-YYYY') : dayjs(new Date()).format('MM-DD-YYYY')}`}
+              isCheque={true}
+              maxFiles={1}
+              maxSize={10 * 1024 * 1024} // 10MB
+              acceptedFileTypes={['image/*', 'application/pdf']}
+              onUploadComplete={(files) => {
+                setUpdatedCheque({
+                  ...updatedCheque,
+                  fileKeyFront: files[0].fileKey,
+                });
+              }}
+              // isUploaded={!!updatedCheque.fileKeyFront}
             />
 
             <Typography>Back of cheque</Typography>
             {updatedCheque?.fileKeyBack && (
               <DisplayFile fileKey={updatedCheque.fileKeyBack} isCheque />
             )}
-            <FileUpload
-              showNotification={showNotification}
-              fileName={`${month}-${year}-${client?.clientId}_back`}
-              uploadLocation={`cheques/${year}/${month}`}
-              onUploadImageUI={(fileKey: string) => {
+              {/* <FileUpload
+                showNotification={showNotification}
+                fileName={`${month}-${year}-${client?.clientId}_back`}
+                uploadLocation={`cheques/${year}/${month}`}
+                onUploadImageUI={(fileKey: string) => {
+                  setUpdatedCheque({
+                    ...updatedCheque,
+                    fileKeyBack: fileKey,
+                  });
+                }}
+                isCheque
+              /> */}
+              <PresignedFileUpload
+              location={`cheques/${year}/${client?.clientId}/${dateRange[1] ? dayjs(dateRange[1]).format('MM-DD-YYYY') : dayjs(new Date()).format('MM-DD-YYYY')}`}
+              isCheque={true}
+              maxFiles={1}
+              maxSize={10 * 1024 * 1024} // 10MB
+              acceptedFileTypes={['image/*', 'application/pdf']}
+              onUploadComplete={(files) => {
                 setUpdatedCheque({
                   ...updatedCheque,
-                  fileKeyBack: fileKey,
+                  fileKeyBack: files[0].fileKey,
                 });
               }}
-              isCheque
+              // isUploaded={!!updatedCheque.fileKeyBack}
             />
 
             <Typography variant="h6" fontWeight="regular">
