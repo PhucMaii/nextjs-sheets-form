@@ -237,11 +237,15 @@ export default function OrdersPage() {
   const handleUpdateStatus = async (
     orderId: number,
     updatedStatus: ORDER_STATUS,
+    fileKey?: string,
   ) => {
+    console.log(fileKey, 'fileKey in handle update status');
+    // return;
     try {
       const response = await axios.put(`${API_URL.DRIVER_ORDERS}/status`, {
         orderId,
         updatedStatus,
+        fileKey,
       });
 
       if (response.data.error) {

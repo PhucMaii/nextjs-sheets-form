@@ -21,6 +21,7 @@ export default async function uploadToS3(
   location: string,
   isCheque: boolean = false,
 ) {
+  console.log(file.name, 'file name in upload to s3')
   try {
     if (
       !process.env.NEXT_PUBLIC_S3_BUCKET_NAME ||

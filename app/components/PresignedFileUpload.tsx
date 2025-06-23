@@ -1,17 +1,19 @@
-'use client'
+'use client';
 
-import React, { useCallback, useState } from 'react'
-import { useDropzone } from 'react-dropzone'
-import { usePresignedUpload } from '../../hooks/usePresignedUpload'
+import React, { useCallback, useState } from 'react';
+import { useDropzone } from 'react-dropzone';
+import { usePresignedUpload } from '../../hooks/usePresignedUpload';
 
 interface PresignedFileUploadProps {
-  location: string
-  isCheque?: boolean
-  maxFiles?: number
-  maxSize?: number
-  acceptedFileTypes?: string[]
-  onUploadComplete?: (uploadedFiles: Array<{ fileKey: string; fileName: string }>) => void
-  onUploadError?: (error: string) => void
+  location: string;
+  isCheque?: boolean;
+  maxFiles?: number;
+  maxSize?: number;
+  acceptedFileTypes?: string[];
+  onUploadComplete?: (
+    uploadedFiles: Array<{ fileKey: string; fileName: string }>,
+  ) => void;
+  onUploadError?: (error: string) => void;
   className?: string;
   isUploaded?: boolean;
 }
@@ -27,96 +29,124 @@ export const PresignedFileUpload: React.FC<PresignedFileUploadProps> = ({
   className = '',
   isUploaded = false,
 }) => {
-  const [isGeneratingUrl, setIsGeneratingUrl] = useState(false)
-  const { isUploading, progress, error, uploadedFiles, uploadFile, resetUpload, clearError } =
-    usePresignedUpload()
+  const [isGeneratingUrl, setIsGeneratingUrl] = useState(false);
+  const {
+    isUploading,
+    progress,
+    error,
+    uploadedFiles,
+    uploadFile,
+    clearError,
+  } = usePresignedUpload();
 
-  const generatePresignedUrl = useCallback(async (file: File) => {
-    try {
-      setIsGeneratingUrl(true)
-      clearError()
+  const generatePresignedUrl = useCallback(
+    async (file: File) => {
+      try {
+        setIsGeneratingUrl(true);
+        clearError();
 
-      const response = await fetch('/api/upload/presigned-url', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          fileName: file.name,
-          fileType: file.type,
-          location,
-          isCheque,
-          expiresIn: 3600,
-        }),
-      })
+        const response = await fetch('/api/upload/presigned-url', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            fileName: file.name,
+            fileType: file.type,
+            location,
+            isCheque,
+            expiresIn: 3600,
+          }),
+        });
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to generate presigned URL')
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(
+            errorData.error || 'Failed to generate presigned URL',
+          );
+        }
+
+        const { presignedUrl, fileKey } = await response.json();
+        return { presignedUrl, fileKey };
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : 'Failed to generate presigned URL';
+        console.error('Error generating presigned URL:', error);
+        onUploadError?.(errorMessage);
+        throw error;
+      } finally {
+        setIsGeneratingUrl(false);
       }
+    },
+    [location, isCheque, clearError, onUploadError],
+  );
 
-      const { presignedUrl, fileKey } = await response.json()
-      return { presignedUrl, fileKey }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to generate presigned URL'
-      console.error('Error generating presigned URL:', error)
-      onUploadError?.(errorMessage)
-      throw error
-    } finally {
-      setIsGeneratingUrl(false)
-    }
-  }, [location, isCheque, clearError, onUploadError])
+  const handleFileUpload = useCallback(
+    async (acceptedFiles: File[]) => {
+      try {
+        clearError();
 
-  const handleFileUpload = useCallback(async (acceptedFiles: File[]) => {
-    try {
-      clearError()
-      
-      const files = [];
-      for (const file of acceptedFiles) {
-        const { presignedUrl, fileKey } = await generatePresignedUrl(file)
-        console.log('Generated presigned URL with fileKey:', fileKey);
-        await uploadFile(file, presignedUrl, fileKey)
-        files.push({
+        const files = [];
+        for (const file of acceptedFiles) {
+          const { presignedUrl, fileKey } = await generatePresignedUrl(file);
+          console.log('Generated presigned URL with fileKey:', fileKey);
+          await uploadFile(file, presignedUrl, fileKey);
+          files.push({
             fileKey: fileKey,
             fileName: file.name,
-        });
+          });
+        }
+
+        onUploadComplete?.(files as any);
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : 'Upload failed';
+        console.error('Upload error:', error);
+        onUploadError?.(errorMessage);
       }
-      
-      onUploadComplete?.(files as any)
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Upload failed'
-      console.error('Upload error:', error)
-      onUploadError?.(errorMessage)
-    }
-  }, [generatePresignedUrl, uploadFile, uploadedFiles, clearError, onUploadComplete, onUploadError])
+    },
+    [
+      generatePresignedUrl,
+      uploadFile,
+      uploadedFiles,
+      clearError,
+      onUploadComplete,
+      onUploadError,
+    ],
+  );
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
-      handleFileUpload(acceptedFiles)
+      handleFileUpload(acceptedFiles);
     },
     [handleFileUpload],
-  )
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     maxFiles,
     maxSize,
-    accept: acceptedFileTypes.reduce((acc, type) => {
-      acc[type] = []
-      return acc
-    }, {} as Record<string, string[]>),
+    accept: acceptedFileTypes.reduce(
+      (acc, type) => {
+        acc[type] = [];
+        return acc;
+      },
+      {} as Record<string, string[]>,
+    ),
     disabled: isUploaded,
   });
 
   console.log(uploadedFiles, 'uploadedFiles');
 
   const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes'
-    const k = 1024
-    const sizes = ['Bytes', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-  }
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
 
   return (
     <div className={`w-full ${className}`}>
@@ -125,27 +155,35 @@ export const PresignedFileUpload: React.FC<PresignedFileUploadProps> = ({
         {...getRootProps()}
         className={`
           border-2 border-dashed rounded-lg p-8 text-center transition-colors
-          ${isUploaded 
-            ? 'border-gray-200 bg-gray-50 cursor-not-allowed' 
-            : isDragActive 
-              ? 'border-blue-500 bg-blue-50 cursor-pointer' 
-              : 'border-gray-300 hover:border-gray-400 cursor-pointer'
+          ${
+            isUploaded
+              ? 'border-gray-200 bg-gray-50 cursor-not-allowed'
+              : isDragActive
+                ? 'border-blue-500 bg-blue-50 cursor-pointer'
+                : 'border-gray-300 hover:border-gray-400 cursor-pointer'
           }
-          ${(isUploading || isGeneratingUrl) ? 'opacity-50 cursor-not-allowed' : ''}
+          ${isUploading || isGeneratingUrl ? 'opacity-50 cursor-not-allowed' : ''}
         `}
       >
-        <input {...getInputProps()} disabled={isUploaded || isUploading || isGeneratingUrl} />
-        
+        <input
+          {...getInputProps()}
+          disabled={isUploaded || isUploading || isGeneratingUrl}
+        />
+
         <div className="space-y-4">
           <div className="text-6xl text-gray-400">📁</div>
-          
+
           {isUploaded ? (
             <div>
-              <p className="text-lg font-medium text-gray-500">Files already uploaded</p>
+              <p className="text-lg font-medium text-gray-500">
+                Files already uploaded
+              </p>
               <p className="text-sm text-gray-400 mt-2">Upload is complete</p>
             </div>
           ) : isDragActive ? (
-            <p className="text-lg font-medium text-blue-600">Drop the files here...</p>
+            <p className="text-lg font-medium text-blue-600">
+              Drop the files here...
+            </p>
           ) : (
             <div>
               <p className="text-lg font-medium text-gray-700">
@@ -199,7 +237,9 @@ export const PresignedFileUpload: React.FC<PresignedFileUploadProps> = ({
       {/* Uploaded Files List */}
       {uploadedFiles.length > 0 && (
         <div className="mt-4">
-          <h3 className="text-lg font-medium text-gray-700 mb-2">Uploaded Files:</h3>
+          <h3 className="text-lg font-medium text-gray-700 mb-2">
+            Uploaded Files:
+          </h3>
           <div className="space-y-2">
             {uploadedFiles.map((file, index) => (
               <div
@@ -216,18 +256,6 @@ export const PresignedFileUpload: React.FC<PresignedFileUploadProps> = ({
           </div>
         </div>
       )}
-
-      {/* Reset Button */}
-      {uploadedFiles.length > 0 && (
-        <div className="mt-4">
-          <button
-            onClick={resetUpload}
-            className="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            Reset Uploads
-          </button>
-        </div>
-      )}
     </div>
-  )
-} 
+  );
+};

@@ -63,7 +63,11 @@ export default function OrderComponent({
   const [isOpenDetails, setIsOpenDetails] = useState<boolean>(false);
   const [isOpenClientDetails, setIsOpenClientDetails] =
     useState<boolean>(false);
-  const [isOpenConfirmDelivery, setIsOpenConfirmDelivery] = useState<boolean>(false);
+  const [confirmDeliveryModalProps, setConfirmDeliveryModalProps] =
+    useState<any>({
+      open: false,
+      updatedStatus: ORDER_STATUS.DELIVERED,
+    });
   const isDateToday = useMemo(() => {
     const today = new Date();
     const deliveryDate = new Date(order.deliveryDate);
@@ -141,10 +145,18 @@ export default function OrderComponent({
         updatedStatus={confirmModalProps.updatedStatus}
         orderId={order.id}
       />
-      <ConfirmDelivery 
-        open={isOpenConfirmDelivery}
-        onClose={() => setIsOpenConfirmDelivery(false)}
+      <ConfirmDelivery
+        open={confirmDeliveryModalProps.open}
+        onClose={() =>
+          setConfirmDeliveryModalProps({
+            ...confirmDeliveryModalProps,
+            open: false,
+          })
+        }
         order={order}
+        onConfirm={handleUpdateStatus}
+        updatedStatus={confirmDeliveryModalProps.updatedStatus}
+        showNotification={showNotification}
       />
       {isOpenDetails && (
         <OrderDetails
@@ -167,7 +179,12 @@ export default function OrderComponent({
           </Grid>
         )} */}
         <Grid item xs={12}>
-          <Box display="flex" justifyContent="space-between" alignItems="center" gap={1}>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            gap={1}
+          >
             <StatusText
               text={order?.paymentStatus}
               type={
@@ -184,16 +201,13 @@ export default function OrderComponent({
               }
             />
 
-            {
-              !isDateToday && (
-                <StatusText
-                  text="Date Difference"
-                  type="info"
-                  icon={<InfoIcon />}
-                />
-              )
-            }
-  
+            {!isDateToday && (
+              <StatusText
+                text="Date Difference"
+                type="info"
+                icon={<InfoIcon />}
+              />
+            )}
           </Box>
         </Grid>
         <Grid item xs={1}>
@@ -251,7 +265,13 @@ export default function OrderComponent({
             {order.status !== ORDER_STATUS.DELIVERED && (
               <Fab
                 sx={{ zIndex: 0 }}
-                onClick={() => setIsOpenConfirmDelivery(true)}
+                onClick={() =>
+                  setConfirmDeliveryModalProps({
+                    ...confirmDeliveryModalProps,
+                    open: true,
+                    updatedStatus: ORDER_STATUS.DELIVERED,
+                  })
+                }
                 color="primary"
                 size="small"
               >
@@ -261,14 +281,22 @@ export default function OrderComponent({
             {order?.paymentStatus !== PaymentStatus.Paid && (
               <Fab
                 sx={{ zIndex: 0 }}
-                onClick={() =>
+                onClick={() => {
+                  if (order.status !== ORDER_STATUS.DELIVERED) {
+                    setConfirmDeliveryModalProps({
+                      ...confirmDeliveryModalProps,
+                      open: true,
+                      updatedStatus: ORDER_STATUS.COMPLETED,
+                    });
+                    return;
+                  }
                   setConfirmModalProps({
                     on: true,
                     heading: `Have you delivered and collected money from order for ${order.clientName}`,
                     color: 'success',
                     updatedStatus: ORDER_STATUS.COMPLETED,
-                  })
-                }
+                  });
+                }}
                 color="success"
                 size="small"
               >

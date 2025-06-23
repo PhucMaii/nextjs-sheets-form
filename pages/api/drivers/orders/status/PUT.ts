@@ -12,13 +12,17 @@ import { NextApiRequest, NextApiResponse } from 'next';
 interface IBody {
   orderId: number;
   updatedStatus: ORDER_STATUS;
+  fileKey?: string;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { orderId, updatedStatus }: IBody = req.body;
+    const { orderId, updatedStatus, fileKey }: IBody = req.body;
+    console.log(req.body, 'req.body in put');
+    console.log(fileKey, 'fileKey in put');
+    // return;
 
     const existingOrder = await prisma.orders.findUnique({
       where: {
@@ -79,7 +83,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     await recordAction(existingOrder.id, createdBy, title);
 
-    console.log(statusUpdateData, 'statusUpdateData');
     const updatedOrder = await prisma.orders.update({
       where: {
         id: existingOrder.id,
@@ -106,8 +109,39 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             inventoryUnit: true,
           },
         },
+        delivery: true,
       },
     });
+
+    // If fileKey is provided, and updated status is fulfilled but have no delivery proof,
+    // then create delivery proof and save the file key
+    if (
+      fileKey &&
+      updatedOrder.status === ORDER_STATUS.DELIVERED &&
+      !updatedOrder.delivery
+    ) {
+      console.log('accessing to delivery proof');
+      // Create delivery proof
+      const deliveryProof = await prisma.delivery.create({
+        data: {
+          orderId: updatedOrder.id,
+          employeeId: driverUpdate.id,
+          deliveredAt: dateAndTime,
+          companyId: existingOrder.companyId,
+        },
+      });
+      // Save to Media
+      await prisma.media.create({
+        data: {
+          fileKey,
+          type: 'image/jpeg',
+          createdBy: updatedBy,
+          createdAt: dateAndTime,
+          deliveryId: deliveryProof.id,
+          companyId: existingOrder.companyId,
+        },
+      });
+    }
 
     // Inventory Item Update
     // From other status to VOID -> Inventory Item get restock

@@ -51,6 +51,7 @@ model Company {
   quoteItems        QuoteItem[]
   payrolls          Payroll[]
   deliveries        Delivery[]
+  medias            Media[]
 }
 
 model PageView {
@@ -960,9 +961,11 @@ model Media {
   createdBy    String
   lossReportId Int?
   deliveryId   Int?
+  companyId    Int?
 
   lossReport LossReport? @relation(fields: [lossReportId], references: [id], onDelete: Cascade)
   delivery   Delivery?   @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+  company    Company?    @relation(fields: [companyId], references: [id], onDelete: Cascade)
 }
 
 enum QuoteStatus {
