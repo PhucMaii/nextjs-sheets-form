@@ -69,6 +69,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
               preference: true,
             },
           },
+          delivery: {
+            include: {
+              medias: true,
+            },
+          },
         },
         orderBy: {
           id: 'desc',
@@ -126,6 +131,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
               category: true,
               routes: true,
               preference: true,
+            },
+          },
+          delivery: {
+            include: {
+              medias: true,
             },
           },
         },

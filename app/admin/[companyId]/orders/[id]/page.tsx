@@ -38,6 +38,7 @@ import DeleteModal from '../../components/Modals/delete/DeleteModal';
 import { PaymentStatus } from '@prisma/client';
 import { HandCoinsIcon, TruckIcon } from 'lucide-react';
 import { LoadingButton } from '@mui/lab';
+import DisplayFile from '../../components/Modals/DisplayFile';
 
 const OrderDetailsPage = () => {
   const { id, companyId }: any = useParams();
@@ -649,6 +650,25 @@ const OrderDetailsPage = () => {
           md={4}
           sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
         >
+          {order?.delivery?.medias.length > 0 && (
+            <ShadowSection display="flex" flexDirection="column" gap={1}>
+              <Typography variant="subtitle2" fontWeight={700}>
+                Delivery Proof
+              </Typography>
+
+              <DisplayFile
+                fileKey={order?.delivery?.medias[0].fileKey}
+                width="100%"
+                height="100%"
+                style={{
+                  borderRadius: 10,
+                  border: '1px solid #e0e0e0',
+                  padding: 10,
+                  objectFit: 'contain',
+                }}
+              />
+            </ShadowSection>
+          )}
           {isLoading ? (
             <Skeleton variant="rectangular" height={100} />
           ) : (

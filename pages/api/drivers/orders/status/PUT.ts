@@ -120,7 +120,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       updatedOrder.status === ORDER_STATUS.DELIVERED &&
       !updatedOrder.delivery
     ) {
-      console.log('accessing to delivery proof');
       // Create delivery proof
       const deliveryProof = await prisma.delivery.create({
         data: {
@@ -130,6 +129,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           companyId: existingOrder.companyId,
         },
       });
+      
       // Save to Media
       await prisma.media.create({
         data: {
@@ -141,6 +141,13 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           companyId: existingOrder.companyId,
         },
       });
+
+      // record action
+      await recordAction(
+        updatedOrder.id,
+        updatedBy,
+        `${updatedBy} uploaded delivery proof`,
+      );
     }
 
     // Inventory Item Update

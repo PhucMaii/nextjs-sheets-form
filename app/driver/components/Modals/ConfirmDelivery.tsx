@@ -113,6 +113,9 @@ const ConfirmDelivery = ({
         </Box>
 
         {fileKey && <DisplayFile fileKey={fileKey} />}
+        <Typography variant="subtitle2">
+          Upload Proof
+        </Typography>
         <PresignedFileUpload
           location={`delivery-proof/${formattedDate}/${order.id}`}
           onUploadComplete={handleUploadSuccess}

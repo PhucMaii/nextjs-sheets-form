@@ -12,7 +12,6 @@ interface RequestQuery {
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
-  console.log('RUNN IN ADMIN ORDER');
   try {
     const prisma = new PrismaClient();
 
@@ -38,6 +37,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
               inventoryItem: true,
               inventoryUnit: true,
               fifo: true,
+            },
+          },
+          delivery: {
+            include: {
+              medias: true,
             },
           },
           timeline: {
@@ -116,6 +120,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             inventoryItem: true,
             inventoryUnit: true,
             fifo: true,
+          },
+        },
+        delivery: {
+          include: {
+            medias: true,
           },
         },
       },
