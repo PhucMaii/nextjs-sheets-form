@@ -33,6 +33,8 @@ import InfoIcon from '@mui/icons-material/Info';
 import { PaymentStatus } from '@prisma/client';
 import { AttachMoney, MoneyOffOutlined } from '@mui/icons-material';
 import ConfirmDelivery from './Modals/ConfirmDelivery';
+import PhotoCameraBackIcon from '@mui/icons-material/PhotoCameraBack';
+import ViewImg from '@/app/admin/[companyId]/components/ViewImg';
 
 interface IProps {
   order: Order;
@@ -53,6 +55,11 @@ export default function OrderComponent({
   handleUpdateStatus,
   showNotification,
 }: IProps) {
+  const [confirmDeliveryModalProps, setConfirmDeliveryModalProps] =
+    useState<any>({
+      open: false,
+      updatedStatus: ORDER_STATUS.DELIVERED,
+    });
   const [confirmModalProps, setConfirmModalProps] = useState<any>({
     on: false,
     heading: '',
@@ -63,11 +70,11 @@ export default function OrderComponent({
   const [isOpenDetails, setIsOpenDetails] = useState<boolean>(false);
   const [isOpenClientDetails, setIsOpenClientDetails] =
     useState<boolean>(false);
-  const [confirmDeliveryModalProps, setConfirmDeliveryModalProps] =
-    useState<any>({
-      open: false,
-      updatedStatus: ORDER_STATUS.DELIVERED,
-    });
+  const [viewImgProps, setViewImgProps] = useState<any>({
+    open: false,
+    fileKey: '',
+  });
+
   const isDateToday = useMemo(() => {
     const today = new Date();
     const deliveryDate = new Date(order.deliveryDate);
@@ -158,6 +165,11 @@ export default function OrderComponent({
         updatedStatus={confirmDeliveryModalProps.updatedStatus}
         showNotification={showNotification}
       />
+      <ViewImg
+        open={viewImgProps.open}
+        onClose={() => setViewImgProps({ open: false, fileKey: '' })}
+        fileKeyFront={viewImgProps.fileKey}
+      />
       {isOpenDetails && (
         <OrderDetails
           open={isOpenDetails}
@@ -201,13 +213,28 @@ export default function OrderComponent({
               }
             />
 
-            {!isDateToday && (
-              <StatusText
-                text="Date Difference"
-                type="info"
-                icon={<InfoIcon />}
-              />
-            )}
+            <Box display="flex" alignItems="center" gap={1}>
+              {!isDateToday && (
+                <StatusText
+                  text="Date Difference"
+                  type="info"
+                  icon={<InfoIcon />}
+                />
+              )}
+              {order?.delivery ? (
+                <IconButton
+                  sx={{ m: 0 }}
+                  onClick={() =>
+                    setViewImgProps({
+                      open: true,
+                      fileKey: order.delivery.medias[0].fileKey,
+                    })
+                  }
+                >
+                  <PhotoCameraBackIcon sx={{ fontSize: 24 }} color="primary" />
+                </IconButton>
+              ) : null}
+            </Box>
           </Box>
         </Grid>
         <Grid item xs={1}>

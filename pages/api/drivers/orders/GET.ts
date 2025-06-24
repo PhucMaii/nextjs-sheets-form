@@ -85,6 +85,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             routes: true,
           },
         },
+        delivery: {
+          include: {
+            medias: true,
+          },
+        },
         items: {
           include: {
             inventoryItem: true,

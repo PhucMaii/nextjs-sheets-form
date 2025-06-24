@@ -135,6 +135,7 @@ export interface Order {
   hasSubtractInventory?: boolean;
   paymentStatus?: PaymentStatus;
   timeline?: IOrderTimeline;
+  delivery?: any;
 }
 
 const orderPerPage = 10;

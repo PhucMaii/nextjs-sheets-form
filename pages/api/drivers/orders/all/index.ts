@@ -42,6 +42,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             fifo: true,
           },
         },
+        delivery: {
+          include: {
+            medias: true,
+          },
+        },
       },
     });
 

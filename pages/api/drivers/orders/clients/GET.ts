@@ -47,6 +47,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       include: {
         items: true,
         user: true,
+        delivery: {
+          include: {
+            medias: true,
+          },
+        },
       },
       orderBy: {
         id: 'desc',

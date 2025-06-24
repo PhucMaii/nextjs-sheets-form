@@ -966,6 +966,9 @@ model Media {
   lossReport LossReport? @relation(fields: [lossReportId], references: [id], onDelete: Cascade)
   delivery   Delivery?   @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
   company    Company?    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([deliveryId])
+  @@index([lossReportId])
 }
 
 enum QuoteStatus {
