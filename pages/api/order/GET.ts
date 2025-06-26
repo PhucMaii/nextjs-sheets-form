@@ -4,8 +4,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { generateListOfDateString } from '@/app/utils/time';
-import { normalizeDate } from '../utils/date';
+import { getTodayDate, normalizeDate } from '../utils/date';
 import { getOverdueOrders } from '../utils/order';
+
 
 interface IQuery {
   startDate?: string;
@@ -73,6 +74,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           },
         },
         user: true,
+        delivery: {
+          include: {
+            medias: true,
+          },
+        },
       },
       orderBy: {
         id: 'desc',
@@ -90,6 +96,43 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const dueOrders = formatReturnOrders(incompletedOrders);
 
+    // Get today delivered order
+    const today = getTodayDate();
+    const todayOrder = await prisma.orders.findFirst({
+      where: {
+        userId: existingUser.id,
+        status: ORDER_STATUS.DELIVERED,
+        deliveryDate: today.date,
+      },
+      include: {
+        items: {
+          include: {
+            inventoryItem: true,
+            inventoryUnit: true,
+          },
+        },
+        user: true,
+        delivery: {
+          include: {
+            medias: true,
+          },
+        },
+      },
+    });
+
+    if (todayOrder?.delivery && !todayOrder?.delivery?.isViewed) {
+      await prisma.delivery.update({
+        where: {
+          id: todayOrder?.delivery?.id,
+        },
+        data: {
+          isViewed: true,
+        },
+      });
+    }
+
+    const todayDeliveredOrder = formatReturnOrders([todayOrder]);
+
     return res.status(200).json({
       data: {
         user: existingUser,
@@ -97,6 +140,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         dueAmount,
         dueOrders,
         userOrders: newOrders,
+        todayDeliveredOrder: todayDeliveredOrder[0],
       },
       message: 'Fetch User Orders Successfully',
     });
@@ -109,6 +153,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 }
 
 const formatReturnOrders = (orders: any) => {
+  if (!orders) {
+    return [];
+  }
+
   const newOrders = orders.map((order: any) => {
     const items = order.items.map((item: any) => {
       const totalPrice = item.quantity * item.price;

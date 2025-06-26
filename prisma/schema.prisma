@@ -343,7 +343,8 @@ model Delivery {
   employeeId    Int
   deliveredAt   String
   companyId     Int?
-  
+  isViewed        Boolean?
+
   medias               Media[]
 
   // Relations

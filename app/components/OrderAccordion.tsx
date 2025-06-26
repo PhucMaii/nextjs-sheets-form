@@ -30,6 +30,8 @@ import DeleteModal from './Modals/DeleteModal';
 import SellIcon from '@mui/icons-material/Sell';
 import { useDiscount } from '@/hooks/useDiscount';
 import { PaymentStatus } from '@prisma/client';
+import ImageSearchIcon from '@mui/icons-material/ImageSearch';
+import ViewDelivery from './Modals/ViewDelivery';
 
 interface PropTypes {
   handleDeleteOrder?: (orderId: number) => void;
@@ -50,6 +52,8 @@ export default function OrderAccordion({
 }: PropTypes) {
   const [isEditOrderOpen, setIsEditOrderOpen] = useState<boolean>(false);
   const [isDeleteOrderOpen, setIsDeleteOrderOpen] = useState<boolean>(false);
+  const [isOpenViewDelivery, setIsOpenViewDelivery] = useState<boolean>(false);
+
   const totalQuantity = order.items?.reduce((acc: number, cV: Item) => {
     return acc + cV.quantity;
   }, 0);
@@ -69,6 +73,11 @@ export default function OrderAccordion({
 
   return (
     <>
+    <ViewDelivery
+      open={isOpenViewDelivery}
+      onClose={() => setIsOpenViewDelivery(false)}
+      order={order}
+    />
       {isEdit &&
         handleUpdateOrderUI &&
         handleDeleteOrder &&
@@ -136,10 +145,37 @@ export default function OrderAccordion({
                 ) : null}
               </Box>
             </Grid>
+            <Grid item xs={12} md={2}>
+              <Box
+                display="flex"
+                gap={1}
+                alignItems="center"
+                justifyContent="space-between"
+              >
+                <Typography fontWeight="bold" variant="subtitle1">
+                  #{order.id}
+                </Typography>
+                {order?.delivery?.medias?.length > 0 && <Button
+                  startIcon={<ImageSearchIcon sx={{ fontSize: 16 }} />}
+                  // variant="contained"
+                  size="small"
+                  sx={{ m: 0 }}
+                  onClick={(e: any) => {
+                    e.stopPropagation();
+                    setIsOpenViewDelivery(true);
+                  }}
+                >
+                    <Typography
+                      variant="subtitle2"
+                      fontSize={12}
+                      sx={{ textTransform: 'none' }}
+                    >
+                      Photo
+                    </Typography>
+                </Button>}
+              </Box>
+            </Grid>
             <Grid item xs={12} md={2} sx={{ mr: 2 }}>
-              <Typography fontWeight="bold" variant="subtitle1">
-                #{order.id}
-              </Typography>
               <Typography variant="body2">
                 Order at: {order.orderTime}
               </Typography>

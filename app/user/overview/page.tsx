@@ -16,11 +16,13 @@ import { blue, blueGrey } from '@mui/material/colors';
 import { useRouter } from 'next/navigation';
 import useNotification from '@/hooks/useNotification';
 import { filterDateRangeOrders } from '@/pages/api/utils/date';
-import { SWRFetchData } from '../../utils/db';
 import OrderAccordion from '@/app/components/OrderAccordion';
+import { useQuery } from '@tanstack/react-query';
+import ViewDelivery from '@/app/components/Modals/ViewDelivery';
 
 export default function MainPage() {
   const [client, setClient] = useState<UserType | null>();
+  const [isOpenViewDelivery, setIsOpenViewDelivery] = useState<boolean>(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isTomorrow, setIsTomorrow] = useState<boolean>(() => {
     // format initial date
@@ -33,7 +35,6 @@ export default function MainPage() {
   });
   const [userOrders, setUserOrders] = useState<Order[]>([]);
   const [thisMonthOrders, setThisMonthOrders] = useState<Order[]>([]);
-  // const [totalBill, setTotalBill] = useState<number>(0);
 
   const router: any = useRouter();
   const { showNotification, NotificationComp } = useNotification();
@@ -45,10 +46,24 @@ export default function MainPage() {
   const endDate = dateRange[1];
   endDate.setDate(today.getDate() + 2);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [clientOrders, _mutate, isValidating] = SWRFetchData(
-    `/api/order?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
-  );
+  const {
+    data: clientOrders,
+    isLoading: isValidating,
+    refetch,
+  } = useQuery({
+    queryKey: ['client-orders', dateRange[0], dateRange[1]],
+    queryFn: async () => {
+      const response = await axios.get(
+        `/api/order?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
+      );
+      return response.data;
+    },
+  });
+
+  // Whenever the component is mounted, refetch the data
+  useEffect(() => {
+    refetch();
+  }, []);
 
   useEffect(() => {
     if (clientOrders) {
@@ -56,19 +71,14 @@ export default function MainPage() {
     }
   }, [clientOrders]);
 
-  // useEffect(() => {
-  //   if (thisMonthOrders.length > 0) {
-  //     calculateTotalBill();
-  //   }
-  // }, [thisMonthOrders]);
-
-  // const calculateTotalBill = () => {
-  //   const total = thisMonthOrders.reduce((acc: number, order: Order) => {
-  //     return acc + order.totalPrice;
-  //   }, 0);
-
-  //   setTotalBill(total);
-  // };
+  useEffect(() => {
+    if (
+      clientOrders?.data?.todayDeliveredOrder?.delivery &&
+      !clientOrders?.data?.todayDeliveredOrder?.delivery?.isViewed
+    ) {
+      setIsOpenViewDelivery(true);
+    }
+  }, [clientOrders?.data?.todayDeliveredOrder?.delivery]);
 
   const handleDeleteOrder = async (orderId: number) => {
     try {
@@ -158,6 +168,12 @@ export default function MainPage() {
   return (
     <Sidebar>
       {/* <AuthenGuard> */}
+      <ViewDelivery
+        open={isOpenViewDelivery}
+        onClose={() => setIsOpenViewDelivery(false)}
+        order={clientOrders?.data?.todayDeliveredOrder}
+        isDisableCloseOnClickOutside={true}
+      />
       {NotificationComp}
       <Box
         sx={{
@@ -176,22 +192,6 @@ export default function MainPage() {
             This month
           </Typography>
         </Grid>
-        {/* <Grid item xs={12} md={6}>
-          <OverviewCard
-            icon={<AttachMoneyIcon sx={{ color: blue[700], fontSize: 50 }} />}
-            text="Balance Due"
-            value={totalBill?.toFixed(2)}
-            onClick={() => router.push('/history')}
-          />
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <OverviewCard
-            icon={<ReceiptLongIcon sx={{ color: blue[700], fontSize: 50 }} />}
-            text="Total Orders"
-            value={thisMonthOrders.length}
-            onClick={() => router.push('/history')}
-          />
-        </Grid> */}
         <Grid item xs={12}>
           <OverviewCard
             text="Over Due"
@@ -220,10 +220,23 @@ export default function MainPage() {
           />
         </Grid>
       </Grid>
+      {clientOrders?.data?.todayDeliveredOrder && (
+        <>
+          <Divider textAlign="left">
+            <Typography variant="subtitle2">Today&apos;s Delivered</Typography>
+          </Divider>
+          <OrderAccordion
+            key={clientOrders?.data?.todayDeliveredOrder.id}
+            handleDeleteOrder={() => {}}
+            order={clientOrders?.data?.todayDeliveredOrder}
+            showNotification={showNotification}
+            handleUpdateOrderUI={() => {}}
+            // isEdit
+          />
+        </>
+      )}
       <Divider textAlign="left">
-        <Typography variant="h6" fontWeight="bold">
-          Order
-        </Typography>
+        <Typography variant="subtitle2">Order</Typography>
       </Divider>
       {userOrders.length > 0 ? (
         userOrders.map((order: Order) => (

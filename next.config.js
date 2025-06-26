@@ -10,6 +10,9 @@ const nextConfig = {
       bodySizeLimit: '5mb',
     },
   },
+  images: {
+    domains: ['supreme-sprouts-products.s3.us-west-2.amazonaws.com'],
+  },
 };
 
 const withBundlerAnalyzer = require('@next/bundle-analyzer')({
