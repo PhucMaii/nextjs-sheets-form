@@ -696,7 +696,6 @@ model Fifo {
   createdBy       String
   price           Float?
   
-  vendorItem      VendorItem     @relation(fields: [vendorItemId], references: [id], onDelete: Cascade)
   orderedItems    OrderedItems[]
 
   inventoryItem   InventoryItem  @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
@@ -968,9 +967,12 @@ model Media {
   lossReport LossReport? @relation(fields: [lossReportId], references: [id], onDelete: Cascade)
   delivery   Delivery?   @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
   company    Company?    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+<<<<<<< HEAD
 
   @@index([deliveryId])
   @@index([lossReportId])
+=======
+>>>>>>> 5ac76f841873923829e61d31b7b9c4a3561b5695
 }
 
 enum QuoteStatus {

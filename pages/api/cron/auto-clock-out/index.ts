@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PayrollType, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate } from '@/pages/api/utils/date';
 import { calculateHours } from '@/pages/api/drivers/shift/clock-out';
@@ -58,6 +58,7 @@ export default async function handler(
         const scheduledShift = scheduledShifts[scheduledShifts.length - 1];
 
         const hours = calculateHours(shift.startedAt, scheduledShift?.endedAt || '');
+        const cost = shift.employee?.payrollType === PayrollType.hourly ? hours * (shift?.employee?.payRate || 1) : 0;
 
         await prisma.shiftSession.update({
           where: {
@@ -67,7 +68,7 @@ export default async function handler(
             endedAt: scheduledShift?.endedAt,
             hours,
             isActive: false,
-            cost: hours * (shift?.employee?.payRate || 1),
+            cost,
           },
         });
       } else {
@@ -85,7 +86,7 @@ export default async function handler(
   
         if (latestOrder && latestOrder.deliveredAt) {
           const hours = calculateHours(shift.startedAt, latestOrder.deliveredAt);
-  
+          const cost = shift.employee?.payrollType === PayrollType.hourly ? hours * (shift?.employee?.payRate || 1) : 0;
           await prisma.shiftSession.update({
             where: {
               id: shift.id,
@@ -94,11 +95,12 @@ export default async function handler(
               endedAt: latestOrder.deliveredAt,
               hours,
               isActive: false,
-              cost: hours * (shift?.employee?.payRate || 1),
+              cost,
             },
           });
         } else {
           const hours = calculateHours(shift.startedAt, today.dateAndTime);
+          const cost = shift.employee?.payrollType === PayrollType.hourly ? hours * (shift?.employee?.payRate || 1) : 0;
           await prisma.shiftSession.update({
             where: {
               id: shift.id,
@@ -107,7 +109,7 @@ export default async function handler(
               endedAt: today.dateAndTime,
               isActive: false,
               hours,
-              cost: hours * (shift?.employee?.payRate || 1),
+              cost,
             },
           });
         }
