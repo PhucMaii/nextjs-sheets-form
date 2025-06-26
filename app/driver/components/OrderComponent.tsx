@@ -33,7 +33,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import { PaymentStatus } from '@prisma/client';
 import { AttachMoney, MoneyOffOutlined } from '@mui/icons-material';
 import ConfirmDelivery from './Modals/ConfirmDelivery';
-import PhotoCameraBackIcon from '@mui/icons-material/PhotoCameraBack';
+import ImageSearchIcon from '@mui/icons-material/ImageSearch';
 import ViewImg from '@/app/admin/[companyId]/components/ViewImg';
 
 interface IProps {
@@ -173,7 +173,7 @@ export default function OrderComponent({
         order={order}
         onConfirm={handleUpdateStatus}
         updatedStatus={confirmDeliveryModalProps.updatedStatus}
-        showNotification={showNotification}
+        // showNotification={showNotification}
       />
       <ViewImg
         open={viewImgProps.open}
@@ -231,7 +231,7 @@ export default function OrderComponent({
                   icon={<InfoIcon />}
                 />
               )}
-              {order?.delivery ? (
+              {order?.delivery?.medias?.length > 0 ? (
                 <IconButton
                   sx={{ m: 0 }}
                   onClick={() =>
@@ -241,9 +241,9 @@ export default function OrderComponent({
                     })
                   }
                 >
-                  <PhotoCameraBackIcon sx={{ fontSize: 24 }} color="primary" />
+                  <ImageSearchIcon sx={{ fontSize: 24 }} color="primary" />
                 </IconButton>
-              ) : null}
+              ): null}
             </Box>
           </Box>
         </Grid>

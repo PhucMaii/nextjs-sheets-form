@@ -20,6 +20,7 @@ import ClientDetailsModal from './Modals/ClientDetailsModal';
 import { Order } from '../orders/page';
 import { useReactToPrint } from 'react-to-print';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import ImageSearchIcon from '@mui/icons-material/ImageSearch';
 import axios from 'axios';
 import {
   ORDER_STATUS,
@@ -57,6 +58,7 @@ import { ShowNotificationType } from '@/hooks/useNotification';
 import ApproveOrder from './Modals/ApproveOrder';
 import RejectOrder from './Modals/RejectOrder';
 import { PaymentStatus } from '@prisma/client';
+import ViewImg from './ViewImg';
 interface PropTypes {
   order: Order;
   showNotification?: ShowNotificationType;
@@ -101,6 +103,7 @@ const OrderAccordion = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isOpenEditPrice, setIsOpenEditPrice] = useState<boolean>(false);
   const [isOpenDetails, setIsOpenDetails] = useState<boolean>(false);
+  const [isOpenViewDelivery, setIsOpenViewDelivery] = useState<boolean>(false);
   const [open, setOpen] = useMultipleBoolean({
     isOpenConfirmModal: false,
   });
@@ -419,6 +422,14 @@ const OrderAccordion = ({
   return (
     <>
       <LoadingModal open={isLoading} />
+      {order?.delivery?.medias?.length > 0 &&
+        order?.delivery?.medias[0]?.fileKey ? (
+          <ViewImg
+            fileKeyFront={order?.delivery?.medias[0]?.fileKey || ''}
+            open={isOpenViewDelivery}
+            onClose={() => setIsOpenViewDelivery(false)}
+          />
+        ) : null}
       <div style={{ display: 'none' }}>
         <ComponentToPrint order={order} ref={componentRef} />
       </div>
@@ -607,7 +618,14 @@ const OrderAccordion = ({
             </Box>
           </Grid>
           <Grid item xs={6}>
-            <StatusText text={statusText.text} type={statusText.type} />
+            <Box display="flex" alignItems="center" gap={1}>
+              <StatusText text={statusText.text} type={statusText.type} />
+              {order?.delivery?.medias?.length > 0 && (
+                <IconButton onClick={() => setIsOpenViewDelivery(true)}>
+                  <ImageSearchIcon color="primary" fontSize="small" />
+                </IconButton>
+              )}
+            </Box>
           </Grid>
           <Grid item xs={6}>
             <Box

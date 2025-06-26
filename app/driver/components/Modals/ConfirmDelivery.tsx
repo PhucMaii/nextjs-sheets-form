@@ -5,7 +5,7 @@ import { Order } from '@/app/admin/[companyId]/orders/page';
 import { PresignedFileUpload } from '@/app/components/PresignedFileUpload';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { YYYYMMDDFormat } from '@/app/utils/time';
-import { ShowNotificationType } from '@/hooks/useNotification';
+// import { ShowNotificationType } from '@/hooks/useNotification';
 import { Box, Button, IconButton, Modal, Typography } from '@mui/material';
 import { XIcon } from 'lucide-react';
 import React, { useState } from 'react';
@@ -18,7 +18,7 @@ interface IProps extends ModalProps {
     fileKey: string | null,
   ) => Promise<void>;
   updatedStatus: ORDER_STATUS;
-  showNotification: ShowNotificationType;
+  // showNotification: ShowNotificationType;
 }
 
 const ConfirmDelivery = ({
@@ -27,7 +27,7 @@ const ConfirmDelivery = ({
   order,
   onConfirm,
   updatedStatus,
-  showNotification,
+  // showNotification,
 }: IProps) => {
   const [fileKey, setFileKey] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState({
@@ -46,10 +46,10 @@ const ConfirmDelivery = ({
   // }, [fileKey]);
 
   const handleConfirm = async (fileKey: string | null = null) => {
-    if (!fileKey) {
-      showNotification('error', 'Please upload the proof');
-      return;
-    }
+    // if (!fileKey) {
+    //   showNotification('error', 'Please upload the proof');
+    //   return;
+    // }
     setIsLoading({
       confirm: fileKey ? false : true,
       confirmWithImg: fileKey ? true : false,
@@ -97,16 +97,6 @@ const ConfirmDelivery = ({
           alignItems="center"
           mb={2}
         >
-          {/* <Button>
-            <Box display="flex" alignItems="center" gap={1}>
-              <IconButton>
-                <CameraIcon />
-              </IconButton>
-              <Typography variant="body1" fontWeight={600}>
-                Upload Photo Proof
-              </Typography>
-            </Box>
-          </Button> */}
           <IconButton onClick={onClose}>
             <XIcon />
           </IconButton>
@@ -120,14 +110,6 @@ const ConfirmDelivery = ({
           location={`delivery-proof/${formattedDate}/${order.id}`}
           onUploadComplete={handleUploadSuccess}
         />
-        {/* <Button variant="outlined" color="primary" onClick={handleUploadProof} fullWidth>
-          <Box display="flex" alignItems="center" gap={1}>
-            <CameraIcon />
-            <Typography variant="subtitle2" fontWeight={600}>
-              Upload Proof
-            </Typography>
-          </Box>
-        </Button> */}
 
         <Typography variant="h6" fontWeight={600} textAlign="center">
           {updatedStatus === ORDER_STATUS.COMPLETED
