@@ -132,6 +132,16 @@ export default function OrderComponent({
     }
   };
 
+  const handleRecordStartDelivery = async () => {
+    try {
+      await axios.post(`${API_URL.DRIVER}/orders/start-delivery`, {
+        orderId: order.id,
+      });
+    } catch (error: any) {
+      console.log('Internal Server Error: ', error);
+    }
+  };
+
   return (
     <ShadowSection mt={1}>
       <ClientDetailsModal
@@ -358,6 +368,7 @@ export default function OrderComponent({
                 !order.user?.deliveryAddressLat ||
                 !order.user?.deliveryAddressLng
               }
+              onClick={handleRecordStartDelivery}
             >
               <AssistantDirectionIcon />
             </a>

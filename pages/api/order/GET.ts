@@ -131,7 +131,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    const todayDeliveredOrder = formatReturnOrders([todayOrder]);
+    let todayDeliveredOrder: any = [];
+    if (todayOrder) {
+      todayDeliveredOrder = formatReturnOrders([todayOrder]);
+    }
 
     return res.status(200).json({
       data: {
@@ -140,7 +143,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         dueAmount,
         dueOrders,
         userOrders: newOrders,
-        todayDeliveredOrder: todayDeliveredOrder[0],
+        todayDeliveredOrder: todayDeliveredOrder[0] || null,
       },
       message: 'Fetch User Orders Successfully',
     });
@@ -153,11 +156,18 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 }
 
 const formatReturnOrders = (orders: any) => {
-  if (!orders) {
+  if (!orders || orders.length === 0) {
     return [];
   }
 
   const newOrders = orders.map((order: any) => {
+    if (order.items.length === 0) {
+      return {
+        ...order,
+        items: [],
+      };
+    }
+
     const items = order.items.map((item: any) => {
       const totalPrice = item.quantity * item.price;
       return { ...item, totalPrice };

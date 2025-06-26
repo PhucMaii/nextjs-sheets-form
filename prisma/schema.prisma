@@ -9,13 +9,13 @@ datasource db {
 }
 
 model Company {
-  id        Int    @id @default(autoincrement())
-  name      String
-  address   String?
-  contactNumber  String?
-  email      String?
-  createdAt String
-  createdBy String
+  id            Int     @id @default(autoincrement())
+  name          String
+  address       String?
+  contactNumber String?
+  email         String?
+  createdAt     String
+  createdBy     String
 
   actions           Action[]
   announcements     Announcement[]
@@ -41,7 +41,7 @@ model Company {
   cheques           Cheque[]
   clientStatements  ClientStatement[]
   inventoryUnits    InventoryUnit[]
-  fifos              Fifo[]
+  fifos             Fifo[]
   vendorItems       VendorItem[]
   scheduledOrders   ScheduleOrders[]
   lossReports       LossReport[]
@@ -55,80 +55,86 @@ model Company {
 }
 
 model PageView {
-  id            Int      @id @default(autoincrement())
-  title         String
-  createdAt     String?
+  id        Int     @id @default(autoincrement())
+  title     String
+  createdAt String?
 
-  companyPages  CompanyPage[]
-  adminPages    AdminPage[]
+  companyPages CompanyPage[]
+  adminPages   AdminPage[]
 }
 
 model CompanyPage {
-  id        Int      @id  @default(autoincrement())
+  id        Int @id @default(autoincrement())
   companyId Int
   pageId    Int
 
-  company   Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  pageView  PageView    @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  company  Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  pageView PageView @relation(fields: [pageId], references: [id], onDelete: Cascade)
 }
 
 model AdminPage {
-  id           Int     @id  @default(autoincrement())
-  employeeId   Int
-  pageId       Int
+  id         Int @id @default(autoincrement())
+  employeeId Int
+  pageId     Int
 
-  employee     Employee   @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  pageView     PageView   @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  pageView PageView @relation(fields: [pageId], references: [id], onDelete: Cascade)
 }
 
 model Employee {
-  id              Int     @id @default(autoincrement())
-  name            String  @db.VarChar(255)
-  password        String  @db.VarChar(255)
-  hourlyRate      Float?
-  payRate         Float?
-  payrollType     PayrollType?
-  employeeCode    String
-  email           String?
-  notification     Json?
-  role            String?
-  companyId       Int
-  createdAt       String?
-  createdBy       String?
+  id           Int          @id @default(autoincrement())
+  name         String       @db.VarChar(255)
+  password     String       @db.VarChar(255)
+  hourlyRate   Float?
+  payRate      Float?
+  payrollType  PayrollType?
+  employeeCode String
+  email        String?
+  notification Json?
+  role         String?
+  companyId    Int
+  createdAt    String?
+  createdBy    String?
 
-  shiftSessions     ShiftSession[]
-  routes            Route[]
-  CodBoard          CodBoard[]
-  adminPages        AdminPage[]
-  scheduledShifts   ScheduledShift[]
-  payrolls          Payroll[]
-  deliveries        Delivery[]
+  shiftSessions   ShiftSession[]
+  routes          Route[]
+  CodBoard        CodBoard[]
+  adminPages      AdminPage[]
+  scheduledShifts ScheduledShift[]
+  payrolls        Payroll[]
+  deliveries      Delivery[]
 
   company Company @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([companyId])
 }
 
 model Payroll {
-  id             Int    @id @default(autoincrement())
-  employeeId     Int
-  companyId      Int
-  hours          Float
-  total          Float
-  status         PaymentStatus?
-  startDate      String
-  endDate        String
-  createdAt      String
-  createdBy      String
-  transactionId  Int?
+  id            Int            @id @default(autoincrement())
+  employeeId    Int
+  companyId     Int
+  hours         Float
+  total         Float
+  status        PaymentStatus?
+  startDate     String
+  endDate       String
+  createdAt     String
+  createdBy     String
+  transactionId Int?
 
-  employee      Employee  @relation(fields: [employeeId], references: [id])
-  company       Company   @relation(fields: [companyId], references: [id])
-  transaction   Expense? @relation(fields: [transactionId], references: [id])
+  employee    Employee @relation(fields: [employeeId], references: [id])
+  company     Company  @relation(fields: [companyId], references: [id])
+  transaction Expense? @relation(fields: [transactionId], references: [id])
+
+  @@index([employeeId])
+  @@index([companyId])
+  @@index([startDate, endDate])
 }
 
 model Driver {
-  id           Int     @id @default(autoincrement())
-  name         String  @db.VarChar(255)
-  password     String  @db.VarChar(255)
+  id           Int          @id @default(autoincrement())
+  name         String       @db.VarChar(255)
+  password     String       @db.VarChar(255)
   hourlyRate   Float?
   notification Json?
   role         String?
@@ -190,12 +196,16 @@ model Quote {
 
   items QuoteItem[]
 
-  user User @relation(fields: [userId], references: [id])
-  company  Company?  @relation(fields: [companyId], references: [id])
+  user    User     @relation(fields: [userId], references: [id])
+  company Company? @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
+  @@index([userId])
+  @@index([status])
 }
 
 model QuoteItem {
-  id              Int @id @default(autoincrement())
+  id              Int  @id @default(autoincrement())
   companyId       Int?
   quoteId         Int
   inventoryItemId Int
@@ -249,7 +259,7 @@ model Item {
   category      Category?      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   inventoryItem InventoryItem? @relation(fields: [inventoryItemId], references: [id])
   inventoryUnit InventoryUnit? @relation(fields: [inventoryUnitId], references: [id])
-  company        Company?      @relation(fields: [companyId], references: [id])
+  company       Company?       @relation(fields: [companyId], references: [id])
   SubCategory   SubCategory?   @relation(fields: [subCategoryId], references: [id])
   subCategoryId Int?
 
@@ -283,7 +293,7 @@ model OrderedItems {
   inventoryUnit  InventoryUnit?  @relation(fields: [inventoryUnitId], references: [id])
   inventoryItem  InventoryItem?  @relation(fields: [inventoryItemId], references: [id])
   ScheduleOrders ScheduleOrders? @relation(fields: [scheduledOrderId], references: [id])
-  company         Company?       @relation(fields: [companyId], references: [id])
+  company        Company?        @relation(fields: [companyId], references: [id])
 
   @@index([orderId])
   @@index([companyId])
@@ -294,43 +304,43 @@ model OrderedItems {
 }
 
 model Orders {
-  id                     Int            @id @default(autoincrement())
-  orderTime              String
-  deliveryDate           String
-  note                   String
-  status                 String
-  paymentStatus          PaymentStatus?
-  userId                 Int
-  totalPrice             Float
-  isReplacement          Boolean?
-  isVoid                 Boolean?
-  updateTime             DateTime?
-  createdBy              String?
-  updatedBy              String?
-  codBoardId             Int?
-  GST                    Float?
-  PST                    Float?
-  subTotal               Float?
-  discount               Float?
-  isAffectInventory      Boolean?
-  shippingFee            Float?
-  type                   String?
-  deliveredBy            String?
-  deliveredAt            String?
-  addedToCODBy           String?
-  insertedAt             String?
-  insertedBy             String?
-  companyId              Int?
-  hasSubtractInventory   Boolean?
+  id                   Int            @id @default(autoincrement())
+  orderTime            String
+  deliveryDate         String
+  note                 String
+  status               String
+  paymentStatus        PaymentStatus?
+  userId               Int
+  totalPrice           Float
+  isReplacement        Boolean?
+  isVoid               Boolean?
+  updateTime           DateTime?
+  createdBy            String?
+  updatedBy            String?
+  codBoardId           Int?
+  GST                  Float?
+  PST                  Float?
+  subTotal             Float?
+  discount             Float?
+  isAffectInventory    Boolean?
+  shippingFee          Float?
+  type                 String?
+  deliveredBy          String?
+  deliveredAt          String?
+  addedToCODBy         String?
+  insertedAt           String?
+  insertedBy           String?
+  companyId            Int?
+  hasSubtractInventory Boolean?
 
-  delivery          Delivery? @relation("OrderDelivery")
+  delivery Delivery? @relation("OrderDelivery")
 
-  items             OrderedItems[]
-  timeline          OrderTimeline?  @relation("OrderTimeline")
+  items    OrderedItems[]
+  timeline OrderTimeline? @relation("OrderTimeline")
 
-  user              User?          @relation(fields: [userId], references: [id])
-  company           Company?       @relation(fields: [companyId], references: [id])
-  CodBoard          CodBoard?      @relation(fields: [codBoardId], references: [id])
+  user     User?     @relation(fields: [userId], references: [id])
+  company  Company?  @relation(fields: [companyId], references: [id])
+  CodBoard CodBoard? @relation(fields: [codBoardId], references: [id])
 
   @@index([deliveryDate, status])
   @@index([userId])
@@ -338,21 +348,21 @@ model Orders {
 }
 
 model Delivery {
-  id            Int           @id @default(autoincrement())
-  orderId       Int @unique
-  employeeId    Int
-  deliveredAt   String
-  companyId     Int?
-  startTripAt   String?
-  isViewed        Boolean?
+  id          Int      @id @default(autoincrement())
+  orderId     Int      @unique
+  employeeId  Int
+  deliveredAt String?
+  companyId   Int?
+  startTripAt String?
+  isViewed    Boolean?
 
-  medias               Media[]
+  medias Media[]
 
   // Relations
-  order     Orders    @relation("OrderDelivery", fields: [orderId], references: [id], onDelete: Cascade)
-  employee  Employee  @relation(fields: [employeeId], references: [id])
-  company   Company?  @relation(fields: [companyId], references: [id])
-  
+  order    Orders   @relation("OrderDelivery", fields: [orderId], references: [id], onDelete: Cascade)
+  employee Employee @relation(fields: [employeeId], references: [id])
+  company  Company? @relation(fields: [companyId], references: [id])
+
   @@index([orderId])
   @@index([employeeId])
   @@index([companyId])
@@ -360,24 +370,23 @@ model Delivery {
 }
 
 model OrderTimeline {
-  id        Int            @id @default(autoincrement())
-  orderId   Int             @unique
-  actions   OrderAction[]  
+  id      Int           @id @default(autoincrement())
+  orderId Int           @unique
+  actions OrderAction[]
 
-  order     Orders         @relation("OrderTimeline", fields: [orderId], references: [id], onDelete: Cascade)
+  order Orders @relation("OrderTimeline", fields: [orderId], references: [id], onDelete: Cascade)
 }
 
 model OrderAction {
-  id            Int           @id  @default(autoincrement())
-  timelineId    Int
-  title         String 
-  comment       String?
-  createdAt     String
-  createdBy     String
-  posIndex         Int
+  id         Int     @id @default(autoincrement())
+  timelineId Int
+  title      String
+  comment    String?
+  createdAt  String
+  createdBy  String
+  posIndex   Int
 
-  timeline     OrderTimeline    @relation(fields: [timelineId], references: [id], onDelete: Cascade)
-
+  timeline OrderTimeline @relation(fields: [timelineId], references: [id], onDelete: Cascade)
 }
 
 model UserPreference {
@@ -397,8 +406,8 @@ model ScheduleOrders {
   items         OrderedItems[]
   positionIndex PositionIndex? @relation("ScheduledOrderIndex")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  company     Company?   @relation(fields: [companyId], references: [id])
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company? @relation(fields: [companyId], references: [id])
 
   @@index([userId])
 }
@@ -444,8 +453,8 @@ model DayRange {
   createdBy  String?
   isArchived Boolean?
 
-  company    Company? @relation(fields: [companyId], references: [id])
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company? @relation(fields: [companyId], references: [id])
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Announcement {
@@ -455,7 +464,7 @@ model Announcement {
   updatedAt    DateTime
   announcement String
 
-  company      Company?   @relation(fields: [companyId], references: [id])
+  company Company? @relation(fields: [companyId], references: [id])
 }
 
 model CodBoard {
@@ -584,23 +593,23 @@ model Vendor {
 }
 
 model InventoryItem {
-  id                Int      @id @default(autoincrement())
-  name              String
-  sku               String?
-  supplierSku       String?
-  createdAt         String
-  createdBy         String
-  hasGST            Boolean?
-  hasPST            Boolean?
-  typeId            Int?
-  color             String?
-  indexPos          Int?
-  image             String?
-  isPromotion       Boolean?
-  promotionId       Int?
-  promoIndexPos     Int?
-  companyId         Int?
-  isShowInventory   Boolean?
+  id              Int      @id @default(autoincrement())
+  name            String
+  sku             String?
+  supplierSku     String?
+  createdAt       String
+  createdBy       String
+  hasGST          Boolean?
+  hasPST          Boolean?
+  typeId          Int?
+  color           String?
+  indexPos        Int?
+  image           String?
+  isPromotion     Boolean?
+  promotionId     Int?
+  promoIndexPos   Int?
+  companyId       Int?
+  isShowInventory Boolean?
 
   company      Company?         @relation(fields: [companyId], references: [id])
   item         Item[]
@@ -675,19 +684,19 @@ model VendorItem {
   createdAt       String
   createdBy       String
 
-  inventoryItem InventoryItem   @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
-  vendor        Vendor          @relation(fields: [vendorId], references: [id], onDelete: Cascade)
-  company       Company?        @relation(fields: [companyId], references: [id])
+  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  vendor        Vendor        @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  company       Company?      @relation(fields: [companyId], references: [id])
 
-  fifo          Fifo[]
-  unit          InventoryUnit[]
+  fifo Fifo[]
+  unit InventoryUnit[]
 
   @@index([vendorId])
   @@index([inventoryItemId, vendorId])
 }
 
 model Fifo {
-  id              Int            @id @default(autoincrement())
+  id              Int    @id @default(autoincrement())
   companyId       Int?
   inventoryItemId Int
   vendorItemId    Int
@@ -695,11 +704,12 @@ model Fifo {
   createdAt       String
   createdBy       String
   price           Float?
-  
-  orderedItems    OrderedItems[]
 
-  inventoryItem   InventoryItem  @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
-  company         Company?       @relation(fields: [companyId], references: [id])
+  orderedItems OrderedItems[]
+
+  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  company       Company?      @relation(fields: [companyId], references: [id])
+  vendorItem    VendorItem    @relation(fields: [vendorItemId], references: [id])
 }
 
 model InventoryUnit {
@@ -712,7 +722,7 @@ model InventoryUnit {
   createdAt    String
   createdBy    String
 
-  company      Company?       @relation(fields: [companyId], references: [id])
+  company Company? @relation(fields: [companyId], references: [id])
 
   sellingItem     Item[]
   itemOptions     Option[]
@@ -735,7 +745,7 @@ model Action {
   createdAt   String
   createdBy   String?
 
-  company     Company?  @relation(fields: [companyId], references: [id])
+  company Company? @relation(fields: [companyId], references: [id])
 }
 
 model Cheque {
@@ -752,9 +762,9 @@ model Cheque {
   createdAt    String
   createdBy    String
   userId       Int
-  
-  user         User    @relation(fields: [userId], references: [id])
-  company      Company?  @relation(fields: [companyId], references: [id])
+
+  user    User     @relation(fields: [userId], references: [id])
+  company Company? @relation(fields: [companyId], references: [id])
 }
 
 model ClientStatement {
@@ -767,8 +777,8 @@ model ClientStatement {
   printedBy String
   updatedBy String?
 
-  user      User    @relation(fields: [userId], references: [id])
-  company   Company?  @relation(fields: [companyId], references: [id])
+  user    User     @relation(fields: [userId], references: [id])
+  company Company? @relation(fields: [companyId], references: [id])
 }
 
 model CartItem {
@@ -815,7 +825,7 @@ model Promotion {
   items        InventoryItem[]
   websiteItems Item[]
 
-  company     Company?      @relation(fields: [companyId], references: [id])
+  company Company? @relation(fields: [companyId], references: [id])
 }
 
 model Option {
@@ -838,24 +848,24 @@ model Option {
 }
 
 model ScheduledShift {
-  id            Int    @id @default(autoincrement())
-  companyId     Int
-  employeeId    Int
-  date          String
-  queryDate     String? // Use for query
-  startedAt     String
-  endedAt       String?
-  hours         Float?
-  cost          Float?
-  role          String
-  assignedAt    String?
-  assignedBy    String?
-  createdAt     String
-  createdBy     String
-  status        ScheduledShiftStatus?
+  id         Int                   @id @default(autoincrement())
+  companyId  Int
+  employeeId Int
+  date       String
+  queryDate  String? // Use for query
+  startedAt  String
+  endedAt    String?
+  hours      Float?
+  cost       Float?
+  role       String
+  assignedAt String?
+  assignedBy String?
+  createdAt  String
+  createdBy  String
+  status     ScheduledShiftStatus?
 
-  company       Company     @relation(fields: [companyId], references: [id])
-  employee      Employee    @relation(fields: [employeeId], references: [id])
+  company  Company  @relation(fields: [companyId], references: [id])
+  employee Employee @relation(fields: [employeeId], references: [id])
 
   @@index([companyId])
   @@index([employeeId])
@@ -967,12 +977,9 @@ model Media {
   lossReport LossReport? @relation(fields: [lossReportId], references: [id], onDelete: Cascade)
   delivery   Delivery?   @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
   company    Company?    @relation(fields: [companyId], references: [id], onDelete: Cascade)
-<<<<<<< HEAD
 
   @@index([deliveryId])
   @@index([lossReportId])
-=======
->>>>>>> 5ac76f841873923829e61d31b7b9c4a3561b5695
 }
 
 enum QuoteStatus {

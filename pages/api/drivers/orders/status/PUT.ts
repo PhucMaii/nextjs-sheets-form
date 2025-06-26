@@ -113,42 +113,45 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    // If fileKey is provided, and updated status is fulfilled but have no delivery proof,
-    // then create delivery proof and save the file key
-    if (
-      fileKey &&
-      updatedOrder.status === ORDER_STATUS.DELIVERED &&
-      !updatedOrder.delivery
-    ) {
-      // Create delivery proof
-      const deliveryProof = await prisma.delivery.create({
-        data: {
-          orderId: updatedOrder.id,
-          employeeId: driverUpdate.id,
-          deliveredAt: dateAndTime,
-          companyId: existingOrder.companyId,
-        },
-      });
-      
-      // Save to Media
-      await prisma.media.create({
-        data: {
-          fileKey,
-          type: 'image/jpeg',
-          createdBy: updatedBy,
-          createdAt: dateAndTime,
-          deliveryId: deliveryProof.id,
-          companyId: existingOrder.companyId,
-        },
-      });
+    if (updatedOrder.status === ORDER_STATUS.DELIVERED) {
+      // Check if delivery is initialized
+      let delivery: any = updatedOrder?.delivery;
+      if (!delivery) {
+        delivery = await prisma.delivery.create({
+          data: {
+            orderId: updatedOrder.id,
+            employeeId: driverUpdate.id,
+            deliveredAt: dateAndTime,
+            companyId: existingOrder.companyId,
+          },
+        });
+      }
+  
+      // If fileKey is provided, and updated status is fulfilled but have no delivery proof,
+      // then create delivery proof and save the file key
+      if (fileKey) {
+        // Save to Media
+        await prisma.media.create({
+          data: {
+            fileKey,
+            type: 'image/jpeg',
+            createdBy: updatedBy,
+            createdAt: dateAndTime,
+            deliveryId: delivery?.id,
+            companyId: existingOrder.companyId,
+          },
+        });
+  
+        // record action
+        await recordAction(
+          updatedOrder.id,
+          updatedBy,
+          `${updatedBy} uploaded delivery proof`,
+        );
+      }
 
-      // record action
-      await recordAction(
-        updatedOrder.id,
-        updatedBy,
-        `${updatedBy} uploaded delivery proof`,
-      );
     }
+
 
     // Inventory Item Update
     // From other status to VOID -> Inventory Item get restock
