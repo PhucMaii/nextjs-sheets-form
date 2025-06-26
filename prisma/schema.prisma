@@ -343,6 +343,7 @@ model Delivery {
   employeeId    Int
   deliveredAt   String
   companyId     Int?
+  startTripAt   String?
   isViewed        Boolean?
 
   medias               Media[]
