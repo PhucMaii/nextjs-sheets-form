@@ -1,5 +1,5 @@
 // import { officiallyStartDate } from '@/app/lib/constant';
-import { ORDER_STATUS } from '@/app/utils/enum';
+import { ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
 import { generateListOfDateString } from '@/app/utils/time';
 import { sortByDeliveryDate } from '@/pages/api/utils/date';
 import moment from 'moment-timezone';
@@ -221,11 +221,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       profitChange,
     };
 
+    // Subtract 1 day and 1 month from the start date
+    const lastDateBeforeStart = moment(formattedStartDate).subtract(1, 'day').subtract(1, 'month').toDate();
     // Calculate customers in debt
     const debtRange = generateListOfDateString(
       normalizeDate(officiallyStartDate),
-      formattedEndDate,
+      lastDateBeforeStart,
     );
+    console.log('debtRange', debtRange[debtRange.length - 1]);
 
     let debtOrders: any = [];
     const debtFetchSize = 1000;
@@ -265,11 +268,22 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const customersInDebt = getCustomersInDebt(debtOrders);
 
+
+    const allCustomers = await prisma.user.findMany({
+      where: {
+        companyId: Number(companyId),
+        type: {
+          not: USER_CATEGORIZED.INACTIVE
+        }
+      },
+    });
+
     return res.status(200).json({
       data: {
         customersInDebt,
         overviewData,
         customersProfit,
+        customers: allCustomers,
         reports: {
           thisMonth: thisMonthRevenueReport.values,
           lastMonth: lastMonthRevenueReport.chartData,
