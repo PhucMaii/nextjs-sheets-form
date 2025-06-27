@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { PrismaClient } from '@prisma/client';
-import { FLAG_ORDER_TYPE, USER_CATEGORIZED, USER_ROLE } from '@/app/utils/enum';
+import { FLAG_ORDER_TYPE, ORDER_STATUS, USER_CATEGORIZED, USER_ROLE } from '@/app/utils/enum';
 import {
   checkOrderDeliveryDateValid,
   convertToPSTDate,
@@ -27,6 +27,7 @@ interface IBody {
   items: any[];
   createdBy: USER_ROLE;
   isForceOrder?: boolean;
+  enteredOrderAt?: string;
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -44,6 +45,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       items,
       createdBy,
       isForceOrder,
+      enteredOrderAt,
     }: IBody = req.body;
 
     console.log('body', req.body);
@@ -160,6 +162,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           deliveryDate,
           formattedCreatedBy,
           note,
+          0,
+          ORDER_STATUS.INCOMPLETED,
+          enteredOrderAt,
         );
 
         // const itemListWithTotalPrice = newOrder?.items.map(
@@ -278,6 +283,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       deliveryDate,
       formattedCreatedBy,
       note,
+      0,
+      ORDER_STATUS.INCOMPLETED,
+      enteredOrderAt,
     );
 
     // const itemListWithTotalPrice = newOrder?.items.map((item: OrderedItems) => {

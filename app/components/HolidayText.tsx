@@ -2,6 +2,12 @@ import { Box, Typography } from '@mui/material';
 import { red, yellow } from '@mui/material/colors';
 import React from 'react';
 
+const highlightStyle = {
+  backgroundColor: yellow[800],
+  padding: 1,
+  borderRadius: 5,
+};
+
 export default function HolidayText() {
   return (
     <Box
@@ -23,17 +29,10 @@ export default function HolidayText() {
           sx={{ color: 'white', lineHeight: 1.5 }}
           fontWeight="bold"
         >
-          Price increase related to <br />
-          <strong
-            style={{
-              backgroundColor: yellow[800],
-              padding: 1,
-              borderRadius: 5,
-            }}
-          >
-            Sunrise Tofu Products
-          </strong>{' '} <br />
-          starting from June 30th
+          <strong style={highlightStyle}>
+            Liquid Egg
+          </strong>{' '} price will be <br />
+          increased to $119 on July 15
         </Typography>
         <Typography sx={{ color: 'white', textAlign: 'center' }}>
           We truly appreciate <br /> your support and understanding! 💚
