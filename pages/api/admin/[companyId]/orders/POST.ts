@@ -300,6 +300,7 @@ export const createOrder = async (
   note: string = '',
   shippingFee: number = 0,
   status: ORDER_STATUS = ORDER_STATUS.INCOMPLETED,
+  enteredOrderAt: string = '',
 ) => {
   try {
     const prisma = new PrismaClient();
@@ -352,6 +353,7 @@ export const createOrder = async (
         createdBy,
         companyId,
         paymentStatus: PaymentStatus.Unpaid,
+        enteredOrderAt,
       },
     });
 
