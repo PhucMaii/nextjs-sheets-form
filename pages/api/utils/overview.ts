@@ -126,6 +126,7 @@ export const getLastMonthRevenue = async (
     chartData: formatLengthRevenue,
     revenue: lastMonthRevenue,
     keys: revenueByDate.keys,
+    numberOfOrders: orders.length,
   };
 };
 

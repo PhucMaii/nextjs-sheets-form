@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Box,
   Card,
@@ -9,13 +9,7 @@ import {
   Chip,
 } from '@mui/material';
 import { TrendingUp, TrendingDown } from '@mui/icons-material';
-import { 
-  primary, 
-  success, 
-  error, 
-  warning, 
-  info 
-} from '@/theme/color';
+import { primary, success, error, warning, info } from '@/theme/color';
 
 interface KPICardProps {
   title: string;
@@ -26,6 +20,7 @@ interface KPICardProps {
     value: number;
     isPositive: boolean;
     label: string;
+    isReversed?: boolean;
   };
   color?: 'primary' | 'success' | 'error' | 'warning' | 'info';
   variant?: 'default' | 'gradient';
@@ -42,10 +37,10 @@ const formatCompactNumber = (value: string | number): string => {
     }
     return value;
   }
-  
+
   const num = Number(value);
   if (isNaN(num)) return String(value);
-  
+
   if (num >= 1000000) {
     return (num / 1000000).toFixed(1) + 'M';
   } else if (num >= 1000) {
@@ -74,6 +69,12 @@ export default function KPICard({
   variant = 'default',
   isMinify = false,
 }: KPICardProps) {
+  const positive = useMemo(() => {
+    if (trend?.isReversed) {
+      return !trend?.isPositive;
+    }
+    return trend?.isPositive;
+  }, [trend]);
   // const theme = useTheme();
 
   const getColorConfig = () => {
@@ -134,7 +135,8 @@ export default function KPICard({
       elevation={0}
       sx={{
         height: '100%',
-        background: variant === 'gradient' ? colorConfig.background : 'background.paper',
+        background:
+          variant === 'gradient' ? colorConfig.background : 'background.paper',
         border: `1px solid ${alpha(colorConfig.main, 0.12)}`,
         borderRadius: 3,
         position: 'relative',
@@ -187,7 +189,12 @@ export default function KPICard({
 
         <Box sx={{ position: 'relative', zIndex: 1 }}>
           {/* Header Section */}
-          <Box display="flex" alignItems="center" justifyContent="space-between" mb={isMinify ? 2 : 3}>
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+            mb={isMinify ? 2 : 3}
+          >
             <Box flex={1}>
               <Typography
                 variant="overline"
@@ -195,11 +202,11 @@ export default function KPICard({
                 fontWeight={600}
                 textTransform="uppercase"
                 letterSpacing={1.2}
-                fontSize={isMinify ? "0.7rem" : "0.75rem"}
-                sx={{ 
+                fontSize={isMinify ? '0.7rem' : '0.75rem'}
+                sx={{
                   opacity: 0.8,
                   mb: 0.5,
-                  display: 'block'
+                  display: 'block',
                 }}
               >
                 {title}
@@ -231,16 +238,16 @@ export default function KPICard({
           <Box mb={isMinify ? 1 : 2}>
             <Typography
               className="kpi-value"
-              variant={isMinify ? "h4" : "h3"}
+              variant={isMinify ? 'h4' : 'h3'}
               fontWeight={800}
               color="text.primary"
               sx={{
-                background: variant === 'gradient'
-                  ? colorConfig.gradient
-                  : 'none',
+                background:
+                  variant === 'gradient' ? colorConfig.gradient : 'none',
                 backgroundClip: variant === 'gradient' ? 'text' : 'unset',
                 WebkitBackgroundClip: variant === 'gradient' ? 'text' : 'unset',
-                WebkitTextFillColor: variant === 'gradient' ? 'transparent' : 'unset',
+                WebkitTextFillColor:
+                  variant === 'gradient' ? 'transparent' : 'unset',
                 transition: 'transform 0.3s ease',
                 lineHeight: 1.1,
                 letterSpacing: '-0.02em',
@@ -255,7 +262,7 @@ export default function KPICard({
             <Typography
               variant="body2"
               color="text.secondary"
-              sx={{ 
+              sx={{
                 mb: trend ? 2 : 0,
                 opacity: 0.8,
                 fontSize: '0.875rem',
@@ -270,11 +277,11 @@ export default function KPICard({
           {trend && !isMinify && (
             <Box display="flex" alignItems="center" gap={1.5}>
               <Chip
-                icon={trend.isPositive ? <TrendingUp /> : <TrendingDown />}
-                label={`${trend.isPositive ? '+' : ''}${trend.value}%`}
+                icon={positive ? <TrendingUp /> : <TrendingDown />}
+                label={`${trend.value}%`}
                 size="small"
                 sx={{
-                  background: trend.isPositive 
+                  background: trend.isPositive
                     ? `linear-gradient(135deg, ${success.lightest} 0%, ${alpha(success.main, 0.1)} 100%)`
                     : `linear-gradient(135deg, ${error.lightest} 0%, ${alpha(error.main, 0.1)} 100%)`,
                   color: trend.isPositive ? success.dark : error.dark,
@@ -285,13 +292,13 @@ export default function KPICard({
                     color: 'inherit',
                     fontSize: '0.875rem',
                   },
-                  border: `1px solid ${trend.isPositive ? alpha(success.main, 0.2) : alpha(error.main, 0.2)}`,
+                  border: `1px solid ${positive ? alpha(success.main, 0.2) : alpha(error.main, 0.2)}`,
                 }}
               />
               <Typography
                 variant="caption"
                 color="text.secondary"
-                sx={{ 
+                sx={{
                   opacity: 0.7,
                   fontSize: '0.75rem',
                   fontWeight: 500,
@@ -311,18 +318,22 @@ export default function KPICard({
                   alignItems: 'center',
                   gap: 0.5,
                   color: trend.isPositive ? success.main : error.main,
-                  fontWeight: 600,
+                  fontWeight: 600,  
                   fontSize: '0.75rem',
                 }}
               >
-                {trend.isPositive ? <TrendingUp fontSize="small" /> : <TrendingDown fontSize="small" />}
+                {positive ? (
+                  <TrendingUp fontSize="small" />
+                ) : (
+                  <TrendingDown fontSize="small" />
+                )}
                 <Typography
                   variant="caption"
                   component="span"
                   fontWeight="bold"
                   fontSize="0.75rem"
                 >
-                  {trend.isPositive ? '+' : ''}{trend.value}%
+                  {trend.value}%
                 </Typography>
               </Box>
             </Box>
@@ -331,4 +342,4 @@ export default function KPICard({
       </CardContent>
     </Card>
   );
-} 
+}

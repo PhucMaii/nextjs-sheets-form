@@ -127,6 +127,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
+    // Calculate avg fulfillment time
+    const ordersHasFulfillmentTime = orders.filter((order: any) => {
+      return order?.enteredOrderAt;
+    })
+    const avgFulfillmentTime = ordersHasFulfillmentTime.reduce((acc: number, order: any) => {
+      const fulfillmentTime = moment(order.orderTime).diff(moment(order.enteredOrderAt), 'seconds');
+      return acc + fulfillmentTime;
+    }, 0) / ordersHasFulfillmentTime.length;
+    console.log('avgFulfillmentTime', avgFulfillmentTime);
+
     // Calculate overview data
     const sortedThisMonthOrders = sortByDeliveryDate(orders);
 
@@ -134,7 +144,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return acc + order.totalPrice;
     }, 0);
     const ongoingOrders = sortedThisMonthOrders.filter((order: any) => {
-      return order.status !== ORDER_STATUS.COMPLETED && order.status !== ORDER_STATUS.VOID;
+      return order.status === ORDER_STATUS.INCOMPLETED;
+    });
+    const deliveredOrders = sortedThisMonthOrders.filter((order: any) => {
+      return (
+        order.status === ORDER_STATUS.DELIVERED ||
+        order.status === ORDER_STATUS.COMPLETED
+      );
+    });
+    const cancelledOrders = sortedThisMonthOrders.filter((order: any) => {
+      return order.status === ORDER_STATUS.VOID;
     });
     const unpaidOrders = sortedThisMonthOrders.filter((order: any) => {
       return order?.paymentStatus === PaymentStatus.Unpaid;
@@ -211,6 +230,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const overviewData = {
       manifest,
       numberOfOrders: sortedThisMonthOrders.length,
+      lastMonthOrders: lastMonthRevenueReport.numberOfOrders,
       revenue,
       revenueChange,
       ongoingOrders: ongoingOrders.length,
@@ -219,15 +239,22 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       expensesChange: totalExpensesChange,
       profit,
       profitChange,
+      deliveredOrders: deliveredOrders.length,
+      cancelledOrders: cancelledOrders.length,
+      avgFulfillmentTime,
     };
 
-    // Subtract 1 day and 1 month from the start date
-    const lastDateBeforeStart = moment(formattedStartDate).subtract(1, 'day').subtract(1, 'month').toDate();
+    // Get last month, the end date is the last of last month
+    const lastMonthEndDate = moment()
+      .subtract(1, 'month')
+      .endOf('month')
+      .toDate();
     // Calculate customers in debt
     const debtRange = generateListOfDateString(
       normalizeDate(officiallyStartDate),
-      lastDateBeforeStart,
+      normalizeDate(lastMonthEndDate),
     );
+
     console.log('debtRange', debtRange[debtRange.length - 1]);
 
     let debtOrders: any = [];
@@ -268,13 +295,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const customersInDebt = getCustomersInDebt(debtOrders);
 
-
     const allCustomers = await prisma.user.findMany({
       where: {
         companyId: Number(companyId),
         type: {
-          not: USER_CATEGORIZED.INACTIVE
-        }
+          not: USER_CATEGORIZED.INACTIVE,
+        },
       },
     });
 

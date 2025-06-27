@@ -8,7 +8,6 @@ import {
   Chip,
   useTheme,
   alpha,
-  Divider,
 } from '@mui/material';
 import {
   TrendingDown,
@@ -17,11 +16,47 @@ import {
   Assessment,
   LocalOffer,
 } from '@mui/icons-material';
-import { red, orange, blue, green, purple } from '@mui/material/colors';
+import { red, orange, blue, purple } from '@mui/material/colors';
 
 interface ProductLossInsightsProps {
   productLossData: any;
 }
+
+const LossTypeBreakdown = ({ lossType }: { lossType: any }) => {
+  return (
+      <Box
+        sx={{
+          p: 2,
+          borderRadius: 2,
+          border: `1px solid ${alpha(blue[600], 0.2)}`,
+          backgroundColor: alpha(blue[600], 0.05),
+        }}
+      >
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="space-between"
+          mb={1}
+        >
+          <Typography variant="subtitle2" fontWeight={600}>
+            {lossType.type}
+          </Typography>
+          <Chip
+            label={`${lossType.percentage.toFixed(1)}%`}
+            size="small"
+            sx={{
+              backgroundColor: blue[600],
+              color: 'white',
+              fontWeight: 600,
+            }}
+          />
+        </Box>
+        <Typography variant="body2" color="text.secondary">
+          ${lossType.totalLoss.toFixed(2)} • {lossType.count} reports
+        </Typography>
+      </Box>
+  );
+};
 
 export default function ProductLossInsights({
   productLossData,
@@ -41,9 +76,15 @@ export default function ProductLossInsights({
       };
     }
 
-    const losses = productLossData.productLosses;
-    const totalLoss = losses.reduce((sum: number, loss: any) => sum + (loss?.totalCost || 0), 0);
-    const totalQuantity = losses.reduce((sum: number, loss: any) => sum + (loss?.quantityLost || 0), 0);
+    console.log('productLossData', productLossData);
+
+    // const losses = productLossData.totalLoss;
+    const losses = productLossData.losses;
+    const totalLoss = productLossData.totalLoss;
+    const totalQuantity = losses.reduce(
+      (sum: number, loss: any) => sum + (loss?.quantityLost || 0),
+      0,
+    );
     const totalReports = losses.length;
     const avgLossPerReport = totalReports > 0 ? totalLoss / totalReports : 0;
 
@@ -68,14 +109,36 @@ export default function ProductLossInsights({
       return (loss?.totalCost || 0) > (max?.totalCost || 0) ? loss : max;
     }, null);
 
+    // Find most common loss description
+    const mostCommonLossTermInDescription = losses.reduce(
+      (acc: any, loss: any) => {
+        const description = loss?.description || '';
+        if (!acc[description]) {
+          acc[description] = 0;
+        }
+        acc[description] += 1;
+        return acc;
+      },
+      {},
+    );
+    const mostCommonLossTerm = Object.keys(
+      mostCommonLossTermInDescription,
+    ).sort((a: any, b: any) => mostCommonLossTermInDescription[b] - mostCommonLossTermInDescription[a])[0];
+
+    const lossIncludeCommonTerm = losses.filter((loss: any) => {
+      return loss?.description?.includes(mostCommonLossTerm);
+    });
+
     // Convert loss types to array for display
-    const lossTypeBreakdown = Object.entries(lossTypes).map(([type, data]: [string, any]) => ({
-      type,
-      count: data.count,
-      totalLoss: data.totalLoss,
-      totalQuantity: data.totalQuantity,
-      percentage: totalLoss > 0 ? (data.totalLoss / totalLoss) * 100 : 0,
-    })).sort((a, b) => b.totalLoss - a.totalLoss);
+    const lossTypeBreakdown = Object.entries(lossTypes)
+      .map(([type, data]: [string, any]) => ({
+        type,
+        count: data.count,
+        totalLoss: data.totalLoss,
+        totalQuantity: data.totalQuantity,
+        percentage: totalLoss > 0 ? (data.totalLoss / totalLoss) * 100 : 0,
+      }))
+      .sort((a, b) => b.totalLoss - a.totalLoss);
 
     return {
       totalLoss,
@@ -84,7 +147,18 @@ export default function ProductLossInsights({
       lossTypes,
       avgLossPerReport,
       mostExpensiveLoss,
-      lossTypeBreakdown,
+      lossTypeBreakdown: [
+        ...lossTypeBreakdown,
+        {
+          type: mostCommonLossTerm,
+          count: lossIncludeCommonTerm.length,
+          totalLoss: lossIncludeCommonTerm.reduce((sum: number, loss: any) => sum + (loss?.totalCost || 0), 0),
+          totalQuantity: lossIncludeCommonTerm.reduce((sum: number, loss: any) => sum + (loss?.quantityLost || 0), 0),
+          percentage: lossIncludeCommonTerm.length > 0 ? (lossIncludeCommonTerm.reduce((sum: number, loss: any) => sum + (loss?.totalCost || 0), 0) / totalLoss) * 100 : 0,
+        },
+      ],
+      mostCommonLossTerm,
+      lossIncludeCommonTerm,
     };
   }, [productLossData]);
 
@@ -186,11 +260,16 @@ export default function ProductLossInsights({
                     {metric.title}
                   </Typography>
                 </Box>
-                
-                <Typography variant="h4" fontWeight="bold" color="text.primary" mb={0.5}>
+
+                <Typography
+                  variant="h4"
+                  fontWeight="bold"
+                  color="text.primary"
+                  mb={0.5}
+                >
                   {metric.value}
                 </Typography>
-                
+
                 <Typography variant="body2" color="text.secondary">
                   {metric.subtitle}
                 </Typography>
@@ -207,32 +286,7 @@ export default function ProductLossInsights({
             <Grid container spacing={1}>
               {insights.lossTypeBreakdown.slice(0, 4).map((lossType, index) => (
                 <Grid item xs={12} sm={6} key={index}>
-                  <Box
-                    sx={{
-                      p: 2,
-                      borderRadius: 2,
-                      border: `1px solid ${alpha(blue[600], 0.2)}`,
-                      backgroundColor: alpha(blue[600], 0.05),
-                    }}
-                  >
-                    <Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
-                      <Typography variant="subtitle2" fontWeight={600}>
-                        {lossType.type}
-                      </Typography>
-                      <Chip
-                        label={`${lossType.percentage.toFixed(1)}%`}
-                        size="small"
-                        sx={{
-                          backgroundColor: blue[600],
-                          color: 'white',
-                          fontWeight: 600,
-                        }}
-                      />
-                    </Box>
-                    <Typography variant="body2" color="text.secondary">
-                      ${lossType.totalLoss.toFixed(2)} • {lossType.count} reports
-                    </Typography>
-                  </Box>
+                  <LossTypeBreakdown lossType={lossType} />
                 </Grid>
               ))}
             </Grid>
@@ -256,10 +310,12 @@ export default function ProductLossInsights({
                 <LocalOffer sx={{ color: red[600] }} />
                 <Box flex={1}>
                   <Typography variant="subtitle2" fontWeight={600}>
-                    {insights.mostExpensiveLoss?.inventoryItem?.name || 'Unknown Product'}
+                    {insights.mostExpensiveLoss?.inventoryItem?.name ||
+                      'Unknown Product'}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {insights.mostExpensiveLoss?.lossType} • {insights.mostExpensiveLoss?.quantityLost} units
+                    {insights.mostExpensiveLoss?.lossType} •{' '}
+                    {insights.mostExpensiveLoss?.quantityLost} units
                   </Typography>
                 </Box>
                 <Chip
@@ -275,4 +331,4 @@ export default function ProductLossInsights({
       </CardContent>
     </Card>
   );
-} 
+}

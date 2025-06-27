@@ -94,9 +94,6 @@ export default function BarChart({
           colors: '#666',
           fontSize: '12px',
         },
-        formatter: function (val) {
-          return '$' + parseFloat(val.toString()).toFixed(2);
-        },
       },
     },
     grid: {
@@ -105,7 +102,7 @@ export default function BarChart({
     },
     tooltip: {
       theme: 'dark',
-      custom: customTooltip && detailedData ? function({ series, seriesIndex, dataPointIndex, w }) {
+      custom: customTooltip && detailedData ? function({ dataPointIndex }) {
         const dataPoint = detailedData[dataPointIndex];
         if (!dataPoint) return '';
         
@@ -119,11 +116,12 @@ export default function BarChart({
           </div>
         `;
       } : undefined,
-      y: {
-        formatter: function (val) {
-          return '$' + val.toFixed(2);
-        },
-      },
+      // y: {
+      //   // return item name
+      //   formatter: function (val) {
+      //     return val.name;
+      //   },
+      // },
     },
     fill: {
       opacity: 1,

@@ -65,9 +65,8 @@ export default function DonutChart({
               fontSize: '14px',
               fontWeight: 600,
               color: '#666',
-              formatter: function (w) {
-                const total = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
-                return '$' + total.toFixed(2);
+              formatter: function () {
+                return 'Overview';
               },
             },
           },
@@ -78,11 +77,11 @@ export default function DonutChart({
       show: showLegend,
       position: 'bottom',
       fontSize: '12px',
-      markers: {
-        width: 12,
-        height: 12,
-        radius: 6,
-      },
+      // markers: {
+      //   width: 12,
+      //   height: 12,
+      //   radius: 6,
+      // },
       itemMargin: {
         horizontal: 10,
         vertical: 5,

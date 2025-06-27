@@ -19,8 +19,6 @@ import SelectDateRange from '../components/Select/SelectDateRange';
 import { generateMonthRange } from '@/app/utils/time';
 import { getAdminApiUrl } from '@/app/utils/enum';
 import AreaChart from '../components/Charts/AreaChart';
-import { ShadowSection } from '../reports/styled';
-import PieChart from '../components/Charts/PieChart';
 import ManifestTable from '../components/Tables/ManifestTable';
 import CustomersInDebt from '../components/Tables/CustomersInDebt';
 import LoadingModal from '../components/Modals/LoadingModal';
@@ -30,29 +28,24 @@ import DebtCustomers from '../components/Printing/DebtCustomers';
 import { useReactToPrint } from 'react-to-print';
 import PrintIcon from '@mui/icons-material/Print';
 import useNotification from '@/hooks/useNotification';
-import OverviewData from '../components/Overview/OverviewData';
 import CustomersProfitTable from '../components/Tables/CustomersProfitTable';
 import StatusText from '../components/StatusText';
 import DriverTablesReport from '../components/Tables/DriverTablesReport';
-import { IconBackground } from '../components/OverviewCard/styled';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import ProductLossOverview from '../components/Overview/ProductLossOverview';
-import Inventory2Icon from '@mui/icons-material/Inventory2';
-import ReportIcon from '@mui/icons-material/Report';
-import FlagIcon from '@mui/icons-material/Flag';
-import ProductLossTable from '../components/Tables/ProductLossTable';
 import { useParams } from 'next/navigation';
 
 // New chart components
 import DonutChart from '../components/Charts/DonutChart';
 import BarChart from '../components/Charts/BarChart';
 import CustomerSpendingChart from '../components/Charts/CustomerSpendingChart';
+import LineChart from '../components/Charts/LineChart';
+import ExpenseTrendChart from '../components/Charts/ExpenseTrendChart';
 
 // New overview components
 import KPICard from '@/app/admin/[companyId]/components/Overview/KPICard';
 import OrderStatusOverview from '@/app/admin/[companyId]/components/Overview/OrderStatusOverview';
 import CustomerInsights from '@/app/admin/[companyId]/components/Overview/CustomerInsights';
 import ProductLossInsights from '@/app/admin/[companyId]/components/Overview/ProductLossInsights';
+import ExpenseAnalytics from '@/app/admin/[companyId]/components/Overview/ExpenseAnalytics';
 
 // Icons
 import {
@@ -68,22 +61,7 @@ import {
 } from '@mui/icons-material';
 
 // Import app's color theme
-import {
-  primary,
-  success,
-  error,
-  warning,
-  info,
-  neutral,
-  successColor,
-  errorColor,
-  infoColor,
-  warningColor,
-  successBackground,
-  errorBackground,
-  warningBackground,
-  infoBackground,
-} from '@/theme/color';
+import { primary, success, error, warning, info, neutral } from '@/theme/color';
 
 // Unified blue theme color palette
 const themeColors = {
@@ -228,12 +206,12 @@ export default function Overview() {
   };
 
   const getTopProductsData = () => {
-    if (!productLossData?.productLosses) return { categories: [], data: [] };
+    if (!productLossData?.losses) return { categories: [], data: [] };
 
     // Group losses by product and calculate totals
     const productLossMap = new Map();
 
-    productLossData.productLosses.forEach((loss: any) => {
+    productLossData.losses.forEach((loss: any) => {
       const productName = loss?.inventoryItem?.name || 'Unknown Product';
       const lossAmount = loss?.totalCost || 0;
       const lossQuantity = loss?.quantityLost || 0;
@@ -255,6 +233,8 @@ export default function Overview() {
       productData.reports += 1;
     });
 
+    // console.log('productLossMap', productLossMap);
+
     // Convert to array and sort by total loss
     const sortedProducts = Array.from(productLossMap.entries())
       .map(([productName, data]: [string, any]) => ({
@@ -265,12 +245,12 @@ export default function Overview() {
         reports: data.reports,
       }))
       .sort((a, b) => b.totalLoss - a.totalLoss)
-      .slice(0, 8); // Show top 8 products
+      .slice(0, 3); // Show top 3 products
+
+    // console.log('sortedProducts', sortedProducts);
 
     // Prepare data for chart
-    const categories = sortedProducts.map(
-      (product) => `${product.name} (${product.reports} reports)`,
-    );
+    const categories = sortedProducts.map((product) => `${product.name}`);
     const data = sortedProducts.map((product) => product.totalLoss);
 
     return {
@@ -346,6 +326,22 @@ export default function Overview() {
               </Grid>
               <Grid item xs={12} md={6} lg={3}>
                 <KPICard
+                  title="Total Expenses"
+                  value={`$${(overviewData?.expenses || 0).toFixed(2)}`}
+                  icon={<AttachMoney />}
+                  color="error"
+                  variant="gradient"
+                  isMinify={isMinify}
+                  trend={{
+                    value: overviewData?.expensesChange?.toFixed(2) || 0,
+                    isPositive: (overviewData?.expensesChange || 0) < 0,
+                    label: 'vs last period',
+                    isReversed: true,
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} md={6} lg={3}>
+                <KPICard
                   title="Total Orders"
                   value={overviewData?.numberOfOrders || 0}
                   icon={<ShoppingCart />}
@@ -353,17 +349,6 @@ export default function Overview() {
                   variant="gradient"
                   isMinify={isMinify}
                   subtitle="Orders processed"
-                />
-              </Grid>
-              <Grid item xs={12} md={6} lg={3}>
-                <KPICard
-                  title="Active Customers"
-                  value={customers?.length || 0}
-                  icon={<People />}
-                  color="info"
-                  variant="gradient"
-                  isMinify={isMinify}
-                  subtitle="Engaged customers"
                 />
               </Grid>
               <Grid item xs={12} md={6} lg={3}>
@@ -383,10 +368,141 @@ export default function Overview() {
               </Grid>
             </Grid>
 
+            {/* Additional KPI Cards */}
+            <Grid container spacing={3} mb={4}>
+              <Grid item xs={12} md={6} lg={3}>
+                <KPICard
+                  title="Profit Margin"
+                  value={`${(((overviewData?.profit || 0) / (overviewData?.revenue || 1)) * 100).toFixed(1)}%`}
+                  icon={<Analytics />}
+                  color="success"
+                  variant="gradient"
+                  isMinify={isMinify}
+                  subtitle="Financial health"
+                />
+              </Grid>
+              <Grid item xs={12} md={6} lg={3}>
+                <KPICard
+                  title="Expense Ratio"
+                  value={`${(((overviewData?.expenses || 0) / (overviewData?.revenue || 1)) * 100).toFixed(1)}%`}
+                  icon={<Assessment />}
+                  color="error"
+                  variant="gradient"
+                  isMinify={isMinify}
+                  subtitle="Cost efficiency"
+                />
+              </Grid>
+
+              <Grid item xs={12} md={6} lg={3}>
+                <KPICard
+                  title="Avg Order Value"
+                  value={`$${((overviewData?.revenue || 0) / (overviewData?.numberOfOrders || 1)).toFixed(2)}`}
+                  icon={<ShoppingCart />}
+                  color="primary"
+                  variant="gradient"
+                  isMinify={isMinify}
+                  subtitle="Revenue per order"
+                />
+              </Grid>
+              <Grid item xs={12} md={6} lg={3}>
+                <KPICard
+                  title="Active Customers"
+                  value={customers?.length || 0}
+                  icon={<People />}
+                  color="info"
+                  variant="gradient"
+                  isMinify={isMinify}
+                  subtitle="Engaged customers"
+                />
+              </Grid>
+            </Grid>
+
+            {/* Quick Expense Summary */}
+            {/* <Grid container spacing={3} mb={4}> */}
+            {/* <Grid item xs={12}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 3,
+                    background: `linear-gradient(135deg, ${themeColors.error.background} 0%, #ffffff 100%)`,
+                    border: '1px solid',
+                    borderColor: themeColors.neutral.light,
+                    borderRadius: 3,
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                  }}
+                >
+                  <Box display="flex" alignItems="center" gap={2} mb={3}>
+                    <Box
+                      sx={{
+                        p: 1.5,
+                        borderRadius: 2,
+                        background: themeColors.error.gradient,
+                        color: 'white',
+                        boxShadow: `0 4px 6px -1px ${error.main}40`,
+                      }}
+                    >
+                      <AttachMoney />
+                    </Box>
+                    <Box>
+                      <Typography variant="h6" fontWeight="bold">
+                        Expense Summary
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Quick overview of cost structure and efficiency
+                      </Typography>
+                    </Box>
+                  </Box>
+                  
+                  <Grid container spacing={3}>
+                    <Grid item xs={12} md={3}>
+                      <Box textAlign="center">
+                        <Typography variant="h4" fontWeight="bold" color="error.main">
+                          ${(overviewData?.expenses || 0).toFixed(2)}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Total Expenses
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={12} md={3}>
+                      <Box textAlign="center">
+                        <Typography variant="h4" fontWeight="bold" color="warning.main">
+                          {((overviewData?.expenses || 0) / (overviewData?.revenue || 1) * 100).toFixed(1)}%
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Expense Ratio
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={12} md={3}>
+                      <Box textAlign="center">
+                        <Typography variant="h4" fontWeight="bold" color="success.main">
+                          ${(overviewData?.profit || 0).toFixed(2)}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Net Profit
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={12} md={3}>
+                      <Box textAlign="center">
+                        <Typography variant="h4" fontWeight="bold" color="info.main">
+                          {((overviewData?.profit || 0) / (overviewData?.revenue || 1) * 100).toFixed(1)}%
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Profit Margin
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </Paper>
+              </Grid>
+            </Grid> */}
+
             {/* Main Charts Section */}
             <Grid container spacing={3} mb={4}>
               {/* Revenue Chart */}
-              <Grid item xs={12} lg={8}>
+              <Grid item xs={12} lg={6}>
                 <Paper
                   elevation={0}
                   sx={{
@@ -439,8 +555,64 @@ export default function Overview() {
                 </Paper>
               </Grid>
 
-              {/* Profit/Loss Donut Chart */}
-              <Grid item xs={12} lg={4}>
+              {/* Expense Trend Chart */}
+              <Grid item xs={12} lg={6}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 3,
+                    height: 400,
+                    background: `linear-gradient(135deg, ${themeColors.error.background} 0%, #ffffff 100%)`,
+                    border: '1px solid',
+                    borderColor: themeColors.neutral.light,
+                    borderRadius: 3,
+                    boxShadow:
+                      '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                    '&:hover': {
+                      boxShadow:
+                        '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                      transform: 'translateY(-2px)',
+                      transition: 'all 0.3s ease',
+                    },
+                  }}
+                >
+                  <Box display="flex" alignItems="center" gap={2} mb={3}>
+                    <Box
+                      sx={{
+                        p: 1.5,
+                        borderRadius: 2,
+                        background: themeColors.error.gradient,
+                        color: 'white',
+                        boxShadow: `0 4px 6px -1px ${error.main}40`,
+                      }}
+                    >
+                      <AttachMoney />
+                    </Box>
+                    <Box>
+                      <Typography variant="h6" fontWeight="bold">
+                        Expense Trend
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Cost tracking and analysis
+                      </Typography>
+                    </Box>
+                  </Box>
+                  {overviewData ? (
+                    <ExpenseTrendChart
+                      dateRange={dateRange}
+                      revenueData={revenueData}
+                      height={300}
+                    />
+                  ) : (
+                    <Skeleton variant="rounded" height={300} />
+                  )}
+                </Paper>
+              </Grid>
+            </Grid>
+
+            {/* Financial Overview Chart */}
+            <Grid container spacing={3} mb={4}>
+              <Grid item xs={12}>
                 <Paper
                   elevation={0}
                   sx={{
@@ -512,112 +684,15 @@ export default function Overview() {
               </Grid>
             </Grid>
 
-            {/* Customer Spending Analysis */}
-            {/* <Grid container spacing={3} mb={4}>
-              <Grid item xs={12} md={6}>
-                <Paper
-                  elevation={0}
-                  sx={{
-                    p: 3,
-                    height: 400,
-                    background: `linear-gradient(135deg, ${themeColors.primary.background} 0%, #ffffff 100%)`,
-                    border: '1px solid',
-                    borderColor: themeColors.neutral.light,
-                    borderRadius: 3,
-                    boxShadow:
-                      '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                    '&:hover': {
-                      boxShadow:
-                        '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-                      transform: 'translateY(-2px)',
-                      transition: 'all 0.3s ease',
-                    },
-                  }}
-                >
-                  <Box display="flex" alignItems="center" gap={2} mb={3}>
-                    <Box
-                      sx={{
-                        p: 1.5,
-                        borderRadius: 2,
-                        background: themeColors.primary.gradient,
-                        color: 'white',
-                        boxShadow: `0 4px 6px -1px ${primary.main}40`,
-                      }}
-                    >
-                      <AttachMoney />
-                    </Box>
-                    <Box>
-                      <Typography variant="h6" fontWeight="bold">
-                        Top Customer Spending
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Revenue distribution by top customers
-                      </Typography>
-                    </Box>
-                  </Box>
-                  {customersProfit && customersProfit.length > 0 ? (
-                    <CustomerSpendingChart
-                      customersProfit={customersProfit}
-                      type="pie"
-                    />
-                  ) : (
-                    <Skeleton variant="rounded" height={300} />
-                  )}
-                </Paper>
+            {/* Expense Analytics Section */}
+            <Grid container spacing={3} mb={4}>
+              <Grid item xs={12}>
+                <ExpenseAnalytics
+                  overviewData={overviewData}
+                  dateRange={dateRange}
+                />
               </Grid>
-
-              <Grid item xs={12} md={6}>
-                <Paper
-                  elevation={0}
-                  sx={{
-                    p: 3,
-                    height: 400,
-                    background: `linear-gradient(135deg, ${themeColors.info.background} 0%, #ffffff 100%)`,
-                    border: '1px solid',
-                    borderColor: themeColors.neutral.light,
-                    borderRadius: 3,
-                    boxShadow:
-                      '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                    '&:hover': {
-                      boxShadow:
-                        '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-                      transform: 'translateY(-2px)',
-                      transition: 'all 0.3s ease',
-                    },
-                  }}
-                >
-                  <Box display="flex" alignItems="center" gap={2} mb={3}>
-                    <Box
-                      sx={{
-                        p: 1.5,
-                        borderRadius: 2,
-                        background: themeColors.info.gradient,
-                        color: 'white',
-                        boxShadow: `0 4px 6px -1px ${info.main}40`,
-                      }}
-                    >
-                      <People />
-                    </Box>
-                    <Box>
-                      <Typography variant="h6" fontWeight="bold">
-                        Customer Spending Distribution
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Number of customers by spending range
-                      </Typography>
-                    </Box>
-                  </Box>
-                  {customersProfit && customersProfit.length > 0 ? (
-                    <CustomerSpendingChart
-                      customersProfit={customersProfit}
-                      type="bar"
-                    />
-                  ) : (
-                    <Skeleton variant="rounded" height={300} />
-                  )}
-                </Paper>
-              </Grid>
-            </Grid> */}
+            </Grid>
 
             {/* Product Loss Section */}
             <Grid container spacing={3} mb={4}>
@@ -625,106 +700,6 @@ export default function Overview() {
               <Grid item xs={12} md={8}>
                 <ProductLossInsights productLossData={productLossData} />
               </Grid>
-
-              {/* Loss Overview Cards */}
-              {/* <Grid item xs={12} md={4}>
-                <Paper
-                  elevation={0}
-                  sx={{
-                    p: 3,
-                    height: 400,
-                    background: `linear-gradient(135deg, ${themeColors.error.background} 0%, #ffffff 100%)`,
-                    border: '1px solid',
-                    borderColor: themeColors.neutral.light,
-                    borderRadius: 3,
-                    boxShadow:
-                      '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                    '&:hover': {
-                      boxShadow:
-                        '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-                      transform: 'translateY(-2px)',
-                      transition: 'all 0.3s ease',
-                    },
-                  }}
-                >
-                  <Box display="flex" alignItems="center" gap={2} mb={3}>
-                    <Box
-                      sx={{
-                        p: 1.5,
-                        borderRadius: 2,
-                        background: themeColors.error.gradient,
-                        color: 'white',
-                        boxShadow: `0 4px 6px -1px ${error.main}40`,
-                      }}
-                    >
-                      <Inventory2Icon />
-                    </Box>
-                    <Box>
-                      <Typography variant="h6" fontWeight="bold">
-                        Loss Overview
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Product loss metrics
-                      </Typography>
-                    </Box>
-                  </Box>
-
-                  {/* {productLossData ? (
-                    <Grid container spacing={3}>
-                      <Grid item xs={6}>
-                        <ProductLossOverview
-                          text="Total Loss"
-                          value={productLossData?.totalLoss?.toFixed(2) || 0}
-                          icon={
-                            <AttachMoneyIcon
-                              sx={{ color: error.main, fontSize: 24 }}
-                            />
-                          }
-                          backgroundColorIcon={error.lightest}
-                        />
-                      </Grid>
-                      <Grid item xs={6}>
-                        <ProductLossOverview
-                          text="Loss Quantity"
-                          value={productLossData?.lossQuantity || 0}
-                          icon={
-                            <Inventory2Icon
-                              sx={{ color: error.main, fontSize: 24 }}
-                            />
-                          }
-                          backgroundColorIcon={error.lightest}
-                        />
-                      </Grid>
-                      <Grid item xs={6}>
-                        <ProductLossOverview
-                          text="Reports"
-                          value={productLossData?.productLosses?.length || 0}
-                          icon={
-                            <ReportIcon
-                              sx={{ color: error.main, fontSize: 24 }}
-                            />
-                          }
-                          backgroundColorIcon={error.lightest}
-                        />
-                      </Grid>
-                      <Grid item xs={6}>
-                        <ProductLossOverview
-                          text="Most Common Loss"
-                          value={productLossData?.mostCommonLossType || ''}
-                          icon={
-                            <FlagIcon
-                              sx={{ color: error.main, fontSize: 24 }}
-                            />
-                          }
-                          backgroundColorIcon={error.lightest}
-                        />
-                      </Grid>
-                    </Grid>
-                  ) : (
-                    <Skeleton variant="rounded" height={300} />
-                  )} 
-                </Paper>
-              </Grid> */}
 
               {/* Top Product Losses Chart */}
               <Grid item xs={12} md={4}>

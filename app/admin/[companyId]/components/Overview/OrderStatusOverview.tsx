@@ -19,7 +19,6 @@ import {
   TrendingUp,
   TrendingDown,
   AccessTime,
-  MonetizationOn,
 } from '@mui/icons-material';
 import { 
   primary, 
@@ -85,9 +84,11 @@ export default function OrderStatusOverview({
     const deliveredOrders = overviewData.deliveredOrders || 0;
     const totalRevenue = overviewData.revenue || 0;
 
-    const fulfillmentRate = totalOrders > 0 ? (completedOrders / totalOrders) * 100 : 0;
+    const fulfillmentRate = totalOrders > 0 ? (deliveredOrders / totalOrders) * 100 : 0;
     const cancellationRate = totalOrders > 0 ? (cancelledOrders / totalOrders) * 100 : 0;
     const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
+    const orderGrowthRate = totalOrders > 0 ? ((totalOrders - overviewData.lastMonthOrders) / overviewData.lastMonthOrders) * 100 : 0;
 
     return {
       totalOrders,
@@ -98,9 +99,9 @@ export default function OrderStatusOverview({
       averageOrderValue,
       totalRevenue,
       fulfillmentRate,
-      averageFulfillmentTime: overviewData.averageFulfillmentTime || 2.5, // hours
+      averageFulfillmentTime: overviewData.avgFulfillmentTime || 0, // seconds
       cancellationRate,
-      orderGrowthRate: overviewData.orderGrowthRate || 12.5,
+      orderGrowthRate,
       revenueGrowthRate: overviewData.revenueGrowthRate || 8.3,
     };
   }, [overviewData]);
@@ -125,7 +126,7 @@ export default function OrderStatusOverview({
         percentage: totalOrders > 0 ? (ongoingOrders / totalOrders) * 100 : 0,
         color: warning.main,
         icon: <Pending />,
-        trend: -2.1,
+        // trend: -2.1,
       },
       {
         status: 'Delivered',
@@ -133,7 +134,7 @@ export default function OrderStatusOverview({
         percentage: totalOrders > 0 ? (deliveredOrders / totalOrders) * 100 : 0,
         color: info.main,
         icon: <LocalShipping />,
-        trend: 3.8,
+        // trend: 3.8,
       },
       {
         status: 'Cancelled',
@@ -141,7 +142,7 @@ export default function OrderStatusOverview({
         percentage: totalOrders > 0 ? (cancelledOrders / totalOrders) * 100 : 0,
         color: error.main,
         icon: <Cancel />,
-        trend: -1.5,
+        // trend: -1.5,
       },
     ];
 
@@ -221,7 +222,7 @@ export default function OrderStatusOverview({
               <Box display="flex" alignItems="center" justifyContent="center" gap={0.5} mt={0.5}>
                 {getTrendIcon(orderMetrics.orderGrowthRate)}
                 <Typography variant="caption" color={orderMetrics.orderGrowthRate > 0 ? success.main : error.main}>
-                  {orderMetrics.orderGrowthRate > 0 ? '+' : ''}{orderMetrics.orderGrowthRate}%
+                  {orderMetrics.orderGrowthRate > 0 ? '+' : ''}{Math.abs(orderMetrics.orderGrowthRate).toFixed(1)}%
                 </Typography>
               </Box>
             </Box>
@@ -398,16 +399,16 @@ export default function OrderStatusOverview({
                   </Typography>
                 </Box>
                 <Typography variant="h5" fontWeight="bold" color={info.main}>
-                  {orderMetrics.averageFulfillmentTime}h
+                  {orderMetrics.averageFulfillmentTime?.toFixed(1)}s
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  Target: 2h | Current: {orderMetrics.averageFulfillmentTime}h
+                  take to place an order
                 </Typography>
               </Box>
             </Tooltip>
           </Grid>
           
-          <Grid item xs={12} sm={6}>
+          {/* <Grid item xs={12} sm={6}>
             <Tooltip title="Revenue growth compared to previous period">
               <Box
                 sx={{
@@ -436,7 +437,7 @@ export default function OrderStatusOverview({
                 </Typography>
               </Box>
             </Tooltip>
-          </Grid>
+          </Grid> */}
         </Grid>
 
         {orderStatusData.length === 0 && (

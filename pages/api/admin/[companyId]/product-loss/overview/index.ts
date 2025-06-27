@@ -105,6 +105,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         totalLoss,
         lossQuantity,
         totalLossByItem,
+        losses: productLosses,
         mostCommonLossType: mostCommonLossType ? mostCommonLossType[0] : 'N/A',
       },
       message: 'Product loss overview retrieved successfully',
