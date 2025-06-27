@@ -332,6 +332,7 @@ model Orders {
   insertedBy           String?
   companyId            Int?
   hasSubtractInventory Boolean?
+  enteredOrderAt       String?
 
   delivery Delivery? @relation("OrderDelivery")
 

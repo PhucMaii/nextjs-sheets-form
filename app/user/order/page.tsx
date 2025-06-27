@@ -47,6 +47,7 @@ const steps = [
 export default function OrderForm() {
   const [itemList, setItemList] = useState<any>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [enteredOrderAt, setEnteredOrderAt] = useState<any>();
   // const [tabIdx, setTabIdx] = useState<number>(0);
   const [overrideOrderProps, setOverrideOrderProps] = useState<any>({
     open: false,
@@ -76,6 +77,7 @@ export default function OrderForm() {
       setIsLoading(true);
     } else {
       initializeItems();
+      setEnteredOrderAt(moment().format('YYYY/MM/DD HH:mm:ss'));
       setIsLoading(false);
     }
   }, [items]);
@@ -142,6 +144,7 @@ export default function OrderForm() {
         createdAt: `${timeString} ${dateString}`,
         items: itemsNo0,
         createdBy: USER_ROLE.CLIENT,
+        enteredOrderAt,
       };
 
       // for (const item of itemList) {
