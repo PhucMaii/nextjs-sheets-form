@@ -91,7 +91,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-const filterRangeByDate = (date: string, rangeList: DayRange[]) => {
+export const filterRangeByDate = (date: string, rangeList: DayRange[]) => {
   const selectedDate = normalizeDate(new Date(date));
   // const selectedDate = convertToPSTDate(date);
   console.log('selectedDate: ', selectedDate);

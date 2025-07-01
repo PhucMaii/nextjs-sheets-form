@@ -36,6 +36,7 @@ import { grey } from '@mui/material/colors';
 import { InfoIcon } from 'lucide-react';
 import Link from 'next/link';
 import DeleteModal from '../../components/Modals/delete/DeleteModal';
+import EditItemAvailability from '../../components/Modals/edit/EditItemAvailability';
 
 export default function ItemPage() {
   const { companyId, itemId }: any = useParams();
@@ -49,6 +50,7 @@ export default function ItemPage() {
   const [isImgHovered, setIsImgHovered] = useState(false);
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const [updatedFields, setUpdatedFields] = useState<string[]>([]);
+  const [selectToUpdateVariant, setSelectToUpdateVariant] = useState<any[]>([]);
   const [loading, setLoading] = useState<any>({
     [UPDATE_OPTION.CURRENT_CATEGORY]: false,
     [UPDATE_OPTION.ALL_ITEMS_SAME_NAME]: false,
@@ -252,6 +254,33 @@ export default function ItemPage() {
     ]);
   };
 
+  const handleUpdateItem = async (
+    updatedItem: IItem,
+    updateOption: UPDATE_OPTION = UPDATE_OPTION.CURRENT_CATEGORY,
+    updatedFields: string[] = [],
+  ) => {
+    try {
+      const response = await axios.put(getAdminApiUrl(companyId, '/items'), {
+        updatedItem,
+        updateOption,
+        updatedFields,
+      });
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      // Update Real Data
+      // mutateItems();
+      await fetchItem();
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      showNotification('error', error.response.data.error);
+    }
+  };
+
   return (
     <Sidebar>
       {NotificationComp}
@@ -318,7 +347,16 @@ export default function ItemPage() {
               <Skeleton variant="rectangular" height={100} />
             ) : (
               <ShadowSection>
-                <Box display="flex" gap={0.5} alignItems="center">
+                <Box display="flex" alignItems="center" gap={1}>
+                  <EditItemAvailability
+                    item={item}
+                    handleUpdateItem={handleUpdateItem}
+                    showNotification={showNotification}
+                  />
+
+                  <Typography variant="subtitle2">Availability</Typography>
+                </Box>
+                <Box display="flex" gap={0.5} alignItems="center" sx={{mt: 2}}>
                   <Checkbox
                     checked={updatedFields.includes('name') || false}
                     onChange={() => onSelectToUpdateFields('name')}

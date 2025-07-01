@@ -26,7 +26,6 @@ export default function VariantRow({
   variants,
   setVariants,
 }: VariantRowProps) {
-
   const onChangeVariant = (variant: any) => {
     const newOptions = variants.map((option: any) => {
       if (option.id === variant.id) {
@@ -40,13 +39,18 @@ export default function VariantRow({
 
   const onRemoveVariant = () => {
     console.log('onRemoveVariant', variants);
-    const newOptions = variants.filter((option: any) => option.id !== variant.id);
+    const newOptions = variants.filter(
+      (option: any) => option.id !== variant.id,
+    );
     setVariants(newOptions);
   };
 
   return (
     <>
-      <Grid item xs={12} md={2.8}>
+      <Grid item xs={12} md={0.6}>
+        <Checkbox />
+      </Grid>
+      <Grid item xs={12} md={2.6}>
         <Box display="flex" gap={1} alignItems="center">
           <FormControl fullWidth>
             <InputLabel htmlFor="variants">Variants</InputLabel>
@@ -63,7 +67,7 @@ export default function VariantRow({
         </Box>
       </Grid>
 
-      <Grid item xs={12} md={2.8}>
+      <Grid item xs={12} md={2.6}>
         <Box display="flex" gap={1} alignItems="center">
           <FormControl fullWidth>
             <InputLabel htmlFor="variants">Price</InputLabel>
@@ -79,7 +83,7 @@ export default function VariantRow({
           </FormControl>
         </Box>
       </Grid>
-      <Grid item xs={12} md={2.8}>
+      <Grid item xs={12} md={2.6}>
         <Box display="flex" gap={1} alignItems="center">
           <FormControl fullWidth>
             <InputLabel htmlFor="variants">Previous Price</InputLabel>

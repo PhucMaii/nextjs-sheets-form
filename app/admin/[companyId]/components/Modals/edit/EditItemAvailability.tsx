@@ -50,6 +50,7 @@ export default function EditItemAvailability({
   const handleUpdateItemThisCategory = async () => {
     setIsUpdating(true);
     await handleUpdateItem({ ...item, availability: !item.availability });
+    setAvailability(!item.availability);
     setIsUpdating(false);
     setIsOpen(false);
   };
@@ -75,6 +76,7 @@ export default function EditItemAvailability({
 
       showNotification('success', response.data.message);
       setIsOpen(false);
+      setAvailability(!item.availability);
       setIsUpdating(false);
     } catch (error: any) {
       console.log('There was an error: ', error);

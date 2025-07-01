@@ -15,10 +15,12 @@ import ErrorComponent from '../components/ErrorComponent';
 import DateRange from '../components/Modals/DateRangeModal';
 import DayRange from '../components/DayRange';
 import { blueGrey } from '@mui/material/colors';
-import useSelectDate from '@/hooks/useSelectDate';
+// import useSelectDate from '@/hooks/useSelectDate';
 import useNotification from '@/hooks/useNotification';
 import BlockOrders from '../components/Modals/BlockOrders';
 import { useParams } from 'next/navigation';
+import SelectDateRange from '../components/Select/SelectDateRange';
+import useSelectDate from '@/hooks/useSelectDate';
 
 // const apiURL = `/api/unavailable_days`;
 export default function BlockingPage() {
@@ -30,6 +32,7 @@ export default function BlockingPage() {
     open: false,
     orders: [],
   });
+  const [dateRange, setDateRange] = useState<any>(generateMonthRange());
   const [updatedDateRange, setUpdatedDateRange] = useState<any>(null);
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
@@ -50,7 +53,9 @@ export default function BlockingPage() {
   // Data Fetching
   const [clientList] = SWRFetchData(getAdminApiUrl(companyId, '/clients'));
   const [unavailableRanges, mutateRange] = SWRFetchData(
-    `${apiURL}?userId=${selectedClient?.id || 'All Clients'}&date=${selectedDate}&companyId=${companyId}`,
+    selectedClient
+      ? `${apiURL}/date-range-view?date=${selectedDate}&userId=${selectedClient?.id || 'All Clients'}&startDate=${dateRange[0]}&endDate=${dateRange[1]}&companyId=${companyId}`
+      : `${apiURL}?userId=${`All Clients`}&date=${selectedDate}&companyId=${companyId}`,
   );
 
   // useEffect(() => {
@@ -65,7 +70,7 @@ export default function BlockingPage() {
   useEffect(() => {
     setIsEditing(false);
     setTargetRange(null);
-  }, [selectedClient, selectedDate]);
+  }, [selectedClient, dateRange]);
 
   const initializeEdit = (updatedRange: IDayRange) => {
     setIsEditing(true);
@@ -229,7 +234,11 @@ export default function BlockingPage() {
         <Typography variant="h5" color={blueGrey[800]}>
           Set Unavailable Date
         </Typography>
-        {SelectDate}
+        {selectedClient?.id ? (
+          <SelectDateRange dateRange={dateRange} setDateRange={setDateRange} />
+        ) : (
+          <>{SelectDate}</>
+        )}
       </Box>
       <ShadowSection
         display="flex"
