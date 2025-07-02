@@ -8,7 +8,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ModalProps } from '../Modals/type';
 import ModalHead from '@/app/lib/ModalHead';
 import { BoxModal } from '../Modals/styled';
@@ -21,15 +21,14 @@ import { getAdminApiUrl } from '@/app/utils/enum';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import axios from 'axios';
 import OptionsTable from '../Tables/OptionsTable';
-import { SWRFetchData } from '@/app/utils/db';
-import AddOption from '../Modals/add/AddOption';
 import ErrorComponent from '../ErrorComponent';
 import { useParams } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
 
 interface IProps extends ModalProps {
   item: IItem;
   showNotification: ShowNotificationType;
-  setItems: any;
+  refetch?: any;
 }
 
 export default function BulkEditOptions({
@@ -37,26 +36,45 @@ export default function BulkEditOptions({
   onClose,
   item,
   showNotification,
-  setItems,
+  refetch,
 }: IProps) {
   const { companyId }: any = useParams();
 
   const [categories, setCategories] = useState<any[]>([]);
-  const [isOpenAddOption, setIsOpenAddOption] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedCategories, setSelectedCategories] = useState<ICategory[]>([]);
+  const [options, setOptions] = useState<any[] | null>(null);
 
-  const [updatedItem] = SWRFetchData(
-    getAdminApiUrl(companyId, `/items?itemId=${item.id}`),
-  );
+  // const [updatedItem] = SWRFetchData(
+  //   getAdminApiUrl(companyId, `/items?itemId=${item.id}`),
+  // );
+  const { data: updatedItem, refetch: refetchUpdateItem } = useQuery({
+    queryKey: ['item', item.id],
+    queryFn: async () => {
+      const res = await axios.get(
+        getAdminApiUrl(companyId, `/items?itemId=${item.id}`),
+      );
+
+      return res.data;
+    },
+    enabled: !!item.id,
+  });
 
   //   const [categories] = SWRFetchData(
   //     `${API_URL.CATEGORIES}?inventoryItemId=${item.inventoryItemId}`,
   //   );
 
   useEffect(() => {
-    fetchCategories();
-  }, []);
+    if (item) {
+      fetchCategories();
+    }
+  }, [item]);
+
+  useEffect(() => {
+    if (updatedItem) {
+      setOptions(updatedItem?.data?.options || []);
+    }
+  }, [updatedItem]);
 
   const fetchCategories = async () => {
     try {
@@ -66,6 +84,8 @@ export default function BulkEditOptions({
           `/categories?inventoryItemId=${item.inventoryItemId}`,
         ),
       );
+
+      console.log(response.data.data, 'resoonse');
 
       if (response.data.data) {
         const itemCategory = response.data.data.find(
@@ -94,7 +114,7 @@ export default function BulkEditOptions({
         {
           inventoryItemId: item.inventoryItemId,
           categoryIds,
-          updatedOptions: updatedItem?.data?.options,
+          updatedOptions: options,
         },
       );
 
@@ -103,27 +123,29 @@ export default function BulkEditOptions({
         return;
       }
 
-      const resItems = response.data.data;
-
       // Optimistic update
-      setItems((prevItems: any) => {
-        const updatedItems = prevItems.map((item: any) => {
-          // Check if exists in resItems - means updated
-          const existingItem = resItems.find(
-            (resItem: any) => resItem.id === item.id,
-          );
+      // setItems?.((prevItems: any) => {
+      //   const updatedItems = prevItems.map((item: any) => {
+      //     // Check if exists in resItems - means updated
+      //     const existingItem = resItems.find(
+      //       (resItem: any) => resItem.id === item.id,
+      //     );
 
-          if (existingItem) {
-            return existingItem;
-          } else {
-            return item;
-          }
-        });
+      //     if (existingItem) {
+      //       return existingItem;
+      //     } else {
+      //       return item;
+      //     }
+      //   });
 
-        return updatedItems;
-      });
+      //   return updatedItems;
+      // });
+
+      refetch();
+      refetchUpdateItem();
 
       showNotification('success', response.data.message);
+      onClose();
     } catch (error: any) {
       console.log('There was an error: ', error);
       showNotification('error', 'There was an error: ' + error);
@@ -132,15 +154,60 @@ export default function BulkEditOptions({
     }
   };
 
+  const onAddOption = () => {
+    if (!options) {
+      return;
+    }
+    setOptions((prevOptions) => {
+      if (!prevOptions) return [];
+      return [
+        ...prevOptions,
+        {
+          id: crypto.randomUUID(),
+          name: '',
+          price: 0,
+          prevPrice: 0,
+          isShowDiscount: false,
+        },
+      ];
+    });
+  };
+
+  const onChangeOptions = useCallback(
+    (id: any, field: string, value: any) => {
+      if (!options) return;
+      const newOptions = options.map((option: any) => {
+        if (option.id === id) {
+          return {
+            ...option,
+            [field]: value,
+          };
+        }
+
+        return option;
+      });
+
+      setOptions([...newOptions]);
+    },
+    [options],
+  );
+
+  const onRemoveOption = useCallback((optionId: number | string) => {
+    if (!options) return [];
+    const newOptions = options.filter((option) => option.id !== optionId);
+
+    setOptions(newOptions);
+  }, [options]);
+
   return (
     <>
-      <AddOption
+      {/* <AddOption
         item={item}
         showNotification={showNotification}
         open={isOpenAddOption}
         onClose={() => setIsOpenAddOption(false)}
         noIncludeBulkAdd
-      />
+      /> */}
       <Modal open={open} onClose={onClose}>
         <BoxModal maxHeight="90vh" overflow="auto">
           <ModalHead
@@ -207,23 +274,33 @@ export default function BulkEditOptions({
               />
             </Box>
 
-            <Box display="flex" justifyContent="flex-end">
-              <Button onClick={() => setIsOpenAddOption(true)}>
+            {/* <Box display="flex" justifyContent="flex-end">
+              <Button onClick={onAddOption}>
                 + Add Options
               </Button>
-            </Box>
-            {updatedItem?.data?.options &&
-            updatedItem?.data?.options.length > 0 ? (
+            </Box> */}
+            {options && options.length > 0 ? (
               <OptionsTable
-                options={updatedItem?.data?.options || []}
+                options={options}
                 showNotification={showNotification}
                 noIncludeOption
-                setItems={setItems}
+                // setItems={setItems}
+                onChangeOptions={onChangeOptions}
+                inventoryItemId={item.inventoryItemId || null}
+                onRemoveOption={onRemoveOption}
               />
             ) : (
               <ErrorComponent errorText="No options found" />
             )}
           </Box>
+          <Button
+            onClick={onAddOption}
+            fullWidth
+            variant="outlined"
+            sx={{ mt: 2 }}
+          >
+            + Add Options
+          </Button>
         </BoxModal>
       </Modal>
     </>

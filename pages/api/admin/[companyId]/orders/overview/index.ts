@@ -345,6 +345,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
 export default withAdminAuthGuard(handler);
 
-const normalizeDate = (date: Date | string) => {
+export const normalizeDate = (date: Date | string) => {
   return moment.tz(date, 'America/Los_Angeles').startOf('day').toDate();
 };

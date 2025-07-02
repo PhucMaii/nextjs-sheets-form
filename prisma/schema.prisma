@@ -292,7 +292,7 @@ model OrderedItems {
   fifo           Fifo?           @relation(fields: [fifoId], references: [id])
   inventoryUnit  InventoryUnit?  @relation(fields: [inventoryUnitId], references: [id])
   inventoryItem  InventoryItem?  @relation(fields: [inventoryItemId], references: [id])
-  ScheduleOrders ScheduleOrders? @relation(fields: [scheduledOrderId], references: [id])
+  ScheduleOrders ScheduleOrders? @relation(fields: [scheduledOrderId], references: [id], onDelete: Cascade)
   company        Company?        @relation(fields: [companyId], references: [id])
 
   @@index([orderId])

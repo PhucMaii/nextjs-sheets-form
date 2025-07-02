@@ -1,35 +1,61 @@
 import { IOption } from '@/app/utils/type';
 import {
-  Box,
-  Button,
+  Checkbox,
+  FormControlLabel,
   IconButton,
+  InputAdornment,
+  MenuItem,
+  OutlinedInput,
   Paper,
+  Select,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
-  Typography,
 } from '@mui/material';
 import React, { useState } from 'react';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import EditOption from '../Modals/edit/EditOption';
-import { Discount } from '@mui/icons-material';
 import DeleteOption from '../Modals/delete/DeleteOption';
+import { Trash2Icon } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
+import { getAdminApiUrl } from '@/app/utils/enum';
+import { useParams } from 'next/navigation';
 
 interface IProps {
   options: IOption[];
   showNotification: ShowNotificationType;
   noIncludeOption?: boolean;
-  setItems?: any;
+  // setItems?: any;
+  onChangeOptions?: any;
+  inventoryItemId: number | null;
+  onRemoveOption?: any;
 }
 
 export default function OptionsTable({
   options,
   showNotification,
   noIncludeOption,
-  setItems,
+  // setItems,
+  onChangeOptions,
+  inventoryItemId,
+  onRemoveOption
 }: IProps) {
+  const { companyId }: any = useParams();
+
+  const { data: units } = useQuery({
+    queryKey: ['units', inventoryItemId],
+    queryFn: async () => {
+      const res = await axios.get(
+        getAdminApiUrl(companyId, `/units?inventoryItemId=${inventoryItemId}`),
+      );
+      return res.data.data;
+    },
+    enabled: !!inventoryItemId,
+  });
+
   const [deleteProps, setDeleteProps] = useState<any>({
     open: false,
     option: null,
@@ -38,7 +64,6 @@ export default function OptionsTable({
     open: false,
     option: null,
   });
-  // const [isShowPrevPrice, setIsShowPrevPrice] = useState<boolean>(false);
 
   return (
     <>
@@ -67,7 +92,7 @@ export default function OptionsTable({
           option={deleteProps.option}
           allOptions={options}
           showNotification={showNotification}
-          setItems={setItems}
+          // setItems={setItems}
         />
       )}
       <Paper elevation={0}>
@@ -75,7 +100,10 @@ export default function OptionsTable({
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>
+              <TableCell>Unit</TableCell>
               <TableCell>Price</TableCell>
+              <TableCell>Previous Price</TableCell>
+              <TableCell></TableCell>
               <TableCell></TableCell>
             </TableRow>
           </TableHead>
@@ -83,18 +111,88 @@ export default function OptionsTable({
             {options.map((option: IOption, index: number) => {
               return (
                 <TableRow key={index}>
-                  <TableCell>{option.name}</TableCell>
                   <TableCell>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Typography>${option.price.toFixed(2)}</Typography>
-                      {option?.isShowDiscount && (
-                        <IconButton>
-                          <Discount color="error" />
-                        </IconButton>
-                      )}
-                    </Box>
+                    <OutlinedInput
+                      value={option.name}
+                      onChange={(e: any) => {
+                        onChangeOptions(option.id, 'name', e.target.value);
+                      }}
+                      fullWidth
+                    />
                   </TableCell>
                   <TableCell>
+                    <Select
+                      value={option.unitId}
+                      onChange={(e: any) =>
+                        onChangeOptions(option.id, 'unitId', +e.target.value)
+                      }
+                    >
+                      {units &&
+                        units.map((unit: any) => {
+                          return (
+                            <MenuItem key={unit.id} value={unit.id}>
+                              1:{unit.ratio} - {unit.unit}
+                            </MenuItem>
+                          );
+                        })}
+                    </Select>
+                  </TableCell>
+                  <TableCell>
+                    <OutlinedInput
+                      value={option.price}
+                      onChange={(e: any) => {
+                        onChangeOptions(option.id, 'price', +e.target.value);
+                      }}
+                      startAdornment={
+                        <InputAdornment position="start">$</InputAdornment>
+                      }
+                      fullWidth
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <OutlinedInput
+                      value={option?.prevPrice || 0}
+                      onChange={(e: any) => {
+                        onChangeOptions(
+                          option.id,
+                          'prevPrice',
+                          +e.target.value,
+                        );
+                      }}
+                      fullWidth
+                      startAdornment={
+                        <InputAdornment position="start">$</InputAdornment>
+                      }
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={option?.isShowDiscount || false}
+                          onChange={(e: any) => {
+                            onChangeOptions(
+                              option.id,
+                              'isShowDiscount',
+                              e.target.checked,
+                            );
+                          }}
+                        />
+                      }
+                      label="Show Discount"
+                      labelPlacement="end"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <IconButton onClick={() => {
+                      if (onRemoveOption) {
+                        onRemoveOption(option.id)
+                      }
+                      }}>
+                      <Trash2Icon style={{ width: 20, height: 20 }} />
+                    </IconButton>
+                  </TableCell>
+                  {/* <TableCell>
                     <Box display="flex" gap={1} alignItems="center">
                       <Button
                         color="error"
@@ -108,7 +206,7 @@ export default function OptionsTable({
                         Edit
                       </Button>
                     </Box>
-                  </TableCell>
+                  </TableCell> */}
                 </TableRow>
               );
             })}

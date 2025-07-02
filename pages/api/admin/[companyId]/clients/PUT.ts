@@ -94,7 +94,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       updateFields.categoryId = categoryId;
     }
 
-    console.log(type, 'type');
     if (type && type !== existingUser?.type) {
       updateFields.type = type;
     }
@@ -119,6 +118,15 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           scheduleOrders: true,
         },
       });
+
+      // If updateFields.type === inactive, then delete all schedule orders
+      if (updateFields.type === USER_CATEGORIZED.INACTIVE) {
+        await prisma.scheduleOrders.deleteMany({
+          where: {
+            userId: userId,
+          },
+        });
+      }
 
       // update schedule order if user update to their new cateogry
       if (

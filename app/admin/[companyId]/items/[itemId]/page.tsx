@@ -31,11 +31,11 @@ import UnitRadio from '../../components/Radio/UnitRadio';
 import { getUniqueUnitRatios } from '@/app/utils/array';
 import { UPDATE_OPTION } from '../../components/Modals/edit/EditItem';
 import { LoadingButton } from '@mui/lab';
-import VariantRow from './VariantRow';
-import { grey } from '@mui/material/colors';
-import { InfoIcon } from 'lucide-react';
-import Link from 'next/link';
+import { EditIcon } from 'lucide-react';
 import DeleteModal from '../../components/Modals/delete/DeleteModal';
+import EditItemAvailability from '../../components/Modals/edit/EditItemAvailability';
+import VariantTable from './VariantTable';
+import BulkEditOptions from '../../components/Bulk/BulkEditOptions';
 
 export default function ItemPage() {
   const { companyId, itemId }: any = useParams();
@@ -48,6 +48,7 @@ export default function ItemPage() {
   const [image, setImage] = useState<string | null>(null);
   const [isImgHovered, setIsImgHovered] = useState(false);
   const [isFetching, setIsFetching] = useState<boolean>(true);
+  const [isOpenEditVariants, setIsOpenEditVariants] = useState<boolean>(false);
   const [updatedFields, setUpdatedFields] = useState<string[]>([]);
   const [loading, setLoading] = useState<any>({
     [UPDATE_OPTION.CURRENT_CATEGORY]: false,
@@ -236,21 +237,60 @@ export default function ItemPage() {
     }
   };
 
-  const onAddVariant = () => {
-    setVariants([
-      ...variants,
-      {
-        id: crypto.randomUUID(),
-        unit: item?.inventoryUnit || item?.inventoryUnits[0],
-        unitId: item?.inventoryUnit?.id || item?.inventoryUnits[0]?.id,
-        name: '',
-        price: 0,
-        prevPrice: 0,
-        isShowDiscount: false,
-        availability: true,
-      },
-    ]);
+  const handleUpdateItem = async (
+    updatedItem: IItem,
+    updateOption: UPDATE_OPTION = UPDATE_OPTION.CURRENT_CATEGORY,
+    updatedFields: string[] = [],
+  ) => {
+    try {
+      const response = await axios.put(getAdminApiUrl(companyId, '/items'), {
+        updatedItem,
+        updateOption,
+        updatedFields,
+        // selectedVariants,
+      });
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      // Update Real Data
+      // mutateItems();
+      await fetchItem();
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      showNotification('error', error.response.data.error);
+    }
   };
+
+  // const handleUpdateItem = async (
+  //   updatedItem: IItem,
+  //   updateOption: UPDATE_OPTION = UPDATE_OPTION.CURRENT_CATEGORY,
+  //   updatedFields: string[] = [],
+  // ) => {
+  //   try {
+  //     const response = await axios.put(getAdminApiUrl(companyId, '/items'), {
+  //       updatedItem,
+  //       updateOption,
+  //       updatedFields,
+  //     });
+
+  //     if (response.data.error) {
+  //       showNotification('error', response.data.error);
+  //       return;
+  //     }
+
+  //     // Update Real Data
+  //     // mutateItems();
+  //     await fetchItem();
+  //     showNotification('success', response.data.message);
+  //   } catch (error: any) {
+  //     console.log('There was an error: ', error);
+  //     showNotification('error', error.response.data.error);
+  //   }
+  // };
 
   return (
     <Sidebar>
@@ -268,6 +308,13 @@ export default function ItemPage() {
         targetObj={item}
         handleDelete={handleDeleteItem}
         showTargetObj={item?.name}
+      />
+      <BulkEditOptions
+        open={isOpenEditVariants}
+        onClose={() => setIsOpenEditVariants(false)}
+        item={item}
+        showNotification={showNotification}
+        refetch={fetchItem}
       />
 
       <Box
@@ -318,7 +365,21 @@ export default function ItemPage() {
               <Skeleton variant="rectangular" height={100} />
             ) : (
               <ShadowSection>
-                <Box display="flex" gap={0.5} alignItems="center">
+                <Box display="flex" alignItems="center" gap={1}>
+                  <EditItemAvailability
+                    item={item}
+                    handleUpdateItem={handleUpdateItem}
+                    showNotification={showNotification}
+                  />
+
+                  <Typography variant="subtitle2">Availability</Typography>
+                </Box>
+                <Box
+                  display="flex"
+                  gap={0.5}
+                  alignItems="center"
+                  sx={{ mt: 2 }}
+                >
                   <Checkbox
                     checked={updatedFields.includes('name') || false}
                     onChange={() => onSelectToUpdateFields('name')}
@@ -537,14 +598,10 @@ export default function ItemPage() {
                   alignItems="center"
                   sx={{ mb: 1 }}
                 >
-                  <Box display="flex" gap={0.5} flexDirection="column">
-                    {/* <Checkbox
-                  checked={updatedFields.includes('variants') || false}
-                  onChange={() => onSelectToUpdateFields('variants')}
-                /> */}
-                    <Typography variant="subtitle2" fontWeight={700}>
-                      Variants
-                    </Typography>
+                  <Typography variant="subtitle2" fontWeight={700}>
+                    Variants
+                  </Typography>
+                  {/* <Box display="flex" gap={0.5} flexDirection="column">
                     <Box display="flex" gap={0.5} alignItems="center">
                       <InfoIcon
                         style={{
@@ -562,18 +619,19 @@ export default function ItemPage() {
                         </Link>
                       </Typography>
                     </Box>
-                  </Box>
+                  </Box> */}
 
                   <Button
                     variant="outlined"
                     color="primary"
-                    onClick={onAddVariant}
+                    onClick={() => setIsOpenEditVariants(true)}
+                    startIcon={<EditIcon style={{ width: 15, height: 15 }} />}
                   >
-                    + Add Variant
+                    Edit Variants
                   </Button>
                 </Box>
 
-                <Grid container alignItems="center" spacing={1}>
+                {/* <Grid container alignItems="center" spacing={1}>
                   {variants?.map((option: any, index: number) => (
                     <VariantRow
                       key={index}
@@ -581,9 +639,12 @@ export default function ItemPage() {
                       item={item}
                       setVariants={setVariants}
                       variants={variants}
+                      selectedVariants={selectedVariants}
+                      setSelectedVariants={setSelectedVariants}
                     />
                   ))}
-                </Grid>
+                </Grid> */}
+                <VariantTable variants={variants} />
               </ShadowSection>
             )}
 
@@ -597,6 +658,7 @@ export default function ItemPage() {
 
                 <ListingCategoriesTable
                   listingCategories={item?.listingCategories || []}
+                  categoryId={item.categoryId}
                 />
               </ShadowSection>
             )}

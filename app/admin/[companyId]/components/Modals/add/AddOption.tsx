@@ -82,8 +82,6 @@ export default function AddOption({
     }
   }, [item]);
 
-  console.log(unitList, 'unitList');
-
   useEffect(() => {
     if (unitList) {
       setOption((prevOption: any) => ({
