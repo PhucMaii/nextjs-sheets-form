@@ -45,7 +45,13 @@ export enum UPDATE_OPTION {
   ALL_ITEMS_SAME_NAME = 'all items same name',
 }
 
-const EditItem = ({ open, onClose, targetItem, showNotification, isWebsiteItem = false }: IProps) => {
+const EditItem = ({
+  open,
+  onClose,
+  targetItem,
+  showNotification,
+  isWebsiteItem = false,
+}: IProps) => {
   const { companyId }: any = useParams();
   const [isOpenDeleteModal, setIsOpenDeleteModal] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
@@ -149,6 +155,18 @@ const EditItem = ({ open, onClose, targetItem, showNotification, isWebsiteItem =
     }
   };
 
+  // const onRemoveOptions = (optionId: number | string) => {
+  //   if (!updatedItem?.options || updatedItem.options.length === 0) return [];
+  //   const newOptions = updatedItem?.options.filter(
+  //     (option: any) => option.id !== optionId,
+  //   );
+
+  //   setUpdatedItem({
+  //     ...updatedItem,
+  //     options: [...newOptions],
+  //   });
+  // };
+
   return (
     <>
       {isOpenAddOption && (
@@ -182,22 +200,24 @@ const EditItem = ({ open, onClose, targetItem, showNotification, isWebsiteItem =
             buttonProps={{ loading: isUpdating }}
             onClose={onClose}
           />
-          {!isWebsiteItem && <RadioGroup
-            row
-            value={updateOption}
-            onChange={(e) => setUpdateOption(e.target.value as UPDATE_OPTION)}
-          >
-            <FormControlLabel
-              value={UPDATE_OPTION.CURRENT_CATEGORY}
-              control={<Radio />}
-              label="Only current category"
-            />
-            <FormControlLabel
-              value={UPDATE_OPTION.ALL_ITEMS_SAME_NAME}
-              control={<Radio />}
-              label="Same inventory item"
-            />
-          </RadioGroup>}
+          {!isWebsiteItem && (
+            <RadioGroup
+              row
+              value={updateOption}
+              onChange={(e) => setUpdateOption(e.target.value as UPDATE_OPTION)}
+            >
+              <FormControlLabel
+                value={UPDATE_OPTION.CURRENT_CATEGORY}
+                control={<Radio />}
+                label="Only current category"
+              />
+              <FormControlLabel
+                value={UPDATE_OPTION.ALL_ITEMS_SAME_NAME}
+                control={<Radio />}
+                label="Same inventory item"
+              />
+            </RadioGroup>
+          )}
           <Divider sx={{ my: 2 }}>Price ($)</Divider>
           <Grid container rowGap={2} alignItems="center">
             <Grid item xs={12} textAlign="right">
@@ -320,6 +340,7 @@ const EditItem = ({ open, onClose, targetItem, showNotification, isWebsiteItem =
                 <OptionsTable
                   options={updatedItem?.options || []}
                   showNotification={showNotification}
+                  inventoryItemId={updatedItem?.inventoryItemId || null}
                 />
               </Grid>
             )}

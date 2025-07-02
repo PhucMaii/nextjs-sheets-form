@@ -393,8 +393,9 @@ export default function BulkEditItems() {
           open={editOptionProps.open}
           onClose={() => setEditOptionProps({ open: false, item: null })}
           item={editOptionProps.item}
-          setItems={setItems}
+          // setItems={setItems}
           showNotification={showNotification}
+          refetch={fetchItems}
         />
       )}
 
