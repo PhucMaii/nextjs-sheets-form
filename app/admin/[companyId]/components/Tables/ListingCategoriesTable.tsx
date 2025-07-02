@@ -5,15 +5,22 @@ import {
   Table,
   TableCell,
   TableBody,
+  Box,
+  Typography,
+  Chip,
 } from '@mui/material';
 import React from 'react';
 import { useParams, useRouter } from 'next/navigation';
 
 interface IProps {
   listingCategories: any[];
+  categoryId: number;
 }
 
-export default function ListingCategoriesTable({ listingCategories }: IProps) {
+export default function ListingCategoriesTable({
+  listingCategories,
+  categoryId,
+}: IProps) {
   const { companyId }: any = useParams();
   const router = useRouter();
 
@@ -45,7 +52,23 @@ export default function ListingCategoriesTable({ listingCategories }: IProps) {
                   )
                 }
               >
-                {item?.category?.name}
+                <Box display="flex" alignItems="center" gap={1}>
+                  <Typography
+                    sx={{
+                      '&:hover': {
+                        cursor: 'pointer',
+                        textDecoration: 'underline',
+                        fontWeight: 700,
+                      },
+                    }}
+                    variant="subtitle2"
+                  >
+                    {item?.category?.name}
+                  </Typography>
+                  {categoryId === item.categoryId && (
+                    <Chip label="Current" variant="outlined" size="small" />
+                  )}
+                </Box>
               </TableCell>
               <TableCell
                 sx={{
