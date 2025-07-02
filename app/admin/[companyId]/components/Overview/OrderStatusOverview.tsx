@@ -126,6 +126,7 @@ export default function OrderStatusOverview({
     const deliveredOrders = overviewData.deliveredOrders || 0;
     const totalRevenue = overviewData.revenue || 0;
 
+
     const fulfillmentRate =
       totalOrders > 0 ? (deliveredOrders / totalOrders) * 100 : 0;
     const cancellationRate =
@@ -480,7 +481,7 @@ export default function OrderStatusOverview({
           <Grid item xs={12} sm={6}>
             <PerformanceIndicator
               title="Avg Fulfillment Time"
-              value={orderMetrics.averageFulfillmentTime?.toFixed(1)}
+              value={`${orderMetrics.averageFulfillmentTime?.toFixed(1)}s`}
               tooltip="Average time for user to place an order"
               color={info}
               icon={<AccessTime color="primary" />}

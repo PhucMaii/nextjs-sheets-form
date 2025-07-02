@@ -679,14 +679,14 @@ export default function Overview() {
             </Grid>
 
             {/* Expense Analytics Section */}
-            <Grid container spacing={3} mb={4}>
+            {/* <Grid container spacing={3} mb={4}>
               <Grid item xs={12}>
                 <ExpenseAnalytics
                   overviewData={overviewData}
                   dateRange={dateRange}
                 />
               </Grid>
-            </Grid>
+            </Grid> */}
 
             {/* Product Loss Section */}
             <Grid container spacing={3} mb={4}>

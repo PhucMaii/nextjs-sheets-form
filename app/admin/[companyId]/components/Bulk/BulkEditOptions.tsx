@@ -4,6 +4,7 @@ import {
   Button,
   Checkbox,
   Divider,
+  FormControlLabel,
   Modal,
   TextField,
   Typography,
@@ -84,8 +85,6 @@ export default function BulkEditOptions({
           `/categories?inventoryItemId=${item.inventoryItemId}`,
         ),
       );
-
-      console.log(response.data.data, 'resoonse');
 
       if (response.data.data) {
         const itemCategory = response.data.data.find(
@@ -192,12 +191,26 @@ export default function BulkEditOptions({
     [options],
   );
 
-  const onRemoveOption = useCallback((optionId: number | string) => {
-    if (!options) return [];
-    const newOptions = options.filter((option) => option.id !== optionId);
+  const onRemoveOption = useCallback(
+    (optionId: number | string) => {
+      if (!options) return [];
+      const newOptions = options.filter((option) => option.id !== optionId);
 
-    setOptions(newOptions);
-  }, [options]);
+      setOptions(newOptions);
+    },
+    [options],
+  );
+
+  const onSelectAllCategories = useCallback(
+    (e: any) => {
+      if (e.target.checked) {
+        setSelectedCategories(categories);
+      } else {
+        setSelectedCategories([categories[0]]);
+      }
+    },
+    [categories],
+  );
 
   return (
     <>
@@ -225,6 +238,15 @@ export default function BulkEditOptions({
           <Box display="flex" flexDirection="column" gap={2}>
             <Box display="flex" flexDirection="column" gap={1}>
               <Typography>Assign Category</Typography>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={selectedCategories.length === categories.length}
+                    onChange={onSelectAllCategories}
+                  />
+                }
+                label="Select All"
+              />
               <Autocomplete
                 multiple
                 disableCloseOnSelect
