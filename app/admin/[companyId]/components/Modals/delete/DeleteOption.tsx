@@ -18,7 +18,7 @@ interface IProps extends ModalProps {
   option: IOption;
   allOptions: IOption[];
   showNotification: ShowNotificationType;
-  setItems?: any;
+  // setItems?: any;
 }
 
 export default function DeleteOption({
@@ -27,7 +27,7 @@ export default function DeleteOption({
   option,
   allOptions,
   showNotification,
-  setItems,
+  // setItems,
 }: IProps) {
   const { companyId }: any = useParams();
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
@@ -90,18 +90,18 @@ export default function DeleteOption({
         return;
       }
 
-      if (setItems) {
-        const deletedOptionItem = response.data.data;
-        setItems((prevItems: any) => {
-          return prevItems.map((item: any) => {
-            if (item.id === deletedOptionItem?.id) {
-              return deletedOptionItem;
-            } else {
-              return item;
-            }
-          });
-        });
-      }
+      // if (setItems) {
+      //   const deletedOptionItem = response.data.data;
+      //   setItems((prevItems: any) => {
+      //     return prevItems.map((item: any) => {
+      //       if (item.id === deletedOptionItem?.id) {
+      //         return deletedOptionItem;
+      //       } else {
+      //         return item;
+      //       }
+      //     });
+      //   });
+      // }
       showNotification('success', response.data.message);
       onClose();
     } catch (error: any) {

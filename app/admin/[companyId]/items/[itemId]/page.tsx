@@ -31,12 +31,11 @@ import UnitRadio from '../../components/Radio/UnitRadio';
 import { getUniqueUnitRatios } from '@/app/utils/array';
 import { UPDATE_OPTION } from '../../components/Modals/edit/EditItem';
 import { LoadingButton } from '@mui/lab';
-import VariantRow from './VariantRow';
-import { grey } from '@mui/material/colors';
-import { InfoIcon } from 'lucide-react';
-import Link from 'next/link';
+import { EditIcon } from 'lucide-react';
 import DeleteModal from '../../components/Modals/delete/DeleteModal';
 import EditItemAvailability from '../../components/Modals/edit/EditItemAvailability';
+import BulkEditOptions from '../../components/Bulk/BulkEditOptions';
+import VariantTable from './VariantTable';
 
 export default function ItemPage() {
   const { companyId, itemId }: any = useParams();
@@ -49,8 +48,8 @@ export default function ItemPage() {
   const [image, setImage] = useState<string | null>(null);
   const [isImgHovered, setIsImgHovered] = useState(false);
   const [isFetching, setIsFetching] = useState<boolean>(true);
+  const [isOpenEditVariants, setIsOpenEditVariants] = useState<boolean>(false);
   const [updatedFields, setUpdatedFields] = useState<string[]>([]);
-  const [selectToUpdateVariant, setSelectToUpdateVariant] = useState<any[]>([]);
   const [loading, setLoading] = useState<any>({
     [UPDATE_OPTION.CURRENT_CATEGORY]: false,
     [UPDATE_OPTION.ALL_ITEMS_SAME_NAME]: false,
@@ -238,22 +237,6 @@ export default function ItemPage() {
     }
   };
 
-  const onAddVariant = () => {
-    setVariants([
-      ...variants,
-      {
-        id: crypto.randomUUID(),
-        unit: item?.inventoryUnit || item?.inventoryUnits[0],
-        unitId: item?.inventoryUnit?.id || item?.inventoryUnits[0]?.id,
-        name: '',
-        price: 0,
-        prevPrice: 0,
-        isShowDiscount: false,
-        availability: true,
-      },
-    ]);
-  };
-
   const handleUpdateItem = async (
     updatedItem: IItem,
     updateOption: UPDATE_OPTION = UPDATE_OPTION.CURRENT_CATEGORY,
@@ -264,6 +247,7 @@ export default function ItemPage() {
         updatedItem,
         updateOption,
         updatedFields,
+        // selectedVariants,
       });
 
       if (response.data.error) {
@@ -297,6 +281,13 @@ export default function ItemPage() {
         targetObj={item}
         handleDelete={handleDeleteItem}
         showTargetObj={item?.name}
+      />
+      <BulkEditOptions
+        open={isOpenEditVariants}
+        onClose={() => setIsOpenEditVariants(false)}
+        item={item}
+        showNotification={showNotification}
+        refetch={fetchItem}
       />
 
       <Box
@@ -356,7 +347,12 @@ export default function ItemPage() {
 
                   <Typography variant="subtitle2">Availability</Typography>
                 </Box>
-                <Box display="flex" gap={0.5} alignItems="center" sx={{mt: 2}}>
+                <Box
+                  display="flex"
+                  gap={0.5}
+                  alignItems="center"
+                  sx={{ mt: 2 }}
+                >
                   <Checkbox
                     checked={updatedFields.includes('name') || false}
                     onChange={() => onSelectToUpdateFields('name')}
@@ -575,14 +571,10 @@ export default function ItemPage() {
                   alignItems="center"
                   sx={{ mb: 1 }}
                 >
-                  <Box display="flex" gap={0.5} flexDirection="column">
-                    {/* <Checkbox
-                  checked={updatedFields.includes('variants') || false}
-                  onChange={() => onSelectToUpdateFields('variants')}
-                /> */}
-                    <Typography variant="subtitle2" fontWeight={700}>
-                      Variants
-                    </Typography>
+                  <Typography variant="subtitle2" fontWeight={700}>
+                    Variants
+                  </Typography>
+                  {/* <Box display="flex" gap={0.5} flexDirection="column">
                     <Box display="flex" gap={0.5} alignItems="center">
                       <InfoIcon
                         style={{
@@ -600,18 +592,19 @@ export default function ItemPage() {
                         </Link>
                       </Typography>
                     </Box>
-                  </Box>
+                  </Box> */}
 
                   <Button
                     variant="outlined"
                     color="primary"
-                    onClick={onAddVariant}
+                    onClick={() => setIsOpenEditVariants(true)}
+                    startIcon={<EditIcon style={{ width: 15, height: 15 }} />}
                   >
-                    + Add Variant
+                    Edit Variants
                   </Button>
                 </Box>
 
-                <Grid container alignItems="center" spacing={1}>
+                {/* <Grid container alignItems="center" spacing={1}>
                   {variants?.map((option: any, index: number) => (
                     <VariantRow
                       key={index}
@@ -619,9 +612,12 @@ export default function ItemPage() {
                       item={item}
                       setVariants={setVariants}
                       variants={variants}
+                      selectedVariants={selectedVariants}
+                      setSelectedVariants={setSelectedVariants}
                     />
                   ))}
-                </Grid>
+                </Grid> */}
+                <VariantTable variants={variants} />
               </ShadowSection>
             )}
 
@@ -635,6 +631,7 @@ export default function ItemPage() {
 
                 <ListingCategoriesTable
                   listingCategories={item?.listingCategories || []}
+                  categoryId={item.categoryId}
                 />
               </ShadowSection>
             )}
