@@ -5,7 +5,6 @@ import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Box,
   Button,
-  Divider,
   Grid,
   Skeleton,
   Switch,
@@ -36,8 +35,6 @@ import { useParams } from 'next/navigation';
 // New chart components
 import DonutChart from '../components/Charts/DonutChart';
 import BarChart from '../components/Charts/BarChart';
-import CustomerSpendingChart from '../components/Charts/CustomerSpendingChart';
-import LineChart from '../components/Charts/LineChart';
 import ExpenseTrendChart from '../components/Charts/ExpenseTrendChart';
 
 // New overview components
@@ -259,9 +256,6 @@ export default function Overview() {
       detailedData: sortedProducts, // Keep detailed data for tooltips or other uses
     };
   };
-
-  // Check if data is loading
-  const isDataLoading = !overviewData || !revenueData || !productLossData;
 
   return (
     <Sidebar>

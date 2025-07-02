@@ -19,14 +19,9 @@ import {
   TrendingUp,
   TrendingDown,
   AccessTime,
+  People,
 } from '@mui/icons-material';
-import { 
-  primary, 
-  success, 
-  error, 
-  warning, 
-  info 
-} from '@/theme/color';
+import { primary, success, error, warning, info } from '@/theme/color';
 
 interface OrderStatusData {
   status: string;
@@ -56,6 +51,53 @@ interface OrderStatusOverviewProps {
   overviewData: any;
 }
 
+const PerformanceIndicator = ({
+  title,
+  subtitle = '',
+  value,
+  tooltip,
+  icon,
+  color
+}: {
+  title: string;
+  subtitle?: string;
+  value: number | string;
+  tooltip: string;
+  icon: React.ReactNode;
+  color: any;
+}) => {
+  return (
+    <Tooltip title={tooltip}>
+      <Box
+        sx={{
+          p: 2,
+          borderRadius: 2,
+          background: `linear-gradient(135deg, ${color.lightest} 0%, ${alpha(color.main, 0.05)} 100%)`,
+          border: `1px solid ${alpha(color.main, 0.2)}`,
+          cursor: 'pointer',
+          transition: 'all 0.2s ease',
+          '&:hover': {
+            transform: 'scale(1.02)',
+          },
+        }}
+      >
+        <Box display="flex" alignItems="center" gap={1} mb={1}>
+          {icon}
+          <Typography variant="subtitle2" fontWeight="bold">
+            {title}
+          </Typography>
+        </Box>
+        <Typography variant="h5" fontWeight="bold" color={color.main}>
+          {value}
+        </Typography>
+        <Typography variant="caption" color="text.secondary">
+          {subtitle}
+        </Typography>
+      </Box>
+    </Tooltip>
+  );
+};
+
 export default function OrderStatusOverview({
   overviewData,
 }: OrderStatusOverviewProps) {
@@ -84,11 +126,18 @@ export default function OrderStatusOverview({
     const deliveredOrders = overviewData.deliveredOrders || 0;
     const totalRevenue = overviewData.revenue || 0;
 
-    const fulfillmentRate = totalOrders > 0 ? (deliveredOrders / totalOrders) * 100 : 0;
-    const cancellationRate = totalOrders > 0 ? (cancelledOrders / totalOrders) * 100 : 0;
+    const fulfillmentRate =
+      totalOrders > 0 ? (deliveredOrders / totalOrders) * 100 : 0;
+    const cancellationRate =
+      totalOrders > 0 ? (cancelledOrders / totalOrders) * 100 : 0;
     const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
-    const orderGrowthRate = totalOrders > 0 ? ((totalOrders - overviewData.lastMonthOrders) / overviewData.lastMonthOrders) * 100 : 0;
+    const orderGrowthRate =
+      totalOrders > 0
+        ? ((totalOrders - overviewData.lastMonthOrders) /
+            overviewData.lastMonthOrders) *
+          100
+        : 0;
 
     return {
       totalOrders,
@@ -109,7 +158,13 @@ export default function OrderStatusOverview({
   const orderStatusData = useMemo(() => {
     if (!overviewData) return [];
 
-    const { totalOrders, completedOrders, ongoingOrders, cancelledOrders, deliveredOrders } = orderMetrics;
+    const {
+      totalOrders,
+      completedOrders,
+      ongoingOrders,
+      cancelledOrders,
+      deliveredOrders,
+    } = orderMetrics;
 
     const data: OrderStatusData[] = [
       {
@@ -146,7 +201,7 @@ export default function OrderStatusOverview({
       },
     ];
 
-    return data.filter(item => item.count > 0);
+    return data.filter((item) => item.count > 0);
   }, [overviewData, orderMetrics]);
 
   const getPerformanceColor = (value: number, threshold: number = 80) => {
@@ -156,7 +211,11 @@ export default function OrderStatusOverview({
   };
 
   const getTrendIcon = (trend: number) => {
-    return trend > 0 ? <TrendingUp fontSize="small" /> : <TrendingDown fontSize="small" />;
+    return trend > 0 ? (
+      <TrendingUp fontSize="small" />
+    ) : (
+      <TrendingDown fontSize="small" />
+    );
   };
 
   return (
@@ -216,18 +275,34 @@ export default function OrderStatusOverview({
               <Typography variant="h4" fontWeight="bold" color={success.main}>
                 {orderMetrics.totalOrders}
               </Typography>
-              <Typography variant="caption" color="text.secondary" display="block">
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                display="block"
+              >
                 Total Orders
               </Typography>
-              <Box display="flex" alignItems="center" justifyContent="center" gap={0.5} mt={0.5}>
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                gap={0.5}
+                mt={0.5}
+              >
                 {getTrendIcon(orderMetrics.orderGrowthRate)}
-                <Typography variant="caption" color={orderMetrics.orderGrowthRate > 0 ? success.main : error.main}>
-                  {orderMetrics.orderGrowthRate > 0 ? '+' : ''}{Math.abs(orderMetrics.orderGrowthRate).toFixed(1)}%
+                <Typography
+                  variant="caption"
+                  color={
+                    orderMetrics.orderGrowthRate > 0 ? success.main : error.main
+                  }
+                >
+                  {orderMetrics.orderGrowthRate > 0 ? '+' : ''}
+                  {Math.abs(orderMetrics.orderGrowthRate).toFixed(1)}%
                 </Typography>
               </Box>
             </Box>
           </Grid>
-          
+
           <Grid item xs={6} md={3}>
             <Box
               sx={{
@@ -241,12 +316,16 @@ export default function OrderStatusOverview({
               <Typography variant="h4" fontWeight="bold" color={info.main}>
                 ${orderMetrics.averageOrderValue.toFixed(0)}
               </Typography>
-              <Typography variant="caption" color="text.secondary" display="block">
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                display="block"
+              >
                 Avg Order Value
               </Typography>
             </Box>
           </Grid>
-          
+
           <Grid item xs={6} md={3}>
             <Box
               sx={{
@@ -257,15 +336,23 @@ export default function OrderStatusOverview({
                 textAlign: 'center',
               }}
             >
-              <Typography variant="h4" fontWeight="bold" color={getPerformanceColor(orderMetrics.fulfillmentRate)}>
+              <Typography
+                variant="h4"
+                fontWeight="bold"
+                color={getPerformanceColor(orderMetrics.fulfillmentRate)}
+              >
                 {orderMetrics.fulfillmentRate.toFixed(1)}%
               </Typography>
-              <Typography variant="caption" color="text.secondary" display="block">
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                display="block"
+              >
                 Fulfillment Rate
               </Typography>
             </Box>
           </Grid>
-          
+
           <Grid item xs={6} md={3}>
             <Box
               sx={{
@@ -279,7 +366,11 @@ export default function OrderStatusOverview({
               <Typography variant="h4" fontWeight="bold" color={error.main}>
                 {orderMetrics.cancellationRate.toFixed(1)}%
               </Typography>
-              <Typography variant="caption" color="text.secondary" display="block">
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                display="block"
+              >
                 Cancellation Rate
               </Typography>
             </Box>
@@ -308,7 +399,12 @@ export default function OrderStatusOverview({
                   },
                 }}
               >
-                <Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  mb={1}
+                >
                   <Box display="flex" alignItems="center" gap={1}>
                     <Box
                       sx={{
@@ -333,11 +429,11 @@ export default function OrderStatusOverview({
                     }}
                   />
                 </Box>
-                
+
                 <Typography variant="h4" fontWeight="bold" color="text.primary">
                   {status.count}
                 </Typography>
-                
+
                 <Box
                   sx={{
                     mt: 1,
@@ -361,8 +457,12 @@ export default function OrderStatusOverview({
                 {status.trend && (
                   <Box display="flex" alignItems="center" gap={0.5} mt={1}>
                     {getTrendIcon(status.trend)}
-                    <Typography variant="caption" color={status.trend > 0 ? success.main : error.main}>
-                      {status.trend > 0 ? '+' : ''}{status.trend}% from last period
+                    <Typography
+                      variant="caption"
+                      color={status.trend > 0 ? success.main : error.main}
+                    >
+                      {status.trend > 0 ? '+' : ''}
+                      {status.trend}% from last period
                     </Typography>
                   </Box>
                 )}
@@ -378,36 +478,23 @@ export default function OrderStatusOverview({
         </Typography>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
-            <Tooltip title="Average time from order to delivery">
-              <Box
-                sx={{
-                  p: 2,
-                  borderRadius: 2,
-                  background: `linear-gradient(135deg, ${info.lightest} 0%, ${alpha(info.main, 0.05)} 100%)`,
-                  border: `1px solid ${alpha(info.main, 0.2)}`,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  '&:hover': {
-                    transform: 'scale(1.02)',
-                  },
-                }}
-              >
-                <Box display="flex" alignItems="center" gap={1} mb={1}>
-                  <AccessTime color="primary" />
-                  <Typography variant="subtitle2" fontWeight="bold">
-                    Avg Fulfillment Time
-                  </Typography>
-                </Box>
-                <Typography variant="h5" fontWeight="bold" color={info.main}>
-                  {orderMetrics.averageFulfillmentTime?.toFixed(1)}s
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  take to place an order
-                </Typography>
-              </Box>
-            </Tooltip>
+            <PerformanceIndicator
+              title="Avg Fulfillment Time"
+              value={orderMetrics.averageFulfillmentTime?.toFixed(1)}
+              tooltip="Average time for user to place an order"
+              color={info}
+              icon={<AccessTime color="primary" />}
+            />
           </Grid>
-          
+          <Grid item xs={12} sm={6}>
+            <PerformanceIndicator
+              title="Customers Use App To Order"
+              value={overviewData?.clientsUseAppToOrder?.length}
+              tooltip="Number of customers who use the app to place an order"
+              color={success}
+              icon={<People color="success" />}
+            />
+          </Grid>
           {/* <Grid item xs={12} sm={6}>
             <Tooltip title="Revenue growth compared to previous period">
               <Box
@@ -448,11 +535,13 @@ export default function OrderStatusOverview({
             sx={{ py: 4 }}
           >
             <Typography variant="body2" color="text.secondary">
-              {overviewData ? 'No order data available' : 'Loading order data...'}
+              {overviewData
+                ? 'No order data available'
+                : 'Loading order data...'}
             </Typography>
           </Box>
         )}
       </CardContent>
     </Card>
   );
-} 
+}

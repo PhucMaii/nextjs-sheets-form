@@ -127,14 +127,29 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
+    const ordersWithSelfOrder = orders.filter((order: any) => {
+      return order.createdBy.startsWith('Client');
+    });
+
+    const clientsUseAppToOrder = Array.from(new Set(
+      ordersWithSelfOrder.map((order: any) => {
+          return order.createdBy.split(' - ')[1];
+        }),
+      ),
+    );
+
     // Calculate avg fulfillment time
     const ordersHasFulfillmentTime = orders.filter((order: any) => {
       return order?.enteredOrderAt;
-    })
-    const avgFulfillmentTime = ordersHasFulfillmentTime.reduce((acc: number, order: any) => {
-      const fulfillmentTime = moment(order.orderTime).diff(moment(order.enteredOrderAt), 'seconds');
-      return acc + fulfillmentTime;
-    }, 0) / ordersHasFulfillmentTime.length;
+    });
+    const avgFulfillmentTime =
+      ordersHasFulfillmentTime.reduce((acc: number, order: any) => {
+        const fulfillmentTime = moment(order.orderTime).diff(
+          moment(order.enteredOrderAt),
+          'seconds',
+        );
+        return acc + fulfillmentTime;
+      }, 0) / ordersHasFulfillmentTime.length;
     console.log('avgFulfillmentTime', avgFulfillmentTime);
 
     // Calculate overview data
@@ -242,6 +257,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       deliveredOrders: deliveredOrders.length,
       cancelledOrders: cancelledOrders.length,
       avgFulfillmentTime,
+      clientsUseAppToOrder,
     };
 
     // Get last month, the end date is the last of last month
