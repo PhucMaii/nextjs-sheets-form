@@ -1,5 +1,5 @@
-import { PrismaClient } from '@prisma/client';
 import { websiteItemCategory } from '@/app/lib/constant';
+import prisma from '@/client';
 export default async function handler(req: any, res: any) {
   try {
     if (req.method !== 'GET') {
@@ -8,11 +8,9 @@ export default async function handler(req: any, res: any) {
       });
     }
 
-    const prisma = new PrismaClient();
-
     const products = await prisma.item.findMany({
       where: {
-        categoryId: websiteItemCategory, 
+        categoryId: websiteItemCategory,
       },
       include: {
         inventoryItem: true,
@@ -21,8 +19,8 @@ export default async function handler(req: any, res: any) {
             unit: true,
           },
         },
-      }
-    })
+      },
+    });
 
     // const products = await prisma.itemPreference.findMany({
     //   include: {

@@ -1,5 +1,5 @@
 import { websiteItemCategory } from '@/app/lib/constant';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function handler(
@@ -12,8 +12,6 @@ export default async function handler(
         error: 'Your method is not supported',
       });
     }
-
-    const prisma = new PrismaClient();
 
     const types = await prisma.itemType.findMany({
       include: {
@@ -40,10 +38,12 @@ export default async function handler(
     });
 
     //  Add items to each type
-    const typesWithItems = types.map((type) => ({
-      ...type,
-      items: items.filter((item) => item.inventoryItem?.type?.id === type.id),
-    })).filter((type) => type.items.length > 0);
+    const typesWithItems = types
+      .map((type) => ({
+        ...type,
+        items: items.filter((item) => item.inventoryItem?.type?.id === type.id),
+      }))
+      .filter((type) => type.items.length > 0);
 
     return res.status(200).json({
       data: typesWithItems,

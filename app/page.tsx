@@ -18,16 +18,22 @@ export default function MainPage() {
 
   const {
     data: session,
+    error: sessionError,
     isValidating,
   } = useSWR('/api/auth/session', fetcher, {
     revalidateOnFocus: false,
+    errorRetryCount: 1,
+    errorRetryInterval: 1000,
+    timeout: 10000, // 10 second timeout
   });
 
-
-  if (!session && isValidating) {
+  // Show loading if we're still validating and don't have data yet
+  if (isValidating && !session && !sessionError) {
     return <LoadingComponent />
   }
 
+  // If there's an error with session, just continue without session (guest mode)
+  // The AuthenGuard will handle routing if authentication is required
 
   return (
     <NavbarWrapper>

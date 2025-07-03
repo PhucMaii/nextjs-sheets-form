@@ -12,6 +12,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ChooseOption from '../ChooseOption';
 import { OnSaleBadge } from '../OrderView';
+import Image from 'next/image';
 
 interface IProps {
   product: IItem;
@@ -149,12 +150,13 @@ export default function ProductListing({
             />
           </Box>
         )}
-        <img
+        <Image
           src={img || '/images/landing/image_not_found.jpeg'}
           alt={product?.name || product?.inventoryItem?.name}
-          width="100%"
+          width={200}
           height={200}
-          style={{ borderRadius: '20px' }}
+          style={{ borderRadius: '20px', width: '100%', height: 200 }}
+          loading="lazy"
         />
         <Typography
           variant="h6"

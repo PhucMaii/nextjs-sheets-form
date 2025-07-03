@@ -131,8 +131,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return order.createdBy.startsWith('Client');
     });
 
-    const clientsUseAppToOrder = Array.from(new Set(
-      ordersWithSelfOrder.map((order: any) => {
+    const clientsUseAppToOrder = Array.from(
+      new Set(
+        ordersWithSelfOrder.map((order: any) => {
           return order.createdBy.split(' - ')[1];
         }),
       ),
@@ -144,13 +145,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
     const avgFulfillmentTime =
       ordersHasFulfillmentTime.reduce((acc: number, order: any) => {
-        const fulfillmentTime = moment(order.orderTime).diff(
-          moment(order.enteredOrderAt),
+        const fulfillmentTime = moment.utc(order.orderTime).diff(
+          moment.utc(order.enteredOrderAt),
           'seconds',
         );
         return acc + fulfillmentTime;
       }, 0) / ordersHasFulfillmentTime.length;
-    console.log('avgFulfillmentTime', avgFulfillmentTime);
 
     // Calculate overview data
     const sortedThisMonthOrders = sortByDeliveryDate(orders);

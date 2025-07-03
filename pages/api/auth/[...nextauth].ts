@@ -5,8 +5,7 @@ import NextAuth, { getServerSession, type NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { USER_CATEGORIZED } from '@/app/utils/enum';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 // Define custom types for our user data
 interface CustomUser {
@@ -107,7 +106,6 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       // Add token data to the session
-      console.log({name: token?.name, clientName: token?.clientName, id: token.id, role: token?.role});
       return {
         ...session,
         user: {
@@ -136,8 +134,6 @@ const handler = NextAuth(authOptions);
 export { handler as default };
 
 const loginUser = async (credentials: any) => {
-  const prisma = new PrismaClient();
-
   const user = await prisma.user.findUnique({
     where: {
       clientId: credentials.clientId,
@@ -167,8 +163,6 @@ const loginUser = async (credentials: any) => {
 };
 
 const loginEmployee = async (credentials: any) => {
-  const prisma = new PrismaClient();
-
   const employee = await prisma.employee.findFirst({
     where: {
       employeeCode: credentials.employeeCode,
@@ -177,7 +171,7 @@ const loginEmployee = async (credentials: any) => {
   if (!employee) {
     throw new Error('Employee code does not Exist');
   }
-  
+
   const isPasswordValid = await bcrypt.compare(
     credentials.password,
     employee.password,

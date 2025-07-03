@@ -32,6 +32,12 @@ export const Providers = ({ children }: Props) => {
               <SWRConfig
                 value={{
                   fetcher: (url: string) => axios.get(url).then((r) => r.data),
+                  revalidateOnFocus: false,
+                  revalidateOnReconnect: true,
+                  errorRetryCount: 2,
+                  errorRetryInterval: 2000,
+                  dedupingInterval: 5000,
+                  focusThrottleInterval: 5000,
                 }}
               >
                 <MaintenanceProvider>{children}</MaintenanceProvider>

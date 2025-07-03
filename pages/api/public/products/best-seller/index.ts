@@ -1,5 +1,5 @@
 import { websiteItemCategory } from '@/app/lib/constant';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function handler(
@@ -10,8 +10,6 @@ export default async function handler(
     if (req.method !== 'GET') {
       return res.status(404).json({ error: 'Your method is not supported' });
     }
-
-    const prisma = new PrismaClient();
 
     const bestSellerItems = await prisma.item.findMany({
       where: {

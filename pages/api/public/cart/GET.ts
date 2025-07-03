@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate } from '../../utils/date';
 import {
@@ -6,6 +5,7 @@ import {
   generateSessionSignature,
   verifySessionId,
 } from '@/app/utils/security';
+import prisma from '@/client';
 
 interface IQuery {
   guestSessionId?: string;
@@ -15,8 +15,6 @@ interface IQuery {
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { cartId, guestSessionId, guestSessionSignature }: IQuery = req.query;
 
     if (cartId) {
