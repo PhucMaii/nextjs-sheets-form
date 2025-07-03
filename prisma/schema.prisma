@@ -382,7 +382,7 @@ model OrderAction {
   id         Int     @id @default(autoincrement())
   timelineId Int
   title      String
-  comment    String?
+  comment    String? @db.Text
   createdAt  String
   createdBy  String
   posIndex   Int
