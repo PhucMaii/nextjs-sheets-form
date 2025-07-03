@@ -1,10 +1,10 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { infoBackground } from '@/theme/color';
 import { otherTypeId } from '@/app/lib/constant';
 import { calculateNextIndexPosAndRows } from '@/pages/api/utils/appearance';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
+import prisma from '@/client';
 
 interface IBody {
   name: string;
@@ -23,8 +23,6 @@ interface IQuery {
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const {
       name,
       sku,

@@ -1,8 +1,8 @@
 import { ICartItem } from '@/app/utils/type';
 import { generateOrderTotalPrice } from '@/pages/api/admin/[companyId]/orderedItems/PUT';
 import { getTodayDate } from '@/pages/api/utils/date';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IBody {
   item: ICartItem | any;
@@ -20,8 +20,6 @@ export default async function handler(
         error: 'Your method is not supported',
       });
     }
-
-    const prisma = new PrismaClient();
 
     const { item, userId, cartId }: IBody = req.body;
 
@@ -170,8 +168,6 @@ export default async function handler(
 
 export const updateCartTotalPrice = async (cartId: number) => {
   try {
-    const prisma = new PrismaClient();
-
     const allCartItems = await prisma.cartItem.findMany({
       where: {
         cartId,

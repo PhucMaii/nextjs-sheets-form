@@ -1,8 +1,8 @@
 import { generateListOfDateString } from '@/app/utils/time';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { VIEW_TYPE } from '@/app/utils/enum';
 import { formatDate, sortExpenseByDate } from '@/pages/api/utils/date';
+import prisma from '@/client';
 
 interface IQuery {
   startDate?: string;
@@ -20,8 +20,6 @@ export const config = {
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { startDate, endDate, id, type, companyId }: IQuery = req.query;
 
     if (!startDate || !endDate || !companyId) {
@@ -262,8 +260,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 }
 
 const getTransactions = async (condition: any) => {
-  const prisma = new PrismaClient();
-
   const res = await prisma.expense.findMany({
     where: condition,
     include: {

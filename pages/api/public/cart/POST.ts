@@ -1,9 +1,9 @@
 // import { IItemPreference, OrderSummary } from "@/app/utils/type";
 import { ICartItem } from '@/app/utils/type';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate } from '../../utils/date';
 import { generateOrderTotalPrice } from '../../admin/[companyId]/orderedItems/PUT';
+import prisma from '@/client';
 
 interface IBody {
   items: ICartItem[];
@@ -14,8 +14,6 @@ interface IBody {
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { items, userId, note }: IBody = req.body;
 
     if (userId) {

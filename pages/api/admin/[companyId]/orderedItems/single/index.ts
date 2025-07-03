@@ -1,10 +1,9 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { Fifo, InventoryUnit, PrismaClient } from '@prisma/client';
+import { Fifo, InventoryUnit } from '@prisma/client';
 import { generateOrderTotalPrice } from '../PUT';
 import {
   checkOrderValidToAffectInventory,
-  formatItemsWithTotalPrice,
-} from '@/pages/api/utils/order';
+  formatItemsWithTotalPrice} from '@/pages/api/utils/order';
 import { getTodayDate } from '@/pages/api/utils/date';
 import { IInventoryUnit } from '@/app/utils/type';
 import { getAllUnitsByInventoryItemId } from '@/pages/api/utils/units';
@@ -13,6 +12,7 @@ import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { recordAction } from '@/pages/api/utils/timeline';
+import prisma from '@/client';
 
 interface IBody {
   id: number;
@@ -39,19 +39,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     console.log('req.body', req.body);
 
-    const prisma = new PrismaClient();
     const { id, orderId, quantity, price, itemId } = req.body as IBody;
 
     let updatedOrderedItem;
 
     const existingOrder = await prisma.orders.findUnique({
       where: {
-        id: orderId,
-      },
+        id: orderId},
       include: {
-        items: true,
-      },
-    });
+        items: true}});
 
     if (!existingOrder) {
       return res.status(404).json({ error: 'Order not found' });
@@ -63,13 +59,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (id < 1 && itemId) {
       const targetItem = await prisma.item.findUnique({
         where: {
-          id: itemId,
-        },
+          id: itemId},
         include: {
           inventoryItem: true,
-          inventoryUnit: true,
-        },
-      });
+          inventoryUnit: true}});
 
       if (!targetItem) {
         return res.status(404).json({ error: 'Item not found' });
@@ -83,9 +76,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     } else {
       const existingOrderedItem = await prisma.orderedItems.findUnique({
         where: {
-          id,
-        },
-      });
+          id}});
 
       console.log('existingOrderedItem: ', existingOrderedItem);
 
@@ -99,19 +90,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       updatedOrderedItem = await prisma.orderedItems.update({
         where: {
-          id,
-        },
+          id},
         data: {
           quantity,
           price,
           cost: costAndProfit.cost,
-          profit: price - costAndProfit.cost,
-        },
+          profit: price - costAndProfit.cost},
         include: {
           fifo: true,
-          inventoryUnit: true,
-        },
-      });
+          inventoryUnit: true}});
 
       if (updatedOrderedItem?.fifo && updatedOrderedItem?.inventoryUnit) {
         await updateSingleInventoryItem(
@@ -130,14 +117,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const orderedItems = await prisma.orderedItems.findMany({
       where: {
-        orderId,
-      },
+        orderId},
       include: {
         inventoryItem: true,
         fifo: true,
-        inventoryUnit: true,
-      },
-    });
+        inventoryUnit: true}});
 
     const orderTotalPrice = generateOrderTotalPrice(orderedItems);
     const updatedAt = getTodayDate();
@@ -145,8 +129,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const updatedOrder = await prisma.orders.update({
       where: {
-        id: orderId,
-      },
+        id: orderId},
       data: {
         totalPrice: orderTotalPrice.totalPrice,
         subTotal: orderTotalPrice.subTotal,
@@ -154,19 +137,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         GST: orderTotalPrice.GST,
         discount: orderTotalPrice.discount,
         updatedBy: `Admin - ${adminUpdate.name}`,
-        updateTime: updatedTime,
-      },
+        updateTime: updatedTime},
       include: {
         items: {
           include: {
             fifo: true,
             inventoryUnit: true,
-            inventoryItem: true,
-          },
-        },
-        user: true,
-      },
-    });
+            inventoryItem: true}},
+        user: true}});
 
     const itemsWithTotalPrice = formatItemsWithTotalPrice(updatedOrder.items);
 
@@ -176,10 +154,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         ...updatedOrder,
         items: itemsWithTotalPrice,
         clientName: updatedOrder?.user?.clientName,
-        clientId: updatedOrder?.user?.clientId,
-      },
-      message: 'Update Data Successfully',
-    });
+        clientId: updatedOrder?.user?.clientId},
+      message: 'Update Data Successfully'});
   } catch (error) {
     console.log('Internal Server Error: ', error);
   }
@@ -189,24 +165,15 @@ export default withAdminAuthGuard(handler);
 
 export const generateCostAndProfit = async (orderedItemId: number) => {
   try {
-    const prisma = new PrismaClient();
-
     const existingItem = await prisma.orderedItems.findUnique({
       where: {
-        id: orderedItemId,
-      },
+        id: orderedItemId},
       include: {
         fifo: {
           include: {
             vendorItem: {
               include: {
-                unit: true,
-              },
-            },
-          },
-        },
-      },
-    });
+                unit: true}}}}}});
 
     if (!existingItem) {
       throw new Error(
@@ -246,16 +213,12 @@ export const updateSingleInventoryItem = async (
   // type: 'subtract' | 'restock' | null = null,`
 ) => {
   try {
-    const prisma = new PrismaClient();
-
     // Handle if expense quantity change or admin just force update the inventory => orderId = -1
     // Only check if orderId is a valid id
     if (orderId > 0) {
       const order: any = await prisma.orders.findUnique({
         where: {
-          id: orderId,
-        },
-      });
+          id: orderId}});
 
       if (!order) {
         console.error('Conflict Order Not Found');
@@ -276,12 +239,9 @@ export const updateSingleInventoryItem = async (
     // Subtract the new quantity from inventory quantity, then add back the previous quantity
     const lastUpdatedFifo = await prisma.fifo.findUnique({
       where: {
-        id: fifo.id,
-      },
+        id: fifo.id},
       include: {
-        inventoryItem: true,
-      },
-    });
+        inventoryItem: true}});
 
     if (!lastUpdatedFifo) {
       console.error('Comflict FIFO Not Found');
@@ -301,12 +261,9 @@ export const updateSingleInventoryItem = async (
 
     await prisma.fifo.update({
       where: {
-        id: fifo.id,
-      },
+        id: fifo.id},
       data: {
-        quantity: updatedQuantity,
-      },
-    });
+        quantity: updatedQuantity}});
 
     // Add action of update inventory item
     if (orderId > 0) {
@@ -322,17 +279,13 @@ export const updateSingleInventoryItem = async (
       // Mark the order hasSubtractInventory to true
       await prisma.orders.update({
         where: {
-          id: orderId,
-        },
-        data: { hasSubtractInventory: true },
-      });
+          id: orderId},
+        data: { hasSubtractInventory: true }});
     }
 
     const targetVendorItem = await prisma.vendorItem.findUnique({
       where: {
-        id: fifo.vendorItemId,
-      },
-    });
+        id: fifo.vendorItemId}});
 
     if (!targetVendorItem) {
       console.error('Comflict Vendor Item Not Found');
@@ -341,12 +294,9 @@ export const updateSingleInventoryItem = async (
 
     await prisma.vendorItem.update({
       where: {
-        id: fifo.vendorItemId,
-      },
+        id: fifo.vendorItemId},
       data: {
-        quantity: targetVendorItem?.quantity - fifo.quantity + updatedQuantity,
-      },
-    });
+        quantity: targetVendorItem?.quantity - fifo.quantity + updatedQuantity}});
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
   }

@@ -3,10 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { getTodayDate } from '@/pages/api/utils/date';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-
-const prisma = new PrismaClient();
+import prisma from '@/client';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {

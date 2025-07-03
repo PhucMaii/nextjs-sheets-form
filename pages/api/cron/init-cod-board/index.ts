@@ -1,9 +1,9 @@
-import { PrismaClient } from '@prisma/client';
 import { getTodayDate, normalizeDate } from '@/pages/api/utils/date';
 import { days } from '@/app/lib/constant';
 import { COD_STATUS, ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
 import { getWCODDay } from '@/app/utils/time';
 import { insertOrdersToSelectedBoards } from '@/pages/api/admin/[companyId]/cod/auto-add-board';
+import prisma from '@/client';
 
 // CRON JOB FOR COMPANY ID 1 ONLY
 
@@ -13,8 +13,6 @@ export default async function handler(req: any, res: any) {
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
-
-    const prisma = new PrismaClient();
 
     // Check if cod boards exist for today
     const { date, time } = getTodayDate();

@@ -2,8 +2,8 @@ import { Order } from '@/app/admin/[companyId]/orders/page';
 import { days } from '@/app/lib/constant';
 import { filterByRoute } from '@/app/utils/array';
 import { COD_STATUS, ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IBody {
   createdAt: string;
@@ -18,8 +18,6 @@ interface IBody {
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const {
       createdAt,
       createdBy,

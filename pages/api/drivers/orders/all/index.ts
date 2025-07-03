@@ -1,11 +1,9 @@
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import withDriverAuthGuard from '@/pages/api/utils/withDriverAuthGuar';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
-
-const prisma = new PrismaClient();
+import prisma from '@/client';
 
 interface IQuery {
   deliveryDate?: string;

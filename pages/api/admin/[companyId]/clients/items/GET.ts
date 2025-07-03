@@ -1,6 +1,6 @@
 import { calculateQtyLeft } from '@/pages/api/utils/items';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface RequestQuery {
   categoryId?: string;
@@ -9,7 +9,6 @@ interface RequestQuery {
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
     const { categoryId, companyId } = req.query as RequestQuery;
 
     if (!categoryId || !companyId) {

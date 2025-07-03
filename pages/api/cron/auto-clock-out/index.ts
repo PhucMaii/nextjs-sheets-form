@@ -1,10 +1,9 @@
-import { PayrollType, PrismaClient } from '@prisma/client';
+import { PayrollType } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate } from '@/pages/api/utils/date';
 import { calculateHours } from '@/pages/api/drivers/shift/clock-out';
 import { IScheduledShift } from '@/app/utils/type';
-
-const prisma = new PrismaClient();
+import prisma from '@/client';
 
 export default async function handler(
   req: NextApiRequest,
@@ -20,32 +19,24 @@ export default async function handler(
     const activeShifts: any = await prisma.shiftSession.findMany({
       where: {
         endedAt: null,
-        isActive: true,
-      },
+        isActive: true},
       include: {
         driver: true,
         employee: true,
-        route: true,
-      },
-    });
+        route: true}});
 
     // End shifts
     const today = getTodayDate();
 
     const todayOrders = await prisma.orders.findMany({
       where: {
-        deliveryDate: today.date,
-      },
-    });
+        deliveryDate: today.date}});
 
     const todayScheduledShifts = await prisma.scheduledShift.findMany({
       where: {
-        queryDate: today.date,
-      },
+        queryDate: today.date},
       include: {
-        employee: true,
-      },
-    });
+        employee: true}});
 
     for (const shift of activeShifts) {
       // Find the scheduled shift 
@@ -62,15 +53,12 @@ export default async function handler(
 
         await prisma.shiftSession.update({
           where: {
-            id: shift.id,
-          },
+            id: shift.id},
           data: {
             endedAt: scheduledShift?.endedAt,
             hours,
             isActive: false,
-            cost,
-          },
-        });
+            cost}});
       } else {
         const orderDeliveredByDriver = todayOrders.filter((order) => {
           return order.deliveredBy === shift.employee.name;
@@ -89,29 +77,23 @@ export default async function handler(
           const cost = shift.employee?.payrollType === PayrollType.hourly ? hours * (shift?.employee?.payRate || 1) : 0;
           await prisma.shiftSession.update({
             where: {
-              id: shift.id,
-            },
+              id: shift.id},
             data: {
               endedAt: latestOrder.deliveredAt,
               hours,
               isActive: false,
-              cost,
-            },
-          });
+              cost}});
         } else {
           const hours = calculateHours(shift.startedAt, today.dateAndTime);
           const cost = shift.employee?.payrollType === PayrollType.hourly ? hours * (shift?.employee?.payRate || 1) : 0;
           await prisma.shiftSession.update({
             where: {
-              id: shift.id,
-            },
+              id: shift.id},
             data: {
               endedAt: today.dateAndTime,
               isActive: false,
               hours,
-              cost,
-            },
-          });
+              cost}});
         }
 
       }
@@ -119,12 +101,10 @@ export default async function handler(
     }
 
     return res.status(200).json({
-      message: 'Clock out all drivers successfully',
-    });
+      message: 'Clock out all drivers successfully'});
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({
-      error: 'Internal Server Error: ' + error,
-    });
+      error: 'Internal Server Error: ' + error});
   }
 }

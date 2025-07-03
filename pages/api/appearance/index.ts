@@ -1,15 +1,13 @@
 import { itemsEachRow } from '@/app/lib/constant';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import withAuthGuard from '../utils/withAuthGuard';
 import { PROMOTION_STATUS } from '@/app/utils/enum';
 import { authOptions } from '../auth/[...nextauth]';
 import { getServerSession } from 'next-auth';
+import prisma from '@/client';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const prisma = new PrismaClient();
-
     const session: any = await getServerSession(req, res, authOptions);
 
     const { companyId }: any = session.user;

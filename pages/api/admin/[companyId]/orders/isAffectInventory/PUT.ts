@@ -1,8 +1,8 @@
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { USER_ROLE } from '@/app/utils/enum';
 import { recordAction } from '@/pages/api/utils/timeline';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IBody {
   id: number;
@@ -11,8 +11,6 @@ interface IBody {
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { id, isAffectInventory }: IBody = req.body;
 
     const updatedOrder = await prisma.orders.findUnique({

@@ -1,11 +1,9 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import emailHandler from '@/pages/api/utils/email';
 import { generatePurchaseOrderTemplate } from '@/config/email';
 import { PO_STATUS } from '@/app/utils/enum';
-const prisma = new PrismaClient();
-
+import prisma from '@/client';
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   // This API is only used to change to status CANCELLED or ORDERED
   try {

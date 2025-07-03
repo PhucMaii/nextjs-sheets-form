@@ -8,12 +8,12 @@ import {
   getCustomersInDebt,
   getLastMonthExpenses,
   getLastMonthRevenue,
-  revenueGroupByDeliveryDate,
-} from '@/pages/api/utils/overview';
+  revenueGroupByDeliveryDate} from '@/pages/api/utils/overview';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
-import { PaymentStatus, PrismaClient } from '@prisma/client';
+import { PaymentStatus } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { calculateOrderProfit } from '../GET';
+import prisma from '@/client';
 
 interface IQuery {
   startDate?: string;
@@ -24,25 +24,20 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method !== 'GET') {
       return res.status(404).json({
-        error: 'Your method is not supported',
-      });
+        error: 'Your method is not supported'});
     }
-    const prisma = new PrismaClient();
-
     const { companyId } = req.query;
 
     if (!companyId) {
       return res.status(400).json({
-        error: 'Company ID is required',
-      });
+        error: 'Company ID is required'});
     }
 
     const { startDate, endDate }: IQuery = req.query;
 
     if (!startDate || !endDate) {
       return res.status(404).json({
-        error: 'Date Range Is Not Provided',
-      });
+        error: 'Date Range Is Not Provided'});
     }
 
     const officiallyStartDate = new Date(2024, 0, 1);
@@ -54,8 +49,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     if (formattedStartDate > formattedEndDate) {
       return res.status(404).json({
-        error: 'Date Range Is Not Provided Properly',
-      });
+        error: 'Date Range Is Not Provided Properly'});
     }
 
     const startDateDate = startDate.split(' ')[2];
@@ -85,30 +79,21 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       endDate,
       formattedStartDate,
       formattedEndDate,
-      datesInRange,
-    });
+      datesInRange});
 
     const orders: any = await prisma.orders.findMany({
       where: {
         companyId: Number(companyId),
         status: {
-          not: ORDER_STATUS.VOID,
-        },
+          not: ORDER_STATUS.VOID},
         deliveryDate: {
-          in: datesInRange,
-        },
-      },
+          in: datesInRange}},
       include: {
         items: {
           where: {
             quantity: {
-              gt: 0,
-            },
-          },
-        },
-        user: true,
-      },
-    });
+              gt: 0}}},
+        user: true}});
 
     if (!orders || orders.length === 0) {
       return res.status(200).json({
@@ -120,11 +105,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             thisMonth: [],
             lastMonth: [],
             timeSeries: [], // Time series for displaying time for the chart
-            lastMonthTimeSeries: [],
-          },
-        },
-        message: 'Fetch Overview Data Successfully',
-      });
+            lastMonthTimeSeries: []}},
+        message: 'Fetch Overview Data Successfully'});
     }
 
     const ordersWithSelfOrder = orders.filter((order: any) => {
@@ -196,10 +178,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       where: {
         companyId: Number(companyId),
         date: {
-          in: datesInRange,
-        },
-      },
-    });
+          in: datesInRange}}});
     const totalExpenses = expenses.reduce((acc: number, expense: any) => {
       return acc + expense.amount;
     }, 0);
@@ -227,8 +206,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       acc[clientKey] = {
         amount: newTotalProfit,
-        percentage: (newTotalProfit / profit) * 100,
-      };
+        percentage: (newTotalProfit / profit) * 100};
 
       return acc;
     }, {});
@@ -237,8 +215,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       profitChange,
       lastMonthProfit,
       lastMonthREvenue: lastMonthRevenueReport.revenue,
-      lastMonthExpenses,
-    });
+      lastMonthExpenses});
 
     const manifest = generateManifest(sortedThisMonthOrders, revenue);
 
@@ -257,8 +234,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       deliveredOrders: deliveredOrders.length,
       cancelledOrders: cancelledOrders.length,
       avgFulfillmentTime,
-      clientsUseAppToOrder,
-    };
+      clientsUseAppToOrder};
 
     // Get last month, the end date is the last of last month
     const lastMonthEndDate = moment()
@@ -283,25 +259,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         where: {
           companyId: Number(companyId),
           status: {
-            in: [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED],
-          },
+            in: [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED]},
           deliveryDate: {
-            in: debtRange,
-          },
-        },
+            in: debtRange}},
         include: {
           items: {
             where: {
               quantity: {
-                gt: 0,
-              },
-            },
-          },
-          user: true,
-        },
+                gt: 0}}},
+          user: true},
         take: debtFetchSize,
-        skip: debtFetchSkip,
-      });
+        skip: debtFetchSkip});
 
       if (fetchedDebtOrders.length === 0) break;
 
@@ -315,10 +283,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       where: {
         companyId: Number(companyId),
         type: {
-          not: USER_CATEGORIZED.INACTIVE,
-        },
-      },
-    });
+          not: USER_CATEGORIZED.INACTIVE}}});
 
     return res.status(200).json({
       data: {
@@ -330,16 +295,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           thisMonth: thisMonthRevenueReport.values,
           lastMonth: lastMonthRevenueReport.chartData,
           timeSeries: thisMonthRevenueReport.keys, // Time series for displaying time for the chart
-          lastMonthTimeSeries: lastMonthRevenueReport.keys,
-        },
-      },
-      message: 'Fetch Overview Data Successfully',
-    });
+          lastMonthTimeSeries: lastMonthRevenueReport.keys}},
+      message: 'Fetch Overview Data Successfully'});
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({
-      error: 'Internal Server Error: ' + error,
-    });
+      error: 'Internal Server Error: ' + error});
   }
 };
 

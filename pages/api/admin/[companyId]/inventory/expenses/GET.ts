@@ -1,7 +1,7 @@
 import { generateListOfDateString } from '@/app/utils/time';
 import { normalizeDate } from '@/pages/api/utils/date';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IQuery {
   startDate?: string;
@@ -11,8 +11,6 @@ interface IQuery {
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { startDate, endDate, companyId }: IQuery = req.query;
 
     if (!startDate || !endDate || !companyId) {

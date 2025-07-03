@@ -1,5 +1,6 @@
-import { Item, PrismaClient } from '@prisma/client';
+import { Item } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IBody {
   categoryId: number;
@@ -14,8 +15,6 @@ export default async function handler(
     if (req.method !== 'POST') {
       return res.status(404).json({ error: 'Your method is not supported' });
     }
-
-    const prisma = new PrismaClient();
 
     const { categoryId, newItems }: IBody = req.body;
     const { companyId } = req.query;

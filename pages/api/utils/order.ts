@@ -1,7 +1,8 @@
-import { Orders, PaymentStatus, PrismaClient } from '@prisma/client';
+import { Orders, PaymentStatus } from '@prisma/client';
 import { getTodayDate, normalizeDate } from './date';
 import { ACTION, ORDER_STATUS } from '@/app/utils/enum';
 import { generateListOfDateString, generateMonthRange } from '@/app/utils/time';
+import prisma from '@/client';
 
 export const formatItemsWithTotalPrice = (items: any[]) => {
   return items.map((item: any) => {
@@ -12,8 +13,7 @@ export const formatItemsWithTotalPrice = (items: any[]) => {
     return {
       ...item,
       totalPrice: item.price * item.quantity,
-      totalPrevPrice,
-    };
+      totalPrevPrice};
   });
 };
 
@@ -22,7 +22,6 @@ export const checkOrderValidToAffectInventory = async (
   deliveryDate: string,
 ) => {
   try {
-    const prisma = new PrismaClient();
     const { date, time: currentTime } = getTodayDate();
 
     const normalizedToday = normalizeDate(new Date(date));
@@ -51,9 +50,7 @@ export const checkOrderValidToAffectInventory = async (
           where: {
             name: ACTION.TRACK_INVENTORY,
             date: deliveryDate,
-            companyId: companyId,
-          },
-        });
+            companyId: companyId}});
 
         return !!selectedDayAction;
         // }
@@ -75,8 +72,6 @@ export const getOverdueOrders = async (userId: number) => {
       monthRange[1],
     );
 
-    const prisma = new PrismaClient();
-
     const incompletedOrders: any = await prisma.orders.findMany({
       where: {
         userId,
@@ -85,22 +80,15 @@ export const getOverdueOrders = async (userId: number) => {
           not: ORDER_STATUS.VOID
         },
         deliveryDate: {
-          notIn: currentMonthListOfDateString,
-        },
-      },
+          notIn: currentMonthListOfDateString}},
       include: {
         items: {
           include: {
             inventoryItem: true,
-            inventoryUnit: true,
-          },
-        },
-        user: true,
-      },
+            inventoryUnit: true}},
+        user: true},
       orderBy: {
-        id: 'desc',
-      },
-    });
+        id: 'desc'}});
 
     const dueAmount = incompletedOrders.reduce((acc: number, order: Orders) => {
       return acc + order.totalPrice;
@@ -108,8 +96,7 @@ export const getOverdueOrders = async (userId: number) => {
 
     return {
       orders: incompletedOrders,
-      overDue: dueAmount,
-    };
+      overDue: dueAmount};
   } catch (error: any) {
     throw new Error('Fail to get overdue orders');
   }

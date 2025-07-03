@@ -1,13 +1,11 @@
 import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getDriverInfo } from '../utils/auth';
 import { formatDateString } from '../utils/date';
 import { generateListOfDateString } from '@/app/utils/time';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
-
-const prisma = new PrismaClient();
+import prisma from '@/client';
 
 interface IBody {
   startDate: string;

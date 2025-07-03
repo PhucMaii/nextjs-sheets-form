@@ -1,8 +1,8 @@
 import { UPDATE_OPTION } from '@/app/admin/[companyId]/components/Modals/edit/EditItem';
 import { websiteItemCategoryId } from '@/app/lib/constant';
 import { IItem, IOption } from '@/app/utils/type';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IBody {
   updatedItem: IItem | any;
@@ -13,8 +13,6 @@ interface IBody {
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const {
       updatedItem,
       updateOption = UPDATE_OPTION.CURRENT_CATEGORY,
@@ -276,8 +274,6 @@ const updateAllScheduleOrderItems = async (
   updatedData: any,
 ) => {
   try {
-    const prisma = new PrismaClient();
-
     // CASE 1: UPDATE ALL ITEM WITH SAME INVENTORY ITEM ID - if update all ordered item in scheduled orders same inventory id
     if (
       updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME &&

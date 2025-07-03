@@ -2,9 +2,9 @@ import { generateListOfDateString } from '@/app/utils/time';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { normalizeDate } from '@/pages/api/utils/date';
 import { formatItemsWithTotalPrice } from '@/pages/api/utils/order';
-import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IQuery {
   userId?: string;
@@ -14,8 +14,6 @@ interface IQuery {
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { userId, startDate, endDate } = req.query as IQuery;
 
     if (!startDate || !endDate) {

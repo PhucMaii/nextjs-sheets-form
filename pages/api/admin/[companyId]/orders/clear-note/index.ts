@@ -1,5 +1,5 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 export default async function handler(
   req: NextApiRequest,
@@ -9,8 +9,6 @@ export default async function handler(
     if (req.method !== 'PUT') {
       return res.status(404).json({ error: 'Your method is not supported' });
     }
-
-    const prisma = new PrismaClient();
 
     const { orderId } = req.body as { orderId: number };
 

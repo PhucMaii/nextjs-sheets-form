@@ -1,7 +1,7 @@
 import { generateListOfDateString } from '@/app/utils/time';
 import { normalizeDate } from '@/pages/api/utils/date';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IQuery {
   startDate?: string;
@@ -29,8 +29,6 @@ export default async function handler(
     if (!startDate || !endDate) {
       return res.status(404).json({ error: 'You are missing selected date' });
     }
-
-    const prisma = new PrismaClient();
 
     const normalizedStartDate = normalizeDate(new Date(startDate));
     const normalizedEndDate = normalizeDate(new Date(endDate));

@@ -1,9 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
-
+import prisma from '@/client';
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const { companyId } = req.query;

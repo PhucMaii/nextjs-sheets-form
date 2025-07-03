@@ -1,6 +1,6 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { updateCartTotalPrice } from '../add-to-cart';
+import prisma from '@/client';
 
 interface IBody {
   itemId: number;
@@ -17,8 +17,6 @@ export default async function handler(
         error: 'Your method is not supported',
       });
     }
-
-    const prisma = new PrismaClient();
 
     const { quantity, itemId }: IBody = req.body;
 

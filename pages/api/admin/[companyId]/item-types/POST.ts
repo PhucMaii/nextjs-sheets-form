@@ -1,6 +1,6 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { calculateNextPriority } from '@/pages/api/utils/appearance';
+import prisma from '@/client';
 
 interface IQuery {
   companyId?: string;
@@ -15,8 +15,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     if (!companyId) {
       return res.status(400).json({ error: 'Company ID is required' });
     }
-
-    const prisma = new PrismaClient();
 
     const isNameExisted = await prisma.itemType.findFirst({
       where: {

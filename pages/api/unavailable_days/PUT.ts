@@ -1,8 +1,8 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { handleCheckRangeValid } from './POST';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
+import prisma from '@/client';
 // import { convertToPSTDate } from '../utils/date';
 
 interface IBody {
@@ -14,8 +14,6 @@ interface IBody {
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { updatedRangeId, startDate, endDate, userId }: IBody = req.body;
 
     const session: any = await getServerSession(req, res, authOptions);

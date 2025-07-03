@@ -1,8 +1,6 @@
 import { IProductLoss } from '@/app/utils/type';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-
-const prisma = new PrismaClient();
+import prisma from '@/client';
 
 interface IBody {
   id: number;

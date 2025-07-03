@@ -1,10 +1,8 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { id, updatedBoard }: { id: number; updatedBoard: any } = req.body;
 
     const isDriverValid = await checkIsDriverInDate(
@@ -40,7 +38,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 }
 
 export const checkIsDriverInDate = async (date: string, driverId: number) => {
-  const prisma = new PrismaClient();
   const existedDriverInDate = await prisma.codBoard.findMany({
     where: {
       date,

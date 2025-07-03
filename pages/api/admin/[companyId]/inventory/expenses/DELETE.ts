@@ -1,14 +1,12 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { subtractInventoryItem } from '../../orderedItems/single';
+import prisma from '@/client';
 
 export default async function DELETE(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
   try {
-    const prisma = new PrismaClient();
-
     const { id, companyId }: { id?: string; companyId?: string } = req.query;
 
     if (!id || !companyId) {

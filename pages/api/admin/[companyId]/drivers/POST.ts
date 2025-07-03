@@ -1,7 +1,7 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import bcrypt from 'bcryptjs';
 import { generateEmployeeCode } from '@/pages/api/utils/drivers';
+import prisma from '@/client';
 
 interface IBody {
   employeeCode: string;
@@ -13,8 +13,6 @@ interface IBody {
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { employeeCode, driverName, driverPassword, payRate, role }: IBody =
       req.body;
 

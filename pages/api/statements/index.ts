@@ -1,7 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate } from '../utils/date';
 import { generateListOfDateString } from '@/prisma/seed';
-import { PrismaClient } from '@prisma/client';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import withAuthGuard from '../utils/withAuthGuard';
 import { getServerSession } from 'next-auth';
@@ -11,14 +10,13 @@ import {
   calculateTotalPrice,
   sortKeys,
 } from '@/pages/api/admin/[companyId]/sendInvoicePdf';
+import prisma from '@/client';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method !== 'GET') {
       return res.status(404).json({ error: 'Your method is not supported' });
     }
-
-    const prisma = new PrismaClient();
 
     const session: any = await getServerSession(req, res, authOptions);
     const user: any = session?.user;

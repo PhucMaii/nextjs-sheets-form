@@ -1,9 +1,9 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate } from '@/pages/api/utils/date';
 import { YYYYMMDDFormat } from '@/app/utils/time';
-import { PrismaClient } from '@prisma/client';
 import { ACTION, TYPE, USER_ROLE } from '@/app/utils/enum';
 import { recordAction } from '../../utils/timeline';
+import prisma from '@/client';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const authHeader = req.headers.authorization;
@@ -12,7 +12,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     return res.status(401).json({ error: 'Unauthorized' });
   }
   try {
-    const prisma = new PrismaClient();
     const { date, time } = getTodayDate();
 
     // Check if action has taken yet

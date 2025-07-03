@@ -1,10 +1,10 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createOrder } from '../../admin/[companyId]/orders/POST';
 import { checkOrderDeliveryDateValid } from '../../utils/date';
 import { createGuest } from '../create-guest';
 import { sendEmail, sendWelcomeEmail } from '../../utils/email';
 import { ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
+import prisma from '@/client';
 
 interface IBody {
   cartId: number;
@@ -32,8 +32,6 @@ export default async function handler(
         error: 'Your method is not supported',
       });
     }
-
-    const prisma = new PrismaClient();
 
     const { cartId, userId, guestSessionId, deliveryDate, note }: IBody =
       req.body;

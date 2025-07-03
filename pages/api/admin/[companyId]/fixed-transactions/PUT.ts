@@ -1,12 +1,10 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IBody {
   id: number;
   updatedTransaction: any;
 }
-
-const prisma = new PrismaClient();
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {

@@ -1,14 +1,14 @@
 import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
-import { OrderedItems, PaymentStatus, PrismaClient } from '@prisma/client';
+import { OrderedItems, PaymentStatus } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import {
   restockInventoryItem,
-  subtractInventoryItem,
-} from '../../orderedItems/single';
+  subtractInventoryItem} from '../../orderedItems/single';
 import { recordAction } from '@/pages/api/utils/timeline';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
+import prisma from '@/client';
 
 interface IBody {
   id: number;
@@ -18,7 +18,6 @@ interface IBody {
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
-  const prisma = new PrismaClient();
   try {
     const { id, status, paymentStatus, updatedOrderIds } = req.body as IBody;
     console.log({ status, paymentStatus });
@@ -53,36 +52,27 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     if (id) {
       const existingOrder = await prisma.orders.findUnique({
         where: {
-          id,
-        },
-      });
+          id}});
 
       if (!existingOrder) {
         return res.status(404).json({
-          error: 'Order Not Found',
-        });
+          error: 'Order Not Found'});
       }
 
       console.log(updateData, 'updateData');
 
       const updatedOrder = await prisma.orders.update({
         where: {
-          id,
-        },
+          id},
         data: {
           ...updateData,
           updatedBy: `Admin - ${adminCreate.name}`,
-          updateTime,
-        },
+          updateTime},
         include: {
           items: {
             include: {
               fifo: true,
-              inventoryUnit: true,
-            },
-          },
-        },
-      });
+              inventoryUnit: true}}}});
 
       // Record actions
       let title = '';
@@ -105,13 +95,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
       const user = await prisma.user.findUnique({
         where: {
-          id: updatedOrder.userId,
-        },
+          id: updatedOrder.userId},
         include: {
           category: true,
-          subCategory: true,
-        },
-      });
+          subCategory: true}});
 
       // Inventory Item Update
       // From other status to VOID -> Inventory Item get restock
@@ -150,41 +137,30 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
       return res.status(200).json({
         data: { ...user, ...updatedOrder, items: newItems },
-        message: 'Order Status Updated Successfully',
-      });
+        message: 'Order Status Updated Successfully'});
     }
 
     const updatedOrders = await prisma.orders.findMany({
       where: {
         id: {
-          in: updatedOrderIds,
-        },
-      },
+          in: updatedOrderIds}},
       include: {
         items: {
           include: {
             inventoryItem: true,
             fifo: true,
-            inventoryUnit: true,
-          },
-        },
-      },
-    });
+            inventoryUnit: true}}}});
 
     const idsToUpdate = updatedOrders.map((order: any) => order.id);
 
     await prisma.orders.updateMany({
       where: {
         id: {
-          in: idsToUpdate,
-        },
-      },
+          in: idsToUpdate}},
       data: {
         ...updateData,
         updatedBy: `Admin - ${adminCreate.name}`,
-        updateTime,
-      },
-    });
+        updateTime}});
 
     // From other status to VOID -> Inventory Item get restock
     if (status === ORDER_STATUS.VOID) {
@@ -278,12 +254,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     }
 
     return res.status(200).json({
-      message: 'Order Status Updated Successfully',
-    });
+      message: 'Order Status Updated Successfully'});
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({
-      error: 'Internal Server Error: ' + error,
-    });
+      error: 'Internal Server Error: ' + error});
   }
 }

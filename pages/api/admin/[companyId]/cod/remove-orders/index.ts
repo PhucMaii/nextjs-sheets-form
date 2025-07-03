@@ -3,8 +3,8 @@ import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { USER_ROLE } from '@/app/utils/enum';
 import { recordAction } from '@/pages/api/utils/timeline';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IBody {
   orders: Order[];
@@ -17,8 +17,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         error: 'Your method is not supported',
       });
     }
-
-    const prisma = new PrismaClient();
 
     const { orders }: IBody = req.body;
 

@@ -1,9 +1,9 @@
 import { IItem } from '@/app/utils/type';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { checkAndUpdateUnits } from '../inventory/expenses/POST';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
+import prisma from '@/client';
 
 interface IBody {
   newItem: IItem;
@@ -13,8 +13,6 @@ interface IBody {
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { companyId } = req.query;
 
     if (!companyId) {
@@ -167,8 +165,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
 const checkIsItemValid = async (newItem: IItem) => {
   try {
-    const prisma = new PrismaClient();
-
     // * BAD CASE
     // Check is new name valid
     let inventoryItemExists: any = [];

@@ -1,7 +1,7 @@
 import { IItem } from '@/app/utils/type';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IBody {
   removedItemIdList: number[];
@@ -18,8 +18,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         error: 'Your method is not supported',
       });
     }
-
-    const prisma = new PrismaClient();
 
     const {
       removedItemIdList,

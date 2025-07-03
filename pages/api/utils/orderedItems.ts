@@ -1,9 +1,10 @@
-import { Orders, PrismaClient } from '@prisma/client';
+import { Orders } from '@prisma/client';
 import { checkOrderValidToAffectInventory } from './order';
 import { getTodayDate, sortByDeliveryDate } from './date';
 import { getAllUnitsByInventoryItemId } from './units';
 import { checkAndUpdateUnits } from '../admin/[companyId]/inventory/expenses/POST';
 import { recordAction } from './timeline';
+import prisma from '@/client';
 
 export const createOrderedItems = async (
   companyId: number,
@@ -11,30 +12,19 @@ export const createOrderedItems = async (
   items: any,
   createdBy: string = '',
 ) => {
-  const prisma = new PrismaClient();
-
   // STEP 1: Loop through each item
   const inventoryItems = await prisma.inventoryItem.findMany({
     where: {
-      companyId,
-    },
+      companyId},
     include: {
       vendorItem: {
         include: {
-          unit: true,
-        },
-      },
+          unit: true}},
       fifo: {
         include: {
           vendorItem: {
             include: {
-              unit: true,
-            },
-          },
-        },
-      },
-    },
-  });
+              unit: true}}}}}});
 
   // // Check is order valid to affect inventory
   const isValidToCheckInventory = await checkOrderValidToAffectInventory(
@@ -60,8 +50,7 @@ export const createOrderedItems = async (
         profit: item.price - item.cost,
         quantity: item.quantity,
         isCustomAmount: item.isCustomAmount,
-        companyId,
-      });
+        companyId});
       continue;
     }
 
@@ -76,9 +65,7 @@ export const createOrderedItems = async (
     if (item.inventoryUnitId < 1) {
       const dbUnits = await prisma.inventoryUnit.findMany({
         where: {
-          vendorItemId: item.inventoryUnit.vendorItemId,
-        },
-      });
+          vendorItemId: item.inventoryUnit.vendorItemId}});
       const updatedAt = getTodayDate();
       await checkAndUpdateUnits(
         companyId,
@@ -93,9 +80,7 @@ export const createOrderedItems = async (
         where: {
           vendorItemId: item.inventoryUnit.vendorItemId,
           ratio: item.inventoryUnit.ratio,
-          companyId,
-        },
-      });
+          companyId}});
 
       unitId = targetUnit?.id;
     }
@@ -116,24 +101,18 @@ export const createOrderedItems = async (
               : 0,
             createdAt: order.orderTime,
             createdBy: order?.createdBy || '',
-            companyId,
-          },
+            companyId},
           include: {
-            vendorItem: true,
-          },
-        });
+            vendorItem: true}});
 
         comment += `x${item.quantity} ${item.name}\n`;
 
         // Update vendor item quantity
         await prisma.vendorItem.update({
           where: {
-            id: targetedItem.vendorItem[0].id,
-          },
+            id: targetedItem.vendorItem[0].id},
           data: {
-            quantity: -item.quantity * (itemUnit?.ratio || 1),
-          },
-        });
+            quantity: -item.quantity * (itemUnit?.ratio || 1)}});
 
         // const unitRatioOf1 = targetedItem.vendorItem[0].unit.find((unit) => {
         //   return unit.ratio === 1;
@@ -149,8 +128,7 @@ export const createOrderedItems = async (
             price: item?.option?.price || 0,
             ratio: itemUnit?.ratio || 1,
             prevPrice: item?.option?.prevPrice,
-            isShowDiscount: item?.option?.isShowDiscount,
-          },
+            isShowDiscount: item?.option?.isShowDiscount},
           cost: itemUnit?.unitPrice || 0,
           profit: item.price - (itemUnit?.unitPrice || 0),
           name: item.name,
@@ -159,8 +137,7 @@ export const createOrderedItems = async (
           inventoryUnitId: unitId,
           inventoryItemId: item.inventoryItemId,
           isCustomAmount: item?.isCustomAmount || false,
-          companyId,
-        });
+          companyId});
       }
     } else {
       // CASE 2: Check if vendor item has batch
@@ -199,12 +176,9 @@ export const createOrderedItems = async (
         // If users order more than stock has - fifoIndex should reach the second last item
         await prisma.fifo.update({
           where: {
-            id: sortedFifo[fifoIndex].id,
-          },
+            id: sortedFifo[fifoIndex].id},
           data: {
-            quantity: sortedFifo[fifoIndex].quantity - itemQuantity,
-          },
-        });
+            quantity: sortedFifo[fifoIndex].quantity - itemQuantity}});
 
         comment += `x${item.quantity} ${item.name}\n`;
 
@@ -212,9 +186,7 @@ export const createOrderedItems = async (
         // Update Vendor Item Quantity
         const targetVendorItem = await prisma.vendorItem.findFirst({
           where: {
-            id: sortedFifo[fifoIndex].vendorItemId,
-          },
-        });
+            id: sortedFifo[fifoIndex].vendorItemId}});
 
         if (!targetVendorItem) {
           console.error('COnflict vendor item');
@@ -223,24 +195,17 @@ export const createOrderedItems = async (
 
         await prisma.vendorItem.update({
           where: {
-            id: sortedFifo[fifoIndex].vendorItemId,
-          },
+            id: sortedFifo[fifoIndex].vendorItemId},
           data: {
-            quantity: targetVendorItem.quantity - item.quantity * itemRatio,
-          },
-        });
+            quantity: targetVendorItem.quantity - item.quantity * itemRatio}});
 
         // Move all old ordered items to the current fifo
         await prisma.orderedItems.updateMany({
           where: {
             fifoId: {
-              in: deletedFifoIds,
-            },
-          },
+              in: deletedFifoIds}},
           data: {
-            fifoId: sortedFifo[fifoIndex].id,
-          },
-        });
+            fifoId: sortedFifo[fifoIndex].id}});
 
         allDeletedFifoIds.push(...deletedFifoIds);
 
@@ -262,8 +227,7 @@ export const createOrderedItems = async (
             price: item?.option?.price || 0,
             ratio: itemUnit?.ratio || 1,
             prevPrice: item?.option?.prevPrice,
-            isShowDiscount: item?.option?.isShowDiscount,
-          },
+            isShowDiscount: item?.option?.isShowDiscount},
           companyId,
           name: item.name,
           cost: cost,
@@ -274,8 +238,7 @@ export const createOrderedItems = async (
           prevPrice: item?.prevPrice,
           inventoryUnitId: unitId,
           inventoryItemId: item.inventoryItemId,
-          isCustomAmount: item?.isCustomAmount || false,
-        });
+          isCustomAmount: item?.isCustomAmount || false});
       } else {
         const cost = sortedFifo[0]?.price
           ? sortedFifo[0].price * itemUnit?.ratio
@@ -290,8 +253,7 @@ export const createOrderedItems = async (
             price: item?.option?.price || 0,
             ratio: itemUnit?.ratio || 1,
             prevPrice: item?.option?.prevPrice,
-            isShowDiscount: item?.option?.isShowDiscount,
-          },
+            isShowDiscount: item?.option?.isShowDiscount},
           name: item.name,
           cost: cost,
           profit: item.price - cost,
@@ -302,8 +264,7 @@ export const createOrderedItems = async (
           inventoryUnitId: unitId,
           inventoryItemId: item.inventoryItemId,
           isCustomAmount: item?.isCustomAmount || false,
-          companyId,
-        });
+          companyId});
       }
     }
 
@@ -311,10 +272,7 @@ export const createOrderedItems = async (
       await prisma.fifo.deleteMany({
         where: {
           id: {
-            in: allDeletedFifoIds,
-          },
-        },
-      });
+            in: allDeletedFifoIds}}});
     }
   }
 
@@ -334,8 +292,7 @@ export const createOrderedItems = async (
   }
 
   await prisma.orderedItems.createMany({
-    data: newOrderedItems,
-  });
+    data: newOrderedItems});
 
   return newOrderedItems;
 };

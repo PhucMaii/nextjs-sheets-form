@@ -1,9 +1,7 @@
 import { compareTwoArraysWithFields } from '@/app/utils/array';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
-
-const prisma = new PrismaClient();
 
 interface IBody {
   employeeId: number;

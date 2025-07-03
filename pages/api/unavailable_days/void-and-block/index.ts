@@ -1,11 +1,11 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { PrismaClient } from '@prisma/client';
 import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
 import { getTodayDate } from '../../utils/date';
 import { getDriverInfo } from '../../utils/auth';
 import withAuthGuard from '../../utils/withAuthGuard';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
+import prisma from '@/client';
 
 interface IBody {
   orderIds: number[];
@@ -15,8 +15,6 @@ interface IBody {
   role: USER_ROLE;
   companyId: number;
 }
-
-const prisma = new PrismaClient();
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {

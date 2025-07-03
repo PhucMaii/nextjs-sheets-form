@@ -2,8 +2,8 @@ import { USER_ROLE } from '@/app/utils/enum';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { recordAction } from '@/pages/api/utils/timeline';
 import withDriverAuthGuard from '@/pages/api/utils/withDriverAuthGuar';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IQuery {
   orderId?: string;
@@ -14,8 +14,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method !== 'DELETE') {
       return res.status(404).json({ error: 'Your method is not supported' });
     }
-
-    const prisma = new PrismaClient();
 
     const { orderId }: IQuery = req.query;
 

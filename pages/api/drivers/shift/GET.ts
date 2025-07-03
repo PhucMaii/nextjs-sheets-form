@@ -1,8 +1,8 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getDriverInfo } from '../../utils/auth';
 import { generateListOfDateString } from '@/app/utils/time';
 import { normalizeDate } from '../../utils/date';
+import prisma from '@/client';
 
 interface IQuery {
   startDate?: string;
@@ -11,7 +11,6 @@ interface IQuery {
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
     const { startDate, endDate }: IQuery = req.query;
 
     if (!startDate || !endDate) {

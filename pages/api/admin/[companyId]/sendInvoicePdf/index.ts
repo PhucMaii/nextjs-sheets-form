@@ -6,9 +6,9 @@ import { sendInvoiceThroughEmail } from '@/pages/api/utils/email';
 import { groupOrderByMMYYYY } from '../clients/debt';
 import { generateListOfDateString, YYYYMMDDFormat } from '@/app/utils/time';
 import { ORDER_STATUS } from '@/app/utils/enum';
-import { PrismaClient } from '@prisma/client';
 import { normalizeDate } from '@/pages/api/utils/date';
 import { formatItemsWithTotalPrice } from '@/pages/api/utils/order';
+import prisma from '@/client';
 
 interface IBody {
   client: UserType | null;
@@ -24,7 +24,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
-    const prisma = new PrismaClient();
     const { client, orders, endDate }: IBody = req.body;
 
     const { companyId } = req.query;

@@ -1,5 +1,4 @@
 import { IInventoryUnit } from '@/app/utils/type';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate } from '@/pages/api/utils/date';
 import { getServerSession } from 'next-auth';
@@ -9,6 +8,7 @@ import { formatItemsWithTotalPrice } from '@/pages/api/utils/order';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { checkAndUpdateUnits } from '../../../inventory/expenses/POST';
 import { createOrderedItems } from '@/pages/api/utils/orderedItems';
+import prisma from '@/client';
 
 interface IBody {
   id: number;
@@ -26,8 +26,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         error: 'Your method is not supported',
       });
     }
-    const prisma = new PrismaClient();
-
     const {
       id,
       orderId,

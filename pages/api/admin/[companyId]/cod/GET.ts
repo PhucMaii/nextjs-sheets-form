@@ -1,11 +1,12 @@
 import { findCombinations } from '@/app/utils/array';
 import { COD_STATUS, ORDER_STATUS } from '@/app/utils/enum';
-import { OrderedItems, Orders, PaymentStatus, PrismaClient } from '@prisma/client';
+import { OrderedItems, Orders, PaymentStatus } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { generateListOfDateString } from '@/app/utils/time';
 import { IBoard } from '@/app/utils/type';
 import { days } from '@/app/lib/constant';
 import { normalizeDate } from '@/pages/api/utils/date';
+import prisma from '@/client';
 // import { IBoard } from '@/app/utils/type';
 
 interface IQuery {
@@ -18,8 +19,6 @@ interface IQuery {
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { id, date, startDate, endDate, companyId }: IQuery = req.query;
 
     if (id) {
@@ -340,8 +339,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 }
 
 // const checkBoardStatus = async (boards: IBoard[]) => {
-//   const prisma = new PrismaClient();
-//   const boardsStatusMap = boards.reduce((acc: any, board: any) => {
+//   //   const boardsStatusMap = boards.reduce((acc: any, board: any) => {
 //       const { id, status, orders } = board;
 
 //       const uncollectedOrders = orders.filter((order: any) => {

@@ -1,6 +1,6 @@
 import { websiteItemCategory } from '@/app/lib/constant';
 import { IItem } from '@/app/utils/type';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -18,8 +18,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         error: 'Product Id Not Provided',
       });
     }
-
-    const prisma = new PrismaClient();
 
     const product: any = await prisma.item.findUnique({
       where: {
@@ -53,53 +51,25 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-export default handler;
-
 const getRelatedProducts = async (product: IItem) => {
-  try {
-    const prisma = new PrismaClient();
-
-    const sameTypeItem = await prisma.item.findMany({
-      where: {
-        inventoryItem: {
-          typeId: product.inventoryItem.typeId,
-        },
-        categoryId: websiteItemCategory,
-        id: {
-          not: product.id,
-        },
+  const relatedProducts = await prisma.item.findMany({
+    where: {
+      categoryId: websiteItemCategory,
+      inventoryItem: {
+        typeId: product.inventoryItem.typeId,
       },
-      include: {
-        options: {
-          include: {
-            unit: true,
-          },
-        },
-        inventoryItem: true,
+      id: {
+        not: product.id,
       },
-    });
+    },
+    include: {
+      inventoryItem: true,
+      options: true,
+    },
+    take: 10,
+  });
 
-    const almostSameNameProducts: any = await prisma.item.findMany({
-      where: {
-        inventoryItem: {
-          name: {
-            contains: product.inventoryItem.name,
-          },
-        },
-        categoryId: websiteItemCategory,
-        id: {
-          not: product.id,
-        },
-      },
-    });
-
-    const relatedProducts = almostSameNameProducts.filter(
-      (item: IItem) => item.id !== product.id
-    );
-
-    return [...relatedProducts, ...sameTypeItem];
-  } catch (error: any) {
-    console.log('Internal Server Error: ', error);
-    throw new Error('Internal Server Error: ' + error);
-  }
+  return relatedProducts;
 };
+
+export default handler;

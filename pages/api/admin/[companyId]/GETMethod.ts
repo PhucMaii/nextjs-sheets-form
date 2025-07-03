@@ -1,11 +1,9 @@
 import { USER_ROLE } from '@/app/utils/enum';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const admins = await prisma.user.findMany({
       where: {
         role: {

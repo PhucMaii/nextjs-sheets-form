@@ -1,8 +1,8 @@
 import { otherPaymentMethodId } from '@/app/lib/constant';
 import { TRANSACTION_STATUS } from '@/app/utils/enum';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IBody {
   id?: number;
@@ -19,7 +19,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
-    const prisma = new PrismaClient();
     const { id, idsToUpdate, status, newPaymentMethodId }: IBody = req.body;
 
     if (id) {

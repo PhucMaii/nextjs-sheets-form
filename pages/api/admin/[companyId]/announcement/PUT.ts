@@ -1,5 +1,5 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IBody {
   announcementId: number;
@@ -10,8 +10,6 @@ interface IBody {
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { companyId }: any = req.query;
 
     const {

@@ -1,5 +1,5 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface QueryTypes {
   userId?: string;
@@ -10,8 +10,6 @@ export default async function DELETE(
   res: NextApiResponse,
 ) {
   try {
-    const prisma = new PrismaClient();
-
     const { userId } = req.query as QueryTypes;
 
     const existingUser = await prisma.user.findUnique({

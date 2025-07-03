@@ -1,8 +1,8 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import withDriverAuthGuard from '../../utils/withDriverAuthGuar';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]';
+import prisma from '@/client';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -11,8 +11,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         error: 'Your method is not supported',
       });
     }
-
-    const prisma = new PrismaClient();
 
     const session: any = await getServerSession(req, res, authOptions);
 

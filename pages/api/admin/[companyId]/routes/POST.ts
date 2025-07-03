@@ -1,5 +1,5 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface BodyType {
   day: string;
@@ -9,8 +9,6 @@ interface BodyType {
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { day, driverId, name }: BodyType = req.body;
 
     const { companyId } = req.query;

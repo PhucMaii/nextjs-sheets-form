@@ -1,7 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
-import { PrismaClient } from '@prisma/client';
 import { FLAG_ORDER_TYPE, ORDER_STATUS, USER_CATEGORIZED, USER_ROLE } from '@/app/utils/enum';
 import {
   checkOrderDeliveryDateValid,
@@ -14,6 +13,7 @@ import { createOrder } from '@/pages/api/admin/[companyId]/orders/POST';
 import { pusherServer } from '@/app/pusher';
 import { sendEmail } from '../utils/email';
 import { formatItemsWithTotalPrice } from '../utils/order';
+import prisma from '@/client';
 
 interface RequestQuery {
   userId?: string;
@@ -36,7 +36,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 
   try {
-    const prisma = new PrismaClient();
     const { userId } = req.query as RequestQuery;
     const {
       deliveryDate,

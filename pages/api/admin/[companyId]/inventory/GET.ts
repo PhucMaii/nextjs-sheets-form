@@ -2,8 +2,8 @@ import { inventoryOrder } from '@/app/lib/constant';
 import { sortedItemKeys } from '@/app/utils/array';
 import { STOCK_STATUS } from '@/app/utils/enum';
 import { IInventoryItem } from '@/app/utils/type';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IQuery {
   vendorId?: string;
@@ -13,8 +13,6 @@ interface IQuery {
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { vendorId, inventoryItemId, companyId }: IQuery = req.query;
 
     if (vendorId) {

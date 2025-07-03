@@ -2,8 +2,9 @@ import { generateListOfDateString } from '@/app/utils/time';
 import { IProductLoss } from '@/app/utils/type';
 import { formatDate } from '@/pages/api/utils/date';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
-import { LossReport, PrismaClient } from '@prisma/client';
+import { LossReport } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IQuery {
   startDate?: string;
@@ -11,22 +12,18 @@ interface IQuery {
   companyId?: string;
 }
 
-const prisma = new PrismaClient();
-
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const { startDate, endDate, companyId } = req.query as IQuery;
 
     if (!startDate || !endDate) {
       return res.status(400).json({
-        message: 'Start date and end date are required',
-      });
+        message: 'Start date and end date are required'});
     }
 
     if (!companyId) {
       return res.status(400).json({
-        error: 'Company ID is required',
-      });
+        error: 'Company ID is required'});
     }
 
     const formattedStartDate = formatDate(startDate);
@@ -39,16 +36,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const productLosses: any = await prisma.lossReport.findMany({
       where: {
         reportedDate: {
-          in: listOfDates,
-        },
-        companyId: Number(companyId),
-      },
+          in: listOfDates},
+        companyId: Number(companyId)},
       include: {
         medias: true,
         inventoryItem: true,
-        inventoryUnit: true,
-      },
-    });
+        inventoryUnit: true}});
 
     const totalLoss = productLosses.reduce(
       (acc: number, loss: LossReport) => acc + (loss?.totalCost || 0),
@@ -71,8 +64,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             item: loss?.inventoryItem,
             totalLoss: 0,
             lossQuantity: 0,
-            lossType: loss?.lossType,
-          };
+            lossType: loss?.lossType};
         }
 
         acc[itemName].totalLoss += loss?.totalCost || 0;
@@ -106,15 +98,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         lossQuantity,
         totalLossByItem,
         losses: productLosses,
-        mostCommonLossType: mostCommonLossType ? mostCommonLossType[0] : 'N/A',
-      },
-      message: 'Product loss overview retrieved successfully',
-    });
+        mostCommonLossType: mostCommonLossType ? mostCommonLossType[0] : 'N/A'},
+      message: 'Product loss overview retrieved successfully'});
   } catch (error) {
     console.error(error);
     return res.status(500).json({
-      message: 'Internal server error',
-    });
+      message: 'Internal server error'});
   }
 };
 

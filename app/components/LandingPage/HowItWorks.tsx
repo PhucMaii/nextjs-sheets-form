@@ -54,6 +54,7 @@ export default function HowItWorks() {
                       height={200}
                       objectFit="contain" // Ensures the image maintains its aspect ratio
                       style={{ borderRadius: 20 }}
+                      loading="lazy"
                     />
 
                     <Typography

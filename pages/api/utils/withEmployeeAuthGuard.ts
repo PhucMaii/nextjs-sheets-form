@@ -1,8 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
-import { PrismaClient } from '@prisma/client';
-
+import prisma from '@/client';
 type HandlerFunction = (
   req: NextApiRequest,
   res: NextApiResponse,
@@ -12,8 +11,6 @@ const withEmployeeAuthGuard =
   <T extends HandlerFunction>(handler: T) =>
   async (req: NextApiRequest, res: NextApiResponse) => {
     try {
-      const prisma = new PrismaClient();
-
       const session: any = await getServerSession(req, res, authOptions);
 
       if (!session) {

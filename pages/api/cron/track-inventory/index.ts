@@ -1,10 +1,11 @@
-import { Fifo, PrismaClient } from '@prisma/client';
+import { Fifo } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate } from '@/pages/api/utils/date';
 import { ACTION, ORDER_STATUS } from '@/app/utils/enum';
 import { subtractInventoryItem } from '@/pages/api/admin/[companyId]/orderedItems/single';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import { recordAction } from '../../utils/timeline';
+import prisma from '@/client';
 
 interface ItemMap {
   [key: string]: {
@@ -25,8 +26,6 @@ export default async function handler(
     return res.status(401).json({ error: 'Unauthorized' });
   }
   try {
-    const prisma = new PrismaClient();
-
     const date: { date: string; time: string } = getTodayDate();
 
     // 1. Record the left inventory
@@ -46,19 +45,14 @@ export default async function handler(
         where: {
           name: ACTION.RECORD_INVENTORY,
           date: yesterdayString,
-          companyId: company.id,
-        },
-      });
+          companyId: company.id}});
 
       if (!recordInventoryAction) {
         const inventoryItems = await prisma.inventoryItem.findMany({
           where: {
-            companyId: company.id,
-          },
+            companyId: company.id},
           include: {
-            fifo: true,
-          },
-        });
+            fifo: true}});
 
         let actionDescription: string = '';
 
@@ -77,9 +71,7 @@ export default async function handler(
             date: yesterdayString,
             description: actionDescription,
             createdAt: `${date.time} ${date.date}`,
-            companyId: company.id,
-          },
-        });
+            companyId: company.id}});
 
         console.log({ newAction, actionDescription, companyId: company.id });
       }
@@ -90,9 +82,7 @@ export default async function handler(
         where: {
           name: ACTION.TRACK_INVENTORY,
           date: date.date,
-          companyId: company.id,
-        },
-      });
+          companyId: company.id}});
 
       // If yes, return
       if (action && action.name === ACTION.TRACK_INVENTORY) {
@@ -107,8 +97,7 @@ export default async function handler(
       const orderedItems = await prisma.orderedItems.findMany({
         where: {
           quantity: {
-            gt: 0,
-          },
+            gt: 0},
           companyId: company.id,
           orderId: {
             not: null, // Make sure the orderId is not null
@@ -122,14 +111,11 @@ export default async function handler(
             },
             deliveryDate: date.date, // Only the selected date
             isAffectInventory: true, // Make sure the order is able to affect inventory
-          },
-        },
+          }},
         include: {
           inventoryItem: true,
           inventoryUnit: true,
-          fifo: true,
-        },
-      });
+          fifo: true}});
 
       if (orderedItems.length === 0) {
         console.log('No Items Ordered Today In Company: ', company.id);
@@ -139,9 +125,7 @@ export default async function handler(
             date: date.date,
             description: 'No Items Ordered Today',
             createdAt: `${date.time} ${date.date}`,
-            companyId: company.id,
-          },
-        });
+            companyId: company.id}});
         continue;
       }
 
@@ -161,8 +145,7 @@ export default async function handler(
             quantity: quantityWithRatio1,
             inventoryItem: item.inventoryItem,
             fifo: item.fifo,
-            inventoryUnit: itemUnit,
-          };
+            inventoryUnit: itemUnit};
         } else {
           acc[item.inventoryItemId].quantity += quantityWithRatio1;
         }
@@ -181,9 +164,7 @@ export default async function handler(
           date: date.date,
           description: 'Track Inventory In Progress',
           createdAt: `${date.time} ${date.date}`,
-          companyId: company.id,
-        },
-      });
+          companyId: company.id}});
       let actionDescription: string = '';
       // Loop through that item set, update inventory item quantity
       for (const inventoryItem of Object.values(itemMap)) {
@@ -201,12 +182,9 @@ export default async function handler(
       // Flag the action as taken
       await prisma.action.update({
         where: {
-          id: newAction.id,
-        },
+          id: newAction.id},
         data: {
-          description: actionDescription,
-        },
-      });
+          description: actionDescription}});
     }
 
     return res.status(200).json({ message: 'Track Inventory Successfully' });

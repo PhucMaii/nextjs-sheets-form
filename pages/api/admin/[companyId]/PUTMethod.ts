@@ -1,6 +1,6 @@
 import { USER_ROLE } from '@/app/utils/enum';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 export type UpdateAdmin = {
   clientName: string;
@@ -16,8 +16,6 @@ interface IBody {
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { id, updatedAdmin }: IBody = req.body;
 
     const existingAdmin: any = await prisma.user.findUnique({

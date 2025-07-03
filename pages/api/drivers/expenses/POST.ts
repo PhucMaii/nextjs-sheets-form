@@ -1,8 +1,8 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getDriverInfo } from '../../utils/auth';
 import { mainPaymentMethodId } from '@/app/lib/constant';
 import { TRANSACTION_STATUS } from '@/app/utils/enum';
+import prisma from '@/client';
 
 interface IBody {
   amount: number;
@@ -18,8 +18,6 @@ interface IBody {
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const {
       amount,
       PST,

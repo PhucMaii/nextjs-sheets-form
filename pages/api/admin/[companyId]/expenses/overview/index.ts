@@ -4,6 +4,7 @@ import { normalizeDate } from "@/pages/api/utils/date";
 import { errorResponse, successResponse } from "@/pages/api/utils/response";
 import withAdminAuthGuard from "@/pages/api/utils/withAdminAuthGuard";
 import { NextApiRequest, NextApiResponse } from "next";
+import prisma from '@/client';
 
 interface IQuery {
     companyId: string;

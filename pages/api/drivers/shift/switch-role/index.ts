@@ -3,14 +3,12 @@ import { SHIFT_STATUS, WORKING_ROLE } from '@/app/utils/enum';
 import { getDriverInfo } from '@/pages/api/utils/auth';
 import {
   convertDeliveryDateStringToDate,
-  getTodayDate,
-} from '@/pages/api/utils/date';
-import { PayrollType, PrismaClient, Route } from '@prisma/client';
+  getTodayDate} from '@/pages/api/utils/date';
+import { PayrollType, Route } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { calculateHours } from '../clock-out';
 import withDriverAuthGuard from '@/pages/api/utils/withDriverAuthGuar';
-
-const prisma = new PrismaClient();
+import prisma from '@/client';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -30,9 +28,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       where: {
         // driverId: driver.id,
         employeeId: driver.id,
-        date: today.date,
-      },
-    });
+        date: today.date}});
 
     if (role === currentShift?.role) {
       return res.status(400).json({ error: 'You are already clocked in' });
@@ -58,13 +54,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           routeId: targetRoute?.id || null,
           status: SHIFT_STATUS.UNPAID,
           role,
-          companyId: driver.companyId,
-        },
-      });
+          companyId: driver.companyId}});
       return res.status(200).json({
         data: shiftSession,
-        message: 'Clock In With New Role Successfully',
-      });
+        message: 'Clock In With New Role Successfully'});
     }
 
     // If user has clocked in -> switch role
@@ -77,15 +70,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         
     const updatedShiftSession = await prisma.shiftSession.update({
       where: {
-        id: currentShift.id,
-      },
+        id: currentShift.id},
       data: {
         endedAt: today.dateAndTime,
         hours: hours * 1, // to get the float type
         cost: cost,
-        isActive: false,
-      },
-    });
+        isActive: false}});
 
     // Create new shift with new role
     if (role === WORKING_ROLE.DRIVER) {
@@ -103,9 +93,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           routeId: targetRoute?.id || null,
           status: SHIFT_STATUS.UNPAID,
           role,
-          companyId: driver.companyId,
-        },
-      });
+          companyId: driver.companyId}});
     } else {
       await prisma.shiftSession.create({
         data: {
@@ -116,15 +104,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           isActive: true,
           status: SHIFT_STATUS.UNPAID,
           role,
-          companyId: driver.companyId,
-        },
-      });
+          companyId: driver.companyId}});
     }
 
     return res.status(200).json({
       data: updatedShiftSession,
-      message: 'Switch Role Successfully',
-    });
+      message: 'Switch Role Successfully'});
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({ error: 'Internal Server Error: ' + error });

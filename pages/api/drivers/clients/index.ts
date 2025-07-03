@@ -1,8 +1,8 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import withDriverAuthGuard from '../../utils/withDriverAuthGuar';
 import { authOptions } from '../../auth/[...nextauth]';
 import { getServerSession } from 'next-auth';
+import prisma from '@/client';
 
 interface QueryTypes {
   dayRoute?: string;
@@ -15,8 +15,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
   }
   try {
-    const prisma = new PrismaClient();
-
     const { dayRoute }: QueryTypes = req.query;
 
     const session: any = await getServerSession(req, res, authOptions);

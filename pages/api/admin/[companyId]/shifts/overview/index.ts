@@ -2,10 +2,8 @@ import { SHIFT_STATUS } from '@/app/utils/enum';
 import { generateListOfDateString } from '@/app/utils/time';
 import { formatDate } from '@/pages/api/utils/date';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-
-const prisma = new PrismaClient();
+import prisma from '@/client';
 
 interface IQuery {
   startDate?: string;

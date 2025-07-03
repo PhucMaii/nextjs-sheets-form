@@ -1,6 +1,6 @@
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IBody {
   id: number;
@@ -13,8 +13,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method !== 'PUT') {
       return res.status(404).json({ error: 'Your method is not supported' });
     }
-
-    const prisma = new PrismaClient();
 
     const { id, visibility, isWebsite }: IBody = req.body;
 

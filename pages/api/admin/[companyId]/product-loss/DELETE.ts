@@ -1,12 +1,10 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { manuallyRestockInventoryItemQty } from '@/pages/api/utils/inventoryItem';
+import prisma from '@/client';
 
 interface IQuery {
   id?: string;
 }
-
-const prisma = new PrismaClient();
 
 export default async function DELETE(
   req: NextApiRequest,

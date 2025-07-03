@@ -1,10 +1,8 @@
 import { USER_ROLE } from "@/app/utils/enum";
 import { getCreatedBy } from "@/pages/api/import-sheets/utils";
 import { getTodayDate } from "@/pages/api/utils/date";
-import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
-
-const prisma = new PrismaClient();
+import prisma from '@/client';
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     try {
@@ -30,15 +28,12 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
                     cost: updatedShift?.cost || updatedShift.hours * (updatedShift?.employee?.payRate || 0),
                     startedAt: updatedShift.startedAt,
                     endedAt: updatedShift.endedAt,
-                    role: updatedShift.role,
-                },
+                    role: updatedShift.role},
                 include: {
                     employee: {
                         include: {
-                            company: true,
-                        }
-                    },
-                }
+                            company: true}
+                    }}
             });
 
             return res.status(200).json({ message: 'Shift created successfully', data: newShift });
@@ -47,8 +42,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         const shift = await prisma.scheduledShift.findUnique({
             where: { id: updatedShift.id },
             include: {
-                employee: true,
-            }
+                employee: true}
         });
 
         if (!shift) {
@@ -67,13 +61,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
                 date: updatedShift.date,
                 queryDate: updatedShift.queryDate,
                 hours: updatedShift.hours,
-                cost: cost,
-            },
+                cost: cost},
             include: {
                 employee: {
                     include: {
-                        company: true,
-                    }
+                        company: true}
                 }
             }
         })

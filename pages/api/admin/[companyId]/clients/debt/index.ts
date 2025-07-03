@@ -1,7 +1,8 @@
 import { ORDER_STATUS } from '@/app/utils/enum';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
-import { Orders, PrismaClient } from '@prisma/client';
+import { Orders } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IQuery {
   userId?: string;
@@ -17,8 +18,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         error: 'Your method is not supported',
       });
     }
-    const prisma = new PrismaClient();
-
     const { userId, endMonth, endYear, companyId }: IQuery = req.query;
 
     if (!userId || !endMonth || !endYear || !companyId) {

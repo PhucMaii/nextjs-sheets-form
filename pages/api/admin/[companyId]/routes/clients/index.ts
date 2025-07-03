@@ -1,5 +1,6 @@
-import { PrismaClient, UserRoute } from '@prisma/client';
+import { UserRoute } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IQuery {
   day?: string;
@@ -13,49 +14,35 @@ export default async function handler(
   try {
     if (req.method !== 'GET') {
       return res.status(404).json({
-        error: 'Your method is not supported',
-      });
+        error: 'Your method is not supported'});
     }
-
-    const prisma = new PrismaClient();
 
     const { day, companyId }: IQuery = req.query;
 
     if (!day || !companyId) {
       return res.status(404).json({
-        error: 'Day and Company ID is not provided',
-      });
+        error: 'Day and Company ID is not provided'});
     }
 
     const routeList = await prisma.route.findMany({
       where: {
         day,
-        companyId: Number(companyId),
-      },
+        companyId: Number(companyId)},
       include: {
-        clients: true,
-      },
-    });
+        clients: true}});
 
     const scheduleOrders = await prisma.scheduleOrders.findMany({
       where: {
         day,
-        companyId: Number(companyId),
-      },
+        companyId: Number(companyId)},
       include: {
         user: {
           include: {
-            routes: true,
-          },
-        },
-        positionIndex: true,
-      },
+            routes: true}},
+        positionIndex: true},
       orderBy: {
         positionIndex: {
-          index: 'asc',
-        },
-      },
-    });
+          index: 'asc'}}});
 
     const unsortedRouteListWithUserId = routeList.reduce(
       (acc: any, route: any) => {
@@ -109,12 +96,10 @@ export default async function handler(
 
     return res.status(200).json({
       data: sortedUserIds,
-      message: 'Fetch Clients Based On Routes Successfully',
-    });
+      message: 'Fetch Clients Based On Routes Successfully'});
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({
-      error: 'Internal Server Error: ' + error,
-    });
+      error: 'Internal Server Error: ' + error});
   }
 }

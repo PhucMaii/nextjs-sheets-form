@@ -1,15 +1,13 @@
 import { generateListOfDateString } from '@/app/utils/time';
 import { formatDate } from '@/pages/api/utils/date';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IQuery {
   companyId?: string;
   startDate?: string;
   endDate?: string;
 }
-
-const prisma = new PrismaClient();
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {

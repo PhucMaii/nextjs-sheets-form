@@ -1,7 +1,7 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate } from '@/pages/api/utils/date';
 import { PROMOTION_STATUS } from '@/app/utils/enum';
+import prisma from '@/client';
 
 interface IBody {
   title: string;
@@ -15,8 +15,6 @@ interface IQuery {
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { title, status, itemIds }: IBody = req.body;
 
     const { companyId } = req.query as IQuery;

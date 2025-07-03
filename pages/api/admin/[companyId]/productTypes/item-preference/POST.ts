@@ -1,7 +1,7 @@
 import { getUserInfo } from '@/pages/api/utils/auth';
 import { getTodayDate } from '@/pages/api/utils/date';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IBody {
   inventoryItemId: number;
@@ -18,8 +18,6 @@ interface IBody {
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const {
       inventoryItemId,
       image,

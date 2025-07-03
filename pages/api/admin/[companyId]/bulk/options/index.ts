@@ -1,16 +1,14 @@
 import { getTodayDate } from '@/pages/api/utils/date';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
+import prisma from '@/client';
 
 interface IProps {
   inventoryItemId: number;
   categoryIds: number[];
   updatedOptions: any;
 }
-
-const prisma = new PrismaClient();
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {

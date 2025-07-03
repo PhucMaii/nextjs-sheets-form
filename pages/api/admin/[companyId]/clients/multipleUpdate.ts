@@ -1,7 +1,7 @@
 import { ORDER_TYPE, PAYMENT_TYPE } from '@/app/utils/enum';
 import { UserType } from '@/app/utils/type';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface BodyType {
   clientList: UserType[];
@@ -14,8 +14,6 @@ export default async function MultipleUpdate(
   res: NextApiResponse,
 ) {
   try {
-    const prisma = new PrismaClient();
-
     const { clientList, orderType, paymentType } = req.body as BodyType;
 
     const updatePrefFields: any = {};

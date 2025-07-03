@@ -1,9 +1,7 @@
 import { PROMOTION_STATUS } from '@/app/utils/enum';
 import { getTodayDate } from '@/pages/api/utils/date';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-
-const prisma = new PrismaClient();
+import prisma from '@/client';
 
 interface IBody {
   title: string;

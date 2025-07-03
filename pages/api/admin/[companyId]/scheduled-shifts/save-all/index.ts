@@ -3,11 +3,9 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { ITEM_CATEGORIZED } from '../../orderedItems/PUT';
 import { formatDate, getTodayDate } from '@/pages/api/utils/date';
 import { generateListOfDateString } from '@/app/utils/time';
-import { PrismaClient } from '@prisma/client';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { USER_ROLE } from '@/app/utils/enum';
-
-const prisma = new PrismaClient();
+import prisma from '@/client';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {

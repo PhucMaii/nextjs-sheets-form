@@ -1,8 +1,8 @@
 // import { websiteItemCategoryId } from '@/app/lib/constant';
 import { websiteItemCategoryId } from '@/app/lib/constant';
 import { calculateQtyLeft } from '@/pages/api/utils/items';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IQuery {
   inventoryItemId?: string;
@@ -11,8 +11,6 @@ interface IQuery {
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { inventoryItemId, categoryId } = req.query as IQuery;
     const { companyId } = req.query;
 

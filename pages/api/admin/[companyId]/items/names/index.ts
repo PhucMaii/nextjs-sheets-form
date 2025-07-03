@@ -1,6 +1,6 @@
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -11,8 +11,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     const { companyId } = req.query;
-
-    const prisma = new PrismaClient();
 
     const items = await prisma.item.findMany({
       distinct: ['name'],

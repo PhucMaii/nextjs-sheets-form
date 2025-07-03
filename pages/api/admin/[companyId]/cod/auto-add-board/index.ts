@@ -8,13 +8,13 @@ import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import {
   generate7DaysBefore,
   getTodayDate,
-  normalizeDate,
-} from '@/pages/api/utils/date';
+  normalizeDate} from '@/pages/api/utils/date';
 import { recordAction } from '@/pages/api/utils/timeline';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
-import { PrismaClient, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
+import prisma from '@/client';
 
 interface IBody {
   todayString: string;
@@ -26,13 +26,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(404).json({ error: 'Your method is not supported' });
     }
 
-    const prisma = new PrismaClient();
     const { companyId } = req.query;
 
     if (!companyId) {
       return res.status(400).json({
-        error: 'Company ID is required',
-      });
+        error: 'Company ID is required'});
     }
 
     const { todayString }: IBody = req.body;
@@ -42,8 +40,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     if (!user) {
       return res.status(401).json({
-        error: 'You are not authenticated',
-      });
+        error: 'You are not authenticated'});
     }
 
     const { date, time } = getTodayDate();
@@ -51,13 +48,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const boards: any = await prisma.codBoard.findMany({
       where: {
         date: todayString,
-        companyId: Number(companyId),
-      },
+        companyId: Number(companyId)},
       include: {
         orders: true,
-        employee: true,
-      },
-    });
+        employee: true}});
 
     const wcodDay: any = getWCODDay(todayString);
     const last7Days = generate7DaysBefore(todayString);
@@ -66,21 +60,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const newWCODBoardOrders = await prisma.orders.findMany({
       where: {
         deliveryDate: {
-          in: [...last7Days, todayString],
-        },
+          in: [...last7Days, todayString]},
         companyId: Number(companyId),
         status: {
-          not: ORDER_STATUS.VOID,
-        },
+          not: ORDER_STATUS.VOID},
         codBoardId: null,
         user: {
           preference: {
             paymentType: {
-              in: [wcodDay],
-            },
-          },
-        },
-      },
+              in: [wcodDay]}}}},
       include: {
         items: true,
         user: {
@@ -89,30 +77,19 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             category: true,
             routes: {
               include: {
-                route: true,
-              },
-            },
-          },
-        },
-      },
-    });
+                route: true}}}}}});
 
     const newCODBoardOrders: any = await prisma.orders.findMany({
       where: {
         deliveryDate: todayString,
         status: {
-          not: ORDER_STATUS.VOID,
-        },
+          not: ORDER_STATUS.VOID},
         companyId: Number(companyId),
         codBoardId: null,
         user: {
           preference: {
             paymentType: {
-              in: [PAYMENT_TYPE.COD],
-            },
-          },
-        },
-      },
+              in: [PAYMENT_TYPE.COD]}}}},
       include: {
         items: true,
         user: {
@@ -121,13 +98,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             category: true,
             routes: {
               include: {
-                route: true,
-              },
-            },
-          },
-        },
-      },
-    });
+                route: true}}}}}});
 
     const newBoardOrders = [...newWCODBoardOrders, ...newCODBoardOrders];
     console.log(newCODBoardOrders, 'newCODBoardOrders');
@@ -135,8 +106,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     if (boards.length > 0 && newBoardOrders.length === 0) {
       return res.status(200).json({
-        message: 'Boards are added already',
-      });
+        message: 'Boards are added already'});
     }
 
     const normalizedDate = normalizeDate(new Date(todayString));
@@ -146,14 +116,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const routeOnDate: any = await prisma.route.findMany({
       where: {
         day,
-        companyId: Number(companyId),
-      },
+        companyId: Number(companyId)},
       include: {
         employee: true,
         // driver: true,
-        clients: true,
-      },
-    });
+        clients: true}});
 
     // If there are new orders that have not been added
     if (boards.length > 0 && newBoardOrders.length > 0) {
@@ -166,8 +133,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         user,
       );
       return res.status(200).json({
-        message: 'New orders are added already',
-      });
+        message: 'New orders are added already'});
     }
 
     // Add Boards
@@ -182,39 +148,29 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         status: COD_STATUS.IN_PROCESS,
         createdAt: `${date} ${time}`,
         createdBy: `Admin - ${user.name}`,
-        companyId: Number(companyId),
-      };
+        companyId: Number(companyId)};
     });
 
     await prisma.codBoard.createMany({
-      data: formattedBoards,
-    });
+      data: formattedBoards});
 
     const newBoards: any = await prisma.codBoard.findMany({
       where: {
         date: todayString,
-        companyId: Number(companyId),
-      },
+        companyId: Number(companyId)},
       include: {
-        employee: true,
-      },
-    });
+        employee: true}});
 
     const dateOrders: any = await prisma.orders.findMany({
       where: {
         deliveryDate: todayString,
         status: {
-          not: ORDER_STATUS.VOID,
-        },
+          not: ORDER_STATUS.VOID},
         companyId: Number(companyId),
         user: {
           preference: {
             paymentType: {
-              in: [PAYMENT_TYPE.COD, wcodDay],
-            },
-          },
-        },
-      },
+              in: [PAYMENT_TYPE.COD, wcodDay]}}}},
       include: {
         items: true,
         user: {
@@ -223,13 +179,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             category: true,
             routes: {
               include: {
-                route: true,
-              },
-            },
-          },
-        },
-      },
-    });
+                route: true}}}}}});
 
     // const hasRouteOrders = dateOrders.filter((order: any) => {
     //   return order.user.routes.find((route: any) => route.day === day);
@@ -275,13 +225,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // });
 
     return res.status(200).json({
-      message: 'Boards Added Successfully',
-    });
+      message: 'Boards Added Successfully'});
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({
-      error: 'Internal Server Error: ' + error,
-    });
+      error: 'Internal Server Error: ' + error});
   }
 };
 
@@ -295,8 +243,6 @@ export const insertOrdersToSelectedBoards = async (
   date: string,
   user: User | any,
 ) => {
-  const prisma = new PrismaClient();
-
   const today = normalizeDate(new Date(date));
 
   const pacificTime = getTodayDate();
@@ -332,9 +278,7 @@ export const insertOrdersToSelectedBoards = async (
         date,
         // driverId: -1,
         employeeId: -1,
-        companyId,
-      },
-    });
+        companyId}});
 
     if (!noRouteBoard) {
       const { date, time } = getTodayDate();
@@ -348,23 +292,17 @@ export const insertOrdersToSelectedBoards = async (
           status: COD_STATUS.IN_PROCESS,
           createdAt: `${date} ${time}`,
           createdBy: `Admin - ${user.clientName}`,
-          companyId,
-        },
-      });
+          companyId}});
     }
 
     await prisma.orders.updateMany({
       where: {
         id: {
-          in: noRouteOrderIds,
-        },
-      },
+          in: noRouteOrderIds}},
       data: {
         codBoardId: noRouteBoard.id,
         insertedAt: pacificTime.dateAndTime,
-        insertedBy: user.clientName,
-      },
-    });
+        insertedBy: user.clientName}});
 
     // loop through noRouteOrderIds and record action
     for (const orderId of noRouteOrderIds) {
@@ -404,24 +342,16 @@ export const insertOrdersToSelectedBoards = async (
       const wcodOrders = await prisma.orders.findMany({
         where: {
           userId: {
-            in: clientIds,
-          },
+            in: clientIds},
           deliveryDate: {
-            in: [...dayList, date],
-          },
+            in: [...dayList, date]},
           companyId,
           status: {
-            not: ORDER_STATUS.VOID,
-          },
-        },
+            not: ORDER_STATUS.VOID}},
         include: {
           user: {
             include: {
-              preference: true,
-            },
-          },
-        },
-      });
+              preference: true}}}});
 
       if (wcodOrders.length > 0) {
         orderIds.push(...wcodOrders.map((order: any) => order.id));
@@ -431,15 +361,11 @@ export const insertOrdersToSelectedBoards = async (
     await prisma.orders.updateMany({
       where: {
         id: {
-          in: orderIds,
-        },
-      },
+          in: orderIds}},
       data: {
         codBoardId: board.id,
         insertedAt: pacificTime.dateAndTime,
-        insertedBy: user.clientName,
-      },
-    });
+        insertedBy: user.clientName}});
 
     // loop through orderIds and record action
     for (const orderId of orderIds) {

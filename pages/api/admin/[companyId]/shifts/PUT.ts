@@ -1,9 +1,8 @@
-import { PayrollType, PrismaClient } from '@prisma/client';
+import { PayrollType } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { calculateHours } from '@/pages/api/drivers/shift/clock-out';
 import { WORKING_ROLE } from '@/app/utils/enum';
-
-const prisma = new PrismaClient();
+import prisma from '@/client';
 
 interface IBody {
   id: number;
@@ -26,9 +25,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       include: {
         route: true,
         // driver: true,
-        employee: true,
-      },
-    });
+        employee: true}});
 
     if (!existingShift) {
       return res.status(404).json({ error: 'Shift not found' });
@@ -78,9 +75,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       const driver = await prisma.employee.findUnique({
         where: { id: updatedFields.driverId || existingShift.driverId },
         include: {
-          routes: true,
-        },
-      });
+          routes: true}});
 
       if (!driver) {
         return res.status(404).json({ error: 'Conflict Driver not found' });
@@ -96,13 +91,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     const updatedShift = await prisma.shiftSession.update({
       where: { id },
-      data: { ...updatedFields, isActive: false },
-    });
+      data: { ...updatedFields, isActive: false }});
 
     return res.status(200).json({
       message: 'Update Shift Successfully',
-      data: updatedShift,
-    });
+      data: updatedShift});
   } catch (error: any) {
     console.log('Error in PUT /api/admin/shifts:', error);
     return res.status(500).json({ error: 'Internal Server Error: ' + error });

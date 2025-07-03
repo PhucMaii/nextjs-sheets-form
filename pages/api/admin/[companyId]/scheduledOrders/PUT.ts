@@ -1,8 +1,8 @@
 import { UserType } from '@/app/utils/type';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { categorizeUpdatedItems, ITEM_CATEGORIZED } from '../orderedItems/PUT';
 import { getRouteScheduledOrders, refactorRouteArrangement } from './POST';
+import prisma from '@/client';
 
 interface BodyTypes {
   user: UserType;
@@ -14,8 +14,6 @@ interface BodyTypes {
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { companyId } = req.query;
 
     if (!companyId) {

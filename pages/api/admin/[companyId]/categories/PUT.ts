@@ -1,5 +1,6 @@
-import { Category, PrismaClient } from '@prisma/client';
+import { Category } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IBody {
   updatedCategory: Category;
@@ -7,8 +8,6 @@ interface IBody {
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { updatedCategory }: IBody = req.body;
 
     const existingCategory = await prisma.category.findUnique({

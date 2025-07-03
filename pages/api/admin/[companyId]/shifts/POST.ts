@@ -1,9 +1,8 @@
-import { PayrollType, PrismaClient } from '@prisma/client';
+import { PayrollType } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { SHIFT_STATUS, USER_ROLE, WORKING_ROLE } from '@/app/utils/enum';
 import { calculateHours } from '@/pages/api/drivers/shift/clock-out';
-
-const prisma = new PrismaClient();
+import prisma from '@/client';
 
 interface IBody {
   driverId: number;
@@ -28,9 +27,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const existingDriver = await prisma.employee.findUnique({
       where: {
         id: driverId,
-        role: USER_ROLE.DRIVER,
-      },
-    });
+        role: USER_ROLE.DRIVER}});
 
     if (!existingDriver) {
       return res.status(404).json({ error: 'Driver not found' });
@@ -44,8 +41,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     console.log({
       startedAt,
       endedAt,
-      hours,
-    });
+      hours});
 
     const cost =
       existingDriver.payrollType === PayrollType.hourly
@@ -63,9 +59,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         cost: cost,
         status: SHIFT_STATUS.UNPAID,
         role,
-        companyId: Number(companyId),
-      },
-    });
+        companyId: Number(companyId)}});
 
     return res
       .status(200)

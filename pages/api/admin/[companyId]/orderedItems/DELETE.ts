@@ -1,7 +1,7 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { restockInventoryItem } from './single';
 import { generateOrderTotalPrice } from './PUT';
+import prisma from '@/client';
 
 interface IQuery {
   id?: string;
@@ -12,8 +12,6 @@ export default async function DELETE(
   res: NextApiResponse,
 ) {
   try {
-    const prisma = new PrismaClient();
-
     const { id }: IQuery = req.query;
 
     if (!id) {

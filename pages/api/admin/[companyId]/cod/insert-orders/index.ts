@@ -3,8 +3,8 @@ import { USER_ROLE } from '@/app/utils/enum';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { recordAction } from '@/pages/api/utils/timeline';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IBody {
   orders: Order[];
@@ -19,8 +19,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 
   try {
-    const prisma = new PrismaClient();
-
     const { orders, boardId }: IBody = req.body;
 
     const orderIdList = orders.map((order: Order) => order.id);

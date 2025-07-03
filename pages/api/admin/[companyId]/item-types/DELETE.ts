@@ -1,5 +1,5 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 export default async function DELETE(
   req: NextApiRequest,
@@ -13,8 +13,6 @@ export default async function DELETE(
         error: 'Item Type Id Not Provided',
       });
     }
-
-    const prisma = new PrismaClient();
 
     const existingItemType = await prisma.itemType.findUnique({
       where: {

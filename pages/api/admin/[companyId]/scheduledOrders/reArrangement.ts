@@ -1,6 +1,6 @@
 // import { ScheduledOrder } from '@/app/utils/type';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface BodyTypes {
   removedPositionIndexIdList: number[];
@@ -12,8 +12,6 @@ export default async function reArrangement(
   res: NextApiResponse,
 ) {
   try {
-    const prisma = new PrismaClient();
-
     const { removedPositionIndexIdList, newPositionIndexList }: BodyTypes =
       req.body;
 

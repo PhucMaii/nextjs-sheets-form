@@ -1,8 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { PrismaClient } from '@prisma/client';
 import { FIXED_TRANSACTION_STATUS } from '@/app/utils/enum';
-
-const prisma = new PrismaClient();
+import prisma from '@/client';
 
 interface IQuery {
   id?: string;

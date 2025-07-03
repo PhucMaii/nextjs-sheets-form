@@ -3,8 +3,8 @@ import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { USER_ROLE } from '@/app/utils/enum';
 import { recordAction } from '@/pages/api/utils/timeline';
 import withDriverAuthGuard from '@/pages/api/utils/withDriverAuthGuar';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IBody {
   orders: Order[];
@@ -13,8 +13,6 @@ interface IBody {
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const prisma = new PrismaClient();
-
     const { orders, boardId }: IBody = req.body;
 
     const existingBoard = await prisma.codBoard.findUnique({

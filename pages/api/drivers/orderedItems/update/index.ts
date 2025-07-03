@@ -15,8 +15,8 @@ import { formatItemsWithTotalPrice } from '@/pages/api/utils/order';
 import { createOrderedItems } from '@/pages/api/utils/orderedItems';
 import { recordAction } from '@/pages/api/utils/timeline';
 import withDriverAuthGuard from '@/pages/api/utils/withDriverAuthGuar';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IBody {
   orderId: number;
@@ -28,7 +28,6 @@ interface IBody {
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const prisma = new PrismaClient();
     const updatedData = req.body as any;
     const {
       orderId,

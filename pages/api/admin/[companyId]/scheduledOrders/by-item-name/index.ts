@@ -1,6 +1,6 @@
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IQuery {
   itemName?: string;
@@ -12,8 +12,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method !== 'GET') {
       return res.status(404).json({ error: 'Your method is not supported' });
     }
-
-    const prisma = new PrismaClient();
 
     const { itemName, selectedCategoryIds }: IQuery = req.query;
 

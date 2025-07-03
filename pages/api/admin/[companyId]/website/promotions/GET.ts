@@ -1,18 +1,13 @@
-import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
-
-const prisma = new PrismaClient();
+import prisma from '@/client';
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const promotions = await prisma.promotion.findMany({
       where: {
-        isWebsite: true,
-      },
+        isWebsite: true},
       include: {
-        websiteItems: true,
-      },
-    });
+        websiteItems: true}});
 
     return res.status(200).json({ data: promotions, message: 'Promotions fetched successfully' });
   } catch (error) {

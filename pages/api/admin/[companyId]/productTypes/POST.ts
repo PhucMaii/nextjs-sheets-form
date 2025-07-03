@@ -1,7 +1,7 @@
 import { generateCurrentTime } from '@/app/utils/time';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getUserInfo } from '../../../utils/auth';
+import prisma from '@/client';
 
 interface IBody {
   name: string;
@@ -10,8 +10,6 @@ interface IBody {
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { companyId }: any = req.query;
 
     const { name, icon }: IBody = req.body;

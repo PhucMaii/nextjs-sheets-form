@@ -4,9 +4,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { getTodayDate } from '@/pages/api/utils/date';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createFifo, createOrderedItems } from '../../inventory/expenses/POST';
+import prisma from '@/client';
 
 interface IBody {
   poId: number;
@@ -24,8 +24,6 @@ interface IBody {
     discount?: number;
   };
 }
-
-const prisma = new PrismaClient();
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {

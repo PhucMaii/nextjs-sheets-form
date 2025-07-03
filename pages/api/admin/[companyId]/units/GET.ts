@@ -1,6 +1,6 @@
 import { getUniqueUnitRatios } from '@/app/utils/array';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IQuery {
   vendorItemId?: string;
@@ -9,8 +9,6 @@ interface IQuery {
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { vendorItemId, inventoryItemId } = req.query as IQuery;
 
     if (vendorItemId) {

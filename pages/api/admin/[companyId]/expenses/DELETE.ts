@@ -1,6 +1,6 @@
 import { SHIFT_STATUS } from '@/app/utils/enum';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IQuery {
   id?: string;
@@ -11,8 +11,6 @@ export default async function DELETE(
   res: NextApiResponse,
 ) {
   try {
-    const prisma = new PrismaClient();
-
     const { id }: IQuery = req.query;
 
     if (!id) {

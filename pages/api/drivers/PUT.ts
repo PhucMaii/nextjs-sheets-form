@@ -1,8 +1,8 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import bcrypt from 'bcryptjs';
+import prisma from '@/client';
 
 interface BodyTypes {
   oldPassword?: string;
@@ -11,7 +11,6 @@ interface BodyTypes {
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
     const { oldPassword, newPassword }: BodyTypes = req.body;
 
     const session: any = await getServerSession(req, res, authOptions);

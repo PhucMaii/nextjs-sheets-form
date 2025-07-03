@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ORDER_TYPE, PAYMENT_TYPE, USER_CATEGORIZED } from '@/app/utils/enum';
 import { IItem } from '@/app/utils/type';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import bcrypt from 'bcryptjs';
 import { generateLatLng } from './POST';
 import { categorizeUpdatedItems, ITEM_CATEGORIZED } from '../orderedItems/PUT';
+import prisma from '@/client';
 
 interface BodyTypes {
   userId: number;
@@ -23,7 +23,6 @@ interface BodyTypes {
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
     const {
       userId,
       clientId,

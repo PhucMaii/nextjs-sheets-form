@@ -1,7 +1,5 @@
-import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
-
-const prisma = new PrismaClient();
+import prisma from '@/client';
 
 interface IBody {
     orderIds: number[];
@@ -25,37 +23,25 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         await prisma.orders.updateMany({
             where: {
                 id: {
-                    in: orderIds,
-                },
-            },
+                    in: orderIds}},
             data: {
-                companyId: Number(companyId),
-            },
-        });
+                companyId: Number(companyId)}});
 
         await prisma.orderedItems.updateMany({
             where: {
                 orderId: {
-                    in: orderIds,
-                },
-            },
+                    in: orderIds}},
             data: {
-                companyId: Number(companyId),
-            },
-        });
+                companyId: Number(companyId)}});
 
         await prisma.fifo.updateMany({
             where: {
-                companyId: null,
-            },
+                companyId: null},
             data: {
-                companyId: Number(companyId),
-            },
-        });
+                companyId: Number(companyId)}});
 
         return res.status(200).json({   
-            message: 'Orders updated successfully',
-        });
+            message: 'Orders updated successfully'});
     } catch (error: any) {
         console.error('Internal Server Error: ', error);
         res.status(500).json({ error: error.message });

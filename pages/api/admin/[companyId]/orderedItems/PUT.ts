@@ -11,6 +11,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { recordAction } from '@/pages/api/utils/timeline';
+import prisma from '@/client';
 
 export enum ITEM_CATEGORIZED {
   REMAIN = 'remain',
@@ -46,7 +47,6 @@ interface BodyType {
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
     const { companyId } = req.query;
 
     if (!companyId) {

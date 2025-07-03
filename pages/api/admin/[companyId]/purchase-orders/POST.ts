@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate } from '@/pages/api/utils/date';
 import { getServerSession } from 'next-auth';
@@ -6,8 +5,7 @@ import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { PO_STATUS } from '@/app/utils/enum';
 import { generatePurchaseOrderTemplate } from '@/config/email';
 import emailHandler from '@/pages/api/utils/email';
-const prisma = new PrismaClient();
-
+import prisma from '@/client';
 interface IBody {
   purchaseOrder: any;
   selectedVendor: any;

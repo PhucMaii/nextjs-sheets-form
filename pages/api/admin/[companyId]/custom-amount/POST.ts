@@ -1,6 +1,6 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { generateOrderTotalPrice } from '../orderedItems/PUT';
+import prisma from '@/client';
 
 interface IBody {
   orderId: number;
@@ -14,8 +14,6 @@ interface IBody {
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { orderId, customAmount }: IBody = req.body;
 
     const existingOrder = await prisma.orders.findUnique({

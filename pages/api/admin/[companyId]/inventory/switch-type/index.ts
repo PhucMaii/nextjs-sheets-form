@@ -1,7 +1,7 @@
 import { calculateNextIndexPosAndRows } from '@/pages/api/utils/appearance';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IBody {
   id?: number;
@@ -13,8 +13,6 @@ interface IBody {
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const prisma = new PrismaClient();
-
     const { id, color, idList, typeId, image }: IBody = req.body;
 
     if (id) {

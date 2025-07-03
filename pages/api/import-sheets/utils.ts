@@ -1,5 +1,4 @@
 import { ORDER_STATUS, USER_CATEGORIZED, USER_ROLE } from '@/app/utils/enum';
-import { PrismaClient } from '@prisma/client';
 import {
   restockInventoryItem,
   updateSingleInventoryItem,
@@ -13,6 +12,7 @@ import { generateOrderTotalPrice } from '@/pages/api/admin/[companyId]/orderedIt
 import { checkOrderDeliveryDateValid } from '../utils/date';
 import { OrderedItems } from '@/app/utils/type';
 import { createOrderedItems } from '@/pages/api/utils/orderedItems';
+import prisma from '@/client';
 
 export function calculateNextPos(currentPos: number, result: string[]): string {
   const columns = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -29,8 +29,6 @@ export function calculateNextPos(currentPos: number, result: string[]): string {
 }
 
 export const checkHasClientOrder = async (id: number, deliveryDate: string) => {
-  const prisma = new PrismaClient();
-
   const userOrders = await prisma.orders.findFirst({
     where: {
       userId: id,
@@ -56,8 +54,6 @@ export const overrideOrder = async (
   updatedBy: string,
 ) => {
   try {
-    const prisma = new PrismaClient();
-
     for (const item of newItems) {
       if (item.quantity % 1 !== 0) {
         throw new Error('Invalid Quantity');
@@ -244,7 +240,6 @@ export const getCreatedBy = async (
   res: NextApiResponse,
   createdByRole: USER_ROLE | null = null,
 ) => {
-  const prisma = new PrismaClient();
   const session: any = await getServerSession(req, res, authOptions);
 
   let createdBy = '';

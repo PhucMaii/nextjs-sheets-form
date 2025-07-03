@@ -1,17 +1,15 @@
-import { PrismaClient, Route } from '@prisma/client';
+import { Route } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getDriverInfo } from '../../utils/auth';
 import {
   convertDeliveryDateStringToDate,
-  getTodayDate,
-} from '../../utils/date';
+  getTodayDate} from '../../utils/date';
 import { days } from '@/app/lib/constant';
 import { SHIFT_STATUS } from '@/app/utils/enum';
+import prisma from '@/client';
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { role } = req.body;
 
     const driver: any = await getDriverInfo(req, res);
@@ -47,9 +45,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         routeId: targetRoute?.id,
         status: SHIFT_STATUS.UNPAID,
         role,
-        companyId: driver.companyId,
-      },
-    });
+        companyId: driver.companyId}});
 
     return res
       .status(200)

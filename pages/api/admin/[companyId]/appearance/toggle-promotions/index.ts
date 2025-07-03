@@ -1,7 +1,7 @@
 import { PROMOTION_STATUS } from '@/app/utils/enum';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IBody {
   activePromotionIds: number[];
@@ -12,8 +12,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method !== 'PUT') {
       return res.status(400).json({ error: 'Your method is not supported' });
     }
-
-    const prisma = new PrismaClient();
 
     const { activePromotionIds }: IBody = req.body;
     const { companyId } = req.query;

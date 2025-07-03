@@ -1,9 +1,7 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import withDriverAuthGuard from '../../utils/withDriverAuthGuar';
 import { getDriverInfo } from '../../utils/auth';
-
-const prisma = new PrismaClient();
+import prisma from '@/client';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {

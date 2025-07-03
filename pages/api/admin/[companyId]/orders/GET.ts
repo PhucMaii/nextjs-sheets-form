@@ -1,8 +1,9 @@
 import { ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
-import { OrderedItems, PrismaClient } from '@prisma/client';
+import { OrderedItems } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { normalizeDate } from '@/pages/api/utils/date';
 import { days } from '@/app/lib/constant';
+import prisma from '@/client';
 
 interface RequestQuery {
   orderId?: string;
@@ -13,14 +14,11 @@ interface RequestQuery {
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { orderId, date, status, companyId } = req.query as RequestQuery;
 
     if (!companyId) {
       return res.status(400).json({
-        error: 'Company ID is required',
-      });
+        error: 'Company ID is required'});
     }
 
     if (orderId) {
@@ -29,32 +27,21 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         include: {
           user: {
             include: {
-              category: true,
-            },
-          },
+              category: true}},
           items: {
             include: {
               inventoryItem: true,
               inventoryUnit: true,
-              fifo: true,
-            },
-          },
+              fifo: true}},
           delivery: {
             include: {
-              medias: true,
-            },
-          },
+              medias: true}},
           timeline: {
             include: {
               actions: {
                 orderBy: {
-                  posIndex: 'desc',
-                }
-              },
-            },
-          },
-        },
-      });
+                  posIndex: 'desc'}
+              }}}}});
 
       // Group actions by date
       const groupedActions = order?.timeline?.actions.reduce((acc: any, action: any) => {
@@ -72,10 +59,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           ...order,
           timeline: {
             ...order?.timeline,
-            groupedActions,
-          },
-        },
-      });
+            groupedActions}}});
     }
 
     const fetchCondition: any = {};
@@ -106,54 +90,35 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                 route: {
                   include: {
                     driver: true,
-                    employee: true,
-                  },
-                },
-              },
-            },
+                    employee: true}}}},
             preference: true,
-            category: true,
-          },
-        },
+            category: true}},
         items: {
           include: {
             inventoryItem: true,
             inventoryUnit: true,
-            fifo: true,
-          },
-        },
+            fifo: true}},
         delivery: {
           include: {
-            medias: true,
-          },
-        },
-      },
-    });
+            medias: true}}}});
 
     if (!orders || orders.length === 0) {
       return res.status(200).json({
         message: 'There is no orders at the momment',
-        data: orders,
-      });
+        data: orders});
     }
 
     // Get previous unpaid cod orders
     const previousUnpaidCodOrders = await prisma.orders.findMany({
       where: {
         status: {
-          in: [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED],
-        },
+          in: [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED]},
         user: {
           preference: {
-            paymentType: PAYMENT_TYPE.COD,
-          },
-        },
-        companyId: Number(companyId),
-      },
+            paymentType: PAYMENT_TYPE.COD}},
+        companyId: Number(companyId)},
       include: {
-        user: true,
-      },
-    });
+        user: true}});
 
     // Use hashmap to store previous unpaid cod orders with client id is key
     const previousUnpaidCodOrdersMap = previousUnpaidCodOrders.reduce(
@@ -161,8 +126,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         if (!acc[order.user.clientId]) {
           acc[order.user.clientId] = {
             numberOfOrders: 1,
-            totalPrice: order.totalPrice,
-          };
+            totalPrice: order.totalPrice};
           return acc;
         }
 
@@ -171,8 +135,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         const newNumberOfOrders = acc[order.user.clientId].numberOfOrders + 1;
         acc[order.user.clientId] = {
           numberOfOrders: newNumberOfOrders,
-          totalPrice: newTotalPrice,
-        };
+          totalPrice: newTotalPrice};
         return acc;
       },
       {},
@@ -192,8 +155,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         return {
           ...item,
           totalPrice,
-          totalPrevPrice,
-        };
+          totalPrevPrice};
       });
 
       // Get same order in same date
@@ -230,19 +192,16 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         orderRoute: orderRoute
           ? `${orderRoute.route.name} - ${orderRoute.route?.employee?.name}`
           : 'No route - N/A',
-        profit,
-      };
+        profit};
     });
 
     return res.status(200).json({
       message: 'Fetch All Orders Successfully',
-      data: newOrders,
-    });
+      data: newOrders});
   } catch (error: any) {
     console.log('Fail to get order: ', error);
     return res.status(500).json({
-      error: 'Fail to get orders: ' + error,
-    });
+      error: 'Fail to get orders: ' + error});
   }
 }
 

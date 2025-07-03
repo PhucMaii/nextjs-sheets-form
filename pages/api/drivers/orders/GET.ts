@@ -1,4 +1,4 @@
-import { OrderedItems, PrismaClient, Route, UserRoute } from '@prisma/client';
+import { OrderedItems, Route, UserRoute } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]';
@@ -6,6 +6,7 @@ import { days } from '@/app/lib/constant';
 import { convertDeliveryDateStringToDate } from '../../utils/date';
 import { ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
 import { generateManifest } from '../../utils/overview';
+import prisma from '@/client';
 
 interface IQuery {
   deliveryDate?: string;
@@ -13,35 +14,26 @@ interface IQuery {
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { deliveryDate }: IQuery = req.query;
 
     if (!deliveryDate) {
       return res.status(404).json({
-        error: 'Delivery Date Is Missing',
-      });
+        error: 'Delivery Date Is Missing'});
     }
 
     const session: any = await getServerSession(req, res, authOptions);
 
     const existingDriver = await prisma.employee.findUnique({
       where: {
-        id: Number(session?.user?.id),
-      },
+        id: Number(session?.user?.id)},
       include: {
         routes: {
           include: {
-            clients: true,
-          },
-        },
-      },
-    });
+            clients: true}}}});
 
     if (!existingDriver) {
       return res.status(404).json({
-        error: 'Driver Not Found',
-      });
+        error: 'Driver Not Found'});
     }
 
     const date = convertDeliveryDateStringToDate(deliveryDate);
@@ -57,9 +49,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           employee: existingDriver,
           deliveryOrders: [],
           manifest: {},
-          codAmount: 0,
-        },
-      });
+          codAmount: 0}});
     }
 
     const userIds = targetRoute?.clients.map((userRoute: UserRoute) => {
@@ -70,61 +60,42 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       where: {
         deliveryDate,
         status: {
-          not: ORDER_STATUS.VOID,
-        },
+          not: ORDER_STATUS.VOID},
         userId: {
-          in: userIds,
-        },
-        companyId: session?.user?.companyId,
-      },
+          in: userIds},
+        companyId: session?.user?.companyId},
       include: {
         user: {
           include: {
             preference: true,
             category: true,
-            routes: true,
-          },
-        },
+            routes: true}},
         delivery: {
           include: {
-            medias: true,
-          },
-        },
+            medias: true}},
         items: {
           include: {
             inventoryItem: true,
             inventoryUnit: true,
-            fifo: true,
-          },
-        },
-      },
-    });
+            fifo: true}}}});
 
     const arrangedOrders = await prisma.scheduleOrders.findMany({
       where: {
         userId: {
-          in: userIds,
-        },
+          in: userIds},
         day,
-        companyId: session?.user?.companyId,
-      },
+        companyId: session?.user?.companyId},
       include: {
         user: true,
         items: {
           include: {
             inventoryItem: true,
             inventoryUnit: true,
-            fifo: true,
-          },
-        },
-        positionIndex: true,
-      },
+            fifo: true}},
+        positionIndex: true},
       orderBy: {
         positionIndex: {
-          index: 'asc',
-        },
-      },
-    });
+          index: 'asc'}}});
 
     // Format the return orders
     const sortedDeliveryOrders = [];
@@ -144,8 +115,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       sortedDeliveryOrders.push({
         ...deliveryOrder.user,
         ...deliveryOrder,
-        items: newItems,
-      });
+        items: newItems});
     }
 
     const manifest = generateManifest(deliveryOrders);
@@ -162,14 +132,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         employee: existingDriver,
         deliveryOrders: sortedDeliveryOrders,
         manifest,
-        codAmount,
-      },
-      message: 'Fetch Orders Successfully',
-    });
+        codAmount},
+      message: 'Fetch Orders Successfully'});
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({
-      error: 'Internal Server Error: ' + error,
-    });
+      error: 'Internal Server Error: ' + error});
   }
 }

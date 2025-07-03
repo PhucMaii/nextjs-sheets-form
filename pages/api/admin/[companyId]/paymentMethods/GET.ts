@@ -1,5 +1,6 @@
-import { Expense, PrismaClient } from '@prisma/client';
+import { Expense } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IQuery {
   id?: string;
@@ -8,39 +9,29 @@ interface IQuery {
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { id, companyId }: IQuery = req.query;
 
     if (!companyId) {
       return res.status(400).json({
-        error: 'Company ID is required',
-      });
+        error: 'Company ID is required'});
     }
 
     if (id) {
       const method = await prisma.paymentMethod.findUnique({
         where: {
-          id: Number(id),
-        },
+          id: Number(id)},
         include: {
-          transactions: true,
-        },
-      });
+          transactions: true}});
       return res.status(200).json({
         data: method,
-        message: 'Fetch Payment Methods Successfully',
-      });
+        message: 'Fetch Payment Methods Successfully'});
     }
 
     const allMethods = await prisma.paymentMethod.findMany({
       where: {
-        companyId: Number(companyId),
-      },
+        companyId: Number(companyId)},
       include: {
-        transactions: true,
-      },
-    });
+        transactions: true}});
 
     // Get who used it most
     const mostUsedMethod: any = {};
@@ -69,8 +60,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     return res.status(200).json({
       data: allMethods,
       mostUsedMethod,
-      message: 'Fetch Payment Method Successfully',
-    });
+      message: 'Fetch Payment Method Successfully'});
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({ error: 'Internal Server Error: ' + error });

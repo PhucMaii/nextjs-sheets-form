@@ -1,6 +1,6 @@
 import { PROMOTION_STATUS } from '@/app/utils/enum';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IQuery {
   id?: string;
@@ -10,8 +10,6 @@ interface IQuery {
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { id, status, companyId }: IQuery = req.query;
 
     if (!companyId) {

@@ -4,6 +4,7 @@ import { approveOrderTemplate } from "@/config/email";
 import emailHandler from "@/pages/api/utils/email";
 import withAdminAuthGuard from "@/pages/api/utils/withAdminAuthGuard";
 import { NextApiRequest, NextApiResponse } from "next";
+import prisma from '@/client';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     try {

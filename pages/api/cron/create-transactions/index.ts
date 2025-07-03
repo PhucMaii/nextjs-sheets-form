@@ -1,10 +1,8 @@
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import { RECURRENCE_TYPE, FIXED_TRANSACTION_STATUS } from '@/app/utils/enum';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate, normalizeDate } from '../../utils/date';
-
-const prisma = new PrismaClient();
+import prisma from '@/client';
 
 export default async function handler(
   req: NextApiRequest,

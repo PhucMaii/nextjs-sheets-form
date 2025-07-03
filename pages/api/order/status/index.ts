@@ -1,5 +1,4 @@
 import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { pusherServer } from '@/app/pusher';
 import { getServerSession } from 'next-auth';
@@ -10,6 +9,7 @@ import { restockInventoryItem } from '@/pages/api/admin/[companyId]/orderedItems
 import { testAccountId } from '@/app/lib/constant';
 import { recordAction } from '@/pages/api/utils/timeline';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
+import prisma from '@/client';
 
 interface BodyTypes {
   orderId: number;
@@ -23,8 +23,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         error: 'Your method is not supported',
       });
     }
-
-    const prisma = new PrismaClient();
 
     // Updated Status will always be VOID - Delete order button on client side
     const { orderId, updatedStatus }: BodyTypes = req.body;

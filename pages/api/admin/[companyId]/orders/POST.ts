@@ -3,7 +3,7 @@ import {
   ORDER_STATUS,
   USER_CATEGORIZED,
 } from '@/app/utils/enum';
-import { PaymentStatus, PrismaClient, User } from '@prisma/client';
+import { PaymentStatus, User } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { OrderedItems, UserType } from '@/app/utils/type';
 import { sendEmail } from '@/pages/api/utils/email';
@@ -13,7 +13,6 @@ import {
   convertToPSTDate,
   getTodayDate,
   normalizeDate,
-  // normalizeDate,
 } from '@/pages/api/utils/date';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
@@ -21,6 +20,7 @@ import { checkHasClientOrder } from '@/pages/api/import-sheets/utils';
 import { generateOrderTotalPrice } from '@/pages/api/admin/[companyId]/orderedItems/PUT';
 import { categorizeUser } from '@/pages/api/utils/user';
 import { createOrderedItems } from '@/pages/api/utils/orderedItems';
+import prisma from '@/client';
 
 export const config = {
   api: {
@@ -38,7 +38,6 @@ interface BodyTypes {
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
     const contentLength = req.headers['content-length'];
     console.log('Content-Length Header:', contentLength);
     const requestBodySize = Buffer.byteLength(JSON.stringify(req.body));
@@ -115,8 +114,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         // }),
         // totalPrice: scheduleOrder.totalPrice,
         // userId: scheduleOrder.user.id,
-        // createdAt: createdAt,
+        // createdAt: createdAt
       };
+
       try {
         // Check if the order has no items existed
         if (scheduleOrder.totalPrice === 0) {
@@ -303,8 +303,6 @@ export const createOrder = async (
   enteredOrderAt: string = '',
 ) => {
   try {
-    const prisma = new PrismaClient();
-
     // Check if any item quantity is decimal number
     for (const item of items) {
       if (item.quantity % 1 !== 0) {
@@ -442,9 +440,7 @@ export const createOrder = async (
 //   items: any,
 //   createdBy: string = '',
 // ) => {
-//   const prisma = new PrismaClient();
-
-//   // STEP 1: Loop through each item
+//   //   // STEP 1: Loop through each item
 //   const inventoryItems = await prisma.inventoryItem.findMany({
 //     include: {
 //       vendorItem: {

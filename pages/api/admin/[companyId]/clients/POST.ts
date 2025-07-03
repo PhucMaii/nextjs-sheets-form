@@ -1,8 +1,8 @@
 import { USER_ROLE } from '@/app/utils/enum';
-import { PrismaClient } from '@prisma/client';
 import axios from 'axios';
 import bcrypt from 'bcryptjs';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface BodyTypes {
   clientId: string;
@@ -19,8 +19,6 @@ interface BodyTypes {
 const GEOCODING_API_URL = 'https://maps.googleapis.com/maps/api/geocode/json';
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { companyId } = req.query;
 
     if (!companyId) {

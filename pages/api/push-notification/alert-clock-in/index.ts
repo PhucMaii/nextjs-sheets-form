@@ -1,11 +1,9 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import webpush from 'web-push';
 // import { getTodayDate } from '../../utils/date';
 import { getTodayDate } from '../../utils/date';
+import prisma from '@/client';
 // import { getDriverInfo } from '../../utils/auth';
-
-const prisma = new PrismaClient();
 
 // let driverId: any = null;
 

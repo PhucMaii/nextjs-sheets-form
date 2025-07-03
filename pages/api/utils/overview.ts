@@ -1,9 +1,9 @@
-import { PrismaClient } from '@prisma/client';
 import { checkIsKorean } from './korean';
 import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
 import { Order } from '@/app/admin/[companyId]/orders/page';
 import { normalizeDate } from './date';
 import { generateListOfDateString } from '@/app/utils/time';
+import prisma from '@/client';
 
 export const generateManifest = (orders: any, revenue: number = 0) => {
   const itemList = orders.flatMap((order: any) => {
@@ -79,7 +79,6 @@ export const getLastMonthRevenue = async (
   thisMonthRevenue: any[],
   startDate: Date,
 ) => {
-  const prisma = new PrismaClient();
   const lastMonth = startDate.getMonth();
 
   const lastMonthStart = new Date(startDate.getFullYear(), lastMonth - 2, 1);
@@ -179,7 +178,6 @@ export const getLastMonthExpenses = async (
   companyId: number,
   startDate: Date,
 ) => {
-  const prisma = new PrismaClient();
   const lastMonth = startDate.getMonth();
 
   const lastMonthStart = new Date(startDate.getFullYear(), lastMonth - 2, 1);

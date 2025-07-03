@@ -1,11 +1,9 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import withAuthGuard from '../utils/withAuthGuard';
+import prisma from '@/client';
 
 const GET = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const prisma = new PrismaClient();
-
     const userId: string = req.query.id as any;
     const role: string = req.query.role as any;
 

@@ -1,6 +1,5 @@
 import { USER_ROLE } from '@/app/utils/enum';
 import { verifySessionId } from '@/app/utils/security';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { generateLatLng } from '../../admin/[companyId]/clients/POST';
 import bcrypt from 'bcryptjs';
@@ -8,6 +7,7 @@ import { verifyDeliveryAddress } from '../../utils/address';
 import emailHandler from '../../utils/email';
 import { signUpRequest } from '@/config/email';
 import { getTodayDate } from '../../utils/date';
+import prisma from '@/client';
 
 interface IBody {
   guestSessionId: string;
@@ -118,8 +118,6 @@ export default async function handler(
 }
 
 const generateGuestClientId = async () => {
-  const prisma = new PrismaClient();
-
   const existingClients = await prisma.user.findMany({
     where: {
       clientId: {
@@ -143,7 +141,6 @@ const generateGuestClientId = async () => {
 };
 
 export const createGuest = async (companyId: number, client: any) => {
-  const prisma = new PrismaClient();
   try {
     if (!client.guestSessionId || !client.guestSessionSignature) {
       throw new Error(

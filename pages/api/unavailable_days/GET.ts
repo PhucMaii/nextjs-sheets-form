@@ -1,8 +1,9 @@
-import { DayRange, PrismaClient } from '@prisma/client';
+import { DayRange } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { convertToPSTDate, normalizeDate } from '../utils/date';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
+import prisma from '@/client';
 
 interface IQuery {
   userId?: string;
@@ -11,8 +12,6 @@ interface IQuery {
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { userId, date }: IQuery = req.query;
 
     const session: any = await getServerSession(req, res, authOptions);
@@ -20,49 +19,38 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     if (!userId) {
       return res.status(404).json({
-        error: 'User Id Is Missing',
-      });
+        error: 'User Id Is Missing'});
     }
 
     if (userId === 'All Clients' && date) {
       const allRanges = await prisma.dayRange.findMany({
         where: {
-          companyId,
-        },
+          companyId},
         include: {
-          user: true,
-        },
-      });
+          user: true}});
 
       // Formatted Range By Client For Result
       const filteredRange = filterRangeByDate(date, allRanges);
 
       return res.status(200).json({
         data: filteredRange,
-        message: 'Fetch Unavailable Days Ranges Successfully',
-      });
+        message: 'Fetch Unavailable Days Ranges Successfully'});
     }
 
     const existingUser = await prisma.user.findUnique({
       where: {
-        id: Number(userId),
-      },
-    });
+        id: Number(userId)}});
 
     if (!existingUser) {
       return res.status(400).json({
-        error: 'User Does Not Exist',
-      });
+        error: 'User Does Not Exist'});
     }
 
     const unavailableRanges = await prisma.dayRange.findMany({
       where: {
-        userId: existingUser.id,
-      },
+        userId: existingUser.id},
       include: {
-        user: true,
-      },
-    });
+        user: true}});
 
     if (userId !== 'All Clients' && date) {
       const filteredRange = filterRangeByDate(date, unavailableRanges);
@@ -75,19 +63,16 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
       return res.status(200).json({
         message: 'Fetch Unavailable Days Ranges Successfully',
-        data: filteredRange[Object.keys(filteredRange)[0]],
-      });
+        data: filteredRange[Object.keys(filteredRange)[0]]});
     }
 
     return res.status(200).json({
       data: [],
-      message: 'No Unavailable Days Ranges Found',
-    });
+      message: 'No Unavailable Days Ranges Found'});
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({
-      error: 'Internal Server Error: ' + error,
-    });
+      error: 'Internal Server Error: ' + error});
   }
 }
 

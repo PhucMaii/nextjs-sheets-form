@@ -1,5 +1,4 @@
 import { ICustomAmount } from '@/app/utils/type';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { generateOrderTotalPrice } from '../../orderedItems/PUT';
 import { checkAndUpdateUnits } from '../../inventory/expenses/POST';
@@ -7,6 +6,7 @@ import { getTodayDate } from '@/pages/api/utils/date';
 import { createOrderedItems } from '@/pages/api/utils/orderedItems';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
+import prisma from '@/client';
 
 interface IBody {
   orderId: number;
@@ -15,8 +15,6 @@ interface IBody {
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { orderId, customAmount }: IBody = req.body;
 
     const { companyId } = req.query;

@@ -1,11 +1,12 @@
 import { USER_CATEGORIZED, USER_ROLE } from '@/app/utils/enum';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import bcrypt from 'bcrypt';
 import emailHandler, {
   generateApproveToBePartnerEmail,
 } from '@/pages/api/utils/email';
+import prisma from '@/client';
+
 interface IBody {
   id: number;
   newClientId: string;
@@ -13,8 +14,6 @@ interface IBody {
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const prisma = new PrismaClient();
-
     if (req.method !== 'PUT') {
       return res.status(404).json({ error: 'Your method is not supported' });
     }

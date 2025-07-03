@@ -1,12 +1,9 @@
 import { IVendorItem } from '@/app/utils/type';
-import { PrismaClient } from '@prisma/client';
-
+import prisma from '@/client';
 export const getAllUnitsByInventoryItemId = async (inventoryItemId: number) => {
   if (inventoryItemId < 1) {
     return [];
   }
-  const prisma = new PrismaClient();
-
   try {
     const inventoryItem = await prisma.inventoryItem.findUnique({
       where: {

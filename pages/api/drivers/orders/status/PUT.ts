@@ -6,8 +6,9 @@ import {
 import { getDriverInfo } from '@/pages/api/utils/auth';
 import { getTodayDate } from '@/pages/api/utils/date';
 import { recordAction } from '@/pages/api/utils/timeline';
-import { OrderedItems, PaymentStatus, PrismaClient } from '@prisma/client';
+import { OrderedItems, PaymentStatus } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IBody {
   orderId: number;
@@ -17,8 +18,6 @@ interface IBody {
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { orderId, updatedStatus, fileKey }: IBody = req.body;
     console.log(req.body, 'req.body in put');
     console.log(fileKey, 'fileKey in put');

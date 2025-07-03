@@ -1,13 +1,10 @@
 import { itemsEachRow } from '@/app/lib/constant';
-import { PrismaClient } from '@prisma/client';
-
+import prisma from '@/client';
 export const calculateNextIndexPosAndRows = async (
   typeId: number,
   addedQuantity: number,
 ) => {
   try {
-    const prisma = new PrismaClient();
-
     // Get type
     const type = await prisma.itemType.findUnique({
       where: {
@@ -51,8 +48,6 @@ export const calculateNextIndexPosAndRows = async (
 
 export const calculateNextPriority = async () => {
   try {
-    const prisma = new PrismaClient();
-
     const allItemTypes = await prisma.itemType.findMany({
       orderBy: {
         priority: 'desc',

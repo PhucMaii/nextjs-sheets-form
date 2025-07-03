@@ -1,4 +1,4 @@
-import { Orders, PrismaClient } from '@prisma/client';
+import { Orders } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
@@ -6,6 +6,7 @@ import { ORDER_STATUS } from '@/app/utils/enum';
 import { generateListOfDateString } from '@/app/utils/time';
 import { getTodayDate, normalizeDate } from '../utils/date';
 import { getOverdueOrders } from '../utils/order';
+import prisma from '@/client';
 
 
 interface IQuery {
@@ -17,14 +18,10 @@ export const config = {
   api: {
     bodyParser: {
       sizeLimit: '8mb', // Set desired value here
-    },
-  },
-};
+    }}};
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { startDate, endDate }: IQuery = req.query;
 
     if (!startDate || !endDate) {
@@ -35,12 +32,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     const existingUser = await prisma.user.findUnique({
       where: {
-        id: Number(session?.user?.id),
-      },
+        id: Number(session?.user?.id)},
       include: {
-        category: true,
-      },
-    });
+        category: true}});
 
     if (!existingUser) {
       return res.status(401).json({ error: 'User Not Found' });
@@ -60,30 +54,20 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       where: {
         userId: existingUser.id,
         status: {
-          not: ORDER_STATUS.VOID,
-        },
+          not: ORDER_STATUS.VOID},
         deliveryDate: {
-          in: dateList,
-        },
-      },
+          in: dateList}},
       include: {
         items: {
           include: {
             inventoryItem: true,
-            inventoryUnit: true,
-          },
-        },
+            inventoryUnit: true}},
         user: true,
         delivery: {
           include: {
-            medias: true,
-          },
-        },
-      },
+            medias: true}}},
       orderBy: {
-        id: 'desc',
-      },
-    });
+        id: 'desc'}});
 
     const newOrders = formatReturnOrders(userOrders);
     const totalAmount = userOrders.reduce((acc: number, order: Orders) => {
@@ -102,33 +86,23 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       where: {
         userId: existingUser.id,
         status: ORDER_STATUS.DELIVERED,
-        deliveryDate: today.date,
-      },
+        deliveryDate: today.date},
       include: {
         items: {
           include: {
             inventoryItem: true,
-            inventoryUnit: true,
-          },
-        },
+            inventoryUnit: true}},
         user: true,
         delivery: {
           include: {
-            medias: true,
-          },
-        },
-      },
-    });
+            medias: true}}}});
 
     if (todayOrder?.delivery && !todayOrder?.delivery?.isViewed) {
       await prisma.delivery.update({
         where: {
-          id: todayOrder?.delivery?.id,
-        },
+          id: todayOrder?.delivery?.id},
         data: {
-          isViewed: true,
-        },
-      });
+          isViewed: true}});
     }
 
     let todayDeliveredOrder: any = [];
@@ -143,15 +117,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         dueAmount,
         dueOrders,
         userOrders: newOrders,
-        todayDeliveredOrder: todayDeliveredOrder[0] || null,
-      },
-      message: 'Fetch User Orders Successfully',
-    });
+        todayDeliveredOrder: todayDeliveredOrder[0] || null},
+      message: 'Fetch User Orders Successfully'});
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({
-      error: 'Internal Server Error: ' + error,
-    });
+      error: 'Internal Server Error: ' + error});
   }
 }
 
@@ -164,8 +135,7 @@ const formatReturnOrders = (orders: any) => {
     if (order.items.length === 0) {
       return {
         ...order,
-        items: [],
-      };
+        items: []};
     }
 
     const items = order.items.map((item: any) => {
@@ -177,8 +147,7 @@ const formatReturnOrders = (orders: any) => {
       ...order,
       items,
       ...order.user,
-      id: order.id,
-    };
+      id: order.id};
   });
 
   return newOrders;

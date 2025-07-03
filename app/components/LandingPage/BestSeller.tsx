@@ -17,6 +17,7 @@ import { IItem, IPromotion } from '@/app/utils/type';
 import useNotification from '@/hooks/useNotification';
 import { useRouter } from 'next/navigation';
 import MotionSection from '../MotionSection';
+import LoadingCard from '../LoadingCard';
 
 export default function BestSeller() {
   const [bestSeller, setBestSeller] = useState<IItem[]>([]);
@@ -87,7 +88,7 @@ export default function BestSeller() {
               slidesPerView={smDown ? 1 : mdDown ? 2 : lgDown ? 3 : 5}
               // style={{ padding: '20px' }}
             >
-              {bestSeller &&
+              {bestSeller.length > 0 ?
                 bestSeller?.map((item: any, index: number) => {
                   return (
                     <SwiperSlide key={index}>
@@ -105,7 +106,15 @@ export default function BestSeller() {
                       />
                     </SwiperSlide>
                   );
-                })}
+                }) : (
+                  <>
+                    {Array.from({ length: 10 }).map((_, index) => (
+                      <SwiperSlide key={index}>
+                        <LoadingCard />
+                      </SwiperSlide>
+                    ))}
+                  </>
+                )}
             </Swiper>
           </Grid>
 

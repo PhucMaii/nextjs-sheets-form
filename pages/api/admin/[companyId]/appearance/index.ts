@@ -1,8 +1,8 @@
 import { PROMOTION_STATUS } from '@/app/utils/enum';
 import { IInventoryItem, IItemType } from '@/app/utils/type';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IBody {
   itemTypes: IItemType[] | any;
@@ -13,8 +13,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method !== 'PUT') {
       return res.status(404).json({ error: 'Your method is not supported' });
     }
-
-    const prisma = new PrismaClient();
 
     const { companyId } = req.query;
     const { itemTypes }: IBody = req.body;
@@ -270,8 +268,6 @@ const checkAndUpdateContainers = async (
   tableName: 'itemType' | 'promotion',
   compareField: string,
 ) => {
-  const prisma: any = new PrismaClient();
-
   const updatedContainerNames = updatedContainers.map((container: any) => {
     return container[compareField];
   });
@@ -298,13 +294,20 @@ const checkAndUpdateContainers = async (
     // Re arrange types
     let priority = 1;
     for (let i = 0; i < updatedContainers.length; i++) {
-      console.log(priority, 'priority');
-      const container = updatedContainers[i];
-      await prisma[tableName].update({
-        where: { id: container.id },
-        data: { priority },
-      });
-      priority++;
+      console.log(priority, 'priority')
+      const container = updatedContainers[i]
+      if (tableName === 'itemType') {
+        await prisma.itemType.update({
+          where: { id: container.id },
+          data: { priority }
+        })
+      } else {
+        await prisma.promotion.update({
+          where: { id: container.id },
+          data: { priority }
+        })
+      }
+      priority++
     }
   }
 };
@@ -315,8 +318,6 @@ const checkAndUpdateItemsArrangement = async (
   posField: string,
   keyField: string,
 ) => {
-  const prisma: any = new PrismaClient();
-
   // Convert inventory items to type map for easy retrieve
   const dbItemArrangementMap = convertInventoryItemsToTypeMap(
     dbInventoryItems,

@@ -1,8 +1,8 @@
 // import { pusherServer } from '@/app/pusher';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { restockInventoryItem } from '../../orderedItems/single';
 import { ORDER_STATUS } from '@/app/utils/enum';
+import prisma from '@/client';
 
 interface BodyTypes {
   orderId?: string;
@@ -14,8 +14,6 @@ export default async function DELETE(
   res: NextApiResponse,
 ) {
   try {
-    const prisma = new PrismaClient();
-
     const { orderId, orderList } = req.body as BodyTypes;
 
     if (orderList) {

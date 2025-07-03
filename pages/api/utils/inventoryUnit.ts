@@ -1,11 +1,8 @@
-import { PrismaClient } from '@prisma/client';
-
+import prisma from '@/client';
 export const deleteInventoryUnit = async (
   deletedIds: number[],
   vendorItemId: number,
 ) => {
-  const prisma = new PrismaClient();
-
   const vendorItem = await prisma.vendorItem.findUnique({
     where: {
       id: vendorItemId,

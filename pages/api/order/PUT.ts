@@ -1,4 +1,4 @@
-import { OrderedItems, PrismaClient } from '@prisma/client';
+import { OrderedItems } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
@@ -8,17 +8,16 @@ import emailHandler from '../utils/email';
 import {
   // generateCostAndProfit,
   restockInventoryItem,
-  updateSingleInventoryItem,
-} from '@/pages/api/admin/[companyId]/orderedItems/single';
+  updateSingleInventoryItem} from '@/pages/api/admin/[companyId]/orderedItems/single';
 import {
   categorizeUpdatedItems,
   generateOrderTotalPrice,
-  ITEM_CATEGORIZED,
-} from '@/pages/api/admin/[companyId]/orderedItems/PUT';
+  ITEM_CATEGORIZED} from '@/pages/api/admin/[companyId]/orderedItems/PUT';
 import { formatItemsWithTotalPrice } from '../utils/order';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { createOrderedItems } from '../utils/orderedItems';
 import { recordAction } from '../utils/timeline';
+import prisma from '@/client';
 
 interface BodyProps {
   deliveryDate: string;
@@ -29,42 +28,31 @@ interface BodyProps {
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const body = req.body as BodyProps;
 
     const session: any = await getServerSession(req, res, authOptions);
     const existingUser: any = await prisma.user.findUnique({
       where: {
-        id: Number(session.user.id),
-      },
-    });
+        id: Number(session.user.id)}});
 
     if (!existingUser) {
       return res.status(404).json({
-        error: 'User Not Found',
-      });
+        error: 'User Not Found'});
     }
 
     const userLastOrder = await prisma.orders.findUnique({
       where: {
-        id: body.orderId,
-      },
+        id: body.orderId},
       include: {
         items: {
           include: {
             inventoryItem: true,
             inventoryUnit: true,
-            fifo: true,
-          },
-        },
-      },
-    });
+            fifo: true}}}});
 
     if (!userLastOrder) {
       return res.status(404).json({
-        error: 'Last Order Not Found',
-      });
+        error: 'Last Order Not Found'});
     }
 
     const newItems = categorizeUpdatedItems(
@@ -76,8 +64,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     const actionRecord: any = {
       create: [],
       update: [],
-      delete: [],
-    };
+      delete: []};
 
     for (const item of newItems) {
       // Check item categorize to create, update or delete
@@ -98,9 +85,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         // DELETE
         await prisma.orderedItems.delete({
           where: {
-            id: item.id,
-          },
-        });
+            id: item.id}});
 
         actionRecord.delete.push(item);
 
@@ -125,17 +110,14 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
         await prisma.orderedItems.update({
           where: {
-            id: item.id,
-          },
+            id: item.id},
           data: {
             price: item.price,
             quantity: item.quantity,
             cost,
             profit: item.price - cost,
             inventoryUnitId: item.inventoryUnitId,
-            option: item.option,
-          },
-        });
+            option: item.option}});
 
         // Inventory Update
         if (
@@ -175,22 +157,18 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     const updatedOrderedItems = await prisma.orderedItems.findMany({
       where: {
-        orderId: userLastOrder.id,
-      },
+        orderId: userLastOrder.id},
       include: {
         inventoryItem: true,
         fifo: true,
-        inventoryUnit: true,
-      },
-    });
+        inventoryUnit: true}});
 
     const total = generateOrderTotalPrice(updatedOrderedItems);
 
     // Apply new total price on order and update note
     const newOrder = await prisma.orders.update({
       where: {
-        id: userLastOrder.id,
-      },
+        id: userLastOrder.id},
       data: {
         subTotal: total.subTotal,
         PST: total.PST,
@@ -200,19 +178,14 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         note: body.note,
         isReplacement: true,
         updateTime: new Date(),
-        updatedBy: `Client - ${existingUser.clientId}`,
-      },
+        updatedBy: `Client - ${existingUser.clientId}`},
       include: {
         user: true,
-        items: true,
-      },
-    });
+        items: true}});
 
     const userCategory = await prisma.category.findUnique({
       where: {
-        id: existingUser.categoryId,
-      },
-    });
+        id: existingUser.categoryId}});
 
     // Notify Email for admin
     const emailSendTo: any = process.env.NODEMAILER_EMAIL;
@@ -250,8 +223,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         items: itemsWithTotalPrice,
         totalPrice: newOrder.totalPrice,
         category: userCategory,
-        isReplacement: true,
-      },
+        isReplacement: true},
     );
 
     return res.status(200).json({
@@ -261,13 +233,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         ...newOrder,
         items: itemsWithTotalPrice,
         totalPrice: newOrder.totalPrice,
-        category: userCategory,
-      },
-    });
+        category: userCategory}});
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({
-      error: 'Internal Server Error: ' + error,
-    });
+      error: 'Internal Server Error: ' + error});
   }
 }

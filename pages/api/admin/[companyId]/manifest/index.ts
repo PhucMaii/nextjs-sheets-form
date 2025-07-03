@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { PrismaClient } from '@prisma/client';
 import { Order } from '@/app/admin/[companyId]/orders/page';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import _ from 'lodash';
@@ -8,6 +7,7 @@ import { IItem } from '@/app/utils/type';
 import { mainItems } from '@/app/lib/constant';
 import { checkIsKorean } from '@/pages/api/utils/korean';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
+import prisma from '@/client';
 
 export const config = {
   api: {
@@ -25,8 +25,6 @@ interface IBody {
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const prisma = new PrismaClient();
-
     if (req.method !== 'POST') {
       return res.status(404).json({
         error: 'Your method is not supported',

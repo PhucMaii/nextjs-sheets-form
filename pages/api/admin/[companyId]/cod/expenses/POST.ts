@@ -1,9 +1,9 @@
 import { mainPaymentMethodId } from '@/app/lib/constant';
 import { TRANSACTION_STATUS } from '@/app/utils/enum';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
+import prisma from '@/client';
 
 interface IBody {
   date: string;
@@ -23,7 +23,6 @@ interface IBody {
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
     const { companyId } = req.query;
 
     if (!companyId) {

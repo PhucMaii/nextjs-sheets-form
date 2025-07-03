@@ -1,7 +1,8 @@
 import { getTodayDate } from './date';
-import { Orders, PrismaClient } from '@prisma/client';
+import { Orders } from '@prisma/client';
 import { ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
 import { generateListOfDateString } from '@/app/utils/time';
+import prisma from '@/client';
 
 export const categorizeUser = async (userId: number) => {
   try {
@@ -25,18 +26,13 @@ export const categorizeUser = async (userId: number) => {
     );
     // console.log(listOfDateString, 'list of date string');
 
-    const prisma = new PrismaClient();
     const userOrdersLast3Months = await prisma.orders.findMany({
       where: {
         userId,
         deliveryDate: {
-          in: listOfDateString,
-        },
+          in: listOfDateString},
         status: {
-          not: ORDER_STATUS.VOID,
-        },
-      },
-    });
+          not: ORDER_STATUS.VOID}}});
 
     if (userOrdersLast3Months.length === 0) {
       return USER_CATEGORIZED.NONE;

@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
@@ -6,6 +5,7 @@ import { getTodayDate } from '@/pages/api/utils/date';
 import { MEDIA_TYPE } from '@/app/utils/enum';
 import { InventoryUnit } from '@prisma/client';
 import { manuallySubtractInventoryItemQty } from '@/pages/api/utils/inventoryItem';
+import prisma from '@/client';
 interface ProductLoss {
   inventoryItemId: number;
   employeeId: number;
@@ -27,8 +27,6 @@ interface IBody {
 interface IQuery {
   companyId?: string;
 }
-
-const prisma = new PrismaClient();
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {

@@ -2,11 +2,11 @@ import { stripe } from '@/app/lib/stripe';
 import Stripe from 'stripe';
 import { createGuest } from '../../public/create-guest';
 import { ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
-import { PrismaClient } from '@prisma/client';
 import { createOrder } from '../../admin/[companyId]/orders/POST';
 import { convertCartItemsToOrderItems } from '../../public/place-order';
 import { sendEmail, sendWelcomeEmail } from '../../utils/email';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 export const config = {
   api: {
@@ -21,8 +21,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const buf = await buffer(req);
     const webhookSecret = process.env.NODE_ENV === 'production' ? process.env.WEBHOOK_SECRET_KEY : 'whsec_01a334a8b9bc36bfd9d6d88351918a7e18917556f0e350eab907e01b72d5d062';
-
-    const prisma = new PrismaClient();
 
     const signature = req.headers['stripe-signature'] as string;
     // const event: Stripe.Event;

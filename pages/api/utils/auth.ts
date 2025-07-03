@@ -1,15 +1,13 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
+import prisma from '@/client';
 
 export const getUserInfo = async (
   req: NextApiRequest,
   res: NextApiResponse,
 ) => {
   try {
-    const prisma = new PrismaClient();
-
     const session: any = await getServerSession(req, res, authOptions);
 
     if (!session) {
@@ -44,8 +42,6 @@ export const getDriverInfo = async (
   res: NextApiResponse,
 ) => {
   try {
-    const prisma = new PrismaClient();
-
     const session: any = await getServerSession(req, res, authOptions);
 
     if (!session) {

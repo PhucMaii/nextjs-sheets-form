@@ -1,5 +1,5 @@
-import prisma from "@/client";
 import { getTodayDate } from "./date";
+import prisma from '@/client';
 
 export const getTimeline = async (orderId: number) => {
   let timeline = await prisma.orderTimeline.findFirst({

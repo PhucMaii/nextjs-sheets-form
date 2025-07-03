@@ -2,6 +2,7 @@ import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { getServerSession } from "next-auth";
 import { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/client";
+import prisma from '@/client';
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {

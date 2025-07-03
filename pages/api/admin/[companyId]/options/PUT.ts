@@ -1,8 +1,8 @@
 import { OrderedItems } from '@/app/utils/type';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { updateScheduledOrdersTotalPrice } from './POST';
 import { websiteItemCategoryId } from '@/app/lib/constant';
+import prisma from '@/client';
 
 interface IBody {
   id: number;
@@ -16,8 +16,6 @@ interface IBody {
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const {
       id,
       name,
@@ -161,8 +159,6 @@ export const updateAllScheduleOrderItemsForOption = async (
   isUpdateSameInventory: boolean = false,
 ) => {
   try {
-    const prisma = new PrismaClient();
-
     let scheduledOrders: any[] = [];
 
     if (isUpdateSameInventory) {

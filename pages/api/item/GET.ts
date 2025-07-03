@@ -1,13 +1,12 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { testItemId } from '@/app/lib/constant';
 import { calculateQtyLeft } from '@/pages/api/utils/items';
+import prisma from '@/client';
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
     const session: any = await getServerSession(req, res, authOptions);
     const { userId } = req.query;
 
@@ -105,9 +104,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 //   categoryId: number,
 // ) => {
 //   try {
-//     const prisma = new PrismaClient();
-
-//     const beansprouts = await prisma.item.findMany({
+//     //     const beansprouts = await prisma.item.findMany({
 //       where: {
 //         categoryId,
 //         subCategoryId,

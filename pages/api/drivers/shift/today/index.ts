@@ -5,16 +5,14 @@ import {
   getTodayDate,
 } from '@/pages/api/utils/date';
 import withDriverAuthGuard from '@/pages/api/utils/withDriverAuthGuar';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method !== 'GET') {
       return res.status(404).json({ error: 'Your method is not supported' });
     }
-
-    const prisma = new PrismaClient();
 
     const driver: any = await getDriverInfo(req, res);
 

@@ -1,11 +1,9 @@
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { getTodayDate } from '@/pages/api/utils/date';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
-
-const prisma = new PrismaClient();
+import prisma from '@/client';
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {

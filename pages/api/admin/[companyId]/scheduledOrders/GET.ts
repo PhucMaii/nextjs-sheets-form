@@ -1,7 +1,8 @@
 import { ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
-import { DayRange, Orders, PrismaClient } from '@prisma/client';
+import { DayRange, Orders } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { convertToPSTDate, normalizeDate } from '@/pages/api/utils/date';
+import prisma from '@/client';
 
 interface QueryTypes {
   day?: string;
@@ -12,8 +13,6 @@ interface QueryTypes {
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { day, clientList, deliveryDate, companyId }: QueryTypes = req.query;
 
     const clientIds = clientList
@@ -24,26 +23,18 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       where: {
         day,
         userId: {
-          in: clientIds,
-        },
-        companyId: Number(companyId),
-      },
+          in: clientIds},
+        companyId: Number(companyId)},
       include: {
         items: {
           include: {
             inventoryItem: true,
-            inventoryUnit: true,
-          },
-        },
+            inventoryUnit: true}},
         positionIndex: true,
-        user: true,
-      },
+        user: true},
       orderBy: {
         positionIndex: {
-          index: 'asc',
-        },
-      },
-    });
+          index: 'asc'}}});
 
     if (deliveryDate) {
       const clientPreOrdersInfo = await getClientsPreOrderInfo(
@@ -61,8 +52,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           return {
             ...scheduledOrder,
             blocked: isInactive,
-            ...clientPreOrdersInfo[userId],
-          };
+            ...clientPreOrdersInfo[userId]};
         }
 
         return { ...scheduledOrder, blocked: isInactive };
@@ -71,13 +61,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     return res.status(200).json({
       data: scheduleOrders,
-      message: 'Fetch Schedule Order Successfully',
-    });
+      message: 'Fetch Schedule Order Successfully'});
   } catch (error: any) {
     console.log('Internal Server Error: ' + error);
     return res.status(500).json({
-      error: 'Internal Server Error: ' + error,
-    });
+      error: 'Internal Server Error: ' + error});
   }
 }
 
@@ -86,21 +74,16 @@ const getClientsPreOrderInfo = async (
   deliveryDate: string,
 ) => {
   try {
-    const prisma = new PrismaClient();
     // const formattedDate = convertToPSTDate(deliveryDate);
     const formattedDate = normalizeDate(new Date(deliveryDate));
 
     const clientOrdersOnThatDay = await prisma.orders.findMany({
       where: {
         userId: {
-          in: clientIdsList,
-        },
+          in: clientIdsList},
         deliveryDate,
         status: {
-          not: ORDER_STATUS.VOID,
-        },
-      },
-    });
+          not: ORDER_STATUS.VOID}}});
 
     // Use client orders array to get client who has ordered already
     const formattedClients = clientOrdersOnThatDay.reduce(
@@ -119,13 +102,9 @@ const getClientsPreOrderInfo = async (
     const blockingRange = await prisma.dayRange.findMany({
       where: {
         userId: {
-          in: clientIdsList,
-        },
-      },
+          in: clientIdsList}},
       include: {
-        user: true,
-      },
-    });
+        user: true}});
 
     // Filter range that includes delivery date only
     const filteredRange = blockingRange.filter((range: DayRange) => {

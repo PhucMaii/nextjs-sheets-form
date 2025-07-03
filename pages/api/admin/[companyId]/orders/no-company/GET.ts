@@ -1,5 +1,6 @@
 import prisma from "@/client";
 import { NextApiRequest, NextApiResponse } from "next";
+import prisma from '@/client';
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     try {

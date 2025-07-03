@@ -1,5 +1,4 @@
 import { stripe } from '@/app/lib/stripe';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 // import { createOrder } from '../admin/orders/POST';
 import { convertCartItemsToOrderItems } from '../public/place-order';
@@ -9,6 +8,7 @@ import { calculateShippingFee } from '@/app/utils/shipping';
 import { verifyDeliveryAddress } from '../utils/address';
 import { generateLatLng } from '../admin/[companyId]/clients/POST';
 import { gstRate, pstRate } from '@/app/lib/constant';
+import prisma from '@/client';
 // import { ORDER_STATUS } from '@/app/utils/enum';
 // import { generateCostAndProfit } from '../admin/orderedItems/single';
 
@@ -35,8 +35,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method !== 'POST') {
       return res.status(404).json({ error: 'Your method is not supported' });
     }
-
-    const prisma = new PrismaClient();
 
     // Only unregistered user are forced to checkout with provided information
 

@@ -1,6 +1,6 @@
 import { USER_CATEGORIZED } from '@/app/utils/enum';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IQuery {
   month?: string;
@@ -8,8 +8,6 @@ interface IQuery {
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { month }: IQuery = req.query;
     const { companyId } = req.query;
 

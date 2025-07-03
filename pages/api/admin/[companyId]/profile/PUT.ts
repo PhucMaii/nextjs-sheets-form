@@ -1,6 +1,6 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import bcrypt from 'bcryptjs';
+import prisma from '@/client';
 
 interface IBody {
   oldPassword?: string;
@@ -12,7 +12,6 @@ interface IBody {
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
     const { oldPassword, newPassword, email, name, id }: IBody = req.body;
 
     const existingUser = await prisma.employee.findUnique({

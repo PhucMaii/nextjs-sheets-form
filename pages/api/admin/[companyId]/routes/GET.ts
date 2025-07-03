@@ -1,10 +1,11 @@
 import { ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
 import { generateListOfDateString } from '@/app/utils/time';
-import { PaymentStatus, PrismaClient, Route } from '@prisma/client';
+import { PaymentStatus, Route } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { normalizeDate } from '@/pages/api/utils/date';
 import { UserType } from '@/app/utils/type';
 import { Order } from '@/app/admin/[companyId]/orders/page';
+import prisma from '@/client';
 
 interface QueryType {
   day?: string;
@@ -26,13 +27,11 @@ export interface ClientStatementType {
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
     const { day, startDate, endDate, companyId }: QueryType = req.query;
 
     if (!companyId) {
       return res.status(400).json({
-        message: 'Company ID is required',
-      });
+        message: 'Company ID is required'});
     }
 
     if (startDate && endDate) {
@@ -47,8 +46,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       const routes = await prisma.route.findMany({
         where: {
           day,
-          companyId: Number(companyId),
-        },
+          companyId: Number(companyId)},
         include: {
           // driver: true,
           employee: true,
@@ -56,10 +54,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             where: {
               user: {
                 preference: {
-                  paymentType: PAYMENT_TYPE.MONTHLY,
-                },
-              },
-            },
+                  paymentType: PAYMENT_TYPE.MONTHLY}}},
             include: {
               user: {
                 include: {
@@ -70,16 +65,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                   Orders: {
                     where: {
                       deliveryDate: {
-                        in: listOfDayStrings,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
+                        in: listOfDayStrings}}}}}}}}});
 
       const formattedClientOrders: any = {};
       routes.forEach((route: any) => {
@@ -115,23 +101,20 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             deliveredOrders,
             completedOrders,
             voidOrders,
-            route: route,
-          };
+            route: route};
         });
       });
 
       return res.status(200).json({
         data: routes,
         formattedClientOrders,
-        message: 'Fetch Routes Successfully',
-      });
+        message: 'Fetch Routes Successfully'});
     }
 
     const routes: any = await prisma.route.findMany({
       where: {
         day,
-        companyId: Number(companyId),
-      },
+        companyId: Number(companyId)},
       include: {
         // driver: true,
         employee: true,
@@ -142,13 +125,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                 preference: true,
                 category: true,
                 subCategory: true,
-                routes: true,
-              },
-            },
-          },
-        },
-      },
-    });
+                routes: true}}}}}});
 
     // const formattedClientOrders: any = {};
     // routes.forEach((route: any) => {
@@ -164,12 +141,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     return res.status(200).json({
       data: routes,
       // formattedClientOrders,
-      message: 'Fetch Routes Successfully',
-    });
+      message: 'Fetch Routes Successfully'});
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({
-      error: 'Internal Server Error: ' + error,
-    });
+      error: 'Internal Server Error: ' + error});
   }
 }
