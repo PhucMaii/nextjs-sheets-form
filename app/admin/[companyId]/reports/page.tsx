@@ -86,7 +86,7 @@ const useReportData = (
 
 const useReportState = () => {
   const [baseClientOrders, setBaseClientOrders] = useState<Order[]>([]);
-  const [clientValue, setClientValue] = useState<UserType | null>(null);
+  const [clientValue, setClientValue] = useState<UserType | any>({clientId: '', clientName: 'All Clients'});
   const [clientOrders, setClientOrders] = useState<Order[]>([]);
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
   const [unpaidOrders, setUnpaidOrders] = useState<Order[]>([]);
@@ -391,7 +391,7 @@ export default function ReportPage() {
   );
 
   const renderOverviewCards = () => (
-    <Grid container spacing={3} mb={4}>
+    <Grid container spacing={3} mb={2}>
       <Grid item xs={12} sm={6} md={4} lg={2.4}>
         <OverviewCard
           icon={<ReceiptIcon sx={{ color: blue[700], fontSize: 50 }} />}
@@ -492,13 +492,21 @@ export default function ReportPage() {
       {renderHeader()}
       {renderClientSelector()}
 
-      <ShadowSection display="flex" alignItems="center">
-        <Paper sx={{ width: '100%', overflow: 'hidden' }} elevation={0}>
-          {renderOverviewCards()}
-          {renderTabs()}
-          {renderTabContent()}
-        </Paper>
-      </ShadowSection>
+      {!reportState.clientValue ? (
+        <Box sx={{ textAlign: 'center', py: 8 }}>
+          <Typography variant="h6" color="text.secondary">
+            👆 Select a client above to view their reports
+          </Typography>
+        </Box>
+      ) : (
+        <ShadowSection display="flex" alignItems="center">
+          <Paper sx={{ width: '100%', overflow: 'hidden' }} elevation={0}>
+            {renderOverviewCards()}
+            {renderTabs()}
+            {renderTabContent()}
+          </Paper>
+        </ShadowSection>
+      )}
       {/* </AuthenGuard> */}
     </Sidebar>
   );
