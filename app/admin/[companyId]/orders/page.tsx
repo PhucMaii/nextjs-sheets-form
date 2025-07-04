@@ -137,6 +137,7 @@ export interface Order {
 	timeline?: IOrderTimeline;
 	delivery?: any;
 	startTripAt?: string;
+	enteredOrderAt?: string;
 }
 
 const ORDER_PER_PAGE = 10;

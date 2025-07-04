@@ -4,6 +4,7 @@ import Sidebar from '../../components/Sidebar/Sidebar';
 import {
   Box,
   Button,
+  Chip,
   Divider,
   FormControlLabel,
   Grid,
@@ -39,6 +40,7 @@ import { PaymentStatus } from '@prisma/client';
 import { HandCoinsIcon, TruckIcon } from 'lucide-react';
 import { LoadingButton } from '@mui/lab';
 import DisplayFile from '../../components/Modals/DisplayFile';
+import moment from 'moment';
 
 const OrderDetailsPage = () => {
   const { id, companyId }: any = useParams();
@@ -398,6 +400,24 @@ const OrderDetailsPage = () => {
           </IconButton>
           <Typography variant="h5">#{order?.id}</Typography>
           <StatusText type={statusText.type} text={statusText.text} />
+          {order?.enteredOrderAt && (
+            <Chip
+              label={`Take client ${moment(order?.orderTime).diff(order?.enteredOrderAt, 'seconds')}s to place an order`}
+              color="primary"
+              size="small"
+              sx={{ fontSize: 12 }}
+              variant="outlined"
+            />
+          )}
+          {order?.delivery?.startTripAt && order?.delivery?.deliveredAt && (
+            <Chip
+              label={`Take driver ${moment(order?.delivery?.deliveredAt).diff(moment(order?.delivery?.startTripAt), 'minutes')}m to deliver`}
+              color="primary"
+              size="small"
+              sx={{ fontSize: 12 }}
+              variant="outlined"
+            />
+          )}
         </Box>
 
         <Box display="flex" gap={1} alignItems="center">
