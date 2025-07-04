@@ -562,3 +562,5 @@ export const guestCategoryId = 334;
 export const otherTypeId = 19;
 export const itemsEachRow = 2;
 export const testItemId = 10107;
+
+export const minThreshold = 10; // min threshold for inventory item

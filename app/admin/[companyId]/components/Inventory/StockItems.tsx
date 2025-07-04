@@ -4,15 +4,11 @@ import {
   Button,
   Grid,
   IconButton,
-  Menu,
-  MenuItem,
   TextField,
   Typography,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import AddIcon from '@mui/icons-material/Add';
 import InventoryTable from '../Tables/InventoryTable';
-import AddInventory from '../Modals/add/AddInventory';
 import useDebounce from '@/hooks/useDebounce';
 import { IInventoryItem } from '@/app/utils/type';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
@@ -25,10 +21,6 @@ import { EditIcon, Trash2Icon } from 'lucide-react';
 import { ItemType } from '@prisma/client';
 import { generateErrorMsg } from '@/app/lib/error';
 import DeleteModal from '../Modals/delete/DeleteModal';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import { DropdownItemContainer } from '../../orders/styled';
-import { primaryColor } from '@/theme/color';
-import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import SingleFieldUpdate from '../Modals/edit/SingleFieldUpdate';
 import { useParams } from 'next/navigation';
 export const ItemTypeButton = ({
@@ -100,9 +92,9 @@ export default function StockItems({
 }: IProps) {
   const { companyId }: any = useParams();
 
-  const [actionButtonAnchor, setActionButtonAnchor] =
-    useState<null | HTMLElement>(null);
-  const openDropdown = Boolean(actionButtonAnchor);
+  // const [actionButtonAnchor, setActionButtonAnchor] =
+  //   useState<null | HTMLElement>(null);
+  // const openDropdown = Boolean(actionButtonAnchor);
   const [displayData, setDisplayData] = useState<IInventoryItem[]>([]);
   const [deleteProps, setDeleteProps] = useState<any>({
     open: false,
@@ -297,53 +289,53 @@ export default function StockItems({
     });
   };
 
-  const actionButton = (
-    <Box display="flex" alignItems="center" justifyContent="center" gap={2}>
-      <Button
-        variant="outlined"
-        aria-controls={openDropdown ? 'basic-menu' : undefined}
-        aria-haspopup="true"
-        aria-expanded={openDropdown ? 'true' : undefined}
-        onClick={(e) => setActionButtonAnchor(e.currentTarget)}
-      >
-        <Box display="flex" alignItems="center" gap={1}>
-          <ArrowDownwardIcon fontSize="small" />
-          <Typography fontWeight="medium">Actions</Typography>
-        </Box>
-      </Button>
+  // const actionButton = (
+  //   <Box display="flex" alignItems="center" justifyContent="center" gap={2}>
+  //     <Button
+  //       variant="outlined"
+  //       aria-controls={openDropdown ? 'basic-menu' : undefined}
+  //       aria-haspopup="true"
+  //       aria-expanded={openDropdown ? 'true' : undefined}
+  //       onClick={(e) => setActionButtonAnchor(e.currentTarget)}
+  //     >
+  //       <Box display="flex" alignItems="center" gap={1}>
+  //         <ArrowDownwardIcon fontSize="small" />
+  //         <Typography fontWeight="medium">Actions</Typography>
+  //       </Box>
+  //     </Button>
 
-      <Menu
-        id="basic-menu"
-        anchorEl={actionButtonAnchor}
-        open={openDropdown}
-        onClose={() => setActionButtonAnchor(null)}
-        MenuListProps={{
-          'aria-labelledby': 'basic-button',
-        }}
-      >
-        <MenuItem
-          onClick={() => {
-            setIsOpenAddItem(true);
-          }}
-        >
-          <DropdownItemContainer display="flex" gap={2}>
-            <AddIcon sx={{ color: primaryColor }} />
-            <Typography>Add Item</Typography>
-          </DropdownItemContainer>
-        </MenuItem>
+  //     <Menu
+  //       id="basic-menu"
+  //       anchorEl={actionButtonAnchor}
+  //       open={openDropdown}
+  //       onClose={() => setActionButtonAnchor(null)}
+  //       MenuListProps={{
+  //         'aria-labelledby': 'basic-button',
+  //       }}
+  //     >
+  //       <MenuItem
+  //         onClick={() => {
+  //           setIsOpenAddItem(true);
+  //         }}
+  //       >
+  //         <DropdownItemContainer display="flex" gap={2}>
+  //           <AddIcon sx={{ color: primaryColor }} />
+  //           <Typography>Add Item</Typography>
+  //         </DropdownItemContainer>
+  //       </MenuItem>
 
-        <MenuItem
-          disabled={selectedItems.length === 0}
-          onClick={() => setIsOpenBulkTypeUpdate(true)}
-        >
-          <DropdownItemContainer display="flex" gap={2}>
-            <ModeEditIcon sx={{ color: primaryColor }} />
-            <Typography>Update type</Typography>
-          </DropdownItemContainer>
-        </MenuItem>
-      </Menu>
-    </Box>
-  );
+  //       <MenuItem
+  //         disabled={selectedItems.length === 0}
+  //         onClick={() => setIsOpenBulkTypeUpdate(true)}
+  //       >
+  //         <DropdownItemContainer display="flex" gap={2}>
+  //           <ModeEditIcon sx={{ color: primaryColor }} />
+  //           <Typography>Update type</Typography>
+  //         </DropdownItemContainer>
+  //       </MenuItem>
+  //     </Menu>
+  //   </Box>
+  // );
 
   return (
     <>
@@ -381,11 +373,11 @@ export default function StockItems({
         updatedField="type"
         renderField="name"
       />
-      <AddInventory
+      {/* <AddInventory
         open={isOpenAddItem}
         onClose={() => setIsOpenAddItem(false)}
         showNotification={showNotification}
-      />
+      /> */}
       <Box display="flex" flexDirection="column" overflow="auto" width="100%">
         <Box
           // maxWidth="100%"
@@ -439,10 +431,10 @@ export default function StockItems({
           </Button>
         </Box>
         <Grid container alignItems="center" spacing={1} mt={2}>
-          <Grid item xs={12} md={10.5} lg={11}>
+          <Grid item xs={12}>
             <TextField
               label="Search"
-              placeholder="Search items by name..."
+              placeholder="Search items by name, sku..."
               size="small"
               variant="filled"
               value={searchKeywords}
@@ -451,7 +443,7 @@ export default function StockItems({
             />
           </Grid>
 
-          <Grid item xs={12} md={1.5} lg={1} textAlign="right">
+          {/* <Grid item xs={12} md={1.5} lg={1} textAlign="right"> */}
             {/* <Button onClick={() => setIsOpenAddItem(true)}>
               <Box display="flex" alignItems="center" gap={0.5}>
                 <AddIcon />
@@ -460,8 +452,8 @@ export default function StockItems({
                 </Typography>
               </Box>
             </Button> */}
-            {actionButton}
-          </Grid>
+            {/* {actionButton} */}
+          {/* </Grid> */}
         </Grid>
 
         {isLoading ? (

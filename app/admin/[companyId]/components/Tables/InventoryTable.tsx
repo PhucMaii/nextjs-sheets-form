@@ -3,39 +3,33 @@ import {
   AlertColor,
   Box,
   Button,
+  Card,
+  CardContent,
   Checkbox,
-  IconButton,
-  MenuItem,
-  Paper,
-  Select,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
   Typography,
+  alpha,
 } from '@mui/material';
-import React, { memo, useState } from 'react';
+import React, { Dispatch, SetStateAction, memo, useState } from 'react';
 import EditInventory from '../Modals/edit/EditInventory';
-import DeleteModal from '../Modals/delete/DeleteModal';
 import axios from 'axios';
 import { getAdminApiUrl } from '@/app/utils/enum';
 import BatchQuantityModal from '../Inventory/BatchQuantityModal';
-import { ArrowRightIcon, EditIcon } from 'lucide-react';
+import { Package } from 'lucide-react';
 import ViewItemMissing from '../Modals/ViewItemMissing';
 import { ItemType } from '@prisma/client';
 import LoadingModal from '../Modals/LoadingModal';
-import { grey } from '@mui/material/colors';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
+import InventoryItemCard from '../Inventory/InventoryItemCard';
 
 interface IProps {
   inventoryItems: IInventoryItem[];
   showNotification: (type: AlertColor, message: string) => void;
   itemTypes: ItemType[];
   selectedItems: IInventoryItem[];
-  setSelectedItems: (item: IInventoryItem[]) => void;
+  setSelectedItems: Dispatch<SetStateAction<IInventoryItem[]>>;
 }
 
+// Main Table Component
 const InventoryTable = ({
   inventoryItems,
   showNotification,
@@ -59,7 +53,7 @@ const InventoryTable = ({
     inventoryItem: inventoryItems[0],
   });
 
-  const router = useRouter();
+  // const isMobile = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   const handleDelete = async (targetObj: IInventoryItem) => {
     setIsLoading(true);
@@ -116,13 +110,22 @@ const InventoryTable = ({
   };
 
   const onSelectItem = (e: any, item: IInventoryItem) => {
-    e.stopPropagation();
+    // e.stopPropagation();
+    console.log('onSelectItem', e, item);
     const isExisted = selectedItems.find((i) => i.id === item.id);
 
     if (isExisted) {
-      setSelectedItems(selectedItems.filter((i) => i.id !== item.id));
+      setSelectedItems((prevSelectedItems: IInventoryItem[]) => {
+        const newSelectedItems = prevSelectedItems.filter(
+          (i: IInventoryItem) => i.id !== item.id,
+        );
+        return newSelectedItems;
+      });
     } else {
-      setSelectedItems([...selectedItems, item]);
+      setSelectedItems((prevSelectedItems: IInventoryItem[]) => {
+        const newSelectedItems = [...prevSelectedItems, item];
+        return newSelectedItems;
+      });
     }
   };
 
@@ -134,16 +137,84 @@ const InventoryTable = ({
     }
   };
 
+  // Bulk Actions Header
+  const renderBulkActions = () => (
+    <Card
+      sx={{
+        my: 2,
+        // bgcolor: alpha('#3B82F6', 0.05),
+        border: `1px solid ${alpha('#3B82F6', 0.2)}`,
+        borderRadius: 1,
+        boxShadow: 'none',
+      }}
+    >
+      <Box sx={{ py: 1, px: 2 }}>
+        <Box display="flex" alignItems="center" justifyContent="space-between">
+          <Box display="flex" alignItems="center" gap={2}>
+            <Checkbox
+              checked={selectedItems.length === inventoryItems.length}
+              indeterminate={
+                selectedItems.length > 0 &&
+                selectedItems.length < inventoryItems.length
+              }
+              onChange={onSelectAll}
+            />
+            <Typography variant="subtitle1" fontWeight={600}>
+              {selectedItems.length > 0
+                ? `${selectedItems.length} items selected`
+                : 'Select items for bulk actions'}
+            </Typography>
+          </Box>
+
+          {selectedItems.length > 0 && (
+            <Box display="flex" gap={1}>
+              <Button
+                variant="outlined"
+                size="small"
+                sx={{ textTransform: 'none' }}
+              >
+                Bulk Edit
+              </Button>
+              <Button
+                variant="outlined"
+                color="error"
+                size="small"
+                sx={{ textTransform: 'none' }}
+              >
+                Delete Selected
+              </Button>
+            </Box>
+          )}
+        </Box>
+      </Box>
+    </Card>
+  );
+
+  // Empty State
+  const renderEmptyState = () => (
+    <Card sx={{ p: 8, textAlign: 'center', borderRadius: 3 }}>
+      <Package size={64} color="#9CA3AF" style={{ marginBottom: 16 }} />
+      <Typography variant="h6" color="text.secondary" mb={1}>
+        No inventory items found
+      </Typography>
+      <Typography variant="body2" color="text.secondary">
+        Start by adding your first inventory item
+      </Typography>
+    </Card>
+  );
+
+  if (inventoryItems.length === 0) {
+    return renderEmptyState();
+  }
+
   return (
-    <>
+    <Box>
+      {/* Modals */}
       {batchProps.open && (
         <BatchQuantityModal
           open={batchProps.open}
           onClose={() =>
-            setBatchProps((prevState: any) => ({
-              ...prevState,
-              open: false,
-            }))
+            setBatchProps((prevState: any) => ({ ...prevState, open: false }))
           }
           fifoList={batchProps.inventoryItem?.fifo || []}
           showNotification={showNotification}
@@ -155,10 +226,7 @@ const InventoryTable = ({
           inventoryItem={editItemProps.inventoryItem}
           open={editItemProps.open}
           onClose={() =>
-            setEditItemProps(() => ({
-              inventoryItem: null,
-              open: false,
-            }))
+            setEditItemProps(() => ({ inventoryItem: null, open: false }))
           }
           showNotification={showNotification}
         />
@@ -176,194 +244,35 @@ const InventoryTable = ({
           quantity={viewItemMissingProps.quantity}
         />
       )}
-      <Paper sx={{ overflow: 'scroll', width: '100%' }}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell padding="checkbox">
-                <Checkbox
-                  checked={selectedItems.length === inventoryItems.length}
-                  onClick={onSelectAll}
-                />
-              </TableCell>
-              <TableCell>Supplier SKU</TableCell>
-              <TableCell>SKU</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Listing</TableCell>
-              <TableCell>Type</TableCell>
-              <TableCell>Vendor - Unit Value</TableCell>
-              <TableCell>Quantity</TableCell>
-              <TableCell>Total Value</TableCell>
-              <TableCell></TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {inventoryItems.map((item: IInventoryItem | any, index: number) => {
-              let unit;
-              for (const vendorItem of item.vendorItem) {
-                unit = vendorItem.unit.find((vUnit: any) => vUnit?.ratio === 1);
+
+      {/* Bulk Actions */}
+      {renderBulkActions()}
+
+      {/* Items List */}
+      <Box>
+        {inventoryItems.map((item: IInventoryItem, index: number) => {
+          const isSelected = selectedItems.some((i) => i.id === item.id);
+          return (
+            <InventoryItemCard
+              key={item.id || index}
+              item={item}
+              isSelected={isSelected}
+              onSelect={(e) => onSelectItem(e, item)}
+              onEdit={() =>
+                setEditItemProps({ open: true, inventoryItem: item })
               }
-
-              const isSelected = selectedItems.some((i) => i.id === item.id);
-
-              return (
-                <TableRow
-                  key={index}
-                  sx={{ '&:hover': { backgroundColor: grey[50] } }}
-                  onClick={() =>
-                    setEditItemProps((prevState: any) => ({
-                      ...prevState,
-                      open: true,
-                      inventoryItem: item,
-                    }))
-                  }
-                >
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      checked={isSelected}
-                      onClick={(e: any) => onSelectItem(e, item)}
-                    />
-                  </TableCell>
-                  <TableCell sx={{ width: 200 }}>
-                    <Typography>{item?.supplierSku || 'N/A'}</Typography>
-                  </TableCell>
-                  {/* {item.quantity < 0 ? (
-                      <IconButton
-                        size="small"
-                        color="primary"
-                        onClick={(e: any) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-
-                          setViewItemMissingProps((prevState: any) => ({
-                            ...prevState,
-                            open: true,
-                            inventoryItem: item,
-                            quantity: item.quantity,
-                          }));
-                        }}
-                      >
-                        <PhoneIcon size={20} />
-                      </IconButton>
-                    ) : null} */}
-                  <TableCell sx={{ width: 200 }}>
-                    <Typography>{item?.sku || 'N/A'}</Typography>
-                  </TableCell>
-                  <TableCell sx={{ width: 300 }}>
-                    <Typography>{item.name}</Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Box display="flex" gap={1} alignItems="center">
-                      <Typography>
-                        {item?.listingCategories?.length || 0} listing
-                      </Typography>
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        onClick={(e: any) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                          router.push(
-                            `/admin/${companyId}/inventory/bulk/selling-items/${item.id}`,
-                          );
-                        }}
-                      >
-                        <Box display="flex" gap={1} alignItems="center">
-                          <Typography variant="caption">Edit</Typography>
-                          <ArrowRightIcon size={16} />
-                        </Box>
-                      </Button>
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Select
-                      value={item?.typeId || 0}
-                      onChange={(e: any) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-
-                        handleChangeType(item, e.target.value);
-                      }}
-                      onClick={(e: any) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                      }}
-                    >
-                      {itemTypes.map((type: ItemType, index: number) => {
-                        return (
-                          <MenuItem value={type.id} key={index}>
-                            {type.name}
-                          </MenuItem>
-                        );
-                      })}
-                      <MenuItem value={0}>N/A</MenuItem>
-                    </Select>
-                  </TableCell>
-                  <TableCell>
-                    <Box display="flex" flexDirection="column" gap={3}>
-                      {item?.vendorItem?.map((vItem: any, index: number) => {
-                        const smallestUnit = vItem?.unit.find(
-                          (unit: any) => unit?.ratio === 1,
-                        );
-                        return (
-                          <Typography key={index}>
-                            {vItem?.vendor?.name}{' '}
-                            <strong>(${smallestUnit?.unitPrice})</strong>
-                          </Typography>
-                        );
-                      })}
-                    </Box>
-                  </TableCell>
-                  <TableCell sx={{ width: 200 }}>
-                    <Box
-                      display="flex"
-                      gap={1}
-                      justifyContent="space-between"
-                      alignItems="center"
-                    >
-                      <Typography>
-                        {item?.quantity} {unit?.unit}
-                      </Typography>
-                      {/* <BatchQuantityModal
-                        fifoList={item?.fifo || []}
-                        showNotification={showNotification}
-                      /> */}
-                      <IconButton
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setBatchProps((prevState: any) => ({
-                            ...prevState,
-                            open: true,
-                            inventoryItem: item,
-                          }));
-                        }}
-                        size="small"
-                      >
-                        <EditIcon fontSize={24} />
-                      </IconButton>
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Typography>${item?.totalValue?.toFixed(2)}</Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Box display="flex" gap={2}>
-                      <DeleteModal
-                        includedButton
-                        targetObj={item}
-                        handleDelete={handleDelete}
-                        showTargetObj={item.name}
-                      />
-                    </Box>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </Paper>
-    </>
+              onViewBatch={() =>
+                setBatchProps({ open: true, inventoryItem: item })
+              }
+              onDelete={() => handleDelete(item)}
+              itemTypes={itemTypes}
+              onChangeType={(typeId) => handleChangeType(item, typeId)}
+              companyId={companyId}
+            />
+          );
+        })}
+      </Box>
+    </Box>
   );
 };
 
@@ -371,7 +280,12 @@ export default memo(InventoryTable, (prev, next) => {
   return (
     JSON.stringify(prev.inventoryItems) ===
       JSON.stringify(next.inventoryItems) &&
-    JSON.stringify(prev.itemTypes) === JSON.stringify(next.itemTypes) &&
-    JSON.stringify(prev.selectedItems) === JSON.stringify(next.selectedItems)
+    Object.is(prev.selectedItems, next.selectedItems)
   );
 });
+
+// export default memo(InventoryTable, (prev, next) => {
+//   return (
+//     JSON.stringify(prev.inventoryItems) === JSON.stringify(next.inventoryItems)
+//   );
+// });

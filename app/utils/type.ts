@@ -250,6 +250,7 @@ export interface IInventoryItem extends InventoryItem {
   stockStatus: STOCK_STATUS;
   preference?: ItemPreference;
   type?: ItemType;
+  listingCategories?: any;
 }
 
 export interface IItemType extends ItemType {
