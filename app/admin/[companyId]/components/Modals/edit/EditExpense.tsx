@@ -1,7 +1,9 @@
 import {
   AlertColor,
   Box,
+  Checkbox,
   Divider,
+  FormControlLabel,
   Grid,
   MenuItem,
   Modal,
@@ -19,6 +21,7 @@ import axios from 'axios';
 import { SWRFetchData } from '@/app/utils/db';
 import { ModalProps } from '../type';
 import { useParams } from 'next/navigation';
+import { gstRate, pstRate } from '@/app/lib/constant';
 // import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
 
 interface IProps extends ModalProps {
@@ -47,26 +50,53 @@ export default function EditExpense({
   const [adminsAndDriversRes] = SWRFetchData(
     getAdminApiUrl(companyId, '/adminsAndDrivers'),
   );
-  
-  console.log(updatedExpense);
+
   useEffect(() => {
     if (transaction) {
-      setUpdatedExpense(transaction);
+      setUpdatedExpense({
+        ...transaction,
+        hasGST: transaction?.GST && transaction?.GST > 0 ? true : false,
+        hasPST: transaction?.PST && transaction?.PST > 0 ? true : false,
+      });
     }
   }, [transaction]);
 
+  // useEffect(() => {
+  //   if (updatedExpense) {
+  //     setUpdatedExpense((prevState: any) => ({
+  //       ...prevState,
+  //       amount:
+  //         prevState?.subTotal +
+  //         prevState.GST +
+  //         prevState.PST -
+  //         (prevState?.discount || 0),
+  //     }));
+  //   }
+  // }, [updatedExpense?.discount]);
+
   useEffect(() => {
-    if (updatedExpense) {
+    if (updatedExpense && updatedExpense?.subTotal) {
+      const gst =
+        Math.round(
+          (updatedExpense?.hasGST ? updatedExpense?.subTotal * gstRate : 0) * 100,
+        ) / 100;
+      const pst =
+        Math.round(
+          (updatedExpense?.hasPST ? updatedExpense?.subTotal * pstRate : 0) * 100,
+        ) / 100;
+
       setUpdatedExpense((prevState: any) => ({
         ...prevState,
-        amount:
-          prevState?.subTotal +
-          prevState.GST +
-          prevState.PST -
-          (prevState?.discount || 0),
+        amount: prevState?.subTotal + gst + pst - (prevState?.discount || 0),
+        GST: gst,
+        PST: pst,
       }));
     }
-  }, [updatedExpense?.discount]);
+  }, [
+    updatedExpense?.discount,
+    updatedExpense?.hasGST,
+    updatedExpense?.hasPST,
+  ]);
 
   const onChangeExpense = (field: string, value: any) => {
     setUpdatedExpense({
@@ -163,8 +193,41 @@ export default function EditExpense({
                 </Box>
               </Grid>
               <Grid item xs={12}>
-                <Box display="flex" flexDirection="column" gap={2}>
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  gap={2}
+                  width="100%"
+                >
                   <Typography variant="h6">Subtotal</Typography>
+                  <Box display="flex" alignItems="center" gap={2}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={updatedExpense?.hasGST || false}
+                          onChange={(e) =>
+                            onChangeExpense('hasGST', e.target.checked)
+                          }
+                        />
+                      }
+                      label="GST (5%)"
+                    />
+
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={updatedExpense?.hasPST || false}
+                          onChange={(e) =>
+                            onChangeExpense('hasPST', e.target.checked)
+                          }
+                        />
+                      }
+                      label="PST (7%)"
+                    />
+                  </Box>
+                </Box>
+                <Box display="flex" flexDirection="column" gap={2} width="100%">
                   <TextField
                     label="Subtotal"
                     placeholder="Subtotal"
@@ -177,7 +240,20 @@ export default function EditExpense({
                   />
                 </Box>
               </Grid>
-              <Grid item md={6} xs={12}>
+              {(updatedExpense?.hasGST || updatedExpense?.hasPST) && (
+                <Grid item xs={12}>
+                  <Box display="flex" alignItems="center" gap={2}>
+                    <Typography>
+                      GST (5%): {updatedExpense?.GST?.toFixed(2) || 0}
+                    </Typography>
+                    <Divider orientation="vertical" flexItem />
+                    <Typography>
+                      PST (7%): {updatedExpense?.PST?.toFixed(2) || 0}
+                    </Typography>
+                  </Box>
+                </Grid>
+              )}
+              {/* <Grid item md={6} xs={12}>
                 <Box display="flex" flexDirection="column" gap={2}>
                   <Typography variant="h6">GST (5%)</Typography>
                   <TextField
@@ -200,7 +276,7 @@ export default function EditExpense({
                     onChange={(e) => onChangeExpense('PST', +e.target.value)}
                   />
                 </Box>
-              </Grid>
+              </Grid> */}
               <Grid item xs={12}>
                 <Box display="flex" flexDirection="column" gap={2}>
                   <Typography variant="h6">Total</Typography>

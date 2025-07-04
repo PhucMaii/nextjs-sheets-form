@@ -7,6 +7,8 @@ import {
   TextField,
   MenuItem,
   Box,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { ModalProps } from '../type';
@@ -26,6 +28,8 @@ import { LoadingButton } from '@mui/lab';
 import { Trash2Icon } from 'lucide-react';
 import { grey } from '@mui/material/colors';
 import { useParams } from 'next/navigation';
+import { pstRate } from '@/app/lib/constant';
+import { gstRate } from '@/app/lib/constant';
 interface IProps extends ModalProps {
   fixedTransaction: FixedTransaction;
   showNotification: ShowNotificationType;
@@ -43,8 +47,9 @@ export default function EditFixedTransaction({
 
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
-  const [updatedTransaction, setUpdatedTransaction] =
-    useState<FixedTransaction>(fixedTransaction);
+  const [updatedTransaction, setUpdatedTransaction] = useState<
+    FixedTransaction | any
+  >(fixedTransaction);
 
   const { selectedEmployee, renderEmployeeSearch } = useEmployee(
     updatedTransaction?.defaultSpentBy || undefined,
@@ -52,24 +57,63 @@ export default function EditFixedTransaction({
 
   useEffect(() => {
     if (fixedTransaction) {
-      setUpdatedTransaction(fixedTransaction);
+      setUpdatedTransaction({
+        ...fixedTransaction,
+        hasGST:
+          fixedTransaction?.defaultGST && fixedTransaction?.defaultGST > 0
+            ? true
+            : false,
+        hasPST:
+          fixedTransaction?.defaultPST && fixedTransaction?.defaultPST > 0
+            ? true
+            : false,
+      });
     }
   }, [fixedTransaction]);
 
+  console.log(updatedTransaction);
+
+  // useEffect(() => {
+  //   if (updatedTransaction?.defaultSubtotal) {
+  //     setUpdatedTransaction({
+  //       ...updatedTransaction,
+  //       defaultAmount:
+  //         updatedTransaction.defaultSubtotal +
+  //         (updatedTransaction.defaultPST || 0) +
+  //         (updatedTransaction.defaultGST || 0),
+  //     });
+  //   }
+  // }, [
+  //   updatedTransaction?.defaultSubtotal,
+  //   updatedTransaction?.defaultPST,
+  //   updatedTransaction?.defaultGST,
+  // ]);
+
   useEffect(() => {
-    if (updatedTransaction?.defaultSubtotal) {
-      setUpdatedTransaction({
-        ...updatedTransaction,
-        defaultAmount:
-          updatedTransaction.defaultSubtotal +
-          (updatedTransaction.defaultPST || 0) +
-          (updatedTransaction.defaultGST || 0),
-      });
+    if (updatedTransaction && updatedTransaction?.defaultSubtotal) {
+      const gst =
+      Math.round(
+        (updatedTransaction?.hasGST
+          ? updatedTransaction?.defaultSubtotal * gstRate
+          : 0) * 100,
+      ) / 100;
+    const pst =
+      Math.round(
+        (updatedTransaction?.hasPST
+          ? updatedTransaction?.defaultSubtotal * pstRate
+          : 0) * 100,
+      ) / 100;
+      setUpdatedTransaction((prevState: any) => ({
+        ...prevState,
+        defaultGST: gst,
+        defaultPST: pst,
+        defaultAmount: prevState?.defaultSubtotal + gst + pst,
+      }));
     }
   }, [
-    updatedTransaction?.defaultSubtotal,
-    updatedTransaction?.defaultPST,
-    updatedTransaction?.defaultGST,
+    // updatedTransaction?.defaultSubtotal,
+    updatedTransaction?.hasGST,
+    updatedTransaction?.hasPST,
   ]);
 
   const handleDelete = async () => {
@@ -172,7 +216,44 @@ export default function EditFixedTransaction({
           </Grid>
 
           <Grid item xs={12} display="flex" flexDirection="column" gap={1}>
-            <Typography variant="body1">Default Subtotal</Typography>
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              gap={2}
+            >
+              <Typography variant="body1">Default Subtotal</Typography>
+              <Box display="flex" alignItems="center" gap={2}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={updatedTransaction?.hasGST || false}
+                      onChange={(e) =>
+                        setUpdatedTransaction({
+                          ...updatedTransaction,
+                          hasGST: e.target.checked,
+                        })
+                      }
+                    />
+                  }
+                  label="GST (5%)"
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={updatedTransaction?.hasPST || false}
+                      onChange={(e) =>
+                        setUpdatedTransaction({
+                          ...updatedTransaction,
+                          hasPST: e.target.checked,
+                        })
+                      }
+                    />
+                  }
+                  label="PST (7%)"
+                />
+              </Box>
+            </Box>
             <TextField
               value={updatedTransaction?.defaultSubtotal}
               onChange={(e: any) => {
@@ -183,10 +264,23 @@ export default function EditFixedTransaction({
               }}
               sx={{ width: '100%' }}
               type="number"
+              fullWidth
             />
           </Grid>
 
-          <Grid item xs={6} display="flex" gap={1} flexDirection="column">
+          {(updatedTransaction?.hasGST || updatedTransaction?.hasPST) && (
+            <Grid item xs={12} display="flex" alignItems="center" gap={1}>
+              <Typography>
+                GST (5%): {updatedTransaction?.defaultGST?.toFixed(2) || 0}
+              </Typography>
+              <Divider orientation="vertical" flexItem sx={{ mx: 2 }} />
+              <Typography>
+                PST (7%): {updatedTransaction?.defaultPST?.toFixed(2) || 0}
+              </Typography>
+            </Grid>
+          )}
+
+          {/* <Grid item xs={6} display="flex" gap={1} flexDirection="column">
             <Typography variant="body1">Default PST</Typography>
             <TextField
               label="PST"
@@ -216,7 +310,7 @@ export default function EditFixedTransaction({
               }
               type="number"
             />
-          </Grid>
+          </Grid> */}
 
           <Grid item xs={12} display="flex" flexDirection="column" gap={1}>
             <Typography variant="body1">Default Total</Typography>
@@ -225,7 +319,7 @@ export default function EditFixedTransaction({
               onChange={(e: any) => {
                 setUpdatedTransaction({
                   ...updatedTransaction,
-                  defaultAmount: e.target.value,
+                  defaultAmount: +e.target.value,
                 });
               }}
               sx={{ width: '100%' }}

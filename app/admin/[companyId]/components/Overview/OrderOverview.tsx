@@ -208,8 +208,9 @@ export default function OrderOverview({
           <Box
             display="flex"
             justifyContent="space-between"
+            flexDirection={smDown ? 'column' : 'row'}
             gap={4}
-            alignItems="center"
+            alignItems={smDown ? 'flex-start' : 'center'}
           >
             <Box
               display="flex"
@@ -273,9 +274,10 @@ export default function OrderOverview({
           </Typography>
           <Box
             display="flex"
+            flexDirection={smDown ? 'column' : 'row'}
             justifyContent="space-between"
             gap={4}
-            alignItems="center"
+            alignItems={smDown ? 'flex-start' : 'center'}
           >
             <Box
               display="flex"
@@ -292,7 +294,9 @@ export default function OrderOverview({
                 fontWeight="bold"
                 sx={{ color: `${primaryColor} !important` }}
               >
-                {lastWeekTotalProfit.toFixed(2)}
+                {smDown
+                  ? minifyNumber(lastWeekTotalProfit)
+                  : lastWeekTotalProfit.toFixed(2)}
               </Typography>
             </Box>
             <Box
@@ -310,7 +314,9 @@ export default function OrderOverview({
                 fontWeight="bold"
                 sx={{ color: `${primaryColor} !important` }}
               >
-                {todayTotalProfit.toFixed(2)}
+                {smDown
+                  ? minifyNumber(todayTotalProfit)
+                  : todayTotalProfit.toFixed(2)}
               </Typography>
             </Box>
           </Box>
@@ -336,9 +342,10 @@ export default function OrderOverview({
           </Typography>
           <Box
             display="flex"
+            flexDirection={smDown ? 'column' : 'row'}
             justifyContent="space-between"
             gap={4}
-            alignItems="center"
+            alignItems={smDown ? 'flex-start' : 'center'}
           >
             <Box
               display="flex"
@@ -355,7 +362,9 @@ export default function OrderOverview({
                 fontWeight="bold"
                 sx={{ color: `${primaryColor} !important` }}
               >
-                {openBill.length}
+                {smDown
+                  ? minifyNumber(openBill.length)
+                  : openBill.length}
               </Typography>
             </Box>
             <Box
@@ -373,7 +382,9 @@ export default function OrderOverview({
                 fontWeight="bold"
                 sx={{ color: `${primaryColor} !important` }}
               >
-                {totalBill.toFixed(2)}
+                {smDown
+                  ? minifyNumber(totalBill)
+                  : totalBill.toFixed(2)}
               </Typography>
             </Box>
           </Box>

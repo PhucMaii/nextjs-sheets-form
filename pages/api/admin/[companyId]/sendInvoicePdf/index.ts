@@ -6,7 +6,7 @@ import { sendInvoiceThroughEmail } from '@/pages/api/utils/email';
 import { groupOrderByMMYYYY } from '../clients/debt';
 import { generateListOfDateString, YYYYMMDDFormat } from '@/app/utils/time';
 import { ORDER_STATUS } from '@/app/utils/enum';
-import { PrismaClient } from '@prisma/client';
+import { PaymentStatus, PrismaClient } from '@prisma/client';
 import { normalizeDate } from '@/pages/api/utils/date';
 import { formatItemsWithTotalPrice } from '@/pages/api/utils/order';
 
@@ -54,8 +54,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         companyId: Number(companyId),
         userId: client.id,
         status: {
-          in: [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED],
+          not: ORDER_STATUS.VOID,
         },
+        paymentStatus: PaymentStatus.Unpaid,
         deliveryDate: {
           in: listOfDateString,
         },

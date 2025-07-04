@@ -230,6 +230,8 @@ export interface IExpense extends Expense {
   paymentMethod: IPaymentMethod;
   vendors?: VendorExpense[];
   orderedItems?: OrderedItems[];
+  hasGST?: boolean; 
+  hasPST?: boolean;
 }
 
 export interface IPaymentMethod extends PaymentMethod {

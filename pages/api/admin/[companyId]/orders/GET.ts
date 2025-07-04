@@ -1,5 +1,5 @@
 import { ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
-import { OrderedItems, PrismaClient } from '@prisma/client';
+import { OrderedItems, PaymentStatus, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { normalizeDate } from '@/pages/api/utils/date';
 import { days } from '@/app/lib/constant';
@@ -141,8 +141,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const previousUnpaidCodOrders = await prisma.orders.findMany({
       where: {
         status: {
-          in: [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED],
+          not: ORDER_STATUS.VOID,
         },
+        paymentStatus: PaymentStatus.Unpaid,
         user: {
           preference: {
             paymentType: PAYMENT_TYPE.COD,

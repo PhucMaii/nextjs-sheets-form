@@ -6,6 +6,9 @@ import {
   Modal,
   Select,
   TextField,
+  Box,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { ModalProps } from '../type';
@@ -23,7 +26,7 @@ import useEmployee from '@/hooks/select/useEmployee';
 import SelectExpenseStatus from '../../Select/SelectExpenseStatus';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import axios from 'axios';
-import { mainPaymentMethodId } from '@/app/lib/constant';
+import { gstRate, mainPaymentMethodId, pstRate } from '@/app/lib/constant';
 import dayjs from 'dayjs';
 import { fetchApi } from '@/app/utils/db';
 import { useParams } from 'next/navigation';
@@ -87,20 +90,48 @@ export default function AddFixedTransaction({
     }
   }, [open]);
 
+  // useEffect(() => {
+  //   // if (newFixedTransaction?.defaultSubtotal) {
+  //   setNewFixedTransaction({
+  //     ...newFixedTransaction,
+  //     defaultAmount:
+  //       (newFixedTransaction?.defaultSubtotal || 0) +
+  //       (newFixedTransaction.defaultPST || 0) +
+  //       (newFixedTransaction.defaultGST || 0),
+  //   });
+  //   // }
+  // }, [
+  //   newFixedTransaction?.defaultSubtotal,
+  //   newFixedTransaction?.defaultPST,
+  //   newFixedTransaction?.defaultGST,
+  // ]);
+
   useEffect(() => {
-    // if (newFixedTransaction?.defaultSubtotal) {
-    setNewFixedTransaction({
-      ...newFixedTransaction,
-      defaultAmount:
-        (newFixedTransaction?.defaultSubtotal || 0) +
-        (newFixedTransaction.defaultPST || 0) +
-        (newFixedTransaction.defaultGST || 0),
-    });
-    // }
+    if (newFixedTransaction?.defaultSubtotal) {
+      const gst =
+        Math.round(
+          (newFixedTransaction?.hasGST
+            ? newFixedTransaction?.defaultSubtotal * gstRate
+            : 0) * 100,
+        ) / 100;
+      const pst =
+        Math.round(
+          (newFixedTransaction?.hasPST
+            ? newFixedTransaction?.defaultSubtotal * pstRate
+            : 0) * 100,
+        ) / 100;
+
+      setNewFixedTransaction((prevState: any) => ({
+        ...prevState,
+        defaultGST: gst,
+        defaultPST: pst,
+        defaultAmount: prevState?.defaultSubtotal + gst + pst,
+      }));
+    }
   }, [
     newFixedTransaction?.defaultSubtotal,
-    newFixedTransaction?.defaultPST,
-    newFixedTransaction?.defaultGST,
+    newFixedTransaction?.hasGST,
+    newFixedTransaction?.hasPST,
   ]);
 
   const fetchPaymentMethods = async () => {
@@ -216,7 +247,44 @@ export default function AddFixedTransaction({
           </Grid> */}
 
           <Grid item xs={12} display="flex" gap={1} flexDirection="column">
-            <Typography variant="body1">Default Subtotal</Typography>
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              gap={2}
+            >
+              <Typography variant="body1">Default Subtotal</Typography>
+              <Box display="flex" alignItems="center" gap={2}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={newFixedTransaction?.hasGST || false}
+                      onChange={(e) =>
+                        setNewFixedTransaction({
+                          ...newFixedTransaction,
+                          hasGST: e.target.checked,
+                        })
+                      }
+                    />
+                  }
+                  label="GST (5%)"
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={newFixedTransaction?.hasPST || false}
+                      onChange={(e) =>
+                        setNewFixedTransaction({
+                          ...newFixedTransaction,
+                          hasPST: e.target.checked,
+                        })
+                      }
+                    />
+                  }
+                  label="PST (7%)"
+                />
+              </Box>
+            </Box>
             <TextField
               label="Subtotal"
               fullWidth
@@ -231,7 +299,19 @@ export default function AddFixedTransaction({
             />
           </Grid>
 
-          <Grid item xs={6} display="flex" gap={1} flexDirection="column">
+          {(newFixedTransaction?.hasGST || newFixedTransaction?.hasPST) && (
+            <Grid item xs={12} display="flex" gap={1} alignItems="center">
+              <Typography>
+                GST (5%): {newFixedTransaction?.defaultGST?.toFixed(2) || 0}
+              </Typography>
+              <Divider orientation="vertical" flexItem sx={{ mx: 2 }} />
+              <Typography>
+                PST (7%): {newFixedTransaction?.defaultPST?.toFixed(2) || 0}
+              </Typography>
+            </Grid>
+          )}
+
+          {/* <Grid item xs={6} display="flex" gap={1} flexDirection="column">
             <Typography variant="body1">Default PST</Typography>
             <TextField
               label="PST"
@@ -261,7 +341,7 @@ export default function AddFixedTransaction({
               }
               type="number"
             />
-          </Grid>
+          </Grid> */}
 
           <Grid item xs={12} display="flex" gap={1} flexDirection="column">
             <Typography variant="body1">Default Total</Typography>

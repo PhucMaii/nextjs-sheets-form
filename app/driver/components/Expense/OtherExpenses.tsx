@@ -9,6 +9,9 @@ import { LoadingButton } from '@mui/lab';
 import {
   AlertColor,
   Box,
+  Checkbox,
+  Divider,
+  FormControlLabel,
   Grid,
   MenuItem,
   Select,
@@ -16,7 +19,7 @@ import {
   Typography,
 } from '@mui/material';
 import axios from 'axios';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface IProps {
   showNotification: (type: AlertColor, message: string) => void;
@@ -47,6 +50,24 @@ export default function OtherExpenses({ showNotification }: IProps) {
       [field]: value,
     });
   };
+
+  useEffect(() => {
+    if (newExpense && newExpense?.subTotal) {
+      const gst = Math.round(newExpense?.hasGST ? newExpense?.subTotal * 0.05 : 0) * 100 / 100;
+      const pst = Math.round(newExpense?.hasPST ? newExpense?.subTotal * 0.07 : 0) * 100 / 100;
+
+      setNewExpense((prevState: any) => ({
+        ...prevState,
+        GST: gst,
+        PST: pst,
+        amount: prevState?.subTotal + gst + pst - (prevState?.discount || 0),
+      }));
+    }
+  }, [
+    newExpense?.hasGST,
+    newExpense?.hasPST,
+    newExpense?.discount,
+  ]);
 
   const handleAddExpense = async () => {
     try {
@@ -96,19 +117,48 @@ export default function OtherExpenses({ showNotification }: IProps) {
       </Box> */}
       <Grid container spacing={2}>
         <Grid item xs={12}>
-          <Box display="flex" flexDirection="column" gap={2}>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            gap={2}
+          >
             <Typography variant="h6">Subtotal</Typography>
-            <TextField
-              label="Subtotal"
-              placeholder="Subtotal"
-              fullWidth
-              value={newExpense.subTotal}
-              type="number"
-              onChange={(e) => onChangeNewExpense('subTotal', +e.target.value)}
-            />
+            <Box display="flex" alignItems="center" gap={2}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={newExpense?.hasGST || false}
+                    onChange={(e) =>
+                      onChangeNewExpense('hasGST', e.target.checked)
+                    }
+                  />
+                }
+                label="GST (5%)"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={newExpense?.hasPST || false}
+                    onChange={(e) =>
+                      onChangeNewExpense('hasPST', e.target.checked)
+                    }
+                  />
+                }
+                label="PST (7%)"
+              />
+            </Box>
           </Box>
+          <TextField
+            label="Subtotal"
+            placeholder="Subtotal"
+            fullWidth
+            value={newExpense.subTotal}
+            type="number"
+            onChange={(e) => onChangeNewExpense('subTotal', +e.target.value)}
+          />
         </Grid>
-        <Grid item md={6} xs={12}>
+        {/* <Grid item md={6} xs={12}>
           <Box display="flex" flexDirection="column" gap={2}>
             <Typography variant="h6">GST (5%)</Typography>
             <TextField
@@ -131,7 +181,22 @@ export default function OtherExpenses({ showNotification }: IProps) {
               onChange={(e) => onChangeNewExpense('PST', +e.target.value)}
             />
           </Box>
-        </Grid>
+        </Grid> */}
+        {(newExpense?.hasGST || newExpense?.hasPST) && (
+          <Grid
+            item
+            xs={12}
+            sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
+          >
+            <Typography>
+              GST (5%): {newExpense?.GST?.toFixed(2) || 0}
+            </Typography>
+            <Divider orientation="vertical" flexItem />
+            <Typography>
+              PST (7%): {newExpense?.PST?.toFixed(2) || 0}
+            </Typography>
+          </Grid>
+        )}
         <Grid item xs={12}>
           <Box display="flex" flexDirection="column" gap={2}>
             <Typography variant="h6">Total</Typography>

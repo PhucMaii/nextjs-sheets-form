@@ -16,6 +16,7 @@ import {
 } from '@mui/material';
 import { sendChequeMsg } from '@/app/lib/constant';
 import { grey } from '@mui/material/colors';
+import { PaymentStatus } from '@prisma/client';
 
 interface IProps {
   client: UserType | null;
@@ -33,7 +34,7 @@ export const WeeklyStatement = forwardRef(
     const filteredOrders = orders.filter((order: Order) => {
       return (
         order.status !== ORDER_STATUS.VOID &&
-        order.status !== ORDER_STATUS.COMPLETED
+        order.paymentStatus !== PaymentStatus.Paid
       );
     });
 

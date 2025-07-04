@@ -16,6 +16,7 @@ import { grey } from '@mui/material/colors';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import useApiDebtData from '@/hooks/useApiDebtData';
 import { sendChequeMsg } from '@/app/lib/constant';
+import { PaymentStatus } from '@prisma/client';
 
 interface PropTypes {
   client: UserType | null;
@@ -37,7 +38,7 @@ export const InvoicePrint = forwardRef(
       }
       return (
         order.status !== ORDER_STATUS.VOID &&
-        order.status !== ORDER_STATUS.COMPLETED
+        order.paymentStatus !== PaymentStatus.Paid
       );
     });
 
