@@ -7,6 +7,7 @@ import { UserType } from '@/app/utils/type';
 import { Order } from '../../orders/page';
 import { sendChequeMsg } from '@/app/lib/constant';
 import { styles } from './styles';
+import { PaymentStatus } from '@prisma/client';
 
 interface IProps {
   client: UserType | null;
@@ -30,7 +31,7 @@ const InvoiceDocument: React.FC<IProps> = ({
     }
     return (
       order.status !== ORDER_STATUS.VOID &&
-      order.status !== ORDER_STATUS.COMPLETED
+      order.paymentStatus !== PaymentStatus.Paid
     );
   });
   const today = new Date();

@@ -15,7 +15,9 @@ import {
   OutlinedInput,
   Skeleton,
   Switch,
+  Theme,
   Typography,
+  useMediaQuery,
 } from '@mui/material';
 import { ShadowSection } from '../../reports/styled';
 import OrderedItemsTable from '../../components/Tables/OrderedItemsTable';
@@ -96,6 +98,8 @@ const OrderDetailsPage = () => {
   const [isUpdatingNotes, setIsUpdatingNotes] = useState<boolean>(false);
   const [isMarking, setIsMarking] = useState<boolean>(false);
   const printRef = useRef<HTMLDivElement>(null);
+
+  const smDown = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'));
 
   useEffect(() => {
     if (order) {
@@ -393,31 +397,46 @@ const OrderDetailsPage = () => {
           showNotification={showNotification}
         />
       )}
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Box display="flex" gap={1} alignItems="center">
-          <IconButton onClick={() => router.back()}>
-            <ArrowBackIos />
-          </IconButton>
-          <Typography variant="h5">#{order?.id}</Typography>
-          <StatusText type={statusText.type} text={statusText.text} />
-          {order?.enteredOrderAt && (
-            <Chip
-              label={`Take client ${moment(order?.orderTime).diff(order?.enteredOrderAt, 'seconds')}s to place an order`}
-              color="primary"
-              size="small"
-              sx={{ fontSize: 12 }}
-              variant="outlined"
-            />
-          )}
-          {order?.delivery?.startTripAt && order?.delivery?.deliveredAt && (
-            <Chip
-              label={`Take driver ${moment(order?.delivery?.deliveredAt).diff(moment(order?.delivery?.startTripAt), 'minutes')}m to deliver`}
-              color="primary"
-              size="small"
-              sx={{ fontSize: 12 }}
-              variant="outlined"
-            />
-          )}
+      <Box
+        display="flex"
+        justifyContent={smDown ? 'center' : 'space-between'}
+        alignItems={smDown ? 'flex-start' : 'center'}
+        flexDirection={smDown ? 'column' : 'row'}
+        gap={smDown ? 1 : 0}
+      >
+        <Box
+          display="flex"
+          gap={1}
+          alignItems={smDown ? 'flex-start' : 'center'}
+          flexDirection={smDown ? 'column' : 'row'}
+        >
+          <Box display="flex" gap={1} alignItems="center">
+            <IconButton onClick={() => router.back()}>
+              <ArrowBackIos />
+            </IconButton>
+            <Typography variant="h5">#{order?.id}</Typography>
+            <StatusText type={statusText.type} text={statusText.text} />
+          </Box>
+          <Box display="flex" gap={1} alignItems="center">
+            {order?.enteredOrderAt && (
+              <Chip
+                label={`Take client ${moment(order?.orderTime).diff(order?.enteredOrderAt, 'seconds')}s to place an order`}
+                color="primary"
+                size="small"
+                sx={{ fontSize: 12 }}
+                variant="outlined"
+              />
+            )}
+            {order?.delivery?.startTripAt && order?.delivery?.deliveredAt && (
+              <Chip
+                label={`Take driver ${moment(order?.delivery?.deliveredAt).diff(moment(order?.delivery?.startTripAt), 'minutes')}m to deliver`}
+                color="primary"
+                size="small"
+                sx={{ fontSize: 12 }}
+                variant="outlined"
+              />
+            )}
+          </Box>
         </Box>
 
         <Box display="flex" gap={1} alignItems="center">

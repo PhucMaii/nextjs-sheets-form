@@ -81,20 +81,44 @@ export default function AddExpense({
     }
   }, [adminsAndDriversRes]);
 
+  // useEffect(() => {
+  //   setNewExpense({
+  //     ...newExpense,
+  //     amount:
+  //       newExpense.subTotal +
+  //       newExpense.GST +
+  //       newExpense.PST -
+  //       newExpense.discount,
+  //   });
+  // }, [
+  //   newExpense.PST,
+  //   newExpense.GST,
+  //   newExpense.subTotal,
+  //   newExpense.discount,
+  // ]);
+
   useEffect(() => {
-    setNewExpense({
-      ...newExpense,
-      amount:
-        newExpense.subTotal +
-        newExpense.GST +
-        newExpense.PST -
-        newExpense.discount,
-    });
+    if (newExpense?.subTotal) {
+      const gst =
+        Math.round(
+          (newExpense?.hasGST ? newExpense?.subTotal * 0.05 : 0) * 100,
+        ) / 100;
+      const pst =
+        Math.round(
+          (newExpense?.hasPST ? newExpense?.subTotal * 0.07 : 0) * 100,
+        ) / 100;
+      setNewExpense({
+        ...newExpense,
+        GST: gst,
+        PST: pst,
+        amount: newExpense?.subTotal + gst + pst - (newExpense?.discount || 0),
+      });
+    }
   }, [
-    newExpense.PST,
-    newExpense.GST,
-    newExpense.subTotal,
-    newExpense.discount,
+    newExpense?.subTotal,
+    newExpense?.hasGST,
+    newExpense?.hasPST,
+    newExpense?.discount,
   ]);
 
   const handleAddExpense = async () => {

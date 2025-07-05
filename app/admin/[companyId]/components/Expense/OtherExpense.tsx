@@ -2,6 +2,9 @@ import { IPaymentMethod } from '@/app/utils/type';
 import { LoadingButton } from '@mui/lab';
 import {
   Box,
+  Checkbox,
+  Divider,
+  FormControlLabel,
   Grid,
   MenuItem,
   Select,
@@ -74,19 +77,64 @@ export default function OtherExpense({
           </Box>
         </Grid>
         <Grid item xs={12}>
-          <Box display="flex" flexDirection="column" gap={1}>
+          {/* <Box display="flex" flexDirection="column" gap={1}> */}
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            gap={2}
+          >
             <Typography variant="h6">Subtotal</Typography>
-            <TextField
-              label="Subtotal"
-              placeholder="Subtotal"
-              fullWidth
-              value={newExpense.subTotal}
-              type="number"
-              onChange={(e) => onChangeNewExpense('subTotal', +e.target.value)}
-            />
+            <Box display="flex" alignItems="center" gap={2}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={newExpense?.hasGST || false}
+                    onChange={(e) =>
+                      onChangeNewExpense('hasGST', e.target.checked)
+                    }
+                  />
+                }
+                label="GST (5%)"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={newExpense?.hasPST || false}
+                    onChange={(e) =>
+                      onChangeNewExpense('hasPST', e.target.checked)
+                    }
+                  />
+                }
+                label="PST (7%)"
+              />
+            </Box>
           </Box>
+
+          <TextField
+            label="Subtotal"
+            placeholder="Subtotal"
+            fullWidth
+            value={newExpense.subTotal}
+            type="number"
+            onChange={(e) => onChangeNewExpense('subTotal', +e.target.value)}
+          />
+          {/* </Box> */}
         </Grid>
-        <Grid item md={6} xs={12}>
+        {(newExpense?.hasGST || newExpense?.hasPST) && (
+          <Grid item xs={12}>
+            <Box display="flex" alignItems="center" gap={2}>
+              <Typography>
+                GST (5%): {newExpense?.GST?.toFixed(2) || 0}
+              </Typography>
+              <Divider orientation="vertical" flexItem />
+              <Typography>
+                PST (7%): {newExpense?.PST?.toFixed(2) || 0}
+              </Typography>
+            </Box>
+          </Grid>
+        )}
+        {/* <Grid item md={6} xs={12}>
           <Box display="flex" flexDirection="column" gap={1}>
             <Typography variant="h6">GST (5%)</Typography>
             <TextField
@@ -109,7 +157,7 @@ export default function OtherExpense({
               onChange={(e) => onChangeNewExpense('PST', +e.target.value)}
             />
           </Box>
-        </Grid>
+        </Grid> */}
         <Grid item xs={12}>
           <Box display="flex" flexDirection="column" gap={1}>
             <Typography variant="h6">Total</Typography>

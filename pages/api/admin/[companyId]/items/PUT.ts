@@ -130,11 +130,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       delete updatedData.prevPrice;
     }
 
-    // Update PRICE / NAME all items has same inventory id
     if (
       updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME &&
       existingItem.inventoryItemId
     ) {
+      console.log('updatedData', { updatedData, updatedFields });
       await prisma.item.updateMany({
         where: {
           inventoryItemId: existingItem.inventoryItemId,

@@ -1,6 +1,6 @@
 import { ORDER_STATUS } from '@/app/utils/enum';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
-import { Orders, PrismaClient } from '@prisma/client';
+import { Orders, PaymentStatus, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IQuery {
@@ -27,17 +27,18 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
-    const incompletedOrders = await prisma.orders.findMany({
+    const unpaidOrders = await prisma.orders.findMany({
       where: {
         userId: Number(userId),
+        paymentStatus: PaymentStatus.Unpaid,
         status: {
-          in: [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED],
+          not: ORDER_STATUS.VOID,
         },
         companyId: Number(companyId),
       },
     });
 
-    if (incompletedOrders.length === 0) {
+    if (unpaidOrders.length === 0) {
       return res.status(200).json({
         data: [],
         message: 'User Has No Debt',
@@ -46,7 +47,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // Group order by mm/yyyy
     const debtOrdersByMonth = groupOrderByMMYYYY(
-      incompletedOrders,
+      unpaidOrders,
       endMonth,
       endYear,
     );

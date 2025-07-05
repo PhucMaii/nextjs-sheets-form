@@ -178,7 +178,6 @@ export default function FixedTransactionsPage() {
           //   });
           // }}
           dayCellContent={(params) => {
-            console.log(params);
             const date = YYYYMMDDFormat(params.date);
             const dateFixedTransactions = fixedTransactions
               .filter((transaction: any) => {

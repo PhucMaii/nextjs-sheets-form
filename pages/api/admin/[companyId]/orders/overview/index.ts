@@ -283,8 +283,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         where: {
           companyId: Number(companyId),
           status: {
-            in: [ORDER_STATUS.INCOMPLETED, ORDER_STATUS.DELIVERED],
+            not: ORDER_STATUS.VOID,
           },
+          paymentStatus: PaymentStatus.Unpaid,
           deliveryDate: {
             in: debtRange,
           },
