@@ -120,6 +120,33 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
+  const users = await prisma.user.findMany({
+    where: {
+      companyId: 1,
+      type: 'Inactive',
+    },
+  });
+
+  const inactiveUserIds = users.map((user) => user.id); 
+
+  const inactiveUserRoutes = await prisma.userRoute.deleteMany({
+    where: {
+      userId: {
+        in: inactiveUserIds,
+      },
+    },
+  });
+
+  const inactiveUserSchedules = await prisma.scheduleOrders.deleteMany({
+    where: {
+      userId: {
+        in: inactiveUserIds,
+      },
+    },
+  });
+
+  console.log(inactiveUserRoutes);
+  console.log(inactiveUserSchedules);
   // const monthlyDrivers = await prisma.shiftSession.updateMany({
   //   where: {
   //     employee: {

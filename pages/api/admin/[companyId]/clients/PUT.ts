@@ -119,9 +119,14 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         },
       });
 
-      // If updateFields.type === inactive, then delete all schedule orders
+      // If updateFields.type === inactive, then delete all schedule orders and user routes
       if (updateFields.type === USER_CATEGORIZED.INACTIVE) {
         await prisma.scheduleOrders.deleteMany({
+          where: {
+            userId: userId,
+          },
+        });
+        await prisma.userRoute.deleteMany({
           where: {
             userId: userId,
           },
