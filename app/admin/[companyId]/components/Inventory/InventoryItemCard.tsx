@@ -194,11 +194,12 @@ const InventoryItemCard = ({
               size="small"
               variant="outlined"
               endIcon={<ExternalLink size={14} />}
-              onClick={() =>
+              onClick={(e: any) => {
+                e.stopPropagation();
                 router.push(
                   `/admin/${companyId}/inventory/bulk/selling-items/${item.id}`,
-                )
-              }
+                );
+              }}
               sx={{
                 textTransform: 'none',
                 fontSize: '0.75rem',
@@ -221,6 +222,7 @@ const InventoryItemCard = ({
             onChange={(e) => onChangeType(Number(e.target.value))}
             size="small"
             sx={{ minWidth: 120 }}
+            onClick={(e: any) => e.stopPropagation()}
           >
             {itemTypes.map((type: ItemType) => (
               <MenuItem key={type.id} value={type.id}>

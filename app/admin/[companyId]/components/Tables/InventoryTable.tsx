@@ -55,7 +55,8 @@ const InventoryTable = ({
 
   // const isMobile = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
-  const handleDelete = async (targetObj: IInventoryItem) => {
+  const handleDelete = async (e: any, targetObj: IInventoryItem) => {
+    e.stopPropagation();
     setIsLoading(true);
     try {
       const response = await axios.delete(
@@ -110,7 +111,7 @@ const InventoryTable = ({
   };
 
   const onSelectItem = (e: any, item: IInventoryItem) => {
-    // e.stopPropagation();
+    e.stopPropagation();
     console.log('onSelectItem', e, item);
     const isExisted = selectedItems.find((i) => i.id === item.id);
 

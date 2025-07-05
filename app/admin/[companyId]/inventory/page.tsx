@@ -24,11 +24,10 @@ import {
   Clock,
   Plus,
   AlertTriangle,
-  CheckCircle,
   AlertCircle,
 } from 'lucide-react';
 import TrackInventoryRecord from '../components/Modals/TrackInventoryRecord';
-import { useParams, useRouterf } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { ShadowSection } from '../reports/styled';
 import AddInventory from '../components/Modals/add/AddInventory';
 import { minThreshold } from '@/app/lib/constant';

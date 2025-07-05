@@ -103,7 +103,6 @@ export default function StockItems({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isOpenBulkTypeUpdate, setIsOpenBulkTypeUpdate] =
     useState<boolean>(false);
-  const [isOpenAddItem, setIsOpenAddItem] = useState<boolean>(false);
   const [singleFieldProps, setSingleFieldProps] = useState<any>({
     open: false,
     mode: 'add',
