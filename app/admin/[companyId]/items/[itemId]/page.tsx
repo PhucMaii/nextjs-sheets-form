@@ -36,6 +36,7 @@ import DeleteModal from '../../components/Modals/delete/DeleteModal';
 import EditItemAvailability from '../../components/Modals/edit/EditItemAvailability';
 import VariantTable from './VariantTable';
 import BulkEditOptions from '../../components/Bulk/BulkEditOptions';
+import Image from 'next/image';
 
 export default function ItemPage() {
   const { companyId, itemId }: any = useParams();
@@ -403,14 +404,40 @@ export default function ItemPage() {
               <>
                 {variants?.length === 0 && (
                   <ShadowSection sx={{ mt: 1 }}>
-                    <Box display="flex" gap={0.5} alignItems="center">
-                      <Checkbox
-                        checked={updatedFields.includes('price') || false}
-                        onChange={() => onSelectToUpdateFields('price')}
+                    <Box
+                      display="flex"
+                      gap={1}
+                      alignItems="center"
+                      justifyContent="space-between"
+                    >
+                      <Box display="flex" gap={0.5} alignItems="center">
+                        <Checkbox
+                          checked={updatedFields.includes('price') || false}
+                          onChange={() => {
+                            onSelectToUpdateFields('price');
+                            onSelectToUpdateFields('prevPrice');
+                            onSelectToUpdateFields('isShowDiscount');
+                          }}
+                        />
+                        <Typography variant="subtitle2" fontWeight={700}>
+                          Pricing
+                        </Typography>
+                      </Box>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={item?.isShowDiscount || false}
+                            onChange={(e) =>
+                              setItem((prev: any) => ({
+                                ...prev,
+                                isShowDiscount: e.target.checked,
+                              }))
+                            }
+                          />
+                        }
+                        label="Show Discount"
+                        sx={{ mt: 1, px: '9px' }} // to be aligned with the checkbox
                       />
-                      <Typography variant="subtitle2" fontWeight={700}>
-                        Pricing
-                      </Typography>
                     </Box>
                     <Grid
                       container
@@ -418,7 +445,7 @@ export default function ItemPage() {
                       alignItems="center"
                       sx={{ mt: 1 }}
                     >
-                      <Grid item xs={12} md={6}>
+                      <Grid item xs={12} md={item?.isShowDiscount ? 6 : 12}>
                         <Box
                           display="flex"
                           flexDirection="column"
@@ -442,36 +469,38 @@ export default function ItemPage() {
                           />
                         </Box>
                       </Grid>
-                      <Grid item xs={12} md={6}>
-                        <Box
-                          display="flex"
-                          flexDirection="column"
-                          sx={{ width: '100%' }}
-                        >
-                          <Typography variant="subtitle2">
-                            Previous Price
-                          </Typography>
-                          <OutlinedInput
-                            fullWidth
-                            placeholder="Enter previous price"
-                            value={item?.prevPrice || 0}
-                            onChange={(e) =>
-                              setItem((prev: any) => ({
-                                ...prev,
-                                prevPrice: Number(e.target.value),
-                              }))
-                            }
-                            sx={{ mt: 1 }}
-                            startAdornment={
-                              <InputAdornment position="start">
-                                $
-                              </InputAdornment>
-                            }
-                            type="number"
-                          />
-                        </Box>
-                      </Grid>
-                      <Grid item xs={12}>
+                      {item?.isShowDiscount && (
+                        <Grid item xs={12} md={6}>
+                          <Box
+                            display="flex"
+                            flexDirection="column"
+                            sx={{ width: '100%' }}
+                          >
+                            <Typography variant="subtitle2">
+                              Previous Price
+                            </Typography>
+                            <OutlinedInput
+                              fullWidth
+                              placeholder="Enter previous price"
+                              value={item?.prevPrice || 0}
+                              onChange={(e) =>
+                                setItem((prev: any) => ({
+                                  ...prev,
+                                  prevPrice: Number(e.target.value),
+                                }))
+                              }
+                              sx={{ mt: 1 }}
+                              startAdornment={
+                                <InputAdornment position="start">
+                                  $
+                                </InputAdornment>
+                              }
+                              type="number"
+                            />
+                          </Box>
+                        </Grid>
+                      )}
+                      {/* <Grid item xs={12}>
                         <FormControlLabel
                           control={
                             <Checkbox
@@ -487,7 +516,7 @@ export default function ItemPage() {
                           label="Show Discount"
                           sx={{ mt: 1, px: '9px' }} // to be aligned with the checkbox
                         />
-                      </Grid>
+                      </Grid> */}
                       <Grid item xs={12}>
                         <Divider sx={{ my: 1 }} />
                       </Grid>
@@ -718,7 +747,7 @@ export default function ItemPage() {
                       Upload Image
                     </Button>
                   )}
-                  <img
+                  <Image
                     src={image || ''}
                     alt="Inventory Item"
                     style={{
@@ -727,6 +756,8 @@ export default function ItemPage() {
                       opacity: isImgHovered ? 0.5 : 1,
                       filter: isImgHovered ? 'blur(2px)' : 'none',
                     }}
+                    width={100}
+                    height={100}
                   />
                 </Box>
               </Box>
