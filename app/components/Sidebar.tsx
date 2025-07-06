@@ -148,8 +148,8 @@ export default function Sidebar({ children }: PropTypes) {
           gap={2}
           sx={{ mb: 10, p: 1 }}
         >
-          {/* <HolidayText />
-          {children} */}
+          {/* <HolidayText /> */}
+          {children}
         </Box>
         {isOpenSnackbar && (
           <Snackbar
