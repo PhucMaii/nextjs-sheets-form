@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { limitOrderHour } from '@/app/lib/constant';
 import { Order } from '@/app/admin/[companyId]/orders/page';
 import { UserType } from '@/app/utils/type';
@@ -23,28 +23,27 @@ import ViewDelivery from '@/app/components/Modals/ViewDelivery';
 export default function MainPage() {
   const [client, setClient] = useState<UserType | null>();
   const [isOpenViewDelivery, setIsOpenViewDelivery] = useState<boolean>(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [isTomorrow, setIsTomorrow] = useState<boolean>(() => {
-    // format initial date
+
+  // Memoize isTomorrow calculation
+  const isTomorrow = useMemo(() => {
     const dateObj = new Date();
-    // if current hour is greater limit hour, then tomorrrow is more concern
-    if (dateObj.getHours() >= limitOrderHour) {
-      return true;
-    }
-    return false;
-  });
+    return dateObj.getHours() >= limitOrderHour;
+  }, []);
+
   const [userOrders, setUserOrders] = useState<Order[]>([]);
   const [thisMonthOrders, setThisMonthOrders] = useState<Order[]>([]);
 
   const router: any = useRouter();
   const { showNotification, NotificationComp } = useNotification();
 
-  const dateRange = generateMonthRange();
-
-  // set date to tomorrow
-  const today = new Date();
-  const endDate = dateRange[1];
-  endDate.setDate(today.getDate() + 2);
+  // Memoize date range calculation
+  const dateRange = useMemo(() => {
+    const range = generateMonthRange();
+    const today = new Date();
+    const endDate = range[1];
+    endDate.setDate(today.getDate() + 2);
+    return range;
+  }, []);
 
   const {
     data: clientOrders,
@@ -56,104 +55,114 @@ export default function MainPage() {
       const response = await axios.get(
         `/api/order?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
       );
-      return response.data;
+      return response.data.data;
     },
   });
 
-  // Whenever the component is mounted, refetch the data
   useEffect(() => {
     refetch();
   }, []);
 
-  useEffect(() => {
-    if (clientOrders) {
-      initializeUser();
-    }
-  }, [clientOrders]);
+  // Memoize processed data to avoid recalculating on every render
+  const processedData = useMemo(() => {
+    if (!clientOrders) return null;
 
-  useEffect(() => {
-    if (
-      clientOrders?.data?.todayDeliveredOrder?.delivery &&
-      !clientOrders?.data?.todayDeliveredOrder?.delivery?.isViewed
-    ) {
-      setIsOpenViewDelivery(true);
-    }
-  }, [clientOrders?.data?.todayDeliveredOrder?.delivery]);
-
-  const handleDeleteOrder = async (orderId: number) => {
-    try {
-      const response = await axios.put(`/api/order/status`, {
-        orderId,
-        updatedStatus: ORDER_STATUS.VOID,
-      });
-
-      if (response.data.error) {
-        showNotification('error', response.data.error);
-        return;
-      }
-
-      const newThisMonthOrders = thisMonthOrders.filter((order: Order) => {
-        return order.id !== orderId;
-      });
-
-      showNotification('success', response.data.message);
-
-      const newUserOrders = userOrders.filter(
-        (order: Order) => order.id !== orderId,
-      );
-      setUserOrders(newUserOrders);
-      setThisMonthOrders(newThisMonthOrders);
-    } catch (error: any) {
-      console.log('Internal Server Error: ', error);
-      showNotification('error', 'Fail to delete the order: ' + error);
-    }
-  };
-
-  const initializeUser = () => {
     const dateObj = new Date();
     if (dateObj.getHours() >= limitOrderHour) {
       dateObj.setDate(dateObj.getDate() + 1);
     }
     const formattedDate = YYYYMMDDFormat(dateObj);
-    const userOrderList = clientOrders.data.userOrders;
-    const orderToday = userOrderList
-      .filter((order: Order) => {
-        return order.deliveryDate === formattedDate;
-      })
-      .map((order: Order) => {
-        return { ...clientOrders.data.user, ...order };
-      });
+    const userOrderList = clientOrders.userOrders;
 
-    setClient(clientOrders.data.user);
-    setUserOrders(orderToday);
+    const orderToday = userOrderList
+      .filter((order: Order) => order.deliveryDate === formattedDate)
+      .map((order: Order) => ({ ...clientOrders.user, ...order }));
 
     const orderList = filterDateRangeOrders(
-      clientOrders.data.userOrders,
+      userOrderList,
       dateRange[0],
       dateRange[1],
     );
 
-    setThisMonthOrders(orderList);
-  };
+    return {
+      user: clientOrders.user,
+      todayOrders: orderToday,
+      monthOrders: orderList,
+    };
+  }, [clientOrders, dateRange]);
 
-  const handleUpdateOrderUI = (updatedOrder: Order) => {
-    const newOrders = thisMonthOrders.map((order: Order) => {
-      if (order.id === updatedOrder.id) {
-        return updatedOrder;
+  // Update states when processed data changes
+  useEffect(() => {
+    if (processedData) {
+      // Batch state updates to prevent multiple re-renders
+      setClient(processedData.user);
+      setUserOrders(processedData.todayOrders);
+      setThisMonthOrders(processedData.monthOrders);
+    }
+  }, [processedData]);
+
+  useEffect(() => {
+    if (
+      clientOrders?.todayDeliveredOrder?.delivery &&
+      !clientOrders?.todayDeliveredOrder?.delivery?.isViewed
+    ) {
+      setIsOpenViewDelivery(true);
+    }
+  }, [clientOrders?.todayDeliveredOrder?.delivery]);
+
+  const handleDeleteOrder = useCallback(
+    async (orderId: number) => {
+      try {
+        const response = await axios.put(`/api/order/status`, {
+          orderId,
+          updatedStatus: ORDER_STATUS.VOID,
+        });
+
+        if (response.data.error) {
+          showNotification('error', response.data.error);
+          return;
+        }
+
+        const newThisMonthOrders = thisMonthOrders.filter((order: Order) => {
+          return order.id !== orderId;
+        });
+
+        showNotification('success', response.data.message);
+
+        const newUserOrders = userOrders.filter(
+          (order: Order) => order.id !== orderId,
+        );
+        setUserOrders(newUserOrders);
+        setThisMonthOrders(newThisMonthOrders);
+      } catch (error: any) {
+        console.log('Internal Server Error: ', error);
+        showNotification('error', 'Fail to delete the order: ' + error);
       }
-      return order;
-    });
+    },
+    [thisMonthOrders, userOrders, showNotification],
+  );
 
-    const todayOrders = userOrders.map((order: Order) => {
-      if (order.id === updatedOrder.id) {
-        return updatedOrder;
-      }
-      return order;
-    });
+  const handleUpdateOrderUI = useCallback(
+    (updatedOrder: Order) => {
+      const newOrders = thisMonthOrders.map((order: Order) => {
+        if (order.id === updatedOrder.id) {
+          return updatedOrder;
+        }
+        return order;
+      });
 
-    setThisMonthOrders(newOrders);
-    setUserOrders(todayOrders);
-  };
+      const todayOrders = userOrders.map((order: Order) => {
+        if (order.id === updatedOrder.id) {
+          return updatedOrder;
+        }
+        return order;
+      });
+
+      setThisMonthOrders(newOrders);
+      setUserOrders(todayOrders);
+    },
+    [thisMonthOrders, userOrders],
+  );
 
   if (isValidating && !clientOrders) {
     return (
@@ -171,7 +180,7 @@ export default function MainPage() {
       <ViewDelivery
         open={isOpenViewDelivery}
         onClose={() => setIsOpenViewDelivery(false)}
-        order={clientOrders?.data?.todayDeliveredOrder}
+        order={clientOrders?.todayDeliveredOrder}
         isDisableCloseOnClickOutside={true}
       />
       {NotificationComp}
@@ -195,7 +204,7 @@ export default function MainPage() {
         <Grid item xs={12}>
           <OverviewCard
             text="Over Due"
-            value={clientOrders?.data?.dueAmount?.toFixed(2) || 0}
+            value={clientOrders?.dueAmount?.toFixed(2) || 0}
             icon={
               <AttachMoneyIcon
                 sx={{ fontSize: 50 }}
@@ -208,7 +217,7 @@ export default function MainPage() {
         <Grid item xs={6}>
           <OverviewCard
             text="Current Month ($)"
-            value={clientOrders?.data?.currentMonthBill?.toFixed(2) || 0}
+            value={clientOrders?.currentMonthBill?.toFixed(2) || 0}
             // icon={<MonetizationOnIcon fontSize="large" color="primary" />}
           />
         </Grid>
@@ -220,15 +229,15 @@ export default function MainPage() {
           />
         </Grid>
       </Grid>
-      {clientOrders?.data?.todayDeliveredOrder && (
+      {clientOrders?.todayDeliveredOrder && (
         <>
           <Divider textAlign="left">
             <Typography variant="subtitle2">Today&apos;s Delivered</Typography>
           </Divider>
           <OrderAccordion
-            key={clientOrders?.data?.todayDeliveredOrder.id}
+            key={clientOrders?.todayDeliveredOrder.id}
             handleDeleteOrder={() => {}}
-            order={clientOrders?.data?.todayDeliveredOrder}
+            order={clientOrders?.todayDeliveredOrder}
             showNotification={showNotification}
             handleUpdateOrderUI={() => {}}
             // isEdit
