@@ -125,40 +125,80 @@ export default function StockPurchased({
     return vendorsSorted;
   }, [vendors]);
 
-  useEffect(() => {
-    const newSubtotal = newExpense.subTotal - newExpense.discount;
-    const newGST = Math.round(newSubtotal * gstRate * 100) / 100;
-    const newPst = Math.round(newSubtotal * pstRate * 100) / 100;
-    setNewExpense((prevState: any) => ({
-      ...prevState,
-      amount:
-        newSubtotal + newGST + newPst,
-      discountPercent:
-        (Math.round((newExpense.discount / newExpense.subTotal) * 100) / 100) *
-        100,
-      GST: newGST,
-      PST: newPst,
-    }));
-  }, [newExpense.discount]);
+  // useEffect(() => {
+  //   const newSubtotal = newExpense.subTotal - newExpense.discount;
+  //   setNewExpense((prevState: any) => ({
+  //     ...prevState,
+  //     amount:
+  //       newSubtotal + gstTotal + pstTotal,
+  //     discountPercent:
+  //       (Math.round((newExpense.discount / newExpense.subTotal) * 100) / 100) *
+  //       100,
+  //     GST: gstTotal,
+  //     PST: pstTotal,
+  //   }));
+  // }, [newExpense.discount]);
 
   const onChangeDiscount = (value: number, isPercent: boolean) => {
     if (isPercent) {
       const discount =
         Math.round((value / 100) * newExpense.subTotal * 100) / 100;
+      const { gstTotal, pstTotal } = calculateTaxWithDiscount(value);
+
       setNewExpense((prevState: any) => ({
         ...prevState,
         discount: discount,
         discountPercent: value,
+        GST: gstTotal,
+        PST: pstTotal,
+        amount: newExpense.subTotal - discount + gstTotal + pstTotal,
       }));
     } else {
       const discountPercent =
         Math.round((value / newExpense.subTotal) * 100 * 100) / 100;
+
+      const { gstTotal, pstTotal } = calculateTaxWithDiscount(discountPercent);
+
       setNewExpense((prevState: any) => ({
         ...prevState,
         discount: value,
         discountPercent: discountPercent,
+        GST: gstTotal,
+        PST: pstTotal,
+        amount: newExpense.subTotal + gstTotal + pstTotal - value,
       }));
     }
+  };
+
+  const calculateTaxWithDiscount = (discountPercent: number) => {
+    const gstItems = purchasedItems.filter(
+      (item: any) => item?.inventoryItem?.hasGST,
+    );
+    const pstItems = purchasedItems.filter(
+      (item: any) => item?.inventoryItem?.hasPST,
+    );
+
+    const gstItemsTotalWithDiscount =
+      gstItems.reduce((acc: any, item: any) => {
+        return acc + item.unit.unitPrice * item.quantity;
+      }, 0) *
+      (1 - discountPercent / 100);
+
+    const pstItemsTotalWithDiscount =
+      pstItems.reduce((acc: any, item: any) => {
+        return acc + item.unit.unitPrice * item.quantity;
+      }, 0) *
+      (1 - discountPercent / 100);
+
+    const gstTotal =
+      Math.round(gstItemsTotalWithDiscount * gstRate * 100) / 100;
+    const pstTotal =
+      Math.round(pstItemsTotalWithDiscount * pstRate * 100) / 100;
+
+    return {
+      gstTotal,
+      pstTotal,
+    };
   };
 
   useEffect(() => {
@@ -357,7 +397,6 @@ export default function StockPurchased({
       return acc;
     }, {});
 
-    console.log(total, 'total');
     // setTotalAmount(newAmount);
     setNewExpense((prevState: any) => ({
       ...prevState,
