@@ -161,6 +161,7 @@ export const ItemButton = ({
   ref,
   disabled,
   flexColOnDiscount,
+  isExample,
   // onRemove,
 }: {
   item: IItem;
@@ -170,10 +171,11 @@ export const ItemButton = ({
   ref?: any;
   disabled?: boolean;
   flexColOnDiscount?: boolean;
+  isExample?: boolean;
   // onRemove?: any;
 }) => {
   // console.log(item, 'ITEM');
-  const isDisabled = disabled || !item?.availability;
+  const isDisabled = isExample ? false : disabled || !item?.availability;
   const options = useMemo(() => {
     if (!item?.options || item?.options.length === 0) return null;
     const lowestPriceOption = item?.options.sort(
@@ -374,7 +376,11 @@ export const ItemButton = ({
           gap={1}
           sx={{ zIndex: 1 }}
         >
-          {item?.availability ? (
+          {isExample ? (
+            <Typography fontWeight="bold" sx={{ textTransform: 'none' }}>
+              {item.price?.toFixed(2) || 'N/A'}
+            </Typography>
+          ) : item?.availability ? (
             <>
               <Typography fontWeight="bold" sx={{ textTransform: 'none' }}>
                 {options?.lowestPrice

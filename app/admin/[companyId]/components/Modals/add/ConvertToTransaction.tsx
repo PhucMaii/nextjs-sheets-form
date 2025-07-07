@@ -2,8 +2,10 @@ import ModalHead from '@/app/lib/ModalHead';
 import {
   Box,
   Divider,
+  InputAdornment,
   MenuItem,
   Modal,
+  OutlinedInput,
   Select,
   TextField,
   Typography,
@@ -79,17 +81,58 @@ export default function ConvertToTransaction({
     fetchPaymentMethod();
   }, []);
 
-  useEffect(() => {
-    if (expenseData) {
+  // useEffect(() => {
+  //   if (expenseData) {
+  //     setExpenseData((prevState: any) => ({
+  //       ...prevState,
+  //       amount: prevState.subTotal + prevState.tax - prevState.discount,
+  //       tax: prevState.tax,
+  //       discount: prevState.discount,
+  //       subTotal: prevState.subTotal,
+  //     }));
+  //   }
+  // }, [expenseData?.discount, expenseData?.subTotal, expenseData?.tax]);
+
+  const onChangeExpense = (field: string, value: number | string) => {
+    if (field === 'discount') {
+      const discountPercent =
+        Math.round((+value / expenseData?.subTotal) * 100 * 100) / 100;
       setExpenseData((prevState: any) => ({
         ...prevState,
-        amount: prevState.subTotal + prevState.tax - prevState.discount,
-        tax: prevState.tax,
-        discount: prevState.discount,
-        subTotal: prevState.subTotal,
+        discount: +value,
+        discountPercent: discountPercent,
+        amount: prevState.subTotal + prevState.tax - +value,
+      }));
+    } else if (field === 'discountPercent') {
+      const discount =
+        Math.round((+value / 100) * expenseData?.subTotal * 100) / 100;
+      setExpenseData((prevState: any) => ({
+        ...prevState,
+        discount: +discount,
+        discountPercent: +value,
+        amount: prevState.subTotal + prevState.tax - +discount,
+      }));
+    } else if (field === 'subTotal') {
+      const discountPercent =
+        Math.round((expenseData?.discount / +value) * 100 * 100) / 100;
+      setExpenseData((prevState: any) => ({
+        ...prevState,
+        discountPercent: discountPercent,
+        amount: value + prevState.tax - expenseData?.discount,
+      }));
+    } else if (field === 'tax') {
+      setExpenseData((prevState: any) => ({
+        ...prevState,
+        tax: value,
+        amount: prevState.subTotal + value - expenseData?.discount || 0,
+      }));
+    } else {
+      setExpenseData((prevState: any) => ({
+        ...prevState,
+        [field]: value,
       }));
     }
-  }, [expenseData?.discount, expenseData?.subTotal, expenseData?.tax]);
+  };
 
   const calculateTransactionCost = (items: IPOItem[], discount: number = 0) => {
     const subtotal = items?.reduce((acc: number, item: IPOItem) => {
@@ -239,16 +282,41 @@ export default function ConvertToTransaction({
         <Divider sx={{ my: 2 }}>Bill</Divider>
 
         <Box display="flex" flexDirection="column" gap={2}>
-          <Box>
-            {/* Discount */}
-            <Box display="flex" flexDirection="column" gap={1}>
+          {/* Discount */}
+          <Box display="flex" alignItems="center" gap={1}>
+            <Box
+              display="flex"
+              flexDirection="column"
+              gap={1}
+              sx={{ width: '100%' }}
+            >
               <Typography>Discount ($)</Typography>
-              <TextField
+              <OutlinedInput
                 type="number"
                 value={expenseData?.discount}
                 fullWidth
+                onChange={(e) => onChangeExpense('discount', +e.target.value)}
+                startAdornment={
+                  <InputAdornment position="start">$</InputAdornment>
+                }
+              />
+            </Box>
+            <Box
+              display="flex"
+              flexDirection="column"
+              gap={1}
+              sx={{ width: '100%' }}
+            >
+              <Typography>Discount (%)</Typography>
+              <OutlinedInput
+                type="number"
+                value={expenseData?.discountPercent}
+                fullWidth
                 onChange={(e) =>
-                  setExpenseData({ ...expenseData, discount: +e.target.value })
+                  onChangeExpense('discountPercent', +e.target.value)
+                }
+                startAdornment={
+                  <InputAdornment position="start">%</InputAdornment>
                 }
               />
             </Box>
@@ -259,9 +327,7 @@ export default function ConvertToTransaction({
               type="number"
               value={expenseData.subTotal}
               fullWidth
-              onChange={(e) =>
-                setExpenseData({ ...expenseData, subTotal: +e.target.value })
-              }
+              onChange={(e) => onChangeExpense('subTotal', +e.target.value)}
             />
           </Box>
           <Box display="flex" flexDirection="column" gap={1}>
@@ -270,9 +336,7 @@ export default function ConvertToTransaction({
               type="number"
               value={expenseData.tax}
               fullWidth
-              onChange={(e) =>
-                setExpenseData({ ...expenseData, tax: +e.target.value })
-              }
+              onChange={(e) => onChangeExpense('tax', +e.target.value)}
             />
           </Box>
 
@@ -301,9 +365,7 @@ export default function ConvertToTransaction({
               type="text"
               value={expenseData.invoice}
               fullWidth
-              onChange={(e) =>
-                setExpenseData({ ...expenseData, invoice: e.target.value })
-              }
+              onChange={(e) => onChangeExpense('invoice', e.target.value)}
             />
           </Box>
 
@@ -314,9 +376,7 @@ export default function ConvertToTransaction({
               type="text"
               value={expenseData.description}
               fullWidth
-              onChange={(e) =>
-                setExpenseData({ ...expenseData, description: e.target.value })
-              }
+              onChange={(e) => onChangeExpense('description', e.target.value)}
             />
           </Box>
 

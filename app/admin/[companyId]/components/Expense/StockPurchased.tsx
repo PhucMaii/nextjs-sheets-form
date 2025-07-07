@@ -15,8 +15,10 @@ import {
   FormControl,
   Grid,
   IconButton,
+  InputAdornment,
   InputLabel,
   MenuItem,
+  OutlinedInput,
   Select,
   TextField,
   Typography,
@@ -124,12 +126,40 @@ export default function StockPurchased({
   }, [vendors]);
 
   useEffect(() => {
+    const newSubtotal = newExpense.subTotal - newExpense.discount;
+    const newGST = Math.round(newSubtotal * gstRate * 100) / 100;
+    const newPst = Math.round(newSubtotal * pstRate * 100) / 100;
     setNewExpense((prevState: any) => ({
       ...prevState,
       amount:
-        prevState.subTotal + prevState.GST + prevState.PST - prevState.discount,
+        newSubtotal + newGST + newPst,
+      discountPercent:
+        (Math.round((newExpense.discount / newExpense.subTotal) * 100) / 100) *
+        100,
+      GST: newGST,
+      PST: newPst,
     }));
   }, [newExpense.discount]);
+
+  const onChangeDiscount = (value: number, isPercent: boolean) => {
+    if (isPercent) {
+      const discount =
+        Math.round((value / 100) * newExpense.subTotal * 100) / 100;
+      setNewExpense((prevState: any) => ({
+        ...prevState,
+        discount: discount,
+        discountPercent: value,
+      }));
+    } else {
+      const discountPercent =
+        Math.round((value / newExpense.subTotal) * 100 * 100) / 100;
+      setNewExpense((prevState: any) => ({
+        ...prevState,
+        discount: value,
+        discountPercent: discountPercent,
+      }));
+    }
+  };
 
   useEffect(() => {
     if (purchasedItems.length > 0) {
@@ -143,6 +173,7 @@ export default function StockPurchased({
         GST: 0,
         PST: 0,
         discount: 0,
+        discountPercent: 0,
         description: '',
       });
       // setTotalAmount(0);
@@ -663,18 +694,47 @@ export default function StockPurchased({
 
         <Divider sx={{ my: 2 }}>Bill</Divider>
         <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <Box display="flex" flexDirection="column" gap={1}>
-              <Typography variant="h6">Discount</Typography>
-              <TextField
+          <Grid
+            item
+            xs={12}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              width: '100%',
+            }}
+          >
+            <Box
+              display="flex"
+              flexDirection="column"
+              gap={1}
+              sx={{ width: '100%' }}
+            >
+              <Typography variant="h6">Discount ($)</Typography>
+              <OutlinedInput
                 fullWidth
                 type="number"
                 value={newExpense.discount}
-                onChange={(e) =>
-                  setNewExpense((prevState: any) => ({
-                    ...prevState,
-                    discount: +e.target.value,
-                  }))
+                onChange={(e) => onChangeDiscount(+e.target.value, false)}
+                startAdornment={
+                  <InputAdornment position="start">$</InputAdornment>
+                }
+              />
+            </Box>
+            <Box
+              display="flex"
+              flexDirection="column"
+              gap={1}
+              sx={{ width: '100%' }}
+            >
+              <Typography variant="h6">Discount (%)</Typography>
+              <OutlinedInput
+                fullWidth
+                type="number"
+                value={newExpense.discountPercent}
+                onChange={(e) => onChangeDiscount(+e.target.value, true)}
+                startAdornment={
+                  <InputAdornment position="start">%</InputAdornment>
                 }
               />
             </Box>
@@ -697,7 +757,7 @@ export default function StockPurchased({
               />
             </Box>
           </Grid>
-          <Grid item xs={6}>
+          {/* <Grid item xs={6}>
             <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="h6">GST (5%)</Typography>
               <TextField
@@ -732,7 +792,20 @@ export default function StockPurchased({
                 }
               />
             </Box>
-          </Grid>
+          </Grid> */}
+          {newExpense?.GST || newExpense?.PST ? (
+            <Grid item xs={12}>
+              <Box display="flex" alignItems="center" gap={1}>
+                <Typography variant="h6">
+                  GST (5%): ${newExpense?.GST || 0}
+                </Typography>
+                <Divider orientation="vertical" flexItem />
+                <Typography variant="h6">
+                  PST (7%): ${newExpense?.PST || 0}
+                </Typography>
+              </Box>
+            </Grid>
+          ) : null}
           <Grid item xs={12}>
             <Box display="flex" flexDirection="column" gap={1}>
               <Typography variant="h6">Amount</Typography>
@@ -812,7 +885,7 @@ export default function StockPurchased({
             {paymentMethods.length > 0 &&
               paymentMethods.map((item: any, index: number) => {
                 return (
-                  <MenuItem 
+                  <MenuItem
                     key={index}
                     value={item.id}
                     disabled={

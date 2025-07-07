@@ -15,7 +15,6 @@ import { SWRFetchData } from '@/app/utils/db';
 import StockPurchased from '../../Expense/StockPurchased';
 import OtherExpense from '../../Expense/OtherExpense';
 // import { getAdminsAndDrivers } from '@/app/utils/adminsAndDrivers';
-import { mainPaymentMethodId } from '@/app/lib/constant';
 import { useParams } from 'next/navigation';
 
 interface IProps extends ModalProps {
@@ -97,30 +96,6 @@ export default function AddExpense({
   //   newExpense.discount,
   // ]);
 
-  useEffect(() => {
-    if (newExpense?.subTotal) {
-      const gst =
-        Math.round(
-          (newExpense?.hasGST ? newExpense?.subTotal * 0.05 : 0) * 100,
-        ) / 100;
-      const pst =
-        Math.round(
-          (newExpense?.hasPST ? newExpense?.subTotal * 0.07 : 0) * 100,
-        ) / 100;
-      setNewExpense({
-        ...newExpense,
-        GST: gst,
-        PST: pst,
-        amount: newExpense?.subTotal + gst + pst - (newExpense?.discount || 0),
-      });
-    }
-  }, [
-    newExpense?.subTotal,
-    newExpense?.hasGST,
-    newExpense?.hasPST,
-    newExpense?.discount,
-  ]);
-
   const handleAddExpense = async () => {
     try {
       setIsAdding(true);
@@ -180,21 +155,6 @@ export default function AddExpense({
     }
   };
 
-  const onChangeNewExpense = (field: string, value: any) => {
-    if (field === 'paymentMethodId' && value === mainPaymentMethodId) {
-      setNewExpense({
-        ...newExpense,
-        [field]: value,
-        status: TRANSACTION_STATUS.PAID,
-      });
-    } else {
-      setNewExpense({
-        ...newExpense,
-        [field]: value,
-      });
-    }
-  };
-
   return (
     <Modal open={open} onClose={onClose}>
       <BoxModal maxHeight={'80vh'} overflow={'auto'}>
@@ -234,9 +194,9 @@ export default function AddExpense({
             adminsAndDrivers={adminsAndDrivers}
             paymentMethods={paymentMethods?.data || []}
             SelectDate={SelectDate}
-            onChangeNewExpense={onChangeNewExpense}
             newExpense={newExpense}
             handleAddExpense={handleAddExpense}
+            setNewExpense={setNewExpense}
           />
         )}
       </BoxModal>

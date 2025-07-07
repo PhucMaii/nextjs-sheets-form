@@ -135,13 +135,15 @@ const EditStockPurchased = ({
 
   useEffect(() => {
     if (updatedExpense) {
+      const newSubtotal = updatedExpense?.subTotal - updatedExpense?.discount;
+      const newGST = Math.round(newSubtotal * gstRate * 100) / 100;
+      const newPst = Math.round(newSubtotal * pstRate * 100) / 100;
       setUpdatedExpense((prevState: any) => ({
         ...prevState,
         amount:
-          prevState?.subTotal +
-          prevState.GST +
-          prevState.PST -
-          (prevState?.discount || 0),
+          newSubtotal + newGST + newPst,
+        GST: newGST,
+        PST: newPst,
       }));
     }
   }, [updatedExpense?.discount]);
@@ -824,7 +826,7 @@ const EditStockPurchased = ({
                   />
                 </Box>
               </Grid>
-              <Grid item xs={6}>
+              {/* <Grid item xs={6}>
                 <Box display="flex" flexDirection="column" gap={1}>
                   <Typography variant="h6">GST (5%)</Typography>
                   <TextField
@@ -859,7 +861,20 @@ const EditStockPurchased = ({
                     }
                   />
                 </Box>
-              </Grid>
+              </Grid> */}
+              {updatedExpense?.GST || updatedExpense?.PST ? (
+                <Grid item xs={12}>
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <Typography variant="h6">
+                      GST (5%): ${updatedExpense?.GST || 0}
+                    </Typography>
+                    <Divider orientation="vertical" flexItem />
+                    <Typography variant="h6">
+                      PST (7%): ${updatedExpense?.PST || 0}
+                    </Typography>
+                  </Box>
+                </Grid>
+              ) : null}
               <Grid item xs={12}>
                 <Box display="flex" flexDirection="column" gap={1}>
                   <Typography variant="h6">Amount</Typography>
