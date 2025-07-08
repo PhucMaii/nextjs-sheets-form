@@ -96,11 +96,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         where: {
           name: existingOption.name,
           inventoryItemId: existingOption.inventoryItemId,
-          item: {
-            categoryId: {
-              not: websiteItemCategoryId,
-            },
-          },
+          // item: {
+          //   categoryId: {
+          //     not: websiteItemCategoryId,
+          //   },
+          // },
         },
         data: {
           name,
