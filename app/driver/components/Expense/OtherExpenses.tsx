@@ -52,9 +52,9 @@ export default function OtherExpenses({ showNotification }: IProps) {
   };
 
   useEffect(() => {
-    if (newExpense && newExpense?.subTotal) {
-      const gst = Math.round(newExpense?.hasGST ? newExpense?.subTotal * 0.05 : 0) * 100 / 100;
-      const pst = Math.round(newExpense?.hasPST ? newExpense?.subTotal * 0.07 : 0) * 100 / 100;
+    // if (newExpense && newExpense?.subTotal) {
+      const gst = Math.round(newExpense?.hasGST ? (newExpense?.subTotal - (newExpense?.discount || 0)) * 0.05 : 0) * 100 / 100;
+      const pst = Math.round(newExpense?.hasPST ? (newExpense?.subTotal - (newExpense?.discount || 0)) * 0.07 : 0) * 100 / 100;
 
       setNewExpense((prevState: any) => ({
         ...prevState,
@@ -62,7 +62,7 @@ export default function OtherExpenses({ showNotification }: IProps) {
         PST: pst,
         amount: prevState?.subTotal + gst + pst - (prevState?.discount || 0),
       }));
-    }
+    // }
   }, [
     newExpense?.hasGST,
     newExpense?.hasPST,

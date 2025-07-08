@@ -161,6 +161,7 @@ export const ItemButton = ({
   ref,
   disabled,
   flexColOnDiscount,
+  isExample,
   // onRemove,
 }: {
   item: IItem;
@@ -170,9 +171,11 @@ export const ItemButton = ({
   ref?: any;
   disabled?: boolean;
   flexColOnDiscount?: boolean;
+  isExample?: boolean;
   // onRemove?: any;
 }) => {
   // console.log(item, 'ITEM');
+  const isDisabled = isExample ? false : disabled || !item?.availability;
   const options = useMemo(() => {
     if (!item?.options || item?.options.length === 0) return null;
     const lowestPriceOption = item?.options.sort(
@@ -209,11 +212,11 @@ export const ItemButton = ({
         width: '100%',
         height: '100%',
         ...style,
-        opacity: disabled ? 0.5 : 1,
+        opacity: isDisabled ? 0.5 : 1,
       }}
       onClick={onClick}
       ref={ref}
-      disabled={disabled || item?.availability === false}
+      disabled={isDisabled}
     >
       {item.inventoryItem?.isShowInventory &&
       item?.qtyLeft &&
@@ -233,7 +236,10 @@ export const ItemButton = ({
             padding: '0 5px',
           }}
         >
-          <Typography variant="caption" sx={{ fontSize: 8, textTransform: 'none' }}>
+          <Typography
+            variant="caption"
+            sx={{ fontSize: 8, textTransform: 'none' }}
+          >
             Only {item.qtyLeft} left!
           </Typography>
         </Box>
@@ -248,8 +254,7 @@ export const ItemButton = ({
           position: 'relative',
           p: 1,
           // backgroundColor: blue[50],
-          color:
-            disabled || item?.availability === false ? grey[400] : blackColor,
+          color: blackColor,
           borderRadius: 1,
           width: '100%',
           height: '100%',
@@ -290,7 +295,7 @@ export const ItemButton = ({
               borderRadius: 'inherit',
               inset: 0, // Make the image stretch to fill the container
               zIndex: 0,
-              opacity: disabled ? 0.2 : 0.5,
+              opacity: isDisabled ? 0.2 : 0.5,
               // brightness
               filter: 'brightness(93%)',
             }}
@@ -371,18 +376,30 @@ export const ItemButton = ({
           gap={1}
           sx={{ zIndex: 1 }}
         >
-          <Typography fontWeight="bold" sx={{ textTransform: 'none' }}>
-            {options?.lowestPrice
-              ? `From $${options.lowestPrice.toFixed(2)}`
-              : `$${item.price?.toFixed(2) || 'N/A'}`}
-          </Typography>
-          {item.isShowDiscount && item.prevPrice && (
-            <Typography
-              fontWeight="bold"
-              sx={{ textDecoration: 'line-through' }}
-              color="error"
-            >
-              ${item.prevPrice.toFixed(2)}
+          {isExample ? (
+            <Typography fontWeight="bold" sx={{ textTransform: 'none' }}>
+              {item.price?.toFixed(2) || 'N/A'}
+            </Typography>
+          ) : item?.availability ? (
+            <>
+              <Typography fontWeight="bold" sx={{ textTransform: 'none' }}>
+                {options?.lowestPrice
+                  ? `From $${options.lowestPrice.toFixed(2)}`
+                  : `$${item.price?.toFixed(2) || 'N/A'}`}
+              </Typography>
+              {item.isShowDiscount && item.prevPrice && (
+                <Typography
+                  fontWeight="bold"
+                  sx={{ textDecoration: 'line-through' }}
+                  color="error"
+                >
+                  ${item.prevPrice.toFixed(2)}
+                </Typography>
+              )}
+            </>
+          ) : (
+            <Typography fontWeight="bold" sx={{ textTransform: 'none' }}>
+              N/A
             </Typography>
           )}
         </Box>
@@ -570,7 +587,10 @@ const OrderView = ({
 
   useEffect(() => {
     if (debouncedKeywords) {
-      const newItems = handleSearch(debouncedKeywords, items, ['name', 'inventoryItem.sku']);
+      const newItems = handleSearch(debouncedKeywords, items, [
+        'name',
+        'inventoryItem.sku',
+      ]);
       setDisplayItems(newItems);
     } else {
       setDisplayItems(items);

@@ -145,21 +145,6 @@ export default function ConfirmToPayShifts({
     }
   };
 
-  const onChangeNewExpense = (field: string, value: any) => {
-    if (field === 'paymentMethodId' && value === mainPaymentMethodId) {
-      setNewExpense({
-        ...newExpense,
-        [field]: value,
-        status: TRANSACTION_STATUS.PAID,
-      });
-    } else {
-      setNewExpense({
-        ...newExpense,
-        [field]: value,
-      });
-    }
-  };
-
   return (
     <Modal open={open} onClose={onClose}>
       <BoxModal maxHeight="80vh" overflow="scroll">
@@ -178,8 +163,8 @@ export default function ConfirmToPayShifts({
           paymentMethods={paymentMethods}
           adminsAndDrivers={adminsAndDrivers}
           SelectDate={SelectDate}
-          onChangeNewExpense={onChangeNewExpense}
           newExpense={newExpense}
+          setNewExpense={setNewExpense}
           handleAddExpense={handleAddExpense}
         />
       </BoxModal>

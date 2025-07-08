@@ -8,19 +8,24 @@ import {
   Grid,
   MenuItem,
   Select,
+  OutlinedInput,
   TextField,
   Typography,
+  InputAdornment,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import SelectExpenseStatus from '../Select/SelectExpenseStatus';
+import { TRANSACTION_STATUS } from '@/app/utils/enum';
+import { mainPaymentMethodId } from '@/app/lib/constant';
 
 interface IProps {
   paymentMethods: any[];
   codBoardId?: number;
   adminsAndDrivers: string[];
   SelectDate: any;
-  onChangeNewExpense: any;
+  // onChangeNewExpense: any;
   newExpense: any;
+  setNewExpense: any;
   handleAddExpense: any;
 }
 
@@ -28,12 +33,36 @@ export default function OtherExpense({
   paymentMethods,
   codBoardId,
   adminsAndDrivers,
-  SelectDate,
-  onChangeNewExpense,
+  setNewExpense,
   newExpense,
   handleAddExpense,
+  SelectDate,
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    // if (newExpense?.subTotal || newExpense?.discount) {
+      const gst =
+        Math.round(
+          (newExpense?.hasGST ? (newExpense?.subTotal - (newExpense?.discount || 0)) * 0.05 : 0) * 100,
+        ) / 100;
+      const pst =
+        Math.round(
+          (newExpense?.hasPST ? (newExpense?.subTotal - (newExpense?.discount || 0))  * 0.07 : 0) * 100,
+        ) / 100;
+      setNewExpense((prevState: any) => ({
+        ...prevState,
+        GST: gst,
+        PST: pst,
+        amount: prevState?.subTotal + gst + pst - (prevState?.discount || 0),
+      }));
+    // }
+  }, [
+    newExpense?.subTotal,
+    newExpense?.hasGST,
+    newExpense?.hasPST,
+    newExpense?.discount,
+  ]);
 
   const handleSubmit = async () => {
     try {
@@ -46,6 +75,47 @@ export default function OtherExpense({
     }
   };
 
+  const onChangeNewExpense = (field: string, value: any) => {
+    if (field === 'paymentMethodId' && value === mainPaymentMethodId) {
+      setNewExpense({
+        ...newExpense,
+        [field]: value,
+        status: TRANSACTION_STATUS.PAID,
+      });
+    } else {
+      if (field === 'subTotal') {
+        const discountPercent = Math.round(((newExpense.discount / value) * 100) * 100) / 100;
+        setNewExpense({
+          ...newExpense,
+          discountPercent: discountPercent,
+          subTotal: value,
+        });
+      } else {
+        setNewExpense({
+          ...newExpense,
+          [field]: value,
+        });
+      }
+    }
+  };
+
+  const onChangeDiscount = (value: number, isPercent: boolean) => {
+    if (isPercent) {
+      const discount = Math.round(((value / 100) * newExpense.subTotal) * 100) / 100;
+      setNewExpense((prevState: any) => ({
+        ...prevState,
+        discount: discount,
+        discountPercent: value,
+      }));
+    } else {
+      const discountPercent = Math.round(((value / newExpense.subTotal) * 100) * 100) / 100;
+      setNewExpense((prevState: any) => ({
+        ...prevState,
+        discount: value,
+        discountPercent: discountPercent || 0,
+      }));
+    }
+  };
   return (
     <Box display="flex" flexDirection="column" gap={3}>
       <Box display="flex" flexDirection="column" gap={2}>
@@ -64,15 +134,45 @@ export default function OtherExpense({
       </Box> */}
       {/* GST and PST */}
       <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <Box display="flex" flexDirection="column" gap={1}>
-            <Typography variant="h6">Discount</Typography>
-            <TextField
-              placeholder="Discount"
+        <Grid
+          item
+          xs={12}
+          sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+        >
+          <Box
+            display="flex"
+            flexDirection="column"
+            gap={1}
+            sx={{ width: '100%' }}
+          >
+            <Typography variant="h6">Discount ($)</Typography>
+            <OutlinedInput
+              placeholder="Enter discount in $"
               fullWidth
               value={newExpense.discount}
               type="number"
-              onChange={(e) => onChangeNewExpense('discount', +e.target.value)}
+              onChange={(e) => onChangeDiscount(+e.target.value, false)}
+              startAdornment={
+                <InputAdornment position="start">$</InputAdornment>
+              }
+            />
+          </Box>
+          <Box
+            display="flex"
+            flexDirection="column"
+            gap={1}
+            sx={{ width: '100%' }}
+          >
+            <Typography variant="h6">Discount (%)</Typography>
+            <OutlinedInput
+              placeholder="Enter discount in %"
+              fullWidth
+              value={newExpense.discountPercent}
+              type="number"
+              onChange={(e) => onChangeDiscount(+e.target.value, true)}
+              startAdornment={
+                <InputAdornment position="start">%</InputAdornment>
+              }
             />
           </Box>
         </Grid>

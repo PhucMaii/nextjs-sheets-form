@@ -7,6 +7,8 @@ import {
   Grid,
   MenuItem,
   Modal,
+  InputAdornment,
+  OutlinedInput,
   Select,
   TextField,
   Typography,
@@ -41,7 +43,7 @@ export default function EditExpense({
   const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   // const [open, setOpen] = useState<boolean>(false);
-  const [updatedExpense, setUpdatedExpense] = useState<IExpense>(transaction);
+  const [updatedExpense, setUpdatedExpense] = useState<any>(transaction);
   const { date, SelectDate } = useSelectDate(transaction?.date, true);
 
   const [paymentMethods] = SWRFetchData(
@@ -75,14 +77,20 @@ export default function EditExpense({
   // }, [updatedExpense?.discount]);
 
   useEffect(() => {
-    if (updatedExpense && updatedExpense?.subTotal) {
+    if (updatedExpense) {
       const gst =
         Math.round(
-          (updatedExpense?.hasGST ? updatedExpense?.subTotal * gstRate : 0) * 100,
+          (updatedExpense?.hasGST
+            ? (updatedExpense?.subTotal - (updatedExpense?.discount || 0)) *
+              gstRate
+            : 0) * 100,
         ) / 100;
       const pst =
         Math.round(
-          (updatedExpense?.hasPST ? updatedExpense?.subTotal * pstRate : 0) * 100,
+          (updatedExpense?.hasPST
+            ? (updatedExpense?.subTotal - (updatedExpense?.discount || 0)) *
+              pstRate
+            : 0) * 100,
         ) / 100;
 
       setUpdatedExpense((prevState: any) => ({
@@ -99,10 +107,33 @@ export default function EditExpense({
   ]);
 
   const onChangeExpense = (field: string, value: any) => {
-    setUpdatedExpense({
-      ...updatedExpense,
-      [field]: value,
-    });
+    if (field === 'subTotal') {
+      const discountPercent = Math.round(((updatedExpense?.discount || 0) * 100) / value);
+      setUpdatedExpense((prevState: any) => ({
+        ...prevState,
+        discountPercent: discountPercent,
+        subTotal: value,
+      }));
+    } else if (field === 'discount') {
+      const discountPercent = Math.round(((value / updatedExpense?.subTotal) * 100) * 100) / 100;
+      setUpdatedExpense((prevState: any) => ({
+        ...prevState,
+        discountPercent: discountPercent,
+        discount: value,
+      }));
+    } else if (field === 'discountPercent') {
+      const discount = Math.round(((value / 100) * updatedExpense?.subTotal) * 100) / 100;
+      setUpdatedExpense((prevState: any) => ({
+        ...prevState,
+        discount: discount,
+        discountPercent: value,
+      }));
+    } else {
+      setUpdatedExpense({
+        ...updatedExpense,
+        [field]: value,
+      });
+    }
   };
 
   useEffect(() => {
@@ -178,16 +209,48 @@ export default function EditExpense({
               />
             </Box> */}
             <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <Box display="flex" flexDirection="column" gap={2}>
+              <Grid
+                item
+                xs={12}
+                sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+              >
+                <Box
+                  display="flex"
+                  flexDirection="column"
+                  gap={2}
+                  sx={{ width: '100%' }}
+                >
                   <Typography variant="h6">Discount</Typography>
-                  <TextField
-                    placeholder="Discount"
+                  <OutlinedInput
+                    placeholder="Discount ($)"
                     fullWidth
                     type="number"
                     value={updatedExpense?.discount || 0}
                     onChange={(e) =>
                       onChangeExpense('discount', +e.target.value)
+                    }
+                    startAdornment={
+                      <InputAdornment position="start">$</InputAdornment>
+                    }
+                  />
+                </Box>
+                <Box
+                  display="flex"
+                  flexDirection="column"
+                  gap={2}
+                  sx={{ width: '100%' }}
+                >
+                  <Typography variant="h6">Discount (%)</Typography>
+                  <OutlinedInput
+                    placeholder="Discount (%)"
+                    fullWidth
+                    type="number"
+                    value={updatedExpense?.discountPercent || 0}
+                    onChange={(e) =>
+                      onChangeExpense('discountPercent', +e.target.value)
+                    }
+                    startAdornment={
+                      <InputAdornment position="start">%</InputAdornment>
                     }
                   />
                 </Box>

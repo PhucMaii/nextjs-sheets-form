@@ -112,11 +112,13 @@ export const SortableItem = ({
   item,
   dndMode,
   onOpenSwitchType,
+  isExample,
   // onRemove,
 }: {
   item: any;
   dndMode: boolean;
   onOpenSwitchType: any;
+  isExample?: boolean;
   // onRemove?: any;
 }) => {
   // const id = item?.id?.split(' - ')[1];
@@ -147,6 +149,7 @@ export const SortableItem = ({
       // lg={3}
     >
       <ItemButton
+        isExample={isExample}
         item={{ ...item, price: 11 } as IItem}
         containerStyle={{
           backgroundColor: item?.color || infoBackground,

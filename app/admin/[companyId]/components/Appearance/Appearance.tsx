@@ -804,6 +804,7 @@ export default function Appearance({ types, showNotification }: IProps) {
                             item={item}
                             dndMode={dndMode}
                             onOpenSwitchType={() => onOpenSwitchType(item)}
+                            isExample
                             // onRemove={handleRemove}
                           />
                         );
@@ -836,6 +837,7 @@ export default function Appearance({ types, showNotification }: IProps) {
                 onOpenSwitchType={() =>
                   onOpenSwitchType(findItem(activeItemId))
                 }
+                isExample
               />
             )}
 
@@ -851,6 +853,7 @@ export default function Appearance({ types, showNotification }: IProps) {
                       item={item}
                       dndMode={dndMode}
                       onOpenSwitchType={() => onOpenSwitchType(item)}
+                      isExample
                     />
                   ))}
               </SortableItemType>

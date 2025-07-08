@@ -107,17 +107,17 @@ export default function AddFixedTransaction({
   // ]);
 
   useEffect(() => {
-    if (newFixedTransaction?.defaultSubtotal) {
+    // if (newFixedTransaction?.defaultSubtotal) {
       const gst =
         Math.round(
           (newFixedTransaction?.hasGST
-            ? newFixedTransaction?.defaultSubtotal * gstRate
+            ? (newFixedTransaction?.defaultSubtotal - (newFixedTransaction?.discount || 0)) * gstRate
             : 0) * 100,
         ) / 100;
       const pst =
         Math.round(
           (newFixedTransaction?.hasPST
-            ? newFixedTransaction?.defaultSubtotal * pstRate
+            ? (newFixedTransaction?.defaultSubtotal - (newFixedTransaction?.discount || 0)) * pstRate
             : 0) * 100,
         ) / 100;
 
@@ -125,9 +125,9 @@ export default function AddFixedTransaction({
         ...prevState,
         defaultGST: gst,
         defaultPST: pst,
-        defaultAmount: prevState?.defaultSubtotal + gst + pst,
+        defaultAmount: prevState?.defaultSubtotal + gst + pst - (prevState?.discount || 0),
       }));
-    }
+    // }
   }, [
     newFixedTransaction?.defaultSubtotal,
     newFixedTransaction?.hasGST,

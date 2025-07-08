@@ -133,18 +133,19 @@ const EditStockPurchased = ({
     }
   }, [purchasedItems]);
 
-  useEffect(() => {
-    if (updatedExpense) {
-      setUpdatedExpense((prevState: any) => ({
-        ...prevState,
-        amount:
-          prevState?.subTotal +
-          prevState.GST +
-          prevState.PST -
-          (prevState?.discount || 0),
-      }));
-    }
-  }, [updatedExpense?.discount]);
+  // useEffect(() => {
+  //   if (updatedExpense) {
+  //     const newSubtotal = updatedExpense?.subTotal - updatedExpense?.discount;
+  //     const newGST = Math.round(newSubtotal * gstRate * 100) / 100;
+  //     const newPst = Math.round(newSubtotal * pstRate * 100) / 100;
+  //     setUpdatedExpense((prevState: any) => ({
+  //       ...prevState,
+  //       amount: newSubtotal + newGST + newPst,
+  //       GST: newGST,
+  //       PST: newPst,
+  //     }));
+  //   }
+  // }, [updatedExpense?.discount]);
 
   useEffect(() => {
     if (selectedVendorId !== -1) {
@@ -228,7 +229,6 @@ const EditStockPurchased = ({
   //   const users: any = await getAdminsAndDrivers(showNotification);
   //   setAdminsAndDrivers(users);
   // };
-
   const addPromptedItem = () => {
     if (promptedItem.id === -1) {
       showNotification('error', 'Please select item');
@@ -273,6 +273,11 @@ const EditStockPurchased = ({
   };
 
   const calculateNewAmount = () => {
+    const discountPercent =
+      updatedExpense?.discountPercent ||
+      Math.round(
+        (updatedExpense?.discount / updatedExpense?.subTotal) * 100 * 100,
+      ) / 100;
     const total = purchasedItems.reduce((acc: any, item: any) => {
       if (!acc?.subTotal) {
         acc.subTotal = 0;
@@ -289,11 +294,19 @@ const EditStockPurchased = ({
       acc.subTotal += item.unitPrice * item.quantity;
 
       if (item?.inventoryItem?.hasPST) {
-        acc.PST += item.unitPrice * item.quantity * pstRate;
+        acc.PST +=
+          item.unitPrice *
+          item.quantity *
+          pstRate *
+          (1 - discountPercent / 100);
       }
 
       if (item?.inventoryItem?.hasGST) {
-        acc.GST += item.unitPrice * item.quantity * gstRate;
+        acc.GST +=
+          item.unitPrice *
+          item.quantity *
+          gstRate *
+          (1 - discountPercent / 100);
       }
 
       return acc;
@@ -304,14 +317,18 @@ const EditStockPurchased = ({
       setUpdatedExpense((prevState: any) => ({
         ...prevState,
         amount:
-          parseFloat(total.subTotal.toFixed(2)) +
-          (stockPurchased?.PST || 0) +
-          (stockPurchased?.GST || 0) -
-          (prevState?.discount || 0),
+          Math.round(
+            (parseFloat(total.subTotal.toFixed(2)) +
+              (stockPurchased?.PST || 0) +
+              (stockPurchased?.GST || 0) -
+              (prevState?.discount || 0)) *
+              100,
+          ) / 100,
         subTotal: parseFloat(total.subTotal.toFixed(2)),
         GST: stockPurchased?.GST || 0,
         PST: stockPurchased?.PST || 0,
         discount: parseFloat(prevState?.discount?.toFixed(2)),
+        discountPercent: discountPercent,
       }));
       return;
     }
@@ -319,14 +336,18 @@ const EditStockPurchased = ({
     setUpdatedExpense((prevState: any) => ({
       ...prevState,
       amount:
-        parseFloat(total.subTotal.toFixed(2)) +
-        parseFloat(total.PST.toFixed(2)) +
-        parseFloat(total.GST.toFixed(2)) -
-        (prevState?.discount || 0),
+        Math.round(
+          (parseFloat(total.subTotal.toFixed(2)) +
+            (stockPurchased?.PST || 0) +
+            (stockPurchased?.GST || 0) -
+            (prevState?.discount || 0)) *
+            100,
+        ) / 100,
       subTotal: parseFloat(total.subTotal.toFixed(2)),
       GST: parseFloat(total.GST.toFixed(2)),
       PST: parseFloat(total.PST.toFixed(2)),
       discount: parseFloat(prevState?.discount?.toFixed(2)),
+      discountPercent: discountPercent,
     }));
   };
 
@@ -347,6 +368,72 @@ const EditStockPurchased = ({
       unit: { ...promptedItem.unit, unitPrice: newUnitPrice },
       units: newUnits,
     });
+  };
+
+  const calculateTaxWithDiscount = (discountPercent: number) => {
+    const gstItems = purchasedItems.filter(
+      (item: any) => item?.inventoryItem?.hasGST,
+    );
+    const pstItems = purchasedItems.filter(
+      (item: any) => item?.inventoryItem?.hasPST,
+    );
+
+    const gstItemsTotalWithDiscount =
+      gstItems.reduce((acc: any, item: any) => {
+        return acc + item.unit.unitPrice * item.quantity;
+      }, 0) *
+      (1 - discountPercent / 100);
+
+    const pstItemsTotalWithDiscount =
+      pstItems.reduce((acc: any, item: any) => {
+        return acc + item.unit.unitPrice * item.quantity;
+      }, 0) *
+      (1 - discountPercent / 100);
+
+    const gstTotal =
+      Math.round(gstItemsTotalWithDiscount * gstRate * 100) / 100;
+    const pstTotal =
+      Math.round(pstItemsTotalWithDiscount * pstRate * 100) / 100;
+
+    return {
+      gstTotal,
+      pstTotal,
+    };
+  };
+
+  const onChangeDiscount = (value: number, isPercent: boolean) => {
+    if (isPercent) {
+      const { gstTotal, pstTotal } = calculateTaxWithDiscount(value);
+      const discount =
+        Math.round((value / 100) * updatedExpense.subTotal * 100) / 100;
+      setUpdatedExpense((prevState: any) => ({
+        ...prevState,
+        discount: discount,
+        discountPercent: value,
+        GST: gstTotal,
+        PST: pstTotal,
+        amount:
+          Math.round(
+            (updatedExpense.subTotal - discount + gstTotal + pstTotal) * 100,
+          ) / 100,
+      }));
+    } else {
+      const { gstTotal, pstTotal } = calculateTaxWithDiscount(value);
+
+      const discountPercent =
+        Math.round((value / updatedExpense.subTotal) * 100 * 100) / 100;
+      setUpdatedExpense((prevState: any) => ({
+        ...prevState,
+        discount: value,
+        discountPercent: discountPercent,
+        GST: gstTotal,
+        PST: pstTotal,
+        amount:
+          Math.round(
+            (updatedExpense.subTotal + gstTotal + pstTotal - value) * 100,
+          ) / 100,
+      }));
+    }
   };
 
   const handleChangeItem = (e: any, targetItem: any, keyChange: string) => {
@@ -789,20 +876,27 @@ const EditStockPurchased = ({
 
             <Divider sx={{ my: 2 }}>Bill</Divider>
             <Grid container spacing={2}>
-              <Grid item xs={12}>
+              <Grid item xs={6}>
                 <Box display="flex" flexDirection="column" gap={1}>
-                  <Typography variant="h6">Discount</Typography>
+                  <Typography variant="h6">Discount ($)</Typography>
                   <TextField
                     placeholder="Discount"
                     fullWidth
                     type="number"
                     value={updatedExpense?.discount || 0}
-                    onChange={(e) =>
-                      setUpdatedExpense((prevState: any) => ({
-                        ...prevState,
-                        discount: +e.target.value,
-                      }))
-                    }
+                    onChange={(e) => onChangeDiscount(+e.target.value, false)}
+                  />
+                </Box>
+              </Grid>
+              <Grid item xs={6}>
+                <Box display="flex" flexDirection="column" gap={1}>
+                  <Typography variant="h6">Discount (%)</Typography>
+                  <TextField
+                    placeholder="Discount (%)"
+                    fullWidth
+                    type="number"
+                    value={updatedExpense?.discountPercent || 0}
+                    onChange={(e) => onChangeDiscount(+e.target.value, true)}
                   />
                 </Box>
               </Grid>
@@ -824,7 +918,7 @@ const EditStockPurchased = ({
                   />
                 </Box>
               </Grid>
-              <Grid item xs={6}>
+              {/* <Grid item xs={6}>
                 <Box display="flex" flexDirection="column" gap={1}>
                   <Typography variant="h6">GST (5%)</Typography>
                   <TextField
@@ -859,7 +953,20 @@ const EditStockPurchased = ({
                     }
                   />
                 </Box>
-              </Grid>
+              </Grid> */}
+              {updatedExpense?.GST || updatedExpense?.PST ? (
+                <Grid item xs={12}>
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <Typography variant="h6">
+                      GST (5%): ${updatedExpense?.GST || 0}
+                    </Typography>
+                    <Divider orientation="vertical" flexItem />
+                    <Typography variant="h6">
+                      PST (7%): ${updatedExpense?.PST || 0}
+                    </Typography>
+                  </Box>
+                </Grid>
+              ) : null}
               <Grid item xs={12}>
                 <Box display="flex" flexDirection="column" gap={1}>
                   <Typography variant="h6">Amount</Typography>

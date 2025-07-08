@@ -8,6 +8,7 @@ import { grey } from '@mui/material/colors';
 import { generateImgUrl } from '@/app/lib/s3';
 import { websiteItemCategory } from '@/app/lib/constant';
 import { useParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 interface IProps {
   item: IItem;
@@ -66,7 +67,7 @@ export default function Item({
         onClick={() => router.push(`/admin/${companyId}/items/${item.id}`)}
       >
         <Grid container alignItems="center" columnSpacing={1}>
-          <Grid item lg={1} md={12} onClick={(e) => e.stopPropagation()}>
+          <Grid item lg={1} md={2} xs={2} onClick={(e) => e.stopPropagation()}>
             <EditItemAvailability
               item={item}
               showNotification={showNotification}
@@ -76,16 +77,20 @@ export default function Item({
           {item.categoryId === websiteItemCategory && (
             <Grid item md={2}>
               {img ? (
-                <img
+                <Image
                   src={img}
                   alt={item?.name}
                   style={{ maxWidth: 100, height: 100, objectFit: 'contain' }}
+                  width={100}
+                  height={100}
                 />
               ) : (
-                <img
+                <Image
                   src="/images/not-found.png"
                   alt={item?.name}
                   style={{ maxWidth: 100, height: 100, objectFit: 'contain' }}
+                  width={100}
+                  height={100}
                 />
               )}
             </Grid>
@@ -107,8 +112,8 @@ export default function Item({
                 : `$${item.price.toFixed(2)}`}
             </Typography>
           </Grid>
-          <Grid item md={3} xs={12} onClick={(e) => e.stopPropagation()}>
-            <Box display="flex" gap={1}>
+          <Grid item xs={12} md={3}>
+            <Box display="flex" sx={{width: 'fit-content'}} onClick={(e) => e.stopPropagation()} gap={1}>
               <DeleteModal
                 targetObj={item}
                 handleDelete={handleDeleteItem}

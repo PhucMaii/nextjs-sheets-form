@@ -93,21 +93,6 @@ export default function ConvertPayroll({
     }
   };
 
-  const onChangeNewExpense = (field: string, value: any) => {
-    if (field === 'paymentMethodId' && value === mainPaymentMethodId) {
-      setNewExpense({
-        ...newExpense,
-        [field]: value,
-        status: TRANSACTION_STATUS.PAID,
-      });
-    } else {
-      setNewExpense({
-        ...newExpense,
-        [field]: value,
-      });
-    }
-  };
-
   const handleConvert = async () => {
     try {
       const response = await axios.post(
@@ -153,9 +138,9 @@ export default function ConvertPayroll({
           paymentMethods={paymentMethods}
           adminsAndDrivers={adminsAndDrivers}
           SelectDate={SelectDate}
-          onChangeNewExpense={onChangeNewExpense}
           newExpense={newExpense}
           handleAddExpense={handleConvert}
+          setNewExpense={setNewExpense}
         />
       </BoxModal>
     </Modal>

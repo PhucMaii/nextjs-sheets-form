@@ -411,6 +411,7 @@ model ScheduleOrders {
   company Company? @relation(fields: [companyId], references: [id])
 
   @@index([userId])
+  @@index([day])
 }
 
 model PositionIndex {
@@ -433,6 +434,8 @@ model Route {
   driver   Driver    @relation(fields: [driverId], references: [id])
   employee Employee? @relation(fields: [employeeId], references: [id])
   company  Company?  @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([day, companyId])
 }
 
 model UserRoute {
@@ -442,6 +445,8 @@ model UserRoute {
   route   Route @relation(fields: [routeId], references: [id], onDelete: Cascade)
 
   @@id([userId, routeId])
+  @@index([routeId])
+  @@index([userId])
 }
 
 model DayRange {

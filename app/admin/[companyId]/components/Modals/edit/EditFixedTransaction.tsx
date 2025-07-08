@@ -90,26 +90,26 @@ export default function EditFixedTransaction({
   // ]);
 
   useEffect(() => {
-    if (updatedTransaction && updatedTransaction?.defaultSubtotal) {
+    // if (updatedTransaction && updatedTransaction?.defaultSubtotal) {
       const gst =
       Math.round(
         (updatedTransaction?.hasGST
-          ? updatedTransaction?.defaultSubtotal * gstRate
+          ? (updatedTransaction?.defaultSubtotal - (updatedTransaction?.discount || 0)) * gstRate
           : 0) * 100,
       ) / 100;
     const pst =
       Math.round(
         (updatedTransaction?.hasPST
-          ? updatedTransaction?.defaultSubtotal * pstRate
+          ? (updatedTransaction?.defaultSubtotal - (updatedTransaction?.discount || 0)) * pstRate
           : 0) * 100,
       ) / 100;
       setUpdatedTransaction((prevState: any) => ({
         ...prevState,
         defaultGST: gst,
         defaultPST: pst,
-        defaultAmount: prevState?.defaultSubtotal + gst + pst,
+        defaultAmount: prevState?.defaultSubtotal + gst + pst - (updatedTransaction?.discount || 0) ,
       }));
-    }
+    // }
   }, [
     // updatedTransaction?.defaultSubtotal,
     updatedTransaction?.hasGST,
