@@ -12,14 +12,21 @@ import {
   TextField,
   Typography,
   OutlinedInput,
+  InputLabel,
+  FormControl,
+  IconButton,
 } from '@mui/material';
 import { ShadowSection } from '../../reports/styled';
 import { useQuery } from '@tanstack/react-query';
-import { getAdminApiUrl } from '@/app/utils/enum';
+import { getAdminApiUrl, USER_ROLE } from '@/app/utils/enum';
 import { useParams } from 'next/navigation';
 import axios from 'axios';
 import VendorSelection from '../../components/Modals/Selection/VendorSelection';
-import { IVendor } from '@/app/utils/type';
+import { InfoIcon, Trash2Icon } from 'lucide-react';
+import { grey } from '@mui/material/colors';
+import useNotification from '@/hooks/useNotification';
+import { units } from '@/app/lib/constant';
+import UnitSearch from '../../components/Autocomplete/UnitSearch';
 
 const CreateInventory = () => {
   const { companyId }: any = useParams();
@@ -33,6 +40,8 @@ const CreateInventory = () => {
       return response.data.data;
     },
   });
+
+  const { showNotification, NotificationComp } = useNotification();
 
   const [newInventoryItem, setNewInventoryItem] = useState<any>({
     name: '',
@@ -49,7 +58,14 @@ const CreateInventory = () => {
       if (!vendor.units || vendor.units.length === 0) {
         return {
           ...vendor,
-          units: [{ unit: 'bags', ratio: 1, price: 0 }],
+          units: [
+            {
+              id: `first-${crypto.randomUUID()}`,
+              unit: 'bags',
+              ratio: 1,
+              price: 0,
+            },
+          ],
         };
       }
       return vendor;
@@ -57,8 +73,66 @@ const CreateInventory = () => {
     setSelectedVendors(vendorsWithUnits);
   };
 
+  const onAddUnit = (vendorId: number) => {
+    const newSelectedVendors = selectedVendors.map((vendor) => {
+      if (vendor.id === vendorId) {
+        return {
+          ...vendor,
+          units: [
+            ...vendor.units,
+            { id: crypto.randomUUID(), unit: 'bags', ratio: 2, price: 0 },
+          ],
+        };
+      }
+      return vendor;
+    });
+    setSelectedVendors(newSelectedVendors);
+  };
+
+  const onChangeUnit = (
+    vendorId: number,
+    unitId: number,
+    field: string,
+    value: string,
+  ) => {
+    const newSelectedVendors = selectedVendors.map((vendor) => {
+      if (vendor.id === vendorId) {
+        return {
+          ...vendor,
+          units: vendor.units.map((unit: any) =>
+            unit.id === unitId ? { ...unit, [field]: value } : unit,
+          ),
+        };
+      }
+      return vendor;
+    });
+    setSelectedVendors(newSelectedVendors);
+  };
+
+  const onDeleteUnit = (vendorId: number, unitId: string) => {
+    const newSelectedVendors = selectedVendors.map((vendor) => {
+      if (vendor.id === vendorId) {
+        if (vendor.units.length === 1) {
+          showNotification('error', 'Vendor must have at least one unit');
+          return vendor;
+        }
+        if (unitId.includes('first')) {
+          showNotification('error', 'Unit with ratio of 1 cannot be deleted');
+          return vendor;
+        }
+        return {
+          ...vendor,
+          units: vendor.units.filter((unit: any) => unit.id !== unitId),
+        };
+      }
+      return vendor;
+    });
+    setSelectedVendors(newSelectedVendors);
+  };
+
   return (
     <Sidebar>
+      {NotificationComp}
       <VendorSelection
         open={isOpenVendorSelection}
         onClose={() => setIsOpenVendorSelection(false)}
@@ -185,8 +259,20 @@ const CreateInventory = () => {
 
       {/* Vendor and Units */}
       <ShadowSection>
-        <Box display="flex" alignItems="center" justifyContent="space-between">
-          <Typography fontWeight={600}>Vendors</Typography>
+        <Box
+          display="flex"
+          alignItems="flex-start"
+          justifyContent="space-between"
+        >
+          <Box display="flex" flexDirection="column" gap={0.5}>
+            <Typography fontWeight={600}>Vendors</Typography>
+            <Box display="flex" alignItems="center" gap={1}>
+              <InfoIcon style={{ width: 16, height: 16, color: grey[700] }} />
+              <Typography variant="body2" color={grey[700]}>
+                Each vendor must have unit with ratio of 1.
+              </Typography>
+            </Box>
+          </Box>
           <Button
             color="primary"
             onClick={() => setIsOpenVendorSelection(true)}
@@ -196,25 +282,101 @@ const CreateInventory = () => {
         </Box>
 
         {/* Vendor Items */}
-        <Box>
+        <Box mt={2} display="flex" flexDirection="column" gap={2}>
           {selectedVendors.map((vendor) => (
             <Box key={vendor.id}>
-              <Typography>{vendor.name}</Typography>
+              <Typography fontWeight={600}>{vendor.name}</Typography>
               <Box>
-                {vendor?.units && vendor?.units.map((unit: any, index: number) => (
-                  <Grid container key={unit.id} alignItems="center" spacing={2} sx={{ my: 1 }}>
-                    <Grid item xs={12} md={4}>
-                      <OutlinedInput label="Unit" value={unit.unit} />
+                {vendor?.units &&
+                  vendor?.units.map((unit: any, index: number) => (
+                    <Grid
+                      container
+                      key={unit.id}
+                      alignItems="center"
+                      spacing={2}
+                      sx={{my: 0.5}}
+                    >
+                      <Grid item xs={12} md={3.8}>
+                        {/* <FormControl fullWidth> */}
+                          {/* <InputLabel htmlFor="unit-input">Unit</InputLabel> */}
+                          <UnitSearch
+                            value={unit.unit}
+                            handleSelectPromptedItem={(selectedUnit: any) =>
+                              onChangeUnit(vendor.id, unit.id, 'unit', selectedUnit)
+                            }
+                            displayItems={units}
+                            role={USER_ROLE.ADMIN}
+                          />
+                          {/* <OutlinedInput
+                            id="unit-input"
+                            label="Unit"
+                            value={unit.unit}
+                            fullWidth
+                            onChange={(e) =>
+                              onChangeUnit(
+                                vendor.id,
+                                unit.id,
+                                'unit',
+                                e.target.value,
+                              )
+                            }
+                          /> */}
+                        {/* </FormControl> */}
+                      </Grid>
+                      <Grid item xs={12} md={3.8}>
+                        <FormControl fullWidth>
+                          <InputLabel htmlFor="ratio-input">Ratio</InputLabel>
+                          <OutlinedInput
+                            id="ratio-input"
+                            label="Ratio"
+                            value={unit.ratio}
+                            fullWidth
+                            disabled={index === 0 || unit.id.includes('first')}
+                            onChange={(e) =>
+                              onChangeUnit(
+                                vendor.id,
+                                unit.id,
+                                'ratio',
+                                e.target.value,
+                              )
+                            }
+                          />
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={12} md={3.8}>
+                        <FormControl fullWidth>
+                          <InputLabel htmlFor="price-input">Price</InputLabel>
+                          <OutlinedInput
+                            id="price-input"
+                            label="Price"
+                            value={unit.price}
+                            fullWidth
+                            onChange={(e) =>
+                              onChangeUnit(
+                                vendor.id,
+                                unit.id,
+                                'price',
+                                e.target.value,
+                              )
+                            }
+                          />
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={12} md={0.4} textAlign="right">
+                        <IconButton
+                          onClick={() => onDeleteUnit(vendor.id, unit.id)}
+                        >
+                          <Trash2Icon
+                            style={{ width: 20, height: 20, color: grey[700] }}
+                          />
+                        </IconButton>
+                      </Grid>
                     </Grid>
-                    <Grid item xs={12} md={4}>
-                      <OutlinedInput label="Ratio" value={unit.ratio} />
-                    </Grid>
-                    <Grid item xs={12} md={4}>
-                      <OutlinedInput label="Price" value={unit.price} />
-                    </Grid>
-                  </Grid>
-                ))}
+                  ))}
               </Box>
+              <Button fullWidth onClick={() => onAddUnit(vendor.id)}>
+                + Add Unit
+              </Button>
             </Box>
           ))}
         </Box>

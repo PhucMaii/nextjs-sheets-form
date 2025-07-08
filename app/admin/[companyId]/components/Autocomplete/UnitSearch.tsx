@@ -74,7 +74,7 @@ export default function UnitSearch({
       }}
       sx={{ width: '100%' }}
       freeSolo
-      renderInput={(params) => <TextField {...params} label="Item" />}
+      renderInput={(params) => <TextField {...params} label="Unit" />}
     />
   );
 }
