@@ -151,7 +151,7 @@ export default function StockPurchased({
         discountPercent: value,
         GST: gstTotal,
         PST: pstTotal,
-        amount: newExpense.subTotal - discount + gstTotal + pstTotal,
+        amount: Math.round((newExpense.subTotal - discount + gstTotal + pstTotal) * 100) / 100,
       }));
     } else {
       const discountPercent =
@@ -165,7 +165,7 @@ export default function StockPurchased({
         discountPercent: discountPercent,
         GST: gstTotal,
         PST: pstTotal,
-        amount: newExpense.subTotal + gstTotal + pstTotal - value,
+        amount: Math.round((newExpense.subTotal + gstTotal + pstTotal - value) * 100) / 100,
       }));
     }
   };

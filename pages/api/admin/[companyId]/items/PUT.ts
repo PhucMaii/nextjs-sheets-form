@@ -1,5 +1,4 @@
 import { UPDATE_OPTION } from '@/app/admin/[companyId]/components/Modals/edit/EditItem';
-import { websiteItemCategoryId } from '@/app/lib/constant';
 import { IItem, IOption } from '@/app/utils/type';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -138,9 +137,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       await prisma.item.updateMany({
         where: {
           inventoryItemId: existingItem.inventoryItemId,
-          categoryId: {
-            not: websiteItemCategoryId,
-          },
+          // categoryId: {
+          //   not: websiteItemCategoryId,
+          // },
         },
         data: updatedData,
       });

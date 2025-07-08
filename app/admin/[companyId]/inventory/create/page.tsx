@@ -27,6 +27,7 @@ import { grey } from '@mui/material/colors';
 import useNotification from '@/hooks/useNotification';
 import { units } from '@/app/lib/constant';
 import UnitSearch from '../../components/Autocomplete/UnitSearch';
+import useModalSelect from '@/hooks/select/useModalSelect';
 
 const CreateInventory = () => {
   const { companyId }: any = useParams();
@@ -42,17 +43,6 @@ const CreateInventory = () => {
   });
 
   const { showNotification, NotificationComp } = useNotification();
-
-  const [newInventoryItem, setNewInventoryItem] = useState<any>({
-    name: '',
-    sku: '',
-    typeId: -1,
-  });
-
-  const [isOpenVendorSelection, setIsOpenVendorSelection] = useState(false);
-  const [selectedVendors, setSelectedVendors] = useState<any[]>([]);
-  // const [units, setUnits] = useState<any[]>([]);
-
   const handleOnSelectVendors = (vendors: any[]) => {
     const vendorsWithUnits = vendors.map((vendor) => {
       if (!vendor.units || vendor.units.length === 0) {
@@ -73,14 +63,44 @@ const CreateInventory = () => {
     setSelectedVendors(vendorsWithUnits);
   };
 
+  const {
+    handleOpen: handleOpenVendorSelection,
+    selectedItems: selectedVendors,
+    setSelectedItems: setSelectedVendors,
+    SelectionModal: VendorSelectionModal,
+  } = useModalSelect('Vendor', [], handleOnSelectVendors);
+
+  const [newInventoryItem, setNewInventoryItem] = useState<any>({
+    name: '',
+    sku: '',
+    typeId: -1,
+  });
+
+  const [isOpenVendorSelection, setIsOpenVendorSelection] = useState(false);
+  // const [selectedVendors, setSelectedVendors] = useState<any[]>([]);
+  // const [units, setUnits] = useState<any[]>([]);
+
   const onAddUnit = (vendorId: number) => {
     const newSelectedVendors = selectedVendors.map((vendor) => {
       if (vendor.id === vendorId) {
+        // the default unit name must be random different from the existing list of units
+        const nonExistingUnits = units.filter(
+          (unit) => !vendor.units.some((u: any) => u.unit === unit),
+        );
+        let randomUnit = 'bags';
+
+        if (nonExistingUnits.length > 0) {
+          randomUnit =
+            nonExistingUnits[
+              Math.floor(Math.random() * nonExistingUnits.length)
+            ];
+        }
+
         return {
           ...vendor,
           units: [
             ...vendor.units,
-            { id: crypto.randomUUID(), unit: 'bags', ratio: 2, price: 0 },
+            { id: crypto.randomUUID(), unit: randomUnit, ratio: 2, price: 0 },
           ],
         };
       }
@@ -133,13 +153,14 @@ const CreateInventory = () => {
   return (
     <Sidebar>
       {NotificationComp}
-      <VendorSelection
+      {/* <VendorSelection
         open={isOpenVendorSelection}
         onClose={() => setIsOpenVendorSelection(false)}
         selectedVendors={selectedVendors}
         setSelectedVendors={setSelectedVendors}
         fnOnSelect={handleOnSelectVendors}
-      />
+      /> */}
+      {VendorSelectionModal()}
       <Typography variant="h5">Create Inventory</Typography>
 
       {/* General Information */}
@@ -275,7 +296,7 @@ const CreateInventory = () => {
           </Box>
           <Button
             color="primary"
-            onClick={() => setIsOpenVendorSelection(true)}
+            onClick={handleOpenVendorSelection}
           >
             + Add Vendor
           </Button>
@@ -294,20 +315,25 @@ const CreateInventory = () => {
                       key={unit.id}
                       alignItems="center"
                       spacing={2}
-                      sx={{my: 0.5}}
+                      sx={{ my: 0.5 }}
                     >
                       <Grid item xs={12} md={3.8}>
                         {/* <FormControl fullWidth> */}
-                          {/* <InputLabel htmlFor="unit-input">Unit</InputLabel> */}
-                          <UnitSearch
-                            value={unit.unit}
-                            handleSelectPromptedItem={(selectedUnit: any) =>
-                              onChangeUnit(vendor.id, unit.id, 'unit', selectedUnit)
-                            }
-                            displayItems={units}
-                            role={USER_ROLE.ADMIN}
-                          />
-                          {/* <OutlinedInput
+                        {/* <InputLabel htmlFor="unit-input">Unit</InputLabel> */}
+                        <UnitSearch
+                          value={unit.unit}
+                          handleSelectPromptedItem={(selectedUnit: any) =>
+                            onChangeUnit(
+                              vendor.id,
+                              unit.id,
+                              'unit',
+                              selectedUnit,
+                            )
+                          }
+                          displayItems={units}
+                          role={USER_ROLE.ADMIN}
+                        />
+                        {/* <OutlinedInput
                             id="unit-input"
                             label="Unit"
                             value={unit.unit}
@@ -380,6 +406,22 @@ const CreateInventory = () => {
             </Box>
           ))}
         </Box>
+      </ShadowSection>
+
+      {/* Assign categories to this inventory */}
+      <ShadowSection>
+        <Box display="flex" alignItems="center" justifyContent="space-between">
+          <Typography fontWeight={600}>Assign Categories</Typography>
+          <Button color="primary">+ Add Category</Button>
+        </Box>
+
+        {/* <Box mt={2} display="flex" flexDirection="column" gap={2}>
+          {categories.map((category) => (
+            <Box key={category.id}>
+              <Typography fontWeight={600}>{category.name}</Typography>
+            </Box>
+          ))}
+        </Box> */}
       </ShadowSection>
     </Sidebar>
   );

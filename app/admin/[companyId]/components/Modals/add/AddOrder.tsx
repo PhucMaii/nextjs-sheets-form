@@ -139,7 +139,7 @@ export default function AddOrder({
       console.log(error);
       showNotification(
         'error',
-        'There was an error creating order: ' + error.response.data.error,
+        'Fail to create order: ' + error.response.data.error,
       );
       return;
     }
