@@ -27,6 +27,13 @@ export const generateOrderTemplate = (
   orderId: number,
   flag?: string,
 ) => {
+  const actualItemSubtotal = order?.items.reduce(
+    (acc: number, item: any) => acc + item.price * item.quantity,
+    0,
+  );
+  const isSubtotalUnmatch =
+    actualItemSubtotal.toFixed(2) !== order?.subTotal.toFixed(2);
+
   let orderDetailsTemplate = '';
 
   const flagText = flag
@@ -117,6 +124,17 @@ export const generateOrderTemplate = (
       <p style="text-align: right;">Order by: ${order?.createdBy}</p>
       ${order?.updatedBy ? `<p style="text-align: right;">Updated by: ${order?.updatedBy}</p>` : ''}
 
+      ${
+        isSubtotalUnmatch
+          ? `
+        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
+          <p style="text-align: right; color: red;">Subtotal is not match with actual item subtotal. We'll fix it as soon as possible.</p>
+          <p style="text-align: right; color: red;">Actual item subtotal: $${actualItemSubtotal.toFixed(2)}</p>
+          <p style="text-align: right; color: red;">Order subtotal: $${order?.subTotal?.toFixed(2)}</p>
+        </div>
+        `
+          : ''
+      }
     </div>
   `;
 };
