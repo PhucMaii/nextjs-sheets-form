@@ -1,4 +1,5 @@
 import {
+  Alert,
   Box,
   Button,
   Divider,
@@ -779,6 +780,12 @@ const OrderView = ({
       return;
     }
 
+    const total = generateOrderTotalPrice(orderedItems, order?.shippingFee);
+    if (total.totalPrice < 12) {
+      showNotification('error', 'Total price must be greater than $12');
+      return;
+    }
+
     if (orderedItems.length > 0) {
       const isItemsValid = orderedItems.every((i: any) => i.quantity > 0);
 
@@ -1100,6 +1107,8 @@ const OrderView = ({
             />
           )}
 
+        {renderWarning()}
+
         <Typography variant="h6" textAlign="center">
           {clientName ? `${clientName}'s` : 'My'} Order
         </Typography>
@@ -1399,6 +1408,18 @@ const OrderView = ({
     );
   };
 
+  const renderWarning = () => {
+    // For order with less than $12, show warning
+    if (order?.totalPrice && order?.totalPrice < 12) {
+      return (
+        <Alert severity="warning">
+          Looks like your order is just under $12. You&apos;re almost there! Add a
+          little more to complete your order 😊
+        </Alert>
+      );
+    }
+  };
+
   if (smDown) {
     return (
       <>
@@ -1448,7 +1469,12 @@ const OrderView = ({
           </Box>
 
           {/* <Box maxHeight="100vh" overflow="scroll"> */}
-          {tabIdx === 0 && renderDisplayItems()}
+          {tabIdx === 0 && (
+            <>
+              {renderWarning()}
+              {renderDisplayItems()}
+            </>
+          )}
           {tabIdx === 1 && renderMyOrder()}
 
           <Box

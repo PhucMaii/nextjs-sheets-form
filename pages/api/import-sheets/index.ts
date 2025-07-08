@@ -288,6 +288,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       enteredOrderAt,
     );
 
+    console.log('newOrder', newOrder);
+
+    if (!newOrder) {
+      return res.status(400).json({
+        error: newOrder.error,
+      });
+    }
+
     // const itemListWithTotalPrice = newOrder?.items.map((item: OrderedItems) => {
     //   const itemTotalPrice = item.price * item.quantity;
 
@@ -323,7 +331,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       message: 'Order Placed Successfully',
     });
   } catch (error: any) {
-    console.log(error);
+    console.log(error, 'error');
     // If it's a Pusher "Payload Too Large" error (413)
     if (error?.status === 413 || error?.message?.includes('413')) {
       return res.status(200).json({
@@ -332,7 +340,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
     return res.status(500).json({
-      error: 'Internal Server Error: ' + error,
+      error,
     });
   }
 };
