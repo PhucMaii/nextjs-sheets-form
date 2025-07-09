@@ -3,18 +3,19 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { infoBackground } from '@/theme/color';
 import { otherTypeId } from '@/app/lib/constant';
 import { calculateNextIndexPosAndRows } from '@/pages/api/utils/appearance';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/pages/api/auth/[...nextauth]';
+import { getCreatedBy } from '@/pages/api/import-sheets/utils';
+import { getTodayDate } from '@/pages/api/utils/date';
+import { USER_ROLE } from '@/app/utils/enum';
 
 interface IBody {
   name: string;
   sku: string;
-  supplierSku: string;
+  // supplierSku: string;
   typeId: number;
   hasPST: boolean;
   hasGST: boolean;
   vendorItems: any[];
-  createdAt: string;
+  sellingItems: any[];
 }
 
 interface IQuery {
@@ -28,12 +29,12 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const {
       name,
       sku,
-      supplierSku,
+      // supplierSku,
       typeId,
       hasPST,
       hasGST,
       vendorItems,
-      createdAt,
+      sellingItems,
     }: IBody = req.body;
 
     const { companyId }: IQuery = req.query;
@@ -48,6 +49,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     const existingVendors = await prisma.vendor.findMany({
       where: {
+        companyId: Number(companyId),
         id: {
           in: vendorIds,
         },
@@ -58,9 +60,9 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       return res.status(404).json({ error: 'Vendor not found' });
     }
 
-    const session: any = await getServerSession(req, res, authOptions);
-    const user: any = session?.user;
-    const createdBy = `Admin - ${user.name}`;
+    const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
+    const today = getTodayDate();
+    const createdAt = today.dateAndTime;
 
     // Check has name existed
     const sameNameInventory = await prisma.inventoryItem.findFirst({
@@ -82,7 +84,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const newInventory = await prisma.inventoryItem.create({
       data: {
         name,
-        supplierSku,
+        // supplierSku,
         sku,
         hasPST,
         hasGST,
@@ -106,11 +108,12 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     });
 
     // Create Vendor Item
-    const newVendorItems = vendorIds.map((vendorId: number) => {
+    const newVendorItems = vendorItems.map((vendorItem: any) => {
       return {
         inventoryItemId: newInventory.id,
-        vendorId,
+        vendorId: vendorItem.vendorId,
         quantity: 0,
+        supplierSku: vendorItem.supplierSku,
         createdAt,
         createdBy,
         companyId: Number(companyId),
@@ -123,6 +126,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     const createdVendorItems = await prisma.vendorItem.findMany({
       where: {
+        companyId: Number(companyId),
         inventoryItemId: newInventory.id,
       },
       include: {
@@ -158,6 +162,48 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     await prisma.inventoryUnit.createMany({
       data: newUnits,
+    });
+
+    const justCreatedUnits = await prisma.inventoryUnit.findMany({
+      where: {
+        companyId: Number(companyId),
+        createdAt,
+      },
+    });
+
+    // Create Selling Items
+    const newSellingItems = sellingItems.map((sellingItem: any) => {
+      const targetUnit = justCreatedUnits.find(
+        (unit: any) =>
+          unit.unit === sellingItem.inventoryUnit.unit &&
+          unit.ratio === sellingItem.inventoryUnit.ratio &&
+          unit.unitPrice === sellingItem.inventoryUnit.unitPrice,
+      );
+
+      if (!targetUnit) {
+        console.error(
+          `Conflict Unit not found for sellingItem ID: ${sellingItem.id}`,
+        );
+        return null; // Skip this sellingItem by returning null
+      }
+
+      return {
+        inventoryItemId: newInventory.id,
+        categoryId: sellingItem.categoryId,
+        name: sellingItem.name,
+        price: sellingItem.price,
+        inventoryUnitId: targetUnit.id,
+        isShowDiscount: false,
+        prevPrice: null,
+        availability: true,
+        createdAt,
+        createdBy,
+        companyId: Number(companyId),
+      };
+    });
+
+    await prisma.item.createMany({
+      data: newSellingItems.filter((item: any) => item !== null) as any,
     });
 
     return res.status(201).json({

@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import {
   Button,
@@ -19,18 +19,19 @@ import {
 import { ShadowSection } from '../../reports/styled';
 import { useQuery } from '@tanstack/react-query';
 import { getAdminApiUrl, USER_ROLE } from '@/app/utils/enum';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import axios from 'axios';
-import VendorSelection from '../../components/Modals/Selection/VendorSelection';
 import { InfoIcon, Trash2Icon } from 'lucide-react';
 import { grey } from '@mui/material/colors';
 import useNotification from '@/hooks/useNotification';
 import { units } from '@/app/lib/constant';
 import UnitSearch from '../../components/Autocomplete/UnitSearch';
 import useModalSelect from '@/hooks/select/useModalSelect';
+import { LoadingButton } from '@mui/lab';
 
 const CreateInventory = () => {
   const { companyId }: any = useParams();
+  const router = useRouter();
 
   const { data: itemTypes } = useQuery({
     queryKey: ['itemTypes'],
@@ -42,12 +43,32 @@ const CreateInventory = () => {
     },
   });
 
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const response = await axios.get(
+        getAdminApiUrl(companyId, '/categories'),
+      );
+      return response.data.data;
+    },
+  });
+
+  const { data: vendors } = useQuery({
+    queryKey: ['vendors'],
+    queryFn: async () => {
+      const response = await axios.get(getAdminApiUrl(companyId, '/vendors'));
+      return response.data.data;
+    },
+  });
+
   const { showNotification, NotificationComp } = useNotification();
+
   const handleOnSelectVendors = (vendors: any[]) => {
     const vendorsWithUnits = vendors.map((vendor) => {
       if (!vendor.units || vendor.units.length === 0) {
         return {
           ...vendor,
+          vendorId: vendor.id,
           units: [
             {
               id: `first-${crypto.randomUUID()}`,
@@ -63,22 +84,64 @@ const CreateInventory = () => {
     setSelectedVendors(vendorsWithUnits);
   };
 
+  const handleOnSelectCategories = (newCategories: any[]) => {
+    const sellingItemWithCategories = newCategories.map((category) => {
+      if (category.isItem) {
+        return category;
+      }
+
+      return {
+        id: category.id,
+        categoryId: category.id,
+        category,
+        itemId: crypto.randomUUID(),
+        name: newInventoryItem?.name || '',
+        price: newInventoryItem?.price || 0,
+        inventoryUnit: selectedVendors[0]?.units[0] || null,
+        isShowDiscount: false,
+        prevPrice: 0,
+        availability: true,
+        typeId: newInventoryItem.typeId,
+        sku: newInventoryItem.sku,
+        hasGST: newInventoryItem.hasGST,
+        hasPST: newInventoryItem.hasPST,
+        isItem: true,
+      };
+    });
+
+    setSelectedSellingItems(sellingItemWithCategories);
+  };
+
   const {
     handleOpen: handleOpenVendorSelection,
     selectedItems: selectedVendors,
     setSelectedItems: setSelectedVendors,
     SelectionModal: VendorSelectionModal,
-  } = useModalSelect('Vendor', [], handleOnSelectVendors);
+  } = useModalSelect('Vendor', vendors || [], handleOnSelectVendors);
+
+  const {
+    handleOpen: handleOpenCategorySelection,
+    selectedItems: selectedSellingItems,
+    setSelectedItems: setSelectedSellingItems,
+    SelectionModal: CategorySelectionModal,
+  } = useModalSelect('Category', categories || [], handleOnSelectCategories);
+
+  const uniqueRatioUnits = useMemo(() => {
+    // get all the units from the selected vendors and filter out the duplicate units
+    const listOfUnits = selectedVendors.flatMap((vendor) => vendor.units);
+    const uniqueUnits = listOfUnits.filter(
+      (unit, index, self) =>
+        self.findIndex((t) => t.ratio === unit.ratio) === index,
+    );
+    return uniqueUnits;
+  }, [selectedVendors]);
 
   const [newInventoryItem, setNewInventoryItem] = useState<any>({
     name: '',
     sku: '',
     typeId: -1,
   });
-
-  const [isOpenVendorSelection, setIsOpenVendorSelection] = useState(false);
-  // const [selectedVendors, setSelectedVendors] = useState<any[]>([]);
-  // const [units, setUnits] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const onAddUnit = (vendorId: number) => {
     const newSelectedVendors = selectedVendors.map((vendor) => {
@@ -113,7 +176,7 @@ const CreateInventory = () => {
     vendorId: number,
     unitId: number,
     field: string,
-    value: string,
+    value: string | number,
   ) => {
     const newSelectedVendors = selectedVendors.map((vendor) => {
       if (vendor.id === vendorId) {
@@ -127,6 +190,23 @@ const CreateInventory = () => {
       return vendor;
     });
     setSelectedVendors(newSelectedVendors);
+  };
+
+  const onChangeSellingItem = (
+    itemId: string,
+    field: string,
+    value: string | number,
+  ) => {
+    const newSelectedSellingItems = selectedSellingItems.map((item) => {
+      if (item.itemId === itemId) {
+        console.log('item', item);
+        console.log('field', field);
+        console.log('value', value);
+        return { ...item, [field]: value };
+      }
+      return item;
+    });
+    setSelectedSellingItems(newSelectedSellingItems);
   };
 
   const onDeleteUnit = (vendorId: number, unitId: string) => {
@@ -150,6 +230,54 @@ const CreateInventory = () => {
     setSelectedVendors(newSelectedVendors);
   };
 
+  const onDeleteSellingItem = (itemId: string) => {
+    const newSelectedSellingItems = selectedSellingItems.filter(
+      (item) => item.itemId !== itemId,
+    );
+    setSelectedSellingItems(newSelectedSellingItems);
+  };
+
+  const onChangeVendor = (vendorId: number, field: string, value: string) => {
+    const newSelectedVendors = selectedVendors.map((vendor) => {
+      if (vendor.id === vendorId) {
+        return { ...vendor, [field]: value };
+      }
+      return vendor;
+    });
+    setSelectedVendors(newSelectedVendors);
+  };
+
+  const handleCreateInventory = async () => {
+    try {
+      setIsLoading(true);
+      const response = await axios.post(
+        getAdminApiUrl(companyId, '/inventory'),
+        {
+          name: newInventoryItem.name,
+          sku: newInventoryItem.sku,
+          typeId: newInventoryItem.typeId,
+          hasGST: newInventoryItem.hasGST,
+          hasPST: newInventoryItem.hasPST,
+          vendorItems: selectedVendors,
+          sellingItems: selectedSellingItems,
+        },
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      showNotification('success', 'Inventory item created successfully');
+      router.push(`/admin/${companyId}/inventory`);
+    } catch (error: any) {
+      console.log('Fail to create inventory item: ', error);
+      showNotification('error', 'Fail to create inventory item: ' + error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Sidebar>
       {NotificationComp}
@@ -161,7 +289,19 @@ const CreateInventory = () => {
         fnOnSelect={handleOnSelectVendors}
       /> */}
       {VendorSelectionModal()}
-      <Typography variant="h5">Create Inventory</Typography>
+      {CategorySelectionModal()}
+
+      <Box display="flex" alignItems="center" justifyContent="space-between">
+        <Typography variant="h5">Create Inventory</Typography>
+        <LoadingButton
+          color="primary"
+          variant="contained"
+          onClick={handleCreateInventory}
+          loading={isLoading}
+        >
+          Create
+        </LoadingButton>
+      </Box>
 
       {/* General Information */}
       <ShadowSection>
@@ -297,6 +437,7 @@ const CreateInventory = () => {
           <Button
             color="primary"
             onClick={handleOpenVendorSelection}
+            disabled={!newInventoryItem.name}
           >
             + Add Vendor
           </Button>
@@ -306,7 +447,23 @@ const CreateInventory = () => {
         <Box mt={2} display="flex" flexDirection="column" gap={2}>
           {selectedVendors.map((vendor) => (
             <Box key={vendor.id}>
-              <Typography fontWeight={600}>{vendor.name}</Typography>
+              <Box display="flex" alignItems="center" gap={1} sx={{ my: 1 }}>
+                <Typography fontWeight={600}>{vendor.name}</Typography>
+                <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+                <FormControl>
+                  <InputLabel htmlFor="vendor-name-input">
+                    Supplier SKU
+                  </InputLabel>
+                  <OutlinedInput
+                    id="vendor-supplier-sku-input"
+                    label="Supplier SKU"
+                    value={vendor?.supplierSku || ''}
+                    onChange={(e) =>
+                      onChangeVendor(vendor.id, 'supplierSku', e.target.value)
+                    }
+                  />
+                </FormControl>
+              </Box>
               <Box>
                 {vendor?.units &&
                   vendor?.units.map((unit: any, index: number) => (
@@ -321,7 +478,7 @@ const CreateInventory = () => {
                         {/* <FormControl fullWidth> */}
                         {/* <InputLabel htmlFor="unit-input">Unit</InputLabel> */}
                         <UnitSearch
-                          value={unit.unit}
+                          value={unit?.unit || ''}
                           handleSelectPromptedItem={(selectedUnit: any) =>
                             onChangeUnit(
                               vendor.id,
@@ -363,7 +520,7 @@ const CreateInventory = () => {
                                 vendor.id,
                                 unit.id,
                                 'ratio',
-                                e.target.value,
+                                +e.target.value,
                               )
                             }
                           />
@@ -375,14 +532,14 @@ const CreateInventory = () => {
                           <OutlinedInput
                             id="price-input"
                             label="Price"
-                            value={unit.price}
+                            value={unit?.unitPrice || 0}
                             fullWidth
                             onChange={(e) =>
                               onChangeUnit(
                                 vendor.id,
                                 unit.id,
-                                'price',
-                                e.target.value,
+                                'unitPrice',
+                                +e.target.value,
                               )
                             }
                           />
@@ -400,7 +557,11 @@ const CreateInventory = () => {
                     </Grid>
                   ))}
               </Box>
-              <Button fullWidth onClick={() => onAddUnit(vendor.id)}>
+              <Button
+                fullWidth
+                onClick={() => onAddUnit(vendor.id)}
+                sx={{ mt: 1 }}
+              >
                 + Add Unit
               </Button>
             </Box>
@@ -412,7 +573,79 @@ const CreateInventory = () => {
       <ShadowSection>
         <Box display="flex" alignItems="center" justifyContent="space-between">
           <Typography fontWeight={600}>Assign Categories</Typography>
-          <Button color="primary">+ Add Category</Button>
+          <Button
+            color="primary"
+            onClick={handleOpenCategorySelection}
+            disabled={selectedVendors.length === 0}
+          >
+            + Add Category
+          </Button>
+        </Box>
+
+        <Box mt={2} display="flex" flexDirection="column" gap={2}>
+          {selectedSellingItems.map((item) => (
+            <Box key={item.id}>
+              <Typography fontWeight={600}>{item.category.name}</Typography>
+              <Grid container alignItems="center" spacing={1} sx={{ my: 0.5 }}>
+                <Grid item xs={12} md={3.8}>
+                  <FormControl fullWidth>
+                    <InputLabel htmlFor="price-input">Name</InputLabel>
+                    <OutlinedInput
+                      id="name-input"
+                      label="Name"
+                      value={item.name}
+                      onChange={(e) =>
+                        onChangeSellingItem(item.itemId, 'name', e.target.value)
+                      }
+                    />
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} md={3.8}>
+                  <FormControl fullWidth>
+                    <InputLabel htmlFor="price-input">Price</InputLabel>
+                    <OutlinedInput
+                      id="price-input"
+                      label="Price"
+                      value={item.price}
+                      onChange={(e) =>
+                        onChangeSellingItem(
+                          item.itemId,
+                          'price',
+                          +e.target.value,
+                        )
+                      }
+                    />
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} md={3.8}>
+                  <Select
+                    value={JSON.stringify(item.inventoryUnit)}
+                    fullWidth
+                    onChange={(e) =>
+                      onChangeSellingItem(
+                        item.itemId,
+                        'inventoryUnit',
+                        JSON.parse(e.target.value),
+                      )
+                    }
+                  >
+                    {uniqueRatioUnits.map((unit) => (
+                      <MenuItem key={unit.id} value={JSON.stringify(unit)}>
+                        1:{unit.ratio} - {unit.unit}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </Grid>
+                <Grid item xs={12} md={0.4} textAlign="right">
+                  <IconButton onClick={() => onDeleteSellingItem(item.itemId)}>
+                    <Trash2Icon
+                      style={{ width: 20, height: 20, color: grey[700] }}
+                    />
+                  </IconButton>
+                </Grid>
+              </Grid>
+            </Box>
+          ))}
         </Box>
 
         {/* <Box mt={2} display="flex" flexDirection="column" gap={2}>

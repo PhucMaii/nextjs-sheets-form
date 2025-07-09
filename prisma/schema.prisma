@@ -251,6 +251,8 @@ model Item {
   image           String?
   promotionId     Int? // support for only item in website category
   isBestSeller    Boolean?
+  createdAt       String?
+  createdBy       String?
 
   options  Option[]
   cartItem CartItem[]
@@ -689,6 +691,7 @@ model VendorItem {
   quantity        Float
   createdAt       String
   createdBy       String
+  supplierSku     String?
 
   inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
   vendor        Vendor        @relation(fields: [vendorId], references: [id], onDelete: Cascade)

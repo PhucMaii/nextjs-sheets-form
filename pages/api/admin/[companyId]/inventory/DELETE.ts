@@ -38,6 +38,18 @@ export default async function DELETE(
       },
     });
 
+    await prisma.vendorItem.deleteMany({
+      where: {
+        inventoryItemId: Number(id),
+      },
+    });
+
+    await prisma.item.deleteMany({
+      where: {
+        inventoryItemId: Number(id),
+      },
+    });
+
     return res.status(200).json({
       message: 'Inventory Item Deleted Successfully',
     });

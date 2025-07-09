@@ -46,6 +46,16 @@ const ModalSelection = ({
     fnOnSelect?.(newSelectedItems);
   };
 
+  const onSelectAllItems = () => {
+    if (selectedItems.length === filteredItems.length) {
+      setSelectedItems([]);
+      fnOnSelect?.([]);
+    } else {
+      setSelectedItems(filteredItems);
+      fnOnSelect?.(filteredItems);
+    }
+  };
+
   return (
     <Modal open={open} onClose={onClose}>
       <BoxModal maxHeight="80vh" overflow="auto">
@@ -73,7 +83,22 @@ const ModalSelection = ({
           onChange={(e) => setSearchKeywords(e.target.value)}
         />
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 1 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 1,
+              mb: 1
+            }}
+          >
+            <Typography variant="body2">Select All</Typography>
+            <Checkbox
+              checked={selectedItems.length === filteredItems.length}
+              onChange={() => onSelectAllItems()}
+            />
+          </Box>
           {filteredItems?.map((item: any) => (
             <Box
               key={item.id}
@@ -97,9 +122,13 @@ const ModalSelection = ({
   );
 };
 
-const useModalSelect = (label: string, itemList: any[], fnOnSelect?: (items: any[]) => void) => {
+const useModalSelect = (
+  label: string,
+  itemList: any[],
+  fnOnSelect?: (items: any[]) => void,
+) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedItems, setSelectedItems] = useState<any[]>([]);  
+  const [selectedItems, setSelectedItems] = useState<any[]>([]);
 
   const handleOpen = () => {
     setIsOpen(true);
@@ -122,7 +151,14 @@ const useModalSelect = (label: string, itemList: any[], fnOnSelect?: (items: any
     );
   };
 
-  return { isOpen, selectedItems, setSelectedItems, SelectionModal, handleOpen, handleClose };
+  return {
+    isOpen,
+    selectedItems,
+    setSelectedItems,
+    SelectionModal,
+    handleOpen,
+    handleClose,
+  };
 };
 
 export default useModalSelect;
