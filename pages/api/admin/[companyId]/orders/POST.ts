@@ -333,7 +333,7 @@ export const createOrder = async (
     }
 
     const total = generateOrderTotalPrice(items, shippingFee);
-    if (total.totalPrice < 12) {
+    if (total.totalPrice < 12 && createdBy.split(' - ')[0] === 'Client') {
       throw new Error('Total price must be greater than $12');
     }
     const { date, time } = getTodayDate();
