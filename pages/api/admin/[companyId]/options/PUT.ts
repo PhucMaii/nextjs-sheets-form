@@ -2,6 +2,7 @@ import { OrderedItems } from '@/app/utils/type';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { updateScheduledOrdersTotalPrice } from './POST';
+// import { websiteItemCategoryId } from '@/app/lib/constant';
 
 interface IBody {
   id: number;

@@ -781,7 +781,7 @@ const OrderView = ({
     }
 
     const total = generateOrderTotalPrice(orderedItems, order?.shippingFee);
-    if (total.totalPrice < 12) {
+    if (total.totalPrice < 12 && role === USER_ROLE.CLIENT) {
       showNotification('error', 'Total price must be greater than $12');
       return;
     }
@@ -1410,10 +1410,10 @@ const OrderView = ({
 
   const renderWarning = () => {
     // For order with less than $12, show warning
-    if (order?.totalPrice && order?.totalPrice < 12) {
+    if (order?.totalPrice && order?.totalPrice < 12 && role === USER_ROLE.CLIENT) {
       return (
         <Alert severity="warning">
-          Looks like your order is just under $12. You're almost there! Add a
+          Looks like your order is just under $12. You&apos;re almost there! Add a
           little more to complete your order 😊
         </Alert>
       );
