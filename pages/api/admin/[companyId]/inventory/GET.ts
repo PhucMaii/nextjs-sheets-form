@@ -86,6 +86,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           item: {
             include: {
               category: true,
+              inventoryUnit: true,
+              options: {
+                include: {
+                  unit: true,
+                },
+              },
             },
           },
           type: true,
@@ -112,18 +118,22 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         (item: any) => ({
           ...item,
           name: item.vendor.name,
-          id: item.vendor.id,
+          id: item.vendor.id, // use id as vendor id to match with front end
+          vendorItemId: item.id,
           supplierSku: item?.supplierSku || '',
           units: item.unit,
         }),
       );
 
+      // Format item to match with InventoryTemplate
       const formattedItem = {
         ...formattedInventory[0],
         vendorItem: vendorItemWithListOfUnits,
         sellingItems: inventoryItem.item.map((item: any) => ({
           ...item,
+          id: item.categoryId || 0,
           itemId: item.id,
+          isItem: true,
         })),
       };
 

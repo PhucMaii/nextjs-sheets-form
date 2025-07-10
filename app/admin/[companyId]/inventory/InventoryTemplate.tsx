@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Button,
@@ -15,6 +15,7 @@ import {
   InputLabel,
   FormControl,
   IconButton,
+  FormControlLabel,
 } from '@mui/material';
 import { ShadowSection } from '../reports/styled';
 import { useQuery } from '@tanstack/react-query';
@@ -29,6 +30,7 @@ import UnitSearch from '../components/Autocomplete/UnitSearch';
 import useModalSelect from '@/hooks/select/useModalSelect';
 import { LoadingButton } from '@mui/lab';
 import BackButton from '../components/BackButton';
+import Link from 'next/link';
 
 interface InventoryTemplateProps {
   onSubmit: (params: any) => Promise<void>;
@@ -169,6 +171,12 @@ const InventoryTemplate = ({
       typeId: -1,
     },
   );
+  const [applyToAllItems, setApplyToAllItems] = useState<boolean>(false);
+  const [itemToAllItems, setItemToAllItems] = useState<any>({
+    name: newInventoryItem?.name || '',
+    price: newInventoryItem?.price || 0,
+    unit: uniqueRatioUnits[0] || null,
+  });
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -234,30 +242,27 @@ const InventoryTemplate = ({
   ) => {
     const newSelectedSellingItems = selectedSellingItems.map((item) => {
       if (item.itemId === itemId) {
-        console.log('item', item);
-        console.log('field', field);
-        console.log('value', value);
-        return { ...item, [field]: value };
+        return { ...item, [field]: value, isChanged: true };
       }
       return item;
     });
     setSelectedSellingItems(newSelectedSellingItems);
   };
 
-  const onDeleteUnit = (vendorId: number, unitId: string) => {
+  const onDeleteUnit = (vendorId: number, unit: any) => {
     const newSelectedVendors = selectedVendors.map((vendor) => {
       if (vendor.id === vendorId) {
         if (vendor.units.length === 1) {
           showNotification('error', 'Vendor must have at least one unit');
           return vendor;
         }
-        if (unitId.includes('first')) {
+        if (unit?.ratio === 1) {
           showNotification('error', 'Unit with ratio of 1 cannot be deleted');
           return vendor;
         }
         return {
           ...vendor,
-          units: vendor.units.filter((unit: any) => unit.id !== unitId),
+          units: vendor.units.filter((u: any) => u.id !== unit.id),
         };
       }
       return vendor;
@@ -289,6 +294,8 @@ const InventoryTemplate = ({
         newInventoryItem,
         selectedVendors,
         selectedSellingItems,
+        applyToAllItems,
+        updatedSellingItem: applyToAllItems ? itemToAllItems : null,
       });
       // const response = await axios.post(
       //   getAdminApiUrl(companyId, '/inventory'),
@@ -316,6 +323,154 @@ const InventoryTemplate = ({
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const renderSellingItem = (item: any) => {
+    if (item.options && item.options.length > 0) {
+      const smallestOption = item.options.reduce(
+        (smallest: any, current: any) => {
+          return smallest.price < current.price ? smallest : current;
+        },
+        item.options[0],
+      );
+
+      return (
+        <Box key={item.id}>
+          {!isNaN(Number(item.itemId)) ? (
+            <Link href={`/admin/${companyId}/items/${item.itemId}`}>
+              <Typography
+                sx={{
+                  textDecoration: 'underline',
+                  color: 'black',
+                  width: 'fit-content',
+                }}
+                fontWeight={600}
+              >
+                {item.category.name}
+              </Typography>
+            </Link>
+          ) : (
+            <Typography fontWeight={600}>{item.category.name}</Typography>
+          )}
+          <Grid container alignItems="center" spacing={1} sx={{ my: 0.5 }}>
+            <Grid item xs={12} md={3.8}>
+              <Typography fontWeight={600}>Name</Typography>
+              <Typography>{item.name}</Typography>
+            </Grid>
+            <Grid item xs={12} md={3.8}>
+              <Typography fontWeight={600}>Price</Typography>
+              <Typography>From: ${smallestOption.price}</Typography>
+            </Grid>
+            <Grid item xs={12} md={3.8}>
+              <Typography fontWeight={600}>Unit</Typography>
+              <Typography>
+                1: {smallestOption.unit.ratio} - {smallestOption.unit.unit}
+              </Typography>
+              {/* </Grid>
+                {uniqueRatioUnits.map((unit) => {
+                  console.log(
+                    { unit, inventoryUnit: item.inventoryUnit },
+                    'unit',
+                  );
+                  return (
+                    <MenuItem key={unit.id} value={JSON.stringify(unit)}>
+                      1:{unit.ratio} - {unit.unit}
+                    </MenuItem>
+                  );
+                })}
+              </Select> */}
+            </Grid>
+            <Grid item xs={12} md={0.4} textAlign="right">
+              <IconButton onClick={() => onDeleteSellingItem(item.itemId)}>
+                <Trash2Icon
+                  style={{ width: 20, height: 20, color: grey[700] }}
+                />
+              </IconButton>
+            </Grid>
+          </Grid>
+        </Box>
+      );
+    }
+
+    return (
+      <Box key={item.id}>
+        {!isNaN(Number(item.itemId)) ? (
+          <Link href={`/admin/${companyId}/items/${item.itemId}`}>
+            <Typography
+              sx={{
+                textDecoration: 'underline',
+                color: 'black',
+                width: 'fit-content',
+              }}
+              fontWeight={600}
+            >
+              {item.category.name}
+            </Typography>
+          </Link>
+        ) : (
+          <Typography fontWeight={600}>{item.category.name}</Typography>
+        )}
+        <Grid container alignItems="center" spacing={1} sx={{ my: 0.5 }}>
+          <Grid item xs={12} md={3.8}>
+            <FormControl fullWidth>
+              <InputLabel htmlFor="price-input">Name</InputLabel>
+              <OutlinedInput
+                id="name-input"
+                label="Name"
+                value={item.name}
+                onChange={(e) =>
+                  onChangeSellingItem(item.itemId, 'name', e.target.value)
+                }
+              />
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} md={3.8}>
+            <FormControl fullWidth>
+              <InputLabel htmlFor="price-input">Price</InputLabel>
+              <OutlinedInput
+                id="price-input"
+                label="Price"
+                type="number"
+                value={item.price}
+                onChange={(e) =>
+                  onChangeSellingItem(item.itemId, 'price', +e.target.value)
+                }
+              />
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} md={3.8}>
+            <Select
+              value={JSON.stringify(item.inventoryUnit)}
+              fullWidth
+              onChange={(e) =>
+                onChangeSellingItem(
+                  item.itemId,
+                  'inventoryUnit',
+                  JSON.parse(e.target.value),
+                )
+              }
+            >
+              {uniqueRatioUnits.map((unit) => {
+                console.log(
+                  { unit, inventoryUnit: item.inventoryUnit },
+                  'unit',
+                );
+                return (
+                  <MenuItem key={unit.id} value={JSON.stringify(unit)}>
+                    1:{unit.ratio} - {unit.unit}
+                  </MenuItem>
+                );
+              })}
+            </Select>
+          </Grid>
+          <Grid item xs={12} md={0.4} textAlign="right">
+            <IconButton onClick={() => onDeleteSellingItem(item.itemId)}>
+              <Trash2Icon style={{ width: 20, height: 20, color: grey[700] }} />
+            </IconButton>
+          </Grid>
+        </Grid>
+      </Box>
+    );
   };
 
   return (
@@ -555,8 +710,12 @@ const InventoryTemplate = ({
                             id="ratio-input"
                             label="Ratio"
                             value={unit.ratio}
+                            type="number"
                             fullWidth
-                            disabled={index === 0 || unit.id.includes('first')}
+                            disabled={
+                              index === 0 ||
+                              unit?.id?.toString()?.includes('first')
+                            }
                             onChange={(e) =>
                               onChangeUnit(
                                 vendor.id,
@@ -590,7 +749,7 @@ const InventoryTemplate = ({
                       </Grid>
                       <Grid item xs={12} md={0.4} textAlign="right">
                         <IconButton
-                          onClick={() => onDeleteUnit(vendor.id, unit.id)}
+                          onClick={() => onDeleteUnit(vendor.id, unit)}
                         >
                           <Trash2Icon
                             style={{ width: 20, height: 20, color: grey[700] }}
@@ -615,7 +774,15 @@ const InventoryTemplate = ({
       {/* Assign categories to this inventory */}
       <ShadowSection>
         <Box display="flex" alignItems="center" justifyContent="space-between">
-          <Typography fontWeight={600}>Assign Categories</Typography>
+          <Box display="flex" flexDirection="column" gap={0.5}>
+            <Typography fontWeight={600}>Assign Categories</Typography>
+            <Box display="flex" alignItems="center" gap={1}>
+              <InfoIcon style={{ width: 16, height: 16, color: grey[700] }} />
+              <Typography variant="body2" color={grey[700]}>
+                Variants items must be edited at item page.
+              </Typography>
+            </Box>
+          </Box>
           <Button
             color="primary"
             onClick={handleOpenCategorySelection}
@@ -625,71 +792,78 @@ const InventoryTemplate = ({
           </Button>
         </Box>
 
+        <Box
+          display="flex"
+          alignItems="center"
+          gap={1}
+          sx={{ my: 1, justifyContent: 'flex-end' }}
+        >
+          <FormControlLabel
+            control={
+              <Switch
+                checked={applyToAllItems}
+                onChange={(e) => setApplyToAllItems(e.target.checked)}
+              />
+            }
+            label="Apply to all items"
+          />
+        </Box>
+
         <Box mt={2} display="flex" flexDirection="column" gap={2}>
-          {selectedSellingItems.map((item) => (
-            <Box key={item.id}>
-              <Typography fontWeight={600}>{item.category.name}</Typography>
-              <Grid container alignItems="center" spacing={1} sx={{ my: 0.5 }}>
-                <Grid item xs={12} md={3.8}>
-                  <FormControl fullWidth>
-                    <InputLabel htmlFor="price-input">Name</InputLabel>
-                    <OutlinedInput
-                      id="name-input"
-                      label="Name"
-                      value={item.name}
-                      onChange={(e) =>
-                        onChangeSellingItem(item.itemId, 'name', e.target.value)
-                      }
-                    />
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} md={3.8}>
-                  <FormControl fullWidth>
-                    <InputLabel htmlFor="price-input">Price</InputLabel>
-                    <OutlinedInput
-                      id="price-input"
-                      label="Price"
-                      type="number"
-                      value={item.price}
-                      onChange={(e) =>
-                        onChangeSellingItem(
-                          item.itemId,
-                          'price',
-                          +e.target.value,
-                        )
-                      }
-                    />
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} md={3.8}>
-                  <Select
-                    value={JSON.stringify(item.inventoryUnit)}
-                    fullWidth
-                    onChange={(e) =>
-                      onChangeSellingItem(
-                        item.itemId,
-                        'inventoryUnit',
-                        JSON.parse(e.target.value),
-                      )
-                    }
-                  >
-                    {uniqueRatioUnits.map((unit) => (
-                      <MenuItem key={unit.id} value={JSON.stringify(unit)}>
-                        1:{unit.ratio} - {unit.unit}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </Grid>
-                <Grid item xs={12} md={0.4} textAlign="right">
-                  <IconButton onClick={() => onDeleteSellingItem(item.itemId)}>
-                    <Trash2Icon
-                      style={{ width: 20, height: 20, color: grey[700] }}
-                    />
-                  </IconButton>
-                </Grid>
+          {!applyToAllItems ? (
+            selectedSellingItems.map((item) => (
+              <Fragment key={item.id}>{renderSellingItem(item)}</Fragment>
+            ))
+          ) : (
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs={12} md={4}>
+                <Typography fontWeight={600}>Name</Typography>
+                <OutlinedInput
+                  value={itemToAllItems.name}
+                  onChange={(e) =>
+                    setItemToAllItems((prev: any) => ({
+                      ...prev,
+                      name: e.target.value,
+                    }))
+                  }
+                  fullWidth
+                />
               </Grid>
-            </Box>
-          ))}
+              <Grid item xs={12} md={4}>
+                <Typography fontWeight={600}>Price</Typography>
+                <OutlinedInput
+                  fullWidth
+                  value={itemToAllItems.price}
+                  type="number"
+                  onChange={(e) =>
+                    setItemToAllItems((prev: any) => ({
+                      ...prev,
+                      price: +e.target.value,
+                    }))
+                  }
+                />
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <Typography fontWeight={600}>Unit</Typography>
+                <Select
+                  value={JSON.stringify(itemToAllItems.inventoryUnit)}
+                  onChange={(e) =>
+                    setItemToAllItems((prev: any) => ({
+                      ...prev,
+                      inventoryUnit: JSON.parse(e.target.value),
+                    }))
+                  }
+                  fullWidth
+                >
+                  {uniqueRatioUnits.map((unit: any) => (
+                    <MenuItem key={unit.id} value={JSON.stringify(unit)}>
+                      1:{unit.ratio} - {unit.unit}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </Grid>
+            </Grid>
+          )}
         </Box>
 
         {/* <Box mt={2} display="flex" flexDirection="column" gap={2}>

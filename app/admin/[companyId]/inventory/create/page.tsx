@@ -34,7 +34,7 @@ export default function CreateInventoryPage() {
       );
 
       if (response.data.error) {
-        return;
+        throw new Error(response.data.error);
       }
 
       router.push(`/admin/${companyId}/inventory`);

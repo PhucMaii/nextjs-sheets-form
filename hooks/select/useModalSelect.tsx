@@ -10,7 +10,7 @@ import {
   Typography,
 } from '@mui/material';
 import { SearchIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 const ModalSelection = ({
   open,
@@ -31,14 +31,18 @@ const ModalSelection = ({
 }) => {
   const [searchKeywords, setSearchKeywords] = useState('');
 
-  const filteredItems = itemList.filter((item) =>
-    item.name.toLowerCase().includes(searchKeywords.toLowerCase()),
+  const filteredItems = useMemo(
+    () =>
+      itemList.filter((item) =>
+        item.name.toLowerCase().includes(searchKeywords.toLowerCase()),
+      ),
+    [itemList, searchKeywords],
   );
 
   const onSelectItem = (item: any) => {
-    const newSelectedItems = [...selectedItems];
+    let newSelectedItems = [...selectedItems];
     if (newSelectedItems.some((v) => v.id === item.id)) {
-      newSelectedItems.splice(newSelectedItems.indexOf(item), 1);
+      newSelectedItems = newSelectedItems.filter((v) => v.id !== item.id);
     } else {
       newSelectedItems.push(item);
     }
@@ -90,7 +94,7 @@ const ModalSelection = ({
               alignItems: 'center',
               justifyContent: 'space-between',
               gap: 1,
-              mb: 1
+              mb: 1,
             }}
           >
             <Typography variant="body2">Select All</Typography>
@@ -129,7 +133,9 @@ const useModalSelect = (
   defaultSelectedItems?: any[] | null,
 ) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedItems, setSelectedItems] = useState<any[]>(defaultSelectedItems || []);
+  const [selectedItems, setSelectedItems] = useState<any[]>(
+    defaultSelectedItems || [],
+  );
 
   useEffect(() => {
     if (defaultSelectedItems) {

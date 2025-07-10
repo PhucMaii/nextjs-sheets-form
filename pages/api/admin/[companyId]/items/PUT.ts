@@ -148,8 +148,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     // Update schedule order items
     const responseUpdate = await updateAllScheduleOrderItems(
-      existingItem,
-      updatedItem,
+      existingItem.categoryId || 0,
+      updatedItem.inventoryItemId,
       updateOption,
       updatedData,
     );
@@ -269,9 +269,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-const updateAllScheduleOrderItems = async (
-  oldItem: any,
-  updatedItem: any,
+export const updateAllScheduleOrderItems = async (
+  categoryId: number,
+  inventoryItemId: number,
   updateOption: UPDATE_OPTION,
   updatedData: any,
 ) => {
@@ -281,7 +281,7 @@ const updateAllScheduleOrderItems = async (
     // CASE 1: UPDATE ALL ITEM WITH SAME INVENTORY ITEM ID - if update all ordered item in scheduled orders same inventory id
     if (
       updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME &&
-      updatedItem?.inventoryItemId
+      inventoryItemId
     ) {
       await prisma.orderedItems.updateMany({
         where: {
@@ -290,7 +290,7 @@ const updateAllScheduleOrderItems = async (
           },
           orderId: null,
           expenseId: null,
-          inventoryItemId: updatedItem.inventoryItemId,
+          inventoryItemId,
         },
         data: updatedData,
       });
@@ -300,7 +300,7 @@ const updateAllScheduleOrderItems = async (
         where: {
           items: {
             some: {
-              inventoryItemId: updatedItem.inventoryItemId,
+              inventoryItemId,
             },
           },
         },
@@ -337,7 +337,7 @@ const updateAllScheduleOrderItems = async (
     const scheduleOrders = await prisma.scheduleOrders.findMany({
       where: {
         user: {
-          categoryId: oldItem.categoryId,
+          categoryId
         },
       },
       include: {
@@ -352,7 +352,7 @@ const updateAllScheduleOrderItems = async (
 
     // Filter items that match with old item
     const matchedItems = scheduleOrderItems.filter(
-      (item: any) => item.inventoryItemId === oldItem.inventoryItemId,
+      (item: any) => item.inventoryItemId === inventoryItemId,
     );
 
     // Update matched items
@@ -371,7 +371,7 @@ const updateAllScheduleOrderItems = async (
     const justUpdatedOrders = await prisma.scheduleOrders.findMany({
       where: {
         user: {
-          categoryId: oldItem.categoryId,
+          categoryId,
         },
       },
       include: {
