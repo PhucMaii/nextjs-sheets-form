@@ -51,7 +51,6 @@ const OrderDetails = ({
   const [isOpenClearNote, setIsOpenClearNote] = useState<boolean>(false);
   const [clientItems, setClientItems] = useState<any>([]);
 
-  console.log('order?.user?.categoryId', order?.user?.categoryId);
   useEffect(() => {
     if (order?.user?.categoryId) {
       fetchClientItems();

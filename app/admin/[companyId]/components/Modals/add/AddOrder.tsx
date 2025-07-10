@@ -150,6 +150,8 @@ export default function AddOrder({
       return;
     }
 
+    console.log(clientValue, 'CLIENT VALUE');
+
     if (!clientValue) {
       showNotification('error', 'Please select a client');
       return;

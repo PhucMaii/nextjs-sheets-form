@@ -12,6 +12,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const prisma = new PrismaClient();
 
     const { userId, items, day, routeId } = req.body;
+    console.log(userId, 'USER ID');
 
     const { companyId } = req.query;
 
@@ -89,7 +90,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         // Should have a test to check if any scheduledOrder has position index of -1 -> bugs
         const routeScheduledOrders = await getRouteScheduledOrders(routeId);
         const sameRouteOrder = routeScheduledOrders.find(
-          (scheduledOrder: ScheduledOrder) => scheduledOrder.userId === userId,
+          (scheduledOrder: ScheduledOrder) =>
+            scheduledOrder && scheduledOrder?.userId === userId,
         );
 
         // If owner/client of new order does not exist in selected route -> refactor arrangement of other route
@@ -315,21 +317,23 @@ export const getRouteScheduledOrders = async (routeId: number) => {
     }
 
     // Get all scheduled orders in selected route
-    const scheduledOrders = route.clients.map((client: UserRoute | any) => {
-      if (client.user.scheduleOrders.length === 0) {
-        return null;
-      }
+    const scheduledOrders = route.clients
+      .map((client: UserRoute | any) => {
+        if (client.user.scheduleOrders.length === 0) {
+          return null;
+        }
 
-      // Access to client to get all scheduled orders
-      // Then find the one has same day as route day
-      const routePreOrder = client.user.scheduleOrders.find(
-        (scheduledOrder: ScheduledOrder) => {
-          return scheduledOrder.day === route.day;
-        },
-      );
+        // Access to client to get all scheduled orders
+        // Then find the one has same day as route day
+        const routePreOrder = client.user.scheduleOrders.find(
+          (scheduledOrder: ScheduledOrder) => {
+            return scheduledOrder.day === route.day;
+          },
+        );
 
-      return routePreOrder;
-    });
+        return routePreOrder;
+      })
+      .filter((order) => order !== null && order !== undefined); // Filter out null/undefined values
 
     return scheduledOrders;
   } catch (error: any) {
@@ -348,8 +352,12 @@ export const refactorRouteArrangement = async (routeId: number) => {
 
     // Get all position index of fetched scheduled orders and sort it
     const sortedPosIndexList = routeScheduledOrders
+      .filter(
+        (scheduledOrder) =>
+          scheduledOrder !== null && scheduledOrder !== undefined,
+      ) // Add safety filter
       .map((scheduledOrder: ScheduledOrder) => {
-        return scheduledOrder.positionIndex;
+        return scheduledOrder?.positionIndex;
       })
       .sort(
         (posIndexA: PositionIndex, posIndexB: PositionIndex) =>

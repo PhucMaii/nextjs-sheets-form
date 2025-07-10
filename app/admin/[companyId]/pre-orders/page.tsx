@@ -351,7 +351,6 @@ export default function ScheduledOrderPage() {
   };
 
   const initializeOrders = () => {
-    console.log('orders', orders);
     setBaseOrderList(orders?.data);
     setOrderList(orders?.data);
   };
@@ -406,8 +405,6 @@ export default function ScheduledOrderPage() {
       setSelectedOrders(orderList);
     }
   };
-
-  console.log('orderList', orderList);
 
   // const handleUpdateOrderUI = (updatedOrder: ScheduledOrder) => {
   //   // update base order list

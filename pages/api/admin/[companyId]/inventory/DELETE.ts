@@ -32,11 +32,31 @@ export default async function DELETE(
       });
     }
 
+    await prisma.fifo.deleteMany({
+      where: {
+        inventoryItemId: Number(id),
+      },
+    });
+
+    await prisma.vendorItem.deleteMany({
+      where: {
+        inventoryItemId: Number(id),
+      },
+    });
+
+    await prisma.item.deleteMany({
+      where: {
+        inventoryItemId: Number(id),
+      },
+    });
+    
     await prisma.inventoryItem.delete({
       where: {
         id: Number(id),
       },
     });
+
+
 
     return res.status(200).json({
       message: 'Inventory Item Deleted Successfully',
@@ -46,3 +66,4 @@ export default async function DELETE(
     return res.status(500).json({ error: 'Internal Server Error: ' + error });
   }
 }
+

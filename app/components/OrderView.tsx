@@ -797,7 +797,10 @@ const OrderView = ({
 
     setIsLoading(true);
     try {
-      await onSubmit({ ...order, items: orderedItems });
+      await onSubmit({
+        ...order,
+        items: orderedItems,
+      });
       setOrderedItems([]);
       setIsLoading(false);
     } catch (error: any) {
