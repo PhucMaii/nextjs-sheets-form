@@ -31,7 +31,7 @@ interface IProps {
   onSelect: (e: any) => void;
   onEdit: () => void;
   onViewBatch: () => void;
-  onDelete: () => Promise<void>;
+  onDelete: (e: any, item: IInventoryItem) => Promise<void>;
   itemTypes: ItemType[];
   onChangeType: (typeId: number) => void;
   companyId: string;
@@ -279,7 +279,7 @@ const InventoryItemCard = ({
               <DeleteModal
                 includedButton
                 targetObj={item}
-                handleDelete={onDelete}
+                handleDelete={(e) => onDelete(e, item)}
                 showTargetObj={item.name}
               />
             </Box>
@@ -342,14 +342,17 @@ const InventoryItemCard = ({
             gap={1}
           >
             <Tooltip title="Edit Item">
-              <IconButton size="small" onClick={onEdit}>
+              <IconButton size="small" onClick={(e: any) => {
+                e.stopPropagation();
+                router.push(`/admin/${companyId}/inventory/${item.id}`);
+              }}>
                 <EditIcon size={18} />
               </IconButton>
             </Tooltip>
             <DeleteModal
               includedButton
               targetObj={item}
-              handleDelete={onDelete}
+              handleDelete={(e) => onDelete(e, item)}
               showTargetObj={item.name}
             />
           </Grid>

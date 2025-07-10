@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   Card,
-  CardContent,
   Checkbox,
   Typography,
   alpha,
@@ -265,7 +264,7 @@ const InventoryTable = ({
               onViewBatch={() =>
                 setBatchProps({ open: true, inventoryItem: item })
               }
-              onDelete={() => handleDelete(item)}
+              onDelete={(e) => handleDelete(e, item)}
               itemTypes={itemTypes}
               onChangeType={(typeId) => handleChangeType(item, typeId)}
               companyId={companyId}

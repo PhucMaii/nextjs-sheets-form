@@ -10,7 +10,7 @@ import {
   Typography,
 } from '@mui/material';
 import { SearchIcon } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const ModalSelection = ({
   open,
@@ -126,9 +126,16 @@ const useModalSelect = (
   label: string,
   itemList: any[],
   fnOnSelect?: (items: any[]) => void,
+  defaultSelectedItems?: any[] | null,
 ) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedItems, setSelectedItems] = useState<any[]>([]);
+  const [selectedItems, setSelectedItems] = useState<any[]>(defaultSelectedItems || []);
+
+  useEffect(() => {
+    if (defaultSelectedItems) {
+      setSelectedItems(defaultSelectedItems);
+    }
+  }, [defaultSelectedItems]);
 
   const handleOpen = () => {
     setIsOpen(true);

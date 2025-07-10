@@ -83,6 +83,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
               unit: true,
             },
           },
+          item: {
+            include: {
+              category: true,
+            },
+          },
           type: true,
         },
       });
@@ -95,16 +100,35 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         inventoryItem,
       ]);
 
-      let sellingUnits = inventoryItem.vendorItem.flatMap(
-        (item: any) => item.unit,
+      // let sellingUnits = inventoryItem.vendorItem.flatMap(
+      //   (item: any) => item.unit,
+      // );
+
+      // sellingUnits = Array.from(
+      //   new Map(sellingUnits.map((unit: any) => [unit.ratio, unit])).values(),
+      // );
+
+      const vendorItemWithListOfUnits = inventoryItem.vendorItem.map(
+        (item: any) => ({
+          ...item,
+          name: item.vendor.name,
+          id: item.vendor.id,
+          supplierSku: item?.supplierSku || '',
+          units: item.unit,
+        }),
       );
 
-      sellingUnits = Array.from(
-        new Map(sellingUnits.map((unit: any) => [unit.ratio, unit])).values(),
-      );
+      const formattedItem = {
+        ...formattedInventory[0],
+        vendorItem: vendorItemWithListOfUnits,
+        sellingItems: inventoryItem.item.map((item: any) => ({
+          ...item,
+          itemId: item.id,
+        })),
+      };
 
       return res.status(200).json({
-        data: { ...formattedInventory, units: sellingUnits },
+        data: formattedItem,
         message: 'Fetch Inventory Successfully',
       });
     }

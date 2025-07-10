@@ -10,7 +10,7 @@ import { LoadingButton } from '@mui/lab';
 
 interface PropTypes {
   targetObj: any;
-  handleDelete: (deletedOrder: any) => Promise<void>;
+  handleDelete: (e: any, deletedOrder: any) => Promise<void>;
   includedButton?: boolean;
   includedIconButton?: boolean;
   open?: boolean;
@@ -37,7 +37,7 @@ export default function DeleteModal({
     e.preventDefault();
     try {
       setIsDeleting(true);
-      await handleDelete(targetObj);
+      await handleDelete(e, targetObj);
       setIsDeleting(false);
       if (handleCloseModal) {
         handleCloseModal();

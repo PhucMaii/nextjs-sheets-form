@@ -1,15 +1,14 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { checkAndUpdateUnits } from './expenses/POST';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/pages/api/auth/[...nextauth]';
+import { getCreatedBy } from '@/pages/api/import-sheets/utils';
+import { USER_ROLE } from '@/app/utils/enum';
 
 interface IBody {
   id: number;
   name: string;
   sku: string;
   supplierSku: string;
-  color: string;
   hasPST?: boolean;
   hasGST?: boolean;
   vendorItems: any[];
@@ -34,10 +33,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       name,
       sku,
       supplierSku,
-      color,
       hasPST,
       hasGST,
       vendorItems,
+      updatedSellingItems,
       updatedAt,
       isShowInventory,
     }: IBody = req.body;
@@ -122,20 +121,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    if (color && existingInventoryItem.color !== color) {
-      await prisma.inventoryItem.update({
-        where: {
-          id,
-        },
-        data: {
-          color,
-        },
-      });
-    }
-
-    const session: any = await getServerSession(req, res, authOptions);
-    const employee: any = session?.user;
-    const createdBy = `Admin - ${employee.name}`;
+    const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
 
     let dbInventoryItemLeft = existingInventoryItem.vendorItem;
     for (const updatedVendorItem of vendorItems) {

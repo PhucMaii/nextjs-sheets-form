@@ -32,9 +32,9 @@ export default async function DELETE(
       });
     }
 
-    await prisma.inventoryItem.delete({
+    await prisma.fifo.deleteMany({
       where: {
-        id: Number(id),
+        inventoryItemId: Number(id),
       },
     });
 
@@ -49,6 +49,14 @@ export default async function DELETE(
         inventoryItemId: Number(id),
       },
     });
+    
+    await prisma.inventoryItem.delete({
+      where: {
+        id: Number(id),
+      },
+    });
+
+
 
     return res.status(200).json({
       message: 'Inventory Item Deleted Successfully',
