@@ -1,5 +1,6 @@
 import React from 'react';
 import loaderStyle from './style.module.css';
+import Image from 'next/image';
 
 export default function LoadingComponent() {
   return (
@@ -10,7 +11,12 @@ export default function LoadingComponent() {
         role="status"
       ></div> */}
       <div className={loaderStyle.loader}>
-        <img alt="Supreme Sprouts Logo" src="/supremesproutsIcon.png" />
+        <Image
+          alt="Supreme Sprouts Logo"
+          src="/supremesproutsIcon.png"
+          width={100}
+          height={100}
+        />
       </div>
       <div className={loaderStyle.text}></div>
     </div>

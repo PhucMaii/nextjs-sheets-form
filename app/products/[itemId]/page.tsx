@@ -39,6 +39,7 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/scrollbar';
 import '../../../styles/swiper.css';
+import Image from 'next/image';
 
 export default function ItemPage() {
   const { itemId }: any = useParams();
@@ -333,7 +334,7 @@ export default function ItemPage() {
               alignItems: 'center',
             }}
           >
-            <img
+            <Image
               src={imgUrl}
               alt={itemData?.inventoryItem.name}
               style={{
@@ -341,6 +342,8 @@ export default function ItemPage() {
                 maxHeight: '100%',
                 objectFit: 'contain',
               }}
+              width={100}
+              height={100}
             />
           </Grid>
           <Grid item xs={12} md={6}>

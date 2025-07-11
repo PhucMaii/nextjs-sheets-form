@@ -23,6 +23,7 @@ import { filter } from '../../Autocomplete/VendorItemSearch';
 import useEditUnit from '@/hooks/unit/useEditUnit';
 import useImageGallery from '@/hooks/useImageGallery';
 import { useParams } from 'next/navigation';
+import Image from 'next/image';
 interface IProps extends ModalProps {
   showNotification: (type: AlertColor, message: string) => void;
   typeId: number;
@@ -51,8 +52,9 @@ export default function AddItemIntoType({
     typeId,
   });
 
-  const [inventoryItems] = SWRFetchData(getAdminApiUrl(companyId, '/inventory'));
-
+  const [inventoryItems] = SWRFetchData(
+    getAdminApiUrl(companyId, '/inventory'),
+  );
 
   const { selectedImage, renderImageGallery } = useImageGallery(
     'products',
@@ -67,7 +69,6 @@ export default function AddItemIntoType({
       showNotification,
       false,
     );
-
 
   useEffect(() => {
     if (promptedItem.id > 0) {
@@ -311,11 +312,12 @@ export default function AddItemIntoType({
           <Typography>Upload Image</Typography>
           {promptedItem?.image && (
             <Box display="flex" gap={2} alignItems="center">
-              <img
-                src={img}
+              <Image
+                src={img || ''}
                 alt={promptedItem.name}
                 width={100}
                 height={100}
+                loading="lazy"
               />
               <Typography>{promptedItem.image}</Typography>
             </Box>

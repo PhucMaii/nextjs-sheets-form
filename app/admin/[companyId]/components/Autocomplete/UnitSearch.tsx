@@ -34,7 +34,11 @@ export default function UnitSearch({
       disabled={disabled}
       value={value}
       onChange={(event, newValue) => {
-        handleSelectPromptedItem(newValue);
+        if (newValue.inputValue) {
+          handleSelectPromptedItem(newValue.inputValue);
+        } else {
+          handleSelectPromptedItem(newValue);
+        }
       }}
       filterOptions={(options, params) => {
         const filtered = filter(options, params);
@@ -57,7 +61,7 @@ export default function UnitSearch({
       id="free-solo-with-text-demo"
       options={displayItems}
       getOptionLabel={(option) => {
-        // Check if the option has a custom title (for new item suggestion)
+        // Check if the option has a custom title (for new item suggestion) remove the add " "
         if (option.title) {
           return option.title;
         }

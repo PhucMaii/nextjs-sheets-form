@@ -57,7 +57,7 @@ const PriceDisplay: React.FC<{
               fontSize: '0.875rem',
             }}
           >
-            ${price}
+            ${prevPrice}
           </Typography>
           <Chip
             label={`-${calculateDiscountPercentage(price, prevPrice)}%`}

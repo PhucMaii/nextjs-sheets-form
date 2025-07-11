@@ -2,6 +2,7 @@
 import { generateImgUrl } from '@/app/lib/s3';
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, CircularProgress } from '@mui/material';
+import Image from 'next/image';
 
 interface IProps {
   fileKey: string;
@@ -97,7 +98,7 @@ export default function DisplayFile({
       {fileKey.split('.')[1] === 'pdf' ? (
         <embed src={url} width={width || '100px'} height={height || '100px'} />
       ) : (
-        <img
+        <Image
           src={url}
           alt={alt || 'file'}
           style={{
@@ -105,8 +106,13 @@ export default function DisplayFile({
             height: height || '100px',
             ...style,
           }}
+          objectFit="cover"
           onClick={onClick}
           onError={() => setError('Failed to load image')}
+          width={100}
+          height={100}
+          loading="lazy"
+          unoptimized={true}
         />
       )}
     </>

@@ -14,6 +14,7 @@ interface IBody {
   typeId: number;
   hasPST: boolean;
   hasGST: boolean;
+  isShowInventory: boolean;
   vendorItems: any[];
   sellingItems: any[];
 }
@@ -33,6 +34,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       typeId,
       hasPST,
       hasGST,
+      isShowInventory,
       vendorItems,
       sellingItems,
     }: IBody = req.body;
@@ -88,6 +90,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         sku,
         hasPST,
         hasGST,
+        isShowInventory,
         createdAt,
         createdBy,
         color: infoBackground,
@@ -193,8 +196,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         name: sellingItem.name,
         price: sellingItem.price,
         inventoryUnitId: targetUnit.id,
-        isShowDiscount: false,
-        prevPrice: null,
+        isShowDiscount: sellingItem.isShowDiscount,
+        prevPrice: sellingItem.prevPrice,
         availability: true,
         createdAt,
         createdBy,

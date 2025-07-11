@@ -1,5 +1,11 @@
 'use client';
-import React, { Fragment, useEffect, useMemo, useState } from 'react';
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Button,
@@ -16,21 +22,24 @@ import {
   FormControl,
   IconButton,
   FormControlLabel,
+  InputAdornment,
+  Checkbox,
 } from '@mui/material';
 import { ShadowSection } from '../reports/styled';
 import { useQuery } from '@tanstack/react-query';
 import { getAdminApiUrl, USER_ROLE } from '@/app/utils/enum';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import axios from 'axios';
 import { InfoIcon, Trash2Icon } from 'lucide-react';
 import { grey } from '@mui/material/colors';
-import useNotification from '@/hooks/useNotification';
+import { ShowNotificationType } from '@/hooks/useNotification';
 import { units } from '@/app/lib/constant';
 import UnitSearch from '../components/Autocomplete/UnitSearch';
 import useModalSelect from '@/hooks/select/useModalSelect';
 import { LoadingButton } from '@mui/lab';
 import BackButton from '../components/BackButton';
-import Link from 'next/link';
+import { InventoryItemCardSkeleton } from '../components/Inventory/InventoryItemCard';
+import { Skeleton } from '@mui/material';
 
 interface InventoryTemplateProps {
   onSubmit: (params: any) => Promise<void>;
@@ -39,7 +48,110 @@ interface InventoryTemplateProps {
   defaultSelectedVendors?: any[];
   defaultSellingItems?: any[];
   title: string;
+  isInitializing?: boolean;
+  showNotification: ShowNotificationType;
 }
+
+const InventoryTemplateSkeleton = () => {
+  return (
+    <Sidebar>
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+        mb={2}
+      >
+        <BackButton />
+        <Button variant="contained" disabled>
+          Loading...
+        </Button>
+      </Box>
+      <Typography variant="h5" mb={3}>
+        Loading Inventory...
+      </Typography>
+
+      {/* Skeleton Loading States */}
+      <ShadowSection>
+        <Typography fontWeight={600} mb={2}>
+          General Information
+        </Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={6} sm={8}>
+            <Skeleton
+              variant="rectangular"
+              height={56}
+              sx={{ borderRadius: 1 }}
+            />
+          </Grid>
+          <Grid item xs={6} sm={4}>
+            <Skeleton
+              variant="rectangular"
+              height={56}
+              sx={{ borderRadius: 1 }}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <Skeleton
+              variant="rectangular"
+              height={56}
+              sx={{ borderRadius: 1 }}
+            />
+          </Grid>
+        </Grid>
+      </ShadowSection>
+
+      <ShadowSection>
+        <Typography fontWeight={600} mb={2}>
+          Vendors
+        </Typography>
+        <Box display="flex" flexDirection="column" gap={2}>
+          {[1, 2].map((index) => (
+            <Box key={index}>
+              <Skeleton variant="text" width={200} height={24} sx={{ mb: 1 }} />
+              <Grid container spacing={2} alignItems="center">
+                <Grid item xs={12} md={3.8}>
+                  <Skeleton
+                    variant="rectangular"
+                    height={56}
+                    sx={{ borderRadius: 1 }}
+                  />
+                </Grid>
+                <Grid item xs={12} md={3.8}>
+                  <Skeleton
+                    variant="rectangular"
+                    height={56}
+                    sx={{ borderRadius: 1 }}
+                  />
+                </Grid>
+                <Grid item xs={12} md={3.8}>
+                  <Skeleton
+                    variant="rectangular"
+                    height={56}
+                    sx={{ borderRadius: 1 }}
+                  />
+                </Grid>
+                <Grid item xs={12} md={0.4}>
+                  <Skeleton variant="circular" width={40} height={40} />
+                </Grid>
+              </Grid>
+            </Box>
+          ))}
+        </Box>
+      </ShadowSection>
+
+      <ShadowSection>
+        <Typography fontWeight={600} mb={2}>
+          Assign Categories
+        </Typography>
+        <Box display="flex" flexDirection="column" gap={2}>
+          {[1, 2, 3].map((index) => (
+            <InventoryItemCardSkeleton key={index} />
+          ))}
+        </Box>
+      </ShadowSection>
+    </Sidebar>
+  );
+};
 
 const InventoryTemplate = ({
   onSubmit,
@@ -48,8 +160,11 @@ const InventoryTemplate = ({
   defaultSelectedVendors,
   defaultSellingItems,
   title,
+  isInitializing,
+  showNotification,
 }: InventoryTemplateProps) => {
   const { companyId }: any = useParams();
+  const router = useRouter();
 
   const { data: itemTypes } = useQuery({
     queryKey: ['itemTypes'],
@@ -79,8 +194,6 @@ const InventoryTemplate = ({
     },
   });
 
-  const { showNotification, NotificationComp } = useNotification();
-
   const handleOnSelectVendors = (vendors: any[]) => {
     const vendorsWithUnits = vendors.map((vendor) => {
       if (!vendor.units || vendor.units.length === 0) {
@@ -104,8 +217,33 @@ const InventoryTemplate = ({
 
   const handleOnSelectCategories = (newCategories: any[]) => {
     const sellingItemWithCategories = newCategories.map((category) => {
+      // if the category is selected, return the category
       if (category.isItem) {
         return category;
+      }
+
+      // Check if defaultSellingItems has a category with the same id
+      const defaultSellingItem = defaultSellingItems?.find(
+        (item) => item.categoryId === category.id,
+      );
+      if (defaultSellingItem) {
+        return {
+          id: category.id,
+          categoryId: category.id,
+          category,
+          itemId: crypto.randomUUID(),
+          name: defaultSellingItem.name || '',
+          price: defaultSellingItem.price || 0,
+          inventoryUnit: defaultSellingItem.inventoryUnit || null,
+          isShowDiscount: defaultSellingItem.isShowDiscount || false,
+          prevPrice: defaultSellingItem.prevPrice || 0,
+          availability: defaultSellingItem.availability || true,
+          typeId: newInventoryItem.typeId,
+          sku: newInventoryItem.sku,
+          hasGST: newInventoryItem.hasGST,
+          hasPST: newInventoryItem.hasPST,
+          isItem: true,
+        };
       }
 
       return {
@@ -164,6 +302,16 @@ const InventoryTemplate = ({
     return uniqueUnits;
   }, [selectedVendors]);
 
+  useEffect(() => {
+    if (selectedVendors.length > 0) {
+      setItemToAllItems({
+        name: newInventoryItem?.name || '',
+        price: newInventoryItem?.price || 0,
+        inventoryUnit: uniqueRatioUnits[0] || null,
+      });
+    }
+  }, [selectedVendors, uniqueRatioUnits]);
+
   const [newInventoryItem, setNewInventoryItem] = useState<any>(
     defaultInventoryItem || {
       name: '',
@@ -171,7 +319,6 @@ const InventoryTemplate = ({
       typeId: -1,
     },
   );
-  const [applyToAllItems, setApplyToAllItems] = useState<boolean>(false);
   const [itemToAllItems, setItemToAllItems] = useState<any>({
     name: newInventoryItem?.name || '',
     price: newInventoryItem?.price || 0,
@@ -181,73 +328,77 @@ const InventoryTemplate = ({
 
   useEffect(() => {
     if (defaultInventoryItem) {
-      console.log(defaultInventoryItem, 'defaultInventoryItem');
       setNewInventoryItem(defaultInventoryItem);
     }
   }, [defaultInventoryItem]);
 
-  const onAddUnit = (vendorId: number) => {
-    const newSelectedVendors = selectedVendors.map((vendor) => {
-      if (vendor.id === vendorId) {
-        // the default unit name must be random different from the existing list of units
-        const nonExistingUnits = units.filter(
-          (unit) => !vendor.units.some((u: any) => u.unit === unit),
-        );
-        let randomUnit = 'bags';
+  const onAddUnit = useCallback(
+    (vendorId: number) => {
+      const newSelectedVendors = selectedVendors.map((vendor) => {
+        if (vendor.id === vendorId) {
+          // the default unit name must be random different from the existing list of units
+          const nonExistingUnits = units.filter(
+            (unit) => !vendor.units.some((u: any) => u.unit === unit),
+          );
+          let randomUnit = 'bags';
 
-        if (nonExistingUnits.length > 0) {
-          randomUnit =
-            nonExistingUnits[
-              Math.floor(Math.random() * nonExistingUnits.length)
-            ];
+          if (nonExistingUnits.length > 0) {
+            randomUnit =
+              nonExistingUnits[
+                Math.floor(Math.random() * nonExistingUnits.length)
+              ];
+          }
+
+          return {
+            ...vendor,
+            units: [
+              ...vendor.units,
+              { id: crypto.randomUUID(), unit: randomUnit, ratio: 2, price: 0 },
+            ],
+          };
         }
+        return vendor;
+      });
+      setSelectedVendors(newSelectedVendors);
+    },
+    [selectedVendors],
+  );
 
-        return {
-          ...vendor,
-          units: [
-            ...vendor.units,
-            { id: crypto.randomUUID(), unit: randomUnit, ratio: 2, price: 0 },
-          ],
-        };
-      }
-      return vendor;
-    });
-    setSelectedVendors(newSelectedVendors);
-  };
+  const onChangeUnit = useCallback(
+    (
+      vendorId: number,
+      unitId: number,
+      field: string,
+      value: string | number,
+    ) => {
+      const newSelectedVendors = selectedVendors.map((vendor) => {
+        if (vendor.id === vendorId) {
+          return {
+            ...vendor,
+            units: vendor.units.map((unit: any) =>
+              unit.id === unitId ? { ...unit, [field]: value } : unit,
+            ),
+          };
+        }
+        return vendor;
+      });
+      setSelectedVendors(newSelectedVendors);
+    },
+    [selectedVendors],
+  );
 
-  const onChangeUnit = (
-    vendorId: number,
-    unitId: number,
-    field: string,
-    value: string | number,
-  ) => {
-    const newSelectedVendors = selectedVendors.map((vendor) => {
-      if (vendor.id === vendorId) {
-        return {
-          ...vendor,
-          units: vendor.units.map((unit: any) =>
-            unit.id === unitId ? { ...unit, [field]: value } : unit,
-          ),
-        };
-      }
-      return vendor;
-    });
-    setSelectedVendors(newSelectedVendors);
-  };
-
-  const onChangeSellingItem = (
-    itemId: string,
-    field: string,
-    value: string | number,
-  ) => {
-    const newSelectedSellingItems = selectedSellingItems.map((item) => {
-      if (item.itemId === itemId) {
-        return { ...item, [field]: value, isChanged: true };
-      }
-      return item;
-    });
-    setSelectedSellingItems(newSelectedSellingItems);
-  };
+  const onChangeSellingItem = useCallback(
+    (itemId: string, field: string, value: string | number | boolean) => {
+      const newSelectedSellingItems = selectedSellingItems.map((item) => {
+        if (item.itemId === itemId) {
+          return { ...item, [field]: value };
+        }
+        return item;
+      });
+      setSelectedSellingItems(newSelectedSellingItems);
+    },
+    [selectedSellingItems],
+  );
 
   const onDeleteUnit = (vendorId: number, unit: any) => {
     const newSelectedVendors = selectedVendors.map((vendor) => {
@@ -270,32 +421,92 @@ const InventoryTemplate = ({
     setSelectedVendors(newSelectedVendors);
   };
 
-  const onDeleteSellingItem = (itemId: string) => {
-    const newSelectedSellingItems = selectedSellingItems.filter(
-      (item) => item.itemId !== itemId,
-    );
+  const onDeleteSellingItem = useCallback(
+    (itemId: string) => {
+      const newSelectedSellingItems = selectedSellingItems.filter(
+        (item) => item.itemId !== itemId,
+      );
+      setSelectedSellingItems(newSelectedSellingItems);
+    },
+    [selectedSellingItems],
+  );
+
+  const onChangeVendor = useCallback(
+    (vendorId: number, field: string, value: string) => {
+      const newSelectedVendors = selectedVendors.map((vendor) => {
+        if (vendor.id === vendorId) {
+          return { ...vendor, [field]: value };
+        }
+        return vendor;
+      });
+      setSelectedVendors(newSelectedVendors);
+    },
+    [selectedVendors],
+  );
+
+  const handleApplyToAllItems = () => {
+    const newSelectedSellingItems = selectedSellingItems.map((item) => {
+      return { ...item, ...itemToAllItems };
+    });
     setSelectedSellingItems(newSelectedSellingItems);
   };
 
-  const onChangeVendor = (vendorId: number, field: string, value: string) => {
-    const newSelectedVendors = selectedVendors.map((vendor) => {
-      if (vendor.id === vendorId) {
-        return { ...vendor, [field]: value };
-      }
-      return vendor;
+  const checkBeforeSubmit = () => {
+    if (newInventoryItem.name === '') {
+      showNotification('error', 'Name is required');
+      return false;
+    }
+
+    if (selectedVendors.length === 0) {
+      showNotification('error', 'Vendors are required');
+      return false;
+    }
+
+    // Check if all selling items have required fields
+    const allSellingItemsHaveRequiredFields = selectedSellingItems.every(
+      (item) => {
+        return (
+          item.name !== '' && item.price !== 0 && item.inventoryUnit !== null
+        );
+      },
+    );
+
+    if (!allSellingItemsHaveRequiredFields) {
+      showNotification('error', 'All selling items must have required fields');
+      return false;
+    }
+
+    // Check if units in one vendor are unique
+    const allVendorsHaveUniqueUnits = selectedVendors.every((vendor) => {
+      const uniqueUnits = vendor.units.filter(
+        (unit: any, index: number, self: any) =>
+          self.findIndex(
+            (t: any) => t.unit === unit.unit || t.ratio === unit.ratio,
+          ) === index,
+      );
+      return uniqueUnits.length === vendor.units.length;
     });
-    setSelectedVendors(newSelectedVendors);
+
+    if (!allVendorsHaveUniqueUnits) {
+      showNotification('error', 'Units in one vendor must be unique');
+      return false;
+    }
+
+    return true;
   };
 
   const handleSubmit = async () => {
+    if (!checkBeforeSubmit()) {
+      return;
+    }
+
     try {
       setIsLoading(true);
       await onSubmit({
         newInventoryItem,
         selectedVendors,
         selectedSellingItems,
-        applyToAllItems,
-        updatedSellingItem: applyToAllItems ? itemToAllItems : null,
+        updatedSellingItem: itemToAllItems,
       });
       // const response = await axios.post(
       //   getAdminApiUrl(companyId, '/inventory'),
@@ -325,61 +536,186 @@ const InventoryTemplate = ({
     }
   };
 
-  const renderSellingItem = (item: any) => {
-    if (item.options && item.options.length > 0) {
-      const smallestOption = item.options.reduce(
-        (smallest: any, current: any) => {
-          return smallest.price < current.price ? smallest : current;
-        },
-        item.options[0],
-      );
+  const renderedSellingItems = useMemo(() => {
+    const renderItem = (item: any) => {
+      if (item.options && item.options.length > 0) {
+        const smallestOption = item.options.reduce(
+          (smallest: any, current: any) => {
+            return smallest.price < current.price ? smallest : current;
+          },
+          item.options[0],
+        );
+
+        return (
+          <Box key={item.id}>
+            {!isNaN(Number(item.itemId)) ? (
+              // <Link
+              //   href={`/admin/${companyId}/items/${item.itemId}`}
+              //   style={{ width: 'fit-content' }}
+              // >
+              <Typography
+                sx={{
+                  color: 'black',
+                  width: 'fit-content',
+                  '&:hover': {
+                    textDecoration: 'underline',
+                    cursor: 'pointer',
+                  },
+                }}
+                fontWeight={600}
+                onClick={() => {
+                  router.push(`/admin/${companyId}/items/${item.itemId}`);
+                }}
+              >
+                {item.category.name}
+              </Typography>
+            ) : (
+              <Typography fontWeight={600}>{item.category.name}</Typography>
+            )}
+            <Grid container alignItems="center" spacing={1} sx={{ my: 0.5 }}>
+              <Grid item xs={12} md={3.8}>
+                <Typography fontWeight={600}>Name</Typography>
+                <Typography>{item.name}</Typography>
+              </Grid>
+              <Grid item xs={12} md={3.8}>
+                <Typography fontWeight={600}>Unit</Typography>
+                <Typography>
+                  1:{smallestOption.unit.ratio} - {smallestOption.unit.unit}
+                </Typography>
+              </Grid>
+              <Grid item xs={12} md={3.8}>
+                <Typography fontWeight={600}>Price</Typography>
+                <Typography>From: ${smallestOption.price}</Typography>
+              </Grid>
+              <Grid item xs={12} md={0.4} textAlign="right">
+                <IconButton onClick={() => onDeleteSellingItem(item.itemId)}>
+                  <Trash2Icon
+                    style={{ width: 20, height: 20, color: grey[700] }}
+                  />
+                </IconButton>
+              </Grid>
+              <Grid item xs={12}>
+                <Divider sx={{ my: 1 }} />
+              </Grid>
+            </Grid>
+          </Box>
+        );
+      }
 
       return (
         <Box key={item.id}>
           {!isNaN(Number(item.itemId)) ? (
-            <Link href={`/admin/${companyId}/items/${item.itemId}`}>
-              <Typography
-                sx={{
+            // <Link
+            //   href={`/admin/${companyId}/items/${item.itemId}`}
+            //   style={{ width: 'fit-content' }}
+            // >
+            <Typography
+              sx={{
+                color: 'black',
+                width: 'fit-content',
+                '&:hover': {
                   textDecoration: 'underline',
-                  color: 'black',
-                  width: 'fit-content',
-                }}
-                fontWeight={600}
-              >
-                {item.category.name}
-              </Typography>
-            </Link>
+                  cursor: 'pointer',
+                },
+              }}
+              fontWeight={600}
+              onClick={() => {
+                router.push(`/admin/${companyId}/items/${item.itemId}`);
+              }}
+            >
+              {item.category.name}
+            </Typography>
           ) : (
+            // </Link>
             <Typography fontWeight={600}>{item.category.name}</Typography>
           )}
           <Grid container alignItems="center" spacing={1} sx={{ my: 0.5 }}>
-            <Grid item xs={12} md={3.8}>
-              <Typography fontWeight={600}>Name</Typography>
-              <Typography>{item.name}</Typography>
+            <Grid item xs={12} md={3.3}>
+              <FormControl fullWidth>
+                <InputLabel htmlFor="name-input">Name</InputLabel>
+                <OutlinedInput
+                  id="name-input"
+                  label="Name"
+                  value={item.name}
+                  onChange={(e) =>
+                    onChangeSellingItem(item.itemId, 'name', e.target.value)
+                  }
+                />
+              </FormControl>
             </Grid>
-            <Grid item xs={12} md={3.8}>
-              <Typography fontWeight={600}>Price</Typography>
-              <Typography>From: ${smallestOption.price}</Typography>
+            <Grid item xs={12} md={3.3}>
+              <Select
+                value={JSON.stringify(item.inventoryUnit)}
+                fullWidth
+                onChange={(e) =>
+                  onChangeSellingItem(
+                    item.itemId,
+                    'inventoryUnit',
+                    JSON.parse(e.target.value),
+                  )
+                }
+              >
+                {uniqueRatioUnits.map((unit) => (
+                  <MenuItem key={unit.id} value={JSON.stringify(unit)}>
+                    1:{unit.ratio} - {unit.unit}
+                  </MenuItem>
+                ))}
+              </Select>
             </Grid>
-            <Grid item xs={12} md={3.8}>
-              <Typography fontWeight={600}>Unit</Typography>
-              <Typography>
-                1: {smallestOption.unit.ratio} - {smallestOption.unit.unit}
-              </Typography>
-              {/* </Grid>
-                {uniqueRatioUnits.map((unit) => {
-                  console.log(
-                    { unit, inventoryUnit: item.inventoryUnit },
-                    'unit',
-                  );
-                  return (
-                    <MenuItem key={unit.id} value={JSON.stringify(unit)}>
-                      1:{unit.ratio} - {unit.unit}
-                    </MenuItem>
-                  );
-                })}
-              </Select> */}
+            <Grid item xs={12} md={3.3}>
+              <FormControl fullWidth>
+                <InputLabel htmlFor="price-input">Price</InputLabel>
+                <OutlinedInput
+                  id="price-input"
+                  label="Price"
+                  type="number"
+                  value={item.price}
+                  onChange={(e) =>
+                    onChangeSellingItem(item.itemId, 'price', +e.target.value)
+                  }
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={item.isShowDiscount}
+                            onChange={(e) =>
+                              onChangeSellingItem(
+                                item.itemId,
+                                'isShowDiscount',
+                                e.target.checked,
+                              )
+                            }
+                          />
+                        }
+                        label="Show Discount"
+                      />
+                    </InputAdornment>
+                  }
+                />
+              </FormControl>
             </Grid>
+
+            <Grid item xs={12} md={1.5}>
+              <FormControl fullWidth>
+                <InputLabel htmlFor="prev-price-input">Prev Price</InputLabel>
+                <OutlinedInput
+                  id="prev-price-input"
+                  label="Prev Price"
+                  fullWidth
+                  type="number"
+                  value={item.prevPrice}
+                  onChange={(e) =>
+                    onChangeSellingItem(
+                      item.itemId,
+                      'prevPrice',
+                      +e.target.value,
+                    )
+                  }
+                />
+              </FormControl>
+            </Grid>
+
             <Grid item xs={12} md={0.4} textAlign="right">
               <IconButton onClick={() => onDeleteSellingItem(item.itemId)}>
                 <Trash2Icon
@@ -390,92 +726,19 @@ const InventoryTemplate = ({
           </Grid>
         </Box>
       );
-    }
+    };
 
-    return (
-      <Box key={item.id}>
-        {!isNaN(Number(item.itemId)) ? (
-          <Link href={`/admin/${companyId}/items/${item.itemId}`}>
-            <Typography
-              sx={{
-                textDecoration: 'underline',
-                color: 'black',
-                width: 'fit-content',
-              }}
-              fontWeight={600}
-            >
-              {item.category.name}
-            </Typography>
-          </Link>
-        ) : (
-          <Typography fontWeight={600}>{item.category.name}</Typography>
-        )}
-        <Grid container alignItems="center" spacing={1} sx={{ my: 0.5 }}>
-          <Grid item xs={12} md={3.8}>
-            <FormControl fullWidth>
-              <InputLabel htmlFor="price-input">Name</InputLabel>
-              <OutlinedInput
-                id="name-input"
-                label="Name"
-                value={item.name}
-                onChange={(e) =>
-                  onChangeSellingItem(item.itemId, 'name', e.target.value)
-                }
-              />
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} md={3.8}>
-            <FormControl fullWidth>
-              <InputLabel htmlFor="price-input">Price</InputLabel>
-              <OutlinedInput
-                id="price-input"
-                label="Price"
-                type="number"
-                value={item.price}
-                onChange={(e) =>
-                  onChangeSellingItem(item.itemId, 'price', +e.target.value)
-                }
-              />
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} md={3.8}>
-            <Select
-              value={JSON.stringify(item.inventoryUnit)}
-              fullWidth
-              onChange={(e) =>
-                onChangeSellingItem(
-                  item.itemId,
-                  'inventoryUnit',
-                  JSON.parse(e.target.value),
-                )
-              }
-            >
-              {uniqueRatioUnits.map((unit) => {
-                console.log(
-                  { unit, inventoryUnit: item.inventoryUnit },
-                  'unit',
-                );
-                return (
-                  <MenuItem key={unit.id} value={JSON.stringify(unit)}>
-                    1:{unit.ratio} - {unit.unit}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          </Grid>
-          <Grid item xs={12} md={0.4} textAlign="right">
-            <IconButton onClick={() => onDeleteSellingItem(item.itemId)}>
-              <Trash2Icon style={{ width: 20, height: 20, color: grey[700] }} />
-            </IconButton>
-          </Grid>
-        </Grid>
-      </Box>
-    );
-  };
+    return selectedSellingItems.map((item) => (
+      <Fragment key={item.id}>{renderItem(item)}</Fragment>
+    ));
+  }, [selectedSellingItems, uniqueRatioUnits]);
+
+  if (isInitializing) {
+    return <InventoryTemplateSkeleton />;
+  }
 
   return (
     <Sidebar>
-      {NotificationComp}
       {/* <VendorSelection
         open={isOpenVendorSelection}
         onClose={() => setIsOpenVendorSelection(false)}
@@ -546,6 +809,22 @@ const InventoryTemplate = ({
           </Grid>
           <Grid item xs={12}>
             <Divider sx={{ my: 1 }} />
+          </Grid>
+          <Grid item xs={12} textAlign="right">
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={newInventoryItem?.isShowInventory || false}
+                  onChange={(e) =>
+                    setNewInventoryItem((prev: any) => ({
+                      ...prev,
+                      isShowInventory: e.target.checked,
+                    }))
+                  }
+                />
+              }
+              label="Show Low Stock Quantity"
+            />
           </Grid>
           <Grid
             item
@@ -766,6 +1045,7 @@ const InventoryTemplate = ({
               >
                 + Add Unit
               </Button>
+              <Divider sx={{ my: 1 }} />
             </Box>
           ))}
         </Box>
@@ -792,87 +1072,148 @@ const InventoryTemplate = ({
           </Button>
         </Box>
 
-        <Box
-          display="flex"
-          alignItems="center"
-          gap={1}
-          sx={{ my: 1, justifyContent: 'flex-end' }}
-        >
-          <FormControlLabel
-            control={
-              <Switch
-                checked={applyToAllItems}
-                onChange={(e) => setApplyToAllItems(e.target.checked)}
-              />
-            }
-            label="Apply to all items"
-          />
-        </Box>
+        {/* {selectedSellingItems.length > 0 && (
+          <Box
+            display="flex"
+            alignItems="center"
+            gap={1}
+            sx={{ my: 1, justifyContent: 'flex-end' }}
+          >
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={applyToAllItems}
+                  onChange={(e) => setApplyToAllItems(e.target.checked)}
+                />
+              }
+              label="Apply to all items"
+            />
+          </Box>
+        )} */}
 
-        <Box mt={2} display="flex" flexDirection="column" gap={2}>
-          {!applyToAllItems ? (
-            selectedSellingItems.map((item) => (
-              <Fragment key={item.id}>{renderSellingItem(item)}</Fragment>
-            ))
-          ) : (
+        {selectedSellingItems.length > 0 && (
+          <>
+            <Typography fontWeight={600} mt={2} mb={1}>
+              General Item Set
+            </Typography>
             <Grid container spacing={2} alignItems="center">
-              <Grid item xs={12} md={4}>
-                <Typography fontWeight={600}>Name</Typography>
-                <OutlinedInput
-                  value={itemToAllItems.name}
-                  onChange={(e) =>
-                    setItemToAllItems((prev: any) => ({
-                      ...prev,
-                      name: e.target.value,
-                    }))
-                  }
-                  fullWidth
-                />
+              <Grid item xs={12} md={3.3}>
+                <FormControl fullWidth>
+                  <InputLabel htmlFor="general-name-input">Name</InputLabel>
+                  <OutlinedInput
+                    id="general-name-input"
+                    label="Name"
+                    value={itemToAllItems.name}
+                    onChange={(e) =>
+                      setItemToAllItems((prev: any) => ({
+                        ...prev,
+                        name: e.target.value,
+                      }))
+                    }
+                    fullWidth
+                  />
+                </FormControl>
               </Grid>
-              <Grid item xs={12} md={4}>
-                <Typography fontWeight={600}>Price</Typography>
-                <OutlinedInput
-                  fullWidth
-                  value={itemToAllItems.price}
-                  type="number"
-                  onChange={(e) =>
-                    setItemToAllItems((prev: any) => ({
-                      ...prev,
-                      price: +e.target.value,
-                    }))
-                  }
-                />
+              <Grid item xs={12} md={3.3}>
+                <FormControl fullWidth>
+                  <InputLabel htmlFor="general-unit-input">Unit</InputLabel>
+                  <Select
+                    id="general-unit-input"
+                    label="Unit"
+                    value={JSON.stringify(itemToAllItems?.inventoryUnit || {})}
+                    onChange={(e) =>
+                      setItemToAllItems((prev: any) => ({
+                        ...prev,
+                        inventoryUnit: JSON.parse(e.target.value),
+                      }))
+                    }
+                    fullWidth
+                  >
+                    {uniqueRatioUnits.map((unit: any) => (
+                      <MenuItem key={unit.id} value={JSON.stringify(unit)}>
+                        1:{unit.ratio} - {unit.unit}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Grid>
-              <Grid item xs={12} md={4}>
-                <Typography fontWeight={600}>Unit</Typography>
-                <Select
-                  value={JSON.stringify(itemToAllItems.inventoryUnit)}
-                  onChange={(e) =>
-                    setItemToAllItems((prev: any) => ({
-                      ...prev,
-                      inventoryUnit: JSON.parse(e.target.value),
-                    }))
-                  }
-                  fullWidth
+              <Grid item xs={12} md={3.3}>
+                <FormControl fullWidth>
+                  <InputLabel htmlFor="general-price-input">Price</InputLabel>
+                  <OutlinedInput
+                    id="general-price-input"
+                    label="Price"
+                    fullWidth
+                    value={itemToAllItems.price}
+                    type="number"
+                    onChange={(e) =>
+                      setItemToAllItems((prev: any) => ({
+                        ...prev,
+                        price: +e.target.value,
+                      }))
+                    }
+                    endAdornment={
+                      <InputAdornment position="end">
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={itemToAllItems.isShowDiscount}
+                              onChange={(e) =>
+                                setItemToAllItems((prev: any) => ({
+                                  ...prev,
+                                  isShowDiscount: e.target.checked,
+                                }))
+                              }
+                            />
+                          }
+                          label="Show Discount"
+                        />
+                      </InputAdornment>
+                    }
+                  />
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={2}>
+                <FormControl fullWidth>
+                  <InputLabel htmlFor="general-prev-price-input">
+                    Prev Price
+                  </InputLabel>
+                  <OutlinedInput
+                    id="general-prev-price-input"
+                    label="Prev Price"
+                    fullWidth
+                    value={itemToAllItems.prevPrice}
+                    type="number"
+                    onChange={(e) =>
+                      setItemToAllItems((prev: any) => ({
+                        ...prev,
+                        prevPrice: +e.target.value,
+                      }))
+                    }
+                  />
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} textAlign="right">
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleApplyToAllItems}
                 >
-                  {uniqueRatioUnits.map((unit: any) => (
-                    <MenuItem key={unit.id} value={JSON.stringify(unit)}>
-                      1:{unit.ratio} - {unit.unit}
-                    </MenuItem>
-                  ))}
-                </Select>
+                  Apply
+                </Button>
+              </Grid>
+              <Grid item xs={12}>
+                <Divider flexItem sx={{ my: 1 }}>
+                  Selling Items
+                </Divider>
               </Grid>
             </Grid>
-          )}
+          </>
+        )}
+        <Box mt={4} display="flex" flexDirection="column" gap={2}>
+          {renderedSellingItems}
         </Box>
-
-        {/* <Box mt={2} display="flex" flexDirection="column" gap={2}>
-          {categories.map((category) => (
-            <Box key={category.id}>
-              <Typography fontWeight={600}>{category.name}</Typography>
-            </Box>
-          ))}
-        </Box> */}
       </ShadowSection>
     </Sidebar>
   );

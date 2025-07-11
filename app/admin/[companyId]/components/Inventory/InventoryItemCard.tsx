@@ -18,12 +18,153 @@ import {
   Avatar,
   Grid,
   useMediaQuery,
+  Skeleton,
 } from '@mui/material';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import DeleteModal from '../Modals/delete/DeleteModal';
-import { EditIcon, Package, Eye, ExternalLink } from 'lucide-react';
+import { EditIcon, Package, ExternalLink } from 'lucide-react';
 import { ItemType } from '@prisma/client';
 import { useRouter } from 'next/navigation';
+
+// Skeleton Loading Component
+export const InventoryItemCardSkeleton = () => {
+  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
+
+  return (
+    <Card
+      sx={{
+        mb: 2,
+        border: `1px solid ${alpha('#000', 0.08)}`,
+        borderRadius: 1,
+        boxShadow: 'none',
+        backgroundColor: '#fff',
+      }}
+    >
+      <CardContent sx={{ p: 3 }}>
+        {/* Header Row Skeleton */}
+        <Grid container alignItems="center" mb={2} spacing={2}>
+          <Grid item xs={1} sm={2} md={0.5}>
+            <Skeleton variant="circular" width={24} height={24} />
+          </Grid>
+
+          {mdDown && (
+            <Grid
+              item
+              xs={11}
+              sm={10}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <Skeleton variant="rounded" width={80} height={24} />
+              <Box display="flex" alignItems="center" gap={1}>
+                <Skeleton variant="circular" width={32} height={32} />
+                <Skeleton variant="circular" width={32} height={32} />
+              </Box>
+            </Grid>
+          )}
+
+          <Grid item xs={12} md={10}>
+            <Box display="flex" alignItems="center" gap={2} flex={1}>
+              <Skeleton variant="circular" width={48} height={48} />
+
+              <Box flex={1} minWidth={0}>
+                <Box display="flex" alignItems="center" gap={2} mb={1}>
+                  <Skeleton variant="text" width={200} height={28} />
+                  {!mdDown && (
+                    <Skeleton variant="rounded" width={80} height={24} />
+                  )}
+                </Box>
+
+                <Box display="flex" gap={3} alignItems="center">
+                  <Skeleton variant="text" width={120} height={20} />
+                  <Skeleton variant="text" width={150} height={20} />
+                </Box>
+              </Box>
+            </Box>
+          </Grid>
+
+          {!mdDown && (
+            <Grid
+              item
+              md={1.5}
+              display="flex"
+              justifyContent="flex-end"
+              alignItems="center"
+              gap={1}
+            >
+              <Skeleton variant="circular" width={32} height={32} />
+              <Skeleton variant="circular" width={32} height={32} />
+            </Grid>
+          )}
+        </Grid>
+
+        {/* Key Metrics Skeleton */}
+        <Box
+          display="grid"
+          gridTemplateColumns={{ xs: 'repeat(1, 1fr)', md: 'repeat(4, 1fr)' }}
+          gap={2}
+          mb={2}
+        >
+          {/* Quantity */}
+          <Box>
+            <Skeleton variant="text" width={60} height={16} sx={{ mb: 0.5 }} />
+            <Box display="flex" alignItems="center" gap={1}>
+              <Skeleton variant="text" width={80} height={24} />
+              <Skeleton variant="circular" width={20} height={20} />
+            </Box>
+          </Box>
+
+          {/* Total Value */}
+          <Box>
+            <Skeleton variant="text" width={80} height={16} sx={{ mb: 0.5 }} />
+            <Skeleton variant="text" width={60} height={24} />
+          </Box>
+
+          {/* Listings */}
+          <Box>
+            <Skeleton variant="text" width={60} height={16} sx={{ mb: 0.5 }} />
+            <Box display="flex" alignItems="center" gap={1}>
+              <Skeleton variant="text" width={20} height={24} />
+              <Skeleton variant="rounded" width={50} height={28} />
+            </Box>
+          </Box>
+
+          {/* Type */}
+          <Box>
+            <Skeleton variant="text" width={40} height={16} sx={{ mb: 0.5 }} />
+            <Skeleton variant="rounded" width={120} height={40} />
+          </Box>
+        </Box>
+
+        {/* Vendor Information Skeleton (collapsed state) */}
+        <Divider sx={{ my: 2 }} />
+        <Box>
+          <Skeleton variant="text" width={150} height={20} sx={{ mb: 2 }} />
+          <Box
+            sx={{
+              p: 2,
+              bgcolor: alpha('#000', 0.02),
+              borderRadius: 2,
+              border: `1px solid ${alpha('#000', 0.06)}`,
+            }}
+          >
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+            >
+              <Skeleton variant="text" width={180} height={20} />
+              <Skeleton variant="rounded" width={60} height={24} />
+            </Box>
+          </Box>
+        </Box>
+      </CardContent>
+    </Card>
+  );
+};
 
 interface IProps {
   item: IInventoryItem;
@@ -132,7 +273,9 @@ const InventoryItemCard = ({
                     alignItems="center"
                   >
                     <Typography variant="body2" fontWeight={500}>
-                      {vItem?.vendor?.name}
+                      {`${vItem?.supplierSku ? vItem?.supplierSku : 'N/A'} - ${
+                        vItem?.vendor?.name
+                      }`}
                     </Typography>
                     <Chip
                       label={`$${smallestUnit?.unitPrice}`}
@@ -342,10 +485,13 @@ const InventoryItemCard = ({
             gap={1}
           >
             <Tooltip title="Edit Item">
-              <IconButton size="small" onClick={(e: any) => {
-                e.stopPropagation();
-                router.push(`/admin/${companyId}/inventory/${item.id}`);
-              }}>
+              <IconButton
+                size="small"
+                onClick={(e: any) => {
+                  e.stopPropagation();
+                  router.push(`/admin/${companyId}/inventory/${item.id}`);
+                }}
+              >
                 <EditIcon size={18} />
               </IconButton>
             </Tooltip>

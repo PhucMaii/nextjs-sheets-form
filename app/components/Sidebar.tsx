@@ -32,6 +32,7 @@ import useNotification from '@/hooks/useNotification';
 import { MaintenanceContext } from '../context/MaintenanceProvider';
 import Maintenance from './Maintenance';
 import { USER_CATEGORIZED } from '../utils/enum';
+import Image from 'next/image';
 // import HolidayText from './HolidayText';
 
 interface PropTypes {
@@ -86,10 +87,12 @@ export default function Sidebar({ children }: PropTypes) {
     <>
       {NotificationComp}
       <Toolbar sx={{ mt: 4 }}>
-        <img
+        <Image
           style={{ maxWidth: '100%', height: 'auto', borderRadius: '20px' }}
           alt="Supreme Sprouts Logo"
           src="/supremesproutsIcon.png"
+          width={100}
+          height={100}
         />
       </Toolbar>
 

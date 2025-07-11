@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { green } from '@mui/material/colors';
 import { Trash2Icon } from 'lucide-react';
+import Image from 'next/image';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -144,10 +145,13 @@ export default function CheckoutItemRow({ item, showNotification }: IProps) {
       {/* Name */}
       <TableCell>
         <Box display="flex" gap={2} alignItems="center">
-          <img
+          <Image
             style={{ width: '150px', height: '100%', objectFit: 'contain' }}
-            src={img}
+            src={img || ''}
             alt=""
+            width={100}
+            height={100}
+            loading="lazy"
           />
           <Box display="flex" flexDirection="column">
             <Box

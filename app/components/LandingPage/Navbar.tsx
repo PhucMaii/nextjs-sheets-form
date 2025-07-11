@@ -45,6 +45,7 @@ import { updateUser } from '@/state/user/userSlice';
 import { IItemType } from '@/app/utils/type';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import ItemTypePopover from './ItemTypePopover';
+import Image from 'next/image';
 
 const CartBadge = styled(Badge)`
   & .${badgeClasses.badge} {
@@ -304,14 +305,17 @@ export default function Navbar({style}: {style?: any}) {
             onClose={() => setIsNavOpen(false)}
           >
             <Toolbar sx={{ mt: 6 }}>
-              <img
+              <Image
                 style={{
                   maxWidth: '100%',
                   height: 'auto',
                   borderRadius: '20px',
+                  width: '100%',
                 }}
                 alt="Supreme Sprouts Logo"
                 src="/supremesproutsIcon.png"
+                width={100}
+                height={100}
               />
             </Toolbar>
 

@@ -5,10 +5,12 @@ import { useParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { getAdminApiUrl } from '@/app/utils/enum';
+import useNotification from '@/hooks/useNotification';
 
 export default function CreateInventoryPage() {
   const { companyId }: any = useParams();
   const router = useRouter();
+  const { showNotification, NotificationComp } = useNotification();
 
   const handleCreateInventory = async ({
     newInventoryItem,
@@ -28,6 +30,7 @@ export default function CreateInventoryPage() {
           typeId: newInventoryItem.typeId,
           hasGST: newInventoryItem.hasGST,
           hasPST: newInventoryItem.hasPST,
+          isShowInventory: newInventoryItem.isShowInventory,
           vendorItems: selectedVendors,
           sellingItems: selectedSellingItems,
         },
@@ -37,12 +40,22 @@ export default function CreateInventoryPage() {
         throw new Error(response.data.error);
       }
 
+      showNotification('success', 'Inventory item created successfully');
       router.push(`/admin/${companyId}/inventory`);
     } catch (error: any) {
       console.log('Fail to create inventory item: ', error);
+      showNotification('error', 'Fail to create inventory item');
     }
   };
   return (
-    <InventoryTemplate onSubmit={handleCreateInventory} buttonLabel="Create" title="Create Inventory" />
+    <>
+      {NotificationComp}
+      <InventoryTemplate
+        onSubmit={handleCreateInventory}
+        buttonLabel="Create"
+        title="Create Inventory"
+        showNotification={showNotification}
+      />
+    </>
   );
 }

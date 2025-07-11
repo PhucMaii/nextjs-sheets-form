@@ -17,6 +17,7 @@ import SellIcon from '@mui/icons-material/Sell';
 import { ShadowSection } from '../../reports/styled';
 import { generateImgUrl } from '@/app/lib/s3';
 import { grey } from '@mui/material/colors';
+import Image from 'next/image';
 
 const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
   <Tooltip {...props} classes={{ popper: className }} />
@@ -49,11 +50,12 @@ const QuickViewItem = ({ item }: { item: any }) => {
   return (
     <Grid container spacing={2} sx={{ width: `100%` }} alignItems="flex-start">
       <Grid item xs={3}>
-        <img
+        <Image
           src={imgUrl}
           alt={item.inventoryItem.name}
           width={40}
           height={40}
+          loading="lazy"
         />
       </Grid>
       <Grid item xs={6}>

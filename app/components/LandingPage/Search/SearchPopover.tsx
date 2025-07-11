@@ -6,6 +6,7 @@ import { landingPagePrimaryColor } from '@/constant/landingPage';
 import { Box, Popover, Typography } from '@mui/material';
 import { green, grey } from '@mui/material/colors';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 export const PopoverItem = ({ item, onClick }: { item: any, onClick: () => void }) => {
   const [img, setImg] = useState<string | undefined>(undefined);
@@ -29,12 +30,13 @@ export const PopoverItem = ({ item, onClick }: { item: any, onClick: () => void 
         '&:hover': { backgroundColor: grey[200] },
       }}
     >
-      <img
-        src={img}
+      <Image
+        src={img || ''}
         alt={item.inventoryItem.name}
         width={100}
-        height={'100%'}
-        style={{ borderRadius: '20px' }}
+        height={100}
+        style={{ borderRadius: '20px', height: '100%' }}
+        loading="lazy"
       />
       <Typography variant="h6">{item.inventoryItem.name}</Typography>
     </Box>

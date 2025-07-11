@@ -21,7 +21,6 @@ import { EditIcon, Trash2Icon } from 'lucide-react';
 import { ItemType } from '@prisma/client';
 import { generateErrorMsg } from '@/app/lib/error';
 import DeleteModal from '../Modals/delete/DeleteModal';
-import SingleFieldUpdate from '../Modals/edit/SingleFieldUpdate';
 import { useParams } from 'next/navigation';
 export const ItemTypeButton = ({
   type,
@@ -101,15 +100,12 @@ export default function StockItems({
     targetObj: null,
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isOpenBulkTypeUpdate, setIsOpenBulkTypeUpdate] =
-    useState<boolean>(false);
   const [singleFieldProps, setSingleFieldProps] = useState<any>({
     open: false,
     mode: 'add',
     defaultValue: null,
     id: -1,
   });
-  const [selectedItems, setSelectedItems] = useState<IInventoryItem[]>([]);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [selectedType, setSelectedType] = useState<string>('All');
 
@@ -243,28 +239,7 @@ export default function StockItems({
     }
   };
 
-  const handleBulkSwitchType = async (field: string, newType: any) => {
-    try {
-      const response = await axios.put(
-        `${getAdminApiUrl(companyId, '/inventory/switch-type')}`,
-        {
-          idList: selectedItems.map((item) => item.id),
-          typeId: newType,
-        },
-      );
 
-      if (response.data.error) {
-        showNotification('error', response.data.error);
-        return;
-      }
-
-      showNotification('success', response.data.message);
-      setSelectedItems([]);
-    } catch (error: any) {
-      console.log('Internal Server Error: ', error);
-      showNotification('error', generateErrorMsg(error));
-    }
-  };
 
   const onOpenDeleteModal = (e: any, type: ItemType) => {
     e.stopPropagation();
@@ -362,16 +337,6 @@ export default function StockItems({
         buttonLabel={singleFieldProps.mode === 'add' ? 'Add' : 'Save'}
         defaultValue={singleFieldProps?.defaultValue || ''}
       />
-      <SingleFieldUpdate
-        open={isOpenBulkTypeUpdate}
-        onClose={() => setIsOpenBulkTypeUpdate(false)}
-        label="Item Type"
-        handleUpdate={handleBulkSwitchType}
-        menuList={itemTypes?.data || []}
-        title="Switch Items Type"
-        updatedField="type"
-        renderField="name"
-      />
       {/* <AddInventory
         open={isOpenAddItem}
         onClose={() => setIsOpenAddItem(false)}
@@ -462,8 +427,6 @@ export default function StockItems({
             inventoryItems={displayData}
             showNotification={showNotification}
             itemTypes={itemTypes?.data || []}
-            selectedItems={selectedItems}
-            setSelectedItems={setSelectedItems}
           />
         )}
       </Box>

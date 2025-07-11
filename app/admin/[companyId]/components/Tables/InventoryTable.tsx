@@ -8,7 +8,7 @@ import {
   Typography,
   alpha,
 } from '@mui/material';
-import React, { Dispatch, SetStateAction, memo, useState } from 'react';
+import React, { memo, useState } from 'react';
 import EditInventory from '../Modals/edit/EditInventory';
 import axios from 'axios';
 import { getAdminApiUrl } from '@/app/utils/enum';
@@ -19,13 +19,13 @@ import { ItemType } from '@prisma/client';
 import LoadingModal from '../Modals/LoadingModal';
 import { useParams } from 'next/navigation';
 import InventoryItemCard from '../Inventory/InventoryItemCard';
+import { generateErrorMsg } from '@/app/lib/error';
+import SingleFieldUpdate from '../Modals/edit/SingleFieldUpdate';
 
 interface IProps {
   inventoryItems: IInventoryItem[];
   showNotification: (type: AlertColor, message: string) => void;
   itemTypes: ItemType[];
-  selectedItems: IInventoryItem[];
-  setSelectedItems: Dispatch<SetStateAction<IInventoryItem[]>>;
 }
 
 // Main Table Component
@@ -33,8 +33,6 @@ const InventoryTable = ({
   inventoryItems,
   showNotification,
   itemTypes,
-  selectedItems,
-  setSelectedItems,
 }: IProps) => {
   const { companyId }: any = useParams();
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -47,6 +45,8 @@ const InventoryTable = ({
     inventoryItem: inventoryItems[0],
     quantity: inventoryItems[0]?.quantity || 0,
   });
+  const [isOpenBulkTypeUpdate, setIsOpenBulkTypeUpdate] = useState<boolean>(false);
+  const [selectedItems, setSelectedItems] = useState<IInventoryItem[]>([]);
   const [batchProps, setBatchProps] = useState<any>({
     open: false,
     inventoryItem: inventoryItems[0],
@@ -74,6 +74,29 @@ const InventoryTable = ({
       console.log('Fail to delete item: ' + error);
       showNotification('error', 'Fail to delete item: ' + error);
       setIsLoading(false);
+    }
+  };
+
+  const handleBulkSwitchType = async (field: string, newType: any) => {
+    try {
+      const response = await axios.put(
+        `${getAdminApiUrl(companyId, '/inventory/switch-type')}`,
+        {
+          idList: selectedItems.map((item) => item.id),
+          typeId: newType,
+        },
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+      setSelectedItems([]);
+    } catch (error: any) {
+      console.log('Internal Server Error: ', error);
+      showNotification('error', generateErrorMsg(error));
     }
   };
 
@@ -172,17 +195,18 @@ const InventoryTable = ({
                 variant="outlined"
                 size="small"
                 sx={{ textTransform: 'none' }}
+                onClick={() => setIsOpenBulkTypeUpdate(true)}
               >
                 Bulk Edit
               </Button>
-              <Button
+              {/* <Button
                 variant="outlined"
                 color="error"
                 size="small"
                 sx={{ textTransform: 'none' }}
               >
                 Delete Selected
-              </Button>
+              </Button> */}
             </Box>
           )}
         </Box>
@@ -208,79 +232,90 @@ const InventoryTable = ({
   }
 
   return (
-    <Box>
-      {/* Modals */}
-      {batchProps.open && (
-        <BatchQuantityModal
-          open={batchProps.open}
-          onClose={() =>
-            setBatchProps((prevState: any) => ({ ...prevState, open: false }))
-          }
-          fifoList={batchProps.inventoryItem?.fifo || []}
-          showNotification={showNotification}
-        />
-      )}
-      <LoadingModal open={isLoading} />
-      {editItemProps.inventoryItem && (
-        <EditInventory
-          inventoryItem={editItemProps.inventoryItem}
-          open={editItemProps.open}
-          onClose={() =>
-            setEditItemProps(() => ({ inventoryItem: null, open: false }))
-          }
-          showNotification={showNotification}
-        />
-      )}
-      {viewItemMissingProps && (
-        <ViewItemMissing
-          open={viewItemMissingProps.open}
-          onClose={() =>
-            setViewItemMissingProps((prevState: any) => ({
-              ...prevState,
-              open: false,
-            }))
-          }
-          inventoryItem={viewItemMissingProps.inventoryItem}
-          quantity={viewItemMissingProps.quantity}
-        />
-      )}
-
-      {/* Bulk Actions */}
-      {renderBulkActions()}
-
-      {/* Items List */}
+    <>
+      <SingleFieldUpdate
+        open={isOpenBulkTypeUpdate}
+        onClose={() => setIsOpenBulkTypeUpdate(false)}
+        label="Item Type"
+        handleUpdate={handleBulkSwitchType}
+        menuList={itemTypes || []}
+        title="Switch Items Type"
+        updatedField="type"
+        renderField="name"
+      />
       <Box>
-        {inventoryItems.map((item: IInventoryItem, index: number) => {
-          const isSelected = selectedItems.some((i) => i.id === item.id);
-          return (
-            <InventoryItemCard
-              key={item.id || index}
-              item={item}
-              isSelected={isSelected}
-              onSelect={(e) => onSelectItem(e, item)}
-              onEdit={() =>
-                setEditItemProps({ open: true, inventoryItem: item })
-              }
-              onViewBatch={() =>
-                setBatchProps({ open: true, inventoryItem: item })
-              }
-              onDelete={(e) => handleDelete(e, item)}
-              itemTypes={itemTypes}
-              onChangeType={(typeId) => handleChangeType(item, typeId)}
-              companyId={companyId}
-            />
-          );
-        })}
+        {/* Modals */}
+        {batchProps.open && (
+          <BatchQuantityModal
+            open={batchProps.open}
+            onClose={() =>
+              setBatchProps((prevState: any) => ({ ...prevState, open: false }))
+            }
+            fifoList={batchProps.inventoryItem?.fifo || []}
+            showNotification={showNotification}
+          />
+        )}
+        <LoadingModal open={isLoading} />
+        {editItemProps.inventoryItem && (
+          <EditInventory
+            inventoryItem={editItemProps.inventoryItem}
+            open={editItemProps.open}
+            onClose={() =>
+              setEditItemProps(() => ({ inventoryItem: null, open: false }))
+            }
+            showNotification={showNotification}
+          />
+        )}
+        {viewItemMissingProps && (
+          <ViewItemMissing
+            open={viewItemMissingProps.open}
+            onClose={() =>
+              setViewItemMissingProps((prevState: any) => ({
+                ...prevState,
+                open: false,
+              }))
+            }
+            inventoryItem={viewItemMissingProps.inventoryItem}
+            quantity={viewItemMissingProps.quantity}
+          />
+        )}
+
+        {/* Bulk Actions */}
+        {renderBulkActions()}
+
+        {/* Items List */}
+        <Box>
+          {inventoryItems.map((item: IInventoryItem, index: number) => {
+            const isSelected = selectedItems.some((i) => i.id === item.id);
+            return (
+              <InventoryItemCard
+                key={item.id || index}
+                item={item}
+                isSelected={isSelected}
+                onSelect={(e) => onSelectItem(e, item)}
+                onEdit={() =>
+                  setEditItemProps({ open: true, inventoryItem: item })
+                }
+                onViewBatch={() =>
+                  setBatchProps({ open: true, inventoryItem: item })
+                }
+                onDelete={(e) => handleDelete(e, item)}
+                itemTypes={itemTypes}
+                onChangeType={(typeId) => handleChangeType(item, typeId)}
+                companyId={companyId}
+              />
+            );
+          })}
+        </Box>
       </Box>
-    </Box>
+    </>
   );
 };
 
 export default memo(InventoryTable, (prev, next) => {
   return (
     JSON.stringify(prev.inventoryItems) ===
-      JSON.stringify(next.inventoryItems) &&
-    Object.is(prev.selectedItems, next.selectedItems)
+      JSON.stringify(next.inventoryItems)
   );
 });
 

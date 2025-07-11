@@ -38,6 +38,7 @@ import PushReSubscriber from '@/app/components/PushResubscriber';
 import CircleNotificationsIcon from '@mui/icons-material/CircleNotifications';
 import axios from 'axios';
 import useNotification from '@/hooks/useNotification';
+import Image from 'next/image';
 
 interface IProps {
   children: ReactNode;
@@ -131,10 +132,12 @@ export default function Sidebar({ children }: IProps) {
   const content = (
     <>
       <Toolbar sx={{ mt: 4 }}>
-        <img
+        <Image
           style={{ maxWidth: '100%', height: 'auto', borderRadius: '20px' }}
           alt="Supreme Sprouts Logo"
           src="/supremesproutsIcon.png"
+          width={100}
+          height={100}
         />
       </Toolbar>
 

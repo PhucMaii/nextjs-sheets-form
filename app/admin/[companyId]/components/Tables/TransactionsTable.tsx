@@ -21,6 +21,7 @@ import SelectExpenseStatus from '../Select/SelectExpenseStatus';
 import { IExpense } from '@/app/utils/type';
 import { grey } from '@mui/material/colors';
 import { useParams } from 'next/navigation';
+import Image from 'next/image';
 
 interface IProps {
   transactions: IExpense[];
@@ -191,10 +192,13 @@ const TransactionsTable = ({
                     )}
                     <TableCell style={{ width: 50 }}>
                       {/* <Toolbar> */}
-                      <img
+                      <Image
                         src={`/images/${transaction?.paymentMethod?.type}.png`}
                         alt="method"
                         style={{ width: 30, height: 30 }}
+                        width={100}
+                        height={100}
+                        loading="lazy"
                       />
                       {/* </Toolbar> */}
                     </TableCell>

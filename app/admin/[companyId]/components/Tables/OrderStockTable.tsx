@@ -15,6 +15,7 @@ import DeleteModal from '../Modals/delete/DeleteModal';
 import axios from 'axios';
 import { getAdminApiUrl } from '@/app/utils/enum';
 import { useParams } from 'next/navigation';
+import Image from 'next/image';
 
 interface IProps {
   stockOrders: IExpense[];
@@ -95,10 +96,13 @@ export default function OrderStockTable({
               return (
                 <TableRow key={index}>
                   <TableCell>
-                    <img
+                    <Image
                       src={`/images/${expense.paymentMethod.type}.png`}
                       alt="method"
                       style={{ width: 30, height: 30 }}
+                      width={100}
+                      height={100}
+                      loading="lazy"
                     />
                   </TableCell>
                   <TableCell>{expense?.invoice}</TableCell>

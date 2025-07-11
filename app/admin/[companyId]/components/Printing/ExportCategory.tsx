@@ -12,6 +12,7 @@ import React, { forwardRef } from 'react';
 import { BorderTableCell } from './ManifestPrint';
 import { CheckIcon, XIcon } from 'lucide-react';
 import DisplayFile from '../Modals/DisplayFile';
+import Image from 'next/image';
 
 // eslint-disable-next-line react/display-name
 const ExportCategory = forwardRef(({ items }: any, ref: any) => {
@@ -21,11 +22,12 @@ const ExportCategory = forwardRef(({ items }: any, ref: any) => {
 
       <Grid container spacing={1} alignItems="center">
         <Grid item xs={6}>
-          <img
+          <Image
             src="/supremesproutsLogo.ico"
             alt="Supreme Sprouts Ltd."
             width={40}
             height={40}
+            loading="lazy"
           />
           <Typography variant="h6">Supreme Sprouts Ltd.</Typography>
           <Box>

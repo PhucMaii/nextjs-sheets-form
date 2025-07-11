@@ -4,6 +4,7 @@ import { generateImgUrl } from '@/app/lib/s3';
 import { ModalProps } from './Modals/type';
 import { grey } from '@mui/material/colors';
 import { XIcon } from 'lucide-react';
+import Image from 'next/image';
 // import { getLoadUrl } from '@/app/lib/r2';
 
 interface IProps extends ModalProps {
@@ -86,7 +87,7 @@ export default function ViewImg({
           }}
         >
           {fileKeyFront && (
-            <img
+            <Image
               src={urlFront}
               alt="front"
               style={{
@@ -94,10 +95,13 @@ export default function ViewImg({
                 maxHeight: '45vh',
                 objectFit: 'contain',
               }}
+              width={100}
+              height={100}
+              loading="lazy"
             />
           )}
           {fileKeyBack && (
-            <img
+            <Image
               src={urlBack}
               alt="back"
               style={{
@@ -105,6 +109,9 @@ export default function ViewImg({
                 maxHeight: '45vh',
                 objectFit: 'contain',
               }}
+              width={100}
+              height={100}
+              loading="lazy"
             />
           )}
         </Box>

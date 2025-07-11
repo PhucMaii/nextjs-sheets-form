@@ -360,10 +360,14 @@ export const ItemButton = ({
           </Box>
           {((item?.isShowDiscount && item?.prevPrice) ||
             options?.highestDiscount) && (
-            // <Box display="flex" justifyContent="flex-end" sx={{width: '100%'}}>
+            // If options, then not display the prev price
             <OnSaleBadge
               discountPrice={item.price}
-              prevPrice={item?.prevPrice || 0}
+              prevPrice={
+                item?.options && item?.options.length > 0
+                  ? 0
+                  : item?.prevPrice || 0
+              }
               percentage={options?.highestDiscount}
             />
 
@@ -388,7 +392,7 @@ export const ItemButton = ({
                   ? `From $${options.lowestPrice.toFixed(2)}`
                   : `$${item.price?.toFixed(2) || 'N/A'}`}
               </Typography>
-              {item.isShowDiscount && item.prevPrice && (
+              {(!item.options || item.options.length === 0) && item.isShowDiscount && item.prevPrice && (
                 <Typography
                   fontWeight="bold"
                   sx={{ textDecoration: 'line-through' }}
@@ -1410,11 +1414,15 @@ const OrderView = ({
 
   const renderWarning = () => {
     // For order with less than $12, show warning
-    if (order?.totalPrice && order?.totalPrice < 12 && role === USER_ROLE.CLIENT) {
+    if (
+      order?.totalPrice &&
+      order?.totalPrice < 12 &&
+      role === USER_ROLE.CLIENT
+    ) {
       return (
         <Alert severity="warning">
-          Looks like your order is just under $12. You&apos;re almost there! Add a
-          little more to complete your order 😊
+          Looks like your order is just under $12. You&apos;re almost there! Add
+          a little more to complete your order 😊
         </Alert>
       );
     }

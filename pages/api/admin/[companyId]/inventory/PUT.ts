@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { checkAndUpdateUnits } from './expenses/POST';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
@@ -19,8 +18,6 @@ interface IBody {
   vendorItems: any[];
   updatedSellingItems: any[];
   isShowInventory?: boolean;
-  updatedOption?: UPDATE_OPTION;
-  updatedSingleSellingItem?: any;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
@@ -43,8 +40,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       vendorItems,
       updatedSellingItems,
       isShowInventory,
-      updatedOption,
-      updatedSingleSellingItem,
+      // updatedSingleSellingItem,
     }: IBody = req.body;
 
     const updatedAt = getTodayDate().dateAndTime;
@@ -138,7 +134,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     let dbInventoryItemLeft = existingInventoryItem.vendorItem;
     for (const updatedVendorItem of vendorItems) {
-      console.log(updatedVendorItem, 'updatedVendorItem');
       if (
         !isNaN(Number(updatedVendorItem.vendorItemId)) &&
         Number(updatedVendorItem.vendorItemId) > 0
@@ -258,76 +253,82 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    if (
-      updatedOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME &&
-      updatedSingleSellingItem
-    ) {
-      // Check if there is any new selling item added, new item has itemId is not a number
-      if (updatedSellingItems.length > 0) {
-        const newSellingItem = updatedSellingItems.filter(
-          (item: any) => !isNaN(Number(item.itemId)),
-        );
+    // if (
+    //   updatedOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME &&
+    //   updatedSingleSellingItem
+    // ) {
+    //   // Check if there is any new selling item added, new item has itemId is not a number
+    //   if (updatedSellingItems.length > 0) {
+    //     const newSellingItem = updatedSellingItems.filter(
+    //       (item: any) => !isNaN(Number(item.itemId)),
+    //     );
 
-        if (newSellingItem.length > 0) {
-          await prisma.item.createMany({
-            data: newSellingItem.map((item: any) => ({
-              name: item.name,
-              price: item.price,
-              inventoryUnitId: item.inventoryUnit.id,
-              availability: item.availability,
-              categoryId: item.categoryId,
-              inventoryItemId: existingInventoryItem.id,
-              createdAt: updatedAt,
-              createdBy,
-              companyId: Number(companyId),
-            })),
-          });
-        }
+    //     if (newSellingItem.length > 0) {
+    //       await prisma.item.createMany({
+    //         data: newSellingItem.map((item: any) => ({
+    //           name: item.name,
+    //           price: item.price,
+    //           inventoryUnitId: item.inventoryUnit.id,
+    //           availability: item.availability,
+    //           categoryId: item.categoryId,
+    //           inventoryItemId: existingInventoryItem.id,
+    //           createdAt: updatedAt,
+    //           createdBy,
+    //           companyId: Number(companyId),
+    //         })),
+    //       });
+    //     }
 
-        // Check if there is any selling item removed, removed selling item can be found in existingInventoryItem.item but not in updatedSellingItems
-        const removedSellingItem = existingInventoryItem.item.filter(
-          (item: any) =>
-            !updatedSellingItems.some(
-              (updatedItem: any) => updatedItem.itemId === item.id,
-            ),
-        );
+    //     // Check if there is any selling item removed, removed selling item can be found in existingInventoryItem.item but not in updatedSellingItems
+    //     const removedSellingItem = existingInventoryItem.item.filter(
+    //       (item: any) =>
+    //         !updatedSellingItems.some(
+    //           (updatedItem: any) => updatedItem.itemId === item.id,
+    //         ),
+    //     );
 
-        if (removedSellingItem.length > 0) {
-          // Delete all removed selling item
-          await deleteRelatedOrderedItemInScheduledOrders(removedSellingItem);
-        }
-      }
-      // Update all items in inventory item
-      await prisma.item.updateMany({
-        where: {
-          inventoryItemId: existingInventoryItem.id,
-        },
-        data: {
-          name: updatedSingleSellingItem.name,
-          price: updatedSingleSellingItem.price,
-          inventoryUnitId: updatedSingleSellingItem.inventoryUnit.id,
-        },
-      });
+    //     if (removedSellingItem.length > 0) {
+    //       // Delete all removed selling item
+    //       await deleteRelatedOrderedItemInScheduledOrders(removedSellingItem);
+    //     }
+    //   }
+    //   // Update all items in inventory item
+    //   await prisma.item.updateMany({
+    //     where: {
+    //       inventoryItemId: existingInventoryItem.id,
+    //     },
+    //     data: {
+    //       name: updatedSingleSellingItem.name,
+    //       price: updatedSingleSellingItem.price,
+    //       inventoryUnitId: updatedSingleSellingItem.inventoryUnit.id,
+    //     },
+    //   });
 
-      await updateAllScheduleOrderItems(
-        existingInventoryItem.item[0].categoryId || 0,
-        existingInventoryItem.id,
-        UPDATE_OPTION.ALL_ITEMS_SAME_NAME,
-        {
-          name: updatedSingleSellingItem.name,
-          price: updatedSingleSellingItem.price,
-          inventoryUnitId: updatedSingleSellingItem.inventoryUnit.id,
-        },
+    //   await updateAllScheduleOrderItems(
+    //     existingInventoryItem.item[0].categoryId || 0,
+    //     existingInventoryItem.id,
+    //     UPDATE_OPTION.ALL_ITEMS_SAME_NAME,
+    //     {
+    //       name: updatedSingleSellingItem.name,
+    //       price: updatedSingleSellingItem.price,
+    //       inventoryUnitId: updatedSingleSellingItem.inventoryUnit.id,
+    //     },
+    //   );
+
+    //   // RETURN BLOCK FOR ALL_ITEMS_SAME_NAME
+    //   return res.status(200).json({
+    //     message: 'Inventory Item Updated Successfully',
+    //   });
+    // }
+
+    const toChangeItems: any[] = [];
+    if (updatedSellingItems && updatedSellingItems.length > 0) {
+      const nonVariantsItems = updatedSellingItems.filter(
+        (item: any) => !item.options || item.options.length === 0,
       );
 
-      // RETURN BLOCK FOR ALL_ITEMS_SAME_NAME
-      return res.status(200).json({
-        message: 'Inventory Item Updated Successfully',
-      });
-    }
-
-    if (updatedSellingItems && updatedSellingItems.length > 0) {
-      const updatedItemPromises = updatedSellingItems.map(
+      // only update non variants items
+      const updatedItemPromises = nonVariantsItems.map(
         (updatedSellingItem: any) => {
           const existingSellingItem = existingInventoryItem.item.find(
             (item: any) => item.id === updatedSellingItem.itemId,
@@ -343,6 +344,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
                 availability: updatedSellingItem.availability,
                 categoryId: updatedSellingItem.categoryId,
                 inventoryItemId: existingInventoryItem.id,
+                isShowDiscount: updatedSellingItem.isShowDiscount,
+                prevPrice: updatedSellingItem.prevPrice,
                 createdAt: updatedAt,
                 createdBy,
                 companyId: Number(companyId),
@@ -355,14 +358,29 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             existingSellingItem.name !== updatedSellingItem.name ||
             existingSellingItem.price !== updatedSellingItem.price ||
             existingSellingItem.inventoryUnit?.id !==
-              updatedSellingItem.inventoryUnit.id
+              updatedSellingItem.inventoryUnit.id ||
+            existingSellingItem.isShowDiscount !==
+              updatedSellingItem.isShowDiscount ||
+            existingSellingItem.prevPrice !== updatedSellingItem.prevPrice
           ) {
+            toChangeItems.push({
+              id: existingSellingItem.id,
+              name: updatedSellingItem.name,
+              price: updatedSellingItem.price,
+              inventoryUnitId: updatedSellingItem.inventoryUnit.id,
+              isShowDiscount: updatedSellingItem.isShowDiscount,
+              prevPrice: updatedSellingItem.prevPrice,
+              categoryId: updatedSellingItem.categoryId,
+              inventoryItemId: existingInventoryItem.id,
+            });
             return prisma.item.update({
               where: { id: existingSellingItem.id },
               data: {
                 name: updatedSellingItem.name,
                 price: updatedSellingItem.price,
                 inventoryUnitId: updatedSellingItem.inventoryUnit.id,
+                isShowDiscount: updatedSellingItem.isShowDiscount,
+                prevPrice: updatedSellingItem.prevPrice,
               },
             });
           }
@@ -375,7 +393,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         (item: any) => item !== null,
       );
 
-      await Promise.all(filteredUpdatedSellingItems);
+      if (filteredUpdatedSellingItems.length > 0) {
+        await Promise.all(filteredUpdatedSellingItems);
+      }
 
       // Check if there is any selling item removed, removed selling item can be found in existingInventoryItem.item but not in updatedSellingItems
       const removedSellingItems = existingInventoryItem.item.filter(
@@ -391,8 +411,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       }
 
       // Update schedule order items
-      const scheduledOrderItemPromises = updatedSellingItems.map(
-        (item: any) => {
+      if (toChangeItems.length > 0) {
+        const scheduledOrderItemPromises = toChangeItems.map((item: any) => {
           return updateAllScheduleOrderItems(
             item.categoryId,
             item.inventoryItemId,
@@ -401,12 +421,14 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
               name: item.name,
               price: item.price,
               inventoryUnitId: item.inventoryUnit.id,
+              isShowDiscount: item.isShowDiscount,
+              prevPrice: item.prevPrice,
             },
           );
-        },
-      );
+        });
 
-      await Promise.all(scheduledOrderItemPromises);
+        await Promise.all(scheduledOrderItemPromises);
+      }
     }
 
     return res.status(200).json({
