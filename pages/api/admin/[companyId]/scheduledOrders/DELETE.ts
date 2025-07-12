@@ -10,7 +10,6 @@ export enum DELETE_OPTION {
 interface BodyTypes {
   scheduleOrderId?: string;
   scheduleOrderList?: ScheduleOrders[];
-  deleteOption?: DELETE_OPTION;
   routeId: number;
   userId?: number;
 }
@@ -25,7 +24,6 @@ export default async function DELETE(
     const {
       scheduleOrderId,
       scheduleOrderList,
-      deleteOption,
       routeId,
       userId,
     } = req.body as BodyTypes;
@@ -107,12 +105,6 @@ export default async function DELETE(
             routeId,
           },
         },
-      });
-    }
-
-    if (deleteOption === DELETE_OPTION.TEMPORARY) {
-      return res.status(200).json({
-        message: `Client Removed From Route x ${routeId} Successfully`,
       });
     }
 

@@ -66,3 +66,4 @@ export default async function DELETE(
     return res.status(500).json({ error: 'Internal Server Error: ' + error });
   }
 }
+

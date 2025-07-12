@@ -49,6 +49,7 @@ export const createOrderedItems = async (
     const targetedItem = inventoryItems.find(
       (inventoryItem) => inventoryItem.id === item.inventoryItemId,
     );
+    console.log(targetedItem, 'targetedItem');
 
     // Custom Amount Not Link With Inventory
     if (!targetedItem && item.isCustomAmount) {
@@ -64,6 +65,7 @@ export const createOrderedItems = async (
       });
       continue;
     }
+
 
     if (!targetedItem) {
       console.error('Conflict Inventory Item Not Found');
@@ -106,7 +108,7 @@ export const createOrderedItems = async (
     // console.log({ targetedItem, item }, 'targetedItem');
     // CASE 1:Check if vendor item has no batch
     if (targetedItem.fifo.length === 0) {
-      if (isValidToCheckInventory) {
+      // if (isValidToCheckInventory) {
         const newFifo = await prisma.fifo.create({
           data: {
             inventoryItemId: targetedItem.id,
@@ -131,7 +133,7 @@ export const createOrderedItems = async (
             id: targetedItem.vendorItem[0].id,
           },
           data: {
-            quantity: -item.quantity * (itemUnit?.ratio || 1),
+            quantity: isValidToCheckInventory ? -item.quantity * (itemUnit?.ratio || 1) : 0,
           },
         });
 
@@ -161,7 +163,7 @@ export const createOrderedItems = async (
           isCustomAmount: item?.isCustomAmount || false,
           companyId,
         });
-      }
+      // }
     } else {
       // CASE 2: Check if vendor item has batch
       // STEP 2: Get and Sorted from latest date all FIFO from inventory item
@@ -215,6 +217,8 @@ export const createOrderedItems = async (
             id: sortedFifo[fifoIndex].vendorItemId,
           },
         });
+
+        console.log(targetVendorItem, 'targetVendorItem');
 
         if (!targetVendorItem) {
           console.error('COnflict vendor item');
@@ -277,6 +281,7 @@ export const createOrderedItems = async (
           isCustomAmount: item?.isCustomAmount || false,
         });
       } else {
+        console.log('got to final block')
         const cost = sortedFifo[0]?.price
           ? sortedFifo[0].price * itemUnit?.ratio
           : itemUnit?.unitPrice || 0;
