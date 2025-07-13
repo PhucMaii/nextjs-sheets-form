@@ -4,7 +4,7 @@ export const minifyNumber = (num: number | null) => {
   }
 
   if (num < 1000) {
-    return num.toString();
+    return num.toFixed(2);
   }
 
   const units = ['K', 'M', 'B', 'T'];
