@@ -106,7 +106,9 @@ const TransactionsTable = ({
           setDeleteProps((prevState: any) => ({ ...prevState, open: false }))
         }
         targetObj={deleteProps.transaction}
-        handleDelete={handleDeleteTransaction}
+        handleDelete={(_e: any, transaction: any) =>
+          handleDeleteTransaction(transaction)
+        }
         showTargetObj={deleteProps.transaction?.invoice}
       />
       {editProps.type === ExpenseType.stockPurchased && showNotification && (

@@ -73,7 +73,9 @@ export default function AdminTable({ admins, showNotification }: IProps) {
                       <Box display="flex" flexDirection="row" gap={1}>
                         <DeleteModal
                           targetObj={admin}
-                          handleDelete={onDeleteAdmin}
+                          handleDelete={(_e: any, admin: UserType) =>
+                            onDeleteAdmin(admin)
+                          }
                           includedButton
                           showTargetObj={`Admin - ${admin.clientName}`}
                         />

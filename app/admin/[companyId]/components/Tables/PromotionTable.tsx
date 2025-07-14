@@ -129,7 +129,9 @@ export default function PromotionTable({
         }
         targetObj={deleteProps.promotion}
         showTargetObj={deleteProps?.promotion?.title}
-        handleDelete={handleDelete}
+        handleDelete={(_e: any, targetPromotion: any) =>
+          handleDelete(targetPromotion)
+        }
       />
       {editProps.open && editProps.promotion && (
         <EditPromotion

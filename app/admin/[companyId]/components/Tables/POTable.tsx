@@ -89,7 +89,7 @@ export default function POTable({
       <DeleteModal
         open={deleteModal.open}
         handleCloseModal={() => setDeleteModal({ open: false, id: null })}
-        handleDelete={handleDelete}
+        handleDelete={(_e: any, id: number) => handleDelete(id)}
         targetObj={deleteModal.id}
         showTargetObj={deleteModal.targetObj?.poNumber}
       />

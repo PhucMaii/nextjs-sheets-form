@@ -128,7 +128,9 @@ export default function EditCheque({
           setDeleteModalProps({ open: false, cheque: null })
         }
         targetObj={deleteModalProps.cheque}
-        handleDelete={handleDeleteCheque}
+        handleDelete={(_e: any, deletedCheque: any) =>
+          handleDeleteCheque(deletedCheque)
+        }
         showTargetObj={updatedCheque?.chequeNumber || ''}
       />
       <Modal open={open} onClose={onClose}>

@@ -180,7 +180,7 @@ const EditItem = ({
       <DeleteModal
         open={isOpenDeleteModal}
         handleCloseModal={() => setIsOpenDeleteModal(false)}
-        handleDelete={() => handleDeleteItem(targetItem)}
+        handleDelete={(_e: any, targetItem: IItem) => handleDeleteItem(targetItem)}
         targetObj={targetItem}
         showTargetObj={targetItem.name}
       />

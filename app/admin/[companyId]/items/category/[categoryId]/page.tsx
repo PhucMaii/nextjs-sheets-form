@@ -336,7 +336,9 @@ export default function ItemPage() {
       />
       <DeleteModal
         targetObj={currentCategory}
-        handleDelete={handleDeleteCategory}
+        handleDelete={(_e: any, targetObj: any) =>
+          handleDeleteCategory(targetObj)
+        }
         open={open.isDeleteModalOpen}
         handleCloseModal={() => setOpen('isDeleteModalOpen', false)}
       />

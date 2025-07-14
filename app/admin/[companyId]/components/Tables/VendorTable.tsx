@@ -77,7 +77,9 @@ export default function VendorTable({ vendors, showNotification }: IProps) {
                       <DeleteModal
                         targetObj={vendor}
                         includedButton
-                        handleDelete={handleDelete}
+                        handleDelete={(_e: any, targetObj: IVendor) =>
+                          handleDelete(targetObj)
+                        }
                       />
                       <EditVendor
                         vendor={vendor}

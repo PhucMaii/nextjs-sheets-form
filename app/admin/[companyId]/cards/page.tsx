@@ -341,7 +341,9 @@ export default function CardManagement() {
           setOpenModal({ ...openModal, deleteModal: false })
         }
         targetObj={currentMethod}
-        handleDelete={handleDeleteMethod}
+        handleDelete={(_e: any, targetMethod: IPaymentMethod) =>
+          handleDeleteMethod(targetMethod)
+        }
       />
 
       <Box

@@ -71,7 +71,7 @@ export default function OrderStockTable({
         handleCloseModal={() =>
           setDeleteProps({ open: false, stockPurchased: stockOrders[0] })
         }
-        handleDelete={handleDelete}
+        handleDelete={(_e: any, targetObj: IExpense) => handleDelete(targetObj)}
         targetObj={deleteProps.stockPurchased}
         showTargetObj={deleteProps.stockPurchased?.invoice}
       />

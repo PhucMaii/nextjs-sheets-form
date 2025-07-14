@@ -528,7 +528,7 @@ export default function ScheduledOrderPage() {
       <DeleteModal
         open={isDeleteModalOpen}
         handleCloseModal={() => setIsDeleteModalOpen(false)}
-        handleDelete={deleteRoute}
+        handleDelete={(_e: any, targetRoute: IRoutes) => deleteRoute(targetRoute)}
         targetObj={routes[routeIndex]}
       />
       <EditDeliveryDate

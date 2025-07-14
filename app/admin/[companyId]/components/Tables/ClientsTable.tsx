@@ -163,7 +163,9 @@ const ClientsTable = ({
             <DeleteModal
               includedButton
               targetObj={client}
-              handleDelete={handleDeleteClient}
+              handleDelete={(_e: any, client: UserType) =>
+                handleDeleteClient(client)
+              }
             />
             <EditClient
               client={client}

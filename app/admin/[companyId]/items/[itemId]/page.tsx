@@ -307,7 +307,9 @@ export default function ItemPage() {
         open={isOpenDeleteModal}
         handleCloseModal={() => setIsOpenDeleteModal(false)}
         targetObj={item}
-        handleDelete={handleDeleteItem}
+        handleDelete={(_e: any, targetItem: IItem) =>
+          handleDeleteItem(targetItem)
+        }
         showTargetObj={item?.name}
       />
       <BulkEditOptions

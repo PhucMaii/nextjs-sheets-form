@@ -318,7 +318,7 @@ export default function StockItems({
         handleCloseModal={() =>
           setDeleteProps({ open: false, targetObj: null })
         }
-        handleDelete={handleDeleteType}
+        handleDelete={(_e: any, type: ItemType) => handleDeleteType(type)}
         showTargetObj={deleteProps?.targetObj?.name}
         targetObj={deleteProps?.targetObj}
       />

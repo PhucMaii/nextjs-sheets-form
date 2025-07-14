@@ -59,7 +59,7 @@ export default function ProductTypeTable({ types, showNotification }: IProps) {
       <DeleteModal
         open={open.deleteProductType}
         handleCloseModal={() => setOpen('deleteProductType', false)}
-        handleDelete={onDeleteType}
+        handleDelete={(_e: any, type: IItemType) => onDeleteType(type)}
         targetObj={deletingType}
         showTargetObj={deletingType?.name}
       />

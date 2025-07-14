@@ -116,7 +116,9 @@ export default function Item({
             <Box display="flex" sx={{width: 'fit-content'}} onClick={(e) => e.stopPropagation()} gap={1}>
               <DeleteModal
                 targetObj={item}
-                handleDelete={handleDeleteItem}
+                handleDelete={(_e: any, targetItem: IItem) =>
+                  handleDeleteItem(targetItem)
+                }
                 includedButton
               />
               {/* <EditItem

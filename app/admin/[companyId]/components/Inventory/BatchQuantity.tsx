@@ -158,7 +158,7 @@ export default function BatchQuantity({
                   </IconButton> */}
               <DeleteModal
                 targetObj={targetFifo?.data}
-                handleDelete={handleDeleteFifo}
+                handleDelete={(_e: any, fifo: IFifo) => handleDeleteFifo(fifo)}
                 includedIconButton
               />
               <IconButton

@@ -138,7 +138,9 @@ const OrderDetails = ({
       <DeleteModal
         open={isOpenClearNote}
         handleCloseModal={() => setIsOpenClearNote(false)}
-        handleDelete={onClearNote}
+        handleDelete={(_e: any, selectedOrder: Order) =>
+          onClearNote(selectedOrder)
+        }
         targetObj={order}
         message="Are you sure to clear note ?"
       />

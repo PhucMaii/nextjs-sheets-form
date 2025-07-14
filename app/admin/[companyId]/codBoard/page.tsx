@@ -145,7 +145,7 @@ export default function CodBoard() {
         open={deleteBoard.isOpen}
         handleCloseModal={() => setDeleteBoard({ id: -1, isOpen: false })}
         targetObj={deleteBoard.id}
-        handleDelete={handleDeleteBoard}
+        handleDelete={(_e: any, boardId: number) => handleDeleteBoard(boardId)}
       />
       <AddCodBoard
         open={isOpenAddBoard}

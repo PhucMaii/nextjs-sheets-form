@@ -101,7 +101,9 @@ export default function OrderDetailsTable({
     <>
       <DeleteModal
         targetObj={deleteModalProps.targetObj}
-        handleDelete={handleDeleteItem}
+        handleDelete={(_e: any, targetObj: OrderedItems) =>
+          handleDeleteItem(targetObj)
+        }
         open={deleteModalProps.open}
         handleCloseModal={() =>
           setDeleteModalProps({ open: false, targetObj: {} })
