@@ -70,12 +70,14 @@ export default async function DELETE(
       }
 
       for (const item of existingOrder.items) {
+        console.log(item);
         if (
           item?.fifo &&
           item?.inventoryUnit &&
           existingOrder.status !== ORDER_STATUS.VOID &&
           item.quantity > 0
         ) {
+          console.log('restocking');
           await restockInventoryItem(
             Number(orderId),
             item.fifo,

@@ -410,7 +410,7 @@ const ClientOrdersTable = ({
           setOpenDelete((prevState: any) => ({ ...prevState, open: false }))
         }
         targetObj={openDelete.order}
-        handleDelete={handleDeleteOrder}
+        handleDelete={(_e: any, order: any) => handleDeleteOrder(order)}
         showTargetObj={openDelete?.order?.user?.clientName}
       />
       <EditReportOrder

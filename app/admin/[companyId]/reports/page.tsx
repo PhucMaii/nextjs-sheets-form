@@ -40,6 +40,7 @@ import OrderInReportPage from './OrderInReportPage';
 import ChequeTab from './ChequeTab';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import useDebounce from '@/hooks/useDebounce';
+import { PaymentStatus } from '@prisma/client';
 
 // Types
 interface ReportStats {
@@ -141,8 +142,7 @@ const calculateTotalBill = (orders: Order[]): ReportStats => {
 const calculateUnpaidBill = (orders: Order[]): number => {
   const unpaidOrders = orders.filter((order: Order) => {
     return (
-      order.status === ORDER_STATUS.DELIVERED ||
-      order.status === ORDER_STATUS.INCOMPLETED
+      order.paymentStatus === PaymentStatus.Unpaid && order.status !== ORDER_STATUS.VOID
     );
   });
 
