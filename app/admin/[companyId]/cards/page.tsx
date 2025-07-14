@@ -8,6 +8,7 @@ import {
   Grid,
   IconButton,
   ListSubheader,
+  Menu,
   MenuItem,
   Select,
   Typography,
@@ -20,7 +21,7 @@ import OverviewCard from '../components/OverviewCard/OverviewCard';
 import PaidIcon from '@mui/icons-material/Paid';
 import { CardStyled } from '../components/OverviewCard/styled';
 import Image from 'next/image';
-import { Nfc } from 'lucide-react';
+import { CheckIcon, FilterIcon, Nfc } from 'lucide-react';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import AreaChart from '../components/Charts/AreaChart';
 import { ShadowSection } from '../reports/styled';
@@ -52,11 +53,15 @@ import { useParams } from 'next/navigation';
 export default function CardManagement() {
   const { companyId }: any = useParams();
 
+  const [filterAnchorEl, setFilterAnchorEl] = useState<any>(null);
+  const isOpenFilter = Boolean(filterAnchorEl);
   const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
+  // const [displayedTransactions, setDisplayedTransactions] = useState<IExpense[]>([]);
   const [selectedViewObj, setSelectedViewObj] = useState<any>({
     type: VIEW_TYPE.ALL,
     id: 0,
   });
+  const [filterStatus, setFilterStatus] = useState<string>('All');
   const [currentMethod, setCurrentMethod] = useState<
     IPaymentMethod | any | null
   >(null);
@@ -139,6 +144,50 @@ export default function CardManagement() {
 
     return mostUsed;
   }, [transactions?.data]);
+
+   const displayedTransactions = useMemo(() => {
+    if (filterStatus === 'All') {
+      return transactions?.data;
+    }
+
+    if (filterStatus === 'Unpaid') {
+      return transactions?.data.filter(
+        (transaction: IExpense) => transaction.status === 'Unpaid',
+      );
+    }
+
+    if (filterStatus === 'Paid') {
+      return transactions?.data.filter(
+        (transaction: IExpense) => transaction.status === 'Paid',
+      );
+    }
+
+    return transactions?.data;
+   }, [transactions?.data, filterStatus]);
+
+  // useEffect(() => {
+  //   if (transactions?.data) {
+  //     setDisplayedTransactions(transactions?.data);
+  //   }
+  // }, [transactions?.data]);
+
+  // useEffect(() => {
+  //   if (filterStatus === 'Unpaid') {
+  //     setDisplayedTransactions(
+  //       transactions?.data.filter(
+  //         (transaction: IExpense) => transaction.status === 'Unpaid',
+  //       ),
+  //     );
+  //   } else if (filterStatus === 'Paid') {
+  //     setDisplayedTransactions(
+  //       transactions?.data.filter(
+  //         (transaction: IExpense) => transaction.status === 'Paid',
+  //       ),
+  //     );
+  //   } else {
+  //     setDisplayedTransactions(transactions?.data);
+  //   }
+  // }, [filterStatus]);
 
   useEffect(() => {
     if (selectedViewObj.id !== -1) {
@@ -603,7 +652,13 @@ export default function CardManagement() {
               </Grid>
               <Grid item xs={12} md={8}>
                 <ShadowSection>
-                  <Box display="flex" alignItems="center" gap={2} mb={2}>
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    gap={2}
+                    mb={2}
+                  >
                     <Typography
                       variant="h5"
                       fontWeight="bold"
@@ -612,12 +667,85 @@ export default function CardManagement() {
                     >
                       Recent Transactions
                     </Typography>
-                    {Actions}
+                    <Box display="flex" alignItems="center" gap={2}>
+                      {Actions}
+                      <IconButton
+                        onClick={(e) => setFilterAnchorEl(e.currentTarget)}
+                      >
+                        <FilterIcon
+                          style={{
+                            width: 20,
+                            height: 20,
+                            color: blueGrey[800],
+                          }}
+                        />
+                      </IconButton>
+                      <Menu
+                        anchorEl={filterAnchorEl}
+                        open={isOpenFilter}
+                        onClose={() => setFilterAnchorEl(null)}
+                        sx={{
+                          '& .MuiList-root': {
+                            width: 150,
+                          },
+                        }}
+                      >
+                        <ListSubheader>Filter</ListSubheader>
+                        <MenuItem onClick={() => setFilterStatus('All')} sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                        }}>
+                          {filterStatus === 'All' && (
+                            <CheckIcon
+                              style={{
+                                width: 20,
+                                height: 20,
+                                color: blueGrey[800],
+                              }}
+                            />
+                          )}
+                          <Typography>All</Typography>
+                        </MenuItem>
+                        <MenuItem onClick={() => setFilterStatus('Unpaid')} sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                        }}>
+                          {filterStatus === 'Unpaid' && (
+                            <CheckIcon
+                              style={{
+                                width: 20,
+                                height: 20,
+                                color: blueGrey[800],
+                              }}
+                            />
+                          )}
+                          <Typography>Unpaid</Typography>
+                        </MenuItem>
+                        <MenuItem onClick={() => setFilterStatus('Paid')} sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                        }}>
+                          {filterStatus === 'Paid' && (
+                            <CheckIcon
+                              style={{
+                                width: 20,
+                                height: 20,
+                                color: blueGrey[800],
+                              }}
+                            />
+                          )}
+                          <Typography>Paid</Typography>
+                        </MenuItem>
+                      </Menu>
+                    </Box>
                   </Box>
 
                   {/* Recent Transactions */}
                   <TransactionsTable
-                    transactions={transactions?.data || []}
+                    transactions={displayedTransactions || []}
                     handleUpdateStatus={handleUpdateStatus}
                     showNotification={showNotification}
                     selectedExpense={selectedExpenses}

@@ -1,9 +1,12 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Box,
   Grid,
+  ListSubheader,
+  IconButton,
+  Menu,
   MenuItem,
   Select,
   TextField,
@@ -21,9 +24,11 @@ import { IExpense } from '@/app/utils/type';
 import useDebounce from '@/hooks/useDebounce';
 import TransactionOverview from '../components/Overview/TransactionOverview';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
+import { CheckIcon } from 'lucide-react';
 import LoadingModal from '../components/Modals/LoadingModal';
 import { useUpdateExpenseStatus } from '@/hooks/update/useUpdateExpenseStatus';
 import { useParams } from 'next/navigation';
+import { FilterIcon } from 'lucide-react';
 
 export default function Transactions() {
   const { companyId }: any = useParams();
@@ -31,9 +36,9 @@ export default function Transactions() {
   const [baseTransactions, setBaseTransactions] = useState<IExpense[]>([]);
   const [currentMethodId, setCurrentMethodId] = useState<number>(-1);
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
-  const [displayTransactions, setDisplayTransactions] = useState<IExpense[]>(
-    [],
-  );
+  const [filterStatus, setFilterStatus] = useState<string>('All');
+  const [filterAnchorEl, setFilterAnchorEl] = useState<any>(null);
+  const isOpenFilter = Boolean(filterAnchorEl);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [selectedExpenses, setSelectedExpenses] = useState<IExpense[]>([]);
@@ -64,6 +69,37 @@ export default function Transactions() {
     getAdminApiUrl(companyId, '/adminsAndDrivers'),
   );
 
+  // Combined filtering logic using useMemo
+  const displayTransactions = useMemo(() => {
+    let filtered = baseTransactions;
+
+    // Apply search filter
+    if (debouncedKeywords) {
+      const searchLower = debouncedKeywords.toLowerCase();
+      filtered = filtered.filter((transaction: IExpense) => {
+        const searchableFields = [
+          transaction.invoice,
+          transaction?.vendors?.[0]?.vendorId?.toString(),
+          transaction.spentBy,
+          transaction.description,
+        ];
+
+        return searchableFields.some((field) => 
+          field?.toLowerCase().includes(searchLower)
+        );
+      });
+    }
+
+    // Apply status filter
+    if (filterStatus !== 'All') {
+      filtered = filtered.filter((transaction: IExpense) => 
+        transaction.status === filterStatus
+      );
+    }
+
+    return filtered;
+  }, [baseTransactions, debouncedKeywords, filterStatus]);
+
   useEffect(() => {
     if (expenses) {
       setIsLoading(false);
@@ -74,32 +110,6 @@ export default function Transactions() {
     }
   }, [expenses?.data, dateRange]);
 
-  // console.log(displayTransactions, 'displayTransactions');
-
-  useEffect(() => {
-    if (debouncedKeywords) {
-      const newTransactions = baseTransactions.filter((transaction: any) => {
-        return (
-          transaction.invoice === debouncedKeywords ||
-          (transaction?.vendors
-            ? transaction?.vendors[0]?.vendor?.name
-                ?.toLowerCase()
-                ?.includes(debouncedKeywords.toLowerCase())
-            : false) ||
-          transaction.spentBy
-            .toLowerCase()
-            .includes(debouncedKeywords.toLowerCase()) ||
-          transaction.description
-            .toLowerCase()
-            .includes(debouncedKeywords.toLowerCase())
-        );
-      });
-      setDisplayTransactions(newTransactions);
-    } else {
-      setDisplayTransactions(baseTransactions);
-    }
-  }, [debouncedKeywords, baseTransactions]);
-
   useEffect(() => {
     if (adminsAndDriversRes) {
       setAdminsAndDrivers(adminsAndDriversRes?.data);
@@ -108,7 +118,6 @@ export default function Transactions() {
 
   const initializeTransactions = () => {
     setBaseTransactions(expenses?.data || []);
-    setDisplayTransactions(expenses?.data || []);
   };
 
   const handleSelectExpense = (e: any, targetExpense: IExpense) => {
@@ -135,11 +144,32 @@ export default function Transactions() {
       return;
     }
 
-    if (selectedExpenses.length === baseTransactions.length) {
+    if (selectedExpenses.length === displayTransactions.length && displayTransactions.length > 0) {
       setSelectedExpenses([]);
     } else {
-      setSelectedExpenses(baseTransactions);
+      setSelectedExpenses(displayTransactions);
     }
+  };
+
+  // Clear all filters
+  const handleClearFilters = () => {
+    setSearchKeywords('');
+    setFilterStatus('All');
+  };
+
+  // Get filter summary text
+  const getFilterSummary = () => {
+    let summary = `Showing ${displayTransactions.length} of ${baseTransactions.length} transactions`;
+    
+    if (debouncedKeywords) {
+      summary += ` matching "${debouncedKeywords}"`;
+    }
+    
+    if (filterStatus !== 'All') {
+      summary += ` with status "${filterStatus}"`;
+    }
+    
+    return summary;
   };
 
   return (
@@ -183,16 +213,134 @@ export default function Transactions() {
             <TextField
               fullWidth
               label="Search"
-              placeholder="Search Transaction..."
+              placeholder="Search transactions by invoice, vendor, spent by, or description..."
               variant="filled"
               value={searchKeywords}
               onChange={(e) => setSearchKeywords(e.target.value)}
             />
           </Grid>
-          <Grid item xs={4} md={2} textAlign="center">
+          <Grid
+            item
+            xs={4}
+            md={2}
+            textAlign="center"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            gap={2}
+          >
             {Actions}
+            <Box>
+              <IconButton onClick={(e) => setFilterAnchorEl(e.currentTarget)}>
+                <FilterIcon
+                  style={{
+                    width: 20,
+                    height: 20,
+                    color: blueGrey[800],
+                  }}
+                />
+              </IconButton>
+              <Menu
+                anchorEl={filterAnchorEl}
+                open={isOpenFilter}
+                onClose={() => setFilterAnchorEl(null)}
+                sx={{
+                  '& .MuiList-root': {
+                    width: 150,
+                  },
+                }}
+              >
+                <ListSubheader>Filter by Status</ListSubheader>
+                <MenuItem
+                  onClick={() => {
+                    setFilterStatus('All');
+                    setFilterAnchorEl(null);
+                  }}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                  }}
+                >
+                  {filterStatus === 'All' && (
+                    <CheckIcon
+                      style={{
+                        width: 20,
+                        height: 20,
+                        color: blueGrey[800],
+                      }}
+                    />
+                  )}
+                  <Typography>All</Typography>
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    setFilterStatus('Unpaid');
+                    setFilterAnchorEl(null);
+                  }}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                  }}
+                >
+                  {filterStatus === 'Unpaid' && (
+                    <CheckIcon
+                      style={{
+                        width: 20,
+                        height: 20,
+                        color: blueGrey[800],
+                      }}
+                    />
+                  )}
+                  <Typography>Unpaid</Typography>
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    setFilterStatus('Paid');
+                    setFilterAnchorEl(null);
+                  }}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                  }}
+                >
+                  {filterStatus === 'Paid' && (
+                    <CheckIcon
+                      style={{
+                        width: 20,
+                        height: 20,
+                        color: blueGrey[800],
+                      }}
+                    />
+                  )}
+                  <Typography>Paid</Typography>
+                </MenuItem>
+              </Menu>
+            </Box>
           </Grid>
         </Grid>
+        
+        {/* Filter Summary and Clear Button */}
+        <Box mt={2} display="flex" justifyContent="space-between" alignItems="center">
+          <Typography variant="body2" color="text.secondary">
+            {getFilterSummary()}
+          </Typography>
+          {(searchKeywords || filterStatus !== 'All') && (
+            <Box>
+              <Typography
+                variant="body2"
+                color="primary"
+                sx={{ cursor: 'pointer', textDecoration: 'underline' }}
+                onClick={handleClearFilters}
+              >
+                Clear Filters
+              </Typography>
+            </Box>
+          )}
+        </Box>
+        
         {isLoading ? (
           <LoadingComponent />
         ) : (
