@@ -95,8 +95,8 @@ export default function ViewImg({
                 maxHeight: '45vh',
                 objectFit: 'contain',
               }}
-              width={100}
-              height={100}
+              width={500}
+              height={500}
               loading="lazy"
             />
           )}
@@ -109,8 +109,8 @@ export default function ViewImg({
                 maxHeight: '45vh',
                 objectFit: 'contain',
               }}
-              width={100}
-              height={100}
+              width={500}
+              height={500}
               loading="lazy"
             />
           )}

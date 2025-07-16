@@ -701,6 +701,7 @@ model VendorItem {
   unit InventoryUnit[]
 
   @@index([vendorId])
+  @@index([inventoryItemId])
   @@index([inventoryItemId, vendorId])
 }
 
@@ -719,6 +720,9 @@ model Fifo {
   inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
   company       Company?      @relation(fields: [companyId], references: [id])
   vendorItem    VendorItem    @relation(fields: [vendorItemId], references: [id])
+
+  @@index([inventoryItemId])
+  @@index([vendorItemId])
 }
 
 model InventoryUnit {
