@@ -17,7 +17,7 @@ import {
 import { blueGrey } from '@mui/material/colors';
 import SelectDateRange from '../components/Select/SelectDateRange';
 import { generateListOfDateString, generateMonthRange } from '@/app/utils/time';
-import OverviewCard from '../components/OverviewCard/OverviewCard';
+import KPICard from '../components/Overview/KPICard';
 import PaidIcon from '@mui/icons-material/Paid';
 import { CardStyled } from '../components/OverviewCard/styled';
 import Image from 'next/image';
@@ -32,7 +32,6 @@ import AddPaymentMethod from '../components/Modals/add/AddPaymentMethod';
 import useNotification from '@/hooks/useNotification';
 import { fetchApi, SWRFetchData } from '@/app/utils/db';
 import {
-  API_URL,
   PAYMENT_METHOD_TYPE,
   VIEW_TYPE,
   getAdminApiUrl,
@@ -49,6 +48,48 @@ import DeleteModal from '../components/Modals/delete/DeleteModal';
 import { useUpdateExpenseStatus } from '@/hooks/update/useUpdateExpenseStatus';
 import LoadingModal from '../components/Modals/LoadingModal';
 import { useParams } from 'next/navigation';
+import { error, errorBackground, errorColor } from '@/theme/color';
+
+const SpendingItem = ({
+  item,
+  transactions,
+}: {
+  item: any;
+  transactions: any;
+}) => {
+  const color = blueGrey[700];
+
+  return (
+    <Box
+      display="flex"
+      alignItems="center"
+      justifyContent="space-between"
+      p={2}
+      sx={{
+        borderLeft: `5px solid ${blueGrey[700]}`,
+        backgroundColor: '#f8fafc',
+        borderRadius: '0 8px 8px 0',
+        transition: 'all 0.2s ease',
+        '&:hover': {
+          backgroundColor: '#f1f5f9',
+          transform: 'translateX(4px)',
+        },
+      }}
+    >
+      <Typography variant="body1" fontWeight="600" color={blueGrey[700]}>
+        {item[0]}
+      </Typography>
+      <Box textAlign="right">
+        <Typography variant="body1" fontWeight="bold" color={blueGrey[800]}>
+          {`$${item[1]?.toFixed(2)}`}
+        </Typography>
+        <Typography variant="caption" color={blueGrey[700]} fontWeight="600">
+          {`${((item[1] / transactions?.overview?.totalSpent) * 100)?.toFixed(2)}%`}
+        </Typography>
+      </Box>
+    </Box>
+  );
+};
 
 export default function CardManagement() {
   const { companyId }: any = useParams();
@@ -145,7 +186,7 @@ export default function CardManagement() {
     return mostUsed;
   }, [transactions?.data]);
 
-   const displayedTransactions = useMemo(() => {
+  const displayedTransactions = useMemo(() => {
     if (filterStatus === 'All') {
       return transactions?.data;
     }
@@ -163,31 +204,7 @@ export default function CardManagement() {
     }
 
     return transactions?.data;
-   }, [transactions?.data, filterStatus]);
-
-  // useEffect(() => {
-  //   if (transactions?.data) {
-  //     setDisplayedTransactions(transactions?.data);
-  //   }
-  // }, [transactions?.data]);
-
-  // useEffect(() => {
-  //   if (filterStatus === 'Unpaid') {
-  //     setDisplayedTransactions(
-  //       transactions?.data.filter(
-  //         (transaction: IExpense) => transaction.status === 'Unpaid',
-  //       ),
-  //     );
-  //   } else if (filterStatus === 'Paid') {
-  //     setDisplayedTransactions(
-  //       transactions?.data.filter(
-  //         (transaction: IExpense) => transaction.status === 'Paid',
-  //       ),
-  //     );
-  //   } else {
-  //     setDisplayedTransactions(transactions?.data);
-  //   }
-  // }, [filterStatus]);
+  }, [transactions?.data, filterStatus]);
 
   useEffect(() => {
     if (selectedViewObj.id !== -1) {
@@ -530,6 +547,518 @@ export default function CardManagement() {
 
         {selectedViewObj.id === -1 ? (
           <ErrorComponent errorText="Please select payment method" />
+        ) : selectedViewObj.type === VIEW_TYPE.VENDOR ? (
+          // Vendor Overview Dashboard
+          <>
+            <Grid container spacing={2}>
+              {/* Vendor Header */}
+              <Grid item xs={12}>
+                {/* <Box
+                  sx={{
+                    // background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+                    borderRadius: 3,
+                    p: 4,
+                    color: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+                    // boxShadow: '0 8px 32px rgba(25, 118, 210, 0.2)',
+                    border: `1px solid ${blueGrey[200]}`,
+                  }}
+                > */}
+                <Typography variant="h4" fontWeight="bold" my={1}>
+                  {currentMethod?.name} Vendor Analysis
+                </Typography>
+                {/* </Box> */}
+              </Grid>
+
+              {/* Overview Cards - Main Metrics */}
+              <Grid item xs={12} md={3}>
+                <KPICard
+                  title="Total Spent"
+                  value={`$${transactions?.overview?.totalSpent?.toFixed(2) || 0}`}
+                  icon={<PaidIcon />}
+                  color="primary"
+                  variant="gradient"
+                />
+              </Grid>
+              <Grid item xs={12} md={3}>
+                <KPICard
+                  title="Unpaid Amount"
+                  value={`$${transactions?.overview?.unpaidAmount?.toFixed(2) || 0}`}
+                  icon={<AccountBalanceWalletIcon />}
+                  color="warning"
+                  variant="gradient"
+                />
+              </Grid>
+              <Grid item xs={12} md={3}>
+                <KPICard
+                  title="Paid Amount"
+                  value={`$${transactions?.overview?.paidAmount?.toFixed(2) || 0}`}
+                  icon={<PaymentsIcon />}
+                  color="success"
+                  variant="gradient"
+                />
+              </Grid>
+              <Grid item xs={12} md={3}>
+                <KPICard
+                  title="Overdue Amount"
+                  value={`$${transactions?.overview?.overdueAmount?.toFixed(2) || 0}`}
+                  icon={<AccountBalanceWalletIcon />}
+                  color="error"
+                  variant="gradient"
+                  subtitle={`Latest transaction on: ${transactions?.overview?.overdueExpenses[transactions?.overview?.overdueExpenses.length - 1]?.date || ''}`}
+                />
+              </Grid>
+
+              {/* Charts and Analysis Section */}
+              <Grid item xs={12} md={8}>
+                <ShadowSection>
+                  <Typography
+                    variant="h6"
+                    fontWeight="bold"
+                    color={blueGrey[800]}
+                    mb={2}
+                  >
+                    Spending Trend Analysis
+                  </Typography>
+                  <AreaChart
+                    timeSeries={listOfDateString}
+                    thisMonthData={transactions?.chartData || []}
+                  />
+                </ShadowSection>
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <ShadowSection>
+                  <Typography
+                    variant="h6"
+                    fontWeight="bold"
+                    color={blueGrey[800]}
+                    mb={2}
+                  >
+                    Payment Status Breakdown
+                  </Typography>
+                  <Box display="flex" flexDirection="column" gap={2}>
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="space-between"
+                      p={2.5}
+                      sx={{
+                        backgroundColor: '#e8f5e8',
+                        borderRadius: 2,
+                        border: '1px solid #c8e6c9',
+                      }}
+                    >
+                      <Typography
+                        variant="body1"
+                        fontWeight="600"
+                        color="#2e7d32"
+                      >
+                        Paid
+                      </Typography>
+                      <Typography
+                        variant="h5"
+                        fontWeight="bold"
+                        color="#388e3c"
+                      >
+                        {transactions?.overview?.paidPercentage}%
+                      </Typography>
+                    </Box>
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="space-between"
+                      p={2.5}
+                      sx={{
+                        backgroundColor: errorBackground,
+                        borderRadius: 2,
+                        border: `1px solid ${error['main']}`,
+                      }}
+                    >
+                      <Typography
+                        variant="body1"
+                        fontWeight="600"
+                        color="error"
+                      >
+                        Unpaid
+                      </Typography>
+                      <Typography variant="h5" fontWeight="bold" color="error">
+                        {transactions?.overview?.unpaidPercentage}%
+                      </Typography>
+                    </Box>
+                  </Box>
+                </ShadowSection>
+              </Grid>
+
+              {/* Category Analysis */}
+              <Grid item xs={12} md={6}>
+                <ShadowSection>
+                  <Typography
+                    variant="h6"
+                    fontWeight="bold"
+                    color={blueGrey[800]}
+                    mb={2}
+                  >
+                    Top Spending Categories
+                  </Typography>
+                  <Box display="flex" flexDirection="column" gap={1.5}>
+                    {transactions?.overview?.topSpendingItems.map(
+                      (item: any, index: number) => (
+                        <SpendingItem
+                          key={index}
+                          item={item}
+                          transactions={transactions}
+                        />
+                      ),
+                    )}
+                  </Box>
+                </ShadowSection>
+              </Grid>
+
+              {/* Payment Timeline */}
+              <Grid item xs={12} md={6}>
+                <ShadowSection>
+                  <Typography
+                    variant="h6"
+                    fontWeight="bold"
+                    color={blueGrey[800]}
+                    mb={2}
+                  >
+                    Payment Timeline Insights
+                  </Typography>
+                  <Box display="flex" flexDirection="column" gap={2}>
+                    <Box
+                      p={3}
+                      sx={{
+                        backgroundColor: '#e3f2fd',
+                        borderRadius: 2,
+                        border: '1px solid #bbdefb',
+                        boxShadow: '0 2px 8px rgba(25, 118, 210, 0.1)',
+                      }}
+                    >
+                      <Typography
+                        variant="body1"
+                        fontWeight="600"
+                        color="#1565c0"
+                        mb={0.5}
+                      >
+                        Average Payment Delay
+                      </Typography>
+                      <Typography
+                        variant="h4"
+                        fontWeight="bold"
+                        color="#1976d2"
+                      >
+                        {transactions?.overview?.avgPaymentDelay?.toFixed(2)} days
+                      </Typography>
+                    </Box>
+                    <Box
+                      p={3}
+                      sx={{
+                        backgroundColor: '#fff3e0',
+                        borderRadius: 2,
+                        border: '1px solid #ffcc02',
+                        boxShadow: '0 2px 8px rgba(245, 124, 0, 0.1)',
+                      }}
+                    >
+                      <Typography
+                        variant="body1"
+                        fontWeight="600"
+                        color="#e65100"
+                        mb={0.5}
+                      >
+                        Longest Outstanding
+                      </Typography>
+                      <Typography
+                        variant="h4"
+                        fontWeight="bold"
+                        color="#f57c00"
+                      >
+                        {transactions?.overview?.longestPaymentDelay?.toFixed(2)} days
+                      </Typography>
+                    </Box>
+                    <Box
+                      p={3}
+                      sx={{
+                        backgroundColor: '#e8f5e8',
+                        borderRadius: 2,
+                        border: '1px solid #c8e6c9',
+                        boxShadow: '0 2px 8px rgba(56, 142, 60, 0.1)',
+                      }}
+                    >
+                      <Typography
+                        variant="body1"
+                        fontWeight="600"
+                        color="#2e7d32"
+                        mb={0.5}
+                      >
+                        Fastest Payment
+                      </Typography>
+                      <Typography
+                        variant="h4"
+                        fontWeight="bold"
+                        color="#388e3c"
+                      >
+                        {transactions?.overview?.shortestPaymentDelay?.toFixed(2)} days
+                      </Typography>
+                    </Box>
+                  </Box>
+                </ShadowSection>
+              </Grid>
+
+              {/* Action Items */}
+              <Grid item xs={12}>
+                <ShadowSection>
+                  <Typography
+                    variant="h6"
+                    fontWeight="bold"
+                    color={blueGrey[800]}
+                    mb={3}
+                  >
+                    Action Items & Recommendations
+                  </Typography>
+                  <Grid container spacing={3}>
+                    <Grid item xs={12} md={4}>
+                      <Box
+                        p={3}
+                        sx={{
+                          backgroundColor: '#ffebee',
+                          borderRadius: 2,
+                          border: '1px solid #ffcdd2',
+                          boxShadow: '0 4px 12px rgba(211, 47, 47, 0.15)',
+                          transition: 'transform 0.2s ease',
+                          '&:hover': { transform: 'translateY(-2px)' },
+                        }}
+                      >
+                        <Box display="flex" alignItems="center" gap={1} mb={1}>
+                          <Box
+                            sx={{
+                              width: 8,
+                              height: 8,
+                              borderRadius: '50%',
+                              backgroundColor: '#d32f2f',
+                            }}
+                          />
+                          <Typography
+                            variant="subtitle1"
+                            fontWeight="bold"
+                            color="#c62828"
+                          >
+                            Urgent: Overdue Payments
+                          </Typography>
+                        </Box>
+                        <Typography variant="body2" color="#7f1d1d" mb={1}>
+                          8 payments are overdue. Total amount: $3,240.00
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          color="#d32f2f"
+                          fontWeight="600"
+                        >
+                          Oldest overdue: 45 days
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={12} md={4}>
+                      <Box
+                        p={3}
+                        sx={{
+                          backgroundColor: '#fff3e0',
+                          borderRadius: 2,
+                          border: '1px solid #ffcc02',
+                          boxShadow: '0 4px 12px rgba(245, 124, 0, 0.15)',
+                          transition: 'transform 0.2s ease',
+                          '&:hover': { transform: 'translateY(-2px)' },
+                        }}
+                      >
+                        <Box display="flex" alignItems="center" gap={1} mb={1}>
+                          <Box
+                            sx={{
+                              width: 8,
+                              height: 8,
+                              borderRadius: '50%',
+                              backgroundColor: '#f57c00',
+                            }}
+                          />
+                          <Typography
+                            variant="subtitle1"
+                            fontWeight="bold"
+                            color="#e65100"
+                          >
+                            Review: High Spending
+                          </Typography>
+                        </Box>
+                        <Typography variant="body2" color="#bf360c" mb={1}>
+                          34% increase in spending this month
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          color="#f57c00"
+                          fontWeight="600"
+                        >
+                          Consider budget review
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={12} md={4}>
+                      <Box
+                        p={3}
+                        sx={{
+                          backgroundColor: '#e8f5e8',
+                          borderRadius: 2,
+                          border: '1px solid #c8e6c9',
+                          boxShadow: '0 4px 12px rgba(56, 142, 60, 0.15)',
+                          transition: 'transform 0.2s ease',
+                          '&:hover': { transform: 'translateY(-2px)' },
+                        }}
+                      >
+                        <Box display="flex" alignItems="center" gap={1} mb={1}>
+                          <Box
+                            sx={{
+                              width: 8,
+                              height: 8,
+                              borderRadius: '50%',
+                              backgroundColor: '#388e3c',
+                            }}
+                          />
+                          <Typography
+                            variant="subtitle1"
+                            fontWeight="bold"
+                            color="#2e7d32"
+                          >
+                            Opportunity: Bulk Discount
+                          </Typography>
+                        </Box>
+                        <Typography variant="body2" color="#1b5e20" mb={1}>
+                          Regular high-volume purchases detected
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          color="#388e3c"
+                          fontWeight="600"
+                        >
+                          Negotiate better rates
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </ShadowSection>
+              </Grid>
+
+              {/* Recent Transactions Table */}
+              <Grid item xs={12}>
+                <ShadowSection>
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    gap={2}
+                    mb={2}
+                  >
+                    <Typography
+                      variant="h6"
+                      fontWeight="bold"
+                      color={blueGrey[800]}
+                    >
+                      Recent Transactions with {currentMethod?.name}
+                    </Typography>
+                    <Box display="flex" alignItems="center" gap={2}>
+                      {Actions}
+                      <IconButton
+                        onClick={(e) => setFilterAnchorEl(e.currentTarget)}
+                      >
+                        <FilterIcon
+                          style={{
+                            width: 20,
+                            height: 20,
+                            color: blueGrey[800],
+                          }}
+                        />
+                      </IconButton>
+                      <Menu
+                        anchorEl={filterAnchorEl}
+                        open={isOpenFilter}
+                        onClose={() => setFilterAnchorEl(null)}
+                        sx={{
+                          '& .MuiList-root': {
+                            width: 150,
+                          },
+                        }}
+                      >
+                        <ListSubheader>Filter</ListSubheader>
+                        <MenuItem
+                          onClick={() => setFilterStatus('All')}
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
+                          }}
+                        >
+                          {filterStatus === 'All' && (
+                            <CheckIcon
+                              style={{
+                                width: 20,
+                                height: 20,
+                                color: blueGrey[800],
+                              }}
+                            />
+                          )}
+                          <Typography>All</Typography>
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => setFilterStatus('Unpaid')}
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
+                          }}
+                        >
+                          {filterStatus === 'Unpaid' && (
+                            <CheckIcon
+                              style={{
+                                width: 20,
+                                height: 20,
+                                color: blueGrey[800],
+                              }}
+                            />
+                          )}
+                          <Typography>Unpaid</Typography>
+                        </MenuItem>
+                        <MenuItem
+                          onClick={() => setFilterStatus('Paid')}
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
+                          }}
+                        >
+                          {filterStatus === 'Paid' && (
+                            <CheckIcon
+                              style={{
+                                width: 20,
+                                height: 20,
+                                color: blueGrey[800],
+                              }}
+                            />
+                          )}
+                          <Typography>Paid</Typography>
+                        </MenuItem>
+                      </Menu>
+                    </Box>
+                  </Box>
+
+                  <TransactionsTable
+                    transactions={displayedTransactions || []}
+                    handleUpdateStatus={handleUpdateStatus}
+                    showNotification={showNotification}
+                    selectedExpense={selectedExpenses}
+                    handleSelectExpense={handleSelectExpense}
+                    handleSelectAll={handleSelectAll}
+                    adminsAndDrivers={adminsAndDrivers}
+                  />
+                </ShadowSection>
+              </Grid>
+            </Grid>
+          </>
         ) : (
           <>
             <Grid container spacing={2} sx={{ height: 200 }}>
@@ -617,26 +1146,19 @@ export default function CardManagement() {
               {/* Overivew Cards */}
               <Grid container item xs={12} md={4} spacing={2}>
                 <Grid item xs={12}>
-                  <OverviewCard
-                    textColor={blueGrey[800]}
-                    backgroundColor={blueGrey[50]}
-                    icon={<PaidIcon fontSize="large" color="primary" />}
-                    text="Expense"
+                  <KPICard
+                    title="Expense"
                     value={totalExpense?.toFixed(2)}
+                    icon={<PaidIcon />}
+                    color="primary"
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <OverviewCard
-                    textColor={blueGrey[800]}
-                    backgroundColor={blueGrey[50]}
-                    icon={
-                      <AccountBalanceWalletIcon
-                        fontSize="large"
-                        color="primary"
-                      />
-                    }
-                    text="Transactions"
+                  <KPICard
+                    title="Transactions"
                     value={transactions?.data?.length || 0}
+                    icon={<AccountBalanceWalletIcon />}
+                    color="info"
                   />
                 </Grid>
               </Grid>
@@ -691,11 +1213,14 @@ export default function CardManagement() {
                         }}
                       >
                         <ListSubheader>Filter</ListSubheader>
-                        <MenuItem onClick={() => setFilterStatus('All')} sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 1,
-                        }}>
+                        <MenuItem
+                          onClick={() => setFilterStatus('All')}
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
+                          }}
+                        >
                           {filterStatus === 'All' && (
                             <CheckIcon
                               style={{
@@ -707,11 +1232,14 @@ export default function CardManagement() {
                           )}
                           <Typography>All</Typography>
                         </MenuItem>
-                        <MenuItem onClick={() => setFilterStatus('Unpaid')} sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 1,
-                        }}>
+                        <MenuItem
+                          onClick={() => setFilterStatus('Unpaid')}
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
+                          }}
+                        >
                           {filterStatus === 'Unpaid' && (
                             <CheckIcon
                               style={{
@@ -723,11 +1251,14 @@ export default function CardManagement() {
                           )}
                           <Typography>Unpaid</Typography>
                         </MenuItem>
-                        <MenuItem onClick={() => setFilterStatus('Paid')} sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 1,
-                        }}>
+                        <MenuItem
+                          onClick={() => setFilterStatus('Paid')}
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
+                          }}
+                        >
                           {filterStatus === 'Paid' && (
                             <CheckIcon
                               style={{
