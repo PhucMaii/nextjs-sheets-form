@@ -120,43 +120,44 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-  const users = await prisma.user.findMany({
+  const inventoryItems = await prisma.inventoryItem.findMany({
     where: {
       companyId: 1,
-      type: 'Inactive',
-    },
-  });
-
-  const inactiveUserIds = users.map((user) => user.id); 
-
-  const inactiveUserRoutes = await prisma.userRoute.deleteMany({
-    where: {
-      userId: {
-        in: inactiveUserIds,
+      name: {
+        in: ['BEAN 10 LB', 'BEAN 5 LB', 'BASIL'],
       },
     },
-  });
-
-  const inactiveUserSchedules = await prisma.scheduleOrders.deleteMany({
-    where: {
-      userId: {
-        in: inactiveUserIds,
-      },
+    include: {
+      fifo: true,
     },
   });
 
-  console.log(inactiveUserRoutes);
-  console.log(inactiveUserSchedules);
-  // const monthlyDrivers = await prisma.shiftSession.updateMany({
-  //   where: {
-  //     employee: {
-  //       payrollType: PayrollType.monthly,
-  //     },
-  //   },
-  //   data: {
-  //     cost: 0,
-  //   },
-  // });
+  const listOfDateString = generateListOfDateString(
+    new Date('2025-07-15'),
+    new Date('2025-07-17'),
+  );
+
+  for (const inventoryItem of inventoryItems) {
+    const allOrderedItemsInLast3Days = await prisma.orderedItems.findMany({
+      where: {
+        inventoryItemId: inventoryItem.id,
+        Orders: {
+          deliveryDate: {
+            in: listOfDateString,
+          },
+        },
+      },
+    });
+
+    // assign fifo to each ordered item
+    for (const orderedItem of allOrderedItemsInLast3Days) {
+      console.log(orderedItem.id, inventoryItem.fifo[0].id);
+      await prisma.orderedItems.update({
+        where: { id: orderedItem.id },
+        data: { fifoId: inventoryItem.fifo[0].id },
+      });
+    }
+  }
 }
 
 // async function main() {

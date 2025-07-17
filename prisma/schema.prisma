@@ -559,8 +559,8 @@ model Expense {
   invoice            String?
   status             String?
   fixedTransactionId Int?
-  companyId          Int?
   paidAt             String?
+  companyId          Int?
 
   paymentMethod    PaymentMethod?    @relation(fields: [paymentMethodId], references: [id], onDelete: Cascade)
   codBoard         CodBoard?         @relation(fields: [codBoardId], references: [id])
