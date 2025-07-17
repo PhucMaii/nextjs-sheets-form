@@ -236,15 +236,17 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             },
           });
 
-          await prisma.fifo.update({
-            where: {
-              id: existedItem?.fifoId || 72,
-            },
-            data: {
-              quantity: newFifoQuantity,
-              price: item.unitPrice,
-            },
-          });
+          if (existedItem?.fifoId) {
+            await prisma.fifo.update({
+              where: {
+                id: existedItem.fifoId,
+              },
+              data: {
+                quantity: newFifoQuantity,
+                price: item.unitPrice,
+              },
+            });
+          }
 
           // await prisma.vendorItem.update({
           //   where: {

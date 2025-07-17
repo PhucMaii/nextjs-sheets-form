@@ -55,8 +55,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       items,
     }: IBody = req.body;
 
-    console.log(items, 'items');
-
     const { companyId } = req.query;
 
     if (!companyId) {
@@ -100,7 +98,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const createdBy = `Admin - ${user?.name}`;
-    console.log(codBoardId, 'codBoardId');
 
     const newExpense = await prisma.expense.create({
       data: {
@@ -202,7 +199,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           (vendorItem) => vendorItem.id === item.id,
         );
 
-        await updateVendorItemQuantity(existedItem, item);
+        // await updateVendorItemQuantity(existedItem, item);
 
         // STEP 3: Check unit price in Inventory Unit (Update if needed)
         await checkAndUpdateUnits(
@@ -715,6 +712,7 @@ export const createFifo = async (
 
   const deletedFifoIds = [];
   const itemHasAlreadyUpdateIds: number[] = [];
+  // Create new fifo for items that have negative fifo
   if (allNegativeFifo.length > 0) {
     for (const item of vendorItemList) {
       const negativeFifo = allNegativeFifo.find(
@@ -764,6 +762,7 @@ export const createFifo = async (
     });
   }
 
+  // Create new fifo for items that have positive fifo
   const fifoItems = vendorItemList
     .filter((vItem: any) => !itemHasAlreadyUpdateIds.includes(vItem.id))
     .map((item: any) => {

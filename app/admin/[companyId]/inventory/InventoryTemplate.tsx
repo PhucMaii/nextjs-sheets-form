@@ -40,6 +40,8 @@ import { LoadingButton } from '@mui/lab';
 import BackButton from '../components/BackButton';
 import { InventoryItemCardSkeleton } from '../components/Inventory/InventoryItemCard';
 import { Skeleton } from '@mui/material';
+import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
+import VariantTable from '../items/[itemId]/VariantTable';
 
 interface InventoryTemplateProps {
   onSubmit: (params: any) => Promise<void>;
@@ -444,10 +446,25 @@ const InventoryTemplate = ({
     [selectedVendors],
   );
 
-  const handleApplyToAllItems = () => {
-    const newSelectedSellingItems = selectedSellingItems.map((item) => {
-      return { ...item, ...itemToAllItems };
-    });
+  const handleApplyToAllItems = (field: string = 'all') => {
+    let newSelectedSellingItems: any[] = [];
+    if (field === 'all') {
+      newSelectedSellingItems = selectedSellingItems.map((item) => {
+        return { ...item, ...itemToAllItems };
+      });
+    } else if (field === 'prevPrice') {
+      newSelectedSellingItems = selectedSellingItems.map((item) => {
+        return {
+          ...item,
+          prevPrice: itemToAllItems.prevPrice,
+          isShowDiscount: itemToAllItems.isShowDiscount,
+        };
+      });
+    } else {
+      newSelectedSellingItems = selectedSellingItems.map((item) => {
+        return { ...item, [field]: itemToAllItems[field] };
+      });
+    }
     setSelectedSellingItems(newSelectedSellingItems);
   };
 
@@ -572,30 +589,23 @@ const InventoryTemplate = ({
             ) : (
               <Typography fontWeight={600}>{item.category.name}</Typography>
             )}
-            <Grid container alignItems="center" spacing={1} sx={{ my: 0.5 }}>
-              <Grid item xs={12} md={3.8}>
-                <Typography fontWeight={600}>Name</Typography>
+            <Grid
+              container
+              alignItems="center"
+              spacing={1}
+              sx={{
+                my: 0.5,
+                p: 2,
+                border: '1px solid #e0e0e0',
+                borderRadius: 1,
+              }}
+            >
+              <Grid item xs={12}>
+                {/* <Typography fontWeight={600}>Name</Typography> */}
                 <Typography>{item.name}</Typography>
               </Grid>
-              <Grid item xs={12} md={3.8}>
-                <Typography fontWeight={600}>Unit</Typography>
-                <Typography>
-                  1:{smallestOption.unit.ratio} - {smallestOption.unit.unit}
-                </Typography>
-              </Grid>
-              <Grid item xs={12} md={3.8}>
-                <Typography fontWeight={600}>Price</Typography>
-                <Typography>From: ${smallestOption.price}</Typography>
-              </Grid>
-              <Grid item xs={12} md={0.4} textAlign="right">
-                <IconButton onClick={() => onDeleteSellingItem(item.itemId)}>
-                  <Trash2Icon
-                    style={{ width: 20, height: 20, color: grey[700] }}
-                  />
-                </IconButton>
-              </Grid>
               <Grid item xs={12}>
-                <Divider sx={{ my: 1 }} />
+                <VariantTable variants={item.options} />
               </Grid>
             </Grid>
           </Box>
@@ -643,7 +653,7 @@ const InventoryTemplate = ({
                 />
               </FormControl>
             </Grid>
-            <Grid item xs={12} md={3.3}>
+            <Grid item xs={12} md={1.5}>
               <Select
                 value={JSON.stringify(item.inventoryUnit)}
                 fullWidth
@@ -673,6 +683,26 @@ const InventoryTemplate = ({
                   onChange={(e) =>
                     onChangeSellingItem(item.itemId, 'price', +e.target.value)
                   }
+                />
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} md={3.3}>
+              <FormControl fullWidth>
+                <InputLabel htmlFor="prev-price-input">Prev Price</InputLabel>
+                <OutlinedInput
+                  id="prev-price-input"
+                  label="Prev Price"
+                  fullWidth
+                  type="number"
+                  value={item?.prevPrice || 0}
+                  onChange={(e) =>
+                    onChangeSellingItem(
+                      item.itemId,
+                      'prevPrice',
+                      +e.target.value,
+                    )
+                  }
                   endAdornment={
                     <InputAdornment position="end">
                       <FormControlLabel
@@ -691,26 +721,6 @@ const InventoryTemplate = ({
                         label="Show Discount"
                       />
                     </InputAdornment>
-                  }
-                />
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={12} md={1.5}>
-              <FormControl fullWidth>
-                <InputLabel htmlFor="prev-price-input">Prev Price</InputLabel>
-                <OutlinedInput
-                  id="prev-price-input"
-                  label="Prev Price"
-                  fullWidth
-                  type="number"
-                  value={item.prevPrice}
-                  onChange={(e) =>
-                    onChangeSellingItem(
-                      item.itemId,
-                      'prevPrice',
-                      +e.target.value,
-                    )
                   }
                 />
               </FormControl>
@@ -1111,10 +1121,19 @@ const InventoryTemplate = ({
                       }))
                     }
                     fullWidth
+                    endAdornment={
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() => handleApplyToAllItems('name')}
+                        >
+                          <KeyboardDoubleArrowDownIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    }
                   />
                 </FormControl>
               </Grid>
-              <Grid item xs={12} md={3.3}>
+              <Grid item xs={12} md={1.5}>
                 <FormControl fullWidth>
                   <InputLabel htmlFor="general-unit-input">Unit</InputLabel>
                   <Select
@@ -1128,6 +1147,15 @@ const InventoryTemplate = ({
                       }))
                     }
                     fullWidth
+                    endAdornment={
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() => handleApplyToAllItems('inventoryUnit')}
+                        >
+                          <KeyboardDoubleArrowDownIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    }
                   >
                     {uniqueRatioUnits.map((unit: any) => (
                       <MenuItem key={unit.id} value={JSON.stringify(unit)}>
@@ -1154,26 +1182,33 @@ const InventoryTemplate = ({
                     }
                     endAdornment={
                       <InputAdornment position="end">
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={itemToAllItems.isShowDiscount}
-                              onChange={(e) =>
-                                setItemToAllItems((prev: any) => ({
-                                  ...prev,
-                                  isShowDiscount: e.target.checked,
-                                }))
-                              }
-                            />
-                          }
-                          label="Show Discount"
-                        />
+                        <Box display="flex" alignItems="center" gap={1}>
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={itemToAllItems.isShowDiscount}
+                                onChange={(e) =>
+                                  setItemToAllItems((prev: any) => ({
+                                    ...prev,
+                                    isShowDiscount: e.target.checked,
+                                  }))
+                                }
+                              />
+                            }
+                            label="Show Discount"
+                          />
+                          <IconButton
+                            onClick={() => handleApplyToAllItems('price')}
+                          >
+                            <KeyboardDoubleArrowDownIcon />
+                          </IconButton>
+                        </Box>
                       </InputAdornment>
                     }
                   />
                 </FormControl>
               </Grid>
-              <Grid item xs={12} md={2}>
+              <Grid item xs={12} md={3.9}>
                 <FormControl fullWidth>
                   <InputLabel htmlFor="general-prev-price-input">
                     Prev Price
@@ -1190,6 +1225,31 @@ const InventoryTemplate = ({
                         prevPrice: +e.target.value,
                       }))
                     }
+                    endAdornment={
+                      <InputAdornment position="end">
+                        <Box>
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={itemToAllItems.isShowDiscount}
+                                onChange={(e) =>
+                                  setItemToAllItems((prev: any) => ({
+                                    ...prev,
+                                    isShowDiscount: e.target.checked,
+                                  }))
+                                }
+                              />
+                            }
+                            label="Show Discount"
+                          />
+                          <IconButton
+                            onClick={() => handleApplyToAllItems('prevPrice')}
+                          >
+                            <KeyboardDoubleArrowDownIcon />
+                          </IconButton>
+                        </Box>
+                      </InputAdornment>
+                    }
                   />
                 </FormControl>
               </Grid>
@@ -1198,7 +1258,7 @@ const InventoryTemplate = ({
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={handleApplyToAllItems}
+                  onClick={() => handleApplyToAllItems('all')}
                 >
                   Apply
                 </Button>
