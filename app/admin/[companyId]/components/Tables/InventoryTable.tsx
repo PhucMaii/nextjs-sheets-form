@@ -251,7 +251,7 @@ const InventoryTable = ({
             onClose={() =>
               setBatchProps((prevState: any) => ({ ...prevState, open: false }))
             }
-            fifoList={batchProps.inventoryItem?.fifo || []}
+            inventoryItemId={batchProps.inventoryItem.id || -1}
             showNotification={showNotification}
           />
         )}

@@ -169,7 +169,7 @@ const ClientsTable = ({
             />
             <EditClient
               client={client}
-              showNotification={showNotification}
+              // showNotification={showNotification}
               categories={categories}
               onUpdateClient={onUpdateClient}
             />
