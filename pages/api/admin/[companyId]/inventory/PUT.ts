@@ -7,6 +7,7 @@ import { updateAllScheduleOrderItems } from '../items/PUT';
 import { UPDATE_OPTION } from '@/app/admin/[companyId]/components/Modals/edit/EditItem';
 import { deleteItemInScheduledOrders } from '../items/DELETE';
 import prisma from '@/client';
+import { getUniqueUnitRatios } from '@/app/utils/array';
 
 interface IBody {
   id: number;
@@ -253,74 +254,15 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    // if (
-    //   updatedOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME &&
-    //   updatedSingleSellingItem
-    // ) {
-    //   // Check if there is any new selling item added, new item has itemId is not a number
-    //   if (updatedSellingItems.length > 0) {
-    //     const newSellingItem = updatedSellingItems.filter(
-    //       (item: any) => !isNaN(Number(item.itemId)),
-    //     );
+    const allUnits = await prisma.inventoryUnit.findMany({
+      where: {
+        vendorItem: {
+          inventoryItemId: existingInventoryItem.id,
+        },
+      },
+    });
 
-    //     if (newSellingItem.length > 0) {
-    //       await prisma.item.createMany({
-    //         data: newSellingItem.map((item: any) => ({
-    //           name: item.name,
-    //           price: item.price,
-    //           inventoryUnitId: item.inventoryUnit.id,
-    //           availability: item.availability,
-    //           categoryId: item.categoryId,
-    //           inventoryItemId: existingInventoryItem.id,
-    //           createdAt: updatedAt,
-    //           createdBy,
-    //           companyId: Number(companyId),
-    //         })),
-    //       });
-    //     }
-
-    //     // Check if there is any selling item removed, removed selling item can be found in existingInventoryItem.item but not in updatedSellingItems
-    //     const removedSellingItem = existingInventoryItem.item.filter(
-    //       (item: any) =>
-    //         !updatedSellingItems.some(
-    //           (updatedItem: any) => updatedItem.itemId === item.id,
-    //         ),
-    //     );
-
-    //     if (removedSellingItem.length > 0) {
-    //       // Delete all removed selling item
-    //       await deleteRelatedOrderedItemInScheduledOrders(removedSellingItem);
-    //     }
-    //   }
-    //   // Update all items in inventory item
-    //   await prisma.item.updateMany({
-    //     where: {
-    //       inventoryItemId: existingInventoryItem.id,
-    //     },
-    //     data: {
-    //       name: updatedSingleSellingItem.name,
-    //       price: updatedSingleSellingItem.price,
-    //       inventoryUnitId: updatedSingleSellingItem.inventoryUnit.id,
-    //     },
-    //   });
-
-    //   await updateAllScheduleOrderItems(
-    //     existingInventoryItem.item[0].categoryId || 0,
-    //     existingInventoryItem.id,
-    //     UPDATE_OPTION.ALL_ITEMS_SAME_NAME,
-    //     {
-    //       name: updatedSingleSellingItem.name,
-    //       price: updatedSingleSellingItem.price,
-    //       inventoryUnitId: updatedSingleSellingItem.inventoryUnit.id,
-    //     },
-    //   );
-
-    //   // RETURN BLOCK FOR ALL_ITEMS_SAME_NAME
-    //   return res.status(200).json({
-    //     message: 'Inventory Item Updated Successfully',
-    //   });
-    // }
-
+    const uniqueUnits = getUniqueUnitRatios(allUnits);
     const toChangeItems: any[] = [];
     if (updatedSellingItems && updatedSellingItems.length > 0) {
       const nonVariantsItems = updatedSellingItems.filter(
@@ -363,11 +305,20 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
               updatedSellingItem.isShowDiscount ||
             existingSellingItem.prevPrice !== updatedSellingItem.prevPrice
           ) {
+            let unit: any = existingSellingItem.inventoryUnit;
+            // check if inventory unit.id is correct
+            if (isNaN(Number(updatedSellingItem.inventoryUnit.id))) {
+              unit = uniqueUnits.find(
+                (unit: any) =>
+                  unit.ratio === updatedSellingItem.inventoryUnit.ratio,
+              );
+            }
+
             toChangeItems.push({
               id: existingSellingItem.id,
               name: updatedSellingItem.name,
               price: updatedSellingItem.price,
-              inventoryUnitId: updatedSellingItem.inventoryUnit.id,
+              inventoryUnitId: unit.id,
               isShowDiscount: updatedSellingItem.isShowDiscount,
               prevPrice: updatedSellingItem.prevPrice,
               categoryId: updatedSellingItem.categoryId,
@@ -378,7 +329,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
               data: {
                 name: updatedSellingItem.name,
                 price: updatedSellingItem.price,
-                inventoryUnitId: updatedSellingItem.inventoryUnit.id,
+                inventoryUnitId: unit.id,
                 isShowDiscount: updatedSellingItem.isShowDiscount,
                 prevPrice: updatedSellingItem.prevPrice,
               },
@@ -420,7 +371,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             {
               name: item.name,
               price: item.price,
-              inventoryUnitId: item.inventoryUnit.id,
+              inventoryUnitId: item.inventoryUnitId,
               isShowDiscount: item.isShowDiscount,
               prevPrice: item.prevPrice,
             },

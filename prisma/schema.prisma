@@ -292,7 +292,7 @@ model OrderedItems {
 
   Orders         Orders?         @relation(fields: [orderId], references: [id], onDelete: Cascade)
   expense        Expense?        @relation(fields: [expenseId], references: [id], onDelete: Cascade)
-  fifo           Fifo?           @relation(fields: [fifoId], references: [id])
+  fifo            Fifo?           @relation(fields: [fifoId], references: [id])
   inventoryUnit  InventoryUnit?  @relation(fields: [inventoryUnitId], references: [id])
   inventoryItem  InventoryItem?  @relation(fields: [inventoryItemId], references: [id])
   ScheduleOrders ScheduleOrders? @relation(fields: [scheduledOrderId], references: [id], onDelete: Cascade)
@@ -561,6 +561,7 @@ model Expense {
   invoice            String?
   status             String?
   fixedTransactionId Int?
+  paidAt             String?
   companyId          Int?
   batchTransactionId  Int?
 
@@ -729,6 +730,7 @@ model VendorItem {
   unit InventoryUnit[]
 
   @@index([vendorId])
+  @@index([inventoryItemId])
   @@index([inventoryItemId, vendorId])
 }
 
@@ -747,6 +749,9 @@ model Fifo {
   inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
   company       Company?      @relation(fields: [companyId], references: [id])
   vendorItem    VendorItem    @relation(fields: [vendorItemId], references: [id])
+
+  @@index([inventoryItemId])
+  @@index([vendorItemId])
 }
 
 model InventoryUnit {

@@ -1,5 +1,6 @@
 import { otherPaymentMethodId } from '@/app/lib/constant';
 import { TRANSACTION_STATUS } from '@/app/utils/enum';
+import { getTodayDate } from '@/pages/api/utils/date';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -21,6 +22,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const prisma = new PrismaClient();
     const { id, idsToUpdate, status, newPaymentMethodId }: IBody = req.body;
+
+    const today = getTodayDate().dateAndTime;
 
     if (id) {
       const existingExpense = await prisma.expense.findUnique({
@@ -61,6 +64,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           data: {
             status,
             paymentMethodId: newPaymentMethodId,
+            paidAt: today,
           },
         });
       } else {
@@ -70,6 +74,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           },
           data: {
             status,
+            paidAt: status === TRANSACTION_STATUS.PAID ? today : null,
           },
         });
       }
@@ -88,6 +93,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         },
         data: {
           status,
+          paidAt: status === TRANSACTION_STATUS.PAID ? today : null,
         },
       });
 

@@ -31,17 +31,17 @@ export default function VendorItemSearch({
       filterOptions={(options, params) => {
         const filtered = filter(options, params);
 
-        const { inputValue } = params;
-        // Suggest the creation of a new value
-        const isExisting = options.some(
-          (option) => inputValue === option?.inventoryItem?.name,
-        );
-        if (role === USER_ROLE.ADMIN && inputValue !== '' && !isExisting) {
-          filtered.push({
-            inputValue,
-            title: `Add "${inputValue}"`,
-          });
-        }
+        // const { inputValue } = params;
+        // // Suggest the creation of a new value
+        // const isExisting = options.some(
+        //   (option) => inputValue === option?.inventoryItem?.name,
+        // );
+        // if (role === USER_ROLE.ADMIN && inputValue !== '' && !isExisting) {
+        //   filtered.push({
+        //     inputValue,
+        //     title: `Add "${inputValue}"`,
+        //   });
+        // }
 
         return filtered;
       }}

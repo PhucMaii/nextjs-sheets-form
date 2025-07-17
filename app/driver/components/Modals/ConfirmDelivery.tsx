@@ -8,7 +8,7 @@ import { YYYYMMDDFormat } from '@/app/utils/time';
 // import { ShowNotificationType } from '@/hooks/useNotification';
 import { Box, Button, IconButton, Modal, Typography } from '@mui/material';
 import { XIcon } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface IProps extends ModalProps {
   order: Order;
@@ -39,11 +39,12 @@ const ConfirmDelivery = ({
   const today = new Date();
   const formattedDate = YYYYMMDDFormat(today);
 
-  // useEffect(() => {
-  //   if (fileKey) {
-  //     handleConfirm(fileKey);
-  //   }
-  // }, [fileKey]);
+  // Reset fileKey when modal is closed
+  useEffect(() => {
+    if (!open) {
+      setFileKey(null);
+    }
+  }, [open]);
 
   const handleConfirm = async (fileKey: string | null = null) => {
     // if (!fileKey) {

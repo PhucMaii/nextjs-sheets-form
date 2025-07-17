@@ -167,9 +167,21 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         order.status === ORDER_STATUS.COMPLETED
       );
     });
-    const cancelledOrders = sortedThisMonthOrders.filter((order: any) => {
-      return order.status === ORDER_STATUS.VOID;
+    
+    const cancelledOrders: any = await prisma.orders.findMany({
+      where: {
+        companyId: Number(companyId),
+        status: ORDER_STATUS.VOID,
+        deliveryDate: {
+          in: datesInRange,
+        },
+      },
+      include: {
+        items: true,
+        user: true,
+      },
     });
+
     const unpaidOrders = sortedThisMonthOrders.filter((order: any) => {
       return order?.paymentStatus === PaymentStatus.Unpaid;
     });

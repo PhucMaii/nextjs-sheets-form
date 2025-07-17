@@ -146,33 +146,37 @@ export default async function handler(
       }
 
       // Create a set of same items and quantity
-      const itemMap: ItemMap = orderedItems.reduce(async (acc: any, item: any) => {
-        if (!item.inventoryItemId || !item.inventoryUnitId) return acc; // Make sure again not touching the custom amount
+      const itemMap: ItemMap = orderedItems.reduce(
+        async (acc: any, item: any) => {
+          if (!item.inventoryItemId || !item.inventoryUnitId) return acc; // Make sure again not touching the custom amount
 
-        // If item has option, then set option
-        const itemUnit = item.inventoryUnit;
+          // If item has option, then set option
+          const itemUnit = item.inventoryUnit;
 
-        // Set the quantity to ratio of 1
-        const quantityWithRatio1 = item.quantity * itemUnit.ratio;
+          // Set the quantity to ratio of 1
+          const quantityWithRatio1 = item.quantity * itemUnit.ratio;
 
-        if (!acc[item.inventoryItemId]) {
-          console.log(item, 'item');
-          acc[item.inventoryItemId] = {
-            quantity: quantityWithRatio1,
-            inventoryItem: item.inventoryItem,
-            fifo: item.fifo,
-            inventoryUnit: itemUnit,
-          };
-        } else {
-          acc[item.inventoryItemId].quantity += quantityWithRatio1;
-        }
+          if (!acc[item.inventoryItemId]) {
+            acc[item.inventoryItemId] = {
+              quantity: quantityWithRatio1,
+              inventoryItem: item.inventoryItem,
+              fifo: item.fifo,
+              inventoryUnit: itemUnit,
+            };
+          } else {
+            acc[item.inventoryItemId].quantity += quantityWithRatio1;
+          }
 
-        await recordAction(item.orderId, 'System', `Subtract ${item.quantity} ${item.name} from inventory during auto track inventory`);
-        
-        return acc;
-      }, {});
+          await recordAction(
+            item.orderId,
+            'System',
+            `Subtract ${item.quantity} ${item.name} from inventory during auto track inventory`,
+          );
 
-
+          return acc;
+        },
+        {},
+      );
 
       // Flag the action as taken
       const newAction = await prisma.action.create({
@@ -187,15 +191,23 @@ export default async function handler(
       let actionDescription: string = '';
       // Loop through that item set, update inventory item quantity
       for (const inventoryItem of Object.values(itemMap)) {
-        await subtractInventoryItem(
-          -1, // Force to subtract the inventory quantity
-          inventoryItem.fifo,
-          { ratio: 1 }, // Already calculate correct quantity above
-          inventoryItem.quantity,
-        );
-
-        // Transform itemMap to a string
-        actionDescription += `${inventoryItem.inventoryItem.name}: ${inventoryItem.quantity} || `;
+        try {
+          await subtractInventoryItem(
+            -1, // Force to subtract the inventory quantity
+            inventoryItem.fifo,
+            { ratio: 1 }, // Already calculate correct quantity above
+            inventoryItem.quantity,
+          );
+          console.log('Subtracted Inventory Item: ', {
+            name: inventoryItem.inventoryItem.name,
+            qty: inventoryItem.quantity,
+          });
+          // Transform itemMap to a string
+          actionDescription += `${inventoryItem.inventoryItem.name}: ${inventoryItem.quantity} || `;
+        } catch (error: any) {
+          console.log('Error: ', error);
+          actionDescription += `Error to subtract: ${inventoryItem.inventoryItem.name}: ${inventoryItem.quantity} || `;
+        }
       }
 
       // Flag the action as taken
