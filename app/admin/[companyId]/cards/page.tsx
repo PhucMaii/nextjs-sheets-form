@@ -49,6 +49,7 @@ import { useUpdateExpenseStatus } from '@/hooks/update/useUpdateExpenseStatus';
 import LoadingModal from '../components/Modals/LoadingModal';
 import { useParams } from 'next/navigation';
 import { error, errorBackground, errorColor } from '@/theme/color';
+import moment from 'moment';
 
 const SpendingItem = ({
   item,
@@ -690,7 +691,7 @@ export default function CardManagement() {
               </Grid>
 
               {/* Category Analysis */}
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12}>
                 <ShadowSection>
                   <Typography
                     variant="h6"
@@ -715,7 +716,7 @@ export default function CardManagement() {
               </Grid>
 
               {/* Payment Timeline */}
-              <Grid item xs={12} md={6}>
+              {/* <Grid item xs={12} md={6}>
                 <ShadowSection>
                   <Typography
                     variant="h6"
@@ -748,7 +749,8 @@ export default function CardManagement() {
                         fontWeight="bold"
                         color="#1976d2"
                       >
-                        {transactions?.overview?.avgPaymentDelay?.toFixed(2)} days
+                        {transactions?.overview?.avgPaymentDelay?.toFixed(2)}{' '}
+                        days
                       </Typography>
                     </Box>
                     <Box
@@ -773,7 +775,10 @@ export default function CardManagement() {
                         fontWeight="bold"
                         color="#f57c00"
                       >
-                        {transactions?.overview?.longestPaymentDelay?.toFixed(2)} days
+                        {transactions?.overview?.longestPaymentDelay?.toFixed(
+                          2,
+                        )}{' '}
+                        days
                       </Typography>
                     </Box>
                     <Box
@@ -798,15 +803,18 @@ export default function CardManagement() {
                         fontWeight="bold"
                         color="#388e3c"
                       >
-                        {transactions?.overview?.shortestPaymentDelay?.toFixed(2)} days
+                        {transactions?.overview?.shortestPaymentDelay?.toFixed(
+                          2,
+                        )}{' '}
+                        days
                       </Typography>
                     </Box>
                   </Box>
                 </ShadowSection>
-              </Grid>
+              </Grid> */}
 
               {/* Action Items */}
-              <Grid item xs={12}>
+              {/* <Grid item xs={12}>
                 <ShadowSection>
                   <Typography
                     variant="h6"
@@ -818,45 +826,63 @@ export default function CardManagement() {
                   </Typography>
                   <Grid container spacing={3}>
                     <Grid item xs={12} md={4}>
-                      <Box
-                        p={3}
-                        sx={{
-                          backgroundColor: '#ffebee',
-                          borderRadius: 2,
-                          border: '1px solid #ffcdd2',
-                          boxShadow: '0 4px 12px rgba(211, 47, 47, 0.15)',
-                          transition: 'transform 0.2s ease',
-                          '&:hover': { transform: 'translateY(-2px)' },
-                        }}
-                      >
-                        <Box display="flex" alignItems="center" gap={1} mb={1}>
+                      {transactions?.overview?.overdueExpenses.length > 0 && (
+                        <Box
+                          p={3}
+                          sx={{
+                            backgroundColor: '#ffebee',
+                            borderRadius: 2,
+                            border: '1px solid #ffcdd2',
+                            boxShadow: '0 4px 12px rgba(211, 47, 47, 0.15)',
+                            transition: 'transform 0.2s ease',
+                            '&:hover': { transform: 'translateY(-2px)' },
+                          }}
+                        >
                           <Box
-                            sx={{
-                              width: 8,
-                              height: 8,
-                              borderRadius: '50%',
-                              backgroundColor: '#d32f2f',
-                            }}
-                          />
-                          <Typography
-                            variant="subtitle1"
-                            fontWeight="bold"
-                            color="#c62828"
+                            display="flex"
+                            alignItems="center"
+                            gap={1}
+                            mb={1}
                           >
-                            Urgent: Overdue Payments
+                            <Box
+                              sx={{
+                                width: 8,
+                                height: 8,
+                                borderRadius: '50%',
+                                backgroundColor: '#d32f2f',
+                              }}
+                            />
+                            <Typography
+                              variant="subtitle1"
+                              fontWeight="bold"
+                              color="#c62828"
+                            >
+                              Urgent: Overdue Payments
+                            </Typography>
+                          </Box>
+                          <Typography variant="body2" color="#7f1d1d" mb={1}>
+                            {transactions?.overview?.overdueExpenses.length}{' '}
+                            payments are overdue. Total amount: $
+                            {transactions?.overview?.overdueAmount?.toFixed(2)}
+                          </Typography>
+                          <Typography
+                            variant="caption"
+                            color="#d32f2f"
+                            fontWeight="600"
+                          >
+                            Oldest overdue:{' '}
+                            {Math.abs(
+                              moment(
+                                transactions?.overview?.overdueExpenses[
+                                  transactions?.overview?.overdueExpenses
+                                    .length - 1
+                                ]?.date,
+                              ).diff(moment(), 'days'),
+                            )}{' '}
+                            days
                           </Typography>
                         </Box>
-                        <Typography variant="body2" color="#7f1d1d" mb={1}>
-                          8 payments are overdue. Total amount: $3,240.00
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          color="#d32f2f"
-                          fontWeight="600"
-                        >
-                          Oldest overdue: 45 days
-                        </Typography>
-                      </Box>
+                      )}
                     </Grid>
                     <Grid item xs={12} md={4}>
                       <Box
@@ -888,7 +914,8 @@ export default function CardManagement() {
                           </Typography>
                         </Box>
                         <Typography variant="body2" color="#bf360c" mb={1}>
-                          34% increase in spending this month
+                          {transactions?.overview?.thisMonthExpensesPercentage}%
+                          increase in spending this month
                         </Typography>
                         <Typography
                           variant="caption"
@@ -942,7 +969,7 @@ export default function CardManagement() {
                     </Grid>
                   </Grid>
                 </ShadowSection>
-              </Grid>
+              </Grid> */}
 
               {/* Recent Transactions Table */}
               <Grid item xs={12}>

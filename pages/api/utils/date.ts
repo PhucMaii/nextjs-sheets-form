@@ -1,6 +1,6 @@
 import { Order } from '@/app/admin/[companyId]/orders/page';
 import { limitOrderHour } from '@/app/lib/constant';
-import { YYYYMMDDFormat } from '@/app/utils/time';
+import { generateListOfDateString, YYYYMMDDFormat } from '@/app/utils/time';
 import { Expense } from '@prisma/client';
 
 export const convertDeliveryDateStringToDate = (deliveryDate: string) => {
@@ -117,7 +117,7 @@ export const getTodayDate = (
 
 export const formatDateString = (inputDate: Date | string) => {
   let inputDateTypeDate: Date;
-  console.log({inputDate, type: typeof inputDate}, 'inputDate');
+  console.log({ inputDate, type: typeof inputDate }, 'inputDate');
   if (typeof inputDate === 'string') {
     inputDateTypeDate = new Date(inputDate);
   } else {
@@ -229,17 +229,32 @@ export const formatDate = (date: string) => {
 };
 
 export const getDaysOfThisWeek = (startedDate: string, endedDate: string) => {
-    const startDate = new Date(startedDate);
-    const endDate = new Date(endedDate);
-    const dates = [];
+  const startDate = new Date(startedDate);
+  const endDate = new Date(endedDate);
+  const dates = [];
 
-    for (
-      let d = new Date(startDate);
-      d <= endDate;
-      d.setDate(d.getDate() + 1)
-    ) {
-      dates.push(d.toLocaleDateString('en-US', { dateStyle: 'full' }));
-    }
+  for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+    dates.push(d.toLocaleDateString('en-US', { dateStyle: 'full' }));
+  }
 
-    return dates;
-}
+  return dates;
+};
+
+export const getLastMonthListOfDateString = (startDate: Date) => {
+  const lastMonth = startDate.getMonth();
+
+  const lastMonthStart = new Date(startDate.getFullYear(), lastMonth - 2, 1);
+  const lastMonthEnd = new Date(
+    startDate.getFullYear(),
+    startDate.getMonth() - 1,
+    1,
+  );
+  lastMonthEnd.setDate(0);
+
+  const datesInRange = generateListOfDateString(
+    normalizeDate(lastMonthStart),
+    normalizeDate(lastMonthEnd),
+  );
+
+  return datesInRange;
+};

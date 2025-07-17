@@ -1,8 +1,12 @@
-import { generateListOfDateString } from '@/app/utils/time';
+import { generateListOfDateString, generateMonthRange } from '@/app/utils/time';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { TRANSACTION_STATUS, VIEW_TYPE } from '@/app/utils/enum';
-import { formatDate, sortExpenseByDate } from '@/pages/api/utils/date';
+import {
+  formatDate,
+  getLastMonthListOfDateString,
+  sortExpenseByDate,
+} from '@/pages/api/utils/date';
 import prisma from '@/client';
 import moment from 'moment';
 
@@ -237,8 +241,16 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       return acc + expense.amount;
     }, 0);
 
+    const monthRange = generateMonthRange();
+    const currentMonthListOfDateString = generateListOfDateString(
+      monthRange[0],
+      monthRange[1],
+    );
     const overdueExpenses = await getExpenseWithVendorId(Number(id), {
       status: TRANSACTION_STATUS.UNPAID,
+      date: {
+        notIn: currentMonthListOfDateString,
+      },
     });
 
     const overdueAmount = overdueExpenses.reduce((acc: any, expense: any) => {
@@ -252,6 +264,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     // Payment delays
     const paymentDelays = getPaymentDelays(sortedExpensesByDate);
+
+    // Compare with last month
+    const lastMonthExpenses = await getLastMonthExpenses(
+      Number(companyId),
+      formattedStartDate,
+    );
 
     const overview = {
       totalSpent,
@@ -268,6 +286,14 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       avgPaymentDelay: paymentDelays.avgPaymentDelay,
       longestPaymentDelay: paymentDelays.longestPaymentDelay,
       shortestPaymentDelay: paymentDelays.shortestPaymentDelay,
+      lastMonthExpenses: lastMonthExpenses.totalSpent,
+      lastMonthExpensesPercentage:
+        Math.round(
+          (lastMonthExpenses.totalSpent / totalSpent) * 100 * 100,
+        ) / 100,
+      thisMonthExpensesPercentage:
+        Math.round((totalSpent / lastMonthExpenses.totalSpent) * 100 * 100) /
+        100,
     };
 
     return res.status(200).json({
@@ -440,22 +466,46 @@ const getPaymentDelays = (expenses: any) => {
     };
   });
 
-  const avgPaymentDelay = paymentDelays.reduce((acc: any, expense: any) => {
-    return acc + expense.paymentDelay;
-  }, 0) / paymentDelays.length;
+  const avgPaymentDelay =
+    paymentDelays.reduce((acc: any, expense: any) => {
+      return acc + expense.paymentDelay;
+    }, 0) / paymentDelays.length;
 
   const longestPaymentDelay = paymentDelays.reduce((acc: any, expense: any) => {
     return Math.max(acc, expense.paymentDelay);
   }, 0);
 
-  const shortestPaymentDelay = paymentDelays.reduce((acc: any, expense: any) => {
-    return Math.min(acc, expense.paymentDelay);
-  }, Infinity);
+  const shortestPaymentDelay = paymentDelays.reduce(
+    (acc: any, expense: any) => {
+      return Math.min(acc, expense.paymentDelay);
+    },
+    Infinity,
+  );
 
   return {
     paymentDelays,
     avgPaymentDelay,
     longestPaymentDelay,
     shortestPaymentDelay,
+  };
+};
+
+const getLastMonthExpenses = async (companyId: number, startDate: any) => {
+  const lastMonthListOfDateString =
+    getLastMonthListOfDateString(startDate);
+
+  const lastMonthExpenses = await getTransactions({
+    date: {
+      in: lastMonthListOfDateString,
+    },
+  });
+
+  const totalSpent = lastMonthExpenses.reduce((acc: any, expense: any) => {
+    return acc + expense.amount;
+  }, 0);
+
+  return {
+    totalSpent,
+    lastMonthExpenses,
   };
 };
