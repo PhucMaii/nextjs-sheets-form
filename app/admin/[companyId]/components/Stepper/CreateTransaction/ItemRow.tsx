@@ -12,9 +12,8 @@ import {
   TextField,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import React, { useEffect } from 'react';
+import React from 'react';
 import UnitRadio from '../../Radio/UnitRadio';
-import { gstRate, pstRate } from '@/app/lib/constant';
 
 export default function ItemRow({
   item,
@@ -119,7 +118,7 @@ export default function ItemRow({
           <TextField
             fullWidth
             label="GST"
-            value={item?.inventoryItem?.hasGST ? (item.total * gstRate)?.toFixed(2) : 0}
+            value={item?.GST?.toFixed(2) || 0}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">$</InputAdornment>
@@ -133,7 +132,7 @@ export default function ItemRow({
           <TextField
             fullWidth
             label="PST"
-            value={item?.inventoryItem?.hasPST ? (item.total * pstRate)?.toFixed(2) : 0}
+            value={item?.PST?.toFixed(2) || 0}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">$</InputAdornment>

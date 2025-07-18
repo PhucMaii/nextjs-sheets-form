@@ -1,10 +1,9 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Box,
   Button,
   Container,
-  IconButton,
   Step,
   StepLabel,
   Stepper,
@@ -32,6 +31,8 @@ import {
   successColor,
 } from '@/theme/color';
 import { ShadowSection } from '../../reports/styled';
+import { useQuery } from '@tanstack/react-query';
+import { gstRate, pstRate } from '@/app/lib/constant';
 
 interface ExpenseItem {
   id: string | number;
@@ -47,6 +48,35 @@ export default function CreateTransaction() {
   const router = useRouter();
   const { showNotification, NotificationComp } = useNotification();
 
+  const { data: adminsAndDrivers } = useQuery({
+    queryKey: ['adminsAndDrivers'],
+    queryFn: () =>
+      axios
+        .get(getAdminApiUrl(companyId, '/adminsAndDrivers'))
+        .then((res) => res.data.data),
+  });
+
+  const { data: paymentMethods } = useQuery({
+    queryKey: ['paymentMethods'],
+    queryFn: () =>
+      axios
+        .get(getAdminApiUrl(companyId, '/paymentMethods'))
+        .then((res) => res.data.data),
+  });
+
+  const { data: vendors } = useQuery({
+    queryKey: ['vendors'],
+    queryFn: () =>
+      axios
+        .get(getAdminApiUrl(companyId, '/vendors'))
+        .then((res) => res.data.data),
+  });
+
+  const [isShowDiscountPercent, setIsShowDiscountPercent] =
+    useState<boolean>(false);
+  const [selectedVendorId, setSelectedVendorId] = useState<number>(-1);
+  const [vendorItems, setVendorItems] = useState<any[]>([]);
+
   // Form state
   const [activeStep, setActiveStep] = useState(0);
   const [transactionType, setTransactionType] = useState('stock');
@@ -54,7 +84,7 @@ export default function CreateTransaction() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form data
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<any>({
     description: '',
     spentBy: '',
     paymentMethodId: -1,
@@ -65,6 +95,15 @@ export default function CreateTransaction() {
     discount: 0,
     total: 0,
     discountPercentage: 0,
+    hasGST: false,
+    hasPST: false,
+    initialSubTotal: 0,
+    vendorId: -1,
+    vendor: null,
+    inventoryItems: [],
+    inventoryUnits: [],
+    inventoryItem: null,
+    inventoryUnit: null,
   });
 
   // Expense items for stock purchases
@@ -78,11 +117,194 @@ export default function CreateTransaction() {
       unit: [],
     },
   ]);
+
+  const sortedVendors = useMemo(() => {
+    if (!vendors) {
+      return [];
+    }
+
+    const vendorsSorted = [...vendors].sort((a: any, b: any) => {
+      return a?.name?.localeCompare(b?.name);
+    });
+
+    return vendorsSorted;
+  }, [vendors]);
+
+  // Clear form data and expense items when transaction type changes
+  useEffect(() => {
+    clearFormData();
+    clearExpenseItems();
+  }, [transactionType]);
+
+  // Clear expense items when selected vendor changes
+  useEffect(() => {
+    clearExpenseItems();
+  }, [selectedVendorId]);
+
+  // Set vendor items when selected vendor changes
+  useEffect(() => {
+    if (selectedVendorId !== -1) {
+      setFormData((prev: any) => ({
+        ...prev,
+        vendorId: selectedVendorId,
+        vendor: vendors?.find((v: any) => v.id === selectedVendorId),
+      }));
+
+      if (vendors) {
+        const targetVendor = vendors?.find((vendor: any) => {
+          return vendor.id === selectedVendorId;
+        });
+
+        if (targetVendor) {
+          setVendorItems(targetVendor?.vendorItem);
+        }
+      }
+    }
+  }, [selectedVendorId]);
+
+  // Calculate subtotal, gst, pst, discount, total
+  useEffect(() => {
+    if (expenseItems.length === 0) {
+      setFormData((prev: any) => ({
+        ...prev,
+        subTotal: 0,
+        GST: 0,
+        PST: 0,
+        discount: 0,
+        total: 0,
+        discountPercentage: 0,
+      }));
+      return;
+    }
+    const subTotal =
+      expenseItems.reduce((acc: number, item: any) => {
+        return acc + item.total;
+      }, 0) - formData.discount;
+
+    const { gstTotal, pstTotal } = calculateTaxWithDiscount(
+      formData.discountPercentage,
+    );
+
+    setFormData((prev: any) => ({
+      ...prev,
+      subTotal: subTotal,
+      GST: gstTotal,
+      PST: pstTotal,
+      total: subTotal + gstTotal + pstTotal,
+    }));
+  }, [expenseItems]);
+
+  // This useEffect could not work with Stock type
+  useEffect(() => {
+    if (transactionType === 'stock') return;
+
+    if (formData.hasGST || formData.hasPST) {
+      const gstTotal = formData.hasGST
+        ? Math.round(formData.subTotal * gstRate * 100) / 100
+        : 0;
+      const pstTotal = formData.hasPST
+        ? Math.round(formData.subTotal * pstRate * 100) / 100
+        : 0;
+
+      setFormData((prev: any) => ({
+        ...prev,
+        GST: gstTotal,
+        PST: pstTotal,
+        total: formData.subTotal + gstTotal + pstTotal,
+      }));
+    } else {
+      setFormData((prev: any) => ({
+        ...prev,
+        GST: 0,
+        PST: 0,
+        total: formData.subTotal,
+      }));
+    }
+  }, [formData.hasGST, formData.hasPST, formData.subTotal]);
+
   const steps = [
     { label: 'Transaction Type', icon: <MousePointerIcon /> },
     { label: 'Details', icon: <ReceiptTextIcon /> },
     { label: 'Review & Submit', icon: <Preview /> },
   ];
+
+  const calculateTaxWithDiscount = (discountPercent: number = 0) => {
+    const gstItems = expenseItems.filter(
+      (item: any) => item?.inventoryItem?.hasGST,
+    );
+    const pstItems = expenseItems.filter(
+      (item: any) => item?.inventoryItem?.hasPST,
+    );
+
+    const gstItemsTotalWithDiscount =
+      gstItems.reduce((acc: any, item: any) => {
+        return acc + item.unitPrice * item.quantity;
+      }, 0) *
+      (1 - discountPercent / 100);
+
+    const pstItemsTotalWithDiscount =
+      pstItems.reduce((acc: any, item: any) => {
+        return acc + item.unitPrice * item.quantity;
+      }, 0) *
+      (1 - discountPercent / 100);
+
+    const gstTotal =
+      Math.round(gstItemsTotalWithDiscount * gstRate * 100) / 100;
+    const pstTotal =
+      Math.round(pstItemsTotalWithDiscount * pstRate * 100) / 100;
+
+    return {
+      gstTotal,
+      pstTotal,
+    };
+  };
+
+  const handleDiscountChange = (e: any, type: 'stock' | 'expense') => {
+    const currentSubTotal =
+      type === 'stock'
+        ? expenseItems.reduce((acc: number, item: any) => {
+            return acc + item.total;
+          }, 0)
+        : formData.initialSubTotal;
+
+    if (isShowDiscountPercent) {
+      const discount = (currentSubTotal * Number(e.target.value)) / 100;
+
+      const { gstTotal, pstTotal } = calculateTaxWithDiscount(
+        Number(e.target.value),
+      );
+
+      const newSubTotal = currentSubTotal - discount;
+
+      setFormData((prev: any) => ({
+        ...prev,
+        discountPercentage: Number(e.target.value),
+        discount: discount,
+        subTotal: newSubTotal,
+        GST: gstTotal,
+        PST: pstTotal,
+        total: newSubTotal + gstTotal + pstTotal,
+      }));
+    } else {
+      const discount = Number(e.target.value);
+      const discountPercentage =
+        Math.round((discount / currentSubTotal) * 100 * 100) / 100;
+      const { gstTotal, pstTotal } =
+        calculateTaxWithDiscount(discountPercentage);
+
+      const newSubTotal = currentSubTotal - discount;
+
+      setFormData((prev: any) => ({
+        ...prev,
+        discount: discount,
+        discountPercentage: discountPercentage,
+        subTotal: newSubTotal,
+        GST: gstTotal,
+        PST: pstTotal,
+        total: newSubTotal + gstTotal + pstTotal,
+      }));
+    }
+  };
 
   // Handle expense item changes
   const handleItemChange = (
@@ -94,27 +316,43 @@ export default function CreateTransaction() {
       prev.map((item) => {
         if (item.id === id) {
           if (field === 'selectedItem') {
+            const total = value.inventoryUnit.unitPrice * item.quantity;
+            const pst = value.inventoryItem?.hasPST ? total * pstRate : 0;
+            const gst = value.inventoryItem?.hasGST ? total * gstRate : 0;
+
             return {
               ...item,
               id: value.id,
               unit: value.unit,
               inventoryUnit: value.inventoryUnit,
               unitPrice: value.inventoryUnit.unitPrice,
-              total: value.inventoryUnit.unitPrice * item.quantity,
+              total,
               inventoryItem: value.inventoryItem,
+              GST: gst,
+              PST: pst,
             };
           }
-          const updated = {
+          const updated: any = {
             ...item,
             [field]: value,
           };
 
           if (field === 'inventoryUnit') {
+            const total = value.unitPrice * updated.quantity;
+            const pst = updated.inventoryItem?.hasPST ? total * pstRate : 0;
+            const gst = updated.inventoryItem?.hasGST ? total * gstRate : 0;
             updated.unitPrice = value.unitPrice;
-            updated.total = value.unitPrice * item.quantity;
+            updated.total = total;
+            updated.GST = gst;
+            updated.PST = pst;
           }
           if (field === 'quantity' || field === 'unitPrice') {
-            updated.total = updated.quantity * updated.unitPrice;
+            const total = updated.unitPrice * updated.quantity;
+            const pst = updated.inventoryItem?.hasPST ? total * pstRate : 0;
+            const gst = updated.inventoryItem?.hasGST ? total * gstRate : 0;
+            updated.total = total;
+            updated.GST = gst;
+            updated.PST = pst;
           }
           return updated;
         }
@@ -147,6 +385,30 @@ export default function CreateTransaction() {
         unit: [],
       },
     ]);
+  };
+
+  const clearFormData = () => {
+    setFormData({
+      description: '',
+      spentBy: '',
+      paymentMethodId: -1,
+      status: TRANSACTION_STATUS.UNPAID,
+      subTotal: 0,
+      GST: 0,
+      PST: 0,
+      discount: 0,
+      total: 0,
+      discountPercentage: 0,
+      hasGST: false,
+      hasPST: false,
+      initialSubTotal: 0,
+      vendorId: -1,
+      vendor: null,
+      inventoryItems: [],
+      inventoryUnits: [],
+      inventoryItem: null,
+      inventoryUnit: null,
+    });
   };
 
   // Remove expense item
@@ -248,7 +510,7 @@ export default function CreateTransaction() {
                 Add a new expense or stock purchase to your records
               </Typography>
             </Box>
-            <IconButton
+            {/* <IconButton
               onClick={() => router.back()}
               sx={{
                 backgroundColor: grey[100],
@@ -256,15 +518,23 @@ export default function CreateTransaction() {
               }}
             >
               <ArrowBack />
-            </IconButton>
+            </IconButton> */}
           </Box>
         </Box>
 
         {/* Stepper */}
         <ShadowSection sx={{ p: 2, mb: 2 }}>
           <Stepper activeStep={activeStep} alternativeLabel>
-            {steps.map((step) => (
-              <Step key={step.label}>
+            {steps.map((step, index) => (
+              <Step
+                key={step.label}
+                onClick={() => {
+                  // Only allow to go to previous steps
+                  if (index < activeStep) {
+                    setActiveStep(index);
+                  }
+                }}
+              >
                 <StepLabel
                   StepIconComponent={({ active, completed }) => (
                     <Box
@@ -317,7 +587,15 @@ export default function CreateTransaction() {
               addExpenseItem={addExpenseItem}
               handleItemChange={handleItemChange}
               removeExpenseItem={removeExpenseItem}
-              clearExpenseItems={clearExpenseItems}
+              adminsAndDrivers={adminsAndDrivers}
+              paymentMethods={paymentMethods}
+              selectedVendorId={selectedVendorId}
+              setSelectedVendorId={setSelectedVendorId}
+              sortedVendors={sortedVendors}
+              vendorItems={vendorItems}
+              isShowDiscountPercent={isShowDiscountPercent}
+              setIsShowDiscountPercent={setIsShowDiscountPercent}
+              handleDiscountChange={handleDiscountChange}
             />
           )}
           {activeStep === 2 && (

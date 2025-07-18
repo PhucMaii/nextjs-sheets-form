@@ -33,16 +33,30 @@ import {
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
 import { TRANSACTION_STATUS } from '@/app/utils/enum';
-import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
-import { getAdminApiUrl } from '@/app/utils/enum';
-import { useParams } from 'next/navigation';
 import { BorderSection } from '../../../reports/styled';
 import CreditCardIcon from '@mui/icons-material/CreditCard';
-import { useEffect, useMemo, useState } from 'react';
 import ItemRow from './ItemRow';
-import { gstRate, pstRate } from '@/app/lib/constant';
-import { handleCheckRangeValid } from '@/pages/api/unavailable_days/POST';
+
+interface PropTypes {
+  transactionType: string;
+  selectedDate: any;
+  setSelectedDate: (date: any) => void;
+  formData: any;
+  setFormData: (data: any) => void;
+  expenseItems: any;
+  addExpenseItem: () => void;
+  handleItemChange: any;
+  removeExpenseItem: any;
+  adminsAndDrivers: any;
+  paymentMethods: any;
+  selectedVendorId: any;
+  setSelectedVendorId: any;
+  sortedVendors: any;
+  vendorItems: any;
+  isShowDiscountPercent: boolean;
+  setIsShowDiscountPercent: (value: boolean) => void;
+  handleDiscountChange: (e: any, type: 'stock' | 'expense') => void;
+}
 
 export default function DetailsStep({
   transactionType,
@@ -54,214 +68,16 @@ export default function DetailsStep({
   addExpenseItem,
   handleItemChange,
   removeExpenseItem,
-  clearExpenseItems,
-}: {
-  transactionType: string;
-  selectedDate: any;
-  setSelectedDate: (date: any) => void;
-  formData: any;
-  setFormData: (data: any) => void;
-  expenseItems: any;
-  addExpenseItem: () => void;
-  handleItemChange: any;
-  removeExpenseItem: any;
-  clearExpenseItems: any;
-}) {
-  const { companyId }: any = useParams();
-  const { data: adminsAndDrivers } = useQuery({
-    queryKey: ['adminsAndDrivers'],
-    queryFn: () =>
-      axios
-        .get(getAdminApiUrl(companyId, '/adminsAndDrivers'))
-        .then((res) => res.data.data),
-  });
-
-  const { data: paymentMethods } = useQuery({
-    queryKey: ['paymentMethods'],
-    queryFn: () =>
-      axios
-        .get(getAdminApiUrl(companyId, '/paymentMethods'))
-        .then((res) => res.data.data),
-  });
-
-  const { data: vendors } = useQuery({
-    queryKey: ['vendors'],
-    queryFn: () =>
-      axios
-        .get(getAdminApiUrl(companyId, '/vendors'))
-        .then((res) => res.data.data),
-  });
-
-  const [isShowDiscountPercent, setIsShowDiscountPercent] =
-    useState<boolean>(false);
-  const [selectedVendorId, setSelectedVendorId] = useState<number>(-1);
-  const [vendorItems, setVendorItems] = useState<any[]>([]);
-
-  const sortedVendors = useMemo(() => {
-    if (!vendors) {
-      return [];
-    }
-
-    const vendorsSorted = [...vendors].sort((a: any, b: any) => {
-      return a?.name?.localeCompare(b?.name);
-    });
-
-    return vendorsSorted;
-  }, [vendors]);
-
-  useEffect(() => {
-    clearExpenseItems();
-  }, [selectedVendorId]);
-
-  useEffect(() => {
-    if (selectedVendorId !== -1) {
-      setFormData((prev: any) => ({
-        ...prev,
-        vendorId: selectedVendorId,
-        vendor: vendors?.find((v: any) => v.id === selectedVendorId),
-      }));
-
-      if (vendors) {
-        const targetVendor = vendors?.find((vendor: any) => {
-          return vendor.id === selectedVendorId;
-        });
-        console.log(targetVendor, 'targetVendor');
-
-        if (targetVendor) {
-          setVendorItems(targetVendor?.vendorItem);
-        }
-      }
-    }
-  }, [selectedVendorId]);
-
-  // Calculate subtotal, gst, pst, discount, total
-  useEffect(() => {
-    if (expenseItems.length === 0) {
-      setFormData((prev: any) => ({
-        ...prev,
-        subTotal: 0,
-        GST: 0,
-        PST: 0,
-        discount: 0,
-        total: 0,
-        discountPercentage: 0,
-      }));
-      return;
-    }
-    const subTotal =
-      expenseItems.reduce((acc: number, item: any) => {
-        return acc + item.total;
-      }, 0) - formData.discount;
-
-    const { gstTotal, pstTotal } = calculateTaxWithDiscount(
-      formData.discountPercentage,
-    );
-
-    setFormData((prev: any) => ({
-      ...prev,
-      subTotal: subTotal,
-      GST: gstTotal,
-      PST: pstTotal,
-      total: subTotal + gstTotal + pstTotal,
-    }));
-  }, [expenseItems]);
-
-  useEffect(() => {
-    if (formData.hasGST || formData.hasPST) {
-      const gstTotal = formData.hasGST
-        ? Math.round(formData.subTotal * gstRate * 100) / 100
-        : 0;
-      const pstTotal = formData.hasPST
-        ? Math.round(formData.subTotal * pstRate * 100) / 100
-        : 0;
-        
-      setFormData((prev: any) => ({
-        ...prev,
-        GST: gstTotal,
-        PST: pstTotal,
-        total: formData.subTotal + gstTotal + pstTotal,
-      }));
-    }
-  }, [formData.hasGST, formData.hasPST, formData.subTotal]);
-
-  const calculateTaxWithDiscount = (discountPercent: number = 0) => {
-    const gstItems = expenseItems.filter(
-      (item: any) => item?.inventoryItem?.hasGST,
-    );
-    const pstItems = expenseItems.filter(
-      (item: any) => item?.inventoryItem?.hasPST,
-    );
-
-    const gstItemsTotalWithDiscount =
-      gstItems.reduce((acc: any, item: any) => {
-        return acc + item.unitPrice * item.quantity;
-      }, 0) *
-      (1 - discountPercent / 100);
-
-    const pstItemsTotalWithDiscount =
-      pstItems.reduce((acc: any, item: any) => {
-        return acc + item.unitPrice * item.quantity;
-      }, 0) *
-      (1 - discountPercent / 100);
-
-    const gstTotal =
-      Math.round(gstItemsTotalWithDiscount * gstRate * 100) / 100;
-    const pstTotal =
-      Math.round(pstItemsTotalWithDiscount * pstRate * 100) / 100;
-
-    return {
-      gstTotal,
-      pstTotal,
-    };
-  };
-
-  const handleDiscountChange = (e: any, type: 'stock' | 'expense') => {
-    const currentSubTotal =
-      type === 'stock'
-        ? expenseItems.reduce((acc: number, item: any) => {
-            return acc + item.total;
-          }, 0)
-        : formData.initialSubTotal;
-
-    if (isShowDiscountPercent) {
-      const discount = (currentSubTotal * Number(e.target.value)) / 100;
-
-      const { gstTotal, pstTotal } = calculateTaxWithDiscount(
-        Number(e.target.value),
-      );
-
-      const newSubTotal = currentSubTotal - discount;
-
-      setFormData((prev: any) => ({
-        ...prev,
-        discountPercentage: Number(e.target.value),
-        discount: discount,
-        subTotal: newSubTotal,
-        GST: gstTotal,
-        PST: pstTotal,
-        total: newSubTotal + gstTotal + pstTotal,
-      }));
-    } else {
-      const discount = Number(e.target.value);
-      const discountPercentage =
-        Math.round((discount / currentSubTotal) * 100 * 100) / 100;
-      const { gstTotal, pstTotal } =
-        calculateTaxWithDiscount(discountPercentage);
-
-      const newSubTotal = currentSubTotal - discount;
-
-      setFormData((prev: any) => ({
-        ...prev,
-        discount: discount,
-        discountPercentage: discountPercentage,
-        subTotal: newSubTotal,
-        GST: gstTotal,
-        PST: pstTotal,
-        total: newSubTotal + gstTotal + pstTotal,
-      }));
-    }
-  };
-
+  adminsAndDrivers,
+  paymentMethods,
+  selectedVendorId,
+  setSelectedVendorId,
+  sortedVendors,
+  vendorItems,
+  isShowDiscountPercent,
+  setIsShowDiscountPercent,
+  handleDiscountChange,
+}: PropTypes) {
   return (
     <Fade in timeout={500}>
       <Box>
