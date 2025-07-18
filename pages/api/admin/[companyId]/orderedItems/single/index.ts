@@ -5,7 +5,7 @@ import {
   checkOrderValidToAffectInventory,
   formatItemsWithTotalPrice,
 } from '@/pages/api/utils/order';
-import { getTodayDate } from '@/pages/api/utils/date';
+import { getTodayDate, sortByDeliveryDate } from '@/pages/api/utils/date';
 import { IInventoryUnit } from '@/app/utils/type';
 import { getAllUnitsByInventoryItemId } from '@/pages/api/utils/units';
 import { createOrderedItems } from '@/pages/api/utils/orderedItems';
@@ -13,6 +13,7 @@ import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { recordAction } from '@/pages/api/utils/timeline';
+import prisma from '@/client';
 
 interface IBody {
   id: number;
@@ -380,11 +381,44 @@ export const subtractInventoryItem = async (
   subtractedQuantity: number,
 ) => {
   try {
+    // Find the proper fifo to subtract from
+    const {
+      fifo: properFifo,
+      deletedFifoIds,
+      newSubtractedQuantity,
+    } = await findProperFifoToSubtract(
+      fifo.inventoryItemId,
+      subtractedQuantity,
+    );
+
+    // move all ordered items to the proper fifo
+    if (deletedFifoIds.length > 0) {
+      await prisma.orderedItems.updateMany({
+        where: {
+          fifoId: {
+            in: deletedFifoIds,
+          },
+        },
+        data: {
+          fifoId: properFifo.id,
+        },
+      });
+  
+      // delete the old fifos
+      await prisma.fifo.deleteMany({
+        where: {
+          id: {
+            in: deletedFifoIds,
+          },
+        },
+      });
+    }
+
     await updateSingleInventoryItem(
       orderId,
-      fifo,
+      properFifo,
       unit,
-      subtractedQuantity,
+      newSubtractedQuantity,
       0,
       null,
       // 'subtract',
@@ -392,4 +426,38 @@ export const subtractInventoryItem = async (
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
   }
+};
+
+export const findProperFifoToSubtract = async (
+  inventoryItemId: number,
+  subtractedQuantity: number, // must be in ratio of 1
+) => {
+  const allFifos = await prisma.fifo.findMany({
+    where: {
+      inventoryItemId,
+    },
+  });
+
+  const sortedFifos = sortByDeliveryDate(allFifos, 'createdAt');
+
+  let newSubtractedQuantity = subtractedQuantity;
+
+  let fifoIndex = 0;
+  const deletedFifoIds: number[] = [];
+
+  while (fifoIndex < sortedFifos.length - 1) {
+    if (newSubtractedQuantity >= sortedFifos[fifoIndex].quantity) {
+      newSubtractedQuantity -= sortedFifos[fifoIndex].quantity;
+      deletedFifoIds.push(sortedFifos[fifoIndex].id);
+      fifoIndex++;
+    } else {
+      break;
+    }
+  }
+
+  return {
+    fifo: sortedFifos[fifoIndex],
+    deletedFifoIds,
+    newSubtractedQuantity,
+  };
 };

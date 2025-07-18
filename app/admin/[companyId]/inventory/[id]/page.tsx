@@ -31,10 +31,22 @@ const InventoryDetail = () => {
     selectedSellingItems: any;
   }) => {
     try {
+      // return;
       const res = await axios.put(getAdminApiUrl(companyId, `/inventory`), {
-        ...newInventoryItem,
+        id: Number(id),
+        name: newInventoryItem.name,
+        sku: newInventoryItem.sku,
+        supplierSku: newInventoryItem.supplierSku,
+        hasPST: newInventoryItem.hasPST,
+        hasGST: newInventoryItem.hasGST,
+        isShowInventory: newInventoryItem.isShowInventory,
         vendorItems: selectedVendors,
-        updatedSellingItems: selectedSellingItems,
+        updatedSellingItems: selectedSellingItems.map((item: any) => ({
+          ...item,
+          category: {
+            id: item.category.id,
+          },
+        })),
       });
 
       if (res.data.error) {
@@ -54,13 +66,13 @@ const InventoryDetail = () => {
       {NotificationComp}
       <InventoryTemplate
         onSubmit={handleUpdateInventory}
-      buttonLabel="Save"
-      defaultSelectedVendors={inventoryItem?.vendorItem || []}
-      defaultSellingItems={inventoryItem?.sellingItems || []}
-      defaultInventoryItem={inventoryItem || null}
-      title={'Edit Inventory'}
-      isInitializing={isLoading}
-      showNotification={showNotification}
+        buttonLabel="Save"
+        defaultSelectedVendors={inventoryItem?.vendorItem || []}
+        defaultSellingItems={inventoryItem?.sellingItems || []}
+        defaultInventoryItem={inventoryItem || null}
+        title={'Edit Inventory'}
+        isInitializing={isLoading}
+        showNotification={showNotification}
       />
     </>
   );

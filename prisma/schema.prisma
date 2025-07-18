@@ -52,6 +52,7 @@ model Company {
   payrolls          Payroll[]
   deliveries        Delivery[]
   medias            Media[]
+  batchTransactions BatchTransaction[]
 }
 
 model PageView {
@@ -179,6 +180,9 @@ model User {
   cart                Cart[]
   cheques             Cheque[]
   quotes              Quote[]
+
+  @@index([userPreferenceId])
+  @@index([categoryId])
 }
 
 model Quote {
@@ -346,6 +350,7 @@ model Orders {
   CodBoard CodBoard? @relation(fields: [codBoardId], references: [id])
 
   @@index([deliveryDate, status])
+  @@index([deliveryDate])
   @@index([userId])
   @@index([companyId])
 }
@@ -398,6 +403,9 @@ model UserPreference {
   paymentType String?
   userId      Int
   User        User[]
+
+  @@index([userId])
+  @@index([paymentType])
 }
 
 model ScheduleOrders {
@@ -510,6 +518,7 @@ model PaymentMethod {
 
   transactions      Expense[]
   fixedTransactions FixedTransaction[]
+  batchTransactions  BatchTransaction[]
 
   company Company? @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
@@ -561,16 +570,42 @@ model Expense {
   fixedTransactionId Int?
   paidAt             String?
   companyId          Int?
+  batchTransactionId  Int?
 
   paymentMethod    PaymentMethod?    @relation(fields: [paymentMethodId], references: [id], onDelete: Cascade)
   codBoard         CodBoard?         @relation(fields: [codBoardId], references: [id])
   company          Company?          @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  batchTransaction  BatchTransaction?  @relation(fields: [batchTransactionId], references: [id], onDelete: Cascade)
   orderedItems     OrderedItems[]
   vendors          VendorExpense[]
   shifts           ShiftSession[]
   purchaseOrders   PO[]
   payrolls         Payroll[]
   fixedTransaction FixedTransaction? @relation(fields: [fixedTransactionId], references: [id])
+}
+
+model BatchTransaction {
+  id              Int       @id   @default(autoincrement())
+  createdAt       String
+  createdBy       String
+  description     String?
+  date            String
+  startDate       String
+  endDate         String
+  discount        Float?
+  subTotal        Float?
+  total           Float?
+  PST             Float?
+  GST             Float?
+  companyId       Int?
+  spentBy         String
+  paymentMethodId Int
+  status          PaymentStatus?
+
+  transactions    Expense[]
+
+  company         Company?  @relation(fields: [companyId], references: [id])
+  paymentMethod   PaymentMethod @relation(fields: [paymentMethodId], references: [id])
 }
 
 model VendorExpense {
