@@ -25,12 +25,16 @@ import {
   Plus,
   AlertTriangle,
   AlertCircle,
+  BarChart3,
 } from 'lucide-react';
 import TrackInventoryRecord from '../components/Modals/TrackInventoryRecord';
 import { useParams, useRouter } from 'next/navigation';
 import { ShadowSection } from '../reports/styled';
 import AddInventory from '../components/Modals/add/AddInventory';
 import { minThreshold } from '@/app/lib/constant';
+import axios from 'axios';
+import LoadingButton from '@mui/lab/LoadingButton';
+import ConfirmModal from '../components/Modals/ConfirmModal';
 
 // Enhanced styled components
 const PageContainer = ({ children }: { children: React.ReactNode }) => (
@@ -161,9 +165,9 @@ const QuickStatsCard = ({
 export default function InventoryPage() {
   const { companyId }: any = useParams();
   const router = useRouter();
-  // const [isTrackingInventory, setIsTrackingInventory] =
-  //   useState<boolean>(false);
-  // const [isOpenConfirmModal, setIsOpenConfirmModal] = useState<boolean>(false);
+  const [isTrackingInventory, setIsTrackingInventory] =
+    useState<boolean>(false);
+  const [isOpenConfirmModal, setIsOpenConfirmModal] = useState<boolean>(false);
   const [isOpenTrackInventoryRecord, setIsOpenTrackInventoryRecord] =
     useState<boolean>(false);
   const [isOpenAddItem, setIsOpenAddItem] = useState<boolean>(false);
@@ -196,6 +200,26 @@ export default function InventoryPage() {
       outOfStockItems,
       totalValue,
     };
+  };
+
+  const handleTrackInventory = async () => {
+    try {
+      setIsTrackingInventory(true);
+      const response = await axios.post(`/api/cron/track-inventory`);
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        setIsTrackingInventory(false);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+      setIsTrackingInventory(false);
+    } catch (error: any) {
+      console.log('Internal Server Error: ', error);
+      showNotification('error', 'Internal Server Error: ' + error);
+      setIsTrackingInventory(false);
+    }
   };
 
   const stats = useMemo(() => getInventoryStats(), [inventoryItems]);
@@ -337,7 +361,7 @@ export default function InventoryPage() {
           >
             View Records
           </Button>
-          {/* <LoadingButton
+          <LoadingButton
             loading={isTrackingInventory}
             variant="contained"
             startIcon={<BarChart3 size={18} />}
@@ -351,7 +375,7 @@ export default function InventoryPage() {
             }}
           >
             Check Inventory
-          </LoadingButton> */}
+          </LoadingButton>
           <Button
             variant="contained"
             startIcon={<Plus size={18} />}
@@ -438,14 +462,14 @@ export default function InventoryPage() {
           onClose={() => setIsOpenAddStockPurchased(false)}
           showNotification={showNotification}
         /> */}
-        {/* <ConfirmModal
+        <ConfirmModal
           open={isOpenConfirmModal}
           onClose={() => setIsOpenConfirmModal(false)}
           showNotification={showNotification}
           title="Check Inventory Quantity"
           handleSubmit={handleTrackInventory}
           buttonLabel="Check Now"
-        /> */}
+        />
         <TrackInventoryRecord
           open={isOpenTrackInventoryRecord}
           onClose={() => setIsOpenTrackInventoryRecord(false)}
