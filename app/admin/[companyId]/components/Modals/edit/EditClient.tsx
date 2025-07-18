@@ -1,6 +1,6 @@
 import React, { memo, useState } from 'react';
 import {
-  AlertColor,
+  // AlertColor,
   Box,
   Button,
   Divider,
@@ -18,7 +18,7 @@ import { UserType } from '@/app/utils/type';
 import { Category } from '@prisma/client';
 import AutoCompleteAddress from '../../AutoCompleteAddress';
 import { LoadingButton } from '@mui/lab';
-import UnavailableRange from '../UnavailableRange';
+// import UnavailableRange from '../UnavailableRange';
 import { USER_CATEGORIZED } from '@/app/utils/enum';
 // import ScheduleIcon from '@mui/icons-material/Schedule';
 
@@ -26,21 +26,21 @@ interface PropTypes {
   client: UserType;
   categories: Category[];
   onUpdateClient: (userId: number, updatedData: any) => void;
-  showNotification: (type: AlertColor, message: string) => void;
+  // showNotification: (type: AlertColor, message: string) => void;
 }
 
 const EditClient = ({
   client,
   categories,
   onUpdateClient,
-  showNotification,
+  // showNotification,
 }: PropTypes) => {
   const [deliveryAddress, setDeliveryAddress] = useState<any>({
     description: client.deliveryAddress,
   });
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [isUnavailableRangeOpen, setIsUnavailableRangeOpen] =
-    useState<boolean>(false);
+  // const [isUnavailableRangeOpen, setIsUnavailableRangeOpen] =
+  //   useState<boolean>(false);
   const [updatedClient, setUpdatedClient] = useState<UserType>({
     ...client,
     password: '',
@@ -73,12 +73,12 @@ const EditClient = ({
 
   return (
     <>
-      <UnavailableRange
+      {/* <UnavailableRange
         currentUser={client}
         open={isUnavailableRangeOpen}
         onClose={() => setIsUnavailableRangeOpen(false)}
         showNotification={showNotification}
-      />
+      /> */}
       <Button
         onClick={(e: any) => {
           e.stopPropagation();

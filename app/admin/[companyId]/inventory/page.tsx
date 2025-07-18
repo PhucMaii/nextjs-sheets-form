@@ -176,26 +176,6 @@ export default function InventoryPage() {
   const isMobile = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
   const isLoading = !inventoryItems;
 
-  // const handleTrackInventory = async () => {
-  //   try {
-  //     setIsTrackingInventory(true);
-  //     const response = await axios.post(`/api/cron/track-inventory`);
-
-  //     if (response.data.error) {
-  //       showNotification('error', response.data.error);
-  //       setIsTrackingInventory(false);
-  //       return;
-  //     }
-
-  //     showNotification('success', response.data.message);
-  //     setIsTrackingInventory(false);
-  //   } catch (error: any) {
-  //     console.log('Internal Server Error: ', error);
-  //     showNotification('error', 'Internal Server Error: ' + error);
-  //     setIsTrackingInventory(false);
-  //   }
-  // };
-
   const getInventoryStats = () => {
     const items = inventoryItems?.data || [];
     const totalItems = items.length;

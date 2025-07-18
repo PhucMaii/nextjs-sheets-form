@@ -5,19 +5,40 @@ import { IFifo } from '@/app/utils/type';
 import BatchQuantity from './BatchQuantity';
 import ErrorComponent from '../ErrorComponent';
 import { ModalProps } from '../Modals/type';
+import { useQuery } from '@tanstack/react-query';
+import { useParams } from 'next/navigation';
+import { getAdminApiUrl } from '@/app/utils/enum';
+import axios from 'axios';
 
 interface IProps extends ModalProps {
-  fifoList: IFifo[];
+  // fifoList: IFifo[];
   showNotification: (type: AlertColor, message: string) => void;
+  inventoryItemId: number;
 }
 
 export default function BatchQuantityModal({
-  fifoList,
+  // fifoList,
   showNotification,
   open,
   onClose,
+  inventoryItemId,
 }: IProps) {
+  const { companyId }: any = useParams();
   // const [open, setOpen] = useState<boolean>(false);
+
+  const { data: fifoList, refetch: refetchFifoList, isLoading } = useQuery({
+    queryKey: ['fifo', inventoryItemId],
+    queryFn: async () => {
+      const res = await axios.get(
+        getAdminApiUrl(
+          companyId,
+          `/inventory/fifo?inventoryItemId=${inventoryItemId}`,
+        ),
+      );
+      console.log(res.data, 'res.data');
+      return res.data?.data || [];
+    },
+  });
 
   return (
     <>
@@ -49,7 +70,7 @@ export default function BatchQuantityModal({
             alignItems="center"
             justifyContent="center"
           >
-            {fifoList.length > 0 ? (
+            {fifoList && fifoList?.length > 0 ? (
               fifoList.map((fifo: IFifo, index: number) => {
                 return (
                   <>
@@ -59,13 +80,16 @@ export default function BatchQuantityModal({
                       showNotification={showNotification}
                       fifoList={fifoList}
                       fifoIndex={index}
+                      refetchFifoList={refetchFifoList}
                     />
                     <Divider flexItem sx={{ my: 1 }} />
                   </>
                 );
               })
             ) : (
-              <ErrorComponent errorText="No Batch Found" />
+              <ErrorComponent
+                errorText={isLoading ? 'Fetching Batch...' : 'No Batch Found'}
+              />
             )}
           </Box>
         </BoxModal>

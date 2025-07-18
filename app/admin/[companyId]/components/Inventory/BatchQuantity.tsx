@@ -12,7 +12,6 @@ import EditIcon from '@mui/icons-material/Edit';
 import { LoadingButton } from '@mui/lab';
 import axios from 'axios';
 import { getAdminApiUrl } from '@/app/utils/enum';
-import { SWRFetchData } from '@/app/utils/db';
 import DeleteModal from '../Modals/delete/DeleteModal';
 import EditOffIcon from '@mui/icons-material/EditOff';
 import { useParams } from 'next/navigation';
@@ -22,6 +21,7 @@ interface IProps {
   fifoList: IFifo[];
   fifo: IFifo;
   showNotification: (type: AlertColor, message: string) => void;
+  refetchFifoList: any;
 }
 
 export default function BatchQuantity({
@@ -29,16 +29,13 @@ export default function BatchQuantity({
   fifo,
   fifoIndex,
   showNotification,
+  refetchFifoList,
 }: IProps) {
   const { companyId }: any = useParams();
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [updatedQuantity, setUpdatedQuantity] = useState<number>(fifo.quantity);
-
-  const [targetFifo] = SWRFetchData(
-    `${getAdminApiUrl(companyId, `/inventory/fifo?id=${fifo.id}`)}`,
-  );
 
   useEffect(() => {
     if (fifo) {
@@ -69,6 +66,7 @@ export default function BatchQuantity({
         return;
       }
 
+      await refetchFifoList();
       showNotification('success', response.data.message);
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
@@ -157,7 +155,7 @@ export default function BatchQuantity({
                     <DeleteIcon fontSize="medium" />
                   </IconButton> */}
               <DeleteModal
-                targetObj={targetFifo?.data}
+                targetObj={fifo}
                 handleDelete={(_e: any, fifo: IFifo) => handleDeleteFifo(fifo)}
                 includedIconButton
               />
@@ -182,7 +180,7 @@ export default function BatchQuantity({
           borderRadius: 4,
         }}
       >
-        {targetFifo?.data?.orderedItems?.length}
+        {fifo?.orderedItems?.length}
       </Typography>
       <Typography variant="body1">Created at: {fifo.createdAt}</Typography>
     </Box>
