@@ -15,7 +15,7 @@ import { ArrowBack, Save, Preview } from '@mui/icons-material';
 import { blueGrey, grey } from '@mui/material/colors';
 import { useParams, useRouter } from 'next/navigation';
 import { getAdminApiUrl, TRANSACTION_STATUS } from '@/app/utils/enum';
-import { generateCurrentTime, YYYYMMDDFormat } from '@/app/utils/time';
+import { YYYYMMDDFormat } from '@/app/utils/time';
 import axios from 'axios';
 import useNotification from '@/hooks/useNotification';
 import Sidebar from '../../components/Sidebar/Sidebar';
@@ -33,15 +33,7 @@ import {
 import { ShadowSection } from '../../reports/styled';
 import { useQuery } from '@tanstack/react-query';
 import { gstRate, pstRate } from '@/app/lib/constant';
-
-interface ExpenseItem {
-  id: string | number;
-  description: string;
-  quantity: number;
-  unitPrice: number;
-  total: number;
-  unit: any[];
-}
+import { IExpenseItem } from '@/pages/api/admin/[companyId]/inventory/expenses/POST';
 
 export default function CreateTransaction() {
   const { companyId }: any = useParams();
@@ -85,6 +77,7 @@ export default function CreateTransaction() {
 
   // Form data
   const [formData, setFormData] = useState<any>({
+    invoice: '',
     description: '',
     spentBy: '',
     paymentMethodId: -1,
@@ -107,14 +100,14 @@ export default function CreateTransaction() {
   });
 
   // Expense items for stock purchases
-  const [expenseItems, setExpenseItems] = useState<ExpenseItem[]>([
+  const [expenseItems, setExpenseItems] = useState<IExpenseItem[]>([
     {
-      id: '1',
-      description: '',
+      id: 1,
+      vendorId: 1,
       quantity: 1,
-      unitPrice: 0,
-      total: 0,
-      unit: [],
+      units: [],
+      unit: null,
+      inventoryItemId: 1,
     },
   ]);
 
@@ -308,7 +301,7 @@ export default function CreateTransaction() {
 
   // Handle expense item changes
   const handleItemChange = (
-    id: string,
+    id: number,
     field: string,
     value: string | number | any,
   ) => {
@@ -322,9 +315,11 @@ export default function CreateTransaction() {
 
             return {
               ...item,
-              id: value.id,
-              unit: value.unit,
-              inventoryUnit: value.inventoryUnit,
+              id: value.id, // vendorItemId
+              units: value.unit,
+              unit: value.inventoryUnit,
+              vendorId: value.vendorId,
+              inventoryItemId: value.inventoryItemId,
               unitPrice: value.inventoryUnit.unitPrice,
               total,
               inventoryItem: value.inventoryItem,
@@ -337,7 +332,7 @@ export default function CreateTransaction() {
             [field]: value,
           };
 
-          if (field === 'inventoryUnit') {
+          if (field === 'unit') {
             const total = value.unitPrice * updated.quantity;
             const pst = updated.inventoryItem?.hasPST ? total * pstRate : 0;
             const gst = updated.inventoryItem?.hasGST ? total * gstRate : 0;
@@ -353,6 +348,24 @@ export default function CreateTransaction() {
             updated.total = total;
             updated.GST = gst;
             updated.PST = pst;
+
+            // Update unit price in unit
+            updated.unit = {
+              ...item.unit,
+              unitPrice: updated.unitPrice,
+            };
+
+            // Update unit price in units
+            const newUnits = item.units.map((unit: any) => {
+              if (unit.id === updated.unit?.id) {
+                return {
+                  ...unit,
+                  unitPrice: updated.unitPrice,
+                };
+              }
+              return unit;
+            });
+            updated.units = newUnits;
           }
           return updated;
         }
@@ -377,12 +390,12 @@ export default function CreateTransaction() {
   const clearExpenseItems = () => {
     setExpenseItems([
       {
-        id: '1',
-        description: '',
+        id: -1,
+        vendorId: 1,
         quantity: 1,
-        unitPrice: 0,
-        total: 0,
-        unit: [],
+        units: [],
+        unit: null,
+        inventoryItemId: 1,
       },
     ]);
   };
@@ -412,9 +425,72 @@ export default function CreateTransaction() {
   };
 
   // Remove expense item
-  const removeExpenseItem = (id: string) => {
+  const removeExpenseItem = (id: number) => {
     if (expenseItems.length > 1) {
       setExpenseItems((prev) => prev.filter((item) => item.id !== id));
+    }
+  };
+
+  const handleSubmitStock = async () => {
+    try {
+      const response = await axios.post(
+        getAdminApiUrl(companyId, '/inventory/expenses'),
+        {
+          date: YYYYMMDDFormat(selectedDate.toDate()),
+          amount: formData.total,
+          description: formData.description,
+          paymentMethodId: formData.paymentMethodId,
+          spentBy: formData.spentBy,
+          invoice: formData.invoice,
+          subTotal: formData.subTotal,
+          GST: formData.GST,
+          PST: formData.PST,
+          discount: formData.discount,
+          status: formData.status,
+          codBoardId: formData?.codBoardId || null,
+          items: expenseItems,
+        },
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('Something went wrong: ', error);
+      showNotification('error', 'Something went wrong: ' + error);
+    }
+  };
+
+  const handleSubmitExpense = async () => {
+    try {
+      const response = await axios.post(
+        getAdminApiUrl(companyId, '/expenses'),
+        {
+          amount: formData.total,
+          PST: formData.PST,
+          GST: formData.GST,
+          subTotal: formData.subTotal,
+          description: formData.description,
+          spentBy: formData.spentBy,
+          date: YYYYMMDDFormat(selectedDate.toDate()),
+          paymentMethodId: formData.paymentMethodId,
+          status: formData.status,
+          discount: formData.discount,
+        },
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('Something went wrong: ', error);
+      showNotification('error', 'Something went wrong: ' + error);
     }
   };
 
@@ -422,33 +498,14 @@ export default function CreateTransaction() {
   const handleSubmit = async () => {
     try {
       setIsSubmitting(true);
-      const createdAt = generateCurrentTime();
-      const date = YYYYMMDDFormat(selectedDate.toDate());
-
-      const response = await axios.post(
-        getAdminApiUrl(companyId, '/expenses'),
-        {
-          date,
-          createdAt,
-          spentBy: formData.spentBy,
-          total: formData.total,
-          subTotal: formData.subTotal,
-          GST: formData.GST,
-          PST: formData.PST,
-          description: formData.description,
-          discount: formData.discount,
-          paymentMethodId: formData.paymentMethodId,
-          status: formData.status,
-        },
-      );
-
-      if (response.data.error) {
-        showNotification('error', response.data.error);
-        setIsSubmitting(false);
-        return;
+      if (transactionType === 'stock') {
+        await handleSubmitStock();
       }
 
-      showNotification('success', 'Transaction created successfully!');
+      if (transactionType === 'expense') {
+        await handleSubmitExpense();
+      }
+
       setIsSubmitting(false);
       router.push(`/admin/${companyId}/transactions`);
     } catch (error: any) {

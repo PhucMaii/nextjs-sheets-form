@@ -163,8 +163,6 @@ const EditStockPurchased = ({
     }
   }, [selectedVendorId, vendors]);
 
-  console.log(stockPurchased);
-
   useEffect(() => {
     if (stockPurchased) {
       setUpdatedExpense(stockPurchased);
@@ -273,10 +271,11 @@ const EditStockPurchased = ({
   };
 
   const calculateNewAmount = () => {
+    // Discount percent is the discount percentage of the subtotal + discount
     const discountPercent =
       updatedExpense?.discountPercent ||
       Math.round(
-        (updatedExpense?.discount / updatedExpense?.subTotal) * 100 * 100,
+        (updatedExpense?.discount / (updatedExpense?.subTotal + updatedExpense?.discount)) * 100 * 100,
       ) / 100;
     const total = purchasedItems.reduce((acc: any, item: any) => {
       if (!acc?.subTotal) {
@@ -311,6 +310,15 @@ const EditStockPurchased = ({
 
       return acc;
     }, {});
+
+    console.log({
+      discountPercent,
+      subTotal: updatedExpense?.subTotal,
+      PST: updatedExpense?.PST,
+      GST: updatedExpense?.GST,
+      discount: updatedExpense?.discount,
+      total,
+    }, 'discountPercent');
 
     // setTotalAmount(newAmount);
     if (purchasedItems.some((item: any) => !item.inventoryItemId)) {
@@ -518,8 +526,6 @@ const EditStockPurchased = ({
         purchasedItems,
         stockPurchased?.orderedItems,
       );
-
-      console.log(isUpdatePurchasedItems, 'is update purchased items');
 
       // setIsLoading(false);
       // return;

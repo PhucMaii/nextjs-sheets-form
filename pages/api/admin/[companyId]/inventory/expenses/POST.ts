@@ -8,6 +8,17 @@ import { InventoryUnit, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
+import { getTodayDate } from '@/pages/api/utils/date';
+
+export interface IExpenseItem {
+    id: number;
+    quantity: number;
+    // unitPrice: number;
+    vendorId: number;
+    unit: IInventoryUnit | null;
+    units: IInventoryUnit[];
+    inventoryItemId: number;
+}
 
 interface IBody {
   date: string;
@@ -15,7 +26,6 @@ interface IBody {
   description: string;
   paymentMethodId: number;
   spentBy: string;
-  createdAt: string;
   invoice: string;
   subTotal?: number;
   GST?: number;
@@ -23,15 +33,7 @@ interface IBody {
   discount?: number;
   codBoardId?: number;
   status: TRANSACTION_STATUS;
-  items: {
-    id: number;
-    quantity: number;
-    // unitPrice: number;
-    vendorId: number;
-    unit: IInventoryUnit;
-    units: IInventoryUnit[];
-    inventoryItemId: number;
-  }[];
+  items: IExpenseItem[];
 }
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
@@ -44,7 +46,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       description,
       paymentMethodId,
       spentBy,
-      createdAt,
       status,
       discount,
       subTotal,
@@ -98,6 +99,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const createdBy = `Admin - ${user?.name}`;
+    const createdAt = getTodayDate().dateAndTime;
 
     const newExpense = await prisma.expense.create({
       data: {
@@ -140,6 +142,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     // 3 CASES for each item - Brand new item, New vendor item but inventory exists, Item already exists
 
     const itemsAlreadyExist = items.filter((item: any) => item.id > 0);
+    console.log('itemsAlreadyExist', itemsAlreadyExist);
     const itemsToCreate = items.filter((item: any) => item.id === 0);
 
     const newItems =
@@ -767,7 +770,7 @@ export const createFifo = async (
     .filter((vItem: any) => !itemHasAlreadyUpdateIds.includes(vItem.id))
     .map((item: any) => {
       return {
-        inventoryItemId: item.inventoryItemId,
+        inventoryItemId: item?.inventoryItemId || item?.inventoryItem?.id,
         vendorItemId: item.id,
         quantity: item.quantity * item?.unit?.ratio,
         price: item.unit?.unitPrice / item?.unit?.ratio,
@@ -816,6 +819,7 @@ export const createOrderedItems = async (
     },
   });
 
+  // Get just created fifo
   const newFifoItems = await prisma.fifo.findMany({
     where: {
       vendorItemId: {
@@ -845,6 +849,7 @@ export const createOrderedItems = async (
       return { ok: false, error: 'Conflict in Selected Unit' };
     }
 
+    // Re find unit if unit id is invalid
     if (selectedUnit.id < 1) {
       selectedUnit = inventoryUnits.find((unit: any) => {
         return (

@@ -64,6 +64,7 @@ export default function ItemRow({
                   unit: targetItem?.unit || [],
                   inventoryUnit: ratioOf1 || {},
                   inventoryItem: targetItem?.inventoryItem || {},
+                  vendorId: targetItem?.vendorId || null,
                 });
               }}
               fullWidth
@@ -146,7 +147,7 @@ export default function ItemRow({
           <TextField
             fullWidth
             label="Total"
-            value={item.total.toFixed(2)}
+            value={item?.total?.toFixed(2) || 0}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">$</InputAdornment>
@@ -168,12 +169,12 @@ export default function ItemRow({
 
         <Grid item xs={12}>
           <UnitRadio
-            units={item.unit || []}
-            value={JSON.stringify(item.inventoryUnit || {})}
+            units={item.units || []}
+            value={JSON.stringify(item?.unit || {})}
             onChange={(e: any) =>
               handleItemChange(
                 item.id,
-                'inventoryUnit',
+                'unit',
                 JSON.parse(e.target.value),
               )
             }

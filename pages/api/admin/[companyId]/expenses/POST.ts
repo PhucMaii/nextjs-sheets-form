@@ -3,6 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { TRANSACTION_STATUS } from '@/app/utils/enum';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
+import { getTodayDate } from '@/pages/api/utils/date';
 
 interface IBody {
   amount: number;
@@ -10,7 +11,6 @@ interface IBody {
   GST: number;
   subTotal: number;
   description: string;
-  createdAt: string;
   spentBy: string;
   date: string;
   paymentMethodId: number;
@@ -23,7 +23,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const prisma = new PrismaClient();
 
     const {
-      createdAt,
       amount,
       PST,
       GST,
@@ -62,6 +61,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         error: 'Payment Method Not Found',
       });
     }
+
+    const createdAt = getTodayDate().dateAndTime;
 
     const newExpense = await prisma.expense.create({
       data: {

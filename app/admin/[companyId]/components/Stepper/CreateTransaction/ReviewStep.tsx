@@ -149,11 +149,19 @@ export default function ReviewStep({
                             ${item?.unitPrice?.toFixed(2) || 0}
                           </Typography>
                         </Grid>
-                        <Grid item xs={3} md={1} sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
-
-                          {
-                            mdDown && <Typography variant="body2">GST:</Typography>
-                          }
+                        <Grid
+                          item
+                          xs={3}
+                          md={1}
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            gap: 1,
+                          }}
+                        >
+                          {mdDown && (
+                            <Typography variant="body2">GST:</Typography>
+                          )}
                           <Chip
                             label={item?.inventoryItem?.hasGST ? 'Yes' : 'No'}
                             size="small"
@@ -161,10 +169,19 @@ export default function ReviewStep({
                             variant="outlined"
                           />
                         </Grid>
-                        <Grid item xs={3} md={1} sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
-                          {
-                            mdDown && <Typography variant="body2">PST:</Typography>
-                          }
+                        <Grid
+                          item
+                          xs={3}
+                          md={1}
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            gap: 1,
+                          }}
+                        >
+                          {mdDown && (
+                            <Typography variant="body2">PST:</Typography>
+                          )}
                           <Chip
                             label={item?.inventoryItem?.hasPST ? 'Yes' : 'No'}
                             size="small"
@@ -194,6 +211,15 @@ export default function ReviewStep({
 
               {transactionType === 'stock' ? (
                 <Box>
+                  {' '}
+                  {formData.discount > 0 && (
+                    <Box display="flex" justifyContent="space-between" mb={1}>
+                      <Typography variant="body2">Discount:</Typography>
+                      <Typography variant="body2" color="success.main">
+                        -${formData.discount.toFixed(2)}
+                      </Typography>
+                    </Box>
+                  )}
                   <Box display="flex" justifyContent="space-between" mb={1}>
                     <Typography variant="body2">Subtotal:</Typography>
                     <Typography variant="body2">
@@ -212,14 +238,6 @@ export default function ReviewStep({
                       ${formData.PST.toFixed(2)}
                     </Typography>
                   </Box>
-                  {formData.discount > 0 && (
-                    <Box display="flex" justifyContent="space-between" mb={1}>
-                      <Typography variant="body2">Discount:</Typography>
-                      <Typography variant="body2" color="success.main">
-                        -${formData.discount.toFixed(2)}
-                      </Typography>
-                    </Box>
-                  )}
                   <Divider sx={{ my: 2 }} />
                   <Box display="flex" justifyContent="space-between">
                     <Typography variant="h6">Total:</Typography>
@@ -230,8 +248,37 @@ export default function ReviewStep({
                 </Box>
               ) : (
                 <Box>
+                  {formData.discount > 0 && (
+                    <Box display="flex" justifyContent="space-between" mb={1}>
+                      <Typography variant="body2">Discount:</Typography>
+                      <Typography variant="body2" color="success.main">
+                        -${formData.discount.toFixed(2)}
+                      </Typography>
+                    </Box>
+                  )}
                   <Box display="flex" justifyContent="space-between">
-                    <Typography variant="h6">Total Amount:</Typography>
+                    <Typography variant="body2">Subtotal:</Typography>
+                    <Typography variant="body2">
+                      ${formData.subTotal.toFixed(2)}
+                    </Typography>
+                  </Box>
+
+                  <Box display="flex" justifyContent="space-between">
+                    <Typography variant="body2">GST (5%):</Typography>
+                    <Typography variant="body2">
+                      ${formData.GST.toFixed(2)}
+                    </Typography>
+                  </Box>
+
+                  <Box display="flex" justifyContent="space-between">
+                    <Typography variant="body2">PST (7%):</Typography>
+                    <Typography variant="body2">
+                      ${formData.PST.toFixed(2)}
+                    </Typography>
+                  </Box>
+
+                  <Box display="flex" justifyContent="space-between">
+                    <Typography variant="h6">Total:</Typography>
                     <Typography variant="h6" color="primary">
                       ${formData.total.toFixed(2)}
                     </Typography>
