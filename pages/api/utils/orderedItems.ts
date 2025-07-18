@@ -187,6 +187,7 @@ export const createOrderedItems = async (
 
         let itemQuantity = item.quantity * itemRatio; // Check from the unit ratio
 
+        // If item quantity is greater than the fifo quantity, delete the fifo, and move to next fifo with new quantity subtracted
         while (fifoIndex < sortedFifo.length - 1) {
           if (itemQuantity >= sortedFifo[fifoIndex].quantity) {
             deletedFifoIds.push(sortedFifo[fifoIndex].id);
@@ -281,7 +282,7 @@ export const createOrderedItems = async (
           isCustomAmount: item?.isCustomAmount || false,
         });
       } else {
-        console.log('got to final block')
+        // If no valid to check inventory, use the first fifo
         const cost = sortedFifo[0]?.price
           ? sortedFifo[0].price * itemUnit?.ratio
           : itemUnit?.unitPrice || 0;

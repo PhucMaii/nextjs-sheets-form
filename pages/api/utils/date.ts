@@ -36,6 +36,10 @@ export const sortByDeliveryDate = (
   field: string = 'deliveryDate',
   direction: string = 'asc',
 ): any => {
+  if (orders.length === 0 || orders.length === 1) {
+    return orders;
+  }
+
   const sortedOrders = orders.sort((orderA, orderB) => {
     const deliveryDateA: any = convertDeliveryDateStringToDate(orderA[field]);
     const deliveryDateB: any = convertDeliveryDateStringToDate(orderB[field]);
