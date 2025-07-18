@@ -282,6 +282,7 @@ export default function DetailsStep({
                     onClick={addExpenseItem}
                     variant="outlined"
                     size="small"
+                    disabled={selectedVendorId === -1}
                   >
                     Add Item
                   </Button>
@@ -322,18 +323,19 @@ export default function DetailsStep({
                   </Typography>
                 </Divider>
 
-                {expenseItems.map((item: any, index: number) => (
-                  <ItemRow
-                    key={item.id}
-                    item={item}
-                    index={index}
-                    isLastItem={expenseItems.length === 1}
-                    vendorItems={vendorItems}
-                    handleItemChange={handleItemChange}
-                    removeExpenseItem={removeExpenseItem}
-                    expenseItems={expenseItems}
-                  />
-                ))}
+                {selectedVendorId !== -1 &&
+                  expenseItems.map((item: any, index: number) => (
+                    <ItemRow
+                      key={item.id}
+                      item={item}
+                      index={index}
+                      isLastItem={expenseItems.length === 1}
+                      vendorItems={vendorItems}
+                      handleItemChange={handleItemChange}
+                      removeExpenseItem={removeExpenseItem}
+                      expenseItems={expenseItems}
+                    />
+                  ))}
               </BorderSection>
             </Grid>
           ) : (
