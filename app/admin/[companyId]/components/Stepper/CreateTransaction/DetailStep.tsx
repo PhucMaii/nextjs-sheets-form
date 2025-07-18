@@ -105,6 +105,29 @@ export default function DetailsStep({
               <Divider sx={{ mb: 3 }} />
 
               <Grid container spacing={3}>
+                {transactionType === 'stock' && (
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      id="invoice-number"
+                      label="Invoice Number"
+                      value={formData.invoice}
+                      onChange={(e) =>
+                        setFormData((prev: any) => ({
+                          ...prev,
+                          invoice: e.target.value,
+                        }))
+                      }
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <Receipt />
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                  </Grid>
+                )}
                 <Grid item xs={12} md={6}>
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DatePicker

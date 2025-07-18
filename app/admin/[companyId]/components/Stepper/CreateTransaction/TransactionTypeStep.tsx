@@ -1,4 +1,5 @@
-import { blue, blueGrey,  } from '@mui/material/colors';
+import { blue, blueGrey } from '@mui/material/colors';
+import { Dispatch, SetStateAction } from 'react';
 
 import {
   Box,
@@ -17,8 +18,8 @@ export default function TransactionTypeStep({
   transactionType,
   setTransactionType,
 }: {
-  transactionType: string;
-  setTransactionType: (type: string) => void;
+  transactionType: 'stock' | 'other' | '';
+  setTransactionType: Dispatch<SetStateAction<'stock' | 'other' | ''>>;
 }) {
   return (
     <Fade in timeout={500}>

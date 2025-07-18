@@ -71,7 +71,9 @@ export default function CreateTransaction() {
 
   // Form state
   const [activeStep, setActiveStep] = useState(0);
-  const [transactionType, setTransactionType] = useState('stock');
+  const [transactionType, setTransactionType] = useState<
+    'stock' | 'other' | ''
+  >('stock');
   const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs());
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -502,7 +504,7 @@ export default function CreateTransaction() {
         await handleSubmitStock();
       }
 
-      if (transactionType === 'expense') {
+      if (transactionType === 'other') {
         await handleSubmitExpense();
       }
 
