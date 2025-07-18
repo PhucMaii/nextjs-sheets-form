@@ -20,13 +20,15 @@ import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import { DropdownItemContainer } from '@/app/admin/[companyId]/orders/styled';
 import AddExpense from '@/app/admin/[companyId]/components/Modals/add/AddExpense';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 
 export const useUpdateExpenseStatus = (
   showNotification: (type: AlertColor, message: string) => void,
   selectedExpenses: IExpense[] = [],
 ) => {
   const { companyId }: any = useParams();
+  const router = useRouter();
+
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [selectPaymentMethod, setSelectPaymentMethod] = useState<any>({
     isOpenModal: false,
@@ -37,7 +39,7 @@ export const useUpdateExpenseStatus = (
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
   const openDropdown = Boolean(actionButtonAnchor);
-  const [isOpenAddExpense, setIsOpenAddExpense] = useState<boolean>(false);
+  // const [isOpenAddExpense, setIsOpenAddExpense] = useState<boolean>(false);
 
   const [paymentMethods] = SWRFetchData(
     getAdminApiUrl(companyId, '/paymentMethods'),
@@ -211,7 +213,7 @@ export const useUpdateExpenseStatus = (
       >
         <MenuItem
           onClick={() => {
-            setIsOpenAddExpense(true);
+            router.push(`/admin/${companyId}/transactions/create`);
           }}
         >
           <DropdownItemContainer display="flex" gap={2}>
@@ -247,13 +249,13 @@ export const useUpdateExpenseStatus = (
     </Box>
   );
 
-  const AddExpenseModal = (
-    <AddExpense
-      open={isOpenAddExpense}
-      onClose={() => setIsOpenAddExpense(false)}
-      showNotification={showNotification}
-    />
-  );
+  // const AddExpenseModal = (
+  //   <AddExpense
+  //     open={isOpenAddExpense}
+  //     onClose={() => setIsOpenAddExpense(false)}
+  //     showNotification={showNotification}
+  //   />
+  // );
 
   return {
     handleUpdateStatus,
@@ -261,6 +263,6 @@ export const useUpdateExpenseStatus = (
     UpdateExpenseStatusComp,
     isUpdating,
     Actions,
-    AddExpenseModal,
+    // AddExpenseModal,
   };
 };

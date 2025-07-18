@@ -80,24 +80,27 @@ export default function EditExpense({
     if (updatedExpense) {
       const gst =
         Math.round(
-          (updatedExpense?.hasGST
-            ? (updatedExpense?.subTotal - (updatedExpense?.discount || 0)) *
-              gstRate
-            : 0) * 100,
+          (updatedExpense?.hasGST ? updatedExpense?.subTotal * gstRate : 0) *
+            100,
         ) / 100;
       const pst =
         Math.round(
-          (updatedExpense?.hasPST
-            ? (updatedExpense?.subTotal - (updatedExpense?.discount || 0)) *
-              pstRate
-            : 0) * 100,
+          (updatedExpense?.hasPST ? updatedExpense?.subTotal * pstRate : 0) *
+            100,
         ) / 100;
 
       setUpdatedExpense((prevState: any) => ({
         ...prevState,
-        amount: prevState?.subTotal + gst + pst - (prevState?.discount || 0),
+        amount: prevState?.subTotal + gst + pst, // subtotal already includes discount
         GST: gst,
         PST: pst,
+        discountPercent:
+          Math.round(
+            ((prevState?.discount || 0) /
+              (prevState?.subTotal + prevState?.discount)) *
+              100 *
+              100,
+          ) / 100,
       }));
     }
   }, [
@@ -108,25 +111,57 @@ export default function EditExpense({
 
   const onChangeExpense = (field: string, value: any) => {
     if (field === 'subTotal') {
-      const discountPercent = Math.round(((updatedExpense?.discount || 0) * 100) / value);
+      const discountPercent =
+        Math.round(
+          ((updatedExpense?.discount || 0) /
+            (value + (updatedExpense?.discount || 0))) *
+            100 *
+            100,
+        ) / 100;
       setUpdatedExpense((prevState: any) => ({
         ...prevState,
         discountPercent: discountPercent,
         subTotal: value,
+        PST: Math.round(value * pstRate * 100) / 100,
+        GST: Math.round(value * gstRate * 100) / 100,
+        amount:
+          value +
+          (Math.round(value * gstRate * 100) / 100 || 0) +
+          (Math.round(value * pstRate * 100) / 100 || 0),
       }));
     } else if (field === 'discount') {
-      const discountPercent = Math.round(((value / updatedExpense?.subTotal) * 100) * 100) / 100;
+      const total = updatedExpense?.subTotal + updatedExpense?.discount;
+      const newSubtotal = total - value;
+
+      const discountPercent = Math.round((value / total) * 100 * 100) / 100;
       setUpdatedExpense((prevState: any) => ({
         ...prevState,
         discountPercent: discountPercent,
         discount: value,
+        subTotal: newSubtotal,
+        PST: Math.round(newSubtotal * pstRate * 100) / 100,
+        GST: Math.round(newSubtotal * gstRate * 100) / 100,
+        amount:
+          newSubtotal +
+          (Math.round(newSubtotal * gstRate * 100) / 100 || 0) +
+          (Math.round(newSubtotal * pstRate * 100) / 100 || 0),
       }));
     } else if (field === 'discountPercent') {
-      const discount = Math.round(((value / 100) * updatedExpense?.subTotal) * 100) / 100;
+      const total = updatedExpense?.subTotal + updatedExpense?.discount;
+      const newSubtotal = total * (1 - value / 100);
+      const discount = total - newSubtotal;
+
       setUpdatedExpense((prevState: any) => ({
         ...prevState,
         discount: discount,
         discountPercent: value,
+        subTotal: newSubtotal,
+        PST: Math.round(newSubtotal * pstRate * 100) / 100,
+        GST: Math.round(newSubtotal * gstRate * 100) / 100,
+        amount:
+          newSubtotal +
+          (Math.round(newSubtotal * gstRate * 100) / 100 || 0) +
+          (Math.round(newSubtotal * pstRate * 100) / 100 || 0),
       }));
     } else {
       setUpdatedExpense({

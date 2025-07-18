@@ -3,19 +3,26 @@ import React, { useEffect, useState, useMemo } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Box,
+  Card,
+  CardContent,
   Grid,
-  ListSubheader,
   IconButton,
   Menu,
   MenuItem,
   Select,
   TextField,
   Typography,
+  Chip,
+  Stack,
+  Paper,
+  Divider,
+  Badge,
+  Button,
+  InputAdornment,
 } from '@mui/material';
-import { blueGrey } from '@mui/material/colors';
+import { blueGrey, blue, green, red } from '@mui/material/colors';
 import { generateMonthRange } from '@/app/utils/time';
 import SelectDateRange from '../components/Select/SelectDateRange';
-import { ShadowSection } from '../reports/styled';
 import { SWRFetchData } from '@/app/utils/db';
 import { getAdminApiUrl } from '@/app/utils/enum';
 import TransactionsTable from '../components/Tables/TransactionsTable';
@@ -24,11 +31,18 @@ import { IExpense } from '@/app/utils/type';
 import useDebounce from '@/hooks/useDebounce';
 import TransactionOverview from '../components/Overview/TransactionOverview';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
-import { CheckIcon } from 'lucide-react';
+import {
+  CheckIcon,
+  FilterIcon,
+  SearchIcon,
+  XIcon,
+  CreditCardIcon,
+  CalendarIcon,
+  UsersIcon,
+} from 'lucide-react';
 import LoadingModal from '../components/Modals/LoadingModal';
 import { useUpdateExpenseStatus } from '@/hooks/update/useUpdateExpenseStatus';
 import { useParams } from 'next/navigation';
-import { FilterIcon } from 'lucide-react';
 
 export default function Transactions() {
   const { companyId }: any = useParams();
@@ -47,18 +61,16 @@ export default function Transactions() {
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
   const {
     handleUpdateStatus,
-    // handleBulkUpdateStatus,
     UpdateExpenseStatusComp,
     isUpdating,
     Actions,
-    AddExpenseModal,
+    // AddExpenseModal,
   } = useUpdateExpenseStatus(showNotification, selectedExpenses);
 
   // Data Fetching
   const [paymentMethods] = SWRFetchData(
     getAdminApiUrl(companyId, '/paymentMethods'),
   );
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [expenses, _mutateExpenses, isValidating] = SWRFetchData(
     getAdminApiUrl(
       companyId,
@@ -73,7 +85,6 @@ export default function Transactions() {
   const displayTransactions = useMemo(() => {
     let filtered = baseTransactions;
 
-    // Apply search filter
     if (debouncedKeywords) {
       const searchLower = debouncedKeywords.toLowerCase();
       filtered = filtered.filter((transaction: IExpense) => {
@@ -84,16 +95,15 @@ export default function Transactions() {
           transaction.description,
         ];
 
-        return searchableFields.some((field) => 
-          field?.toLowerCase().includes(searchLower)
+        return searchableFields.some((field) =>
+          field?.toLowerCase().includes(searchLower),
         );
       });
     }
 
-    // Apply status filter
     if (filterStatus !== 'All') {
-      filtered = filtered.filter((transaction: IExpense) => 
-        transaction.status === filterStatus
+      filtered = filtered.filter(
+        (transaction: IExpense) => transaction.status === filterStatus,
       );
     }
 
@@ -144,217 +154,332 @@ export default function Transactions() {
       return;
     }
 
-    if (selectedExpenses.length === displayTransactions.length && displayTransactions.length > 0) {
+    if (
+      selectedExpenses.length === displayTransactions.length &&
+      displayTransactions.length > 0
+    ) {
       setSelectedExpenses([]);
     } else {
       setSelectedExpenses(displayTransactions);
     }
   };
 
-  // Clear all filters
   const handleClearFilters = () => {
     setSearchKeywords('');
     setFilterStatus('All');
   };
 
-  // Get filter summary text
-  const getFilterSummary = () => {
-    let summary = `Showing ${displayTransactions.length} of ${baseTransactions.length} transactions`;
-    
-    if (debouncedKeywords) {
-      summary += ` matching "${debouncedKeywords}"`;
-    }
-    
-    if (filterStatus !== 'All') {
-      summary += ` with status "${filterStatus}"`;
-    }
-    
+  const filterSummary = useMemo(() => {
+    let summary = `${displayTransactions.length} of ${baseTransactions.length} transactions`;
     return summary;
-  };
+  }, [displayTransactions, baseTransactions]);
+
+  const hasActiveFilters = useMemo(() => {
+    return searchKeywords || filterStatus !== 'All';
+  }, [searchKeywords, filterStatus]);
+
+  const getStatusColor = useMemo(() => {
+    return (status: string) => {
+      switch (status) {
+        case 'Paid':
+          return green[600];
+        case 'Unpaid':
+          return red[600];
+        default:
+          return blueGrey[600];
+      }
+    };
+  }, []);
 
   return (
     <Sidebar>
       {UpdateExpenseStatusComp}
       <LoadingModal open={isUpdating} />
       {NotificationComp}
-      <Box display="flex" alignItems="center" justifyContent="space-between">
-        {AddExpenseModal}
-        <Typography variant="h5" fontWeight="bold" color={blueGrey[800]}>
-          Transactions
-        </Typography>
 
-        <SelectDateRange dateRange={dateRange} setDateRange={setDateRange} />
+      {/* Modern Header Section */}
+      <Box sx={{ mb: 3 }}>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 3,
+            // background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: blueGrey[700],
+            borderRadius: 2,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          }}
+        >
+          <Grid container alignItems="center" justifyContent="space-between">
+            <Grid item>
+              <Typography variant="h4" fontWeight="bold" sx={{ mb: 1 }}>
+                Transactions
+              </Typography>
+              <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                Manage and track all your business transactions
+              </Typography>
+            </Grid>
+            <Grid item>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                {/* {AddExpenseModal} */}
+                <Box
+                  sx={{
+                    background: 'rgba(255,255,255,0.2)',
+                    borderRadius: 1,
+                    p: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                  }}
+                >
+                  <CalendarIcon size={20} />
+                  <SelectDateRange
+                    dateRange={dateRange}
+                    setDateRange={setDateRange}
+                  />
+                </Box>
+              </Box>
+            </Grid>
+          </Grid>
+        </Paper>
       </Box>
 
-      <TransactionOverview transactions={displayTransactions} />
-      <ShadowSection>
-        <Typography variant="h6" fontWeight="bold" color={blueGrey[800]}>
-          Payment Method
-        </Typography>
-        <Select
-          sx={{ mt: 2 }}
-          value={currentMethodId}
-          onChange={(e) => setCurrentMethodId(Number(e.target.value))}
-          fullWidth
-        >
-          <MenuItem value={-1}>All</MenuItem>
-          {paymentMethods?.data?.length > 0 &&
-            paymentMethods?.data.map((method: any) => (
-              <MenuItem key={method.id} value={method.id}>
-                {method.name}
-              </MenuItem>
-            ))}
-        </Select>
-      </ShadowSection>
+      {/* Overview Section */}
+      <Box sx={{ mb: 3 }}>
+        <TransactionOverview transactions={displayTransactions} />
+      </Box>
 
-      <ShadowSection>
-        <Grid container alignItems="center" spacing={2}>
-          <Grid item xs={8} md={10}>
-            <TextField
-              fullWidth
-              label="Search"
-              placeholder="Search transactions by invoice, vendor, spent by, or description..."
-              variant="filled"
-              value={searchKeywords}
-              onChange={(e) => setSearchKeywords(e.target.value)}
-            />
-          </Grid>
-          <Grid
-            item
-            xs={4}
-            md={2}
-            textAlign="center"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            gap={2}
-          >
-            {Actions}
-            <Box>
-              <IconButton onClick={(e) => setFilterAnchorEl(e.currentTarget)}>
-                <FilterIcon
-                  style={{
-                    width: 20,
-                    height: 20,
-                    color: blueGrey[800],
-                  }}
-                />
-              </IconButton>
+      {/* Modern Filters Section */}
+      <Card
+        sx={{ mb: 3, borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+      >
+        <CardContent sx={{ p: 3 }}>
+          <Grid container spacing={3} alignItems="center">
+            {/* Search */}
+            <Grid item xs={12} md={8}>
+              <Box
+                sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}
+              >
+                <Typography
+                  variant="body2"
+                  fontWeight="medium"
+                  color={blueGrey[700]}
+                >
+                  Search
+                </Typography>
+              </Box>
+              <TextField
+                fullWidth
+                placeholder="Search transactions..."
+                variant="outlined"
+                size="small"
+                value={searchKeywords}
+                onChange={(e) => setSearchKeywords(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon size={20} color={blueGrey[500]} />
+                    </InputAdornment>
+                  ),
+                  endAdornment: searchKeywords && (
+                    <InputAdornment position="end">
+                      <IconButton
+                        size="small"
+                        onClick={() => setSearchKeywords('')}
+                      >
+                        <XIcon size={16} />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                  },
+                }}
+              />
+            </Grid>
+
+            {/* Status Filter */}
+            <Grid item xs={12} md={2}>
+              <Box
+                sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}
+              >
+                <Typography
+                  variant="body2"
+                  fontWeight="medium"
+                  color={blueGrey[700]}
+                >
+                  Status
+                </Typography>
+              </Box>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={(e) => setFilterAnchorEl(e.currentTarget)}
+                endIcon={<FilterIcon size={16} />}
+                fullWidth
+                sx={{
+                  justifyContent: 'space-between',
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  color:
+                    filterStatus === 'All'
+                      ? blueGrey[600]
+                      : getStatusColor(filterStatus),
+                  borderColor:
+                    filterStatus === 'All'
+                      ? blueGrey[300]
+                      : getStatusColor(filterStatus),
+                }}
+              >
+                {filterStatus}
+              </Button>
               <Menu
                 anchorEl={filterAnchorEl}
                 open={isOpenFilter}
                 onClose={() => setFilterAnchorEl(null)}
                 sx={{
-                  '& .MuiList-root': {
-                    width: 150,
+                  '& .MuiPaper-root': {
+                    borderRadius: 2,
+                    minWidth: 150,
                   },
                 }}
               >
-                <ListSubheader>Filter by Status</ListSubheader>
-                <MenuItem
-                  onClick={() => {
-                    setFilterStatus('All');
-                    setFilterAnchorEl(null);
-                  }}
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1,
-                  }}
-                >
-                  {filterStatus === 'All' && (
-                    <CheckIcon
-                      style={{
-                        width: 20,
-                        height: 20,
-                        color: blueGrey[800],
-                      }}
-                    />
-                  )}
-                  <Typography>All</Typography>
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    setFilterStatus('Unpaid');
-                    setFilterAnchorEl(null);
-                  }}
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1,
-                  }}
-                >
-                  {filterStatus === 'Unpaid' && (
-                    <CheckIcon
-                      style={{
-                        width: 20,
-                        height: 20,
-                        color: blueGrey[800],
-                      }}
-                    />
-                  )}
-                  <Typography>Unpaid</Typography>
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    setFilterStatus('Paid');
-                    setFilterAnchorEl(null);
-                  }}
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1,
-                  }}
-                >
-                  {filterStatus === 'Paid' && (
-                    <CheckIcon
-                      style={{
-                        width: 20,
-                        height: 20,
-                        color: blueGrey[800],
-                      }}
-                    />
-                  )}
-                  <Typography>Paid</Typography>
-                </MenuItem>
+                {['All', 'Unpaid', 'Paid'].map((status) => (
+                  <MenuItem
+                    key={status}
+                    onClick={() => {
+                      setFilterStatus(status);
+                      setFilterAnchorEl(null);
+                    }}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1,
+                    }}
+                  >
+                    {filterStatus === status && (
+                      <CheckIcon size={16} color={blue[600]} />
+                    )}
+                    <Typography
+                      color={
+                        status === 'All' ? 'inherit' : getStatusColor(status)
+                      }
+                    >
+                      {status}
+                    </Typography>
+                  </MenuItem>
+                ))}
               </Menu>
-            </Box>
-          </Grid>
-        </Grid>
-        
-        {/* Filter Summary and Clear Button */}
-        <Box mt={2} display="flex" justifyContent="space-between" alignItems="center">
-          <Typography variant="body2" color="text.secondary">
-            {getFilterSummary()}
-          </Typography>
-          {(searchKeywords || filterStatus !== 'All') && (
-            <Box>
-              <Typography
-                variant="body2"
-                color="primary"
-                sx={{ cursor: 'pointer', textDecoration: 'underline' }}
-                onClick={handleClearFilters}
+            </Grid>
+
+            {/* Actions */}
+            <Grid item xs={12} md={2}>
+              <Box
+                sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}
               >
-                Clear Filters
+                <Typography
+                  variant="body2"
+                  fontWeight="medium"
+                  color={blueGrey[700]}
+                >
+                  Actions
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', gap: 1 }}>{Actions}</Box>
+            </Grid>
+          </Grid>
+
+          {/* Filter Summary */}
+          <Divider sx={{ my: 2 }} />
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Typography variant="body2" color="text.secondary">
+                {filterSummary}
               </Typography>
+              {selectedExpenses.length > 0 && (
+                <Chip
+                  label={`${selectedExpenses.length} selected`}
+                  color="primary"
+                  size="small"
+                  variant="outlined"
+                />
+              )}
             </Box>
+
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              {/* Active Filters */}
+              <Stack direction="row" spacing={1}>
+                {searchKeywords && (
+                  <Chip
+                    label={`Search: "${searchKeywords}"`}
+                    size="small"
+                    onDelete={() => setSearchKeywords('')}
+                    color="info"
+                    variant="outlined"
+                  />
+                )}
+                {filterStatus !== 'All' && (
+                  <Chip
+                    label={`Status: ${filterStatus}`}
+                    size="small"
+                    onDelete={() => setFilterStatus('All')}
+                    sx={{
+                      color: getStatusColor(filterStatus),
+                      borderColor: getStatusColor(filterStatus),
+                    }}
+                    variant="outlined"
+                  />
+                )}
+              </Stack>
+
+              {hasActiveFilters && (
+                <Button
+                  variant="text"
+                  size="small"
+                  onClick={handleClearFilters}
+                  sx={{
+                    textTransform: 'none',
+                    color: blueGrey[600],
+                    '&:hover': {
+                      background: blueGrey[50],
+                    },
+                  }}
+                >
+                  Clear All
+                </Button>
+              )}
+            </Box>
+          </Box>
+        </CardContent>
+      </Card>
+
+      {/* Transactions Table Section */}
+      <Card sx={{ borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+        <CardContent sx={{ p: 0 }}>
+          {isLoading ? (
+            <Box sx={{ p: 4 }}>
+              <LoadingComponent />
+            </Box>
+          ) : (
+            <TransactionsTable
+              transactions={displayTransactions}
+              handleUpdateStatus={handleUpdateStatus}
+              showNotification={showNotification}
+              selectedExpense={selectedExpenses || []}
+              handleSelectExpense={handleSelectExpense}
+              handleSelectAll={handleSelectAll}
+              adminsAndDrivers={adminsAndDrivers}
+            />
           )}
-        </Box>
-        
-        {isLoading ? (
-          <LoadingComponent />
-        ) : (
-          <TransactionsTable
-            transactions={displayTransactions}
-            handleUpdateStatus={handleUpdateStatus}
-            showNotification={showNotification}
-            selectedExpense={selectedExpenses || []}
-            handleSelectExpense={handleSelectExpense}
-            handleSelectAll={handleSelectAll}
-            adminsAndDrivers={adminsAndDrivers}
-          />
-        )}
-      </ShadowSection>
+        </CardContent>
+      </Card>
     </Sidebar>
   );
 }

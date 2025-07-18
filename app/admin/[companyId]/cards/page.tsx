@@ -124,7 +124,7 @@ export default function CardManagement() {
     UpdateExpenseStatusComp,
     isUpdating,
     Actions,
-    AddExpenseModal,
+    // AddExpenseModal,
   } = useUpdateExpenseStatus(showNotification, selectedExpenses);
 
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
@@ -383,7 +383,7 @@ export default function CardManagement() {
 
   return (
     <Sidebar>
-      {AddExpenseModal}
+      {/* {AddExpenseModal} */}
       {UpdateExpenseStatusComp}
       <LoadingModal open={isUpdating} />
       {NotificationComp}

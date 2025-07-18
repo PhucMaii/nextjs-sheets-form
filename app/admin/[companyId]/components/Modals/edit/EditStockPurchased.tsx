@@ -165,7 +165,9 @@ const EditStockPurchased = ({
 
   useEffect(() => {
     if (stockPurchased) {
-      setUpdatedExpense(stockPurchased);
+      setUpdatedExpense({
+        ...stockPurchased,
+      });
 
       if (stockPurchased?.vendors) {
         setSelectedVendorId(stockPurchased.vendors[0].vendorId);
@@ -227,6 +229,7 @@ const EditStockPurchased = ({
   //   const users: any = await getAdminsAndDrivers(showNotification);
   //   setAdminsAndDrivers(users);
   // };
+  // console.log(purchasedItems, 'purchasedItems');
   const addPromptedItem = () => {
     if (promptedItem.id === -1) {
       showNotification('error', 'Please select item');
@@ -272,15 +275,18 @@ const EditStockPurchased = ({
 
   const calculateNewAmount = () => {
     // Discount percent is the discount percentage of the subtotal + discount
+    const newTotal = purchasedItems.reduce((acc: any, item: any) => {
+      return acc + item.unitPrice * item.quantity;
+    }, 0);
+
     const discountPercent =
-      updatedExpense?.discountPercent ||
       Math.round(
-        (updatedExpense?.discount / (updatedExpense?.subTotal + updatedExpense?.discount)) * 100 * 100,
+        (updatedExpense?.discount /
+          newTotal) *
+          100 *
+          100,
       ) / 100;
-    const total = purchasedItems.reduce((acc: any, item: any) => {
-      if (!acc?.subTotal) {
-        acc.subTotal = 0;
-      }
+    const tax = purchasedItems.reduce((acc: any, item: any) => {
 
       if (!acc?.PST) {
         acc.PST = 0;
@@ -289,8 +295,6 @@ const EditStockPurchased = ({
       if (!acc?.GST) {
         acc.GST = 0;
       }
-
-      acc.subTotal += item.unitPrice * item.quantity;
 
       if (item?.inventoryItem?.hasPST) {
         acc.PST +=
@@ -311,50 +315,50 @@ const EditStockPurchased = ({
       return acc;
     }, {});
 
-    console.log({
-      discountPercent,
-      subTotal: updatedExpense?.subTotal,
-      PST: updatedExpense?.PST,
-      GST: updatedExpense?.GST,
-      discount: updatedExpense?.discount,
-      total,
-    }, 'discountPercent');
+    // console.log(
+    //   {
+    //     discountPercent,
+    //     subTotal: updatedExpense?.subTotal,
+    //     PST: updatedExpense?.PST,
+    //     GST: updatedExpense?.GST,
+    //     discount: updatedExpense?.discount,
+    //     total,
+    //   },
+    //   'discountPercent',
+    // );
+
+    const newSubtotal = newTotal - (updatedExpense?.discount || 0);
 
     // setTotalAmount(newAmount);
-    if (purchasedItems.some((item: any) => !item.inventoryItemId)) {
-      setUpdatedExpense((prevState: any) => ({
-        ...prevState,
-        amount:
-          Math.round(
-            (parseFloat(total.subTotal.toFixed(2)) +
-              (stockPurchased?.PST || 0) +
-              (stockPurchased?.GST || 0) -
-              (prevState?.discount || 0)) *
-              100,
-          ) / 100,
-        subTotal: parseFloat(total.subTotal.toFixed(2)),
-        GST: stockPurchased?.GST || 0,
-        PST: stockPurchased?.PST || 0,
-        discount: parseFloat(prevState?.discount?.toFixed(2)),
-        discountPercent: discountPercent,
-      }));
-      return;
-    }
+    // if (purchasedItems.some((item: any) => !item.inventoryItemId)) {
+    //   setUpdatedExpense((prevState: any) => ({
+    //     ...prevState,
+    //     amount:
+    //       Math.round(
+    //         (newSubtotal +
+    //           (stockPurchased?.PST || 0) +
+    //           (stockPurchased?.GST || 0)) *
+    //           100,
+    //       ) / 100,
+    //     subTotal: newSubtotal,
+    //     GST: stockPurchased?.GST || 0,
+    //     PST: stockPurchased?.PST || 0,
+    //     discount: Math.round(prevState?.discount * 100) / 100,
+    //     discountPercent: discountPercent,
+    //   }));
+    //   return;
+    // }
 
     setUpdatedExpense((prevState: any) => ({
       ...prevState,
       amount:
         Math.round(
-          (parseFloat(total.subTotal.toFixed(2)) +
-            (stockPurchased?.PST || 0) +
-            (stockPurchased?.GST || 0) -
-            (prevState?.discount || 0)) *
-            100,
+          (newSubtotal + (tax?.PST || 0) + (tax?.GST || 0)) * 100,
         ) / 100,
-      subTotal: parseFloat(total.subTotal.toFixed(2)),
-      GST: parseFloat(total.GST.toFixed(2)),
-      PST: parseFloat(total.PST.toFixed(2)),
-      discount: parseFloat(prevState?.discount?.toFixed(2)),
+      subTotal: newSubtotal,
+      GST: Math.round(tax.GST * 100) / 100,
+      PST: Math.round(tax.PST * 100) / 100,
+      discount: Math.round(prevState?.discount * 100) / 100,
       discountPercent: discountPercent,
     }));
   };
@@ -386,22 +390,24 @@ const EditStockPurchased = ({
       (item: any) => item?.inventoryItem?.hasPST,
     );
 
+    // console.log(discountPercent, 'discountPercent');
+
+    const gstItemsTotal = gstItems.reduce((acc: any, item: any) => {
+      return acc + item.unitPrice * item.quantity * gstRate;
+    }, 0);
+
     const gstItemsTotalWithDiscount =
-      gstItems.reduce((acc: any, item: any) => {
-        return acc + item.unit.unitPrice * item.quantity;
-      }, 0) *
-      (1 - discountPercent / 100);
+      gstItemsTotal * (1 - discountPercent / 100);
+
+    const pstItemsTotal = pstItems.reduce((acc: any, item: any) => {
+      return acc + item.unitPrice * item.quantity * pstRate;
+    }, 0);
 
     const pstItemsTotalWithDiscount =
-      pstItems.reduce((acc: any, item: any) => {
-        return acc + item.unit.unitPrice * item.quantity;
-      }, 0) *
-      (1 - discountPercent / 100);
+      pstItemsTotal * (1 - discountPercent / 100);
 
-    const gstTotal =
-      Math.round(gstItemsTotalWithDiscount * gstRate * 100) / 100;
-    const pstTotal =
-      Math.round(pstItemsTotalWithDiscount * pstRate * 100) / 100;
+    const gstTotal = Math.round(gstItemsTotalWithDiscount * 100) / 100;
+    const pstTotal = Math.round(pstItemsTotalWithDiscount * 100) / 100;
 
     return {
       gstTotal,
@@ -412,34 +418,34 @@ const EditStockPurchased = ({
   const onChangeDiscount = (value: number, isPercent: boolean) => {
     if (isPercent) {
       const { gstTotal, pstTotal } = calculateTaxWithDiscount(value);
-      const discount =
-        Math.round((value / 100) * updatedExpense.subTotal * 100) / 100;
+
+      const total = updatedExpense?.subTotal + updatedExpense?.discount;
+      const newSubtotal = total * (1 - value / 100);
+      const discount = total - newSubtotal;
+
       setUpdatedExpense((prevState: any) => ({
         ...prevState,
         discount: discount,
         discountPercent: value,
         GST: gstTotal,
         PST: pstTotal,
-        amount:
-          Math.round(
-            (updatedExpense.subTotal - discount + gstTotal + pstTotal) * 100,
-          ) / 100,
+        subTotal: newSubtotal,
+        amount: Math.round((newSubtotal + gstTotal + pstTotal) * 100) / 100,
       }));
     } else {
-      const { gstTotal, pstTotal } = calculateTaxWithDiscount(value);
+      const total = updatedExpense?.subTotal + updatedExpense?.discount;
+      const newSubtotal = total - value;
+      const discountPercent = Math.round((value / total) * 100 * 100) / 100;
+      const { gstTotal, pstTotal } = calculateTaxWithDiscount(discountPercent);
 
-      const discountPercent =
-        Math.round((value / updatedExpense.subTotal) * 100 * 100) / 100;
       setUpdatedExpense((prevState: any) => ({
         ...prevState,
         discount: value,
         discountPercent: discountPercent,
         GST: gstTotal,
         PST: pstTotal,
-        amount:
-          Math.round(
-            (updatedExpense.subTotal + gstTotal + pstTotal - value) * 100,
-          ) / 100,
+        subTotal: newSubtotal,
+        amount: Math.round((newSubtotal + gstTotal + pstTotal) * 100) / 100,
       }));
     }
   };
@@ -471,6 +477,7 @@ const EditStockPurchased = ({
               unit: { ...item.unit, unitPrice: +e.target.value },
               totalPrice,
               units: newUnits,
+              price: +e.target.value,
             };
           }
 
@@ -501,6 +508,7 @@ const EditStockPurchased = ({
             unit: { ...item.unit, unitPrice: +e.target.value },
             totalPrice,
             units: newUnits,
+            price: +e.target.value,
           };
         }
 
@@ -515,6 +523,7 @@ const EditStockPurchased = ({
 
     setPurchasedItems(newItemList);
   };
+
   const handleSubmit = async () => {
     if (!stockPurchased?.orderedItems) {
       showNotification('error', 'Please add items');
