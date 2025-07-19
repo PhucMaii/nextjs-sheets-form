@@ -12,14 +12,16 @@ import {
 } from '@mui/material';
 
 import { Payment } from '@mui/icons-material';
-import { BoxIcon } from 'lucide-react';
+import { BoxIcon, Folders, FoldersIcon } from 'lucide-react';
+
+export type TransactionType = 'stock' | 'other' | 'batch' | '';
 
 export default function TransactionTypeStep({
   transactionType,
   setTransactionType,
 }: {
-  transactionType: 'stock' | 'other' | '';
-  setTransactionType: Dispatch<SetStateAction<'stock' | 'other' | ''>>;
+  transactionType: TransactionType;
+  setTransactionType: Dispatch<SetStateAction<TransactionType>>;
 }) {
   return (
     <Fade in timeout={500}>
@@ -31,8 +33,8 @@ export default function TransactionTypeStep({
           Choose the type that best describes your expense
         </Typography>
 
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={4}>
             <Card
               sx={{
                 cursor: 'pointer',
@@ -70,7 +72,7 @@ export default function TransactionTypeStep({
             </Card>
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={4}>
             <Card
               sx={{
                 cursor: 'pointer',
@@ -98,6 +100,45 @@ export default function TransactionTypeStep({
                   miscellaneous costs
                 </Typography>
                 {transactionType === 'other' && (
+                  <Chip
+                    label="Selected"
+                    color="primary"
+                    size="small"
+                    sx={{ mt: 2 }}
+                  />
+                )}
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Card
+              sx={{
+                cursor: 'pointer',
+                border:
+                  transactionType === 'batch'
+                    ? `2px solid ${blue[500]}`
+                    : '2px solid transparent',
+                transition: 'all 0.3s ease',
+                height: '100%',
+                boxShadow: 1,
+                '&:hover': {
+                  boxShadow: 3,
+                  transform: 'translateY(-2px)',
+                },
+              }}
+              onClick={() => setTransactionType('batch')}
+            >
+              <CardContent sx={{ textAlign: 'center', py: 4 }}>
+                <FoldersIcon
+                  style={{ width: 48, height: 48, color: blue[500] }}
+                />
+                <Typography variant="h6" gutterBottom>
+                  Batch Expense
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Batch expenses for multiple expenses at once
+                </Typography>
+                {transactionType === 'batch' && (
                   <Chip
                     label="Selected"
                     color="primary"

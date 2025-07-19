@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import { TRANSACTION_STATUS } from '@/app/utils/enum';
 import { BorderSection } from '../../../reports/styled';
+import { TransactionType } from './TransactionTypeStep';
 
 export default function ReviewStep({
   transactionType,
@@ -20,7 +21,7 @@ export default function ReviewStep({
   formData,
   expenseItems,
 }: {
-  transactionType: string;
+  transactionType: TransactionType;
   selectedDate: any;
   formData: any;
   expenseItems: any;

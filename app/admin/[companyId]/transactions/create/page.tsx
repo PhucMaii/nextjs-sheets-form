@@ -15,13 +15,15 @@ import { ArrowBack, Save, Preview } from '@mui/icons-material';
 import { blueGrey, grey } from '@mui/material/colors';
 import { useParams, useRouter } from 'next/navigation';
 import { getAdminApiUrl, TRANSACTION_STATUS } from '@/app/utils/enum';
-import { YYYYMMDDFormat } from '@/app/utils/time';
+import { generateMonthRange, YYYYMMDDFormat } from '@/app/utils/time';
 import axios from 'axios';
 import useNotification from '@/hooks/useNotification';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import dayjs, { Dayjs } from 'dayjs';
 import DetailsStep from '../../components/Stepper/CreateTransaction/DetailStep';
-import TransactionTypeStep from '../../components/Stepper/CreateTransaction/TransactionTypeStep';
+import TransactionTypeStep, {
+  TransactionType,
+} from '../../components/Stepper/CreateTransaction/TransactionTypeStep';
 import ReviewStep from '../../components/Stepper/CreateTransaction/ReviewStep';
 import { MousePointerIcon, ReceiptTextIcon } from 'lucide-react';
 import {
@@ -69,11 +71,13 @@ export default function CreateTransaction() {
   const [selectedVendorId, setSelectedVendorId] = useState<number>(-1);
   const [vendorItems, setVendorItems] = useState<any[]>([]);
 
+  // Small expenses for batch expenses
+  const [smallExpenses, setSmallExpenses] = useState<any[]>([]);
+
   // Form state
   const [activeStep, setActiveStep] = useState(0);
-  const [transactionType, setTransactionType] = useState<
-    'stock' | 'other' | ''
-  >('stock');
+  const [transactionType, setTransactionType] =
+    useState<TransactionType>('stock');
   const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs());
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -99,6 +103,7 @@ export default function CreateTransaction() {
     inventoryUnits: [],
     inventoryItem: null,
     inventoryUnit: null,
+    dateRange: generateMonthRange(),
   });
 
   // Expense items for stock purchases
@@ -254,140 +259,140 @@ export default function CreateTransaction() {
     };
   };
 
-  const handleDiscountChange = (e: any, type: 'stock' | 'expense') => {
-    const currentSubTotal =
-      type === 'stock'
-        ? expenseItems.reduce((acc: number, item: any) => {
-            return acc + item.total;
-          }, 0)
-        : formData.initialSubTotal;
+  // const handleDiscountChange = (e: any, type: TransactionType) => {
+  //   const currentSubTotal =
+  //     type === 'stock'
+  //       ? expenseItems.reduce((acc: number, item: any) => {
+  //           return acc + item.total;
+  //         }, 0)
+  //       : formData.initialSubTotal;
 
-    if (isShowDiscountPercent) {
-      const discount = (currentSubTotal * Number(e.target.value)) / 100;
+  //   if (isShowDiscountPercent) {
+  //     const discount = (currentSubTotal * Number(e.target.value)) / 100;
 
-      const { gstTotal, pstTotal } = calculateTaxWithDiscount(
-        Number(e.target.value),
-      );
+  //     const { gstTotal, pstTotal } = calculateTaxWithDiscount(
+  //       Number(e.target.value),
+  //     );
 
-      const newSubTotal = currentSubTotal - discount;
+  //     const newSubTotal = currentSubTotal - discount;
 
-      setFormData((prev: any) => ({
-        ...prev,
-        discountPercentage: Number(e.target.value),
-        discount: discount,
-        subTotal: newSubTotal,
-        GST: gstTotal,
-        PST: pstTotal,
-        total: newSubTotal + gstTotal + pstTotal,
-      }));
-    } else {
-      const discount = Number(e.target.value);
-      const discountPercentage =
-        Math.round((discount / currentSubTotal) * 100 * 100) / 100;
-      const { gstTotal, pstTotal } =
-        calculateTaxWithDiscount(discountPercentage);
+  //     setFormData((prev: any) => ({
+  //       ...prev,
+  //       discountPercentage: Number(e.target.value),
+  //       discount: discount,
+  //       subTotal: newSubTotal,
+  //       GST: gstTotal,
+  //       PST: pstTotal,
+  //       total: newSubTotal + gstTotal + pstTotal,
+  //     }));
+  //   } else {
+  //     const discount = Number(e.target.value);
+  //     const discountPercentage =
+  //       Math.round((discount / currentSubTotal) * 100 * 100) / 100;
+  //     const { gstTotal, pstTotal } =
+  //       calculateTaxWithDiscount(discountPercentage);
 
-      const newSubTotal = currentSubTotal - discount;
+  //     const newSubTotal = currentSubTotal - discount;
 
-      setFormData((prev: any) => ({
-        ...prev,
-        discount: discount,
-        discountPercentage: discountPercentage,
-        subTotal: newSubTotal,
-        GST: gstTotal,
-        PST: pstTotal,
-        total: newSubTotal + gstTotal + pstTotal,
-      }));
-    }
-  };
+  //     setFormData((prev: any) => ({
+  //       ...prev,
+  //       discount: discount,
+  //       discountPercentage: discountPercentage,
+  //       subTotal: newSubTotal,
+  //       GST: gstTotal,
+  //       PST: pstTotal,
+  //       total: newSubTotal + gstTotal + pstTotal,
+  //     }));
+  //   }
+  // };
 
   // Handle expense item changes
-  const handleItemChange = (
-    id: number,
-    field: string,
-    value: string | number | any,
-  ) => {
-    setExpenseItems((prev) =>
-      prev.map((item) => {
-        if (item.id === id) {
-          if (field === 'selectedItem') {
-            const total = value.inventoryUnit.unitPrice * item.quantity;
-            const pst = value.inventoryItem?.hasPST ? total * pstRate : 0;
-            const gst = value.inventoryItem?.hasGST ? total * gstRate : 0;
+  // const handleItemChange = (
+  //   id: number,
+  //   field: string,
+  //   value: string | number | any,
+  // ) => {
+  //   setExpenseItems((prev) =>
+  //     prev.map((item) => {
+  //       if (item.id === id) {
+  //         if (field === 'selectedItem') {
+  //           const total = value.inventoryUnit.unitPrice * item.quantity;
+  //           const pst = value.inventoryItem?.hasPST ? total * pstRate : 0;
+  //           const gst = value.inventoryItem?.hasGST ? total * gstRate : 0;
 
-            return {
-              ...item,
-              id: value.id, // vendorItemId
-              units: value.unit,
-              unit: value.inventoryUnit,
-              vendorId: value.vendorId,
-              inventoryItemId: value.inventoryItemId,
-              unitPrice: value.inventoryUnit.unitPrice,
-              total,
-              inventoryItem: value.inventoryItem,
-              GST: gst,
-              PST: pst,
-            };
-          }
-          const updated: any = {
-            ...item,
-            [field]: value,
-          };
+  //           return {
+  //             ...item,
+  //             id: value.id, // vendorItemId
+  //             units: value.unit,
+  //             unit: value.inventoryUnit,
+  //             vendorId: value.vendorId,
+  //             inventoryItemId: value.inventoryItemId,
+  //             unitPrice: value.inventoryUnit.unitPrice,
+  //             total,
+  //             inventoryItem: value.inventoryItem,
+  //             GST: gst,
+  //             PST: pst,
+  //           };
+  //         }
+  //         const updated: any = {
+  //           ...item,
+  //           [field]: value,
+  //         };
 
-          if (field === 'unit') {
-            const total = value.unitPrice * updated.quantity;
-            const pst = updated.inventoryItem?.hasPST ? total * pstRate : 0;
-            const gst = updated.inventoryItem?.hasGST ? total * gstRate : 0;
-            updated.unitPrice = value.unitPrice;
-            updated.total = total;
-            updated.GST = gst;
-            updated.PST = pst;
-          }
-          if (field === 'quantity' || field === 'unitPrice') {
-            const total = updated.unitPrice * updated.quantity;
-            const pst = updated.inventoryItem?.hasPST ? total * pstRate : 0;
-            const gst = updated.inventoryItem?.hasGST ? total * gstRate : 0;
-            updated.total = total;
-            updated.GST = gst;
-            updated.PST = pst;
+  //         if (field === 'unit') {
+  //           const total = value.unitPrice * updated.quantity;
+  //           const pst = updated.inventoryItem?.hasPST ? total * pstRate : 0;
+  //           const gst = updated.inventoryItem?.hasGST ? total * gstRate : 0;
+  //           updated.unitPrice = value.unitPrice;
+  //           updated.total = total;
+  //           updated.GST = gst;
+  //           updated.PST = pst;
+  //         }
+  //         if (field === 'quantity' || field === 'unitPrice') {
+  //           const total = updated.unitPrice * updated.quantity;
+  //           const pst = updated.inventoryItem?.hasPST ? total * pstRate : 0;
+  //           const gst = updated.inventoryItem?.hasGST ? total * gstRate : 0;
+  //           updated.total = total;
+  //           updated.GST = gst;
+  //           updated.PST = pst;
 
-            // Update unit price in unit
-            updated.unit = {
-              ...item.unit,
-              unitPrice: updated.unitPrice,
-            };
+  //           // Update unit price in unit
+  //           updated.unit = {
+  //             ...item.unit,
+  //             unitPrice: updated.unitPrice,
+  //           };
 
-            // Update unit price in units
-            const newUnits = item.units.map((unit: any) => {
-              if (unit.id === updated.unit?.id) {
-                return {
-                  ...unit,
-                  unitPrice: updated.unitPrice,
-                };
-              }
-              return unit;
-            });
-            updated.units = newUnits;
-          }
-          return updated;
-        }
-        return item;
-      }),
-    );
-  };
+  //           // Update unit price in units
+  //           const newUnits = item.units.map((unit: any) => {
+  //             if (unit.id === updated.unit?.id) {
+  //               return {
+  //                 ...unit,
+  //                 unitPrice: updated.unitPrice,
+  //               };
+  //             }
+  //             return unit;
+  //           });
+  //           updated.units = newUnits;
+  //         }
+  //         return updated;
+  //       }
+  //       return item;
+  //     }),
+  //   );
+  // };
 
   // Add new expense item
-  const addExpenseItem = () => {
-    const newItem: any = {
-      id: Date.now().toString(),
-      description: '',
-      quantity: 1,
-      unitPrice: 0,
-      total: 0,
-      unit: [],
-    };
-    setExpenseItems((prev) => [...prev, newItem]);
-  };
+  // const addExpenseItem = () => {
+  //   const newItem: any = {
+  //     id: Date.now().toString(),
+  //     description: '',
+  //     quantity: 1,
+  //     unitPrice: 0,
+  //     total: 0,
+  //     unit: [],
+  //   };
+  //   setExpenseItems((prev) => [...prev, newItem]);
+  // };
 
   const clearExpenseItems = () => {
     setExpenseItems([
@@ -403,7 +408,8 @@ export default function CreateTransaction() {
   };
 
   const clearFormData = () => {
-    setFormData({
+    setFormData((prev: any) => ({
+      ...prev,
       description: '',
       spentBy: '',
       paymentMethodId: -1,
@@ -423,15 +429,15 @@ export default function CreateTransaction() {
       inventoryUnits: [],
       inventoryItem: null,
       inventoryUnit: null,
-    });
+    }));
   };
 
   // Remove expense item
-  const removeExpenseItem = (id: number) => {
-    if (expenseItems.length > 1) {
-      setExpenseItems((prev) => prev.filter((item) => item.id !== id));
-    }
-  };
+  // const removeExpenseItem = (id: number) => {
+  //   if (expenseItems.length > 1) {
+  //     setExpenseItems((prev) => prev.filter((item) => item.id !== id));
+  //   }
+  // };
 
   const handleSubmitStock = async () => {
     try {
@@ -643,18 +649,17 @@ export default function CreateTransaction() {
               formData={formData}
               setFormData={setFormData}
               expenseItems={expenseItems}
-              addExpenseItem={addExpenseItem}
-              handleItemChange={handleItemChange}
-              removeExpenseItem={removeExpenseItem}
+              setExpenseItems={setExpenseItems}
               adminsAndDrivers={adminsAndDrivers}
               paymentMethods={paymentMethods}
               selectedVendorId={selectedVendorId}
               setSelectedVendorId={setSelectedVendorId}
-              sortedVendors={sortedVendors}
               vendorItems={vendorItems}
+              sortedVendors={sortedVendors}
               isShowDiscountPercent={isShowDiscountPercent}
               setIsShowDiscountPercent={setIsShowDiscountPercent}
-              handleDiscountChange={handleDiscountChange}
+              smallExpenses={smallExpenses}
+              setSmallExpenses={setSmallExpenses}
             />
           )}
           {activeStep === 2 && (

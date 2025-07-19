@@ -171,10 +171,10 @@ export const convertToDateStyleFull = (date: Date) => {
 };
 
 export const formatTime = (date: Date): string => {
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-}
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+};
 
 // Helper: format date as YYYY-MM-DD
 export const formatDate = (date: Date): string => {
-  return date.toLocaleDateString()
-}
+  return date.toLocaleDateString();
+};
