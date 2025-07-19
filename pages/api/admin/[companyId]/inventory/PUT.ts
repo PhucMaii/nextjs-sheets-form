@@ -44,6 +44,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       // updatedSingleSellingItem,
     }: IBody = req.body;
 
+    // console.log('req.body', req.body);
+
     const updatedAt = getTodayDate().dateAndTime;
 
     const existingInventoryItem = await prisma.inventoryItem.findUnique({

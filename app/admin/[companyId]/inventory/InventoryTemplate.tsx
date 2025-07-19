@@ -556,12 +556,12 @@ const InventoryTemplate = ({
   const renderedSellingItems = useMemo(() => {
     const renderItem = (item: any) => {
       if (item.options && item.options.length > 0) {
-        const smallestOption = item.options.reduce(
-          (smallest: any, current: any) => {
-            return smallest.price < current.price ? smallest : current;
-          },
-          item.options[0],
-        );
+        // const smallestOption = item.options.reduce(
+        //   (smallest: any, current: any) => {
+        //     return smallest.price < current.price ? smallest : current;
+        //   },
+        //   item.options[0],
+        // );
 
         return (
           <Box key={item.id}>
@@ -1183,20 +1183,7 @@ const InventoryTemplate = ({
                     endAdornment={
                       <InputAdornment position="end">
                         <Box display="flex" alignItems="center" gap={1}>
-                          <FormControlLabel
-                            control={
-                              <Checkbox
-                                checked={itemToAllItems.isShowDiscount}
-                                onChange={(e) =>
-                                  setItemToAllItems((prev: any) => ({
-                                    ...prev,
-                                    isShowDiscount: e.target.checked,
-                                  }))
-                                }
-                              />
-                            }
-                            label="Show Discount"
-                          />
+
                           <IconButton
                             onClick={() => handleApplyToAllItems('price')}
                           >
