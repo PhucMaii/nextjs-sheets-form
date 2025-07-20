@@ -668,6 +668,7 @@ export default function CreateTransaction() {
               selectedDate={selectedDate}
               formData={formData}
               expenseItems={expenseItems}
+              smallExpenses={smallExpenses}
             />
           )}
         </ShadowSection>

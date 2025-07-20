@@ -14,17 +14,20 @@ import {
 import { TRANSACTION_STATUS } from '@/app/utils/enum';
 import { BorderSection } from '../../../reports/styled';
 import { TransactionType } from './TransactionTypeStep';
+import dayjs from 'dayjs';
 
 export default function ReviewStep({
   transactionType,
   selectedDate,
   formData,
   expenseItems,
+  smallExpenses,
 }: {
   transactionType: TransactionType;
   selectedDate: any;
   formData: any;
   expenseItems: any;
+  smallExpenses: any;
 }) {
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
@@ -200,6 +203,77 @@ export default function ReviewStep({
                   ))}
                 </Box>
               )}
+
+              {transactionType === 'batch' && !mdDown && (
+                <Box mt={3}>
+                  <Typography variant="h6" gutterBottom>
+                    Small Expenses
+                  </Typography>
+                  <Divider sx={{ mb: 2 }} />
+
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={3}>
+                      <Typography variant="body2" fontWeight="medium">
+                        Date
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={2}>
+                      <Typography variant="body2" fontWeight="medium">
+                        Subtotal
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={2}>
+                      <Typography variant="body2" fontWeight="medium">
+                        GST (5%)
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={2}>
+                      <Typography variant="body2" fontWeight="medium">
+                        PST (7%)
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} md={3}>
+                      <Typography variant="body2" fontWeight="medium">
+                        Total
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </Box>
+              )}
+              
+              {smallExpenses.length > 0 &&
+                smallExpenses.map((expense: any) => (
+                  <Grid container spacing={2} key={expense.id} my={1}>
+                    <Grid item xs={12} md={3}>
+                      <Typography variant="body2">
+                        {dayjs(expense?.date).format('MM/DD/YYYY')}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={3} md={2}>
+                      <Typography variant="body2">
+                        ${expense?.subTotal?.toFixed(2)}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={3} md={2}>
+                      <Typography variant="body2">
+                        ${expense?.GST?.toFixed(2)}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={3} md={2}>
+                      <Typography variant="body2">
+                        ${expense?.PST?.toFixed(2)}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={3} md={3}>
+                      <Typography variant="body2" fontWeight="medium">
+                        ${expense?.total?.toFixed(2)}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Divider />
+                    </Grid>
+                  </Grid>
+                ))}
             </BorderSection>
           </Grid>
 
