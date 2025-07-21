@@ -1,5 +1,6 @@
 import { AlertColor } from '@mui/material';
 import {
+  BatchTransaction,
   Cart,
   CartItem,
   Category,
@@ -373,4 +374,8 @@ export interface IOrderTimeline extends OrderTimeline {
 
 export interface IOrderAction extends OrderAction {
   order: Order;
+}
+
+export interface IBatchTransaction extends BatchTransaction {
+
 }

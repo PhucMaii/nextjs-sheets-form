@@ -594,6 +594,7 @@ model BatchTransaction {
   companyId       Int?
   spentBy         String
   paymentMethodId Int
+  status          PaymentStatus?
 
   transactions    Expense[]
 

@@ -259,141 +259,6 @@ export default function CreateTransaction() {
     };
   };
 
-  // const handleDiscountChange = (e: any, type: TransactionType) => {
-  //   const currentSubTotal =
-  //     type === 'stock'
-  //       ? expenseItems.reduce((acc: number, item: any) => {
-  //           return acc + item.total;
-  //         }, 0)
-  //       : formData.initialSubTotal;
-
-  //   if (isShowDiscountPercent) {
-  //     const discount = (currentSubTotal * Number(e.target.value)) / 100;
-
-  //     const { gstTotal, pstTotal } = calculateTaxWithDiscount(
-  //       Number(e.target.value),
-  //     );
-
-  //     const newSubTotal = currentSubTotal - discount;
-
-  //     setFormData((prev: any) => ({
-  //       ...prev,
-  //       discountPercentage: Number(e.target.value),
-  //       discount: discount,
-  //       subTotal: newSubTotal,
-  //       GST: gstTotal,
-  //       PST: pstTotal,
-  //       total: newSubTotal + gstTotal + pstTotal,
-  //     }));
-  //   } else {
-  //     const discount = Number(e.target.value);
-  //     const discountPercentage =
-  //       Math.round((discount / currentSubTotal) * 100 * 100) / 100;
-  //     const { gstTotal, pstTotal } =
-  //       calculateTaxWithDiscount(discountPercentage);
-
-  //     const newSubTotal = currentSubTotal - discount;
-
-  //     setFormData((prev: any) => ({
-  //       ...prev,
-  //       discount: discount,
-  //       discountPercentage: discountPercentage,
-  //       subTotal: newSubTotal,
-  //       GST: gstTotal,
-  //       PST: pstTotal,
-  //       total: newSubTotal + gstTotal + pstTotal,
-  //     }));
-  //   }
-  // };
-
-  // Handle expense item changes
-  // const handleItemChange = (
-  //   id: number,
-  //   field: string,
-  //   value: string | number | any,
-  // ) => {
-  //   setExpenseItems((prev) =>
-  //     prev.map((item) => {
-  //       if (item.id === id) {
-  //         if (field === 'selectedItem') {
-  //           const total = value.inventoryUnit.unitPrice * item.quantity;
-  //           const pst = value.inventoryItem?.hasPST ? total * pstRate : 0;
-  //           const gst = value.inventoryItem?.hasGST ? total * gstRate : 0;
-
-  //           return {
-  //             ...item,
-  //             id: value.id, // vendorItemId
-  //             units: value.unit,
-  //             unit: value.inventoryUnit,
-  //             vendorId: value.vendorId,
-  //             inventoryItemId: value.inventoryItemId,
-  //             unitPrice: value.inventoryUnit.unitPrice,
-  //             total,
-  //             inventoryItem: value.inventoryItem,
-  //             GST: gst,
-  //             PST: pst,
-  //           };
-  //         }
-  //         const updated: any = {
-  //           ...item,
-  //           [field]: value,
-  //         };
-
-  //         if (field === 'unit') {
-  //           const total = value.unitPrice * updated.quantity;
-  //           const pst = updated.inventoryItem?.hasPST ? total * pstRate : 0;
-  //           const gst = updated.inventoryItem?.hasGST ? total * gstRate : 0;
-  //           updated.unitPrice = value.unitPrice;
-  //           updated.total = total;
-  //           updated.GST = gst;
-  //           updated.PST = pst;
-  //         }
-  //         if (field === 'quantity' || field === 'unitPrice') {
-  //           const total = updated.unitPrice * updated.quantity;
-  //           const pst = updated.inventoryItem?.hasPST ? total * pstRate : 0;
-  //           const gst = updated.inventoryItem?.hasGST ? total * gstRate : 0;
-  //           updated.total = total;
-  //           updated.GST = gst;
-  //           updated.PST = pst;
-
-  //           // Update unit price in unit
-  //           updated.unit = {
-  //             ...item.unit,
-  //             unitPrice: updated.unitPrice,
-  //           };
-
-  //           // Update unit price in units
-  //           const newUnits = item.units.map((unit: any) => {
-  //             if (unit.id === updated.unit?.id) {
-  //               return {
-  //                 ...unit,
-  //                 unitPrice: updated.unitPrice,
-  //               };
-  //             }
-  //             return unit;
-  //           });
-  //           updated.units = newUnits;
-  //         }
-  //         return updated;
-  //       }
-  //       return item;
-  //     }),
-  //   );
-  // };
-
-  // Add new expense item
-  // const addExpenseItem = () => {
-  //   const newItem: any = {
-  //     id: Date.now().toString(),
-  //     description: '',
-  //     quantity: 1,
-  //     unitPrice: 0,
-  //     total: 0,
-  //     unit: [],
-  //   };
-  //   setExpenseItems((prev) => [...prev, newItem]);
-  // };
-
   const clearExpenseItems = () => {
     setExpenseItems([
       {
@@ -502,6 +367,36 @@ export default function CreateTransaction() {
     }
   };
 
+  const handleSubmitBatchTransaction = async () => {
+    try {
+      const response = await axios.post(
+        getAdminApiUrl(companyId, '/batch-transactions'),
+        {
+          batchTransaction: {
+            ...formData,
+            date: dayjs(selectedDate.toDate()).format('MM/DD/YYYY'),
+            startDate: dayjs(selectedDate.toDate()).format('MM/DD/YYYY'),
+            endDate: dayjs(selectedDate.toDate()).format('MM/DD/YYYY'),
+          },
+          smallExpenses: smallExpenses.map((expense: any) => ({
+            ...expense,
+            date: dayjs(expense.date).format('MM/DD/YYYY'),
+          })),
+        },
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('Something went wrong: ', error);
+      showNotification('error', 'Something went wrong: ' + error);
+    }
+  };
+
   // Handle form submission
   const handleSubmit = async () => {
     try {
@@ -512,6 +407,10 @@ export default function CreateTransaction() {
 
       if (transactionType === 'other') {
         await handleSubmitExpense();
+      }
+
+      if (transactionType === 'batch') {
+        await handleSubmitBatchTransaction();
       }
 
       setIsSubmitting(false);
