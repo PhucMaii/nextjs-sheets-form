@@ -8,8 +8,6 @@ import {
   StepLabel,
   Stepper,
   Typography,
-  Breadcrumbs,
-  Link,
 } from '@mui/material';
 import { ArrowBack, Save, Preview } from '@mui/icons-material';
 import { blueGrey, grey } from '@mui/material/colors';
@@ -36,6 +34,7 @@ import { ShadowSection } from '../../reports/styled';
 import { useQuery } from '@tanstack/react-query';
 import { gstRate, pstRate } from '@/app/lib/constant';
 import { IExpenseItem } from '@/pages/api/admin/[companyId]/inventory/expenses/POST';
+import BackButton from '../../components/BackButton';
 
 export default function CreateTransaction() {
   const { companyId }: any = useParams();
@@ -63,6 +62,19 @@ export default function CreateTransaction() {
     queryFn: () =>
       axios
         .get(getAdminApiUrl(companyId, '/vendors'))
+        .then((res) => res.data.data),
+  });
+
+  const { data: codList } = useQuery({
+    queryKey: ['codList'],
+    queryFn: () =>
+      axios
+        .get(
+          getAdminApiUrl(
+            companyId,
+            `/cod?date=${YYYYMMDDFormat(selectedDate.toDate())}`,
+          ),
+        )
         .then((res) => res.data.data),
   });
 
@@ -446,7 +458,7 @@ export default function CreateTransaction() {
       <Container maxWidth="xl">
         {/* Header */}
         <Box mb={4}>
-          <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 2 }}>
+          {/* <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 2 }}>
             <Link
               color="inherit"
               href={`/admin/${companyId}/transactions`}
@@ -459,7 +471,8 @@ export default function CreateTransaction() {
               Transactions
             </Link>
             <Typography color="text.primary">Create New</Typography>
-          </Breadcrumbs>
+          </Breadcrumbs> */}
+          <BackButton />
 
           <Box
             display="flex"
@@ -564,6 +577,7 @@ export default function CreateTransaction() {
               setIsShowDiscountPercent={setIsShowDiscountPercent}
               smallExpenses={smallExpenses}
               setSmallExpenses={setSmallExpenses}
+              codList={codList || []}
             />
           )}
           {activeStep === 2 && (

@@ -1,16 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  Box,
-  Button,
-  Typography,
-  Breadcrumbs,
-  Link,
-  Paper,
-  Chip,
-  Alert,
-} from '@mui/material';
+import { Box, Button, Typography, Paper, Chip, Alert } from '@mui/material';
 import { ArrowBack, Save } from '@mui/icons-material';
 import { blueGrey } from '@mui/material/colors';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
@@ -24,6 +15,8 @@ import axios from 'axios';
 import { IExpense } from '@/app/utils/type';
 import { gstRate, pstRate } from '@/app/lib/constant';
 import useNotification from '@/hooks/useNotification';
+import BackButton from '../../components/BackButton';
+import { YYYYMMDDFormat } from '@/app/utils/time';
 
 export default function EditTransaction() {
   const { companyId, id }: any = useParams();
@@ -69,6 +62,19 @@ export default function EditTransaction() {
     queryFn: () =>
       axios
         .get(getAdminApiUrl(companyId, '/vendors'))
+        .then((res) => res.data.data),
+  });
+
+  const { data: codList } = useQuery({
+    queryKey: ['codList'],
+    queryFn: () =>
+      axios
+        .get(
+          getAdminApiUrl(
+            companyId,
+            `/cod?date=${YYYYMMDDFormat(selectedDate.toDate())}`,
+          ),
+        )
         .then((res) => res.data.data),
   });
 
@@ -519,7 +525,7 @@ export default function EditTransaction() {
           {/* <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}> */}
           {/* Header */}
           <Box sx={{ mb: 4 }}>
-            <Breadcrumbs sx={{ mb: 2 }}>
+            {/* <Breadcrumbs sx={{ mb: 2 }}>
               <Link
                 underline="hover"
                 color="inherit"
@@ -529,8 +535,8 @@ export default function EditTransaction() {
                 Transactions
               </Link>
               <Typography color="text.primary">Edit Transaction</Typography>
-            </Breadcrumbs>
-
+            </Breadcrumbs> */}
+            <BackButton />
             <Box
               display="flex"
               justifyContent="space-between"
@@ -552,24 +558,24 @@ export default function EditTransaction() {
                   </Typography>
                 </Box>
               </Box>
-              <Box display="flex" gap={2}>
-                <Button
+              {/* <Box display="flex" gap={2}> */}
+              {/* <Button
                   variant="outlined"
                   startIcon={<ArrowBack />}
                   onClick={() => router.back()}
                 >
                   Back
-                </Button>
-                <Button
-                  variant="contained"
-                  startIcon={<Save />}
-                  onClick={handleSave}
-                  disabled={saving}
-                  sx={{ minWidth: 120 }}
-                >
-                  {saving ? 'Saving...' : 'Save Changes'}
-                </Button>
-              </Box>
+                </Button> */}
+              <Button
+                variant="contained"
+                startIcon={<Save />}
+                onClick={handleSave}
+                disabled={saving}
+                sx={{ minWidth: 120 }}
+              >
+                {saving ? 'Saving...' : 'Save Changes'}
+              </Button>
+              {/* </Box> */}
             </Box>
           </Box>
 
@@ -608,6 +614,7 @@ export default function EditTransaction() {
                 smallExpenses={smallExpenses}
                 setSmallExpenses={setSmallExpenses}
                 isEditMode
+                codList={codList || []}
               />
             </Paper>
           </Fade>

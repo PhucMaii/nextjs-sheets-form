@@ -42,6 +42,7 @@ import { primaryColor } from '@/theme/color';
 import { gstRate, pstRate } from '@/app/lib/constant';
 import DateRange from '../../Modals/DateRangeModal';
 import { useEffect, useState } from 'react';
+import ErrorComponent from '../../ErrorComponent';
 
 interface PropTypes {
   transactionType: TransactionType;
@@ -62,6 +63,7 @@ interface PropTypes {
   smallExpenses: any;
   setSmallExpenses: (data: any) => void;
   isEditMode?: boolean;
+  codList: any;
 }
 
 export default function DetailsStep({
@@ -83,6 +85,7 @@ export default function DetailsStep({
   smallExpenses,
   setSmallExpenses,
   isEditMode = false,
+  codList,
 }: PropTypes) {
   const [isSelectRangeOpen, setIsSelectRangeOpen] = useState(false);
 
@@ -633,6 +636,70 @@ export default function DetailsStep({
               </Grid>
             </BorderSection>
           </Grid>
+
+          {/* Assign COD */}
+          {transactionType !== 'batch' && (
+            <Grid item xs={12}>
+              <BorderSection>
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  <Typography variant="subtitle1" gutterBottom>
+                    Assign COD
+                  </Typography>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={formData?.isCOD}
+                        onChange={(e) =>
+                          setFormData((prev: any) => ({
+                            ...prev,
+                            isCOD: e.target.checked,
+                          }))
+                        }
+                      />
+                    }
+                    label="Assign COD"
+                  />
+                </Box>
+
+                {formData.isCOD ? (
+                  <FormControl fullWidth>
+                    <InputLabel>COD</InputLabel>
+                    <Select
+                      disabled={!formData?.isCOD}
+                      label="COD"
+                      startAdornment={
+                        <InputAdornment position="start">
+                          <CreditCardIcon />
+                        </InputAdornment>
+                      }
+                      value={formData?.codId}
+                      onChange={(e) =>
+                        setFormData((prev: any) => ({
+                          ...prev,
+                          codId: e.target.value,
+                        }))
+                      }
+                    >
+                      <MenuItem value={-1}>
+                        <em>Select COD</em>
+                      </MenuItem>
+                      {codList?.map((cod: any) => (
+                        <MenuItem key={cod.id} value={cod.id}>
+                          {cod.employee?.name || "No Route Board"} - {cod.date}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                ) : (
+                  <ErrorComponent errorText="No COD assigned" />
+                )}
+              </BorderSection>
+            </Grid>
+          )}
 
           {/* Transaction Items */}
           {transactionType === 'stock' ? (
