@@ -54,13 +54,14 @@ interface PropTypes {
   adminsAndDrivers: any;
   paymentMethods: any;
   selectedVendorId: any;
-  setSelectedVendorId: any;
+  setSelectedVendorId?: any;
   sortedVendors: any;
   vendorItems: any;
   isShowDiscountPercent: boolean;
   setIsShowDiscountPercent: (value: boolean) => void;
   smallExpenses: any;
   setSmallExpenses: (data: any) => void;
+  isEditMode?: boolean;
 }
 
 export default function DetailsStep({
@@ -81,6 +82,7 @@ export default function DetailsStep({
   setIsShowDiscountPercent,
   smallExpenses,
   setSmallExpenses,
+  isEditMode = false,
 }: PropTypes) {
   const [isSelectRangeOpen, setIsSelectRangeOpen] = useState(false);
 
@@ -116,12 +118,38 @@ export default function DetailsStep({
         discountPercentage: 0,
         description: '',
         spentBy: '',
-        paymentMethodId: -1,
+        paymentMethodId: formData?.paymentMethodId || -1,
       }));
 
       setSmallExpenses(newSmallExpenses);
     }
   }, [formData?.dateRange, formData?.total]);
+
+  // In edit mode only
+  useEffect(() => {
+    if (isEditMode && transactionType === 'batch') {
+      // Divide total by number of months
+      const subTotalPerMonth =
+        Math.round((formData?.subTotal / smallExpenses.length) * 100) / 100;
+      const totalPerMonth =
+        Math.round((formData?.total / smallExpenses.length) * 100) / 100;
+      const gstPerMonth =
+        Math.round((formData?.GST / smallExpenses.length) * 100) / 100;
+      const pstPerMonth =
+        Math.round((formData?.PST / smallExpenses.length) * 100) / 100;
+
+      // Set up small expenses for each month in date range
+      const newSmallExpenses = smallExpenses.map((expense: any) => ({
+        ...expense,
+        subTotal: subTotalPerMonth,
+        total: totalPerMonth,
+        GST: gstPerMonth,
+        PST: pstPerMonth,
+      }));
+
+      setSmallExpenses(newSmallExpenses);
+    }
+  }, [formData?.total]);
 
   const getUniqueMonthsFromDateRange = (
     startDate: Date,
@@ -373,17 +401,28 @@ export default function DetailsStep({
       const removedExpense = prev.find((expense: any) => expense.id === id);
 
       const diff = removedExpense.subTotal;
-      const redistributionPerExpense = prev.length > 0 ? diff / (prev.length - 1) : 0;
+      const redistributionPerExpense =
+        prev.length > 0 ? diff / (prev.length - 1) : 0;
 
       const newSmallExpenses = prev.map((expense: any) => {
         if (expense.id !== id) {
           const adjustedSubtotal = expense.subTotal + redistributionPerExpense;
           const newSubtotal = Math.round(adjustedSubtotal * 100) / 100;
-          const newPst = formData?.hasPST ? Math.round(adjustedSubtotal * pstRate * 100) / 100 : 0;
-          const newGst = formData?.hasGST ? Math.round(adjustedSubtotal * gstRate * 100) / 100 : 0;
+          const newPst = formData?.hasPST
+            ? Math.round(adjustedSubtotal * pstRate * 100) / 100
+            : 0;
+          const newGst = formData?.hasGST
+            ? Math.round(adjustedSubtotal * gstRate * 100) / 100
+            : 0;
           const newTotal = newSubtotal + newPst + newGst;
 
-          return { ...expense, subTotal: newSubtotal, GST: newGst, PST: newPst, total: newTotal };
+          return {
+            ...expense,
+            subTotal: newSubtotal,
+            GST: newGst,
+            PST: newPst,
+            total: newTotal,
+          };
         }
         return null;
       });
@@ -629,7 +668,7 @@ export default function DetailsStep({
                   </Typography>
                 </Divider> */}
 
-                  <FormControl fullWidth>
+                  <FormControl fullWidth disabled={!setSelectedVendorId}>
                     <InputLabel sx={{ mb: 1 }} htmlFor="vendor-select">
                       Vendor
                     </InputLabel>
@@ -637,7 +676,7 @@ export default function DetailsStep({
                       id="vendor-select"
                       value={selectedVendorId}
                       onChange={(e) =>
-                        setSelectedVendorId(Number(e.target.value))
+                        setSelectedVendorId?.(Number(e.target.value))
                       }
                       fullWidth
                       sx={{ mb: 3 }}
@@ -1287,7 +1326,9 @@ export default function DetailsStep({
                         />
                       </Grid>
                       <Grid item xs={1}>
-                        <IconButton onClick={() => removeSmallExpense(expense.id)}>
+                        <IconButton
+                          onClick={() => removeSmallExpense(expense.id)}
+                        >
                           <Trash2Icon />
                         </IconButton>
                       </Grid>

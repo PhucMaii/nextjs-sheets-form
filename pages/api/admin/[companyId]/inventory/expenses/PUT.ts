@@ -5,9 +5,12 @@ import { IInventoryUnit } from '@/app/utils/type';
 import { subtractInventoryItem } from '../../orderedItems/single';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
+import { getTodayDate } from '@/pages/api/utils/date';
+import { getCreatedBy } from '@/pages/api/import-sheets/utils';
+import { USER_ROLE } from '@/app/utils/enum';
 
 interface IPurchasedItem {
-  id: number; // Inventory Item Id
+  id: number; // ordered items id
   name: string;
   quantity: number;
   unitPrice: number;
@@ -32,7 +35,6 @@ interface IBody {
   // oldItemIds: number[]; // Ordered items ids
   oldItems: IPurchasedItem[];
   updatedItems: IPurchasedItem[] | any;
-  updatedAt: string;
   discount?: number;
 }
 
@@ -61,9 +63,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       spentBy,
       oldItems,
       updatedItems,
-      updatedAt,
       discount,
     }: IBody = req.body;
+
+    const updatedAt = getTodayDate().dateAndTime;
 
     const existingExpense = await prisma.expense.findUnique({
       where: {
@@ -133,8 +136,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       return item.id;
     });
 
-    console.log({ oldItemIds, updatedItems });
-
     // Check is there any changes in ordered items
     let isOrderedItemsChange = false;
     if (oldItemIds.length !== updatedItems.length) {
@@ -164,7 +165,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     if (isOrderedItemsChange) {
       const session: any = await getServerSession(req, res, authOptions);
       const user: any = session?.user;
-      const createdBy = `Admin - ${user?.name}`;
+      const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
 
       const vendorItems = await prisma.vendorItem.findMany({
         where: {
@@ -217,13 +218,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             (fifo: any) => fifo.id === existedItem?.fifoId,
           );
 
-          console.log({ existedFifo });
-
           if (!existedFifo) {
             continue;
           }
 
-          console.log({ existedFifo, existedItem, item });
           const newFifoQuantity =
             existedFifo.quantity - existedItem.quantity + item.quantity;
 
@@ -278,7 +276,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           ...newItem.vendorItem,
           unit: newItem.unit,
         }));
-        console.log(vendorItemList, 'vendorItemList');
 
         await createFifo(
           Number(companyId),

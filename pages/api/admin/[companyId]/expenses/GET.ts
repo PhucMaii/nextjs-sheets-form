@@ -1,5 +1,4 @@
 import { generateListOfDateString, generateMonthRange } from '@/app/utils/time';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { TRANSACTION_STATUS, VIEW_TYPE } from '@/app/utils/enum';
 import {
@@ -14,7 +13,7 @@ interface IQuery {
   startDate?: string;
   endDate?: string;
   id?: string;
-  type?: VIEW_TYPE;
+  type?: VIEW_TYPE | string; // could be 'stockPurchased', 'other', 'batch'
   companyId?: string;
 }
 
@@ -28,12 +27,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { startDate, endDate, id, type, companyId }: IQuery = req.query;
 
-    if (!startDate || !endDate || !companyId) {
+    if (!companyId) {
       return res.status(404).json({ error: 'Missing required parameters' });
     }
 
-    const formattedStartDate = formatDate(startDate);
-    const formattedEndDate = formatDate(endDate);
+    const formattedStartDate = formatDate(startDate || '');
+    const formattedEndDate = formatDate(endDate || '');
 
     const listOfDateString = generateListOfDateString(
       formattedStartDate,
@@ -43,7 +42,14 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     // console.log(listOfDateString, 'listOfDateString');
 
     if (!id || Number(id) <= 0) {
-      const expenses = await prisma.expense.findMany({
+      const expenses = await getTransactions({
+        date: {
+          in: listOfDateString,
+        },
+        companyId: Number(companyId),
+      });
+
+      const batchTransactions: any = await prisma.batchTransaction.findMany({
         where: {
           date: {
             in: listOfDateString,
@@ -51,30 +57,15 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           companyId: Number(companyId),
         },
         include: {
+          transactions: true,
           paymentMethod: true,
-          vendors: {
-            include: {
-              vendor: true,
-            },
-          },
-          orderedItems: {
-            include: {
-              inventoryUnit: true,
-              fifo: {
-                select: {
-                  _count: {
-                    select: {
-                      orderedItems: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
         },
       });
 
-      const sortedExpensesByDate = sortExpenseByDate(expenses);
+      const sortedExpensesByDate = sortExpenseByDate([
+        ...expenses,
+        ...batchTransactions,
+      ]);
 
       const transactionBasedOnDate = sortedExpensesByDate.reduce(
         (acc: any, expense: any) => {
@@ -82,7 +73,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             acc[expense.date] = 0;
           }
 
-          acc[expense.date] += expense.amount;
+          acc[expense.date] += expense?.amount || expense?.total;
           return acc;
         },
         {},
@@ -101,11 +92,30 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     let expenses = [];
     if (id) {
+      if (type && type === 'batch') {
+        const batchTransaction = await prisma.batchTransaction.findUnique({
+          where: {
+            id: Number(id),
+          },
+          include: {
+            transactions: true,
+            paymentMethod: true,
+          },
+        });
+
+        return res.status(200).json({
+          data: batchTransaction,
+          message: 'Fetch Batch Transaction successfully',
+        });
+      }
+
       expenses = await getTransactions({
-        date: {
-          in: listOfDateString,
-        },
-        paymentMethodId: Number(id),
+        id: Number(id),
+      });
+
+      return res.status(200).json({
+        data: expenses[0],
+        message: 'Fetch Expenses successfully',
       });
     }
 
@@ -115,54 +125,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           in: listOfDateString,
         },
       });
-      // const vendor = await prisma.vendor.findUnique({
-      //   where: {
-      //     id: Number(id),
-      //   },
-      //   include: {
-      //     expense: {
-      //       where: {
-      //         expense: {
-      //           date: {
-      //             in: listOfDateString,
-      //           },
-      //         },
-      //       },
-      //       include: {
-      //         expense: {
-      //           include: {
-      //             paymentMethod: true,
-      //             vendors: {
-      //               include: {
-      //                 vendor: true,
-      //               },
-      //             },
-      //             orderedItems: {
-      //               include: {
-      //                 inventoryUnit: true,
-      //                 fifo: {
-      //                   select: {
-      //                     _count: {
-      //                       select: {
-      //                         orderedItems: true,
-      //                       },
-      //                     },
-      //                   },
-      //                 },
-      //               },
-      //             },
-      //           },
-      //         },
-      //       },
-      //     },
-      //   },
-      // });
-
-      // if (!vendor) {
-      //   return res.status(404).json({ error: 'Vendor not found' });
-      // }
-
-      // expenses = vendor.expense.map((expense: any) => expense.expense);
     } else if (type && type === VIEW_TYPE.STOCK_PURCHASED) {
       const stockPurchased = await getTransactions({
         date: {
@@ -288,9 +250,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       shortestPaymentDelay: paymentDelays.shortestPaymentDelay,
       lastMonthExpenses: lastMonthExpenses.totalSpent,
       lastMonthExpensesPercentage:
-        Math.round(
-          (lastMonthExpenses.totalSpent / totalSpent) * 100 * 100,
-        ) / 100,
+        Math.round((lastMonthExpenses.totalSpent / totalSpent) * 100 * 100) /
+        100,
       thisMonthExpensesPercentage:
         Math.round((totalSpent / lastMonthExpenses.totalSpent) * 100 * 100) /
         100,
@@ -309,10 +270,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 }
 
 const getTransactions = async (condition: any) => {
-  const prisma = new PrismaClient();
-
   const res = await prisma.expense.findMany({
-    where: condition,
+    where: { ...condition, batchTransactionId: null },
     include: {
       paymentMethod: true,
       vendors: {
@@ -322,6 +281,7 @@ const getTransactions = async (condition: any) => {
       },
       orderedItems: {
         include: {
+          inventoryItem: true,
           inventoryUnit: true,
           fifo: {
             select: {
@@ -491,8 +451,7 @@ const getPaymentDelays = (expenses: any) => {
 };
 
 const getLastMonthExpenses = async (companyId: number, startDate: any) => {
-  const lastMonthListOfDateString =
-    getLastMonthListOfDateString(startDate);
+  const lastMonthListOfDateString = getLastMonthListOfDateString(startDate);
 
   const lastMonthExpenses = await getTransactions({
     date: {

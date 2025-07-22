@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 
 import { Payment } from '@mui/icons-material';
-import { BoxIcon, Folders, FoldersIcon } from 'lucide-react';
+import { BoxIcon, FoldersIcon } from 'lucide-react';
 
 export type TransactionType = 'stock' | 'other' | 'batch' | '';
 

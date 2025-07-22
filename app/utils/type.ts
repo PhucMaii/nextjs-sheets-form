@@ -377,5 +377,5 @@ export interface IOrderAction extends OrderAction {
 }
 
 export interface IBatchTransaction extends BatchTransaction {
-
+  transactions: IExpense[];
 }

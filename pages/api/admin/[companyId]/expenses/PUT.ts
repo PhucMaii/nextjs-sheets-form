@@ -11,6 +11,7 @@ interface IBody {
   GST: number;
   subTotal: number;
   discount?: number;
+  status?: string;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
@@ -27,6 +28,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       GST,
       subTotal,
       discount,
+      status,
     }: IBody = req.body;
 
     const existingExpense = await prisma.expense.findUnique({
@@ -52,6 +54,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         PST,
         GST,
         discount,
+        status,
       },
     });
 

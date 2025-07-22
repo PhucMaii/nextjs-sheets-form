@@ -306,6 +306,11 @@ export default function CreateTransaction() {
 
   const handleSubmitStock = async () => {
     try {
+      if (expenseItems.length === 0) {
+        showNotification('error', 'Please add items to the stock purchase');
+        return;
+      }
+
       const response = await axios.post(
         getAdminApiUrl(companyId, '/inventory/expenses'),
         {
@@ -375,8 +380,8 @@ export default function CreateTransaction() {
           batchTransaction: {
             ...formData,
             date: dayjs(selectedDate.toDate()).format('MM/DD/YYYY'),
-            startDate: dayjs(selectedDate.toDate()).format('MM/DD/YYYY'),
-            endDate: dayjs(selectedDate.toDate()).format('MM/DD/YYYY'),
+            startDate: dayjs(formData.startDate.toDate()).format('MM/DD/YYYY'),
+            endDate: dayjs(formData.endDate.toDate()).format('MM/DD/YYYY'),
           },
           smallExpenses: smallExpenses.map((expense: any) => ({
             ...expense,

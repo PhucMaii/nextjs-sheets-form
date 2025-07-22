@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   Checkbox,
+  Chip,
   Paper,
   Table,
   TableBody,
@@ -20,7 +21,7 @@ import EditStockPurchased from '../Modals/edit/EditStockPurchased';
 import SelectExpenseStatus from '../Select/SelectExpenseStatus';
 import { IExpense } from '@/app/utils/type';
 import { grey } from '@mui/material/colors';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 interface IProps {
@@ -46,6 +47,7 @@ const TransactionsTable = ({
   handleSelectExpense,
   handleSelectAll,
 }: IProps) => {
+  const router = useRouter();
   const [deleteProps, setDeleteProps] = useState<any>({
     open: false,
     transaction: transactions[0],
@@ -95,6 +97,43 @@ const TransactionsTable = ({
       console.log(error);
       showNotification('error', 'Something went wrong');
       return;
+    }
+  };
+
+  const getTypeStyles = (type: string) => {
+    switch (type) {
+      case 'batch':
+        return {
+          backgroundColor: '#f8f9ff',
+          borderLeft: '4px solid #1976d2',
+          chipColor: 'primary' as const,
+          chipVariant: 'filled' as const,
+          fontWeight: 600,
+        };
+      case 'stock':
+        return {
+          backgroundColor: '#f3f8f3',
+          borderLeft: '4px solid #388e3c',
+          chipColor: 'success' as const,
+          chipVariant: 'filled' as const,
+          fontWeight: 600,
+        };
+      case 'other':
+        return {
+          backgroundColor: 'inherit',
+          borderLeft: 'none',
+          chipColor: 'default' as const,
+          chipVariant: 'outlined' as const,
+          fontWeight: 400,
+        };
+      default:
+        return {
+          backgroundColor: 'inherit',
+          borderLeft: 'none',
+          chipColor: 'default' as const,
+          chipVariant: 'outlined' as const,
+          fontWeight: 400,
+        };
     }
   };
 
@@ -153,6 +192,7 @@ const TransactionsTable = ({
                 </TableCell>
               )}
               <TableCell>Method</TableCell>
+              <TableCell>Type</TableCell>
               <TableCell>Invoice</TableCell>
               <TableCell>Amount</TableCell>
               <TableCell>Vendor</TableCell>
@@ -169,10 +209,24 @@ const TransactionsTable = ({
                 const isExpenseSelected = selectedExpense?.some(
                   (expense: IExpense) => expense.id === transaction.id,
                 );
+                const type = transaction?.transactions
+                  ? 'batch'
+                  : transaction?.orderedItems?.length > 0
+                    ? 'stock'
+                    : 'other';
+
+                // Define styling based on transaction type
+
+                const typeStyles = getTypeStyles(type);
+
                 return (
                   <TableRow
                     key={index}
-                    sx={{ '&:hover': { backgroundColor: grey[50] } }}
+                    sx={{
+                      '&:hover': { backgroundColor: grey[50] },
+                      // backgroundColor: typeStyles.backgroundColor,
+                      // borderLeft: typeStyles.borderLeft,
+                    }}
                     onClick={() =>
                       setEditProps({
                         open: true,
@@ -204,14 +258,28 @@ const TransactionsTable = ({
                       />
                       {/* </Toolbar> */}
                     </TableCell>
+                    <TableCell style={{ width: 120 }}>
+                      <Chip
+                        label={type}
+                        size="small"
+                        color={typeStyles.chipColor}
+                        variant={typeStyles.chipVariant}
+                        sx={{
+                          fontSize: '0.75rem',
+                          height: '20px',
+                          fontWeight: typeStyles.fontWeight,
+                        }}
+                      />
+                    </TableCell>
                     <TableCell style={{ width: 50 }}>
                       {transaction?.invoice}
                     </TableCell>
                     <TableCell style={{ width: 100 }}>
-                      ${transaction.amount}
+                      ${transaction?.amount || transaction?.total}
                     </TableCell>
                     <TableCell style={{ width: 300 }}>
-                      {transaction?.vendors[0]?.vendor?.name}
+                      {transaction?.vendors &&
+                        transaction?.vendors[0]?.vendor?.name}
                     </TableCell>
                     <TableCell style={{ width: 300 }}>
                       {transaction.description}
@@ -239,6 +307,23 @@ const TransactionsTable = ({
                             includedButton
                           /> */}
                           <Button
+                            onClick={() =>
+                              // setEditProps({
+                              //   open: true,
+                              //   transaction,
+                              //   type:
+                              //     transaction?.orderedItems?.length > 0
+                              //       ? ExpenseType.stockPurchased
+                              //       : ExpenseType.other,
+                              // })
+                              router.push(
+                                `/admin/${companyId}/transactions/${transaction.id}?type=${type}`,
+                              )
+                            }
+                          >
+                            Edit
+                          </Button>
+                          <Button
                             color="error"
                             onClick={(e: any) => {
                               e.stopPropagation();
@@ -247,20 +332,6 @@ const TransactionsTable = ({
                             }}
                           >
                             Delete
-                          </Button>
-                          <Button
-                            onClick={() =>
-                              setEditProps({
-                                open: true,
-                                transaction,
-                                type:
-                                  transaction?.orderedItems?.length > 0
-                                    ? ExpenseType.stockPurchased
-                                    : ExpenseType.other,
-                              })
-                            }
-                          >
-                            Edit
                           </Button>
                           {/* {adminsAndDrivers &&
                           transaction?.orderedItems?.length > 0 ? (

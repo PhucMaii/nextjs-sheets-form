@@ -9,14 +9,12 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  Select,
   TextField,
   Typography,
   Chip,
   Stack,
   Paper,
   Divider,
-  Badge,
   Button,
   InputAdornment,
 } from '@mui/material';
@@ -36,9 +34,7 @@ import {
   FilterIcon,
   SearchIcon,
   XIcon,
-  CreditCardIcon,
   CalendarIcon,
-  UsersIcon,
 } from 'lucide-react';
 import LoadingModal from '../components/Modals/LoadingModal';
 import { useUpdateExpenseStatus } from '@/hooks/update/useUpdateExpenseStatus';
@@ -48,7 +44,7 @@ export default function Transactions() {
   const { companyId }: any = useParams();
   const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
   const [baseTransactions, setBaseTransactions] = useState<IExpense[]>([]);
-  const [currentMethodId, setCurrentMethodId] = useState<number>(-1);
+  // const [currentMethodId, setCurrentMethodId] = useState<number>(-1);
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
   const [filterStatus, setFilterStatus] = useState<string>('All');
   const [filterAnchorEl, setFilterAnchorEl] = useState<any>(null);
@@ -68,13 +64,11 @@ export default function Transactions() {
   } = useUpdateExpenseStatus(showNotification, selectedExpenses);
 
   // Data Fetching
-  const [paymentMethods] = SWRFetchData(
-    getAdminApiUrl(companyId, '/paymentMethods'),
-  );
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [expenses, _mutateExpenses, isValidating] = SWRFetchData(
     getAdminApiUrl(
       companyId,
-      `/expenses?startDate=${dateRange[0]}&endDate=${dateRange[1]}&id=${currentMethodId}`,
+      `/expenses?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
     ),
   );
   const [adminsAndDriversRes] = SWRFetchData(
@@ -170,7 +164,7 @@ export default function Transactions() {
   };
 
   const filterSummary = useMemo(() => {
-    let summary = `${displayTransactions.length} of ${baseTransactions.length} transactions`;
+    const summary = `${displayTransactions.length} of ${baseTransactions.length} transactions`;
     return summary;
   }, [displayTransactions, baseTransactions]);
 
