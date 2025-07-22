@@ -72,6 +72,8 @@ export default function EditTransaction() {
         .then((res) => res.data.data),
   });
 
+  console.log('expenseItems', transactionData?.orderedItems);
+
   const sortedVendors = useMemo(() => {
     if (!vendors) {
       return [];
@@ -122,6 +124,13 @@ export default function EditTransaction() {
           hasPST: transaction?.PST || transaction.PST > 0,
           hasGST: transaction?.GST || transaction.GST > 0,
           total: transaction?.total || transaction?.amount || 0,
+          dateRange:
+            type === 'batch'
+              ? [
+                  dayjs(transaction?.startDate).toDate(),
+                  dayjs(transaction?.endDate).toDate(),
+                ]
+              : [],
         });
         setSelectedDate(dayjs(transaction.date));
 
@@ -264,7 +273,7 @@ export default function EditTransaction() {
         );
 
         return {
-          id: oldItem?.id,
+          id: oldItem?.id || crypto.randomUUID(),
           name: item.inventoryItem.name,
           quantity: item.quantity,
           unitPrice: item.unitPrice,
@@ -276,11 +285,14 @@ export default function EditTransaction() {
         };
       });
 
+      console.log('updatedItems', updatedItems);
+      // return;
+
       const response = await axios.put(
         getAdminApiUrl(companyId, '/inventory/expenses'),
         {
           id: transactionData.id,
-          date: dayjs(transactionData.date).format('MM/DD/YYYY'),
+          date: dayjs(selectedDate).format('MM/DD/YYYY'),
           amount: transactionData.total,
           PST: transactionData?.PST || 0,
           GST: transactionData?.GST || 0,
@@ -312,7 +324,7 @@ export default function EditTransaction() {
     try {
       const response = await axios.put(getAdminApiUrl(companyId, '/expenses'), {
         id: transactionData.id,
-        date: dayjs(transactionData.date).format('MM/DD/YYYY'),
+        date: dayjs(selectedDate).format('MM/DD/YYYY'),
         amount: transactionData.total,
         subTotal: transactionData.subTotal,
         discount: transactionData?.discount || 0,
@@ -335,6 +347,40 @@ export default function EditTransaction() {
     }
   };
 
+  const handleSaveBatchTransaction = async () => {
+    try {
+      const response = await axios.put(
+        getAdminApiUrl(companyId, '/batch-transactions'),
+        {
+          id: transactionData.id,
+          total: transactionData.total,
+          subTotal: transactionData.subTotal,
+          discount: transactionData?.discount || 0,
+          GST: transactionData.GST,
+          PST: transactionData.PST,
+          spentBy: transactionData.spentBy,
+          date: dayjs(selectedDate).format('MM/DD/YYYY'),
+          paymentMethodId: transactionData.paymentMethodId,
+          status: transactionData.status,
+          description: transactionData.description,
+          startDate: dayjs(transactionData.dateRange[0]).format('MM/DD/YYYY'),
+          endDate: dayjs(transactionData.dateRange[1]).format('MM/DD/YYYY'),
+          smallExpenses: smallExpenses,
+        },
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.error('Error saving batch transaction:', error);
+      showNotification('error', 'Something went wrong');
+    }
+  };
+
   const handleSave = async () => {
     if (transactionType === 'stock' && expenseItems.length === 0) {
       showNotification('error', 'Please add items to the stock purchase');
@@ -351,12 +397,19 @@ export default function EditTransaction() {
 
     try {
       setSaving(true);
+      // console.log('transactionType', transactionType);
       if (transactionType === 'stock') {
         await handleSaveStockPurchase();
+        return;
       }
 
       if (transactionType === 'other') {
         await handleSaveOtherExpense();
+      }
+
+      if (transactionType === 'batch') {
+        // console.log('Saving batch transaction');
+        await handleSaveBatchTransaction();
       }
 
       setSaving(false);
@@ -467,14 +520,6 @@ export default function EditTransaction() {
           {/* Header */}
           <Box sx={{ mb: 4 }}>
             <Breadcrumbs sx={{ mb: 2 }}>
-              <Link
-                underline="hover"
-                color="inherit"
-                href={`/admin/${companyId}`}
-                sx={{ cursor: 'pointer' }}
-              >
-                Dashboard
-              </Link>
               <Link
                 underline="hover"
                 color="inherit"

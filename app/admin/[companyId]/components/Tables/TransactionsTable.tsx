@@ -76,10 +76,17 @@ const TransactionsTable = ({
     try {
       let response;
 
+      // stock purchase
       if (transaction?.orderedItems?.length > 0) {
         response = await axios.delete(
           getAdminApiUrl(companyId, `/inventory/expenses?id=${transaction.id}`),
         );
+        // batch transaction
+      } else if (transaction?.transactions?.length > 0) {
+        response = await axios.delete(
+          getAdminApiUrl(companyId, `/batch-transactions?id=${transaction.id}`),
+        );
+        // other expense
       } else {
         response = await axios.delete(
           getAdminApiUrl(companyId, `/expenses?id=${transaction.id}`),
@@ -227,15 +234,19 @@ const TransactionsTable = ({
                       // backgroundColor: typeStyles.backgroundColor,
                       // borderLeft: typeStyles.borderLeft,
                     }}
-                    onClick={() =>
-                      setEditProps({
-                        open: true,
-                        transaction,
-                        type:
-                          transaction?.orderedItems?.length > 0
-                            ? ExpenseType.stockPurchased
-                            : ExpenseType.other,
-                      })
+                    onClick={
+                      () =>
+                        router.push(
+                          `/admin/${companyId}/transactions/${transaction.id}?type=${type}`,
+                        )
+                      // setEditProps({
+                      //   open: true,
+                      //   transaction,
+                      //   type:
+                      //     transaction?.orderedItems?.length > 0
+                      //       ? ExpenseType.stockPurchased
+                      //       : ExpenseType.other,
+                      // })
                     }
                   >
                     {selectedExpense && (

@@ -188,7 +188,24 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           return vendorItem.id === item?.vendorItemId;
         });
 
+        // Conflict - vendor item not found, must be removed from the bill
         if (!vendorItem) {
+          console.error('Conflict - vendor item not found, must be removed from the bill');
+          await prisma.orderedItems.delete({
+            where: {
+              id: item.id,
+            },
+          });
+
+          // subtract quantity
+          if (item.fifo && item.inventoryUnit) {
+            await subtractInventoryItem(
+              -1,
+              item.fifo,
+              item.inventoryUnit,
+              item.quantity,
+            );
+          }
           continue;
         }
 
@@ -275,6 +292,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         const vendorItemList = newAddedItems.map((newItem: any) => ({
           ...newItem.vendorItem,
           unit: newItem.unit,
+          inventoryItemId: newItem.inventoryItem.id,
         }));
 
         await createFifo(
@@ -308,7 +326,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
               price: newItem.unitPrice,
               quantity: newItem.quantity,
               inventoryUnitId: newItem.unit.id,
-              inventoryItemId: newItem.inventoryItemId,
+              inventoryItemId: newItem.inventoryItem.id,
             };
           }
 
@@ -319,7 +337,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             quantity: newItem.quantity,
             fifoId: selectedFifo.id,
             inventoryUnitId: newItem.unit.id,
-            inventoryItemId: newItem.inventoryItemId,
+            inventoryItemId: newItem.inventoryItem.id,
             companyId: Number(companyId),
           };
         });
@@ -350,7 +368,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           },
         });
 
-        // Restock quantity
+        // subtract quantity
         for (const removedItem of removedItems) {
           if (removedItem.fifo && removedItem.inventoryUnit) {
             await subtractInventoryItem(

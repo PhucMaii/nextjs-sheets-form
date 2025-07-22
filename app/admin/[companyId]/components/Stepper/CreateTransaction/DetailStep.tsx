@@ -87,7 +87,7 @@ export default function DetailsStep({
   const [isSelectRangeOpen, setIsSelectRangeOpen] = useState(false);
 
   useEffect(() => {
-    if (formData?.dateRange && transactionType === 'batch') {
+    if (formData?.dateRange && transactionType === 'batch' && !isEditMode) {
       // Get months included in date range
       const uniqueMonths = getUniqueMonthsFromDateRange(
         formData?.dateRange[0],
@@ -759,7 +759,7 @@ export default function DetailsStep({
                       <TextField
                         fullWidth
                         label="Subtotal"
-                        value={formData.subTotal.toFixed(2)}
+                        value={formData?.subTotal?.toFixed(2) || 0}
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">$</InputAdornment>
@@ -771,7 +771,7 @@ export default function DetailsStep({
                       <TextField
                         fullWidth
                         label="GST (5%)"
-                        value={formData.GST.toFixed(2)}
+                        value={formData?.GST?.toFixed(2) || 0}
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">$</InputAdornment>
@@ -784,7 +784,7 @@ export default function DetailsStep({
                       <TextField
                         fullWidth
                         label="PST (7%)"
-                        value={formData.PST.toFixed(2)}
+                        value={formData?.PST?.toFixed(2) || 0}
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">$</InputAdornment>
@@ -797,7 +797,7 @@ export default function DetailsStep({
                       <TextField
                         fullWidth
                         label="Total Amount"
-                        value={formData?.total?.toFixed(2)}
+                        value={formData?.total?.toFixed(2) || 0}
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">$</InputAdornment>
@@ -927,7 +927,7 @@ export default function DetailsStep({
                       <TextField
                         fullWidth
                         label="GST (5%)"
-                        value={formData.GST.toFixed(2)}
+                        value={formData?.GST?.toFixed(2) || 0}
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">$</InputAdornment>
@@ -942,7 +942,7 @@ export default function DetailsStep({
                       <TextField
                         fullWidth
                         label="PST (7%)"
-                        value={formData.PST.toFixed(2)}
+                        value={formData?.PST?.toFixed(2) || 0}
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">$</InputAdornment>
@@ -960,7 +960,7 @@ export default function DetailsStep({
                     <TextField
                       fullWidth
                       label="Total Amount"
-                      value={formData?.total?.toFixed(2)}
+                      value={formData?.total?.toFixed(2) || 0}
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">$</InputAdornment>
