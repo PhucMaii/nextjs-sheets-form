@@ -32,7 +32,7 @@ import {
 } from '@mui/icons-material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
-import { TRANSACTION_STATUS } from '@/app/utils/enum';
+import { getAdminApiUrl, TRANSACTION_STATUS } from '@/app/utils/enum';
 import { BorderSection } from '../../../reports/styled';
 import CreditCardIcon from '@mui/icons-material/CreditCard';
 import ItemRow from './ItemRow';
@@ -43,6 +43,10 @@ import { gstRate, pstRate } from '@/app/lib/constant';
 import DateRange from '../../Modals/DateRangeModal';
 import { useEffect, useState } from 'react';
 import ErrorComponent from '../../ErrorComponent';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
+import { useParams } from 'next/navigation';
+import { YYYYMMDDFormat } from '@/app/utils/time';
 
 interface PropTypes {
   transactionType: TransactionType;
@@ -63,7 +67,6 @@ interface PropTypes {
   smallExpenses: any;
   setSmallExpenses: (data: any) => void;
   isEditMode?: boolean;
-  codList: any;
 }
 
 export default function DetailsStep({
@@ -85,9 +88,29 @@ export default function DetailsStep({
   smallExpenses,
   setSmallExpenses,
   isEditMode = false,
-  codList,
 }: PropTypes) {
+  const { companyId }: any = useParams();
+  const [codDate, setCodDate] = useState<any>(dayjs(formData?.codBoard?.date || ''));
   const [isSelectRangeOpen, setIsSelectRangeOpen] = useState(false);
+
+  const { data: codList } = useQuery({
+    queryKey: ['codList', codDate.format('MM/DD/YYYY')],
+    queryFn: () =>
+      axios
+        .get(
+          getAdminApiUrl(
+            companyId,
+            `/cod?date=${codDate.format('MM/DD/YYYY')}`,
+          ),
+        )
+        .then((res) => res.data.data),
+  });
+
+  useEffect(() => {
+    if (formData?.codBoard?.date) {
+      setCodDate(dayjs(formData?.codBoard?.date));
+    }
+  }, [formData?.codBoard?.date]);
 
   useEffect(() => {
     if (formData?.dateRange && transactionType === 'batch' && !isEditMode) {
@@ -666,34 +689,67 @@ export default function DetailsStep({
                 </Box>
 
                 {formData.isCOD ? (
-                  <FormControl fullWidth>
-                    <InputLabel>COD</InputLabel>
-                    <Select
-                      disabled={!formData?.isCOD}
-                      label="COD"
-                      startAdornment={
-                        <InputAdornment position="start">
-                          <CreditCardIcon />
-                        </InputAdornment>
-                      }
-                      value={formData?.codId}
-                      onChange={(e) =>
-                        setFormData((prev: any) => ({
-                          ...prev,
-                          codId: e.target.value,
-                        }))
-                      }
-                    >
-                      <MenuItem value={-1}>
-                        <em>Select COD</em>
-                      </MenuItem>
-                      {codList?.map((cod: any) => (
-                        <MenuItem key={cod.id} value={cod.id}>
-                          {cod.employee?.name || "No Route Board"} - {cod.date}
+                  <Box>
+                    {/* COD Date Selection */}
+                    {setCodDate && codDate && (
+                      <Box sx={{ mb: 3 }}>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ mb: 2 }}
+                        >
+                          Select a date to fetch available COD options
+                        </Typography>
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                          <DatePicker
+                            label="COD Date"
+                            value={codDate}
+                            onChange={(newValue) => {
+                              if (newValue && setCodDate) {
+                                setCodDate(newValue);
+                              }
+                            }}
+                            slotProps={{
+                              textField: {
+                                fullWidth: false,
+                                sx: { maxWidth: 300 },
+                              },
+                            }}
+                          />
+                        </LocalizationProvider>
+                      </Box>
+                    )}
+
+                    <FormControl fullWidth>
+                      <InputLabel>COD</InputLabel>
+                      <Select
+                        disabled={!formData?.isCOD}
+                        label="COD"
+                        startAdornment={
+                          <InputAdornment position="start">
+                            <CreditCardIcon />
+                          </InputAdornment>
+                        }
+                        value={formData?.codBoardId}
+                        onChange={(e) =>
+                          setFormData((prev: any) => ({
+                            ...prev,
+                            codBoardId: +e.target.value,
+                          }))
+                        }
+                      >
+                        <MenuItem value={-1}>
+                          <em>Select COD</em>
                         </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+                        {codList?.map((cod: any) => (
+                          <MenuItem key={cod.id} value={cod.id}>
+                            {cod.employee?.name || 'No Route Board'} -{' '}
+                            {cod.date}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Box>
                 ) : (
                   <ErrorComponent errorText="No COD assigned" />
                 )}

@@ -36,6 +36,7 @@ interface IBody {
   oldItems: IPurchasedItem[];
   updatedItems: IPurchasedItem[] | any;
   discount?: number;
+  codBoardId?: number;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
@@ -64,6 +65,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       oldItems,
       updatedItems,
       discount,
+      codBoardId,
     }: IBody = req.body;
 
     const updatedAt = getTodayDate().dateAndTime;
@@ -122,6 +124,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         paymentMethodId: paymentMethodId,
         spentBy: spentBy,
         discount: discount,
+        codBoardId: codBoardId,
       },
       include: {
         orderedItems: {

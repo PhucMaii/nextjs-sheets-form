@@ -16,6 +16,7 @@ interface IBody {
   paymentMethodId: number;
   status: TRANSACTION_STATUS;
   discount?: number;
+  codBoardId?: number;
 }
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
@@ -33,6 +34,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       paymentMethodId,
       status,
       discount,
+      codBoardId,
     }: IBody = req.body;
 
     const { companyId } = req.query;
@@ -79,6 +81,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         status,
         discount,
         companyId: Number(companyId),
+        codBoardId,
       },
     });
 

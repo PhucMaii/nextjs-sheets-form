@@ -41,43 +41,6 @@ export default function CreateTransaction() {
   const router = useRouter();
   const { showNotification, NotificationComp } = useNotification();
 
-  const { data: adminsAndDrivers } = useQuery({
-    queryKey: ['adminsAndDrivers'],
-    queryFn: () =>
-      axios
-        .get(getAdminApiUrl(companyId, '/adminsAndDrivers'))
-        .then((res) => res.data.data),
-  });
-
-  const { data: paymentMethods } = useQuery({
-    queryKey: ['paymentMethods'],
-    queryFn: () =>
-      axios
-        .get(getAdminApiUrl(companyId, '/paymentMethods'))
-        .then((res) => res.data.data),
-  });
-
-  const { data: vendors } = useQuery({
-    queryKey: ['vendors'],
-    queryFn: () =>
-      axios
-        .get(getAdminApiUrl(companyId, '/vendors'))
-        .then((res) => res.data.data),
-  });
-
-  const { data: codList } = useQuery({
-    queryKey: ['codList'],
-    queryFn: () =>
-      axios
-        .get(
-          getAdminApiUrl(
-            companyId,
-            `/cod?date=${YYYYMMDDFormat(selectedDate.toDate())}`,
-          ),
-        )
-        .then((res) => res.data.data),
-  });
-
   const [isShowDiscountPercent, setIsShowDiscountPercent] =
     useState<boolean>(false);
   const [selectedVendorId, setSelectedVendorId] = useState<number>(-1);
@@ -129,6 +92,30 @@ export default function CreateTransaction() {
       inventoryItemId: 1,
     },
   ]);
+
+  const { data: adminsAndDrivers } = useQuery({
+    queryKey: ['adminsAndDrivers'],
+    queryFn: () =>
+      axios
+        .get(getAdminApiUrl(companyId, '/adminsAndDrivers'))
+        .then((res) => res.data.data),
+  });
+
+  const { data: paymentMethods } = useQuery({
+    queryKey: ['paymentMethods'],
+    queryFn: () =>
+      axios
+        .get(getAdminApiUrl(companyId, '/paymentMethods'))
+        .then((res) => res.data.data),
+  });
+
+  const { data: vendors } = useQuery({
+    queryKey: ['vendors'],
+    queryFn: () =>
+      axios
+        .get(getAdminApiUrl(companyId, '/vendors'))
+        .then((res) => res.data.data),
+  });
 
   const sortedVendors = useMemo(() => {
     if (!vendors) {
@@ -337,7 +324,7 @@ export default function CreateTransaction() {
           PST: Math.round(formData.PST * 100) / 100,
           discount: Math.round(formData.discount * 100) / 100,
           status: formData.status,
-          codBoardId: formData?.codBoardId || null,
+          codBoardId: formData?.isCOD ? formData?.codBoardId : null,
           items: expenseItems,
         },
       );
@@ -369,6 +356,7 @@ export default function CreateTransaction() {
           paymentMethodId: formData.paymentMethodId,
           status: formData.status,
           discount: formData.discount,
+          codBoardId: formData?.isCOD ? formData?.codBoardId : null,
         },
       );
 
@@ -577,7 +565,6 @@ export default function CreateTransaction() {
               setIsShowDiscountPercent={setIsShowDiscountPercent}
               smallExpenses={smallExpenses}
               setSmallExpenses={setSmallExpenses}
-              codList={codList || []}
             />
           )}
           {activeStep === 2 && (

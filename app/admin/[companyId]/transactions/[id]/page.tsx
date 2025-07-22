@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { Box, Button, Typography, Paper, Chip, Alert } from '@mui/material';
-import { ArrowBack, Save } from '@mui/icons-material';
+import { Box, Button, Typography, Paper, Chip, Alert, Skeleton } from '@mui/material';
+import { Save } from '@mui/icons-material';
 import { blueGrey } from '@mui/material/colors';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { getAdminApiUrl } from '@/app/utils/enum';
@@ -16,7 +16,6 @@ import { IExpense } from '@/app/utils/type';
 import { gstRate, pstRate } from '@/app/lib/constant';
 import useNotification from '@/hooks/useNotification';
 import BackButton from '../../components/BackButton';
-import { YYYYMMDDFormat } from '@/app/utils/time';
 
 export default function EditTransaction() {
   const { companyId, id }: any = useParams();
@@ -62,19 +61,6 @@ export default function EditTransaction() {
     queryFn: () =>
       axios
         .get(getAdminApiUrl(companyId, '/vendors'))
-        .then((res) => res.data.data),
-  });
-
-  const { data: codList } = useQuery({
-    queryKey: ['codList'],
-    queryFn: () =>
-      axios
-        .get(
-          getAdminApiUrl(
-            companyId,
-            `/cod?date=${YYYYMMDDFormat(selectedDate.toDate())}`,
-          ),
-        )
         .then((res) => res.data.data),
   });
 
@@ -130,6 +116,7 @@ export default function EditTransaction() {
           hasPST: transaction?.PST || transaction.PST > 0,
           hasGST: transaction?.GST || transaction.GST > 0,
           total: transaction?.total || transaction?.amount || 0,
+          isCOD: transaction?.codBoardId ? true : false,
           dateRange:
             type === 'batch'
               ? [
@@ -291,9 +278,6 @@ export default function EditTransaction() {
         };
       });
 
-      console.log('updatedItems', updatedItems);
-      // return;
-
       const response = await axios.put(
         getAdminApiUrl(companyId, '/inventory/expenses'),
         {
@@ -311,6 +295,7 @@ export default function EditTransaction() {
           oldItems: transactionData?.orderedItems || [],
           updatedItems: updatedItems,
           isAffectQuantity: true,
+          codBoardId: transactionData?.isCOD ? transactionData?.codBoardId : null,
         },
       );
 
@@ -339,6 +324,7 @@ export default function EditTransaction() {
         description: transactionData.description,
         paymentMethodId: transactionData.paymentMethodId,
         spentBy: transactionData.spentBy,
+        codBoardId: transactionData?.isCOD ? transactionData?.codBoardId : null,
       });
 
       if (response.data.error) {
@@ -406,7 +392,6 @@ export default function EditTransaction() {
       // console.log('transactionType', transactionType);
       if (transactionType === 'stock') {
         await handleSaveStockPurchase();
-        return;
       }
 
       if (transactionType === 'other') {
@@ -488,14 +473,120 @@ export default function EditTransaction() {
 
   if (loading) {
     return (
-      <Box
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        minHeight="400px"
-      >
-        <Typography>Loading transaction...</Typography>
-      </Box>
+      <Sidebar>
+        <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+          <Box
+            component="main"
+            sx={{ flexGrow: 1, width: { xs: '100%', md: 'calc(100% - 240px)' } }}
+          >
+            {/* Header Skeleton */}
+            <Box sx={{ mb: 4 }}>
+              <Skeleton variant="rectangular" width={120} height={24} sx={{ mb: 2 }} />
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+              >
+                <Box>
+                  <Skeleton variant="text" width={200} height={40} sx={{ mb: 1 }} />
+                  <Box display="flex" alignItems="center" gap={2}>
+                    <Skeleton variant="rounded" width={80} height={32} />
+                    <Skeleton variant="text" width={150} height={20} />
+                  </Box>
+                </Box>
+                <Skeleton variant="rounded" width={140} height={36} />
+              </Box>
+            </Box>
+
+            {/* Main Content Skeleton */}
+            <Paper
+              elevation={0}
+              sx={{
+                p: 4,
+                borderRadius: 2,
+                boxShadow: 'rgba(100, 100, 111, 0.2) 0px 7px 29px 0px',
+              }}
+            >
+              {/* Form Fields Skeleton */}
+              <Box sx={{ mb: 3 }}>
+                <Skeleton variant="text" width={120} height={24} sx={{ mb: 1 }} />
+                <Skeleton variant="rectangular" width="100%" height={56} sx={{ mb: 2 }} />
+              </Box>
+
+              <Box sx={{ mb: 3 }}>
+                <Skeleton variant="text" width={100} height={24} sx={{ mb: 1 }} />
+                <Skeleton variant="rectangular" width="100%" height={56} sx={{ mb: 2 }} />
+              </Box>
+
+              <Box display="flex" gap={2} sx={{ mb: 3 }}>
+                <Box sx={{ flex: 1 }}>
+                  <Skeleton variant="text" width={80} height={24} sx={{ mb: 1 }} />
+                  <Skeleton variant="rectangular" width="100%" height={56} />
+                </Box>
+                <Box sx={{ flex: 1 }}>
+                  <Skeleton variant="text" width={100} height={24} sx={{ mb: 1 }} />
+                  <Skeleton variant="rectangular" width="100%" height={56} />
+                </Box>
+              </Box>
+
+              {/* Table/Items Skeleton */}
+              <Box sx={{ mb: 3 }}>
+                <Skeleton variant="text" width={80} height={24} sx={{ mb: 2 }} />
+                <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, overflow: 'hidden' }}>
+                  {/* Table Header */}
+                  <Box
+                    display="flex"
+                    sx={{
+                      backgroundColor: '#f5f5f5',
+                      p: 2,
+                      borderBottom: '1px solid #e0e0e0',
+                    }}
+                  >
+                    <Skeleton variant="text" width={120} height={20} sx={{ mr: 2 }} />
+                    <Skeleton variant="text" width={80} height={20} sx={{ mr: 2 }} />
+                    <Skeleton variant="text" width={80} height={20} sx={{ mr: 2 }} />
+                    <Skeleton variant="text" width={80} height={20} />
+                  </Box>
+                  {/* Table Rows */}
+                  {[1, 2, 3].map((row) => (
+                    <Box
+                      key={row}
+                      display="flex"
+                      sx={{
+                        p: 2,
+                        borderBottom: '1px solid #e0e0e0',
+                        '&:last-child': { borderBottom: 'none' },
+                      }}
+                    >
+                      <Skeleton variant="text" width={120} height={20} sx={{ mr: 2 }} />
+                      <Skeleton variant="text" width={60} height={20} sx={{ mr: 2 }} />
+                      <Skeleton variant="text" width={80} height={20} sx={{ mr: 2 }} />
+                      <Skeleton variant="text" width={80} height={20} />
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+
+              {/* Summary Section Skeleton */}
+              <Box display="flex" justifyContent="flex-end">
+                <Box sx={{ minWidth: 300 }}>
+                  {['Subtotal', 'Discount', 'GST', 'PST', 'Total'].map((label) => (
+                    <Box
+                      key={label}
+                      display="flex"
+                      justifyContent="space-between"
+                      sx={{ mb: 1 }}
+                    >
+                      <Skeleton variant="text" width={80} height={20} />
+                      <Skeleton variant="text" width={60} height={20} />
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+            </Paper>
+          </Box>
+        </Box>
+      </Sidebar>
     );
   }
 
@@ -614,7 +705,6 @@ export default function EditTransaction() {
                 smallExpenses={smallExpenses}
                 setSmallExpenses={setSmallExpenses}
                 isEditMode
-                codList={codList || []}
               />
             </Paper>
           </Fade>

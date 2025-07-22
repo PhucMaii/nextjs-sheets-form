@@ -279,6 +279,7 @@ const getTransactions = async (condition: any) => {
           vendor: true,
         },
       },
+      codBoard: true,
       orderedItems: {
         include: {
           inventoryItem: true,
