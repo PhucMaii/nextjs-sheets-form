@@ -21,6 +21,10 @@ interface IBody {
   status: TRANSACTION_STATUS;
   createdAt: string;
   invoice: string;
+  spentBy: string;
+  discount: number;
+  GST: number;
+  PST: number;
   items: {
     id: number;
     quantity: number;
@@ -46,6 +50,10 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       createdAt,
       invoice,
       items,
+      spentBy,
+      discount,
+      GST,
+      PST,
     }: IBody = req.body;
 
     const driver = await getDriverInfo(req, res);
@@ -121,15 +129,18 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         description: description,
         status,
         paymentMethodId: paymentMethodId,
-        spentBy: createdBy,
+        spentBy,
         createdAt: createdAt,
         codBoardId: dateBoard.id,
         createdBy,
         companyId: driver.companyId,
+        discount,
+        GST,
+        PST,
       },
     });
 
-    const vendorItems = await prisma.vendorItem.findMany({});
+    // const vendorItems = await prisma.vendorItem.findMany({});
     // Create ordered items
     if (items.length > 0) {
       await createFifo(driver?.companyId || -1, items, createdAt, createdBy);

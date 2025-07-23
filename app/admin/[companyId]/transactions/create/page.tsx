@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import { ArrowBack, Save, Preview } from '@mui/icons-material';
 import { blueGrey, grey } from '@mui/material/colors';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { getAdminApiUrl, TRANSACTION_STATUS } from '@/app/utils/enum';
 import { generateMonthRange, YYYYMMDDFormat } from '@/app/utils/time';
 import axios from 'axios';
@@ -40,6 +40,9 @@ export default function CreateTransaction() {
   const { companyId }: any = useParams();
   const router = useRouter();
   const { showNotification, NotificationComp } = useNotification();
+  const params: any = useSearchParams();
+  const codBoardId = params.get('codBoardId');
+  const defaultCodDate = params.get('codDate');
 
   const [isShowDiscountPercent, setIsShowDiscountPercent] =
     useState<boolean>(false);
@@ -79,6 +82,8 @@ export default function CreateTransaction() {
     inventoryItem: null,
     inventoryUnit: null,
     dateRange: generateMonthRange(),
+    codBoardId: codBoardId || null,
+    isCOD: codBoardId ? true : false,
   });
 
   // Expense items for stock purchases
@@ -128,6 +133,16 @@ export default function CreateTransaction() {
 
     return vendorsSorted;
   }, [vendors]);
+
+  // useEffect(() => {
+  //   if (codBoardId) {
+  //     setFormData((prev: any) => ({
+  //       ...prev,
+  //       codBoardId: codBoardId,
+  //       isCOD: true,
+  //     }));
+  //   }
+  // }, [codBoardId]);
 
   // Clear form data and expense items when transaction type changes
   useEffect(() => {
@@ -324,7 +339,7 @@ export default function CreateTransaction() {
           PST: Math.round(formData.PST * 100) / 100,
           discount: Math.round(formData.discount * 100) / 100,
           status: formData.status,
-          codBoardId: formData?.isCOD ? formData?.codBoardId : null,
+          codBoardId: formData?.isCOD ? Number(formData?.codBoardId) : null,
           items: expenseItems,
         },
       );
@@ -356,7 +371,7 @@ export default function CreateTransaction() {
           paymentMethodId: formData.paymentMethodId,
           status: formData.status,
           discount: formData.discount,
-          codBoardId: formData?.isCOD ? formData?.codBoardId : null,
+          codBoardId: formData?.isCOD ? Number(formData?.codBoardId) : null,
         },
       );
 
@@ -565,6 +580,7 @@ export default function CreateTransaction() {
               setIsShowDiscountPercent={setIsShowDiscountPercent}
               smallExpenses={smallExpenses}
               setSmallExpenses={setSmallExpenses}
+              defaultCodDate={defaultCodDate}
             />
           )}
           {activeStep === 2 && (

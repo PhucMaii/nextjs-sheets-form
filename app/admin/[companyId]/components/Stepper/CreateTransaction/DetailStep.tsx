@@ -47,6 +47,7 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
 import { YYYYMMDDFormat } from '@/app/utils/time';
+import { calculateTaxWithDiscount } from '@/app/utils/item';
 
 interface PropTypes {
   transactionType: TransactionType;
@@ -67,6 +68,7 @@ interface PropTypes {
   smallExpenses: any;
   setSmallExpenses: (data: any) => void;
   isEditMode?: boolean;
+  defaultCodDate?: any;
 }
 
 export default function DetailsStep({
@@ -88,9 +90,10 @@ export default function DetailsStep({
   smallExpenses,
   setSmallExpenses,
   isEditMode = false,
+  defaultCodDate,
 }: PropTypes) {
   const { companyId }: any = useParams();
-  const [codDate, setCodDate] = useState<any>(dayjs(formData?.codBoard?.date || ''));
+  const [codDate, setCodDate] = useState<any>(dayjs(defaultCodDate || ''));
   const [isSelectRangeOpen, setIsSelectRangeOpen] = useState(false);
 
   const { data: codList } = useQuery({
@@ -107,10 +110,11 @@ export default function DetailsStep({
   });
 
   useEffect(() => {
-    if (formData?.codBoard?.date) {
-      setCodDate(dayjs(formData?.codBoard?.date));
+    if (defaultCodDate) {
+      setCodDate(dayjs(defaultCodDate));
     }
-  }, [formData?.codBoard?.date]);
+
+  }, [defaultCodDate]);
 
   useEffect(() => {
     if (formData?.dateRange && transactionType === 'batch' && !isEditMode) {
@@ -270,37 +274,6 @@ export default function DetailsStep({
     setExpenseItems((prev: any) => [...prev, newItem]);
   };
 
-  const calculateTaxWithDiscount = (discountPercent: number = 0) => {
-    const gstItems = expenseItems.filter(
-      (item: any) => item?.inventoryItem?.hasGST,
-    );
-    const pstItems = expenseItems.filter(
-      (item: any) => item?.inventoryItem?.hasPST,
-    );
-
-    const gstItemsTotalWithDiscount =
-      gstItems.reduce((acc: any, item: any) => {
-        return acc + item.unitPrice * item.quantity;
-      }, 0) *
-      (1 - discountPercent / 100);
-
-    const pstItemsTotalWithDiscount =
-      pstItems.reduce((acc: any, item: any) => {
-        return acc + item.unitPrice * item.quantity;
-      }, 0) *
-      (1 - discountPercent / 100);
-
-    const gstTotal =
-      Math.round(gstItemsTotalWithDiscount * gstRate * 100) / 100;
-    const pstTotal =
-      Math.round(pstItemsTotalWithDiscount * pstRate * 100) / 100;
-
-    return {
-      gstTotal,
-      pstTotal,
-    };
-  };
-
   const handleDiscountChange = (e: any, type: TransactionType) => {
     const currentSubTotal =
       type === 'stock'
@@ -312,9 +285,7 @@ export default function DetailsStep({
     if (isShowDiscountPercent) {
       const discount = (currentSubTotal * Number(e.target.value)) / 100;
 
-      const { gstTotal, pstTotal } = calculateTaxWithDiscount(
-        Number(e.target.value),
-      );
+      const { gstTotal, pstTotal } = calculateTaxWithDiscount(expenseItems, Number(e.target.value));
 
       const newSubTotal = currentSubTotal - discount;
 
@@ -332,7 +303,7 @@ export default function DetailsStep({
       const discountPercentage =
         Math.round((discount / currentSubTotal) * 100 * 100) / 100;
       const { gstTotal, pstTotal } =
-        calculateTaxWithDiscount(discountPercentage);
+        calculateTaxWithDiscount(expenseItems, discountPercentage);
 
       const newSubTotal = currentSubTotal - discount;
 

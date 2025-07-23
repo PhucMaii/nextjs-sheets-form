@@ -4,6 +4,7 @@ import POST from './POST';
 import GET from './GET';
 import PUT from './PUT';
 import DELETE from './DELETE';
+import withEmployeeAuthGuard from '@/pages/api/utils/withEmployeeAuthGuard';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -35,4 +36,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-export default withAdminAuthGuard(handler);
+export default withEmployeeAuthGuard(handler);

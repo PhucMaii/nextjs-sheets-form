@@ -1,4 +1,4 @@
-import { Fifo, OrderedItems, PrismaClient } from '@prisma/client';
+import { Fifo, OrderedItems, PaymentStatus, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { checkAndUpdateUnits, createFifo } from './POST';
 import { IInventoryUnit } from '@/app/utils/type';
@@ -37,6 +37,7 @@ interface IBody {
   updatedItems: IPurchasedItem[] | any;
   discount?: number;
   codBoardId?: number;
+  status?: PaymentStatus;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
@@ -66,6 +67,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       updatedItems,
       discount,
       codBoardId,
+      status,
     }: IBody = req.body;
 
     const updatedAt = getTodayDate().dateAndTime;
@@ -125,6 +127,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         spentBy: spentBy,
         discount: discount,
         codBoardId: codBoardId,
+        status: status,
       },
       include: {
         orderedItems: {

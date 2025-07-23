@@ -1,3 +1,4 @@
+import { getDriverInfo } from '@/pages/api/utils/auth';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -5,15 +6,18 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { companyId } = req.query;
+    const { companyId }: any = req.query;
 
-    if (!companyId) {
-      return res.status(400).json({ error: 'Missing companyId' });
+    let companyIdNumber = Number(companyId);
+
+    if (isNaN(companyIdNumber)) {
+      const employee: any = await getDriverInfo(req, res);
+      companyIdNumber = employee?.companyId;
     }
 
     const vendors = await prisma.vendor.findMany({
       where: {
-        companyId: Number(companyId),
+        companyId: companyIdNumber,
       },
       include: {
         vendorItem: {

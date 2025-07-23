@@ -1,7 +1,15 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { Box, Button, Typography, Paper, Chip, Alert, Skeleton } from '@mui/material';
+import {
+  Box,
+  Button,
+  Typography,
+  Paper,
+  Chip,
+  Alert,
+  Skeleton,
+} from '@mui/material';
 import { Save } from '@mui/icons-material';
 import { blueGrey } from '@mui/material/colors';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
@@ -289,13 +297,16 @@ export default function EditTransaction() {
           subTotal: transactionData?.subTotal || 0,
           description: transactionData.description,
           paymentMethodId: transactionData.paymentMethodId,
+          status: transactionData.status,
           spentBy: transactionData.spentBy,
           invoice: transactionData.invoice,
           discount: transactionData?.discount || 0,
           oldItems: transactionData?.orderedItems || [],
           updatedItems: updatedItems,
           isAffectQuantity: true,
-          codBoardId: transactionData?.isCOD ? transactionData?.codBoardId : null,
+          codBoardId: transactionData?.isCOD
+            ? Number(transactionData?.codBoardId)
+            : null,
         },
       );
 
@@ -324,7 +335,10 @@ export default function EditTransaction() {
         description: transactionData.description,
         paymentMethodId: transactionData.paymentMethodId,
         spentBy: transactionData.spentBy,
-        codBoardId: transactionData?.isCOD ? transactionData?.codBoardId : null,
+        status: transactionData.status,
+        codBoardId: transactionData?.isCOD
+          ? Number(transactionData?.codBoardId)
+          : null,
       });
 
       if (response.data.error) {
@@ -477,18 +491,31 @@ export default function EditTransaction() {
         <Box sx={{ display: 'flex', minHeight: '100vh' }}>
           <Box
             component="main"
-            sx={{ flexGrow: 1, width: { xs: '100%', md: 'calc(100% - 240px)' } }}
+            sx={{
+              flexGrow: 1,
+              width: { xs: '100%', md: 'calc(100% - 240px)' },
+            }}
           >
             {/* Header Skeleton */}
             <Box sx={{ mb: 4 }}>
-              <Skeleton variant="rectangular" width={120} height={24} sx={{ mb: 2 }} />
+              <Skeleton
+                variant="rectangular"
+                width={120}
+                height={24}
+                sx={{ mb: 2 }}
+              />
               <Box
                 display="flex"
                 justifyContent="space-between"
                 alignItems="center"
               >
                 <Box>
-                  <Skeleton variant="text" width={200} height={40} sx={{ mb: 1 }} />
+                  <Skeleton
+                    variant="text"
+                    width={200}
+                    height={40}
+                    sx={{ mb: 1 }}
+                  />
                   <Box display="flex" alignItems="center" gap={2}>
                     <Skeleton variant="rounded" width={80} height={32} />
                     <Skeleton variant="text" width={150} height={20} />
@@ -509,30 +536,71 @@ export default function EditTransaction() {
             >
               {/* Form Fields Skeleton */}
               <Box sx={{ mb: 3 }}>
-                <Skeleton variant="text" width={120} height={24} sx={{ mb: 1 }} />
-                <Skeleton variant="rectangular" width="100%" height={56} sx={{ mb: 2 }} />
+                <Skeleton
+                  variant="text"
+                  width={120}
+                  height={24}
+                  sx={{ mb: 1 }}
+                />
+                <Skeleton
+                  variant="rectangular"
+                  width="100%"
+                  height={56}
+                  sx={{ mb: 2 }}
+                />
               </Box>
 
               <Box sx={{ mb: 3 }}>
-                <Skeleton variant="text" width={100} height={24} sx={{ mb: 1 }} />
-                <Skeleton variant="rectangular" width="100%" height={56} sx={{ mb: 2 }} />
+                <Skeleton
+                  variant="text"
+                  width={100}
+                  height={24}
+                  sx={{ mb: 1 }}
+                />
+                <Skeleton
+                  variant="rectangular"
+                  width="100%"
+                  height={56}
+                  sx={{ mb: 2 }}
+                />
               </Box>
 
               <Box display="flex" gap={2} sx={{ mb: 3 }}>
                 <Box sx={{ flex: 1 }}>
-                  <Skeleton variant="text" width={80} height={24} sx={{ mb: 1 }} />
+                  <Skeleton
+                    variant="text"
+                    width={80}
+                    height={24}
+                    sx={{ mb: 1 }}
+                  />
                   <Skeleton variant="rectangular" width="100%" height={56} />
                 </Box>
                 <Box sx={{ flex: 1 }}>
-                  <Skeleton variant="text" width={100} height={24} sx={{ mb: 1 }} />
+                  <Skeleton
+                    variant="text"
+                    width={100}
+                    height={24}
+                    sx={{ mb: 1 }}
+                  />
                   <Skeleton variant="rectangular" width="100%" height={56} />
                 </Box>
               </Box>
 
               {/* Table/Items Skeleton */}
               <Box sx={{ mb: 3 }}>
-                <Skeleton variant="text" width={80} height={24} sx={{ mb: 2 }} />
-                <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, overflow: 'hidden' }}>
+                <Skeleton
+                  variant="text"
+                  width={80}
+                  height={24}
+                  sx={{ mb: 2 }}
+                />
+                <Box
+                  sx={{
+                    border: '1px solid #e0e0e0',
+                    borderRadius: 1,
+                    overflow: 'hidden',
+                  }}
+                >
                   {/* Table Header */}
                   <Box
                     display="flex"
@@ -542,9 +610,24 @@ export default function EditTransaction() {
                       borderBottom: '1px solid #e0e0e0',
                     }}
                   >
-                    <Skeleton variant="text" width={120} height={20} sx={{ mr: 2 }} />
-                    <Skeleton variant="text" width={80} height={20} sx={{ mr: 2 }} />
-                    <Skeleton variant="text" width={80} height={20} sx={{ mr: 2 }} />
+                    <Skeleton
+                      variant="text"
+                      width={120}
+                      height={20}
+                      sx={{ mr: 2 }}
+                    />
+                    <Skeleton
+                      variant="text"
+                      width={80}
+                      height={20}
+                      sx={{ mr: 2 }}
+                    />
+                    <Skeleton
+                      variant="text"
+                      width={80}
+                      height={20}
+                      sx={{ mr: 2 }}
+                    />
                     <Skeleton variant="text" width={80} height={20} />
                   </Box>
                   {/* Table Rows */}
@@ -558,9 +641,24 @@ export default function EditTransaction() {
                         '&:last-child': { borderBottom: 'none' },
                       }}
                     >
-                      <Skeleton variant="text" width={120} height={20} sx={{ mr: 2 }} />
-                      <Skeleton variant="text" width={60} height={20} sx={{ mr: 2 }} />
-                      <Skeleton variant="text" width={80} height={20} sx={{ mr: 2 }} />
+                      <Skeleton
+                        variant="text"
+                        width={120}
+                        height={20}
+                        sx={{ mr: 2 }}
+                      />
+                      <Skeleton
+                        variant="text"
+                        width={60}
+                        height={20}
+                        sx={{ mr: 2 }}
+                      />
+                      <Skeleton
+                        variant="text"
+                        width={80}
+                        height={20}
+                        sx={{ mr: 2 }}
+                      />
                       <Skeleton variant="text" width={80} height={20} />
                     </Box>
                   ))}
@@ -570,17 +668,19 @@ export default function EditTransaction() {
               {/* Summary Section Skeleton */}
               <Box display="flex" justifyContent="flex-end">
                 <Box sx={{ minWidth: 300 }}>
-                  {['Subtotal', 'Discount', 'GST', 'PST', 'Total'].map((label) => (
-                    <Box
-                      key={label}
-                      display="flex"
-                      justifyContent="space-between"
-                      sx={{ mb: 1 }}
-                    >
-                      <Skeleton variant="text" width={80} height={20} />
-                      <Skeleton variant="text" width={60} height={20} />
-                    </Box>
-                  ))}
+                  {['Subtotal', 'Discount', 'GST', 'PST', 'Total'].map(
+                    (label) => (
+                      <Box
+                        key={label}
+                        display="flex"
+                        justifyContent="space-between"
+                        sx={{ mb: 1 }}
+                      >
+                        <Skeleton variant="text" width={80} height={20} />
+                        <Skeleton variant="text" width={60} height={20} />
+                      </Box>
+                    ),
+                  )}
                 </Box>
               </Box>
             </Paper>
@@ -705,6 +805,7 @@ export default function EditTransaction() {
                 smallExpenses={smallExpenses}
                 setSmallExpenses={setSmallExpenses}
                 isEditMode
+                defaultCodDate={transactionData?.codBoard?.date}
               />
             </Paper>
           </Fade>

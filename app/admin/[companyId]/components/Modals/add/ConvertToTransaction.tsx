@@ -21,6 +21,7 @@ import { mainPaymentMethodId } from '@/app/lib/constant';
 import axios from 'axios';
 import { useParams, useRouter } from 'next/navigation';
 import StatusText from '../../StatusText';
+import { calculateTaxWithDiscount } from '@/app/utils/item';
 
 interface IProps extends ModalProps {
   showNotification: ShowNotificationType;
@@ -93,38 +94,74 @@ export default function ConvertToTransaction({
   //   }
   // }, [expenseData?.discount, expenseData?.subTotal, expenseData?.tax]);
 
+  const formatPOItems = (items: IPOItem[]) => {
+    return items.map((item: IPOItem) => ({
+      ...item,
+      unitPrice: item.costPerItem,
+      quantity: item.receivedQty || 0,
+    }));
+  };
+
   const onChangeExpense = (field: string, value: number | string) => {
     if (field === 'discount') {
       const discountPercent =
-        Math.round((+value / expenseData?.subTotal) * 100 * 100) / 100;
+        Math.round((Number(value) / (expenseData?.subTotal + Number(value))) * 100 * 100) / 100;
+
+      console.log(discountPercent, 'discountPercent');
+
+      const newSubtotal = updatedPOItems.reduce((acc: number, item: IPOItem) => {
+        return acc + item.costPerItem * (item.receivedQty || 0);
+      }, 0) - Number(value);
+
+      const { pstTotal, gstTotal } = calculateTaxWithDiscount(
+        formatPOItems(updatedPOItems),
+        discountPercent,
+      );
+
+      console.log(gstTotal, 'gstTotal');
+
       setExpenseData((prevState: any) => ({
         ...prevState,
-        discount: +value,
+        discount: Number(value),
         discountPercent: discountPercent,
-        amount: prevState.subTotal + prevState.tax - +value,
+        subTotal: newSubtotal,
+        tax: gstTotal + pstTotal,
+        amount: newSubtotal + gstTotal + pstTotal,
       }));
     } else if (field === 'discountPercent') {
+      const newSubtotalWithoutDiscount = updatedPOItems.reduce((acc: number, item: IPOItem) => {
+        return acc + item.costPerItem * (item.receivedQty || 0);
+      }, 0)
+
       const discount =
-        Math.round((+value / 100) * expenseData?.subTotal * 100) / 100;
+        Math.round((Number(value) / 100) * newSubtotalWithoutDiscount * 100) / 100;
+      
+      const { pstTotal, gstTotal } = calculateTaxWithDiscount(
+        formatPOItems(updatedPOItems),
+        Number(value),
+      );
+
       setExpenseData((prevState: any) => ({
         ...prevState,
-        discount: +discount,
-        discountPercent: +value,
-        amount: prevState.subTotal + prevState.tax - +discount,
+        discount: discount,
+        discountPercent: Number(value),
+        subTotal: newSubtotalWithoutDiscount - discount,
+        tax: gstTotal + pstTotal,
+        amount: newSubtotalWithoutDiscount + gstTotal + pstTotal - discount,
       }));
     } else if (field === 'subTotal') {
       const discountPercent =
-        Math.round((expenseData?.discount / +value) * 100 * 100) / 100;
+        Math.round((expenseData?.discount / Number(value)) * 100 * 100) / 100;
       setExpenseData((prevState: any) => ({
         ...prevState,
         discountPercent: discountPercent,
-        amount: value + prevState.tax - expenseData?.discount,
+        amount: Number(value) + prevState.tax - expenseData?.discount,
       }));
     } else if (field === 'tax') {
       setExpenseData((prevState: any) => ({
         ...prevState,
-        tax: value,
-        amount: prevState.subTotal + value - expenseData?.discount || 0,
+        tax: Number(value),
+        amount: prevState.subTotal + Number(value) - expenseData?.discount || 0,
       }));
     } else {
       setExpenseData((prevState: any) => ({
@@ -191,13 +228,36 @@ export default function ConvertToTransaction({
     });
 
     // Calculate the new subtotal
-    const newSubtotal = newPOItems.reduce((acc: number, item: IPOItem) => {
-      return acc + item.costPerItem * (item.receivedQty || 0);
-    }, 0);
+    const newSubtotal =
+      newPOItems.reduce((acc: number, item: IPOItem) => {
+        return acc + item.costPerItem * (item.receivedQty || 0);
+      }, 0) - (expenseData?.discount || 0);
+
+    const discountPercent =
+      expenseData?.discountPercent ||
+      Math.round(
+        (expenseData?.discount / (newSubtotal + expenseData?.discount)) *
+          100 *
+          100,
+      ) / 100;
+
+    const { pstTotal, gstTotal } = calculateTaxWithDiscount(
+      formatPOItems(newPOItems),
+      discountPercent,
+    );
+
+    console.log(discountPercent, 'discountPercent');
+
+    const newAmount = newSubtotal + gstTotal + pstTotal;
 
     setUpdatedPOItems(newPOItems);
 
-    setExpenseData({ ...expenseData, subTotal: newSubtotal });
+    setExpenseData({
+      ...expenseData,
+      subTotal: newSubtotal,
+      tax: gstTotal + pstTotal,
+      amount: newAmount,
+    });
   };
 
   const handleReceive = async () => {

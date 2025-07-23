@@ -74,7 +74,7 @@ export default function ShowExpenses({
           <Box display="flex" justifyContent="flex-end" alignItems="center">
             <Button
               variant="contained"
-              onClick={() => router.push(`/admin/${companyId}/transactions/create`)}
+              onClick={() => router.push(`/admin/${companyId}/transactions/create?codBoardId=${boardData.id}&codDate=${boardData.date}`)}
             >
               + New Expense
             </Button>

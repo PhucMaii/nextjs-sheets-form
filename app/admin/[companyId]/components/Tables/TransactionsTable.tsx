@@ -17,7 +17,6 @@ import EditExpense from '../Modals/edit/EditExpense';
 import axios from 'axios';
 import { getAdminApiUrl } from '@/app/utils/enum';
 import DeleteModal from '../Modals/delete/DeleteModal';
-import EditStockPurchased from '../Modals/edit/EditStockPurchased';
 import SelectExpenseStatus from '../Select/SelectExpenseStatus';
 import { IExpense } from '@/app/utils/type';
 import { grey } from '@mui/material/colors';
@@ -157,7 +156,7 @@ const TransactionsTable = ({
         }
         showTargetObj={deleteProps.transaction?.invoice}
       />
-      {editProps.type === ExpenseType.stockPurchased && showNotification && (
+      {/* {editProps.type === ExpenseType.stockPurchased && showNotification && (
         <EditStockPurchased
           open={editProps.open}
           onClose={() =>
@@ -170,7 +169,7 @@ const TransactionsTable = ({
           stockPurchased={editProps.transaction}
           showNotification={showNotification}
         />
-      )}
+      )} */}
 
       {editProps.type === ExpenseType.other && showNotification && (
         <EditExpense
