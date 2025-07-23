@@ -136,6 +136,8 @@ export default function CardManagement() {
       `/expenses?startDate=${dateRange[0]}&endDate=${dateRange[1]}&id=${selectedViewObj.id}&type=${selectedViewObj.type}`,
     ),
   );
+
+  console.log('transactions', transactions);
   const [adminsAndDriversRes] = SWRFetchData(
     getAdminApiUrl(companyId, '/adminsAndDrivers'),
   );
@@ -156,9 +158,12 @@ export default function CardManagement() {
       return 0;
     }
 
-    return transactions?.data.reduce((acc: number, transaction: IExpense) => {
-      return acc + transaction.amount;
-    }, 0);
+    return transactions?.data?.reduce(
+      (acc: number, transaction: IExpense) => {
+        return acc + transaction.amount;
+      },
+      0,
+    );
   }, [transactions]);
 
   const mostUsedMethod = useMemo(() => {
@@ -170,7 +175,7 @@ export default function CardManagement() {
       return {};
     }
 
-    const mostUsed = transactions?.data.reduce(
+    const mostUsed = transactions?.data?.reduce(
       (acc: any, transaction: IExpense) => {
         if (!acc[transaction.spentBy]) {
           acc[transaction.spentBy] = { amount: transaction.amount, count: 1 };

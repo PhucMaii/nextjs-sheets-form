@@ -91,40 +91,15 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     }
 
     let expenses = [];
-    if (id) {
-      if (type && type === 'batch') {
-        const batchTransaction = await prisma.batchTransaction.findUnique({
-          where: {
-            id: Number(id),
-          },
-          include: {
-            transactions: true,
-            paymentMethod: true,
-          },
-        });
-
-        return res.status(200).json({
-          data: batchTransaction,
-          message: 'Fetch Batch Transaction successfully',
-        });
-      }
-
-      expenses = await getTransactions({
-        id: Number(id),
-      });
-
-      return res.status(200).json({
-        data: expenses[0],
-        message: 'Fetch Expenses successfully',
-      });
-    }
 
     if (type && type === VIEW_TYPE.VENDOR) {
+      console.log('listOfDateString', listOfDateString);
       expenses = await getExpenseWithVendorId(Number(id), {
         date: {
           in: listOfDateString,
         },
       });
+      console.log('expenses', expenses);
     } else if (type && type === VIEW_TYPE.STOCK_PURCHASED) {
       const stockPurchased = await getTransactions({
         date: {
@@ -163,6 +138,32 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       });
 
       expenses = [...fixedTransaction];
+    } else if (id) {
+      if (type && type === 'batch') {
+        const batchTransaction = await prisma.batchTransaction.findUnique({
+          where: {
+            id: Number(id),
+          },
+          include: {
+            transactions: true,
+            paymentMethod: true,
+          },
+        });
+
+        return res.status(200).json({
+          data: batchTransaction,
+          message: 'Fetch Batch Transaction successfully',
+        });
+      }
+
+      expenses = await getTransactions({
+        id: Number(id),
+      });
+
+      return res.status(200).json({
+        data: expenses[0],
+        message: 'Fetch Expenses successfully',
+      });
     }
 
     const sortedExpensesByDate = sortExpenseByDate(expenses);
