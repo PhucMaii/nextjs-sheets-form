@@ -5,10 +5,10 @@ import PaidIcon from '@mui/icons-material/Paid';
 import OverviewCard from '../OverviewCard/OverviewCard';
 import MoneyIcon from '@mui/icons-material/Money';
 import { primary } from '@/theme/color';
-import { IExpense } from '@/app/utils/type';
+import { IBatchTransaction, IExpense } from '@/app/utils/type';
 
 interface IProps {
-  transactions: IExpense[];
+  transactions: IExpense[] | IBatchTransaction[] | any[];
 }
 
 export default function TransactionOverview({ transactions }: IProps) {
@@ -17,7 +17,8 @@ export default function TransactionOverview({ transactions }: IProps) {
       return 0;
     }
     return transactions.reduce(
-      (total, transaction) => total + transaction.amount,
+      (total, transaction) =>
+        total + (transaction?.amount || transaction?.total || 0),
       0,
     );
   }, [transactions]);

@@ -3,6 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { TRANSACTION_STATUS } from '@/app/utils/enum';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
+import { getTodayDate } from '@/pages/api/utils/date';
 
 interface IBody {
   amount: number;
@@ -10,12 +11,12 @@ interface IBody {
   GST: number;
   subTotal: number;
   description: string;
-  createdAt: string;
   spentBy: string;
   date: string;
   paymentMethodId: number;
   status: TRANSACTION_STATUS;
   discount?: number;
+  codBoardId?: number;
 }
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
@@ -23,7 +24,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const prisma = new PrismaClient();
 
     const {
-      createdAt,
       amount,
       PST,
       GST,
@@ -34,6 +34,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       paymentMethodId,
       status,
       discount,
+      codBoardId,
     }: IBody = req.body;
 
     const { companyId } = req.query;
@@ -63,6 +64,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
+    const createdAt = getTodayDate().dateAndTime;
+
     const newExpense = await prisma.expense.create({
       data: {
         amount,
@@ -78,6 +81,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         status,
         discount,
         companyId: Number(companyId),
+        codBoardId,
       },
     });
 

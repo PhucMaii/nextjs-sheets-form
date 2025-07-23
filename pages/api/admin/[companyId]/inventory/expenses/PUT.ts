@@ -1,13 +1,14 @@
-import { Fifo, OrderedItems, PrismaClient } from '@prisma/client';
+import { Fifo, OrderedItems, PaymentStatus, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { checkAndUpdateUnits, createFifo } from './POST';
 import { IInventoryUnit } from '@/app/utils/type';
 import { subtractInventoryItem } from '../../orderedItems/single';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/pages/api/auth/[...nextauth]';
+import { getTodayDate } from '@/pages/api/utils/date';
+import { getCreatedBy } from '@/pages/api/import-sheets/utils';
+import { USER_ROLE } from '@/app/utils/enum';
 
 interface IPurchasedItem {
-  id: number; // Inventory Item Id
+  id: number; // ordered items id
   name: string;
   quantity: number;
   unitPrice: number;
@@ -32,8 +33,9 @@ interface IBody {
   // oldItemIds: number[]; // Ordered items ids
   oldItems: IPurchasedItem[];
   updatedItems: IPurchasedItem[] | any;
-  updatedAt: string;
   discount?: number;
+  codBoardId?: number;
+  status?: PaymentStatus;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
@@ -61,9 +63,12 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       spentBy,
       oldItems,
       updatedItems,
-      updatedAt,
       discount,
+      codBoardId,
+      status,
     }: IBody = req.body;
+
+    const updatedAt = getTodayDate().dateAndTime;
 
     const existingExpense = await prisma.expense.findUnique({
       where: {
@@ -119,6 +124,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         paymentMethodId: paymentMethodId,
         spentBy: spentBy,
         discount: discount,
+        codBoardId: codBoardId,
+        status: status,
       },
       include: {
         orderedItems: {
@@ -132,8 +139,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     const oldItemIds = oldItems.map((item: any) => {
       return item.id;
     });
-
-    console.log({ oldItemIds, updatedItems });
 
     // Check is there any changes in ordered items
     let isOrderedItemsChange = false;
@@ -162,9 +167,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     // If there is any changes in ordered items
     if (isOrderedItemsChange) {
-      const session: any = await getServerSession(req, res, authOptions);
-      const user: any = session?.user;
-      const createdBy = `Admin - ${user?.name}`;
+      const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
 
       const vendorItems = await prisma.vendorItem.findMany({
         where: {
@@ -187,7 +190,24 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           return vendorItem.id === item?.vendorItemId;
         });
 
+        // Conflict - vendor item not found, must be removed from the bill
         if (!vendorItem) {
+          console.error('Conflict - vendor item not found, must be removed from the bill');
+          await prisma.orderedItems.delete({
+            where: {
+              id: item.id,
+            },
+          });
+
+          // subtract quantity
+          if (item.fifo && item.inventoryUnit) {
+            await subtractInventoryItem(
+              -1,
+              item.fifo,
+              item.inventoryUnit,
+              item.quantity,
+            );
+          }
           continue;
         }
 
@@ -217,13 +237,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             (fifo: any) => fifo.id === existedItem?.fifoId,
           );
 
-          console.log({ existedFifo });
-
           if (!existedFifo) {
             continue;
           }
 
-          console.log({ existedFifo, existedItem, item });
           const newFifoQuantity =
             existedFifo.quantity - existedItem.quantity + item.quantity;
 
@@ -277,8 +294,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         const vendorItemList = newAddedItems.map((newItem: any) => ({
           ...newItem.vendorItem,
           unit: newItem.unit,
+          inventoryItemId: newItem.inventoryItem.id,
         }));
-        console.log(vendorItemList, 'vendorItemList');
 
         await createFifo(
           Number(companyId),
@@ -311,7 +328,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
               price: newItem.unitPrice,
               quantity: newItem.quantity,
               inventoryUnitId: newItem.unit.id,
-              inventoryItemId: newItem.inventoryItemId,
+              inventoryItemId: newItem.inventoryItem.id,
             };
           }
 
@@ -322,7 +339,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             quantity: newItem.quantity,
             fifoId: selectedFifo.id,
             inventoryUnitId: newItem.unit.id,
-            inventoryItemId: newItem.inventoryItemId,
+            inventoryItemId: newItem.inventoryItem.id,
             companyId: Number(companyId),
           };
         });
@@ -353,7 +370,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           },
         });
 
-        // Restock quantity
+        // subtract quantity
         for (const removedItem of removedItems) {
           if (removedItem.fifo && removedItem.inventoryUnit) {
             await subtractInventoryItem(

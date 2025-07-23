@@ -52,12 +52,10 @@ import EditCodBoard from '../Modals/edit/EditCodBoard';
 import EditIcon from '@mui/icons-material/Edit';
 import InsertOrderToCodBoard from '../Modals/add/InsertOrderToCodBoard';
 import PaidIcon from '@mui/icons-material/Paid';
-import AddExpense from '../Modals/add/AddExpense';
-import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 import useNotification from '@/hooks/useNotification';
 import StatusText from '../StatusText';
 import { InfoIcon } from 'lucide-react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { PaymentStatus } from '@prisma/client';
 import { MoneyOffOutlined } from '@mui/icons-material';
 
@@ -75,6 +73,7 @@ export default function CODBoardDetails({
   // showNotification,
 }: IProps) {
   const { companyId }: any = useParams();
+  const router = useRouter();
 
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
@@ -98,9 +97,9 @@ export default function CODBoardDetails({
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
 
-  const [open, setOpen] = useMultipleBoolean({
-    isOpenAddExpense: false,
-  });
+  // const [open, setOpen] = useMultipleBoolean({
+  //   isOpenAddExpense: false,
+  // });
   const { showNotification, NotificationComp } = useNotification();
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
@@ -276,7 +275,7 @@ export default function CODBoardDetails({
       >
         <MenuItem
           onClick={() => {
-            setOpen('isOpenAddExpense', true);
+            router.push(`/admin/${companyId}/transactions/create`);
           }}
         >
           <DropdownItemContainer display="flex" gap={2}>
@@ -441,7 +440,7 @@ export default function CODBoardDetails({
   return (
     <>
       {NotificationComp}
-      <AddExpense
+      {/* <AddExpense
         showNotification={showNotification}
         open={open.isOpenAddExpense}
         onClose={() => setOpen('isOpenAddExpense', false)}
@@ -453,7 +452,7 @@ export default function CODBoardDetails({
         codBoardId={boardData?.id}
         // paymentMethods={paymentMethods}
         // adminsAndDrivers={adminsAndDrivers}
-      />
+      /> */}
       <InsertOrderToCodBoard
         open={isOpenInsertOrders}
         onClose={() => setIsOpenInsertOrders(false)}

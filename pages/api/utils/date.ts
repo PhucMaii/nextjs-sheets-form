@@ -1,6 +1,7 @@
 import { Order } from '@/app/admin/[companyId]/orders/page';
 import { limitOrderHour } from '@/app/lib/constant';
 import { generateListOfDateString, YYYYMMDDFormat } from '@/app/utils/time';
+import { IBatchTransaction } from '@/app/utils/type';
 import { Expense } from '@prisma/client';
 
 export const convertDeliveryDateStringToDate = (deliveryDate: string) => {
@@ -52,7 +53,7 @@ export const sortByDeliveryDate = (
   return sortedOrders;
 };
 
-export const sortExpenseByDate = (expenses: Expense[]): any => {
+export const sortExpenseByDate = (expenses: Expense[] | IBatchTransaction[]): any => {
   const sortedExpense = expenses.sort((expenseA, expenseB) => {
     const dateA: any = convertDeliveryDateStringToDate(expenseA.date);
     const dateB: any = convertDeliveryDateStringToDate(expenseB.date);

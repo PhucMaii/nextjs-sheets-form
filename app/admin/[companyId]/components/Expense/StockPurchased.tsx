@@ -141,31 +141,52 @@ export default function StockPurchased({
 
   const onChangeDiscount = (value: number, isPercent: boolean) => {
     if (isPercent) {
+      const newSubtotalWithoutDiscount = purchasedItems.reduce(
+        (acc: number, item: any) => {
+          return acc + item.unit.unitPrice * item.quantity;
+        },
+        0,
+      );
+
       const discount =
-        Math.round((value / 100) * newExpense.subTotal * 100) / 100;
-      const { gstTotal, pstTotal } = calculateTaxWithDiscount(value);
+        Math.round((Number(value) / 100) * newSubtotalWithoutDiscount * 100) /
+        100;
+
+      const { pstTotal, gstTotal } = calculateTaxWithDiscount(Number(value));
 
       setNewExpense((prevState: any) => ({
         ...prevState,
+        subTotal: newSubtotalWithoutDiscount - discount,
         discount: discount,
         discountPercent: value,
         GST: gstTotal,
         PST: pstTotal,
-        amount: Math.round((newExpense.subTotal - discount + gstTotal + pstTotal) * 100) / 100,
+        amount:
+          Math.round(
+            (newSubtotalWithoutDiscount - discount + gstTotal + pstTotal) * 100,
+          ) / 100,
       }));
     } else {
       const discountPercent =
-        Math.round((value / newExpense.subTotal) * 100 * 100) / 100;
+        Math.round(
+          (Number(value) / (newExpense.subTotal + Number(value))) * 100 * 100,
+        ) / 100;
+
+      const newSubtotal =
+        purchasedItems.reduce((acc: number, item: any) => {
+          return acc + item.unit.unitPrice * item.quantity;
+        }, 0) - Number(value);
 
       const { gstTotal, pstTotal } = calculateTaxWithDiscount(discountPercent);
 
       setNewExpense((prevState: any) => ({
         ...prevState,
-        discount: value,
+        discount: Number(value),
         discountPercent: discountPercent,
         GST: gstTotal,
         PST: pstTotal,
-        amount: Math.round((newExpense.subTotal + gstTotal + pstTotal - value) * 100) / 100,
+        subTotal: newSubtotal,
+        amount: Math.round((newSubtotal + gstTotal + pstTotal) * 100) / 100,
       }));
     }
   };
@@ -371,44 +392,36 @@ export default function StockPurchased({
     // const newAmount = purchasedItems.reduce((acc: number, item: any) => {
     //   return acc + item.unit.unitPrice * item.quantity;
     // }, 0);
-    const total = purchasedItems.reduce((acc: any, item: any) => {
-      if (!acc?.subTotal) {
-        acc.subTotal = 0;
-      }
+    const subTotalWithoutDiscount = purchasedItems.reduce(
+      (acc: number, item: any) => {
+        return acc + item.unit.unitPrice * item.quantity;
+      },
+      0,
+    );
 
-      if (!acc?.PST) {
-        acc.PST = 0;
-      }
+    const discountPercent =
+      Math.round((newExpense?.discount / subTotalWithoutDiscount) * 100 * 100) /
+      100;
 
-      if (!acc?.GST) {
-        acc.GST = 0;
-      }
-
-      acc.subTotal += item.unit.unitPrice * item.quantity;
-
-      if (item?.inventoryItem?.hasPST) {
-        acc.PST += item.unit.unitPrice * item.quantity * pstRate;
-      }
-
-      if (item?.inventoryItem?.hasGST) {
-        acc.GST += item.unit.unitPrice * item.quantity * gstRate;
-      }
-
-      return acc;
-    }, {});
+    const { pstTotal, gstTotal } = calculateTaxWithDiscount(discountPercent);
 
     // setTotalAmount(newAmount);
     setNewExpense((prevState: any) => ({
       ...prevState,
       amount:
-        parseFloat(total.subTotal.toFixed(2)) +
-        parseFloat(total.PST.toFixed(2)) +
-        parseFloat(total.GST.toFixed(2)) -
-        parseFloat(newExpense.discount.toFixed(2)),
-      subTotal: parseFloat(total.subTotal.toFixed(2)),
-      GST: parseFloat(total.GST.toFixed(2)),
-      PST: parseFloat(total.PST.toFixed(2)),
-      discount: parseFloat(newExpense.discount.toFixed(2)),
+        Math.round(
+          (subTotalWithoutDiscount +
+            gstTotal +
+            pstTotal -
+            (newExpense?.discount || 0)) *
+            100,
+        ) / 100,
+      subTotal:
+        Math.round(
+          (subTotalWithoutDiscount - (newExpense?.discount || 0)) * 100,
+        ) / 100,
+      GST: Math.round(gstTotal * 100) / 100,
+      PST: Math.round(pstTotal * 100) / 100,
     }));
   };
 

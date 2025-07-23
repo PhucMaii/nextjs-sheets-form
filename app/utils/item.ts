@@ -1,3 +1,5 @@
+import { pstRate } from '../lib/constant';
+import { gstRate } from '../lib/constant';
 import { IInventoryItem, IItem, IItemType } from './type';
 
 export const convertItemArrayToMap = (items: IItem[]) => {
@@ -87,5 +89,36 @@ export const convertInventoryItemArrayToMap = (items: IInventoryItem[]) => {
     typesObj,
     sortedKeysByPriority,
     types,
+  };
+};
+
+export const calculateTaxWithDiscount = (items: any[], discountPercent: number = 0) => {
+  const gstItems = items.filter(
+    (item: any) => item?.inventoryItem?.hasGST,
+  );
+  const pstItems = items.filter(
+    (item: any) => item?.inventoryItem?.hasPST,
+  );
+
+  const gstItemsTotalWithDiscount =
+    gstItems.reduce((acc: any, item: any) => {
+      return acc + item.unitPrice * item.quantity;
+    }, 0) *
+    (1 - discountPercent / 100);
+
+  const pstItemsTotalWithDiscount =
+    pstItems.reduce((acc: any, item: any) => {
+      return acc + item.unitPrice * item.quantity;
+    }, 0) *
+    (1 - discountPercent / 100);
+
+  const gstTotal =
+    Math.round(gstItemsTotalWithDiscount * gstRate * 100) / 100;
+  const pstTotal =
+    Math.round(pstItemsTotalWithDiscount * pstRate * 100) / 100;
+
+  return {
+    gstTotal,
+    pstTotal,
   };
 };

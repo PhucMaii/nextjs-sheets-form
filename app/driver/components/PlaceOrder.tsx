@@ -29,7 +29,7 @@ export default function PlaceOrder({ showNotification }: IProps) {
   const [clientList] = SWRFetchData(`${API_URL.DRIVER}/clients`);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [items, mutateItems] = SWRFetchData(
-    `/api/item?userId=${selectedClient?.id}`,
+    selectedClient?.id ? `/api/item?userId=${selectedClient.id}` : '',
   );
 
   // useEffect(() => {
