@@ -734,7 +734,7 @@ export const createFifo = async (
       const newFifo = await prisma.fifo.create({
         data: {
           quantity: itemQuantity + negativeFifo.quantity, // subtract to negative mean subtract
-          inventoryItemId: item.inventoryItemId,
+          inventoryItemId: item?.inventoryItemId || item?.inventoryItem?.id,
           vendorItemId: item.id,
           price: item.unit?.unitPrice / item?.unit?.ratio,
           createdAt,
