@@ -10,6 +10,7 @@ import {
   TableCell,
   TableHead,
   TableRow,
+  Tooltip,
   // Toolbar,
 } from '@mui/material';
 import React, { memo, useEffect, useState } from 'react';
@@ -21,7 +22,6 @@ import SelectExpenseStatus from '../Select/SelectExpenseStatus';
 import { IExpense } from '@/app/utils/type';
 import { grey } from '@mui/material/colors';
 import { useParams, useRouter } from 'next/navigation';
-import Image from 'next/image';
 
 interface IProps {
   transactions: IExpense[];
@@ -258,14 +258,13 @@ const TransactionsTable = ({
                     )}
                     <TableCell style={{ width: 50 }}>
                       {/* <Toolbar> */}
-                      <Image
-                        src={`/images/${transaction?.paymentMethod?.type}.png`}
-                        alt="method"
-                        style={{ width: 30, height: 30 }}
-                        width={100}
-                        height={100}
-                        loading="lazy"
-                      />
+                      <Tooltip title={transaction?.paymentMethod?.name}>
+                        <Chip
+                          label={transaction?.paymentMethod?.type}
+                          size="small"
+                        />
+
+                      </Tooltip>
                       {/* </Toolbar> */}
                     </TableCell>
                     <TableCell style={{ width: 120 }}>

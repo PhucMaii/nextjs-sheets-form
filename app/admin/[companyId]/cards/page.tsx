@@ -124,6 +124,7 @@ export default function CardManagement() {
     UpdateExpenseStatusComp,
     isUpdating,
     Actions,
+    AddExpenseButton,
     // AddExpenseModal,
   } = useUpdateExpenseStatus(showNotification, selectedExpenses);
 
@@ -994,6 +995,7 @@ export default function CardManagement() {
                       Recent Transactions with {currentMethod?.name}
                     </Typography>
                     <Box display="flex" alignItems="center" gap={2}>
+                      {AddExpenseButton}
                       {Actions}
                       <IconButton
                         onClick={(e) => setFilterAnchorEl(e.currentTarget)}
@@ -1222,6 +1224,7 @@ export default function CardManagement() {
                       Recent Transactions
                     </Typography>
                     <Box display="flex" alignItems="center" gap={2}>
+                      {AddExpenseButton}
                       {Actions}
                       <IconButton
                         onClick={(e) => setFilterAnchorEl(e.currentTarget)}

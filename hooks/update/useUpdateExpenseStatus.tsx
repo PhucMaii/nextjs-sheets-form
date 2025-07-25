@@ -19,7 +19,6 @@ import { errorColor, primaryColor, successColor } from '@/theme/color';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import { DropdownItemContainer } from '@/app/admin/[companyId]/orders/styled';
-import AddExpense from '@/app/admin/[companyId]/components/Modals/add/AddExpense';
 import { useParams, useRouter } from 'next/navigation';
 
 export const useUpdateExpenseStatus = (
@@ -187,6 +186,20 @@ export const useUpdateExpenseStatus = (
     />
   );
 
+  const AddExpenseButton = (
+    <Button
+      variant="contained"
+      onClick={() => {
+        router.push(`/admin/${companyId}/transactions/create`);
+      }}
+      startIcon={<AddIcon />}
+    >
+      <Typography fontWeight="medium" sx={{ textTransform: 'none' }}>
+        New Expense
+      </Typography>
+    </Button>
+  );
+
   const Actions = (
     <Box display="flex" alignItems="center" justifyContent="center" gap={2}>
       <Button
@@ -198,7 +211,9 @@ export const useUpdateExpenseStatus = (
       >
         <Box display="flex" alignItems="center" gap={1}>
           <ArrowDownwardIcon fontSize="small" />
-          <Typography fontWeight="medium">Actions</Typography>
+          <Typography fontWeight="medium" sx={{ textTransform: 'none' }}>
+            Actions
+          </Typography>
         </Box>
       </Button>
 
@@ -263,6 +278,7 @@ export const useUpdateExpenseStatus = (
     UpdateExpenseStatusComp,
     isUpdating,
     Actions,
+    AddExpenseButton,
     // AddExpenseModal,
   };
 };

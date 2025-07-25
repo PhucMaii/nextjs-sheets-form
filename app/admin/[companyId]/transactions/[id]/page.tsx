@@ -316,6 +316,7 @@ export default function EditTransaction() {
       }
 
       showNotification('success', response.data.message);
+      router.push(`/admin/${companyId}/transactions`);
     } catch (error) {
       console.error('Error saving transaction:', error);
       showNotification('error', 'Something went wrong');
@@ -347,6 +348,7 @@ export default function EditTransaction() {
       }
 
       showNotification('success', response.data.message);
+      router.push(`/admin/${companyId}/transactions`);
     } catch (error) {
       console.error('Error saving transaction:', error);
       showNotification('error', 'Something went wrong');
@@ -381,6 +383,7 @@ export default function EditTransaction() {
       }
 
       showNotification('success', response.data.message);
+      router.push(`/admin/${companyId}/transactions`);
     } catch (error: any) {
       console.error('Error saving batch transaction:', error);
       showNotification('error', 'Something went wrong');
@@ -418,7 +421,6 @@ export default function EditTransaction() {
       }
 
       setSaving(false);
-      router.push(`/admin/${companyId}/transactions`);
     } catch (error) {
       console.error('Error saving transaction:', error);
       setSaving(false);

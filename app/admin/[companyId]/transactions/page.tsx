@@ -60,6 +60,7 @@ export default function Transactions() {
     UpdateExpenseStatusComp,
     isUpdating,
     Actions,
+    AddExpenseButton,
     // AddExpenseModal,
   } = useUpdateExpenseStatus(showNotification, selectedExpenses);
 
@@ -247,9 +248,9 @@ export default function Transactions() {
         sx={{ mb: 3, borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
       >
         <CardContent sx={{ p: 3 }}>
-          <Grid container spacing={3} alignItems="center">
+          <Grid container spacing={2} alignItems="center">
             {/* Search */}
-            <Grid item xs={12} md={8}>
+            <Grid item xs={12} md={6}>
               <Box
                 sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}
               >
@@ -294,7 +295,7 @@ export default function Transactions() {
             </Grid>
 
             {/* Status Filter */}
-            <Grid item xs={12} md={2}>
+            <Grid item xs={12} md={1} lg={2}>
               <Box
                 sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}
               >
@@ -366,9 +367,22 @@ export default function Transactions() {
                 ))}
               </Menu>
             </Grid>
-
+            <Grid item xs={6} md={3} lg={2}>
+              <Box
+                sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}
+              >
+                <Typography
+                  variant="body2"
+                  fontWeight="medium"
+                  color={blueGrey[700]}
+                >
+                  New Expense
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', gap: 1 }}>{AddExpenseButton}</Box>
+            </Grid>
             {/* Actions */}
-            <Grid item xs={12} md={2}>
+            <Grid item xs={6} md={2} lg={1.5}>
               <Box
                 sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}
               >
