@@ -13,12 +13,11 @@ import {
 } from '@mui/material';
 import {
   People,
-  TrendingUp,
   AccountBalance,
   Group,
   Warning,
 } from '@mui/icons-material';
-import { green, blue, orange, purple, red, yellow, grey } from '@mui/material/colors';
+import { blue, orange, purple, red, yellow, grey } from '@mui/material/colors';
 import { USER_CATEGORIZED } from '@/app/utils/enum';
 
 interface CustomerInsightsProps {
@@ -79,7 +78,7 @@ export default function CustomerInsights({
     const totalSpending = overviewData?.revenue || 0;
     const avgSpendingPerOrder = totalOrders > 0 ? totalSpending / totalOrders : 0;
 
-    const avgCustomerValue = totalSpending / totalCustomers;
+    const avgCustomerValue = totalSpending / overviewData?.activeCustomers;
 
     return {
       totalCustomers,
@@ -105,6 +104,13 @@ export default function CustomerInsights({
       value: customers?.length || 0,
       icon: <People />,
       color: blue[600],
+      subtitle: 'Total customers',
+    },
+    {
+      title: 'Active Customers',
+      value: overviewData?.activeCustomers || 0,
+      icon: <People />,
+      color: blue[600],
       subtitle: 'Active customers',
     },
     {
@@ -114,13 +120,13 @@ export default function CustomerInsights({
       color: red[600],
       subtitle: `${insights.debtPercentage.toFixed(1)}% of customers`,
     },
-    {
-      title: 'Avg Customer Value',
-      value: `$${insights.avgCustomerValue.toFixed(2)}`,
-      icon: <TrendingUp />,
-      color: green[600],
-      subtitle: 'Per customer',
-    },
+    // {
+    //   title: 'Avg Customer Value',
+    //   value: `$${insights.avgCustomerValue.toFixed(2)}`,
+    //   icon: <TrendingUp />,
+    //   color: green[600],
+    //   subtitle: 'Per customer',
+    // },
     {
       title: 'Total Debt',
       value: `$${insights.totalDebt.toFixed(2)}`,

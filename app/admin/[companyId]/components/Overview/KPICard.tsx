@@ -25,6 +25,7 @@ interface KPICardProps {
   color?: 'primary' | 'success' | 'error' | 'warning' | 'info';
   variant?: 'default' | 'gradient';
   isMinify?: boolean;
+  onClick?: () => void;
 }
 
 // Helper function to format numbers in compact view
@@ -68,6 +69,7 @@ export default function KPICard({
   color = 'primary',
   variant = 'default',
   isMinify = false,
+  onClick,
 }: KPICardProps) {
   const positive = useMemo(() => {
     if (trend?.isReversed) {
@@ -133,6 +135,7 @@ export default function KPICard({
   return (
     <Card
       elevation={0}
+      onClick={onClick}
       sx={{
         height: '100%',
         background:
@@ -142,7 +145,7 @@ export default function KPICard({
         position: 'relative',
         overflow: 'hidden',
         transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-        cursor: 'pointer',
+        cursor: onClick ? 'pointer' : 'default',
         '&::before': {
           content: '""',
           position: 'absolute',
@@ -155,18 +158,18 @@ export default function KPICard({
           transition: 'transform 0.3s ease',
         },
         '&:hover': {
-          transform: 'translateY(-8px)',
-          boxShadow: `0 20px 25px -5px ${alpha(colorConfig.main, 0.1)}, 0 10px 10px -5px ${alpha(colorConfig.main, 0.04)}`,
-          borderColor: colorConfig.main,
+          transform: onClick ? 'translateY(-8px)' : 'none',
+          boxShadow: onClick ? `0 20px 25px -5px ${alpha(colorConfig.main, 0.1)}, 0 10px 10px -5px ${alpha(colorConfig.main, 0.04)}` : 'none',
+          borderColor: onClick ? colorConfig.main : undefined,
           '&::before': {
-            transform: 'scaleX(1)',
+            transform: onClick ? 'scaleX(1)' : 'scaleX(0)',
           },
           '& .kpi-icon': {
-            transform: 'scale(1.1) rotate(5deg)',
-            boxShadow: `0 8px 16px ${alpha(colorConfig.main, 0.3)}`,
+            transform: onClick ? 'scale(1.1) rotate(5deg)' : 'none',
+            boxShadow: onClick ? `0 8px 16px ${alpha(colorConfig.main, 0.3)}` : 'none',
           },
           '& .kpi-value': {
-            transform: 'scale(1.02)',
+            transform: onClick ? 'scale(1.02)' : 'none',
           },
         },
       }}

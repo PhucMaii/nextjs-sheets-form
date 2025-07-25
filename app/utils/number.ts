@@ -33,3 +33,9 @@ export const formatTime = (time: string) => {
 
   return hour + ':' + minute + ' ' + ampm;
 };
+
+export const formatCurrency = (value: number) =>
+  `$${value.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+
+export const formatNumberWith2Decimal = (value: number) =>
+  Math.round(value * 100) / 100;

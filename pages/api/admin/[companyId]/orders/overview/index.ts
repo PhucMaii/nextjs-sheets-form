@@ -1,7 +1,7 @@
 // import { officiallyStartDate } from '@/app/lib/constant';
 import { ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
 import { generateListOfDateString } from '@/app/utils/time';
-import { sortByDeliveryDate } from '@/pages/api/utils/date';
+import { convertToPSTDate, sortByDeliveryDate } from '@/pages/api/utils/date';
 import moment from 'moment-timezone';
 import {
   generateManifest,
@@ -80,14 +80,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       isAddUpEndDate,
     );
 
-    console.log({
-      startDate,
-      endDate,
-      formattedStartDate,
-      formattedEndDate,
-      datesInRange,
-    });
-
     const orders: any = await prisma.orders.findMany({
       where: {
         companyId: Number(companyId),
@@ -145,10 +137,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
     const avgFulfillmentTime =
       ordersHasFulfillmentTime.reduce((acc: number, order: any) => {
-        const fulfillmentTime = moment.utc(order.orderTime).diff(
-          moment.utc(order.enteredOrderAt),
-          'seconds',
-        );
+        const fulfillmentTime = moment
+          .utc(order.orderTime)
+          .diff(moment.utc(order.enteredOrderAt), 'seconds');
         return acc + fulfillmentTime;
       }, 0) / ordersHasFulfillmentTime.length;
 
@@ -167,7 +158,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         order.status === ORDER_STATUS.COMPLETED
       );
     });
-    
+
     const cancelledOrders: any = await prisma.orders.findMany({
       where: {
         companyId: Number(companyId),
@@ -222,10 +213,21 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const totalExpensesChange =
       ((totalExpenses - lastMonthExpenses) / lastMonthExpenses) * 100;
 
+    const expensesRatio = (totalExpenses / revenue) * 100;
+    const lastMonthExpensesRatio =
+      (lastMonthExpenses / lastMonthRevenueReport.revenue) * 100;
+    const expensesRatioChange =
+      ((expensesRatio - lastMonthExpensesRatio) / lastMonthExpensesRatio) * 100;
+
     // PROFIT
     const profit = revenue - totalExpenses;
     const lastMonthProfit = lastMonthRevenueReport.revenue - lastMonthExpenses;
     const profitChange = ((profit - lastMonthProfit) / lastMonthProfit) * 100;
+    const profitMargin = (profit / revenue) * 100;
+    const lastMonthProfitMargin =
+      (lastMonthProfit / lastMonthRevenueReport.revenue) * 100;
+    const profitMarginChange =
+      ((profitMargin - lastMonthProfitMargin) / lastMonthProfitMargin) * 100;
 
     // Calculate each customer's profit
     const customersProfit = orders.reduce((acc: any, order: any) => {
@@ -245,12 +247,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return acc;
     }, {});
 
-    console.log('profitChange', {
-      profitChange,
-      lastMonthProfit,
-      lastMonthREvenue: lastMonthRevenueReport.revenue,
-      lastMonthExpenses,
-    });
+    const activeCustomers = Object.keys(customersProfit).length;
+
+    const avgOrderValue = revenue / sortedThisMonthOrders.length;
+    const lastMonthAvgOrderValue =
+      lastMonthRevenueReport.revenue / lastMonthRevenueReport.numberOfOrders;
+    const avgOrderValueChange =
+      ((avgOrderValue - lastMonthAvgOrderValue) / lastMonthAvgOrderValue) * 100;
 
     const manifest = generateManifest(sortedThisMonthOrders, revenue);
 
@@ -258,18 +261,31 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       manifest,
       numberOfOrders: sortedThisMonthOrders.length,
       lastMonthOrders: lastMonthRevenueReport.numberOfOrders,
+      lastMonthRevenueReport,
+      lastMonthExpensesReport: lastMonthExpenses,
+      lastMonthProfit,
       revenue,
       revenueChange,
       ongoingOrders: ongoingOrders.length,
       unpaidAmount,
       expenses: totalExpenses,
       expensesChange: totalExpensesChange,
+      lastMonthExpensesRatio,
+      expensesRatio,
+      expensesRatioChange,
       profit,
       profitChange,
+      profitMargin,
+      lastMonthProfitMargin,
+      profitMarginChange,
+      avgOrderValue,
+      avgOrderValueChange,
+      lastMonthAvgOrderValue,
       deliveredOrders: deliveredOrders.length,
       cancelledOrders: cancelledOrders.length,
       avgFulfillmentTime,
       clientsUseAppToOrder,
+      activeCustomers,
     };
 
     // Get last month, the end date is the last of last month
@@ -279,11 +295,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       .toDate();
     // Calculate customers in debt
     const debtRange = generateListOfDateString(
-      normalizeDate(officiallyStartDate),
-      normalizeDate(lastMonthEndDate),
+      convertToPSTDate(officiallyStartDate),
+      formattedEndDate,
+      isAddUpEndDate
     );
-
-    console.log('debtRange', debtRange[debtRange.length - 1]);
+    console.log('debtRange', {
+      debtRange,
+      lastDayOfDebtRange: debtRange[debtRange.length - 1],
+      officiallyStartDate,
+      lastMonthEndDate,
+      formattedEndDate
+    });
 
     let debtOrders: any = [];
     const debtFetchSize = 1000;

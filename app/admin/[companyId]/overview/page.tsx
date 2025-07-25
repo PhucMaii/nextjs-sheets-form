@@ -39,6 +39,7 @@ import ExpenseTrendChart from '../components/Charts/ExpenseTrendChart';
 
 // New overview components
 import KPICard from '@/app/admin/[companyId]/components/Overview/KPICard';
+import KPIDetailModal from '@/app/admin/[companyId]/components/Overview/KPIDetailModal';
 import OrderStatusOverview from '@/app/admin/[companyId]/components/Overview/OrderStatusOverview';
 import CustomerInsights from '@/app/admin/[companyId]/components/Overview/CustomerInsights';
 import ProductLossInsights from '@/app/admin/[companyId]/components/Overview/ProductLossInsights';
@@ -59,6 +60,7 @@ import {
 
 // Import app's color theme
 import { primary, success, error, warning, info, neutral } from '@/theme/color';
+import { formatCurrency, formatNumberWith2Decimal } from '@/app/utils/number';
 
 // Unified blue theme color palette
 const themeColors = {
@@ -117,6 +119,10 @@ export default function Overview() {
   const [productLossData, setProductLossData] = useState<any>();
   const [isMinify, setIsMinify] = useLocalStorage('isMinify', false);
   const { NotificationComp } = useNotification();
+
+  // Modal state management
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedKPI, setSelectedKPI] = useState<any | null>(null);
 
   // Printing Ref
   const printDetbCustomersRef: any = useRef();
@@ -230,8 +236,6 @@ export default function Overview() {
       productData.reports += 1;
     });
 
-    // console.log('productLossMap', productLossMap);
-
     // Convert to array and sort by total loss
     const sortedProducts = Array.from(productLossMap.entries())
       .map(([productName, data]: [string, any]) => ({
@@ -244,7 +248,6 @@ export default function Overview() {
       .sort((a, b) => b.totalLoss - a.totalLoss)
       .slice(0, 3); // Show top 3 products
 
-    // console.log('sortedProducts', sortedProducts);
 
     // Prepare data for chart
     const categories = sortedProducts.map((product) => `${product.name}`);
@@ -255,6 +258,43 @@ export default function Overview() {
       data,
       detailedData: sortedProducts, // Keep detailed data for tooltips or other uses
     };
+  };
+
+  // KPI Click Handlers
+  const handleKPIClick = (
+    type:
+      | 'revenue'
+      | 'expenses'
+      | 'orders'
+      | 'profit'
+      | 'margin'
+      | 'ratio'
+      | 'avgOrder'
+      | 'customers',
+    title: string,
+    value: string | number,
+    color: 'primary' | 'success' | 'error' | 'warning' | 'info',
+    lastMonthValue: string | number,
+    comparePercentage?: string | number,
+    isPositive?: boolean,
+    isReversed?: boolean,
+  ) => {
+    setSelectedKPI({
+      type,
+      title,
+      value,
+      color,
+      lastMonthValue,
+      comparePercentage,
+      isPositive,
+      isReversed,
+    });
+    setModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setModalOpen(false);
+    setSelectedKPI(null);
   };
 
   return (
@@ -316,6 +356,21 @@ export default function Overview() {
                     isPositive: (overviewData?.revenueChange || 0) > 0,
                     label: 'vs last period',
                   }}
+                  onClick={() =>
+                    handleKPIClick(
+                      'revenue',
+                      'Total Revenue',
+                      `$${formatNumberWith2Decimal(overviewData?.revenue || 0)}`,
+                      'success',
+                      `$${
+                        formatNumberWith2Decimal(
+                          overviewData?.lastMonthRevenueReport?.revenue || 0,
+                        )
+                      }`,
+                      formatNumberWith2Decimal(overviewData?.revenueChange || 0),
+                      (overviewData?.revenueChange || 0) > 0,
+                    )
+                  }
                 />
               </Grid>
               <Grid item xs={12} md={6} lg={3}>
@@ -332,6 +387,20 @@ export default function Overview() {
                     label: 'vs last period',
                     isReversed: true,
                   }}
+                  onClick={() =>
+                    handleKPIClick(
+                      'expenses',
+                      'Total Expenses',
+                      `$${formatNumberWith2Decimal(overviewData?.expenses || 0)}`,
+                      'error',
+                      `$${formatNumberWith2Decimal(
+                        overviewData?.lastMonthExpensesReport || 0,
+                      )}`,
+                      formatNumberWith2Decimal(overviewData?.expensesChange || 0),
+                      (overviewData?.expensesChange || 0) < 0,
+                      true,
+                    )
+                  }
                 />
               </Grid>
               <Grid item xs={12} md={6} lg={3}>
@@ -343,12 +412,21 @@ export default function Overview() {
                   variant="gradient"
                   isMinify={isMinify}
                   subtitle="Orders processed"
+                  onClick={() =>
+                    handleKPIClick(
+                      'orders',
+                      'Total Orders',
+                      overviewData?.numberOfOrders || 0,
+                      'primary',
+                      overviewData?.lastMonthRevenueReport?.numberOfOrders || 0,
+                    )
+                  }
                 />
               </Grid>
               <Grid item xs={12} md={6} lg={3}>
                 <KPICard
                   title="Net Profit"
-                  value={`$${(overviewData?.profit || 0).toFixed(2)}`}
+                  value={`$${formatNumberWith2Decimal(overviewData?.profit || 0)}`}
                   icon={<TrendingUp />}
                   color="warning"
                   variant="gradient"
@@ -358,6 +436,19 @@ export default function Overview() {
                     isPositive: (overviewData?.profitChange || 0) > 0,
                     label: 'vs last period',
                   }}
+                  onClick={() =>
+                    handleKPIClick(
+                      'profit',
+                      'Net Profit',
+                      `$${formatNumberWith2Decimal(overviewData?.profit || 0)}`,
+                      'warning',
+                      `$${formatNumberWith2Decimal(
+                        overviewData?.lastMonthProfit || 0,
+                      )}`,
+                      formatNumberWith2Decimal(overviewData?.profitChange || 0),
+                      (overviewData?.profitChange || 0) > 0,
+                    )
+                  }
                 />
               </Grid>
             </Grid>
@@ -367,12 +458,25 @@ export default function Overview() {
               <Grid item xs={12} md={6} lg={3}>
                 <KPICard
                   title="Profit Margin"
-                  value={`${(((overviewData?.profit || 0) / (overviewData?.revenue || 1)) * 100).toFixed(1)}%`}
+                  value={`${formatNumberWith2Decimal(overviewData?.profitMargin || 0)}%`}
                   icon={<Analytics />}
                   color="success"
                   variant="gradient"
                   isMinify={isMinify}
                   subtitle="Financial health"
+                  onClick={() =>
+                    handleKPIClick(
+                      'margin',
+                      'Profit Margin',
+                      `${formatNumberWith2Decimal(overviewData?.profitMargin || 0)}%`,
+                      'success',
+                      `${formatNumberWith2Decimal(
+                        overviewData?.lastMonthProfitMargin || 0,
+                      )}%`,
+                      formatNumberWith2Decimal(overviewData?.profitMarginChange || 0),
+                      (overviewData?.profitMarginChange || 0) > 0,
+                    )
+                  }
                 />
               </Grid>
               <Grid item xs={12} md={6} lg={3}>
@@ -384,24 +488,53 @@ export default function Overview() {
                   variant="gradient"
                   isMinify={isMinify}
                   subtitle="Cost efficiency"
+                  onClick={() =>
+                    handleKPIClick(
+                      'ratio',
+                      'Expense Ratio',
+                      `${formatNumberWith2Decimal(
+                        overviewData?.expensesRatio || 0,
+                      )}%`,
+                      'error',
+                      `${formatNumberWith2Decimal(
+                        overviewData?.lastMonthExpensesRatio || 0,
+                      )}%`,
+                      formatNumberWith2Decimal(overviewData?.expensesRatioChange || 0),
+                      (overviewData?.expensesRatioChange || 0) < 0,
+                      true,
+                    )
+                  }
                 />
               </Grid>
 
               <Grid item xs={12} md={6} lg={3}>
                 <KPICard
                   title="Avg Order Value"
-                  value={`$${((overviewData?.revenue || 0) / (overviewData?.numberOfOrders || 1)).toFixed(2)}`}
+                  value={`$${formatNumberWith2Decimal(overviewData?.avgOrderValue || 0)}`}
                   icon={<ShoppingCart />}
                   color="primary"
                   variant="gradient"
                   isMinify={isMinify}
                   subtitle="Revenue per order"
+                  onClick={() =>
+                    handleKPIClick(
+                      'avgOrder',
+                      'Avg Order Value',
+                      `$${formatNumberWith2Decimal(overviewData?.avgOrderValue || 0)}`,
+                      'primary',
+                      `$${formatNumberWith2Decimal(
+                        overviewData?.lastMonthAvgOrderValue || 0,
+                      )}`,
+                      formatNumberWith2Decimal(overviewData?.avgOrderValueChange || 0),
+                      (overviewData?.avgOrderValueChange || 0) > 0,
+                    )
+                  }
                 />
               </Grid>
               <Grid item xs={12} md={6} lg={3}>
                 <KPICard
                   title="Active Customers"
-                  value={customers?.length || 0}
+                  value={overviewData?.activeCustomers || 0}
                   icon={<People />}
                   color="info"
                   variant="gradient"
@@ -1014,6 +1147,20 @@ export default function Overview() {
           </Box>
         </Fade>
       </Container>
+      {selectedKPI && (
+        <KPIDetailModal
+          open={modalOpen}
+          onClose={handleModalClose}
+          kpiType={selectedKPI.type}
+          title={selectedKPI.title}
+          currentValue={selectedKPI.value}
+          color={selectedKPI.color}
+          lastMonthValue={selectedKPI.lastMonthValue}
+          comparePercentage={selectedKPI.comparePercentage}
+          isPositive={selectedKPI.isPositive}
+          isReversed={selectedKPI.isReversed}
+        />
+      )}
     </Sidebar>
   );
 }
