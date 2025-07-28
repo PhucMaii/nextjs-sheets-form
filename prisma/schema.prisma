@@ -567,8 +567,9 @@ model Expense {
   codBoardId         Int?
   invoice            String?
   status             String?
-  fixedTransactionId Int?
   paidAt             String?
+
+  fixedTransactionId Int?
   companyId          Int?
   batchTransactionId  Int?
 
@@ -581,6 +582,7 @@ model Expense {
   shifts           ShiftSession[]
   purchaseOrders   PO[]
   payrolls         Payroll[]
+  cheques          Media[]
   fixedTransaction FixedTransaction? @relation(fields: [fixedTransactionId], references: [id])
 }
 
@@ -1019,16 +1021,20 @@ model Media {
   fileKey      String
   createdAt    String
   createdBy    String
+
+  companyId    Int?
   lossReportId Int?
   deliveryId   Int?
-  companyId    Int?
+  expenseId    Int?
 
   lossReport LossReport? @relation(fields: [lossReportId], references: [id], onDelete: Cascade)
   delivery   Delivery?   @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+  expense    Expense?    @relation(fields: [expenseId], references: [id], onDelete: Cascade)
   company    Company?    @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   @@index([deliveryId])
   @@index([lossReportId])
+  @@index([expenseId])
 }
 
 enum QuoteStatus {

@@ -138,6 +138,18 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       });
 
       expenses = [...fixedTransaction];
+    } else if (type && type === VIEW_TYPE.PAYMENT_METHOD) {
+      expenses = await getTransactions({
+        date: {
+          in: listOfDateString,
+        },
+        paymentMethodId: Number(id),
+      });
+
+      return res.status(200).json({
+        data: expenses,
+        message: 'Fetch Expenses successfully',
+      });
     } else if (id) {
       if (type && type === 'batch') {
         const batchTransaction = await prisma.batchTransaction.findUnique({

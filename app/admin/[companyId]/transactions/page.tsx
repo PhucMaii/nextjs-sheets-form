@@ -38,7 +38,7 @@ import {
 } from 'lucide-react';
 import LoadingModal from '../components/Modals/LoadingModal';
 import { useUpdateExpenseStatus } from '@/hooks/update/useUpdateExpenseStatus';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 
 export default function Transactions() {
   const { companyId }: any = useParams();
@@ -52,6 +52,12 @@ export default function Transactions() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [selectedExpenses, setSelectedExpenses] = useState<IExpense[]>([]);
+
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const paramStartDate = searchParams?.get('startDate');
+  const paramEndDate = searchParams?.get('endDate');
+  const paramSearchKeywords = searchParams?.get('q');
 
   const { showNotification, NotificationComp } = useNotification();
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
@@ -120,6 +126,52 @@ export default function Transactions() {
       setAdminsAndDrivers(adminsAndDriversRes?.data);
     }
   }, [adminsAndDriversRes]);
+
+  useEffect(() => {
+    if (paramStartDate || paramEndDate) {
+      setDateRange([
+        new Date(paramStartDate || ''),
+        new Date(paramEndDate || ''),
+      ]);
+    } else {
+      setDateRange(generateMonthRange());
+    }
+  }, [paramStartDate, paramEndDate]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    if (dateRange[0] || dateRange[1]) {
+      params.set('startDate', dateRange[0]);
+      params.set('endDate', dateRange[1]);
+    } else {
+      params.delete('startDate');
+      params.delete('endDate');
+    }
+
+    router.replace(`/admin/${companyId}/transactions?${params.toString()}`, {
+      scroll: false,
+    });
+  }, [dateRange]);
+
+  useEffect(() => {
+    if (paramSearchKeywords) {
+      setSearchKeywords(paramSearchKeywords);
+    }
+  }, [paramSearchKeywords]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (debouncedKeywords) {
+      params.set('q', debouncedKeywords);
+    } else {
+      params.delete('q');
+    }
+
+    router.replace(`/admin/${companyId}/transactions?${params.toString()}`, {
+      scroll: false,
+    });
+  }, [debouncedKeywords]);
 
   const initializeTransactions = () => {
     setBaseTransactions(expenses?.data || []);
