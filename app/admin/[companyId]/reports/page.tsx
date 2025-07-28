@@ -87,7 +87,10 @@ const useReportData = (
 
 const useReportState = () => {
   const [baseClientOrders, setBaseClientOrders] = useState<Order[]>([]);
-  const [clientValue, setClientValue] = useState<UserType | any>({clientId: '', clientName: 'All Clients'});
+  const [clientValue, setClientValue] = useState<UserType | any>({
+    clientId: '',
+    clientName: 'All Clients',
+  });
   const [clientOrders, setClientOrders] = useState<Order[]>([]);
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
   const [unpaidOrders, setUnpaidOrders] = useState<Order[]>([]);
@@ -142,7 +145,8 @@ const calculateTotalBill = (orders: Order[]): ReportStats => {
 const calculateUnpaidBill = (orders: Order[]): number => {
   const unpaidOrders = orders.filter((order: Order) => {
     return (
-      order.paymentStatus === PaymentStatus.Unpaid && order.status !== ORDER_STATUS.VOID
+      order.paymentStatus === PaymentStatus.Unpaid &&
+      order.status !== ORDER_STATUS.VOID
     );
   });
 
@@ -157,12 +161,15 @@ export default function ReportPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { showNotification, NotificationComp } = useNotification();
-  const { date: datePicker, SelectDate } = useSelectDate();
+  const { date: datePicker, setDate, SelectDate } = useSelectDate();
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   // Get URL parameters
   const queryClientId = searchParams?.get('clientId');
   const querySearchKeywords = searchParams?.get('q');
+  const queryDate = searchParams?.get('date');
+  const startDate = searchParams?.get('startDate');
+  const endDate = searchParams?.get('endDate');
 
   // State management
   const reportState = useReportState();
@@ -211,13 +218,14 @@ export default function ReportPage() {
   useEffect(() => {
     const currentUrl = window.location.search;
     const urlParams = new URLSearchParams(currentUrl);
-    
+
     let hasChanges = false;
-    
+
     // Check if clientId needs to be updated in URL
-    const currentClientId = reportState.clientValue?.clientName === 'All Clients' 
-      ? 'All Clients' 
-      : reportState.clientValue?.clientId || '';
+    const currentClientId =
+      reportState.clientValue?.clientName === 'All Clients'
+        ? 'All Clients'
+        : reportState.clientValue?.clientId || '';
     if (urlParams.get('clientId') !== currentClientId) {
       if (currentClientId) {
         urlParams.set('clientId', currentClientId);
@@ -226,23 +234,79 @@ export default function ReportPage() {
       }
       hasChanges = true;
     }
-    
-    // Check if search keywords need to be updated in URL
-    if (debouncedSearchKeywords && urlParams.get('q') !== debouncedSearchKeywords) {
-      urlParams.set('q', debouncedSearchKeywords);
-      hasChanges = true;
-    } else if (!debouncedSearchKeywords && urlParams.get('q')) {
-      urlParams.delete('q');
-      hasChanges = true;
-    }
-    
+
     // Only push to router if there are actual changes
     if (hasChanges) {
       const search = urlParams.toString();
       const queryTerm = search ? `?${search}` : '';
-      router.push(`/admin/${companyId}/reports${queryTerm}`, { scroll: false });
+      router.replace(`/admin/${companyId}/reports${queryTerm}`, {
+        scroll: false,
+      });
     }
-  }, [reportState.clientValue, debouncedSearchKeywords, router, companyId]);
+  }, [reportState.clientValue]);
+
+  useEffect(() => {
+    // Check if search keywords need to be updated in URL
+    let hasChanges = false;
+    const currentUrl = window.location.search;
+    const urlParams = new URLSearchParams(currentUrl);
+
+    console.log(urlParams.get('q'), debouncedSearchKeywords);
+
+    if (debouncedSearchKeywords) {
+      const newOrderData = reportState.baseClientOrders.filter(
+        (order: Order) => {
+          if (
+            order.id.toString().includes(debouncedSearchKeywords) ||
+            order.user.clientId === debouncedSearchKeywords ||
+            order.user.clientName
+              .toLowerCase()
+              .includes(debouncedSearchKeywords.toLowerCase()) ||
+            order.status.toLowerCase() === debouncedSearchKeywords.toLowerCase()
+          ) {
+            return true;
+          }
+          return false;
+        },
+      );
+
+      reportState.setClientOrders(newOrderData);
+
+      if (urlParams.get('q') !== debouncedSearchKeywords) {
+        urlParams.set('q', debouncedSearchKeywords);
+        hasChanges = true;
+      }
+    } else {
+      reportState.setClientOrders(reportState.baseClientOrders);
+
+      if (urlParams.get('q')) {
+        urlParams.delete('q');
+        hasChanges = true;
+      }
+    }
+
+    if (hasChanges) {
+      const search = urlParams.toString();
+      const queryTerm = search ? `?${search}` : '';
+      router.replace(`/admin/${companyId}/reports${queryTerm}`, {
+        scroll: false,
+      });
+    }
+  }, [debouncedSearchKeywords]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    if (datePicker) {
+      params.set('date', datePicker);
+    } else {
+      params.delete('date');
+    }
+
+    router.replace(`/admin/${companyId}/reports?${params.toString()}`, {
+      scroll: false,
+    });
+  }, [datePicker]);
 
   // Effects
   useEffect(() => {
@@ -278,9 +342,43 @@ export default function ReportPage() {
   // Handle URL parameter changes -> update local state
   useEffect(() => {
     if (querySearchKeywords !== reportState.searchKeywords) {
+      console.log('querySearchKeywords', querySearchKeywords);
       reportState.setSearchKeywords(querySearchKeywords || '');
     }
   }, [querySearchKeywords]);
+
+  useEffect(() => {
+    if (queryDate) {
+      setDate(queryDate);
+    }
+  }, [queryDate]);
+
+  useEffect(() => {
+    if (startDate || endDate) {
+      reportState.setDateRange([
+        new Date(startDate || ''),
+        new Date(endDate || ''),
+      ]);
+    } else {
+      reportState.setDateRange(generateMonthRange());
+    }
+  }, [startDate, endDate]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    if (reportState.dateRange[0] || reportState.dateRange.length > 0) {
+      params.set('startDate', reportState.dateRange[0]);
+      params.set('endDate', reportState.dateRange[1]);
+    } else {
+      params.delete('startDate');
+      params.delete('endDate');
+    }
+
+    router.replace(`/admin/${companyId}/reports?${params.toString()}`, {
+      scroll: false,
+    });
+  }, [reportState.dateRange]);
 
   // Event handlers
   const initializeOrders = useCallback(() => {
@@ -465,6 +563,8 @@ export default function ReportPage() {
           datePicker={datePicker}
           baseClientOrders={reportState.baseClientOrders}
           setBaseClientOrders={reportState.setBaseClientOrders}
+          searchKeywords={reportState.searchKeywords}
+          setSearchKeywords={reportState.setSearchKeywords}
         />
       );
     }

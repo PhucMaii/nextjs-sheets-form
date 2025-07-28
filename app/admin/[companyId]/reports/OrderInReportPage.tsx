@@ -16,7 +16,6 @@ import ClientOrdersTable from '../components/Tables/ClientOrdersTable';
 import ErrorComponent from '../components/ErrorComponent';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-import useDebounce from '@/hooks/useDebounce';
 import { Order } from '../orders/page';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -66,9 +65,10 @@ export default function OrderInReportPage({
   setUnpaidOrders,
   mutateOrders,
   datePicker,
+  searchKeywords,
+  setSearchKeywords,
 }: any) {
   const { companyId }: any = useParams();
-  console.log(clientOrders, ' client orders');
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
   const openActionsDropdown = Boolean(actionButtonAnchor);
@@ -85,14 +85,13 @@ export default function OrderInReportPage({
   const [isOpenRouteStatement, setIsOpenRouteStatement] =
     useState<boolean>(false);
   const [isOpenUploadCheque, setIsOpenUploadCheque] = useState<boolean>(false);
-  const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
 
   const currentDate = convertDeliveryDateStringToDate(datePicker);
   const [routes, mutateRoutes] = SWRFetchData(
     getAdminApiUrl(companyId, `/routes?day=${days[currentDate.getDay()]}`),
   );
-  const debouncedKeywords = useDebounce(searchKeywords, 1000);
+
   // Printing Refs
   const invoicePrint: any = useRef();
   const allOrdersInvoicePrint: any = useRef();
@@ -110,27 +109,6 @@ export default function OrderInReportPage({
       mutateRoutes();
     }
   }, [datePicker]);
-
-  useEffect(() => {
-    if (debouncedKeywords) {
-      const newOrderData = baseClientOrders.filter((order: Order) => {
-        if (
-          order.id.toString().includes(debouncedKeywords) ||
-          order.user.clientId === debouncedKeywords ||
-          order.user.clientName
-            .toLowerCase()
-            .includes(debouncedKeywords.toLowerCase()) ||
-          order.status.toLowerCase() === debouncedKeywords.toLowerCase()
-        ) {
-          return true;
-        }
-        return false;
-      });
-      setClientOrders(newOrderData);
-    } else {
-      setClientOrders(baseClientOrders);
-    }
-  }, [debouncedKeywords, baseClientOrders]);
 
   const handleCloseActionsAnchor = () => {
     setActionButtonAnchor(null);

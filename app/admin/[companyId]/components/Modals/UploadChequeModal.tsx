@@ -109,7 +109,6 @@ export default function UploadChequeModal({
   };
 
   const handleFrontUploadComplete = (uploadedFiles: Array<{ fileKey: string; fileName: string }>) => {
-    console.log('Front upload complete:', uploadedFiles);
     if (uploadedFiles.length > 0) {
       setCheque(prev => ({
         ...prev,
@@ -120,7 +119,6 @@ export default function UploadChequeModal({
   };
 
   const handleBackUploadComplete = (uploadedFiles: Array<{ fileKey: string; fileName: string }>) => {
-    console.log('Back upload complete:', uploadedFiles);
     if (uploadedFiles.length > 0) {
       setCheque(prev => ({
         ...prev,
@@ -133,8 +131,6 @@ export default function UploadChequeModal({
   const handleUploadError = (error: string) => {
     showNotification('error', error);
   };
-
-  console.log(cheque, 'cheque');
 
   return (
     <>
