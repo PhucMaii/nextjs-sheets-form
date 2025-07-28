@@ -434,7 +434,7 @@ export default function CreateTransaction() {
       }
 
       setIsSubmitting(false);
-      router.push(`/admin/${companyId}/transactions`);
+      router.back();
     } catch (error: any) {
       console.log('Something went wrong: ', error);
       showNotification('error', 'Something went wrong: ' + error);

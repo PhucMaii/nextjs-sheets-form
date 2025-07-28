@@ -47,7 +47,7 @@ import axios from 'axios';
 import DeleteModal from '../components/Modals/delete/DeleteModal';
 import { useUpdateExpenseStatus } from '@/hooks/update/useUpdateExpenseStatus';
 import LoadingModal from '../components/Modals/LoadingModal';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { error, errorBackground, errorColor } from '@/theme/color';
 import moment from 'moment';
 
@@ -94,6 +94,7 @@ const SpendingItem = ({
 
 export default function CardManagement() {
   const { companyId }: any = useParams();
+  const router = useRouter();
 
   const [filterAnchorEl, setFilterAnchorEl] = useState<any>(null);
   const isOpenFilter = Boolean(filterAnchorEl);
@@ -118,6 +119,12 @@ export default function CardManagement() {
   const [selectedExpenses, setSelectedExpenses] = useState<IExpense[]>([]);
   // const [isOpenAddNewMethod, setIsOpenAddNewMethod] = useState<boolean>(false);
 
+  const searchParams = useSearchParams();
+  const paramStartDate = searchParams?.get('startDate');
+  const paramEndDate = searchParams?.get('endDate');
+  const paramsViewType = searchParams?.get('viewType');
+  const paramsViewId = searchParams?.get('viewId');
+
   const { showNotification, NotificationComp } = useNotification();
   const {
     handleUpdateStatus,
@@ -138,7 +145,6 @@ export default function CardManagement() {
     ),
   );
 
-  console.log('transactions', transactions);
   const [adminsAndDriversRes] = SWRFetchData(
     getAdminApiUrl(companyId, '/adminsAndDrivers'),
   );
@@ -159,12 +165,9 @@ export default function CardManagement() {
       return 0;
     }
 
-    return transactions?.data?.reduce(
-      (acc: number, transaction: IExpense) => {
-        return acc + transaction.amount;
-      },
-      0,
-    );
+    return transactions?.data?.reduce((acc: number, transaction: IExpense) => {
+      return acc + transaction.amount;
+    }, 0);
   }, [transactions]);
 
   const mostUsedMethod = useMemo(() => {
@@ -231,6 +234,62 @@ export default function CardManagement() {
       fetchVendors();
     }
   }, [companyId]);
+
+  useEffect(() => {
+    if (paramsViewType || paramsViewId) {
+      // const selectedType = 
+      setSelectedViewObj({
+        ...selectedViewObj,
+        id: Number(paramsViewId) || selectedViewObj.id,
+        type: paramsViewType || selectedViewObj.type,
+      });
+    }
+  }, [paramsViewType, paramsViewId]);
+
+  console.log('selectedViewObj', selectedViewObj);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    if (selectedViewObj) {
+      params.set('viewType', selectedViewObj.type);
+      params.set('viewId', selectedViewObj.id);
+    } else {
+      params.delete('viewType');
+      params.delete('viewId');
+    }
+
+    router.replace(`/admin/${companyId}/cards?${params.toString()}`, {
+      scroll: false,
+    });
+  }, [selectedViewObj]);
+
+  useEffect(() => {
+    if (paramStartDate || paramEndDate) {
+      setDateRange([
+        new Date(paramStartDate || ''),
+        new Date(paramEndDate || ''),
+      ]);
+    } else {
+      setDateRange(generateMonthRange());
+    }
+  }, [paramStartDate, paramEndDate]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    if (dateRange[0] || dateRange[1]) {
+      params.set('startDate', dateRange[0]);
+      params.set('endDate', dateRange[1]);
+    } else {
+      params.delete('startDate');
+      params.delete('endDate');
+    }
+
+    router.replace(`/admin/${companyId}/cards?${params.toString()}`, {
+      scroll: false,
+    });
+  }, [dateRange]);
 
   const fetchPaymentMethods = async () => {
     const paymentMethods: any = await fetchApi(

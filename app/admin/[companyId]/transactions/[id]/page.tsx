@@ -72,7 +72,6 @@ export default function EditTransaction() {
         .then((res) => res.data.data),
   });
 
-  console.log('expenseItems', transactionData?.orderedItems);
 
   const sortedVendors = useMemo(() => {
     if (!vendors) {
@@ -316,7 +315,7 @@ export default function EditTransaction() {
       }
 
       showNotification('success', response.data.message);
-      router.push(`/admin/${companyId}/transactions`);
+      router.back();
     } catch (error) {
       console.error('Error saving transaction:', error);
       showNotification('error', 'Something went wrong');
@@ -348,7 +347,7 @@ export default function EditTransaction() {
       }
 
       showNotification('success', response.data.message);
-      router.push(`/admin/${companyId}/transactions`);
+      router.back();
     } catch (error) {
       console.error('Error saving transaction:', error);
       showNotification('error', 'Something went wrong');
@@ -383,7 +382,7 @@ export default function EditTransaction() {
       }
 
       showNotification('success', response.data.message);
-      router.push(`/admin/${companyId}/transactions`);
+      router.back();
     } catch (error: any) {
       console.error('Error saving batch transaction:', error);
       showNotification('error', 'Something went wrong');
