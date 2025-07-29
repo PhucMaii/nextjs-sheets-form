@@ -17,7 +17,10 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    domains: ['supreme-sprouts-products.s3.us-west-2.amazonaws.com'],
+    domains: [
+      'supreme-sprouts-products.s3.us-west-2.amazonaws.com',
+      'cheque-bucket.s3.us-west-2.amazonaws.com',
+    ],
   },
 };
 

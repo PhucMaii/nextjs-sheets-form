@@ -4,6 +4,7 @@ import {
   Button,
   Checkbox,
   Chip,
+  IconButton,
   Paper,
   Table,
   TableBody,
@@ -20,8 +21,10 @@ import { getAdminApiUrl } from '@/app/utils/enum';
 import DeleteModal from '../Modals/delete/DeleteModal';
 import SelectExpenseStatus from '../Select/SelectExpenseStatus';
 import { IExpense } from '@/app/utils/type';
-import { grey } from '@mui/material/colors';
+import { blue, grey } from '@mui/material/colors';
 import { useParams, useRouter } from 'next/navigation';
+import ViewImg from '../ViewImg';
+import { ImageIcon } from 'lucide-react';
 
 interface IProps {
   transactions: IExpense[];
@@ -55,6 +58,11 @@ const TransactionsTable = ({
     open: false,
     transaction: transactions[0],
     type: ExpenseType.other,
+  });
+  const [viewImgProps, setViewImgProps] = useState<any>({
+    open: false,
+    fileKeyFront: null,
+    fileKeyBack: null,
   });
   const { companyId }: any = useParams();
 
@@ -156,6 +164,15 @@ const TransactionsTable = ({
         }
         showTargetObj={deleteProps.transaction?.invoice}
       />
+      <ViewImg
+        fileKeyFront={viewImgProps.fileKeyFront}
+        fileKeyBack={viewImgProps.fileKeyBack}
+        open={viewImgProps.open}
+        onClose={() =>
+          setViewImgProps((prevState: any) => ({ ...prevState, open: false }))
+        }
+        isCheque={true}
+      />
       {/* {editProps.type === ExpenseType.stockPurchased && showNotification && (
         <EditStockPurchased
           open={editProps.open}
@@ -197,6 +214,7 @@ const TransactionsTable = ({
                   />
                 </TableCell>
               )}
+              <TableCell>Cheque</TableCell>
               <TableCell>Method</TableCell>
               <TableCell>Type</TableCell>
               <TableCell>Invoice</TableCell>
@@ -256,6 +274,30 @@ const TransactionsTable = ({
                         />
                       </TableCell>
                     )}
+                    <TableCell>
+                      {transaction?.cheques?.length > 0 && (
+                        <IconButton
+                          onClick={(e: any) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            const frontFileKey = transaction?.cheques?.find(
+                              (cheque: any) => cheque.note === 'front',
+                            )?.fileKey;
+                            console.log(frontFileKey, 'frontFileKey');
+                            const backFileKey = transaction?.cheques?.find(
+                              (cheque: any) => cheque.note === 'back',
+                            )?.fileKey;
+                            setViewImgProps({
+                              open: true,
+                              fileKeyFront: frontFileKey,
+                              fileKeyBack: backFileKey,
+                            });
+                          }}
+                        >
+                          <ImageIcon size={16} style={{ color: blue[500] }} />
+                        </IconButton>
+                      )}
+                    </TableCell>
                     <TableCell style={{ width: 50 }}>
                       {/* <Toolbar> */}
                       <Tooltip title={transaction?.paymentMethod?.name}>
@@ -263,7 +305,6 @@ const TransactionsTable = ({
                           label={transaction?.paymentMethod?.type}
                           size="small"
                         />
-
                       </Tooltip>
                       {/* </Toolbar> */}
                     </TableCell>
