@@ -54,7 +54,7 @@ const InventoryDetail = () => {
       }
 
       showNotification('success', 'Inventory item updated successfully');
-      router.push(`/admin/${companyId}/inventory`);
+      router.back();
     } catch (error: any) {
       showNotification('error', 'Fail to update inventory item');
       console.log(error, 'error');

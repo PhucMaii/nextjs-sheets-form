@@ -1,5 +1,5 @@
 'use client';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Box,
@@ -28,13 +28,14 @@ import {
   BarChart3,
 } from 'lucide-react';
 import TrackInventoryRecord from '../components/Modals/TrackInventoryRecord';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { ShadowSection } from '../reports/styled';
 import AddInventory from '../components/Modals/add/AddInventory';
 import { minThreshold } from '@/app/lib/constant';
 import axios from 'axios';
 import LoadingButton from '@mui/lab/LoadingButton';
 import ConfirmModal from '../components/Modals/ConfirmModal';
+import useDebounce from '@/hooks/useDebounce';
 
 // Enhanced styled components
 const PageContainer = ({ children }: { children: React.ReactNode }) => (
@@ -165,12 +166,17 @@ const QuickStatsCard = ({
 export default function InventoryPage() {
   const { companyId }: any = useParams();
   const router = useRouter();
+  const searchParams: any = useSearchParams();
+  const paramsKeywords = searchParams?.get('q');
+
   const [isTrackingInventory, setIsTrackingInventory] =
     useState<boolean>(false);
   const [isOpenConfirmModal, setIsOpenConfirmModal] = useState<boolean>(false);
   const [isOpenTrackInventoryRecord, setIsOpenTrackInventoryRecord] =
     useState<boolean>(false);
   const [isOpenAddItem, setIsOpenAddItem] = useState<boolean>(false);
+  const [searchKeywords, setSearchKeywords] = useState<string>('');
+  const debouncedKeywords = useDebounce(searchKeywords, 1000);
 
   const { showNotification, NotificationComp } = useNotification();
   const [inventoryItems] = SWRFetchData(
@@ -179,6 +185,26 @@ export default function InventoryPage() {
 
   const isMobile = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
   const isLoading = !inventoryItems;
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    if (debouncedKeywords) {
+      params.set('q', debouncedKeywords);
+    } else {
+      params.delete('q');
+    }
+
+    router.replace(`/admin/${companyId}/inventory?${params.toString()}`, {
+      scroll: false,
+    });
+  }, [debouncedKeywords]);
+
+  useEffect(() => {
+    if (paramsKeywords) {
+      setSearchKeywords(paramsKeywords);
+    }
+  }, [paramsKeywords]);
 
   const getInventoryStats = () => {
     const items = inventoryItems?.data || [];
@@ -442,6 +468,9 @@ export default function InventoryPage() {
           <StockItems
             showNotification={showNotification}
             inventoryItems={inventoryItems}
+            searchKeywords={searchKeywords}
+            setSearchKeywords={setSearchKeywords}
+            debouncedKeywords={debouncedKeywords || ''}
           />
         </Box>
       </Fade>

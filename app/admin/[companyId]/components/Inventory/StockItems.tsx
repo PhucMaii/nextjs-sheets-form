@@ -9,7 +9,6 @@ import {
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import InventoryTable from '../Tables/InventoryTable';
-import useDebounce from '@/hooks/useDebounce';
 import { IInventoryItem } from '@/app/utils/type';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import { SWRFetchData } from '@/app/utils/db';
@@ -83,11 +82,17 @@ export const ItemTypeButton = ({
 interface IProps {
   showNotification: (type: AlertColor, message: string) => void;
   inventoryItems: any;
+  searchKeywords: string;
+  setSearchKeywords: (keywords: string) => void;
+  debouncedKeywords: string;
 }
 
 export default function StockItems({
   showNotification,
   inventoryItems,
+  searchKeywords,
+  setSearchKeywords,
+  debouncedKeywords,
 }: IProps) {
   const { companyId }: any = useParams();
 
@@ -106,10 +111,8 @@ export default function StockItems({
     defaultValue: null,
     id: -1,
   });
-  const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [selectedType, setSelectedType] = useState<string>('All');
 
-  const debouncedKeywords = useDebounce(searchKeywords, 1000);
   const [itemTypes] = SWRFetchData(getAdminApiUrl(companyId, '/item-types'));
 
   useEffect(() => {
