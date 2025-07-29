@@ -605,6 +605,7 @@ model BatchTransaction {
   status          PaymentStatus?
 
   transactions    Expense[]
+  cheques         Media[]
 
   company         Company?  @relation(fields: [companyId], references: [id])
   paymentMethod   PaymentMethod @relation(fields: [paymentMethodId], references: [id])
@@ -1016,21 +1017,24 @@ model LossReport {
 }
 
 model Media {
-  id           Int    @id @default(autoincrement())
-  type         String
-  fileKey      String
-  createdAt    String
-  createdBy    String
+  id                    Int    @id @default(autoincrement())
+  type                  String
+  fileKey                String
+  createdAt             String
+  createdBy             String
+  note                  String?
 
-  companyId    Int?
-  lossReportId Int?
-  deliveryId   Int?
-  expenseId    Int?
+  companyId             Int?
+  lossReportId          Int?
+  deliveryId            Int?
+  expenseId             Int?
+  batchTransactionId    Int?
 
   lossReport LossReport? @relation(fields: [lossReportId], references: [id], onDelete: Cascade)
   delivery   Delivery?   @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
   expense    Expense?    @relation(fields: [expenseId], references: [id], onDelete: Cascade)
   company    Company?    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  batchTransaction  BatchTransaction?  @relation(fields: [batchTransactionId], references: [id], onDelete: Cascade)
 
   @@index([deliveryId])
   @@index([lossReportId])

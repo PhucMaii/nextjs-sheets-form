@@ -38,6 +38,7 @@ export default function ViewImg({
       // } else {
         if (fileKeyFront) {
           const urlFront = await generateImgUrl(fileKeyFront, isCheque);
+          console.log(urlFront, 'urlFront');
           setUrlFront(urlFront);
         }
 

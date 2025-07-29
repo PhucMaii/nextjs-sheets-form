@@ -1,9 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { TRANSACTION_STATUS } from '@/app/utils/enum';
+import { TRANSACTION_STATUS, USER_ROLE } from '@/app/utils/enum';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { getTodayDate } from '@/pages/api/utils/date';
+import { updateCheque } from './PUT';
+import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 
 interface IBody {
   amount: number;
@@ -17,6 +19,10 @@ interface IBody {
   status: TRANSACTION_STATUS;
   discount?: number;
   codBoardId?: number;
+  frontFileKey?: string;
+  frontFileType?: string;
+  backFileKey?: string;
+  backFileType?: string;
 }
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
@@ -35,6 +41,10 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       status,
       discount,
       codBoardId,
+      frontFileKey,
+      frontFileType,
+      backFileKey,
+      backFileType,
     }: IBody = req.body;
 
     const { companyId } = req.query;
@@ -65,13 +75,14 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const createdAt = getTodayDate().dateAndTime;
+    const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
 
     const newExpense = await prisma.expense.create({
       data: {
         amount,
         description,
         createdAt,
-        createdBy: `Admin - ${adminUser.clientName}`,
+        createdBy,
         PST,
         GST,
         subTotal,
@@ -85,16 +96,14 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    // const newBalance = existingMethod.balance + amount;
-
-    // await prisma.paymentMethod.update({
-    //   where: {
-    //     id: paymentMethodId,
-    //   },
-    //   data: {
-    //     balance: newBalance,
-    //   },
-    // });
+    await updateCheque(
+      newExpense,
+      frontFileKey,
+      frontFileType,
+      backFileKey,
+      backFileType,
+      createdBy,
+    );
 
     return res.status(201).json({
       data: newExpense,

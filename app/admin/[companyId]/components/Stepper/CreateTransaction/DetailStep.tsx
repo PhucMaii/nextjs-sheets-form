@@ -17,6 +17,7 @@ import {
   IconButton,
   Checkbox,
   FormControlLabel,
+  useMediaQuery,
 } from '@mui/material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -32,7 +33,11 @@ import {
 } from '@mui/icons-material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
-import { getAdminApiUrl, TRANSACTION_STATUS } from '@/app/utils/enum';
+import {
+  getAdminApiUrl,
+  PAYMENT_METHOD_TYPE,
+  TRANSACTION_STATUS,
+} from '@/app/utils/enum';
 import { BorderSection } from '../../../reports/styled';
 import CreditCardIcon from '@mui/icons-material/CreditCard';
 import ItemRow from './ItemRow';
@@ -47,6 +52,9 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
 import { calculateTaxWithDiscount } from '@/app/utils/item';
+import { YYYYMMDDFormat } from '@/app/utils/time';
+import { PresignedFileUpload } from '@/app/components/PresignedFileUpload';
+import DisplayFile from '../../Modals/DisplayFile';
 
 interface PropTypes {
   transactionType: TransactionType;
@@ -70,7 +78,7 @@ interface PropTypes {
   defaultCodDate?: any;
 }
 
-export default function DetailsStep({
+export default function DetailStep({
   transactionType,
   selectedDate,
   setSelectedDate,
@@ -94,6 +102,10 @@ export default function DetailsStep({
   const { companyId }: any = useParams();
   const [codDate, setCodDate] = useState<any>(dayjs(defaultCodDate || ''));
   const [isSelectRangeOpen, setIsSelectRangeOpen] = useState(false);
+  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
+
+  const month = YYYYMMDDFormat(new Date()).split('/')[0];
+  const year = YYYYMMDDFormat(new Date()).split('/')[2];
 
   const { data: codList } = useQuery({
     queryKey: ['codList', codDate.format('MM/DD/YYYY')],
@@ -630,6 +642,152 @@ export default function DetailsStep({
                     placeholder="Enter transaction description..."
                   />
                 </Grid>
+
+                {formData?.paymentMethod?.type ===
+                  PAYMENT_METHOD_TYPE.CHEQUE && (
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      // gap: 2,
+                      mt: 2,
+                      p: 2,
+                      width: '100%',
+                    }}
+                  >
+                    <Divider sx={{ width: '100%', my: 2 }}>
+                      Cheque Proof
+                    </Divider>
+
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      gap={1}
+                      width="100%"
+                      justifyContent="flex-end"
+                    >
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={formData.isFrontCheque}
+                            onChange={(e) => {
+                              setFormData((prev: any) => ({
+                                ...prev,
+                                isFrontCheque: e.target.checked,
+                              }));
+                            }}
+                          />
+                        }
+                        label="Front"
+                      />
+
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={formData.isBackCheque}
+                            onChange={(e) => {
+                              setFormData((prev: any) => ({
+                                ...prev,
+                                isBackCheque: e.target.checked,
+                              }));
+                            }}
+                          />
+                        }
+                        label="Back"
+                      />
+                    </Box>
+
+                    <Box
+                      display="flex"
+                      flexDirection={mdDown ? 'column' : 'row'}
+                      alignItems="flex-start"
+                      gap={1}
+                      width="100%"
+                      mt={2}
+                    >
+                      {!formData?.isFrontCheque && !formData?.isBackCheque && (
+                        <ErrorComponent errorText="Please select either front or back of the cheque to upload" />
+                      )}
+                      {formData?.isFrontCheque && formData?.frontFileKey ? (
+                        <Box width="100%" display="flex" flexDirection="column" alignItems="center" gap={2}>
+                          <Typography>Front</Typography>
+                          <DisplayFile
+                            fileKey={formData?.frontFileKey}
+                            isCheque={true}
+                            width="200px"
+                            height="200px"
+                          />
+                          <Button variant="outlined" size="small" onClick={() => {
+                            setFormData((prev: any) => ({
+                              ...prev,
+                              frontFileKey: null,
+                              frontFileType: null,
+                            }));
+                          }}>Upload Other Proof</Button>
+                        </Box>
+                      ) : formData?.isFrontCheque && !formData?.frontFileKey ? (
+                        <Box width="100%">
+                          <Typography>Front</Typography>
+                          <PresignedFileUpload
+                            location={`transactions/${year}/${month}`}
+                            isCheque={true}
+                            maxFiles={1}
+                            maxSize={10 * 1024 * 1024} // 10MB
+                            acceptedFileTypes={['image/*', 'application/pdf']}
+                            onUploadComplete={(files) => {
+                              setFormData((prev: any) => ({
+                                ...prev,
+                                frontFileKey: files[0].fileKey,
+                                frontFileType: files[0].fileType,
+                              }));
+                            }}
+                            isUploaded={!!formData.frontFileKey}
+                          />
+                        </Box>
+                      ) : null}
+
+                      {formData?.isBackCheque && formData?.backFileKey ? (
+                        <Box width="100%" display="flex" flexDirection="column" alignItems="center" gap={2}>
+                          <Typography>Back</Typography>
+                          <DisplayFile
+                            fileKey={formData?.backFileKey}
+                            isCheque={true}
+                            width="200px"
+                            height="200px"
+                          />
+                          <Button variant="outlined" size="small" onClick={() => {
+                            setFormData((prev: any) => ({
+                              ...prev,
+                              backFileKey: null,
+                              backFileType: null,
+                            }));
+                          }}>Upload Other Proof</Button>
+                        </Box>
+                      ) : formData?.isBackCheque && !formData?.backFileKey ? (
+                        <Box width="100%">
+                          <Typography>Back</Typography>
+                          <PresignedFileUpload
+                            location={`transactions/${year}/${month}`}
+                            isCheque={true}
+                            maxFiles={1}
+                            maxSize={10 * 1024 * 1024} // 10MB
+                            acceptedFileTypes={['image/*', 'application/pdf']}
+                            onUploadComplete={(files) => {
+                              setFormData((prev: any) => ({
+                                ...prev,
+                                backFileKey: files[0].fileKey,
+                                backFileType: files[0].fileType,
+                              }));
+                            }}
+                            isUploaded={!!formData.backFileKey}
+                          />
+                        </Box>
+                      ) : null}
+                    </Box>
+                  </Box>
+                )}
               </Grid>
             </BorderSection>
           </Grid>

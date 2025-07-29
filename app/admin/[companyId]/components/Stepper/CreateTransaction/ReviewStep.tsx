@@ -15,6 +15,7 @@ import { TRANSACTION_STATUS } from '@/app/utils/enum';
 import { BorderSection } from '../../../reports/styled';
 import { TransactionType } from './TransactionTypeStep';
 import dayjs from 'dayjs';
+import DisplayFile from '../../Modals/DisplayFile';
 
 export default function ReviewStep({
   transactionType,
@@ -30,7 +31,7 @@ export default function ReviewStep({
   smallExpenses: any;
 }) {
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
-
+  console.log(formData, 'formData');
   return (
     <Fade in timeout={500}>
       <Box>
@@ -240,7 +241,7 @@ export default function ReviewStep({
                   </Grid>
                 </Box>
               )}
-              
+
               {smallExpenses.length > 0 &&
                 smallExpenses.map((expense: any) => (
                   <Grid container spacing={2} key={expense.id} my={1}>
@@ -282,6 +283,54 @@ export default function ReviewStep({
               <Typography variant="h6" gutterBottom>
                 Financial Summary
               </Typography>
+              {/* if either front file key or back file key is not null, show the cheques proof 
+              and show the front and back file keys in a grid */}
+              {(formData?.isFrontCheque || formData?.isBackCheque) && (
+                <Grid container spacing={2}>
+                  <Grid
+                    item
+                    xs={12}
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: 2,
+                    }}
+                  >
+                    <Divider flexItem>Cheques</Divider>
+
+                    {formData?.isFrontCheque && (
+                      <Box
+                        display="flex"
+                        flexDirection="column"
+                        alignItems="center"
+                        gap={2}
+                      >
+                        <Typography variant="body2">Front</Typography>
+                        <DisplayFile
+                          fileKey={formData?.frontFileKey}
+                          isCheque={true}
+                        />
+                      </Box>
+                    )}
+
+                    {formData?.isBackCheque && (
+                      <Box
+                        display="flex"
+                        flexDirection="column"
+                        alignItems="center"
+                        gap={2}
+                      >
+                        <Typography variant="body2">Back</Typography>
+                        <DisplayFile
+                          fileKey={formData?.backFileKey}
+                          isCheque={true}
+                        />
+                      </Box>
+                    )}
+                  </Grid>
+                </Grid>
+              )}
               <Divider sx={{ mb: 2 }} />
 
               {transactionType === 'stock' ? (
