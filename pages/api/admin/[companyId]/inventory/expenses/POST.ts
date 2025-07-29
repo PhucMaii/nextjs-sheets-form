@@ -9,6 +9,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { getTodayDate } from '@/pages/api/utils/date';
+import { updateCheque } from '../../expenses/PUT';
 
 export interface IExpenseItem {
     id: number;
@@ -32,6 +33,10 @@ interface IBody {
   PST?: number;
   discount?: number;
   codBoardId?: number;
+  frontFileKey?: string;
+  frontFileType?: string;
+  backFileKey?: string;
+  backFileType?: string;
   status: TRANSACTION_STATUS;
   items: IExpenseItem[];
 }
@@ -54,6 +59,10 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       invoice,
       codBoardId,
       items,
+      frontFileKey,
+      frontFileType,
+      backFileKey,
+      backFileType,
     }: IBody = req.body;
 
     const { companyId } = req.query;
@@ -120,6 +129,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         discount,
       },
     });
+
+    await updateCheque(newExpense, frontFileKey, frontFileType, backFileKey, backFileType, createdBy);
 
     // Connect Vendors and Expense
     if (vendors.length > 0) {

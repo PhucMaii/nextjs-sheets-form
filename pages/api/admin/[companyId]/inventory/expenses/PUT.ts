@@ -1,4 +1,9 @@
-import { Fifo, OrderedItems, PaymentStatus, PrismaClient } from '@prisma/client';
+import {
+  Fifo,
+  OrderedItems,
+  PaymentStatus,
+  PrismaClient,
+} from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { checkAndUpdateUnits, createFifo } from './POST';
 import { IInventoryUnit } from '@/app/utils/type';
@@ -6,6 +11,7 @@ import { subtractInventoryItem } from '../../orderedItems/single';
 import { getTodayDate } from '@/pages/api/utils/date';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { USER_ROLE } from '@/app/utils/enum';
+import { updateCheque } from '../../expenses/PUT';
 
 interface IPurchasedItem {
   id: number; // ordered items id
@@ -36,6 +42,10 @@ interface IBody {
   discount?: number;
   codBoardId?: number;
   status?: PaymentStatus;
+  frontFileKey?: string;
+  frontFileType?: string;
+  backFileKey?: string;
+  backFileType?: string;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
@@ -66,6 +76,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       discount,
       codBoardId,
       status,
+      frontFileKey,
+      frontFileType,
+      backFileKey,
+      backFileType,
     }: IBody = req.body;
 
     const updatedAt = getTodayDate().dateAndTime;
@@ -81,6 +95,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             inventoryUnit: true,
           },
         },
+        cheques: true,
       },
     });
 
@@ -133,8 +148,19 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             fifo: true,
           },
         },
+        cheques: true,
       },
     });
+
+    const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
+    await updateCheque(
+      existingExpense,
+      frontFileKey,
+      frontFileType,
+      backFileKey,
+      backFileType,
+      createdBy,
+    );
 
     const oldItemIds = oldItems.map((item: any) => {
       return item.id;
@@ -167,8 +193,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     // If there is any changes in ordered items
     if (isOrderedItemsChange) {
-      const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
-
       const vendorItems = await prisma.vendorItem.findMany({
         where: {
           companyId: Number(companyId),
@@ -192,7 +216,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
         // Conflict - vendor item not found, must be removed from the bill
         if (!vendorItem) {
-          console.error('Conflict - vendor item not found, must be removed from the bill');
+          console.error(
+            'Conflict - vendor item not found, must be removed from the bill',
+          );
           await prisma.orderedItems.delete({
             where: {
               id: item.id,

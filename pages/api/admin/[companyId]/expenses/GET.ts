@@ -59,6 +59,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         include: {
           transactions: true,
           paymentMethod: true,
+          cheques: true,
         },
       });
 
@@ -159,6 +160,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           include: {
             transactions: true,
             paymentMethod: true,
+            cheques: true,
           },
         });
 
@@ -292,6 +294,7 @@ const getTransactions = async (condition: any) => {
           vendor: true,
         },
       },
+      cheques: true,
       codBoard: true,
       orderedItems: {
         include: {

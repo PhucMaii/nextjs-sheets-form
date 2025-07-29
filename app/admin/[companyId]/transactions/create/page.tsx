@@ -18,7 +18,7 @@ import axios from 'axios';
 import useNotification from '@/hooks/useNotification';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import dayjs, { Dayjs } from 'dayjs';
-import DetailsStep from '../../components/Stepper/CreateTransaction/DetailStep';
+import DetailStep from '../../components/Stepper/CreateTransaction/DetailStep';
 import TransactionTypeStep, {
   TransactionType,
 } from '../../components/Stepper/CreateTransaction/TransactionTypeStep';
@@ -341,6 +341,12 @@ export default function CreateTransaction() {
           status: formData.status,
           codBoardId: formData?.isCOD ? Number(formData?.codBoardId) : null,
           items: expenseItems,
+          frontFileKey: formData?.isFrontCheque ? formData?.frontFileKey : null,
+          frontFileType: formData?.isFrontCheque
+            ? formData?.frontFileType
+            : null,
+          backFileKey: formData?.isBackCheque ? formData?.backFileKey : null,
+          backFileType: formData?.isBackCheque ? formData?.backFileType : null,
         },
       );
 
@@ -350,6 +356,7 @@ export default function CreateTransaction() {
       }
 
       showNotification('success', response.data.message);
+      router.back();
     } catch (error: any) {
       console.log('Something went wrong: ', error);
       showNotification('error', 'Something went wrong: ' + error);
@@ -371,6 +378,12 @@ export default function CreateTransaction() {
           paymentMethodId: formData.paymentMethodId,
           status: formData.status,
           discount: formData.discount,
+          frontFileKey: formData?.isFrontCheque ? formData?.frontFileKey : null,
+          frontFileType: formData?.isFrontCheque
+            ? formData?.frontFileType
+            : null,
+          backFileKey: formData?.isBackCheque ? formData?.backFileKey : null,
+          backFileType: formData?.isBackCheque ? formData?.backFileType : null,
           codBoardId: formData?.isCOD ? Number(formData?.codBoardId) : null,
         },
       );
@@ -381,6 +394,7 @@ export default function CreateTransaction() {
       }
 
       showNotification('success', response.data.message);
+      router.back();
     } catch (error: any) {
       console.log('Something went wrong: ', error);
       showNotification('error', 'Something went wrong: ' + error);
@@ -395,13 +409,21 @@ export default function CreateTransaction() {
           batchTransaction: {
             ...formData,
             date: dayjs(selectedDate.toDate()).format('MM/DD/YYYY'),
-            startDate: dayjs(formData.startDate.toDate()).format('MM/DD/YYYY'),
-            endDate: dayjs(formData.endDate.toDate()).format('MM/DD/YYYY'),
+            startDate: dayjs(formData.dateRange[0]).format(
+              'MM/DD/YYYY',
+            ),
+            endDate: dayjs(formData.dateRange[1]).format('MM/DD/YYYY'),
           },
           smallExpenses: smallExpenses.map((expense: any) => ({
             ...expense,
-            date: dayjs(expense.date).format('MM/DD/YYYY'),
+            date: YYYYMMDDFormat(new Date(expense.date)),
           })),
+          frontFileKey: formData?.isFrontCheque ? formData?.frontFileKey : null,
+          frontFileType: formData?.isFrontCheque
+            ? formData?.frontFileType
+            : null,
+          backFileKey: formData?.isBackCheque ? formData?.backFileKey : null,
+          backFileType: formData?.isBackCheque ? formData?.backFileType : null,
         },
       );
 
@@ -411,6 +433,7 @@ export default function CreateTransaction() {
       }
 
       showNotification('success', response.data.message);
+      router.back();
     } catch (error: any) {
       console.log('Something went wrong: ', error);
       showNotification('error', 'Something went wrong: ' + error);
@@ -562,7 +585,7 @@ export default function CreateTransaction() {
             />
           )}
           {activeStep === 1 && (
-            <DetailsStep
+            <DetailStep
               transactionType={transactionType}
               selectedDate={selectedDate}
               setSelectedDate={setSelectedDate}

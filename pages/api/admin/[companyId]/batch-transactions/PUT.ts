@@ -2,6 +2,9 @@ import prisma from '@/client';
 import { PaymentStatus } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
+import { updateCheque } from '../expenses/PUT';
+import { getCreatedBy } from '@/pages/api/import-sheets/utils';
+import { USER_ROLE } from '@/app/utils/enum';
 
 interface IBody {
   id: number;
@@ -18,6 +21,10 @@ interface IBody {
   startDate: string;
   endDate: string;
   smallExpenses: any[];
+  frontFileKey?: string;
+  frontFileType?: string;
+  backFileKey?: string;
+  backFileType?: string;
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -37,6 +44,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       startDate,
       endDate,
       smallExpenses,
+      frontFileKey,
+      frontFileType,
+      backFileKey,
+      backFileType,
     }: IBody = req.body;
 
     const existingBatchTransaction = await prisma.batchTransaction.findUnique({
@@ -68,8 +79,21 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
       include: {
         transactions: true,
+        cheques: true,
       },
     });
+
+    const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
+
+    await updateCheque(
+      updatedBatchTransaction,
+      frontFileKey,
+      frontFileType,
+      backFileKey,
+      backFileType,
+      createdBy,
+      true,
+    );
 
     // Update Small Expenses
     const newSmallExpenses = [];
