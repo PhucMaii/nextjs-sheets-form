@@ -11,7 +11,7 @@ interface PresignedFileUploadProps {
   maxSize?: number;
   acceptedFileTypes?: string[];
   onUploadComplete?: (
-    uploadedFiles: Array<{ fileKey: string; fileName: string }>,
+    uploadedFiles: Array<{ fileKey: string; fileName: string; fileType: string }>,
   ) => void;
   onUploadError?: (error: string) => void;
   className?: string;
@@ -96,6 +96,7 @@ export const PresignedFileUpload: React.FC<PresignedFileUploadProps> = ({
           files.push({
             fileKey: fileKey,
             fileName: file.name,
+            fileType: file.type,
           });
         }
 

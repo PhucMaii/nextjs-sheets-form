@@ -5,16 +5,28 @@ import { IBatchTransaction } from '@/app/utils/type';
 import { getTodayDate } from '@/pages/api/utils/date';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { TRANSACTION_STATUS, USER_ROLE } from '@/app/utils/enum';
+import { updateCheque } from '../expenses/PUT';
 
 interface IBody {
   batchTransaction: IBatchTransaction;
   smallExpenses: Expense[] | any[];
+  frontFileKey?: string;
+  frontFileType?: string;
+  backFileKey?: string;
+  backFileType?: string;
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const { companyId } = req.query;
-    const { batchTransaction, smallExpenses } = req.body as IBody;
+    const {
+      batchTransaction,
+      smallExpenses,
+      frontFileKey,
+      frontFileType,
+      backFileKey,
+      backFileType,
+    } = req.body as IBody;
 
     const createdAt = getTodayDate().dateAndTime;
     const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
@@ -57,6 +69,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         status: createdBatchTransaction?.status || TRANSACTION_STATUS.UNPAID,
       })),
     });
+
+    await updateCheque(
+      createdBatchTransaction,
+      frontFileKey,
+      frontFileType,
+      backFileKey,
+      backFileType,
+      createdBy,
+      true,
+    );
 
     res.status(201).json({
       message: 'Batch transaction created successfully',

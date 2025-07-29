@@ -17,7 +17,7 @@ import { getAdminApiUrl } from '@/app/utils/enum';
 import dayjs, { Dayjs } from 'dayjs';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import { Fade } from '@mui/material';
-import DetailsStep from '../../components/Stepper/CreateTransaction/DetailStep';
+import DetailStep from '../../components/Stepper/CreateTransaction/DetailStep';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { IExpense } from '@/app/utils/type';
@@ -72,7 +72,6 @@ export default function EditTransaction() {
         .then((res) => res.data.data),
   });
 
-
   const sortedVendors = useMemo(() => {
     if (!vendors) {
       return [];
@@ -118,12 +117,43 @@ export default function EditTransaction() {
         );
         const transaction = res.data.data;
 
+        console.log('transaction', transaction);
+
+        let frontFileKey = null;
+        let frontFileType = null;
+        let backFileKey = null;
+        let backFileType = null;
+
+        if (transaction?.cheques?.length > 0) {
+          const frontFile = transaction?.cheques?.find(
+            (cheque: any) => cheque.note === 'front',
+          );
+          const backFile = transaction?.cheques?.find(
+            (cheque: any) => cheque.note === 'back',
+          );
+
+          if (frontFile) {
+            frontFileKey = frontFile.fileKey;
+            frontFileType = frontFile.type;
+          }
+          if (backFile) {
+            backFileKey = backFile.fileKey;
+            backFileType = backFile.type;
+          }
+        }
+
         setTransactionData({
           ...transaction,
           hasPST: transaction?.PST || transaction.PST > 0,
           hasGST: transaction?.GST || transaction.GST > 0,
           total: transaction?.total || transaction?.amount || 0,
           isCOD: transaction?.codBoardId ? true : false,
+          isFrontCheque: frontFileKey ? true : false,
+          isBackCheque: backFileKey ? true : false,
+          frontFileKey: frontFileKey,
+          frontFileType: frontFileType,
+          backFileKey: backFileKey,
+          backFileType: backFileType,
           dateRange:
             type === 'batch'
               ? [
@@ -303,6 +333,18 @@ export default function EditTransaction() {
           oldItems: transactionData?.orderedItems || [],
           updatedItems: updatedItems,
           isAffectQuantity: true,
+          frontFileKey: transactionData?.isFrontCheque
+            ? transactionData.frontFileKey
+            : null,
+          frontFileType: transactionData?.isFrontCheque
+            ? transactionData.frontFileType
+            : null,
+          backFileKey: transactionData?.isBackCheque
+            ? transactionData.backFileKey
+            : null,
+          backFileType: transactionData?.isBackCheque
+            ? transactionData.backFileType
+            : null,
           codBoardId: transactionData?.isCOD
             ? Number(transactionData?.codBoardId)
             : null,
@@ -336,6 +378,18 @@ export default function EditTransaction() {
         paymentMethodId: transactionData.paymentMethodId,
         spentBy: transactionData.spentBy,
         status: transactionData.status,
+        frontFileKey: transactionData?.isFrontCheque
+          ? transactionData.frontFileKey
+          : null,
+        frontFileType: transactionData?.isFrontCheque
+          ? transactionData.frontFileType
+          : null,
+        backFileKey: transactionData?.isBackCheque
+          ? transactionData.backFileKey
+          : null,
+        backFileType: transactionData?.isBackCheque
+          ? transactionData.backFileType
+          : null,
         codBoardId: transactionData?.isCOD
           ? Number(transactionData?.codBoardId)
           : null,
@@ -373,6 +427,18 @@ export default function EditTransaction() {
           startDate: dayjs(transactionData.dateRange[0]).format('MM/DD/YYYY'),
           endDate: dayjs(transactionData.dateRange[1]).format('MM/DD/YYYY'),
           smallExpenses: smallExpenses,
+          frontFileKey: transactionData?.isFrontCheque
+            ? transactionData.frontFileKey
+            : null,
+          frontFileType: transactionData?.isFrontCheque
+            ? transactionData.frontFileType
+            : null,
+          backFileKey: transactionData?.isBackCheque
+            ? transactionData.backFileKey
+            : null,
+          backFileType: transactionData?.isBackCheque
+            ? transactionData.backFileType
+            : null,
         },
       );
 
@@ -783,7 +849,7 @@ export default function EditTransaction() {
                 boxShadow: 'rgba(100, 100, 111, 0.2) 0px 7px 29px 0px',
               }}
             >
-              <DetailsStep
+              <DetailStep
                 transactionType={transactionType}
                 selectedDate={selectedDate}
                 setSelectedDate={setSelectedDate}
