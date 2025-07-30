@@ -200,7 +200,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         inventoryUnitId: targetUnit.id,
         isShowDiscount: sellingItem.isShowDiscount,
         prevPrice: sellingItem.prevPrice,
-        availability: false,
+        availability: true,
         createdAt,
         createdBy,
         companyId: Number(companyId),
