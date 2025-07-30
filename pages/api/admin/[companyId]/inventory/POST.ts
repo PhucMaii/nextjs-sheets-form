@@ -39,6 +39,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       sellingItems,
     }: IBody = req.body;
 
+
+
     const { companyId }: IQuery = req.query;
 
     if (!companyId) {
@@ -198,7 +200,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         inventoryUnitId: targetUnit.id,
         isShowDiscount: sellingItem.isShowDiscount,
         prevPrice: sellingItem.prevPrice,
-        availability: true,
+        availability: false,
         createdAt,
         createdBy,
         companyId: Number(companyId),

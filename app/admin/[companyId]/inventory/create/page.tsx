@@ -22,6 +22,13 @@ export default function CreateInventoryPage() {
     selectedSellingItems: any;
   }) => {
     try {
+      // remove category field from selling items
+      const sellingItems = selectedSellingItems.map((item: any) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { category, ...rest } = item;
+        return rest;
+      });
+
       const response = await axios.post(
         getAdminApiUrl(companyId, '/inventory'),
         {
@@ -32,7 +39,7 @@ export default function CreateInventoryPage() {
           hasPST: newInventoryItem.hasPST,
           isShowInventory: newInventoryItem.isShowInventory,
           vendorItems: selectedVendors,
-          sellingItems: selectedSellingItems,
+          sellingItems,
         },
       );
 
