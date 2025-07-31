@@ -672,6 +672,7 @@ model InventoryItem {
 
   promotion Promotion? @relation(fields: [promotionId], references: [id])
   type      ItemType?  @relation(fields: [typeId], references: [id])
+  timeline  InventoryItemTimeline?  @relation("InventoryItemTimeline")
 
   @@index([indexPos])
   @@index([promoIndexPos])
@@ -789,6 +790,14 @@ model InventoryUnit {
   @@index([vendorItemId])
 }
 
+model InventoryItemTimeline {
+  id        Int    @id  @default(autoincrement())
+  inventoryItemId   Int? @unique
+  actions    Action[]
+
+  inventoryItem    InventoryItem? @relation("InventoryItemTimeline", fields: [inventoryItemId], references: [id])
+}
+
 model Action {
   id          Int     @id @default(autoincrement())
   name        String
@@ -797,6 +806,10 @@ model Action {
   date        String
   createdAt   String
   createdBy   String?
+  inventoryItemTimelineId   Int?
+
+  iventoryItemTimeline    InventoryItemTimeline? @relation(fields: [inventoryItemTimelineId], references: [id], onDelete: Cascade)   
+  
 
   company Company? @relation(fields: [companyId], references: [id])
 }
@@ -895,7 +908,7 @@ model Option {
   unitId Int
   itemId Int
 
-  unit          InventoryUnit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unit          InventoryUnit @relation(fields: [unitId], references: [id])
   item          Item          @relation(fields: [itemId], references: [id], onDelete: Cascade)
   inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
 }

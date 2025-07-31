@@ -40,7 +40,8 @@ const useEmployee = (defaultEmployee?: string) => {
     if (selectedEmployee && allEmployees.length > 0) {
       setSelectedEmployeeData(
         allEmployees.find((employee) => {
-          const role = decodeRole(selectedEmployee);
+          const userRole = selectedEmployee.split(' - ')[0];
+          const role = decodeRole(userRole);
           const name = selectedEmployee.split(' - ')[1];
 
           return employee.role === role && employee.name.includes(name);

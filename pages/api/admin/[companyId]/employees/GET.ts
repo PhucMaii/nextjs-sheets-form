@@ -34,6 +34,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
       });
 
+      console.log('employees', employees);
+
       return res.status(200).json({ data: employees });
     }
 

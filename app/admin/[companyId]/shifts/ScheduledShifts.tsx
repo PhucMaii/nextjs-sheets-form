@@ -68,7 +68,7 @@ export default function ScheduledShifts() {
       0,
     );
     const totalSalaryCost = salaryEmployeesInScheduledShifts.reduce(
-      (acc, employee) => acc + (employee?.payRate || 0),
+      (acc, employee) => acc + (employee?.payRate ? Math.round(employee?.payRate / 4) : 0),
       0,
     );
 
