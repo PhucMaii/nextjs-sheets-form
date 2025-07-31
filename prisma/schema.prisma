@@ -350,6 +350,7 @@ model Orders {
   CodBoard CodBoard? @relation(fields: [codBoardId], references: [id])
 
   @@index([deliveryDate, status])
+  @@index([deliveryDate, status, paymentStatus])
   @@index([deliveryDate])
   @@index([userId])
   @@index([companyId])
