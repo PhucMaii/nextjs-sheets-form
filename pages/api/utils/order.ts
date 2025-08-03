@@ -33,9 +33,9 @@ export const checkOrderValidToAffectInventory = async (
       return false;
     }
 
-    // If same date 
-      // If morning -> check if track inventory action is taken
-      // If afternoon -> auto true
+    // If same date
+    // If morning -> check if track inventory action is taken
+    // If afternoon -> auto true
     if (normalizedOrderDate.getTime() === normalizedToday.getTime()) {
       if (currentTime.includes('AM')) {
         // const hour = currentTime.split(':')[0];
@@ -70,10 +70,29 @@ export const checkOrderValidToAffectInventory = async (
 export const getOverdueOrders = async (userId: number) => {
   try {
     const monthRange = generateMonthRange();
+    // const debtListOfDateString = generateListOfDateString(
+    //   new Date('01/01/2024'),
+    //   monthRange[1],
+    // );
+    // const lastMonth = monthRange[0].getMonth();
+    const lastMonthEnd = new Date(
+      monthRange[0].getFullYear(),
+      monthRange[0].getMonth(),
+      1,
+    );
+
+    lastMonthEnd.setDate(0);
+
     const debtListOfDateString = generateListOfDateString(
       new Date('01/01/2024'),
-      monthRange[1],
+      lastMonthEnd,
     );
+
+    console.log({
+      debtListOfDateString,
+      lastMonthEnd,
+      lastDateInString: debtListOfDateString[debtListOfDateString.length - 1],
+    });
 
     const incompletedOrders: any = await prisma.orders.findMany({
       where: {
@@ -82,7 +101,7 @@ export const getOverdueOrders = async (userId: number) => {
           in: [PaymentStatus.Unpaid],
         },
         status: {
-          not: ORDER_STATUS.VOID
+          not: ORDER_STATUS.VOID,
         },
         deliveryDate: {
           in: debtListOfDateString,
@@ -102,10 +121,11 @@ export const getOverdueOrders = async (userId: number) => {
       },
     });
 
-
     const dueAmount = incompletedOrders.reduce((acc: number, order: Orders) => {
       return acc + order.totalPrice;
     }, 0);
+
+    console.log({ incompletedOrders, dueAmount });
 
     return {
       orders: incompletedOrders,
