@@ -62,7 +62,7 @@ export default function CODBoardSummary({
     }, 0);
   }, [boardData]);
 
-  const uncollectedOrders = useFilterOrders(boardData.orders, [
+  const uncollectedOrders = useFilterOrders(orderWithoutVOID, [
     PaymentStatus.Unpaid
   ], 'payment');
 
@@ -73,7 +73,7 @@ export default function CODBoardSummary({
     0,
   );
 
-  const collectedOrders = useFilterOrders(boardData.orders, [
+  const collectedOrders = useFilterOrders(orderWithoutVOID, [
     PaymentStatus.Paid,
   ], 'payment');
 

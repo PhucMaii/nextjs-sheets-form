@@ -350,6 +350,7 @@ model Orders {
   CodBoard CodBoard? @relation(fields: [codBoardId], references: [id])
 
   @@index([deliveryDate, status])
+  @@index([deliveryDate, status, paymentStatus])
   @@index([deliveryDate])
   @@index([userId])
   @@index([companyId])
@@ -907,7 +908,7 @@ model Option {
   unitId Int
   itemId Int
 
-  unit          InventoryUnit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unit          InventoryUnit @relation(fields: [unitId], references: [id])
   item          Item          @relation(fields: [itemId], references: [id], onDelete: Cascade)
   inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
 }

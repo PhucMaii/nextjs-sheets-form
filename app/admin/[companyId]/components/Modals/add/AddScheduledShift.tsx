@@ -43,8 +43,6 @@ export default function AddScheduledShift({
     role: WORKING_ROLE.DRIVER,
   });
 
-  console.log({ defaultEmployee, defaultDate });
-
   const { renderEmployeeSearch, selectedEmployeeData } =
     useEmployee(defaultEmployee);
 
