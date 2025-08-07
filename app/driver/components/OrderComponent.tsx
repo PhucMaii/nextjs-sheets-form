@@ -20,7 +20,12 @@ import { Item, Order } from '@/app/admin/[companyId]/orders/page';
 import PreviewIcon from '@mui/icons-material/Preview';
 import OrderDetails from './Modals/OrderDetails';
 import ConfirmModal from './Modals/ConfirmModal';
-import { API_URL, ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
+import {
+  API_URL,
+  ORDER_STATUS,
+  PAYMENT_TYPE,
+  USER_CATEGORIZED,
+} from '@/app/utils/enum';
 import ClientDetailsModal from '@/app/admin/[companyId]/components/Modals/ClientDetailsModal';
 import { OrderedItems } from '@/app/utils/type';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -55,6 +60,8 @@ export default function OrderComponent({
   handleUpdateStatus,
   showNotification,
 }: IProps) {
+
+  console.log(order, 'order');
   const [confirmDeliveryModalProps, setConfirmDeliveryModalProps] =
     useState<any>({
       open: false,
@@ -243,7 +250,7 @@ export default function OrderComponent({
                 >
                   <ImageSearchIcon sx={{ fontSize: 24 }} color="primary" />
                 </IconButton>
-              ): null}
+              ) : null}
             </Box>
           </Box>
         </Grid>
@@ -315,31 +322,32 @@ export default function OrderComponent({
                 <LocalShippingIcon />
               </Fab>
             )}
-            {order?.paymentStatus !== PaymentStatus.Paid && (
-              <Fab
-                sx={{ zIndex: 0 }}
-                onClick={() => {
-                  if (order.status !== ORDER_STATUS.DELIVERED) {
-                    setConfirmDeliveryModalProps({
-                      ...confirmDeliveryModalProps,
-                      open: true,
+            {order?.paymentStatus !== PaymentStatus.Paid &&
+              order?.user?.preference?.paymentType!== PAYMENT_TYPE.MONTHLY && (
+                <Fab
+                  sx={{ zIndex: 0 }}
+                  onClick={() => {
+                    if (order.status !== ORDER_STATUS.DELIVERED) {
+                      setConfirmDeliveryModalProps({
+                        ...confirmDeliveryModalProps,
+                        open: true,
+                        updatedStatus: ORDER_STATUS.COMPLETED,
+                      });
+                      return;
+                    }
+                    setConfirmModalProps({
+                      on: true,
+                      heading: `Have you delivered and collected money from order for ${order.clientName}`,
+                      color: 'success',
                       updatedStatus: ORDER_STATUS.COMPLETED,
                     });
-                    return;
-                  }
-                  setConfirmModalProps({
-                    on: true,
-                    heading: `Have you delivered and collected money from order for ${order.clientName}`,
-                    color: 'success',
-                    updatedStatus: ORDER_STATUS.COMPLETED,
-                  });
-                }}
-                color="success"
-                size="small"
-              >
-                <CreditScoreIcon />
-              </Fab>
-            )}
+                  }}
+                  color="success"
+                  size="small"
+                >
+                  <CreditScoreIcon />
+                </Fab>
+              )}
           </Box>
         </Grid>
         <Grid item xs={6}>
