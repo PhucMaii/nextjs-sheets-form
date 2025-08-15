@@ -19,19 +19,19 @@ const OrderedItemRow = ({ item }: { item: OrderedItems }) => {
   const [img, setImg] = useState<string>('/images/not-found.png');
 
   useEffect(() => {
-    if (item.inventoryItem.image) {
-      generateImgUrl(item.inventoryItem.image).then((url) => {
+    if (item?.inventoryItem?.image) {
+      generateImgUrl(item?.inventoryItem?.image).then((url) => {
         console.log(url, 'url');
         setImg(url);
       });
     }
-  }, [item.inventoryItem.image]);
+  }, [item?.inventoryItem]);
   return (
     <TableRow>
       <TableCell sx={{ py: 0.5, px: 0 }}>
         <Image
           src={img ? img : '/images/not-found.png'}
-          alt={item.inventoryItem.name}
+          alt={item?.inventoryItem?.name}
           width={100}
           height={100}
           style={{ objectFit: 'contain' }}
@@ -64,10 +64,10 @@ const OrderedItemRow = ({ item }: { item: OrderedItems }) => {
         </Box>
       </TableCell>
       <TableCell sx={{ fontSize: 16 }}>
-        ${item.inventoryItem.hasGST ? (item.price * gstRate)?.toFixed(2) : 0}
+        ${item?.inventoryItem?.hasGST ? (item.price * gstRate)?.toFixed(2) : 0}
       </TableCell>
       <TableCell sx={{ fontSize: 16 }}>
-        ${item.inventoryItem.hasPST ? (item.price * pstRate)?.toFixed(2) : 0}
+        ${item?.inventoryItem?.hasPST ? (item.price * pstRate)?.toFixed(2) : 0}
       </TableCell>
       <TableCell sx={{ p: 0.5, fontWeight: 700, fontSize: 16 }}>
         ${(item.price * item.quantity)?.toFixed(2)}

@@ -79,6 +79,7 @@ export default function ItemRow({
                 );
                 return (
                   <MenuItem key={item.id} value={item.id} disabled={isSelected}>
+                    {item.inventoryItem?.sku || 'N/A'} -{' '}
                     {item.inventoryItem.name}
                   </MenuItem>
                 );
@@ -172,11 +173,7 @@ export default function ItemRow({
             units={item.units || []}
             value={JSON.stringify(item?.unit || {})}
             onChange={(e: any) =>
-              handleItemChange(
-                item.id,
-                'unit',
-                JSON.parse(e.target.value),
-              )
+              handleItemChange(item.id, 'unit', JSON.parse(e.target.value))
             }
           />
         </Grid>

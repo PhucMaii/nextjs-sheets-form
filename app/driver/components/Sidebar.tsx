@@ -25,7 +25,6 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import { primary } from '@/theme/color';
 import ShiftModal, { ShiftType } from './Modals/ShiftModal';
 import { IShiftSession } from '@/app/utils/type';
-import { SWRFetchData } from '@/app/utils/db';
 import { API_URL } from '@/app/utils/enum';
 import ShiftBanner from './ShiftBanner';
 import { AccessTime } from '@mui/icons-material';
@@ -39,6 +38,7 @@ import CircleNotificationsIcon from '@mui/icons-material/CircleNotifications';
 import axios from 'axios';
 import useNotification from '@/hooks/useNotification';
 import Image from 'next/image';
+import { useQuery } from '@tanstack/react-query';
 
 interface IProps {
   children: ReactNode;
@@ -61,7 +61,14 @@ export default function Sidebar({ children }: IProps) {
 
   const { showNotification, NotificationComp } = useNotification();
 
-  const [todaySession] = SWRFetchData(`${API_URL.DRIVER}/shift/today`);
+  // const [todaySession] = SWRFetchData(`${API_URL.DRIVER}/shift/today`);
+  const { data: todaySession, refetch: refetchTodaySession } = useQuery({
+    queryKey: ['todaySession'],
+    queryFn: async () => {
+      const response = await axios.get(`${API_URL.DRIVER}/shift/today`);
+      return response.data;
+    },
+  });
 
   const router = useRouter();
   const pathname: any = usePathname();
@@ -232,6 +239,7 @@ export default function Sidebar({ children }: IProps) {
           type={shiftModalProps.type}
           shift={shiftSession}
           isDisabledClose={isForceToClockIn}
+          refetch={refetchTodaySession}
         />
         <SwitchRole
           open={isOpenSwitchRole}
@@ -327,6 +335,7 @@ export default function Sidebar({ children }: IProps) {
           type={shiftModalProps.type}
           shift={shiftSession}
           isDisabledClose={isForceToClockIn}
+          refetch={refetchTodaySession}
         />
         <SwitchRole
           open={isOpenSwitchRole}
@@ -402,6 +411,7 @@ export default function Sidebar({ children }: IProps) {
         type={shiftModalProps.type}
         shift={shiftSession}
         isDisabledClose={isForceToClockIn}
+        refetch={refetchTodaySession}
       />
       <SwitchRole
         open={isOpenSwitchRole}

@@ -72,6 +72,7 @@ interface IProps extends ModalProps {
   type: ShiftType;
   shift: IShiftSession | null;
   isDisabledClose: boolean;
+  refetch: any;
 }
 
 const ShiftModal = ({
@@ -80,6 +81,7 @@ const ShiftModal = ({
   type,
   shift,
   isDisabledClose,
+  refetch,
 }: IProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedRole, setSelectedRole] = useState<WORKING_ROLE>(
@@ -104,6 +106,7 @@ const ShiftModal = ({
       }
 
       showNotification('success', response.data.message);
+      await refetch();
       onClose();
       setIsAsked(false);
     } catch (error: any) {
@@ -130,6 +133,7 @@ const ShiftModal = ({
       }
 
       showNotification('success', response.data.message);
+      await refetch();
       onClose();
     } catch (error: any) {
       console.log('There was an error: ', error);
