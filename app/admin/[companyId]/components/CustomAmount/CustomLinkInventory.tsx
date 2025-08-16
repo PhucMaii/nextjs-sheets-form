@@ -154,7 +154,7 @@ const CustomLinkInventory = ({
             ...customAmount,
             id: 0,
             availability: true,
-            totalPrice: customAmount.price,
+            totalPrice: customAmount.price * customAmount.quantity,
             inventoryUnitId: selectedUnit?.id,
             inventoryUnit: {
               ...selectedUnit,

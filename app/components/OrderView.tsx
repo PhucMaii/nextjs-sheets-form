@@ -745,9 +745,11 @@ const OrderView = ({
   const onIncrementQuantity = (item: IItem) => {
     const newItems = orderedItems.map((i) => {
       if (i[comparedField] === item[comparedField]) {
+        const newQuantity = (i?.quantity || 0) + 1;
         return {
           ...i,
-          quantity: (i?.quantity || 0) + 1,
+          quantity: newQuantity,
+          totalPrice: newQuantity * i.price,
         };
       }
       return i;
@@ -763,9 +765,11 @@ const OrderView = ({
 
     const newItems = orderedItems.map((i) => {
       if (i[comparedField] === item[comparedField]) {
+        const newQuantity = (i?.quantity || 0) - 1;
         return {
           ...i,
-          quantity: (i?.quantity || 0) - 1,
+          quantity: newQuantity,
+          totalPrice: newQuantity * i.price,
         };
       }
       return i;

@@ -1,15 +1,14 @@
 import { Remove } from '@mui/icons-material';
 import {
+  Autocomplete,
   Box,
   Divider,
   FormControl,
   Grid,
   IconButton,
   InputAdornment,
-  InputLabel,
-  MenuItem,
-  Select,
   TextField,
+  Typography,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import React from 'react';
@@ -46,21 +45,28 @@ export default function ItemRow({
       <Grid container spacing={2} alignItems="center">
         <Grid item xs={12} md={3}>
           <FormControl fullWidth>
-            <InputLabel sx={{ mb: 1 }} htmlFor={`item-select-${index}`}>
+            {/* <InputLabel sx={{ mb: 1 }} htmlFor={`item-select-${index}`}>
               Item
-            </InputLabel>
-            <Select
+            </InputLabel> */}
+            <Autocomplete
               id={`item-select-${index}`}
-              value={item.id}
-              onChange={(e) => {
+              value={{
+                name: item?.inventoryItem?.name,
+                id: item.id,
+                sku: item?.inventoryItem?.sku || 'N/A',
+                isSelected: expenseItems.some(
+                  (expenseItem: any) => expenseItem.id === item.id,
+                ) || false,
+              }}
+              onChange={(e, value) => {
                 const targetItem = vendorItems.find(
-                  (item: any) => item.id === Number(e.target.value),
+                  (item: any) => item.id === Number(value?.id),
                 );
                 const ratioOf1 = targetItem?.unit.find(
                   (unit: any) => unit.ratio === 1,
                 );
                 handleItemChange(item.id, 'selectedItem', {
-                  id: Number(e.target.value),
+                  id: Number(value?.id),
                   unit: targetItem?.unit || [],
                   inventoryUnit: ratioOf1 || {},
                   inventoryItem: targetItem?.inventoryItem || {},
@@ -68,9 +74,32 @@ export default function ItemRow({
                 });
               }}
               fullWidth
-              label="Item"
+              // label="Item"
+              options={vendorItems.map((item: any) => ({
+                name: item?.inventoryItem?.name,
+                id: item.id,
+                sku: item?.inventoryItem?.sku || 'N/A',
+                isSelected: expenseItems.some(
+                  (expenseItem: any) => expenseItem.id === item.id,
+                ),
+              }))}
+              renderOption={(props, option) => (
+                <li {...props}>
+                  <Typography variant="body2">
+                    {option?.sku || 'N/A'} - {option.name}
+                  </Typography>
+                </li>
+              )}
+              getOptionLabel={(option) => {
+                return `${option?.sku || 'N/A'} - ${option.name}`;
+              }}
+              getOptionDisabled={(option) => {
+                console.log(option, 'option');
+                return option.isSelected;
+              }}
+              renderInput={(params) => <TextField {...params} />}
             >
-              <MenuItem value={-1}>
+              {/* <MenuItem value={-1}>
                 <em>Select item</em>
               </MenuItem>
               {vendorItems.map((item: any) => {
@@ -83,8 +112,8 @@ export default function ItemRow({
                     {item.inventoryItem.name}
                   </MenuItem>
                 );
-              })}
-            </Select>
+              })} */}
+            </Autocomplete>
           </FormControl>
         </Grid>
         <Grid item xs={6} md={1}>
