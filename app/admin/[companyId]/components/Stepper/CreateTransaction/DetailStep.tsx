@@ -831,12 +831,12 @@ export default function DetailStep({
                     control={
                       <Checkbox
                         checked={formData?.isCOD}
-                        onChange={(e) =>
+                        onChange={(e) => {
                           setFormData((prev: any) => ({
                             ...prev,
                             isCOD: e.target.checked,
-                          }))
-                        }
+                          }));
+                        }}
                       />
                     }
                     label="Assign COD"
@@ -862,6 +862,7 @@ export default function DetailStep({
                             onChange={(newValue) => {
                               if (newValue && setCodDate) {
                                 setCodDate(newValue);
+                                setSelectedDate(newValue);
                               }
                             }}
                             slotProps={{
