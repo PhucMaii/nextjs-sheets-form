@@ -87,7 +87,7 @@ const ModalSelection = ({
           onChange={(e) => setSearchKeywords(e.target.value)}
         />
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 1 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', mt: 1 }}>
           <Box
             sx={{
               display: 'flex',
@@ -95,6 +95,7 @@ const ModalSelection = ({
               justifyContent: 'space-between',
               gap: 1,
               mb: 1,
+              p: 1,
             }}
           >
             <Typography variant="body2">Select All</Typography>
@@ -107,17 +108,33 @@ const ModalSelection = ({
             <Box
               key={item.id}
               sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 1,
+                backgroundColor: selectedItems.some((v) => v.id === item.id)
+                  ? 'rgba(0, 0, 0, 0.04)'
+                  : 'transparent',
+                  // p: 1,
+                '&:hover': {
+                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                },
               }}
             >
-              <Typography>{item.name}</Typography>
-              <Checkbox
-                checked={selectedItems.some((v) => v.id === item.id)}
-                onChange={() => onSelectItem(item)}
-              />
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  // gap: 1,
+                  p: 1,
+                  cursor: 'pointer',
+                }}
+                onClick={() => onSelectItem(item)}
+              >
+                <Typography>{item.name}</Typography>
+                <Checkbox
+                  checked={selectedItems.some((v) => v.id === item.id)}
+                  onChange={() => onSelectItem(item)}
+                />
+              </Box>
+              <Divider flexItem />
             </Box>
           ))}
         </Box>

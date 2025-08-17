@@ -341,7 +341,6 @@ export default function DetailStep({
   ) => {
     setExpenseItems((prev: any) =>
       prev.map((item: any) => {
-        console.log(item, 'item', field);
         if (item.id === id) {
           if (field === 'selectedItem') {
             const total = value.inventoryUnit.unitPrice * item.quantity;
