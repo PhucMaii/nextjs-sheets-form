@@ -130,8 +130,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
 
     const newBoardOrders = [...newWCODBoardOrders, ...newCODBoardOrders];
-    console.log(newCODBoardOrders, 'newCODBoardOrders');
-    console.log(newBoardOrders, 'newBoardOrders');
+    // console.log(newCODBoardOrders, 'newCODBoardOrders');
+    // console.log(newBoardOrders, 'newBoardOrders');
 
     if (boards.length > 0 && newBoardOrders.length === 0) {
       return res.status(200).json({
@@ -309,7 +309,6 @@ export const insertOrdersToSelectedBoards = async (
     const selectedDayRoute = order.user.routes.find(
       (route: any) => route.route.day === day,
     );
-    console.log('selectedDayRoute', { selectedDayRoute, day });
     return !!selectedDayRoute;
   });
 

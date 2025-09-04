@@ -17,29 +17,39 @@ import AddIcon from '@mui/icons-material/Add';
 import {
   generateCurrentTime,
   generateMonthRange,
+  generateRecommendDate,
   YYYYMMDDFormat,
 } from '@/app/utils/time';
 import { SWRFetchData } from '@/app/utils/db';
-import { API_URL, getAdminApiUrl } from '@/app/utils/enum';
+import { getAdminApiUrl } from '@/app/utils/enum';
 import AddCodBoard from '../components/Modals/add/AddCodBoard';
 import useNotification from '@/hooks/useNotification';
 import ErrorComponent from '../components/ErrorComponent';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import { IBoard } from '@/app/utils/type';
-import CODBoardDetails from '../components/CODBoard/CODBoardDetails';
+// import CODBoardDetails from '../components/CODBoard/CODBoardDetails';
 import axios from 'axios';
 import DeleteModal from '../components/Modals/delete/DeleteModal';
 import SelectDateRange from '../components/Select/SelectDateRange';
 import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
 import useSelectDate from '@/hooks/useSelectDate';
 import CodOverview from '../components/Overview/CodOverview';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 
 export default function CodBoard() {
   const { companyId }: any = useParams();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const paramsDate = searchParams?.get('date');
+  const paramsStartDate = searchParams?.get('startDate');
+  const paramsEndDate = searchParams?.get('endDate');
+
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
-  const [isSingleDate, setIsSingleDate] = useState<boolean>(false);
-  const [selectedBoard, setSelectedBoard] = useState<IBoard | any>(null);
+  const [isSingleDate, setIsSingleDate] = useState<boolean>(
+    Boolean(paramsDate && !paramsStartDate && !paramsEndDate) || false,
+  );
+  // const [selectedBoard, setSelectedBoard] = useState<IBoard | any>(null);
   const [deleteBoard, setDeleteBoard] = useState<{
     isOpen: boolean;
     id: number;
@@ -54,7 +64,7 @@ export default function CodBoard() {
   const today = new Date();
   const todayString = YYYYMMDDFormat(today);
 
-  const { date, SelectDate } = useSelectDate(todayString);
+  const { date, SelectDate, setDate } = useSelectDate(todayString);
 
   // Data Fetching
   const [codBoards, mutateBoards, isValidating] = SWRFetchData(
@@ -67,8 +77,63 @@ export default function CodBoard() {
   );
 
   useEffect(() => {
+    if (paramsDate) {
+      setDate(YYYYMMDDFormat(new Date(paramsDate)));
+      setIsSingleDate(true);
+    } else {
+      setIsSingleDate(false);
+    }
+  }, [paramsDate]);
+
+  useEffect(() => {
+    if (paramsStartDate && paramsEndDate) {
+      setDateRange([
+        new Date(paramsStartDate),
+        new Date(paramsEndDate),
+      ]);
+      setIsSingleDate(false);
+    } else {
+      setIsSingleDate(true);
+    }
+  }, [paramsStartDate, paramsEndDate]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (isSingleDate) {
+      params.delete('startDate');
+      params.delete('endDate');
+
+      params.set('date', date);
+
+    } else {
+      params.delete('date');
+    }
+
+    router.replace(`/admin/${companyId}/codBoard?${params.toString()}`, {
+      scroll: false,
+    });
+  }, [date, isSingleDate]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (dateRange && !isSingleDate) {
+      params.delete('date');
+
+      params.set('startDate', dateRange[0]);
+      params.set('endDate', dateRange[1]);
+    } else {
+      params.delete('startDate');
+      params.delete('endDate');
+    }
+
+    router.replace(`/admin/${companyId}/codBoard?${params.toString()}`, {
+      scroll: false,
+    });
+  }, [dateRange, isSingleDate]);
+
+  useEffect(() => {
     handleAutoAddBoard();
-  }, [date, selectedBoard]);
+  }, [date]);
 
   useEffect(() => {
     if (!codBoards) {
@@ -126,17 +191,17 @@ export default function CodBoard() {
     }
   };
 
-  if (selectedBoard) {
-    return (
-      <Sidebar>
-        <CODBoardDetails
-          boardData={selectedBoard}
-          onClose={() => setSelectedBoard(null)}
-          isAutoAddBoard={loading.isCheckingAutoAddBoard}
-        />
-      </Sidebar>
-    );
-  }
+  // if (selectedBoard) {
+  //   return (
+  //     <Sidebar>
+  //       <CODBoardDetails
+  //         boardData={selectedBoard}
+  //         onClose={() => setSelectedBoard(null)}
+  //         isAutoAddBoard={loading.isCheckingAutoAddBoard}
+  //       />
+  //     </Sidebar>
+  //   );
+  // }
 
   return (
     <Sidebar>
@@ -221,7 +286,9 @@ export default function CodBoard() {
             <CODBoardSummary
               key={board.id}
               boardData={board}
-              onSelect={() => setSelectedBoard(board)}
+              onSelect={() =>
+                router.push(`/admin/${companyId}/codBoard/${board.id}`)
+              }
               handleDeleteBoard={() =>
                 setDeleteBoard({ isOpen: true, id: board.id })
               }
@@ -240,7 +307,9 @@ export default function CodBoard() {
                 <CODBoardSummary
                   key={board.id}
                   boardData={board}
-                  onSelect={() => setSelectedBoard(board)}
+                  onSelect={() =>
+                    router.push(`/admin/${companyId}/codBoard/${board.id}`)
+                  }
                   handleDeleteBoard={() =>
                     setDeleteBoard({ isOpen: true, id: board.id })
                   }

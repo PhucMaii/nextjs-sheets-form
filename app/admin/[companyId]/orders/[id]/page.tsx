@@ -49,7 +49,7 @@ const OrderDetailsPage = () => {
   const router = useRouter();
   const { showNotification, NotificationComp } = useNotification();
 
-  console.log(window.history.state);
+  // console.log(window.history.state);
 
   const queryClient = useQueryClient();
   const { data: order, isLoading } = useQuery<Order>({

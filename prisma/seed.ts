@@ -120,44 +120,26 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-  const inventoryItems = await prisma.inventoryItem.findMany({
+  const roy2SepCODOrders = await prisma.orders.findMany({
     where: {
       companyId: 1,
-      name: {
-        in: ['BEAN 10 LB', 'BEAN 5 LB', 'BASIL'],
-      },
+      codBoardId: 1742
     },
     include: {
-      fifo: true,
-    },
+      user: true,
+    }
   });
 
-  const listOfDateString = generateListOfDateString(
-    new Date('2025-07-15'),
-    new Date('2025-07-17'),
-  );
-
-  for (const inventoryItem of inventoryItems) {
-    const allOrderedItemsInLast3Days = await prisma.orderedItems.findMany({
-      where: {
-        inventoryItemId: inventoryItem.id,
-        Orders: {
-          deliveryDate: {
-            in: listOfDateString,
-          },
-        },
-      },
-    });
-
-    // assign fifo to each ordered item
-    for (const orderedItem of allOrderedItemsInLast3Days) {
-      console.log(orderedItem.id, inventoryItem.fifo[0].id);
-      await prisma.orderedItems.update({
-        where: { id: orderedItem.id },
-        data: { fifoId: inventoryItem.fifo[0].id },
-      });
+  const formattedOrders = roy2SepCODOrders.map((order: any) => {
+    return {
+      id: order.id,
+      clientName: order.user.clientName,
+      insertedAt: order.insertedAt,
+      addeddToCodBy: order.addedToCodBy,
     }
-  }
+  });
+
+  console.log(formattedOrders);
 }
 
 // async function main() {
