@@ -889,7 +889,7 @@ export default function Overview() {
             </Grid>
 
             {/* Shift Overview Section */}
-            <Grid container spacing={3} mb={4}>
+            {/* <Grid container spacing={3} mb={4}>
               <Grid item xs={12}>
                 <Paper
                   elevation={0}
@@ -1001,11 +1001,11 @@ export default function Overview() {
                   )}
                 </Paper>
               </Grid>
-            </Grid>
+            </Grid> */}
 
             {/* Tables Section */}
             <Grid container spacing={3}>
-              <Grid item xs={12}>
+              {/* <Grid item xs={12}>
                 <Paper
                   elevation={0}
                   sx={{
@@ -1033,7 +1033,7 @@ export default function Overview() {
                     <Skeleton variant="rounded" height={200} />
                   )}
                 </Paper>
-              </Grid>
+              </Grid> */}
 
               <Grid item xs={12}>
                 <Paper
