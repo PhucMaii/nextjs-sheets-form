@@ -8,9 +8,10 @@ import { PayrollType } from '@prisma/client';
 interface IProps {
   payrolls: IPayroll[];
   style?: any;
+  disabled?: boolean;
 }
 
-const PayrollCSV = ({ payrolls, style }: IProps) => {
+const PayrollCSV = ({ payrolls, style, disabled }: IProps) => {
   const headers = [
     { label: 'Driver', key: 'name' },
     { label: 'From - To', key: 'from_to' },
@@ -38,10 +39,10 @@ const PayrollCSV = ({ payrolls, style }: IProps) => {
       headers={headers}
       aria-disabled={true}
     >
-      <Button variant="outlined" size="small" {...style}>
+      <Button variant="outlined" size="small" {...style} disabled={disabled}>
         <Box display="flex" alignItems="center" gap={1}>
-          <DownloadIcon />
-          <Typography sx={{ fontSize: 15 }} fontWeight="bold">
+          <DownloadIcon size={16} />
+          <Typography variant="subtitle2" fontWeight="bold">
             Export CSV
           </Typography>
         </Box>

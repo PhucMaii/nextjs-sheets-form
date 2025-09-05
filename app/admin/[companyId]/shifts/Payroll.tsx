@@ -5,9 +5,9 @@ import {
   OutlinedInput,
   Typography,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ShadowSection } from '../reports/styled';
-import { generateMonthRange } from '@/app/utils/time';
+import { generateMonthRange, YYYYMMDDFormat } from '@/app/utils/time';
 import { SearchIcon } from 'lucide-react';
 import SelectDateRange from '../components/Select/SelectDateRange';
 import PayrollTable from '../components/Tables/PayrollTable';
@@ -20,18 +20,27 @@ import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent
 import PayrollCSV from '../components/CSV/PayrollCSV';
 import { IPayroll } from '@/app/utils/type';
 import ConvertPayroll from '../components/Modals/ConvertPayroll';
+import { useReactToPrint } from 'react-to-print';
+import { PayrollPDF } from '../components/Printing/PayrollPDF';
+import PrintIcon from '@mui/icons-material/Print';
 
 export default function Payroll() {
   const { companyId }: any = useParams();
+  const { showNotification, NotificationComp } = useNotification();
+
   const [isOpenAddPayroll, setIsOpenAddPayroll] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   // last month in default
-  const [dateRange, setDateRange] = useState<any[]>(generateMonthRange(undefined, -1));
+  const [dateRange, setDateRange] = useState<any[]>(
+    generateMonthRange(undefined, -1),
+  );
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [payrolls, setPayrolls] = useState<any[]>([]);
   const [selectedPayrolls, setSelectedPayrolls] = useState<IPayroll[]>([]);
-  const [isOpenConvertPayroll, setIsOpenConvertPayroll] = useState<boolean>(false);
-  const { showNotification, NotificationComp } = useNotification();
+  const [isOpenConvertPayroll, setIsOpenConvertPayroll] =
+    useState<boolean>(false);
+
+  const printPayrollRef = useRef(null);
 
   useEffect(() => {
     if (dateRange[0] && dateRange[1]) {
@@ -64,6 +73,10 @@ export default function Payroll() {
     }
   };
 
+  const handlePrintPayroll = useReactToPrint({
+    content: () => printPayrollRef.current,
+  });
+
   return (
     <>
       {NotificationComp}
@@ -74,13 +87,20 @@ export default function Payroll() {
         refresh={fetchPayrolls}
         dateRange={dateRange}
       />
-      <ConvertPayroll 
+      <ConvertPayroll
         open={isOpenConvertPayroll}
         onClose={() => setIsOpenConvertPayroll(false)}
         payrolls={selectedPayrolls}
         showNotification={showNotification}
         refetchPayrolls={fetchPayrolls}
       />
+      <div style={{ display: 'none' }}>
+        <PayrollPDF
+          payrolls={selectedPayrolls}
+          currentDate={YYYYMMDDFormat(dateRange[1])}
+          ref={printPayrollRef}
+        />
+      </div>
       <Box display="flex" flexDirection="column" gap={2}>
         <Box
           display="flex"
@@ -99,7 +119,21 @@ export default function Payroll() {
             >
               Convert to Transaction
             </Button>
-            <PayrollCSV payrolls={selectedPayrolls || []} />
+
+            <Button
+              variant="outlined"
+              color="primary"
+              size="small"
+              disabled={selectedPayrolls.length === 0}
+              onClick={() => handlePrintPayroll()}
+              startIcon={<PrintIcon />}
+            >
+              Print / PDF
+            </Button>
+            <PayrollCSV
+              payrolls={selectedPayrolls || []}
+              disabled={selectedPayrolls.length === 0}
+            />
           </Box>
         </Box>
 

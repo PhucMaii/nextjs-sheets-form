@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate } from '../utils/date';
-import { generateListOfDateString } from '@/prisma/seed';
 import { PrismaClient } from '@prisma/client';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import withAuthGuard from '../utils/withAuthGuard';
@@ -11,6 +10,7 @@ import {
   calculateTotalPrice,
   sortKeys,
 } from '@/pages/api/admin/[companyId]/sendInvoicePdf';
+import { generateListOfDateString } from '@/app/utils/time';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
