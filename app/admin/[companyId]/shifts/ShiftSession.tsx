@@ -30,7 +30,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import PermContactCalendarIcon from '@mui/icons-material/PermContactCalendar';
-import ConfirmToPayShifts from '../components/Modals/ConfirmToPayShifts';
+// import ConfirmToPayShifts from '../components/Modals/ConfirmToPayShifts';
 // import PayrollCSV from '../components/CSV/PayrollCSV';
 import { useParams } from 'next/navigation';
 
@@ -41,9 +41,9 @@ export default function ShiftSession() {
     open: false,
     shift: null,
   });
-  const [confirmToPayProps, setConfirmToPayProps] = useState<any>({
-    open: false,
-  });
+  // const [confirmToPayProps, setConfirmToPayProps] = useState<any>({
+  //   open: false,
+  // });
   const [isOpenAddShift, setIsOpenAddShift] = useState<boolean>(false);
   const [shifts, setShifts] = useState<Record<string, IShiftSession[]> | null>(
     null,
@@ -208,7 +208,7 @@ export default function ShiftSession() {
   };
   return (
     <>
-      {confirmToPayProps.open && (
+      {/* {confirmToPayProps.open && (
         <ConfirmToPayShifts
           showNotification={showNotification}
           open={confirmToPayProps.open}
@@ -216,7 +216,7 @@ export default function ShiftSession() {
           shifts={selectedShifts}
           onClearSelectedShifts={() => setSelectedShifts([])}
         />
-      )}
+      )} */}
       {editShiftProps.shift && (
         <EditShift
           open={editShiftProps.open}

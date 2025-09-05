@@ -20,7 +20,7 @@ export default function AddPayroll({
   refresh,
   dateRange,
 }: IProps) {
-  const [tab, setTab] = useState<'generate' | 'create'>('generate');
+  const [tab, setTab] = useState<'from-schedule' | 'manually'>('from-schedule');
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -42,12 +42,12 @@ export default function AddPayroll({
           sx={{ borderBottom: 1, borderColor: 'divider' }}
           variant="fullWidth"
         >
-          <Tab label="Generate Payroll" value="generate" />
-          <Tab label="Create Payroll" value="create" />
+          <Tab label="From Schedule" value="from-schedule" />
+          <Tab label="Manually" value="manually" />
         </Tabs>
 
         <Box sx={{ mt: 2 }}>
-          {tab === 'generate' && (
+          {tab === 'from-schedule' && (
             <GeneratePayroll
               showNotification={showNotification}
               onClose={onClose}
@@ -57,7 +57,7 @@ export default function AddPayroll({
             />
           )}
 
-          {tab === 'create' && (
+          {tab === 'manually' && (
             <CreatePayroll
               startDate={dateRange[0]}
               endDate={dateRange[1]}

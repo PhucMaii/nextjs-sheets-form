@@ -25,7 +25,8 @@ export default function Payroll() {
   const { companyId }: any = useParams();
   const [isOpenAddPayroll, setIsOpenAddPayroll] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [dateRange, setDateRange] = useState<any[]>(generateMonthRange());
+  // last month in default
+  const [dateRange, setDateRange] = useState<any[]>(generateMonthRange(undefined, -1));
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const [payrolls, setPayrolls] = useState<any[]>([]);
   const [selectedPayrolls, setSelectedPayrolls] = useState<IPayroll[]>([]);

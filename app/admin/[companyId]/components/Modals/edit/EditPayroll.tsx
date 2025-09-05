@@ -20,6 +20,7 @@ import { ShowNotificationType } from '@/hooks/useNotification';
 import { getAdminApiUrl } from '@/app/utils/enum';
 import { useParams } from 'next/navigation';
 import axios from 'axios';
+import { getRole } from '@/pages/api/utils/employee';
 
 interface IProps extends ModalProps {
   payroll: IPayroll;
@@ -43,7 +44,7 @@ export default function EditPayroll({
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [isOpenDateRange, setIsOpenDateRange] = useState<boolean>(false);
   const { renderEmployeeSearch, selectedEmployeeData } = useEmployee(
-    payroll.employee.name,
+    getRole(payroll.employee.role || '', payroll.employee.name || ''),
   );
 
   useEffect(() => {

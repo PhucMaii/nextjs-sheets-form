@@ -64,13 +64,23 @@ export const generateRecommendDate = (limitHour: number = limitOrderHour) => {
   return formattedDate;
 };
 
-export const generateMonthRange = () => {
+export const generateMonthRange = (
+  startDate?: Date,
+  monthOffset: number = 0,
+) => {
   const today = new Date();
   const month = today.getMonth();
   const year = today.getFullYear();
 
-  const firstDayOfThisMonth = new Date(year, month, 1);
-  const firstDayOfNextMonth = new Date(year, month + 1, 1);
+  // Calculate the target month and year based on the offset
+  const targetMonth = month + monthOffset;
+  const targetYear = year + Math.floor(targetMonth / 12);
+  const adjustedMonth = ((targetMonth % 12) + 12) % 12; // Handle negative months
+
+  const firstDayOfThisMonth = startDate
+    ? new Date(startDate)
+    : new Date(targetYear, adjustedMonth, 1);
+  const firstDayOfNextMonth = new Date(targetYear, adjustedMonth + 1, 1);
   const lastDayOfThisMonth = new Date(firstDayOfNextMonth);
   lastDayOfThisMonth.setDate(0);
   lastDayOfThisMonth.setHours(23, 59, 59);

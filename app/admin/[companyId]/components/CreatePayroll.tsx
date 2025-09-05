@@ -1,12 +1,14 @@
 import { DateRange as DateRangeIcon } from '@mui/icons-material';
 import {
   Box,
+  Chip,
+  CircularProgress,
   Grid,
   InputAdornment,
   OutlinedInput,
   Typography,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import useEmployee from '@/hooks/select/useEmployee';
 import DateRange from './Modals/DateRangeModal';
 import { ClockIcon } from 'lucide-react';
@@ -17,6 +19,7 @@ import { useParams } from 'next/navigation';
 import { LoadingButton } from '@mui/lab';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import { PayrollType } from '@prisma/client';
+import { useQuery } from '@tanstack/react-query';
 
 interface IProps {
   startDate: Date;
@@ -44,6 +47,46 @@ export default function CreatePayroll({
   const [dateRange, setDateRange] = useState<Date[]>([startDate, endDate]);
   const [isCreating, setIsCreating] = useState<boolean>(false);
   const { renderEmployeeSearch, selectedEmployeeData } = useEmployee();
+
+  // Driver shift sessions
+  const { data: driverShifts, isLoading: isLoadingDriverShifts } = useQuery({
+    queryKey: [
+      'driverShifts',
+      selectedEmployeeData?.id,
+      dateRange[0],
+      dateRange[1],
+    ],
+    queryFn: async () => {
+      const response = await axios.get(
+        getAdminApiUrl(
+          companyId,
+          `/shifts?driverId=${selectedEmployeeData?.id}&startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
+        ),
+      );
+      return response.data.data;
+    },
+    enabled: !!selectedEmployeeData?.id,
+  });
+
+  // Total hours
+  const totalHours = useMemo(() => {
+    return (
+      driverShifts?.reduce((acc: number, shift: any) => acc + shift.hours, 0) ||
+      0
+    );
+  }, [driverShifts]);
+
+  useEffect(() => {
+    if (totalHours) {
+      setNewPayroll((prevPayroll: any) => ({
+        ...prevPayroll,
+        hours: Math.round(totalHours * 100) / 100,
+        total: selectedEmployeeData?.payrollType === PayrollType.hourly
+          ? Math.round(totalHours * selectedEmployeeData?.payRate * 100) / 100
+          : Math.round(selectedEmployeeData?.payRate * 100) / 100,
+      }));
+    }
+  }, [totalHours, selectedEmployeeData]);
 
   useEffect(() => {
     if (selectedEmployeeData) {
@@ -127,6 +170,22 @@ export default function CreatePayroll({
             <Typography>Employee</Typography>
             {renderEmployeeSearch()}
           </Grid>
+
+          {driverShifts && driverShifts.length > 0 ? (
+            <Grid item xs={12}>
+              <Chip
+                label={`${driverShifts.length} shifts ($${selectedEmployeeData?.payRate}/hr) - ${totalHours?.toFixed(2)} hours`}
+                size="small"
+              />
+            </Grid>
+          ) : isLoadingDriverShifts && !driverShifts ? (
+            <Grid item xs={12} display="flex" alignItems="center" gap={1}>
+              <CircularProgress size={16} />
+              <Typography variant="caption">
+                Loading Driver Shifts...
+              </Typography>
+            </Grid>
+          ) : null}
 
           <Grid
             item
