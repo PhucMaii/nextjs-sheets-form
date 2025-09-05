@@ -7,8 +7,6 @@ import Fuse from 'fuse.js';
 
 // Utility function to group items by a key
 export const groupBy = (array: any[], key: (item: any) => any) => {
-  console.log('ARRAY:', array);
-  console.log('KEY:', key);
   return array.reduce((result, item) => {
     const groupKey = key(item);
     if (!result[groupKey]) {
@@ -198,7 +196,11 @@ export const compareTwoArrays = (arr1: any[], arr2: any[]) => {
   return JSON.stringify(arr1) === JSON.stringify(arr2);
 };
 
-export const compareTwoArraysWithFields = (arr1: any[], arr2: any[], fields: string[]) => {
+export const compareTwoArraysWithFields = (
+  arr1: any[],
+  arr2: any[],
+  fields: string[],
+) => {
   if (arr1.length !== arr2.length) {
     return false;
   }
@@ -248,7 +250,6 @@ export const onSearchItems = (
   });
 
   const result = fuse.search(searchKeywords);
-  console.log(result, 'result');
 
   const data = result.map((item: any) => item.item);
   return data;

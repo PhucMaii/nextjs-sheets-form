@@ -90,11 +90,15 @@ export default function ScheduledShiftTable({
   const findContainerOfShifts = (id: string, type: 'container' | 'shift') => {
     const targetDate = id.split(' __ ')[2];
     if (type === 'container') {
-      return daysInWeek.find((day: string) => day === targetDate);
+      const employee = employees.find(
+        (employee: any) => employee.id === Number(id.split(' __ ')[1]),
+      );
+      const date = daysInWeek.find((day: string) => day === targetDate);
+      return { date, employee };
     }
 
     const shift = shifts.find((shift: any) => shift.id == id.split(' __ ')[1]);
-    return shift?.date;
+    return { date: shift?.date, employee: shift?.employee };
   };
 
   const findShift = (id: string) => {
@@ -125,6 +129,68 @@ export default function ScheduledShiftTable({
       return;
     }
 
+    // Item Swap Item
+    if (
+      activeType === 'shift' &&
+      overType === 'shift' &&
+      active &&
+      over &&
+      active.id !== over.id
+    ) {
+      const activeShift = findShift(activeId);
+      const overShift = findShift(overId || '');
+
+      if (!activeShift || !overShift) {
+        return;
+      }
+
+      const newShifts = shifts.map((shift: any) => {
+        if (shift.id === activeShift.id) {
+          const { startedAt, endedAt, hours, cost, queryDate } =
+            handleSortShifts(
+              overShift.date,
+              activeShift.startedAt,
+              activeShift.endedAt,
+              overShift.employee,
+            );
+
+          return {
+            ...overShift,
+            employeeId: overShift.employeeId,
+            employee: overShift.employee,
+            startedAt: startedAt,
+            endedAt: endedAt,
+            hours: hours,
+            cost: cost,
+            queryDate: queryDate,
+          };
+        }
+        if (shift.id === overShift.id) {
+          const { startedAt, endedAt, hours, cost, queryDate } =
+            handleSortShifts(
+              activeShift.date,
+              overShift.startedAt,
+              overShift.endedAt,
+              activeShift.employee,
+            );
+
+          return {
+            ...activeShift,
+            employeeId: activeShift.employeeId,
+            employee: activeShift.employee,
+            startedAt: startedAt,
+            endedAt: endedAt,
+            hours: hours,
+            cost: cost,
+            queryDate: queryDate,
+          };
+        }
+        return shift;
+      });
+
+      setShifts(newShifts);
+    }
+
     // Item Drop Into Container
     if (
       activeType === 'shift' &&
@@ -133,11 +199,14 @@ export default function ScheduledShiftTable({
       over &&
       active.id !== over.id
     ) {
-      const activeContainer = findContainerOfShifts(activeId, 'shift');
-      const overContainer = findContainerOfShifts(overId || '', 'container');
+      const { date: activeDate } = findContainerOfShifts(activeId, 'shift');
+      const { date: overDate, employee: overEmployee } = findContainerOfShifts(
+        overId || '',
+        'container',
+      );
 
       // If the active or over container is undefined, return
-      if (!activeContainer || !overContainer) {
+      if (!activeDate || !overDate) {
         return;
       }
 
@@ -145,28 +214,24 @@ export default function ScheduledShiftTable({
 
       const newShifts = shifts.map((shift: any) => {
         if (shift.id === activeShift.id) {
-          const startedAt = formatDateString(
-            dayjs(
-              `${overContainer} ${activeShift.startedAt.split('  ')[1]}`,
-            ).format('YYYY-MM-DD HH:mm:ss'),
-          );
-          const endedAt = formatDateString(
-            dayjs(
-              `${overContainer} ${activeShift.endedAt.split('  ')[1]}`,
-            ).format('YYYY-MM-DD HH:mm:ss'),
-          );
-
-          const hours = dayjs(endedAt).diff(startedAt, 'hours', true);
-          const cost = hours * (activeShift.employee.payRate || 0);
+          const { startedAt, endedAt, hours, cost, queryDate } =
+            handleSortShifts(
+              overDate,
+              activeShift.startedAt,
+              activeShift.endedAt,
+              overEmployee,
+            );
 
           return {
             ...shift,
-            date: overContainer,
+            employeeId: overEmployee?.id,
+            employee: overEmployee,
+            date: overDate,
             startedAt: startedAt,
             endedAt: endedAt,
-            hours: Math.round(hours * 100) / 100,
+            hours: hours,
             cost: cost,
-            queryDate: dayjs(startedAt).format('MM/DD/YYYY'),
+            queryDate: queryDate,
           };
         }
         return shift;
@@ -174,6 +239,38 @@ export default function ScheduledShiftTable({
 
       setShifts(newShifts);
     }
+  };
+
+  const handleSortShifts = (
+    date: string,
+    startedAt: string,
+    endedAt: string,
+    employee: Employee,
+  ) => {
+    const startedAtFormatted = formatDateString(
+      dayjs(`${date} ${startedAt.split('  ')[1]}`).format(
+        'YYYY-MM-DD HH:mm:ss',
+      ),
+    );
+    const endedAtFormatted = formatDateString(
+      dayjs(`${date} ${endedAt.split('  ')[1]}`).format('YYYY-MM-DD HH:mm:ss'),
+    );
+
+    const hours = dayjs(endedAtFormatted).diff(
+      startedAtFormatted,
+      'hours',
+      true,
+    );
+    const cost = hours * (employee.payRate || 0);
+
+    return {
+      startedAt: startedAtFormatted,
+      endedAt: endedAtFormatted,
+      hours: Math.round(hours * 100) / 100,
+      cost: cost,
+      date,
+      queryDate: dayjs(startedAtFormatted).format('MM/DD/YYYY'),
+    };
   };
 
   return (
@@ -194,7 +291,9 @@ export default function ScheduledShiftTable({
           onDragEnd={onDragEnd}
           collisionDetection={closestCorners}
         >
-          <SortableContext items={shifts.map((shift: any) => shift.id)}>
+          <SortableContext
+            items={employees.flatMap((employee: any) => employee.shifts)}
+          >
             <Table>
               <TableHead>
                 <TableRow>
@@ -273,59 +372,57 @@ export default function ScheduledShiftTable({
                           key={`${employee.id}-${day}-${index}`}
                           sx={{
                             borderRight: `1px solid ${grey[200]}`,
-                            p: 1,
+                            p: 3,
                             verticalAlign: 'top',
-                            minWidth: '250px',
+                            minWidth: '300px',
                           }}
                         >
                           <ShiftContainer employee={employee} date={day}>
-                            <SortableContext
+                            {/* <SortableContext
                               items={employeeShifts.map(
                                 (shift: any) => shift.id,
                               )}
+                            > */}
+                            <Box
+                              display="flex"
+                              flexDirection="column"
+                              gap={1}
+                              height="100%"
+                              // justifyContent="center"
                             >
+                              {employeeShifts?.map((shift: any) => (
+                                <Shift
+                                  key={shift.id}
+                                  shift={shift}
+                                  onCopyShift={() => onCopyShift(shift)}
+                                  onOpenEditShift={() =>
+                                    setOpenEditShift({
+                                      open: true,
+                                      shift: shift,
+                                    })
+                                  }
+                                />
+                              ))}
                               <Box
                                 display="flex"
-                                flexDirection="column"
-                                gap={1}
+                                justifyContent="center"
+                                alignItems="center"
                                 height="100%"
-                                // justifyContent="center"
                               >
-                                {employeeShifts?.map((shift: any) => (
-                                  <Shift
-                                    key={shift.id}
-                                    shift={shift}
-                                    onCopyShift={() => onCopyShift(shift)}
-                                    onOpenEditShift={() =>
-                                      setOpenEditShift({
-                                        open: true,
-                                        shift: shift,
-                                      })
-                                    }
-                                  />
-                                ))}
-                                <Box
-                                  display="flex"
-                                  justifyContent="center"
-                                  alignItems="center"
-                                  height="100%"
+                                <Button
+                                  onClick={() => onOpenAddShift(employee, day)}
+                                  sx={{
+                                    // backgroundColor: grey[50],
+                                    width: '100%',
+                                    height: '100%',
+                                    color: grey[600],
+                                  }}
                                 >
-                                  <Button
-                                    onClick={() =>
-                                      onOpenAddShift(employee, day)
-                                    }
-                                    sx={{
-                                      // backgroundColor: grey[50],
-                                      width: '100%',
-                                      height: '100%',
-                                      color: grey[600],
-                                    }}
-                                  >
-                                    <PlusIcon />
-                                  </Button>
-                                </Box>
+                                  <PlusIcon />
+                                </Button>
                               </Box>
-                            </SortableContext>
+                            </Box>
+                            {/* </SortableContext> */}
                           </ShiftContainer>
                         </TableCell>
                       );

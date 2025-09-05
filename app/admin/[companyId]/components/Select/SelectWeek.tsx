@@ -78,8 +78,6 @@ export default function SelectWeek({
     );
   };
 
-  console.log(selectedWeek, 'selectedWeek');
-
   return (
     <>
       {renderSelectedWeek()}
