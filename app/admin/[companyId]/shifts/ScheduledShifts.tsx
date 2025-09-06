@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  CircularProgress,
   Grid,
   Typography,
   useMediaQuery,
@@ -25,6 +24,7 @@ import { LoadingButton } from '@mui/lab';
 import dayjs from 'dayjs';
 import { PayrollType } from '@prisma/client';
 import { Trash2Icon } from 'lucide-react';
+import ConfirmModal from '../components/Modals/ConfirmModal';
 
 export default function ScheduledShifts() {
   const { companyId }: any = useParams();
@@ -32,7 +32,7 @@ export default function ScheduledShifts() {
   const [employees, setEmployees] = useState<IEmployee[]>([]);
   const [isSavingAll, setIsSavingAll] = useState<boolean>(false);
   const [isCopyingLastWeek, setIsCopyingLastWeek] = useState<boolean>(false);
-  const [isDeletingWeekShifts, setIsDeletingWeekShifts] =
+  const [isOpenDeleteWeekShifts, setIsOpenDeleteWeekShifts] =
     useState<boolean>(false);
   const [baseScheduledShifts, setBaseScheduledShifts] = useState<
     IScheduledShift[]
@@ -208,7 +208,6 @@ export default function ScheduledShifts() {
   };
 
   const handleDeleteWeekShifts = async () => {
-    setIsDeletingWeekShifts(true);
     try {
       const startDate = dayjs(selectedWeek[0]).toString();
       const endDate = dayjs(selectedWeek[1]).toString();
@@ -231,8 +230,6 @@ export default function ScheduledShifts() {
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
       showNotification('error', 'Something went wrong: ' + error);
-    } finally {
-      setIsDeletingWeekShifts(false);
     }
   };
 
@@ -253,6 +250,15 @@ export default function ScheduledShifts() {
         defaultEmployee={openAddScheduledShift?.defaultEmployee}
         defaultDate={openAddScheduledShift?.defaultDate}
         refresh={handleSaveAll}
+      />
+      <ConfirmModal
+        title="Are you sure to delete this week shifts?"
+        handleSubmit={handleDeleteWeekShifts}
+        showNotification={showNotification}
+        open={isOpenDeleteWeekShifts}
+        onClose={() => setIsOpenDeleteWeekShifts(false)}
+        buttonLabel="Delete"
+        color="error"
       />
       <Box
         display="flex"
@@ -296,23 +302,17 @@ export default function ScheduledShifts() {
               Total: {overview.totalShifts} shifts
             </Typography>
             <Button
-              onClick={() => handleDeleteWeekShifts()}
+              onClick={() => setIsOpenDeleteWeekShifts(true)}
               variant="outlined"
               color="error"
-              disabled={scheduledShifts.length === 0 || isDeletingWeekShifts}
+              disabled={scheduledShifts.length === 0}
               sx={{
                 textTransform: 'none',
                 p: 0.5,
               }}
-              startIcon={
-                isDeletingWeekShifts ? (
-                  <CircularProgress size={16} />
-                ) : (
-                  <Trash2Icon size={16} />
-                )
-              }
+              startIcon={<Trash2Icon size={16} />}
             >
-              {isDeletingWeekShifts ? 'Deleting...' : 'Delete Week'}
+              Delete Week
             </Button>
           </Grid>
           <Grid item xs={4} textAlign="center">
