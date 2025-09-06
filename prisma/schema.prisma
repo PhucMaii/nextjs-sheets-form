@@ -929,6 +929,8 @@ model ScheduledShift {
   createdAt  String
   createdBy  String
   status     ScheduledShiftStatus?
+  isOff      Boolean?
+  isSkip     Boolean?
 
   company  Company  @relation(fields: [companyId], references: [id])
   employee Employee @relation(fields: [employeeId], references: [id])
@@ -953,9 +955,6 @@ model ShiftSession {
   expenseId  Int?
   role       String?
   companyId  Int?
-  isOff      Boolean?
-  isSkip     Boolean?
-  isExtra    Boolean?
 
   driver   Driver    @relation(fields: [driverId], references: [id])
   employee Employee? @relation(fields: [employeeId], references: [id])

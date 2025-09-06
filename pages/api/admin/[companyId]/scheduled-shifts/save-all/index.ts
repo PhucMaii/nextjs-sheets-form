@@ -59,6 +59,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           assignedBy: createdBy,
           assignedAt: today.dateAndTime,
           cost: shift?.cost || shift.hours * (shift?.employee?.payRate || 0),
+          isOff: shift?.isOff,
+          isSkip: shift?.isSkip,
         })),
       });
     }
@@ -81,6 +83,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             queryDate: shift.queryDate,
             hours: shift.hours,
             cost: shift.cost,
+            isOff: shift?.isOff,
+            isSkip: shift?.isSkip,
           },
         });
       }

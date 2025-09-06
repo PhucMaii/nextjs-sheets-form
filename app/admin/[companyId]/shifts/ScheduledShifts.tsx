@@ -1,4 +1,11 @@
-import { Box, Grid, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Grid,
+  Typography,
+  useMediaQuery,
+} from '@mui/material';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ShadowSection } from '../reports/styled';
 import '../../../../styles/fullCalendar.css';
@@ -17,6 +24,7 @@ import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
 import dayjs from 'dayjs';
 import { PayrollType } from '@prisma/client';
+import { Trash2Icon } from 'lucide-react';
 
 export default function ScheduledShifts() {
   const { companyId }: any = useParams();
@@ -24,6 +32,8 @@ export default function ScheduledShifts() {
   const [employees, setEmployees] = useState<IEmployee[]>([]);
   const [isSavingAll, setIsSavingAll] = useState<boolean>(false);
   const [isCopyingLastWeek, setIsCopyingLastWeek] = useState<boolean>(false);
+  const [isDeletingWeekShifts, setIsDeletingWeekShifts] =
+    useState<boolean>(false);
   const [baseScheduledShifts, setBaseScheduledShifts] = useState<
     IScheduledShift[]
   >([]);
@@ -36,6 +46,7 @@ export default function ScheduledShifts() {
   });
 
   const { showNotification, NotificationComp } = useNotification();
+  const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   const overview = useMemo(() => {
     if (scheduledShifts.length === 0)
@@ -68,7 +79,8 @@ export default function ScheduledShifts() {
       0,
     );
     const totalSalaryCost = salaryEmployeesInScheduledShifts.reduce(
-      (acc, employee) => acc + (employee?.payRate ? Math.round(employee?.payRate / 4) : 0),
+      (acc, employee) =>
+        acc + (employee?.payRate ? Math.round(employee?.payRate / 4) : 0),
       0,
     );
 
@@ -195,6 +207,35 @@ export default function ScheduledShifts() {
     }
   };
 
+  const handleDeleteWeekShifts = async () => {
+    setIsDeletingWeekShifts(true);
+    try {
+      const startDate = dayjs(selectedWeek[0]).toString();
+      const endDate = dayjs(selectedWeek[1]).toString();
+
+      const response = await axios.delete(
+        getAdminApiUrl(
+          companyId,
+          `/scheduled-shifts/delete-week?startDate=${startDate}&endDate=${endDate}`,
+        ),
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      await fetchScheduledShifts();
+
+      showNotification('success', 'Week shifts deleted successfully');
+    } catch (error: any) {
+      console.log('Internal Server Error: ', error);
+      showNotification('error', 'Something went wrong: ' + error);
+    } finally {
+      setIsDeletingWeekShifts(false);
+    }
+  };
+
   return (
     <>
       {NotificationComp}
@@ -243,10 +284,36 @@ export default function ScheduledShifts() {
       </Box>
       <ShadowSection>
         <Grid container spacing={2} alignItems="center">
-          <Grid item xs={4}>
+          <Grid
+            item
+            xs={4}
+            display="flex"
+            flexDirection={smDown ? 'column' : 'row'}
+            alignItems="center"
+            gap={2}
+          >
             <Typography fontWeight="medium">
               Total: {overview.totalShifts} shifts
             </Typography>
+            <Button
+              onClick={() => handleDeleteWeekShifts()}
+              variant="outlined"
+              color="error"
+              disabled={scheduledShifts.length === 0 || isDeletingWeekShifts}
+              sx={{
+                textTransform: 'none',
+                p: 0.5,
+              }}
+              startIcon={
+                isDeletingWeekShifts ? (
+                  <CircularProgress size={16} />
+                ) : (
+                  <Trash2Icon size={16} />
+                )
+              }
+            >
+              {isDeletingWeekShifts ? 'Deleting...' : 'Delete Week'}
+            </Button>
           </Grid>
           <Grid item xs={4} textAlign="center">
             <SelectWeek

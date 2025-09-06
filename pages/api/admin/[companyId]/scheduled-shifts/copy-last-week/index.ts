@@ -44,20 +44,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       formattedEndDate,
     );
 
-    console.log({
-      lastWeekStartedDate,
-      lastWeekEndedDate,
-      formattedStartDate,
-      formattedEndDate,
-      listOfDateString,
-    });
-
     const lastWeekShifts = await prisma.scheduledShift.findMany({
       where: {
         companyId: Number(companyId),
         queryDate: {
           in: listOfDateString,
         },
+        isSkip: false || null,
       },
       include: {
         employee: true,
@@ -92,6 +85,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         createdBy: createdBy,
         companyId: Number(companyId),
         employeeId: shift.employeeId,
+        isOff: false, // default for new week is false
       };
     });
 

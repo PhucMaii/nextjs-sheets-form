@@ -1,4 +1,4 @@
-import { Box, Divider, Typography, Modal } from '@mui/material';
+import { Box, Divider, Typography, Modal, Switch } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { BoxModal } from '../styled';
 import { ModalProps } from '../type';
@@ -185,6 +185,118 @@ export default function EditScheduledShift({
                   }
                 />
               ))}
+            </Box>
+          </Box>
+
+          <Box display="flex" flexDirection="column" gap={3}>
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+              p={2}
+              onClick={() =>
+                setUpdatedShift({
+                  ...updatedShift,
+                  isOff: !updatedShift?.isOff,
+                })
+              }
+              sx={{
+                border: '2px solid',
+                borderColor: updatedShift?.isOff ? 'error.main' : 'divider',
+                borderRadius: 2,
+                backgroundColor: updatedShift?.isOff
+                  ? 'error.light'
+                  : 'background.paper',
+                '&:hover': {
+                  backgroundColor: updatedShift?.isOff
+                    ? 'error.light'
+                    : 'action.hover',
+                },
+                transition: 'all 0.2s ease-in-out',
+              }}
+            >
+              <Box display="flex" flexDirection="column">
+                <Typography
+                  variant="subtitle1"
+                  fontWeight="medium"
+                  color={updatedShift?.isOff ? 'error.dark' : 'text.primary'}
+                >
+                  Day Off
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color={updatedShift?.isOff ? 'error.main' : 'text.secondary'}
+                >
+                  Mark this shift as a day off
+                </Typography>
+              </Box>
+              <Switch
+                checked={updatedShift?.isOff || false}
+                onChange={(e) =>
+                  setUpdatedShift({
+                    ...updatedShift,
+                    isOff: e.target.checked,
+                  })
+                }
+                color="error"
+                size="medium"
+              />
+            </Box>
+
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+              p={2}
+              sx={{
+                border: '2px solid',
+                borderColor: updatedShift?.isSkip ? 'warning.main' : 'divider',
+                borderRadius: 2,
+                backgroundColor: updatedShift?.isSkip
+                  ? 'warning.light'
+                  : 'background.paper',
+                '&:hover': {
+                  backgroundColor: updatedShift?.isSkip
+                    ? 'warning.light'
+                    : 'action.hover',
+                },
+                transition: 'all 0.2s ease-in-out',
+              }}
+              onClick={() =>
+                setUpdatedShift({
+                  ...updatedShift,
+                  isSkip: !updatedShift?.isSkip,
+                })
+              }
+            >
+              <Box display="flex" flexDirection="column">
+                <Typography
+                  variant="subtitle1"
+                  fontWeight="medium"
+                  color={updatedShift?.isSkip ? 'warning.dark' : 'text.primary'}
+                >
+                  Skip Copying
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color={
+                    updatedShift?.isSkip ? 'warning.main' : 'text.secondary'
+                  }
+                >
+                  Exclude this shift when copying to next week
+                </Typography>
+              </Box>
+              <Switch
+                checked={updatedShift?.isSkip || false}
+                onChange={(e) =>
+                  setUpdatedShift({
+                    ...updatedShift,
+                    isSkip: e.target.checked,
+                  })
+                }
+                color="warning"
+                size="medium"
+              />
             </Box>
           </Box>
 
