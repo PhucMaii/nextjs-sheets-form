@@ -5,6 +5,7 @@ import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
 import 'react-calendar/dist/Calendar.css';
+import { shiftMonth } from '@/pages/api/utils/date';
 
 interface PropTypes {
   dateRange: any;
@@ -58,23 +59,13 @@ export default function SelectDateRange({
   };
 
   const handleNextMonth = () => {
-    const nextStartDate = new Date(dateRange[0]);
-    nextStartDate.setMonth(nextStartDate.getMonth() + 1);
-
-    const nextEndDate = new Date(dateRange[1]);
-    nextEndDate.setMonth(nextEndDate.getMonth() + 1);
-
-    setDateRange([nextStartDate, nextEndDate]);
+    const newDateRange = shiftMonth(dateRange[0], 1);
+    setDateRange(newDateRange);
   };
 
   const handlePreviousMonth = () => {
-    const previousStartDate = new Date(dateRange[0]);
-    previousStartDate.setMonth(previousStartDate.getMonth() - 1);
-
-    const previousEndDate = new Date(dateRange[1]);
-    previousEndDate.setMonth(previousEndDate.getMonth() - 1);
-
-    setDateRange([previousStartDate, previousEndDate]);
+    const newDateRange = shiftMonth(dateRange[0], -1);
+    setDateRange(newDateRange);
   };
 
   const renderDateRange = () => {

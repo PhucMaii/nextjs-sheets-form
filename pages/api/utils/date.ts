@@ -263,3 +263,22 @@ export const getLastMonthListOfDateString = (startDate: Date) => {
 
   return datesInRange;
 };
+
+export const monthRange = (year: number, month: number) => {
+  // month is 0-based; overflow/underflow handled by Date()
+  const start = new Date(year, month, 1);
+  start.setHours(0, 0, 0, 0);
+
+  // Day 0 of the next month = last day of this month
+  const end = new Date(year, month + 1, 0);
+  end.setHours(23, 59, 59, 999);
+
+  return [start, end];
+};
+
+export const shiftMonth = (date: Date, offset: number) => {
+  const base = new Date(date); // use the current start as anchor
+  const targetMonth = base.getMonth() + offset;
+  const targetYear = base.getFullYear();
+  return monthRange(targetYear, targetMonth);
+};
