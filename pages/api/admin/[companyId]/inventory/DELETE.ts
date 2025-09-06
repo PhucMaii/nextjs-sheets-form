@@ -38,6 +38,30 @@ export default async function DELETE(
       },
     });
 
+    
+    await prisma.option.deleteMany({
+      where: {
+        inventoryItemId: Number(id),
+      },
+    });
+    
+    
+    // get all vendor items related
+    const vendorItems = await prisma.vendorItem.findMany({
+      where: {
+        inventoryItemId: Number(id),
+      },
+    });
+    
+    await prisma.inventoryUnit.deleteMany({ 
+      where: {
+        vendorItemId: {
+          in: vendorItems.map((vendorItem: any) => vendorItem.id),
+        },
+      },
+    });
+
+
     await prisma.vendorItem.deleteMany({
       where: {
         inventoryItemId: Number(id),
