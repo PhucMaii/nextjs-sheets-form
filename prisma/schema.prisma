@@ -104,8 +104,6 @@ model Employee {
   scheduledShifts ScheduledShift[]
   payrolls        Payroll[]
   deliveries      Delivery[]
-  reassignmentsFrom  Reassignment[]  @relation("FromEmployee")
-  reassignmentsTo    Reassignment[]  @relation("ToEmployee")
 
   company Company @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
@@ -432,15 +430,15 @@ model PositionIndex {
   id               Int            @id @default(autoincrement())
   scheduledOrderId Int            @unique
   index            Int
-  tempIndex        Int?
 
   scheduledOrder   ScheduleOrders @relation("ScheduledOrderIndex", fields: [scheduledOrderId], references: [id], onDelete: Cascade)
 }
 
 model Reassignment {
   id              Int         @id @default(autoincrement())
-  fromEmployeeId    Int
-  toEmployeeId      Int
+  fromRouteId    Int
+  toRouteId      Int
+  index          Int
   reassignedAt    String
   reassignedBy    String
   reason          String?
@@ -448,8 +446,8 @@ model Reassignment {
 
   orders          Orders[]
 
-  from      Employee  @relation("FromEmployee", fields: [fromEmployeeId], references: [id], onDelete: Cascade)
-  to        Employee  @relation("ToEmployee", fields: [toEmployeeId], references: [id], onDelete: Cascade)
+  from      Route  @relation("FromRoute", fields: [fromRouteId], references: [id], onDelete: Cascade)
+  to        Route  @relation("ToRoute", fields: [toRouteId], references: [id], onDelete: Cascade)
 }
 
 model Route {
@@ -459,8 +457,11 @@ model Route {
   employeeId    Int?
   name          String
   companyId     Int?
+
   clients       UserRoute[]
   shiftSessions ShiftSession[]
+  reassignmentFrom  Reassignment[] @relation("FromRoute")
+  reassignmentTo    Reassignment[] @relation("ToRoute")
 
   driver   Driver    @relation(fields: [driverId], references: [id])
   employee Employee? @relation(fields: [employeeId], references: [id])
