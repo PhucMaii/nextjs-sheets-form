@@ -104,6 +104,8 @@ model Employee {
   scheduledShifts ScheduledShift[]
   payrolls        Payroll[]
   deliveries      Delivery[]
+  reassignmentsFrom  Reassignment[]  @relation("FromEmployee")
+  reassignmentsTo    Reassignment[]  @relation("ToEmployee")
 
   company Company @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
@@ -339,6 +341,7 @@ model Orders {
   companyId            Int?
   hasSubtractInventory Boolean?
   enteredOrderAt       String?
+  reassignmentId       Int?
 
   delivery Delivery? @relation("OrderDelivery")
 
@@ -348,6 +351,7 @@ model Orders {
   user     User?     @relation(fields: [userId], references: [id])
   company  Company?  @relation(fields: [companyId], references: [id])
   CodBoard CodBoard? @relation(fields: [codBoardId], references: [id])
+  reassignment   Reassignment?   @relation(fields: [reassignmentId], references: [id])
 
   @@index([deliveryDate, status])
   @@index([deliveryDate, status, paymentStatus])
@@ -367,7 +371,6 @@ model Delivery {
 
   medias Media[]
 
-  // Relations
   order    Orders   @relation("OrderDelivery", fields: [orderId], references: [id], onDelete: Cascade)
   employee Employee @relation(fields: [employeeId], references: [id])
   company  Company? @relation(fields: [companyId], references: [id])
@@ -429,7 +432,24 @@ model PositionIndex {
   id               Int            @id @default(autoincrement())
   scheduledOrderId Int            @unique
   index            Int
+  tempIndex        Int?
+
   scheduledOrder   ScheduleOrders @relation("ScheduledOrderIndex", fields: [scheduledOrderId], references: [id], onDelete: Cascade)
+}
+
+model Reassignment {
+  id              Int         @id @default(autoincrement())
+  fromEmployeeId    Int
+  toEmployeeId      Int
+  reassignedAt    String
+  reassignedBy    String
+  reason          String?
+  status          ReassignmentStatus
+
+  orders          Orders[]
+
+  from      Employee  @relation("FromEmployee", fields: [fromEmployeeId], references: [id], onDelete: Cascade)
+  to        Employee  @relation("ToEmployee", fields: [toEmployeeId], references: [id], onDelete: Cascade)
 }
 
 model Route {
@@ -1077,4 +1097,10 @@ enum PayrollType {
 enum PaymentStatus {
   Paid
   Unpaid
+}
+
+enum ReassignmentStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
 }
