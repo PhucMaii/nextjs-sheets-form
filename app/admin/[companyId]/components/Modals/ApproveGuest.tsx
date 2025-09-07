@@ -14,6 +14,7 @@ import axios from 'axios';
 import { getAdminApiUrl } from '@/app/utils/enum';
 import { useParams } from 'next/navigation';
 import { ShowNotificationType } from '@/hooks/useNotification';
+import { useCategory } from '@/hooks/autocomplete/useCategory';
 
 interface IProps extends ModalProps {
   client: UserType;
@@ -24,6 +25,8 @@ const ApproveGuest = ({ open, onClose, client, showNotification }: IProps) => {
   const { companyId }: any = useParams();
   const [clientId, setClientId] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const { renderCategorySearch } = useCategory(true, []);
 
   const onApproveGuest = async () => {
     if (!clientId || clientId.trim() === '') {
@@ -79,6 +82,11 @@ const ApproveGuest = ({ open, onClose, client, showNotification }: IProps) => {
             onChange={(e) => setClientId(e.target.value)}
             placeholder="Enter new client id..."
           />
+        </Box>
+
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 2 }}>
+          <Typography>Category</Typography>
+          {renderCategorySearch()}
         </Box>
       </BoxModal>
     </Modal>

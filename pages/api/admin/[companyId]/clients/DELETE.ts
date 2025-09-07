@@ -26,6 +26,12 @@ export default async function DELETE(
       });
     }
 
+    await prisma.orders.deleteMany({
+      where: {
+        userId: Number(userId),
+      },
+    });
+
     await prisma.user.delete({
       where: {
         id: Number(userId),

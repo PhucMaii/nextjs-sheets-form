@@ -9,6 +9,7 @@ import emailHandler, {
 interface IBody {
   id: number;
   newClientId: string;
+  categoryId: number;
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -19,7 +20,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(404).json({ error: 'Your method is not supported' });
     }
 
-    const { id, newClientId }: IBody = req.body;
+    const { id, newClientId, categoryId }: IBody = req.body;
 
     if (newClientId.trim() === '') {
       return res.status(404).json({ error: 'You are missing body data' });
@@ -53,6 +54,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
       data: {
         clientId: newClientId.trim(),
+        categoryId: categoryId,
         role: USER_ROLE.CLIENT,
         type: USER_CATEGORIZED.NONE,
         password,

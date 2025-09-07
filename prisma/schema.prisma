@@ -200,7 +200,7 @@ model Quote {
 
   items QuoteItem[]
 
-  user    User     @relation(fields: [userId], references: [id])
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   company Company? @relation(fields: [companyId], references: [id])
 
   @@index([companyId])
@@ -346,7 +346,7 @@ model Orders {
   items    OrderedItems[]
   timeline OrderTimeline? @relation("OrderTimeline")
 
-  user     User?     @relation(fields: [userId], references: [id])
+  user     User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
   company  Company?  @relation(fields: [companyId], references: [id])
   CodBoard CodBoard? @relation(fields: [codBoardId], references: [id])
   reassignment   Reassignment?   @relation(fields: [reassignmentId], references: [id])
@@ -850,7 +850,7 @@ model Cheque {
   createdBy    String
   userId       Int
 
-  user    User     @relation(fields: [userId], references: [id])
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   company Company? @relation(fields: [companyId], references: [id])
 }
 
@@ -864,7 +864,7 @@ model ClientStatement {
   printedBy String
   updatedBy String?
 
-  user    User     @relation(fields: [userId], references: [id])
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   company Company? @relation(fields: [companyId], references: [id])
 }
 
@@ -895,7 +895,7 @@ model Cart {
   createdBy      String
   guestSessionId String?
   items          CartItem[]
-  user           User?      @relation(fields: [userId], references: [id])
+  user           User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Promotion {
