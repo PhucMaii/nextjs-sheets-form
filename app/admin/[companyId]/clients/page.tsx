@@ -1,8 +1,9 @@
 'use client';
 import { SplashScreen } from '@/HOC/AuthenGuard';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import {
+  Badge,
   Box,
   Button,
   Fab,
@@ -20,7 +21,12 @@ import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
 import { blue } from '@mui/material/colors';
 import { UserType } from '@/app/utils/type';
 import axios from 'axios';
-import { ORDER_TYPE, PAYMENT_TYPE, getAdminApiUrl } from '@/app/utils/enum';
+import {
+  ORDER_TYPE,
+  PAYMENT_TYPE,
+  USER_ROLE,
+  getAdminApiUrl,
+} from '@/app/utils/enum';
 import ClientsTable from '../components/Tables/ClientsTable';
 import LoadingModal from '../components/Modals/LoadingModal';
 import { ShadowSection } from '../reports/styled';
@@ -41,9 +47,11 @@ import { useRouter } from 'next/navigation';
 import AdminTable from '../components/Tables/AdminTable';
 import GuestTable from '../components/Tables/GuestTable';
 import { useParams } from 'next/navigation';
+import { GuestContext } from '@/app/context/GuestProvider';
 
 export default function ClientsPage() {
   const { companyId }: any = useParams();
+  const { guests, getGuests } = useContext(GuestContext);
 
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
@@ -74,17 +82,16 @@ export default function ClientsPage() {
       ? getAdminApiUrl(companyId, '/clients')
       : selectedTab === 1
         ? getAdminApiUrl(companyId, '')
-        : getAdminApiUrl(companyId, '/clients', 'role=guest'),
+        : getAdminApiUrl(companyId, '/clients', `role=${USER_ROLE.GUEST}`),
   );
-  const [categories] = SWRFetchData(
-    getAdminApiUrl(companyId, '/categories'),
-  );
+  const [categories] = SWRFetchData(getAdminApiUrl(companyId, '/categories'));
 
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   const router = useRouter();
 
   useEffect(() => {
+    getGuests();
     if (users) {
       initializeUsers();
     }
@@ -335,17 +342,6 @@ export default function ClientsPage() {
     </Box>
   );
 
-  // if (selectedDetailsClient) {
-  //   return (
-  //     <Sidebar noMargin>
-  //       <ClientDetails
-  //         clientData={selectedDetailsClient}
-  //         onClose={() => setSelectedDetailedClient(null)}
-  //       />
-  //     </Sidebar>
-  //   );
-  // }
-
   if (isFetching) {
     return (
       <Sidebar>
@@ -419,7 +415,14 @@ export default function ClientsPage() {
           >
             <Tab value={0} label="Clients" />
             <Tab value={1} label="Admins" />
-            <Tab value={2} label="Guests" />
+            <Tab
+              value={2}
+              label={
+                <Badge badgeContent={guests?.length || 0} color="error">
+                  <span style={{ margin: 4 }}>Guests</span>
+                </Badge>
+              }
+            />
           </Tabs>
         </Box>
         <Grid container spacing={1} alignItems="center">
@@ -497,7 +500,7 @@ export default function ClientsPage() {
         ) : selectedTab === 1 ? (
           <AdminTable admins={userList} showNotification={showNotification} />
         ) : selectedTab === 2 ? (
-          <GuestTable guests={userList} showNotification={showNotification} />
+          <GuestTable guests={guests} showNotification={showNotification} />
         ) : null}
       </ShadowSection>
       {/* </AuthenGuard> */}

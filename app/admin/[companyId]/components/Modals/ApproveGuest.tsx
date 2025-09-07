@@ -1,11 +1,5 @@
-import {
-  Box,
-  Divider,
-  Modal,
-  TextField,
-  Typography,
-} from '@mui/material';
-import React, { memo, useState } from 'react';
+import { Box, Divider, Modal, TextField, Typography } from '@mui/material';
+import React, { memo, useContext, useState } from 'react';
 import { BoxModal } from './styled';
 import { ModalProps } from './type';
 import { UserType } from '@/app/utils/type';
@@ -15,6 +9,7 @@ import { getAdminApiUrl } from '@/app/utils/enum';
 import { useParams } from 'next/navigation';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import { useCategory } from '@/hooks/autocomplete/useCategory';
+import { GuestContext } from '@/app/context/GuestProvider';
 
 interface IProps extends ModalProps {
   client: UserType;
@@ -23,10 +18,11 @@ interface IProps extends ModalProps {
 
 const ApproveGuest = ({ open, onClose, client, showNotification }: IProps) => {
   const { companyId }: any = useParams();
+  const { getGuests } = useContext(GuestContext);
   const [clientId, setClientId] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const { renderCategorySearch } = useCategory(true, []);
+  const { renderCategorySearch, selectedCategory } = useCategory(true, []);
 
   const onApproveGuest = async () => {
     if (!clientId || clientId.trim() === '') {
@@ -41,6 +37,7 @@ const ApproveGuest = ({ open, onClose, client, showNotification }: IProps) => {
         {
           id: client.id,
           newClientId: clientId,
+          categoryId: selectedCategory?.id,
         },
       );
 
@@ -50,8 +47,10 @@ const ApproveGuest = ({ open, onClose, client, showNotification }: IProps) => {
         return;
       }
 
+      await getGuests();
       showNotification('success', response.data.message);
       setIsLoading(false);
+      onClose();
     } catch (error: any) {
       console.log('Fail to approve guest: ', error);
       showNotification('error', 'Fail to approve guest: ' + error);

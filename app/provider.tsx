@@ -11,6 +11,7 @@ import { DragDropProvider } from '@dnd-kit/react';
 import registerSW from './registerSW';
 import { Toaster } from 'react-hot-toast';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import GuestProvider from './context/GuestProvider';
 
 type Props = {
   children?: React.ReactNode;
@@ -40,7 +41,9 @@ export const Providers = ({ children }: Props) => {
                   focusThrottleInterval: 5000,
                 }}
               >
-                <MaintenanceProvider>{children}</MaintenanceProvider>
+                <GuestProvider>
+                  <MaintenanceProvider>{children}</MaintenanceProvider>
+                </GuestProvider>
               </SWRConfig>
             </Provider>
           </DragDropProvider>
