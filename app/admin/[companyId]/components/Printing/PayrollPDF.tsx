@@ -32,43 +32,73 @@ export const PayrollPDF = forwardRef(
     if (!payrolls || payrolls.length === 0) {
       return (
         <div ref={ref}>
-          <Box sx={{ width: '100%', height: '100%', mr: 4 }}>
-            <Typography variant="h4">No Payroll Data Available</Typography>
+          <Box
+            sx={{
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Typography variant="h4" textAlign="center">
+              No Payroll Data Available
+            </Typography>
           </Box>
         </div>
       );
     }
 
     const calculateTotalPayroll = () => {
-      return payrolls.reduce((total, payroll) => total + (payroll.total || 0), 0);
+      return payrolls.reduce(
+        (total, payroll) => total + (payroll.total || 0),
+        0,
+      );
     };
 
     return (
       <div ref={ref} className="print-container">
-        <Box sx={{ width: '90%', height: '100%' }}>
+        <Box
+          sx={{
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
           {/* Header */}
           <Typography variant="h4" textAlign="center" m={2}>
             Supreme Sprouts Ltd. - Payroll Report
           </Typography>
-          
+
           <Box
             display="flex"
-            justifyContent="space-between"
+            justifyContent="center"
             alignItems="center"
+            gap={4}
             m={2}
+            sx={{ width: '100%' }}
           >
-            <Typography variant="h6">
+            <Typography variant="h6" textAlign="center">
               Report Date: {currentDate}
             </Typography>
-            <Typography variant="h6">
+            <Typography variant="h6" textAlign="center">
               Total Payroll: ${calculateTotalPayroll().toFixed(2)}
             </Typography>
           </Box>
-          
-          <Divider sx={{ my: 2 }} />
+
+          <Divider sx={{ my: 2, width: '80%' }} />
 
           {/* Payroll Table */}
-          <Table sx={{ mx: 2 }}>
+          <Table
+            sx={{
+              width: '90%',
+              maxWidth: '1200px',
+              mx: 'auto',
+            }}
+          >
             <TableHead>
               <TableRow>
                 <BorderTableCell
@@ -119,7 +149,7 @@ export const PayrollPDF = forwardRef(
                     backgroundColor: '#f5f5f5',
                   }}
                 >
-                  Hourly Rate ($)
+                  Hourly Rate
                 </BorderTableCell>
                 <BorderTableCell
                   sx={{
@@ -129,7 +159,7 @@ export const PayrollPDF = forwardRef(
                     backgroundColor: '#f5f5f5',
                   }}
                 >
-                  Monthly Rate ($)
+                  Monthly Rate
                 </BorderTableCell>
                 <BorderTableCell
                   sx={{
@@ -137,9 +167,16 @@ export const PayrollPDF = forwardRef(
                     fontSize: 16,
                     fontWeight: 'bold',
                     backgroundColor: '#f5f5f5',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                   }}
                 >
-                  Total ($)
+                  Total
+                  <Typography variant="caption" fontSize={12}>
+                    (before tax)
+                  </Typography>
                 </BorderTableCell>
               </TableRow>
             </TableHead>
@@ -181,20 +218,18 @@ export const PayrollPDF = forwardRef(
                       fontSize: 14,
                     }}
                   >
-                    {payroll.employee.payrollType === PayrollType.hourly 
-                      ? (payroll.employee.payRate?.toFixed(2) || '0.00')
-                      : 'N/A'
-                    }
+                    {payroll.employee.payrollType === PayrollType.hourly
+                      ? `$${payroll.employee.payRate?.toFixed(2)}` || '0.00'
+                      : 'N/A'}
                   </BorderTableCell>
                   <BorderTableCell
                     sx={{
                       fontSize: 14,
                     }}
                   >
-                    {payroll.employee.payrollType === PayrollType.monthly 
-                      ? (payroll.employee.payRate?.toFixed(2) || '0.00')
-                      : 'N/A'
-                    }
+                    {payroll.employee.payrollType === PayrollType.monthly
+                      ? `$${payroll.employee.payRate?.toFixed(2)}` || '0.00'
+                      : 'N/A'}
                   </BorderTableCell>
                   <BorderTableCell
                     sx={{
@@ -211,13 +246,22 @@ export const PayrollPDF = forwardRef(
           </Table>
 
           {/* Summary Section */}
-          <Box sx={{ mt: 4, mx: 2 }}>
-            <Divider sx={{ my: 2 }} />
+          <Box
+            sx={{
+              mt: 4,
+              width: '90%',
+              maxWidth: '1200px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}
+          >
+            <Divider sx={{ my: 2, width: '100%' }} />
             <Box
               display="flex"
               justifyContent="space-between"
               alignItems="center"
-              sx={{ mt: 2 }}
+              sx={{ mt: 2, width: '100%' }}
             >
               <Typography variant="h6" fontWeight="bold">
                 Total Employees: {payrolls.length}
