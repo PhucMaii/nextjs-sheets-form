@@ -217,10 +217,10 @@ model QuoteItem {
   quantity        Int
   price           Int
 
-  quote         Quote         @relation(fields: [quoteId], references: [id])
-  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
-  inventoryUnit InventoryUnit @relation(fields: [inventoryUnitId], references: [id])
-  company       Company?      @relation(fields: [companyId], references: [id])
+  quote         Quote         @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  inventoryUnit InventoryUnit @relation(fields: [inventoryUnitId], references: [id], onDelete: Cascade)
+  company       Company?      @relation(fields: [companyId], references: [id], onDelete: Cascade)
 }
 
 model Category {
@@ -263,7 +263,7 @@ model Item {
 
   promotion     Promotion?     @relation(fields: [promotionId], references: [id])
   category      Category?      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  inventoryItem InventoryItem? @relation(fields: [inventoryItemId], references: [id])
+  inventoryItem InventoryItem? @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
   inventoryUnit InventoryUnit? @relation(fields: [inventoryUnitId], references: [id])
   company       Company?       @relation(fields: [companyId], references: [id])
   SubCategory   SubCategory?   @relation(fields: [subCategoryId], references: [id])
