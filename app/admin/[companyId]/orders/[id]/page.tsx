@@ -444,18 +444,18 @@ const OrderDetailsPage = () => {
                     border: '1px solid',
                     borderColor: 'grey.200',
                     borderRadius: 1,
-                    px: 2,
-                    py: 1,
+                    px: 1,
+                    py: 0.5,
                   }}
                 >
                   <TruckIcon size={16} color="#666" />
-                  <Typography variant="body2" fontWeight={500}>
+                  <Typography variant="caption">
                     {order.orderRoute}
                   </Typography>
                   <Button
                     color="primary"
                     size="small"
-                    sx={{ minWidth: 'auto', px: 1 }}
+                    sx={{ minWidth: 'auto', textTransform: 'none', py: 0 }}
                   >
                     Switch
                   </Button>
@@ -828,7 +828,7 @@ const OrderDetailsPage = () => {
                       color="text.secondary"
                       fontWeight={600}
                     >
-                      Customer ID
+                      Client ID
                     </Typography>
                     <Typography
                       variant="body1"

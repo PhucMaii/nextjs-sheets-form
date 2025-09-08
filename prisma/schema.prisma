@@ -439,6 +439,7 @@ model Reassignment {
   fromRouteId    Int
   toRouteId      Int
   index          Int
+  date           String
   reassignedAt    String
   reassignedBy    String
   reason          String?
