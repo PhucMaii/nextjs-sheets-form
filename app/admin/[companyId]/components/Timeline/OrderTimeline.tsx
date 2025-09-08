@@ -97,7 +97,7 @@ export default function OrderTimeline({ timeline }: IProps) {
                     <TimelineConnector />
                   </TimelineSeparator>
                   <TimelineContent>
-                    <Accordion>
+                    <Accordion elevation={0} sx={{ boxShadow: 'rgba(131, 131, 131, 0.25) 0px 6px 12px -2px, rgba(118, 118, 118, 0.3) 0px 3px 7px -3px'}}>
                       <AccordionSummary
                         expandIcon={
                           action.comment ? <ExpandMoreIcon /> : undefined

@@ -30,6 +30,16 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           user: {
             include: {
               category: true,
+              routes: {
+                include: {
+                  route: {
+                    include: {
+                      driver: true,
+                      employee: true,
+                    },
+                  },
+                },
+              },
             },
           },
           items: {
@@ -49,7 +59,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
               actions: {
                 orderBy: {
                   posIndex: 'desc',
-                }
+                },
               },
             },
           },
@@ -57,14 +67,20 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       });
 
       // Group actions by date
-      const groupedActions = order?.timeline?.actions.reduce((acc: any, action: any) => {
-        const date = action.createdAt.split(' ')[0];
-        if (!acc[date]) {
-          acc[date] = [];
-        }
-        acc[date].push(action);
-        return acc;
-      }, {});
+      const groupedActions = order?.timeline?.actions.reduce(
+        (acc: any, action: any) => {
+          const date = action.createdAt.split(' ')[0];
+          if (!acc[date]) {
+            acc[date] = [];
+          }
+          acc[date].push(action);
+          return acc;
+        },
+        {},
+      );
+
+      // Get order route
+      const orderRoute = getOrderRoute(order);
 
       return res.status(200).json({
         message: 'Fetch Order Successfully',
@@ -74,6 +90,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             ...order?.timeline,
             groupedActions,
           },
+          orderRoute,
         },
       });
     }
@@ -207,12 +224,13 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       );
 
       // Get order route
-      const orderDeliveryDate: Date = normalizeDate(order.deliveryDate);
-      const orderDayIndex = orderDeliveryDate.getDay();
-      const orderDay = days[orderDayIndex];
-      const orderRoute = order.user.routes.find((route: any) => {
-        return route.route.day === orderDay;
-      });
+      // const orderDeliveryDate: Date = normalizeDate(order.deliveryDate);
+      // const orderDayIndex = orderDeliveryDate.getDay();
+      // const orderDay = days[orderDayIndex];
+      // const orderRoute = order.user.routes.find((route: any) => {
+      //   return route.route.day === orderDay;
+      // });
+      const orderRoute = getOrderRoute(order);
 
       // Calculate order profit
       const profit = calculateOrderProfit(formattedItems);
@@ -228,9 +246,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           ? previousUnpaidCodOrdersMap[order.user.clientId]
           : null,
         multipleOrders: sameClientOrder.length > 1 ? true : false,
-        orderRoute: orderRoute
-          ? `${orderRoute.route.name} - ${orderRoute.route?.employee?.name}`
-          : 'No route - N/A',
+        orderRoute: orderRoute,
         profit,
       };
     });
@@ -253,4 +269,16 @@ export const calculateOrderProfit = (items: OrderedItems[]) => {
   }, 0);
 
   return profit;
+};
+
+export const getOrderRoute = (order: any) => {
+  const orderDeliveryDate: Date = normalizeDate(order.deliveryDate);
+  const orderDayIndex = orderDeliveryDate.getDay();
+  const orderDay = days[orderDayIndex];
+  const orderRoute = order.user.routes.find((route: any) => {
+    return route?.route?.day === orderDay;
+  });
+  return (
+    `${orderRoute?.route?.name} - ${orderRoute?.route?.employee?.name}` || 'No route - N/A'
+  );
 };

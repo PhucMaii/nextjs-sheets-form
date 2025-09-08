@@ -15,7 +15,6 @@ import {
   OutlinedInput,
   Skeleton,
   Switch,
-  Theme,
   Typography,
   useMediaQuery,
 } from '@mui/material';
@@ -24,7 +23,6 @@ import OrderedItemsTable from '../../components/Tables/OrderedItemsTable';
 import { ArrowBackIos, KeyboardArrowDown } from '@mui/icons-material';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import StatusText, { COLOR_TYPE } from '../../components/StatusText';
-import { grey } from '@mui/material/colors';
 import OrderTimeline from '../../components/Timeline/OrderTimeline';
 import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation';
@@ -48,6 +46,8 @@ const OrderDetailsPage = () => {
   const { id, companyId }: any = useParams();
   const router = useRouter();
   const { showNotification, NotificationComp } = useNotification();
+
+  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   // console.log(window.history.state);
 
@@ -100,8 +100,6 @@ const OrderDetailsPage = () => {
   const [isUpdatingNotes, setIsUpdatingNotes] = useState<boolean>(false);
   const [isMarking, setIsMarking] = useState<boolean>(false);
   const printRef = useRef<HTMLDivElement>(null);
-
-  const smDown = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'));
 
   useEffect(() => {
     if (order) {
@@ -163,6 +161,8 @@ const OrderDetailsPage = () => {
       setIsMarking(false);
     }
   };
+
+  console.log('order', order);
 
   const handleDeleteOrder = async (targetOrder: Order) => {
     if (!showNotification) {
@@ -399,69 +399,111 @@ const OrderDetailsPage = () => {
           showNotification={showNotification}
         />
       )}
+      {/* Clean Header */}
       <Box
-        display="flex"
-        justifyContent={smDown ? 'center' : 'space-between'}
-        alignItems={smDown ? 'flex-start' : 'center'}
-        flexDirection={smDown ? 'column' : 'row'}
-        gap={smDown ? 1 : 0}
+        sx={{
+          backgroundColor: 'background.paper',
+          border: '1px solid',
+          borderColor: 'divider',
+          borderRadius: 2,
+          p: 3,
+          mb: 1,
+        }}
       >
         <Box
           display="flex"
+          justifyContent={'space-between'}
+          alignItems={mdDown ? 'flex-start' : 'center'}
+          flexDirection={mdDown ? 'column' : 'row'}
           gap={1}
-          alignItems={smDown ? 'flex-start' : 'center'}
-          flexDirection={smDown ? 'column' : 'row'}
+          mb={1}
         >
-          <Box display="flex" gap={1} alignItems="center">
-            <IconButton onClick={() => router.back()}>
-              <ArrowBackIos />
-            </IconButton>
-            <Typography variant="h5">#{order?.id}</Typography>
-            <StatusText type={statusText.type} text={statusText.text} />
-          </Box>
-          <Box display="flex" gap={1} alignItems="center">
-            {order?.enteredOrderAt && (
-              <Chip
-                label={`Take client ${moment(order?.orderTime).diff(order?.enteredOrderAt, 'seconds')}s to place an order`}
-                color="primary"
-                size="small"
-                sx={{ fontSize: 12 }}
-                variant="outlined"
-              />
-            )}
-            {order?.delivery?.startTripAt && order?.delivery?.deliveredAt && (
-              <Chip
-                label={`Take driver ${moment(order?.delivery?.deliveredAt).diff(moment(order?.delivery?.startTripAt), 'minutes')}m to deliver`}
-                color="primary"
-                size="small"
-                sx={{ fontSize: 12 }}
-                variant="outlined"
-              />
-            )}
-          </Box>
-        </Box>
-
-        <Box display="flex" gap={1} alignItems="center">
-          <Button
-            onClick={() => setIsOpenOrderDetails(true)}
-            variant="contained"
-            color="primary"
+          <Box
+            display="flex"
+            flexDirection={mdDown ? 'column' : 'row'}
+            alignItems={mdDown ? 'flex-start' : 'center'}
+            gap={2}
           >
-            Edit
-          </Button>
-          <Button onClick={handlePrint} variant="outlined" color="primary">
-            Print
-          </Button>
-          {moreActions}
+            <Box display="flex" alignItems="center">
+              <IconButton onClick={() => router.back()}>
+                <ArrowBackIos />
+              </IconButton>
+              <Typography variant="h5" fontWeight={600}>
+                Order #{order?.id}
+              </Typography>
+            </Box>
+            <StatusText type={statusText.type} text={statusText.text} />
+            <Box display="flex" gap={2} flexWrap="wrap" alignItems="center">
+              {order?.orderRoute && (
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  gap={1}
+                  sx={{
+                    backgroundColor: 'grey.50',
+                    border: '1px solid',
+                    borderColor: 'grey.200',
+                    borderRadius: 1,
+                    px: 2,
+                    py: 1,
+                  }}
+                >
+                  <TruckIcon size={16} color="#666" />
+                  <Typography variant="body2" fontWeight={500}>
+                    {order.orderRoute}
+                  </Typography>
+                  <Button
+                    color="primary"
+                    size="small"
+                    sx={{ minWidth: 'auto', px: 1 }}
+                  >
+                    Switch
+                  </Button>
+                </Box>
+              )}
+
+              {order?.enteredOrderAt && (
+                <Chip
+                  label={`Order took: ${moment(order?.orderTime).diff(order?.enteredOrderAt, 'seconds')}s`}
+                  color="info"
+                  size="small"
+                  variant="outlined"
+                />
+              )}
+
+              {order?.delivery?.startTripAt && order?.delivery?.deliveredAt && (
+                <Chip
+                  label={`Driver: ${moment(order?.delivery?.deliveredAt).diff(moment(order?.delivery?.startTripAt), 'minutes')}m`}
+                  color="success"
+                  size="small"
+                  variant="outlined"
+                />
+              )}
+            </Box>
+          </Box>
+
+          <Box display="flex" gap={1}>
+            <Button
+              onClick={() => setIsOpenOrderDetails(true)}
+              variant="contained"
+              color="primary"
+            >
+              Edit
+            </Button>
+            <Button onClick={handlePrint} variant="outlined" color="primary">
+              Print
+            </Button>
+            {moreActions}
+          </Box>
         </Box>
       </Box>
 
-      <Grid container spacing={1}>
+      <Grid container spacing={3}>
         <Grid
           item
           xs={12}
           md={8}
-          sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
+          sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}
         >
           {isLoading ? (
             <Skeleton variant="rectangular" height={300} />
@@ -558,72 +600,80 @@ const OrderDetailsPage = () => {
                   Payment
                 </Typography>
 
-                <Box display="flex" flexDirection="column" gap={0.5}>
+                <Box display="flex" flexDirection="column" gap={1}>
                   {order?.discount ? (
                     <Box
                       display="flex"
-                      gap={1}
                       justifyContent="space-between"
                       alignItems="center"
                     >
-                      <Typography variant="h6" fontWeight={500}>
+                      <Typography variant="body2" color="text.secondary">
                         Discount
                       </Typography>
-                      <Typography variant="h6" fontWeight={500}>
-                        -${order?.discount}
+                      <Typography
+                        variant="body2"
+                        color="error.main"
+                        fontWeight={600}
+                      >
+                        -${order?.discount?.toFixed(2)}
                       </Typography>
                     </Box>
                   ) : null}
+
                   <Box
                     display="flex"
-                    gap={1}
                     justifyContent="space-between"
                     alignItems="center"
                   >
-                    <Typography variant="h6" fontWeight={500}>
+                    <Typography variant="body2" color="text.secondary">
                       Subtotal
                     </Typography>
-                    <Typography variant="h6" fontWeight={500}>
+                    <Typography variant="body2" fontWeight={500}>
                       ${order?.subTotal?.toFixed(2)}
                     </Typography>
                   </Box>
+
                   <Box
                     display="flex"
-                    gap={1}
                     justifyContent="space-between"
                     alignItems="center"
                   >
-                    <Typography variant="h6" fontWeight={500}>
+                    <Typography variant="body2" color="text.secondary">
                       GST
                     </Typography>
-                    <Typography variant="h6" fontWeight={500}>
+                    <Typography variant="body2" fontWeight={500}>
                       ${order?.GST?.toFixed(2)}
                     </Typography>
                   </Box>
+
                   <Box
                     display="flex"
-                    gap={1}
                     justifyContent="space-between"
                     alignItems="center"
                   >
-                    <Typography variant="h6" fontWeight={500}>
+                    <Typography variant="body2" color="text.secondary">
                       PST
                     </Typography>
-                    <Typography variant="h6" fontWeight={500}>
+                    <Typography variant="body2" fontWeight={500}>
                       ${order?.PST?.toFixed(2)}
                     </Typography>
                   </Box>
+
+                  <Divider sx={{ my: 1 }} />
+
                   <Box
                     display="flex"
-                    gap={1}
                     justifyContent="space-between"
                     alignItems="center"
-                    mt={2}
                   >
                     <Typography variant="h6" fontWeight={700}>
                       Total
                     </Typography>
-                    <Typography variant="h6" fontWeight={700}>
+                    <Typography
+                      variant="h6"
+                      fontWeight={700}
+                      color="primary.main"
+                    >
                       $
                       {(
                         (order?.subTotal || 0) +
@@ -667,22 +717,33 @@ const OrderDetailsPage = () => {
           {isLoading ? (
             <Skeleton variant="rectangular" height={200} />
           ) : (
-            // <ShadowSection>
-            <>
-              <Typography variant="subtitle2" fontWeight={700}>
-                Order Timeline
-              </Typography>
+            <ShadowSection>
               <Box
-                display="flex"
-                justifyContent="flex-start"
-                width="100%"
-                gap={1}
-                mt={1}
+                sx={{
+                  borderColor: 'divider',
+                  borderWidth: 1,
+                  borderStyle: 'solid',
+                  borderRadius: 2,
+                  p: 3,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 2,
+                }}
               >
-                <OrderTimeline timeline={order?.timeline || null} />
+                <Typography variant="subtitle2" fontWeight={700}>
+                  Order Timeline
+                </Typography>
+                <Box
+                  display="flex"
+                  justifyContent="flex-start"
+                  width="100%"
+                  gap={1}
+                  mt={1}
+                >
+                  <OrderTimeline timeline={order?.timeline || null} />
+                </Box>
               </Box>
-            </>
-            // </ShadowSection>
+            </ShadowSection>
           )}
         </Grid>
         <Grid
@@ -746,50 +807,125 @@ const OrderDetailsPage = () => {
           {isLoading ? (
             <Skeleton variant="rectangular" height={200} />
           ) : (
-            <ShadowSection display="flex" flexDirection="column" gap={1}>
+            <ShadowSection display="flex" flexDirection="column" gap={2}>
               <Typography variant="subtitle2" fontWeight={700}>
-                Customer
+                Customer Information
               </Typography>
 
-              <Typography variant="h6" fontWeight={500}>
-                {order?.user?.clientId || 'N/A'}
-              </Typography>
-
-              <Typography variant="h6" fontWeight={500}>
-                {order?.user?.clientName || 'N/A'}
-              </Typography>
-
-              <Typography variant="h6" fontWeight={500}>
-                {order?.user?.email || 'N/A'}
-              </Typography>
-
-              <Typography variant="h6" fontWeight={500}>
-                {order?.user?.contactNumber || 'N/A'}
-              </Typography>
-
-              <Typography
-                variant="subtitle2"
-                fontWeight={600}
-                sx={{ my: 1, color: grey[600] }}
+              <Box
+                sx={{
+                  backgroundColor: 'background.paper',
+                  borderRadius: 2,
+                  p: 3,
+                  border: '1px solid',
+                  borderColor: 'divider',
+                }}
               >
-                Delivery Address
-              </Typography>
+                <Box display="flex" flexDirection="column" gap={2}>
+                  <Box>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      fontWeight={600}
+                    >
+                      Customer ID
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      fontWeight={500}
+                      sx={{ mt: 0.5 }}
+                    >
+                      {order?.user?.clientId || 'N/A'}
+                    </Typography>
+                  </Box>
 
-              <Typography variant="h6" fontWeight={500}>
-                {order?.user?.deliveryAddress || 'N/A'}
-              </Typography>
+                  <Box>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      fontWeight={600}
+                    >
+                      Name
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      fontWeight={500}
+                      sx={{ mt: 0.5 }}
+                    >
+                      {order?.user?.clientName || 'N/A'}
+                    </Typography>
+                  </Box>
 
-              <Typography
-                variant="subtitle2"
-                fontWeight={600}
-                sx={{ my: 1, color: grey[600] }}
-              >
-                Category
-              </Typography>
+                  <Box>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      fontWeight={600}
+                    >
+                      Email
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      fontWeight={500}
+                      sx={{ mt: 0.5 }}
+                    >
+                      {order?.user?.email || 'N/A'}
+                    </Typography>
+                  </Box>
 
-              <Typography variant="h6" fontWeight={500}>
-                {order?.user?.category?.name || 'N/A'}
-              </Typography>
+                  <Box>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      fontWeight={600}
+                    >
+                      Phone
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      fontWeight={500}
+                      sx={{ mt: 0.5 }}
+                    >
+                      {order?.user?.contactNumber || 'N/A'}
+                    </Typography>
+                  </Box>
+
+                  <Box>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      fontWeight={600}
+                    >
+                      Delivery Address
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      fontWeight={500}
+                      sx={{ mt: 0.5, lineHeight: 1.4 }}
+                    >
+                      {order?.user?.deliveryAddress || 'N/A'}
+                    </Typography>
+                  </Box>
+
+                  <Box>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      fontWeight={600}
+                    >
+                      Category
+                    </Typography>
+                    <Box sx={{ mt: 1 }}>
+                      <Chip
+                        label={order?.user?.category?.name || 'N/A'}
+                        color="primary"
+                        size="small"
+                        variant="outlined"
+                      />
+                    </Box>
+                  </Box>
+                </Box>
+              </Box>
             </ShadowSection>
           )}
         </Grid>
