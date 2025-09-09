@@ -28,6 +28,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       formattedStartDate,
       formattedEndDate,
     );
+    
+    // console.log({ listOfDateStrings, formattedStartDate, formattedEndDate });
 
     const { yyyymmddStartDate, yyyymmddEndDate, employeeIds } = req.body;
 
@@ -54,17 +56,18 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         acc[employeeId] = {
           employeeId,
           hours: 0,
-          total: shift?.employee?.payRate || 0,
+          total: 0,
           shifts: 0,
         };
       }
 
+      
       acc[employeeId].shifts += 1;
       acc[employeeId].hours += shift.hours || 0;
-
+      
       if (shift?.employee?.payrollType === PayrollType.hourly) {
         const shiftTotal =
-          (shift?.employee?.payRate || 0) * (shift?.hours || 0);
+        (shift?.employee?.payRate || 0) * (shift?.hours || 0);
         acc[employeeId].total += shiftTotal;
       }
 
