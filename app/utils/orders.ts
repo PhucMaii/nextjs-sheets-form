@@ -172,8 +172,6 @@ export const generateOrderTotalPrice = (
   let PST = 0;
   let discount = 0;
 
-  console.log(items, 'items');
-
   items.forEach((item) => {
     const itemTotal = item.totalPrice || (item?.quantity || 0) * item.price;
     subTotal += itemTotal;

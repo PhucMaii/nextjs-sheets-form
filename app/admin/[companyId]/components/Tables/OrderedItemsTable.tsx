@@ -21,7 +21,6 @@ const OrderedItemRow = ({ item }: { item: OrderedItems }) => {
   useEffect(() => {
     if (item?.inventoryItem?.image) {
       generateImgUrl(item?.inventoryItem?.image).then((url) => {
-        console.log(url, 'url');
         setImg(url);
       });
     }

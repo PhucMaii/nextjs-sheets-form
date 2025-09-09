@@ -143,6 +143,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                 category: true,
                 subCategory: true,
                 routes: true,
+                scheduleOrders: {
+                  include: {
+                    positionIndex: true,
+                  },
+                },
               },
             },
           },
@@ -150,19 +155,33 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    // const formattedClientOrders: any = {};
-    // routes.forEach((route: any) => {
-    //   formattedClientOrders[route.id] = route.clients.map((client: any) => {
-    //     return {
-    //       client: client.user,
-    //       orders: client.user.Orders,
-    //       route: route,
-    //     };
-    //   })
-    // })
+    // Sort client list in each route based on the scheduled orders
+    const sortedRoutes = routes.map((route: any) => {
+      return {
+        ...route,
+        clients: route.clients.sort((a: any, b: any) => {
+          // find scheduled order of route day
+          const scheduleOrderA = a.user.scheduleOrders.find(
+            (order: any) => order.day === route.day,
+          );
+          const scheduleOrderB = b.user.scheduleOrders.find(
+            (order: any) => order.day === route.day,
+          );
+
+          if (!scheduleOrderA || !scheduleOrderB) {
+            return 0;
+          }
+
+          return (
+            scheduleOrderA.positionIndex.index -
+            scheduleOrderB.positionIndex.index
+          );
+        }),
+      };
+    });
 
     return res.status(200).json({
-      data: routes,
+      data: sortedRoutes,
       // formattedClientOrders,
       message: 'Fetch Routes Successfully',
     });

@@ -41,6 +41,7 @@ import { HandCoinsIcon, TruckIcon } from 'lucide-react';
 import { LoadingButton } from '@mui/lab';
 import DisplayFile from '../../components/Modals/DisplayFile';
 import moment from 'moment';
+import SwitchRouteModal from '../../components/Modals/SwitchRouteModal';
 
 const OrderDetailsPage = () => {
   const { id, companyId }: any = useParams();
@@ -48,8 +49,6 @@ const OrderDetailsPage = () => {
   const { showNotification, NotificationComp } = useNotification();
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
-
-  // console.log(window.history.state);
 
   const queryClient = useQueryClient();
   const { data: order, isLoading } = useQuery<Order>({
@@ -99,6 +98,7 @@ const OrderDetailsPage = () => {
   const [isOpenDeleteModal, setIsOpenDeleteModal] = useState<boolean>(false);
   const [isUpdatingNotes, setIsUpdatingNotes] = useState<boolean>(false);
   const [isMarking, setIsMarking] = useState<boolean>(false);
+  const [isOpenSwitchRouteModal, setIsOpenSwitchRouteModal] = useState<boolean>(false);
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -161,8 +161,6 @@ const OrderDetailsPage = () => {
       setIsMarking(false);
     }
   };
-
-  console.log('order', order);
 
   const handleDeleteOrder = async (targetOrder: Order) => {
     if (!showNotification) {
@@ -399,6 +397,11 @@ const OrderDetailsPage = () => {
           showNotification={showNotification}
         />
       )}
+      <SwitchRouteModal 
+        open={isOpenSwitchRouteModal} 
+        onClose={() => setIsOpenSwitchRouteModal(false)}
+        order={order as Order}
+      />
       {/* Clean Header */}
       <Box
         sx={{
@@ -456,6 +459,7 @@ const OrderDetailsPage = () => {
                     color="primary"
                     size="small"
                     sx={{ minWidth: 'auto', textTransform: 'none', py: 0 }}
+                    onClick={() => setIsOpenSwitchRouteModal(true)}
                   >
                     Switch
                   </Button>
