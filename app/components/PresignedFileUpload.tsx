@@ -3,6 +3,7 @@
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { usePresignedUpload } from '../../hooks/usePresignedUpload';
+import { generateImgUrl } from '../lib/s3';
 
 interface PresignedFileUploadProps {
   location: string;
@@ -12,6 +13,7 @@ interface PresignedFileUploadProps {
   acceptedFileTypes?: string[];
   onUploadComplete?: (
     uploadedFiles: Array<{ fileKey: string; fileName: string; fileType: string }>,
+    imgUrl: string,
   ) => void;
   onUploadError?: (error: string) => void;
   className?: string;
@@ -100,7 +102,8 @@ export const PresignedFileUpload: React.FC<PresignedFileUploadProps> = ({
           });
         }
 
-        onUploadComplete?.(files as any);
+        const imgUrl = await generateImgUrl(files[0].fileKey);
+        onUploadComplete?.(files as any, imgUrl);
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : 'Upload failed';

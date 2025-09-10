@@ -26,6 +26,7 @@ import { grey } from '@mui/material/colors';
 import { useParams } from 'next/navigation';
 import useImageGallery from '@/hooks/useImageGallery';
 import Image from 'next/image';
+import { PresignedFileUpload } from '@/app/components/PresignedFileUpload';
 
 interface IProps extends ModalProps {
   types: IItemType[];
@@ -202,12 +203,13 @@ export default function SwitchTypeAndAppearanceModal({
         </Button>
 
         {isUploadFile && (
-          <FileUpload
-            showNotification={showNotification}
-            fileName={`${item?.name + Date.now()}`}
-            uploadLocation={`products/${item?.name}`}
-            onUploadImageUI={(fileKey: string) => {
-              setItemImage(fileKey);
+          <PresignedFileUpload
+            location={`products/${item?.name}`}
+            maxFiles={1}
+            maxSize={10 * 1024 * 1024} // 10MB
+            acceptedFileTypes={['image/*']}
+            onUploadComplete={(files: any, imgUrl: string) => {
+              setItemImage(imgUrl);
             }}
           />
         )}

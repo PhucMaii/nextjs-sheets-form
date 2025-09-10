@@ -21,7 +21,7 @@ export default async function uploadToS3(
   location: string,
   isCheque: boolean = false,
 ) {
-  console.log(file.name, 'file name in upload to s3')
+  console.log(file.name, 'file name in upload to s3');
   try {
     if (
       !process.env.NEXT_PUBLIC_S3_BUCKET_NAME ||
@@ -57,26 +57,35 @@ export const generateImgUrl = async (
   fileKey: string,
   isCheque: boolean = false,
 ) => {
-  if (!fileKey) return '';
+  if (!fileKey) {
+    console.warn('No file key provided to generateImgUrl');
+    return '/images/not-found.png';
+  }
 
   try {
-    if (isCheque) {
-      const command = new GetObjectCommand({
-        Bucket: process.env.NEXT_PUBLIC_S3_BUCKET_NAME_CHEQUE,
-        Key: fileKey,
-      });
+    const bucketName = isCheque
+      ? process.env.NEXT_PUBLIC_S3_BUCKET_NAME_CHEQUE
+      : process.env.NEXT_PUBLIC_S3_BUCKET_NAME;
 
-      const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
-      return signedUrl;
+    if (!bucketName) {
+      console.error('Missing S3 bucket name environment variable');
+      return '/images/not-found.png';
     }
 
-    return `https://${
-      isCheque
-        ? process.env.NEXT_PUBLIC_S3_BUCKET_NAME_CHEQUE
-        : process.env.NEXT_PUBLIC_S3_BUCKET_NAME
-    }.s3.us-west-2.amazonaws.com/${fileKey}`;
+    const command = new GetObjectCommand({
+      Bucket: bucketName,
+      Key: fileKey,
+    });
+
+    const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+    return signedUrl;
   } catch (error) {
-    console.error('Fail to get image from S3: ', error);
+    console.error(
+      'Failed to generate image URL for fileKey:',
+      fileKey,
+      'Error:',
+      error,
+    );
     return '/images/not-found.png';
   }
 };
@@ -84,7 +93,13 @@ export const generateImgUrl = async (
 export const getAllS3Images = async (folder: string = '') => {
   const allImages = [];
   let continuationToken;
+
   try {
+    if (!process.env.NEXT_PUBLIC_S3_BUCKET_NAME) {
+      console.error('Missing NEXT_PUBLIC_S3_BUCKET_NAME environment variable');
+      return [];
+    }
+
     do {
       const command: any = new ListObjectsV2Command({
         Bucket: process.env.NEXT_PUBLIC_S3_BUCKET_NAME,
@@ -97,14 +112,20 @@ export const getAllS3Images = async (folder: string = '') => {
 
       const imageFiles = objects
         .map((obj: any) => obj.Key)
-        .filter((key: string) => key.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i));
+        .filter((key: string) => {
+          // Validate that key exists and matches image extensions
+          return key && key.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i);
+        });
 
       allImages.push(...imageFiles);
       continuationToken = response.NextContinuationToken;
     } while (continuationToken);
+
+    console.log(`Found ${allImages.length} images in folder: ${folder}`);
     return allImages;
   } catch (error) {
-    console.error('Fail to get images from S3: ', error);
+    console.error('Failed to get images from S3:', error);
+    return [];
   }
 };
 

@@ -29,9 +29,8 @@ export default function DisplayFile({
 
   useEffect(() => {
     const fetchUrl = async () => {
-      console.log('DisplayFile: fileKey =', fileKey, 'isCheque =', isCheque);
-      
       if (!fileKey) {
+        console.warn('DisplayFile: No file key provided');
         setError('No file key provided');
         setIsLoading(false);
         return;
@@ -40,13 +39,14 @@ export default function DisplayFile({
       try {
         setIsLoading(true);
         setError(null);
+        console.log('DisplayFile: Generating URL for fileKey:', fileKey, 'isCheque:', isCheque);
         const url = await generateImgUrl(fileKey, isCheque);
-        console.log('DisplayFile: Generated URL =', url);
-        setUrl(url);
+        console.log('DisplayFile: Generated URL:', url);
+        setUrl(url || '/images/not-found.png');
       } catch (err) {
-        console.error('Failed to generate image URL:', err);
+        console.error('DisplayFile: Failed to generate image URL for fileKey:', fileKey, 'Error:', err);
         setError('Failed to load image');
-        setUrl('');
+        setUrl('/images/not-found.png');
       } finally {
         setIsLoading(false);
       }
@@ -108,11 +108,14 @@ export default function DisplayFile({
           }}
           objectFit="cover"
           onClick={onClick}
-          onError={() => setError('Failed to load image')}
+          onError={(e) => {
+            console.error('DisplayFile: Image failed to load. URL:', url, 'FileKey:', fileKey, 'Event:', e);
+            setError('Failed to load image');
+          }}
           width={100}
           height={100}
           loading="lazy"
-          unoptimized={true}
+          // unoptimized={true}
         />
       )}
     </>
