@@ -595,11 +595,14 @@ model Expense {
   fixedTransactionId Int?
   companyId          Int?
   batchTransactionId  Int?
+  mergeChequeId      Int?
 
   paymentMethod    PaymentMethod?    @relation(fields: [paymentMethodId], references: [id], onDelete: Cascade)
   codBoard         CodBoard?         @relation(fields: [codBoardId], references: [id])
   company          Company?          @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   batchTransaction  BatchTransaction?  @relation(fields: [batchTransactionId], references: [id], onDelete: Cascade)
+  mergeCheque      Cheque?           @relation(fields: [mergeChequeId], references: [id])
+
   orderedItems     OrderedItems[]
   vendors          VendorExpense[]
   shifts           ShiftSession[]
@@ -656,10 +659,13 @@ model Vendor {
   email       String?
   companyId   Int?
 
+
   company        Company?        @relation(fields: [companyId], references: [id])
+  
   expense        VendorExpense[]
   vendorItem     VendorItem[]
   purchaseOrders PO[]
+  payments       Cheque[]
 }
 
 model InventoryItem {
@@ -849,10 +855,15 @@ model Cheque {
   amount       Float
   createdAt    String
   createdBy    String
-  userId       Int
 
-  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       Int? // user pay to company
+  vendorId     Int? // company pay to vendor
+
+  transactions Expense[]
+
   company Company? @relation(fields: [companyId], references: [id])
+  user    User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vendor  Vendor?  @relation(fields: [vendorId], references: [id])
 }
 
 model ClientStatement {
