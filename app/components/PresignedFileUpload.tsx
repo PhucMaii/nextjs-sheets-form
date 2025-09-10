@@ -142,8 +142,6 @@ export const PresignedFileUpload: React.FC<PresignedFileUploadProps> = ({
     disabled: isUploaded,
   });
 
-  console.log(uploadedFiles, 'uploadedFiles');
-
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;

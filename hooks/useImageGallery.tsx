@@ -21,7 +21,6 @@ const useImageGallery = (
     const getImages = async () => {
       try {
         const images = await getAllS3Images(from);
-        console.log(images, 'images');
         setGalleryImages(images || []);
       } catch (error) {
         console.error('Failed to load gallery images:', error);
@@ -124,6 +123,7 @@ const useImageGallery = (
     galleryImages,
     selectedImage,
     renderImageGallery,
+    setSelectedImage,
   };
 };
 

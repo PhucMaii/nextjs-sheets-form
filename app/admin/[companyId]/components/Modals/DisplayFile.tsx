@@ -39,9 +39,7 @@ export default function DisplayFile({
       try {
         setIsLoading(true);
         setError(null);
-        console.log('DisplayFile: Generating URL for fileKey:', fileKey, 'isCheque:', isCheque);
         const url = await generateImgUrl(fileKey, isCheque);
-        console.log('DisplayFile: Generated URL:', url);
         setUrl(url || '/images/not-found.png');
       } catch (err) {
         console.error('DisplayFile: Failed to generate image URL for fileKey:', fileKey, 'Error:', err);
