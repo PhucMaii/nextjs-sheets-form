@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Box,
+  Button,
   Divider,
   Grid,
   IconButton,
@@ -21,7 +22,7 @@ import KPICard from '../components/Overview/KPICard';
 import PaidIcon from '@mui/icons-material/Paid';
 import { CardStyled } from '../components/OverviewCard/styled';
 import Image from 'next/image';
-import { CheckIcon, FilterIcon, Nfc } from 'lucide-react';
+import { CheckIcon, FilterIcon, Nfc, UploadIcon } from 'lucide-react';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import AreaChart from '../components/Charts/AreaChart';
 import { ShadowSection } from '../reports/styled';
@@ -50,6 +51,7 @@ import LoadingModal from '../components/Modals/LoadingModal';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { error, errorBackground, errorColor } from '@/theme/color';
 import moment from 'moment';
+import UploadMergeChequeModal from '../components/Modals/UploadMergeChequeModal';
 
 const SpendingItem = ({
   item,
@@ -117,6 +119,12 @@ export default function CardManagement() {
   const [paymentMethods, setPaymentMethods] = useState<IPaymentMethod[]>([]);
   const [vendors, setVendors] = useState<IVendor[]>([]);
   const [selectedExpenses, setSelectedExpenses] = useState<IExpense[]>([]);
+  const [uploadMergeChequeProps, setUploadMergeChequeProps] = useState<any>({
+    open: false,
+    vendor: null,
+    startDate: dateRange[0],
+    endDate: dateRange[1],
+  });
   // const [isOpenAddNewMethod, setIsOpenAddNewMethod] = useState<boolean>(false);
 
   const searchParams = useSearchParams();
@@ -237,7 +245,7 @@ export default function CardManagement() {
 
   useEffect(() => {
     if (paramsViewType || paramsViewId) {
-      // const selectedType = 
+      // const selectedType =
       setSelectedViewObj({
         ...selectedViewObj,
         id: Number(paramsViewId) || selectedViewObj.id,
@@ -245,8 +253,6 @@ export default function CardManagement() {
       });
     }
   }, [paramsViewType, paramsViewId]);
-
-  console.log('selectedViewObj', selectedViewObj);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -290,6 +296,15 @@ export default function CardManagement() {
       scroll: false,
     });
   }, [dateRange]);
+
+  useEffect(() => {
+    if (selectedViewObj.type === VIEW_TYPE.VENDOR) {
+      setUploadMergeChequeProps({
+        ...uploadMergeChequeProps,
+        vendor: transactions?.data[0]?.vendors[0]?.vendor,
+      });
+    }
+  }, [transactions, selectedViewObj.type]);
 
   const fetchPaymentMethods = async () => {
     const paymentMethods: any = await fetchApi(
@@ -450,6 +465,21 @@ export default function CardManagement() {
     <Sidebar>
       {/* {AddExpenseModal} */}
       {UpdateExpenseStatusComp}
+      {currentMethod && (
+        <UploadMergeChequeModal
+          open={uploadMergeChequeProps.open}
+          onClose={() =>
+            setUploadMergeChequeProps({
+              ...uploadMergeChequeProps,
+              open: false,
+            })
+          }
+          showNotification={showNotification}
+          vendor={uploadMergeChequeProps.vendor}
+          startDate={dateRange[0]}
+          endDate={dateRange[1]}
+        />
+      )}
       <LoadingModal open={isUpdating} />
       {NotificationComp}
       <AddPaymentMethod
@@ -630,7 +660,7 @@ export default function CardManagement() {
                   }}
                 > */}
                 <Typography variant="h4" fontWeight="bold" my={1}>
-                  {currentMethod?.name} Vendor Analysis
+                  {uploadMergeChequeProps.vendor?.name} Vendor Analysis
                 </Typography>
                 {/* </Box> */}
               </Grid>
@@ -1055,6 +1085,18 @@ export default function CardManagement() {
                     </Typography>
                     <Box display="flex" alignItems="center" gap={2}>
                       {AddExpenseButton}
+                      <Button
+                        variant="outlined"
+                        onClick={() =>
+                          setUploadMergeChequeProps({
+                            ...uploadMergeChequeProps,
+                            open: true,
+                          })
+                        }
+                        startIcon={<UploadIcon />}
+                      >
+                        Upload Merge Cheque
+                      </Button>
                       {Actions}
                       <IconButton
                         onClick={(e) => setFilterAnchorEl(e.currentTarget)}
@@ -1178,7 +1220,8 @@ export default function CardManagement() {
                     sx={{ p: 2 }}
                   >
                     <Typography variant="h5" color="white">
-                      {currentMethod?.name}
+                      {currentMethod?.name ||
+                        uploadMergeChequeProps.vendor?.name}
                     </Typography>
                     {currentMethod?.type === PAYMENT_METHOD_TYPE.CASH ? (
                       <PaymentsIcon
