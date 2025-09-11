@@ -379,3 +379,26 @@ export interface IOrderAction extends OrderAction {
 export interface IBatchTransaction extends BatchTransaction {
   transactions: IExpense[];
 }
+
+export interface IMergeCheque {
+  id: number;
+  chequeNumber: string;
+  amount: number;
+  startDate: string;
+  endDate: string;
+  fileKeyFront: string;
+  fileKeyBack?: string;
+  createdAt: string;
+  createdBy: string;
+  vendorId?: number;
+  vendor?: {
+    id: number;
+    name: string;
+  };
+  transactions?: Array<{
+    id: number;
+    description: string;
+    amount: number;
+    date: string;
+  }>;
+}

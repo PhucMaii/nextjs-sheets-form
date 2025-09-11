@@ -22,14 +22,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       return res.status(400).json({ error: 'Vendor ID, start date and end date are required' });
     }
 
-    // const formattedStartDate = formatDate(year);
-    // const formattedEndDate = formatDate(year);
-
-    // const listOfDateString = generateListOfDateString(
-    //   formattedStartDate,
-    //   formattedEndDate,
-    // );
-
     const mergeCheques = await prisma.cheque.findMany({
       where: {
         companyId: Number(companyId),

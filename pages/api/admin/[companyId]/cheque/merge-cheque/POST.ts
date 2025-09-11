@@ -68,8 +68,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    console.log('transactions', transactions);
-
     if (transactions.length !== transactionIds.length) {
       return res
         .status(400)
@@ -114,6 +112,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       },
       data: {
         mergeChequeId: newCheque.id,
+        status: PaymentStatus.Paid,
       },
     });
 

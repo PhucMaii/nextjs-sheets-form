@@ -157,7 +157,7 @@ export default function CardManagement() {
     getAdminApiUrl(companyId, '/adminsAndDrivers'),
   );
 
-  const { data: mergeCheques } = useQuery({
+  const { data: mergeCheques, refetch: mutateMergeCheques } = useQuery({
     queryKey: ['mergeCheques', selectedViewObj.id, dateRange[0], dateRange[1]],
     queryFn: async () => {
       const response = await axios.get(
@@ -956,6 +956,8 @@ export default function CardManagement() {
                   ) : (
                     <MergeChequeTable
                       mergeCheques={mergeCheques || []}
+                      showNotification={showNotification}
+                      mutateMergeCheques={mutateMergeCheques}
                     />
                   )}
                 </ShadowSection>

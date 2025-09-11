@@ -5,7 +5,6 @@ import {
   Checkbox,
   Chip,
   Divider,
-  Grid,
   Modal,
   Table,
   TableBody,
@@ -445,36 +444,6 @@ export default function UploadMergeChequeModal({
                       }}
                       helperText="Amount is automatically calculated from selected transactions"
                     />
-                  </Box>
-
-                  <Box display="flex" flexDirection="column" gap={1}>
-                    <Typography>For</Typography>
-                    <Grid container spacing={2} alignItems="center">
-                      <Grid item xs={6}>
-                        <TextField
-                          fullWidth
-                          label="From"
-                          value={
-                            forDateRange[0]
-                              ? forDateRange[0].toDateString()
-                              : ''
-                          }
-                          onClick={() => setIsSelectForRangeOpen(true)}
-                        />
-                      </Grid>
-                      <Grid item xs={6} textAlign="right">
-                        <TextField
-                          fullWidth
-                          label="To"
-                          value={
-                            forDateRange[1]
-                              ? forDateRange[1].toDateString()
-                              : ''
-                          }
-                          onClick={() => setIsSelectForRangeOpen(true)}
-                        />
-                      </Grid>
-                    </Grid>
                   </Box>
                 </Box>
               </CardContent>
