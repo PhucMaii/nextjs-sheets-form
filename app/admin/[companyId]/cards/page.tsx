@@ -489,6 +489,7 @@ export default function CardManagement() {
           vendor={uploadMergeChequeProps.vendor}
           startDate={dateRange[0]}
           endDate={dateRange[1]}
+          mutateMergeCheques={mutateMergeCheques}
         />
       )}
       <LoadingModal open={isUpdating} />
@@ -833,6 +834,7 @@ export default function CardManagement() {
                   </Tabs>
                   <Box
                     display="flex"
+                    flexDirection={smDown ? 'column' : 'row'}
                     alignItems="center"
                     justifyContent="space-between"
                     gap={2}

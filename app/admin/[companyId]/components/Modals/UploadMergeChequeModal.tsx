@@ -38,6 +38,7 @@ interface IProps extends ModalProps {
   vendor: IVendor | null;
   startDate: Date;
   endDate: Date;
+  mutateMergeCheques: () => void;
 }
 
 interface TransactionStats {
@@ -55,6 +56,7 @@ export default function UploadMergeChequeModal({
   vendor,
   startDate,
   endDate,
+  mutateMergeCheques,
 }: IProps) {
   const { companyId }: any = useParams();
 
@@ -229,6 +231,7 @@ export default function UploadMergeChequeModal({
         return;
       }
 
+      mutateMergeCheques();
       showNotification('success', response.data.message);
       onClose();
     } catch (error: any) {

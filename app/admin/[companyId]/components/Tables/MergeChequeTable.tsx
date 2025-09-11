@@ -92,6 +92,7 @@ const MergeChequeTable = ({
       }
 
       showNotification('success', response.data.message);
+      mutateMergeCheques();
     } catch (error: any) {
       console.log('Fail to delete cheque: ', error);
       showNotification('error', 'Fail to delete cheque: ' + error);
