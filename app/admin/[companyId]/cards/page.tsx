@@ -12,6 +12,8 @@ import {
   Menu,
   MenuItem,
   Select,
+  Tab,
+  Tabs,
   Typography,
   useMediaQuery,
 } from '@mui/material';
@@ -50,8 +52,10 @@ import { useUpdateExpenseStatus } from '@/hooks/update/useUpdateExpenseStatus';
 import LoadingModal from '../components/Modals/LoadingModal';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { error, errorBackground, errorColor } from '@/theme/color';
-import moment from 'moment';
 import UploadMergeChequeModal from '../components/Modals/UploadMergeChequeModal';
+import MergeChequeTable from '../components/Tables/MergeChequeTable';
+import { useQuery } from '@tanstack/react-query';
+import dayjs from 'dayjs';
 
 const SpendingItem = ({
   item,
@@ -60,8 +64,6 @@ const SpendingItem = ({
   item: any;
   transactions: any;
 }) => {
-  const color = blueGrey[700];
-
   return (
     <Box
       display="flex"
@@ -101,7 +103,6 @@ export default function CardManagement() {
   const [filterAnchorEl, setFilterAnchorEl] = useState<any>(null);
   const isOpenFilter = Boolean(filterAnchorEl);
   const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
-  // const [displayedTransactions, setDisplayedTransactions] = useState<IExpense[]>([]);
   const [selectedViewObj, setSelectedViewObj] = useState<any>({
     type: VIEW_TYPE.ALL,
     id: 0,
@@ -125,7 +126,7 @@ export default function CardManagement() {
     startDate: dateRange[0],
     endDate: dateRange[1],
   });
-  // const [isOpenAddNewMethod, setIsOpenAddNewMethod] = useState<boolean>(false);
+  const [tabIndex, setTabIndex] = useState<string>('transactions');
 
   const searchParams = useSearchParams();
   const paramStartDate = searchParams?.get('startDate');
@@ -140,7 +141,6 @@ export default function CardManagement() {
     isUpdating,
     Actions,
     AddExpenseButton,
-    // AddExpenseModal,
   } = useUpdateExpenseStatus(showNotification, selectedExpenses);
 
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
@@ -156,6 +156,17 @@ export default function CardManagement() {
   const [adminsAndDriversRes] = SWRFetchData(
     getAdminApiUrl(companyId, '/adminsAndDrivers'),
   );
+
+  const { data: mergeCheques } = useQuery({
+    queryKey: ['mergeCheques', selectedViewObj.id, dateRange[0], dateRange[1]],
+    queryFn: async () => {
+      const response = await axios.get(
+        getAdminApiUrl(companyId, `/cheque/merge-cheque?vendorId=${selectedViewObj.id}&year=${dayjs(dateRange[0]).format('YYYY')}`),
+      );
+      return response.data.data || [];
+    },
+    enabled: !!selectedViewObj.id,
+  });
 
   const listOfDateString = useMemo(() => {
     const normalizedStartDate = normalizeDate(new Date(dateRange[0]));
@@ -810,265 +821,16 @@ export default function CardManagement() {
                 </ShadowSection>
               </Grid>
 
-              {/* Payment Timeline */}
-              {/* <Grid item xs={12} md={6}>
-                <ShadowSection>
-                  <Typography
-                    variant="h6"
-                    fontWeight="bold"
-                    color={blueGrey[800]}
-                    mb={2}
-                  >
-                    Payment Timeline Insights
-                  </Typography>
-                  <Box display="flex" flexDirection="column" gap={2}>
-                    <Box
-                      p={3}
-                      sx={{
-                        backgroundColor: '#e3f2fd',
-                        borderRadius: 2,
-                        border: '1px solid #bbdefb',
-                        boxShadow: '0 2px 8px rgba(25, 118, 210, 0.1)',
-                      }}
-                    >
-                      <Typography
-                        variant="body1"
-                        fontWeight="600"
-                        color="#1565c0"
-                        mb={0.5}
-                      >
-                        Average Payment Delay
-                      </Typography>
-                      <Typography
-                        variant="h4"
-                        fontWeight="bold"
-                        color="#1976d2"
-                      >
-                        {transactions?.overview?.avgPaymentDelay?.toFixed(2)}{' '}
-                        days
-                      </Typography>
-                    </Box>
-                    <Box
-                      p={3}
-                      sx={{
-                        backgroundColor: '#fff3e0',
-                        borderRadius: 2,
-                        border: '1px solid #ffcc02',
-                        boxShadow: '0 2px 8px rgba(245, 124, 0, 0.1)',
-                      }}
-                    >
-                      <Typography
-                        variant="body1"
-                        fontWeight="600"
-                        color="#e65100"
-                        mb={0.5}
-                      >
-                        Longest Outstanding
-                      </Typography>
-                      <Typography
-                        variant="h4"
-                        fontWeight="bold"
-                        color="#f57c00"
-                      >
-                        {transactions?.overview?.longestPaymentDelay?.toFixed(
-                          2,
-                        )}{' '}
-                        days
-                      </Typography>
-                    </Box>
-                    <Box
-                      p={3}
-                      sx={{
-                        backgroundColor: '#e8f5e8',
-                        borderRadius: 2,
-                        border: '1px solid #c8e6c9',
-                        boxShadow: '0 2px 8px rgba(56, 142, 60, 0.1)',
-                      }}
-                    >
-                      <Typography
-                        variant="body1"
-                        fontWeight="600"
-                        color="#2e7d32"
-                        mb={0.5}
-                      >
-                        Fastest Payment
-                      </Typography>
-                      <Typography
-                        variant="h4"
-                        fontWeight="bold"
-                        color="#388e3c"
-                      >
-                        {transactions?.overview?.shortestPaymentDelay?.toFixed(
-                          2,
-                        )}{' '}
-                        days
-                      </Typography>
-                    </Box>
-                  </Box>
-                </ShadowSection>
-              </Grid> */}
-
-              {/* Action Items */}
-              {/* <Grid item xs={12}>
-                <ShadowSection>
-                  <Typography
-                    variant="h6"
-                    fontWeight="bold"
-                    color={blueGrey[800]}
-                    mb={3}
-                  >
-                    Action Items & Recommendations
-                  </Typography>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} md={4}>
-                      {transactions?.overview?.overdueExpenses.length > 0 && (
-                        <Box
-                          p={3}
-                          sx={{
-                            backgroundColor: '#ffebee',
-                            borderRadius: 2,
-                            border: '1px solid #ffcdd2',
-                            boxShadow: '0 4px 12px rgba(211, 47, 47, 0.15)',
-                            transition: 'transform 0.2s ease',
-                            '&:hover': { transform: 'translateY(-2px)' },
-                          }}
-                        >
-                          <Box
-                            display="flex"
-                            alignItems="center"
-                            gap={1}
-                            mb={1}
-                          >
-                            <Box
-                              sx={{
-                                width: 8,
-                                height: 8,
-                                borderRadius: '50%',
-                                backgroundColor: '#d32f2f',
-                              }}
-                            />
-                            <Typography
-                              variant="subtitle1"
-                              fontWeight="bold"
-                              color="#c62828"
-                            >
-                              Urgent: Overdue Payments
-                            </Typography>
-                          </Box>
-                          <Typography variant="body2" color="#7f1d1d" mb={1}>
-                            {transactions?.overview?.overdueExpenses.length}{' '}
-                            payments are overdue. Total amount: $
-                            {transactions?.overview?.overdueAmount?.toFixed(2)}
-                          </Typography>
-                          <Typography
-                            variant="caption"
-                            color="#d32f2f"
-                            fontWeight="600"
-                          >
-                            Oldest overdue:{' '}
-                            {Math.abs(
-                              moment(
-                                transactions?.overview?.overdueExpenses[
-                                  transactions?.overview?.overdueExpenses
-                                    .length - 1
-                                ]?.date,
-                              ).diff(moment(), 'days'),
-                            )}{' '}
-                            days
-                          </Typography>
-                        </Box>
-                      )}
-                    </Grid>
-                    <Grid item xs={12} md={4}>
-                      <Box
-                        p={3}
-                        sx={{
-                          backgroundColor: '#fff3e0',
-                          borderRadius: 2,
-                          border: '1px solid #ffcc02',
-                          boxShadow: '0 4px 12px rgba(245, 124, 0, 0.15)',
-                          transition: 'transform 0.2s ease',
-                          '&:hover': { transform: 'translateY(-2px)' },
-                        }}
-                      >
-                        <Box display="flex" alignItems="center" gap={1} mb={1}>
-                          <Box
-                            sx={{
-                              width: 8,
-                              height: 8,
-                              borderRadius: '50%',
-                              backgroundColor: '#f57c00',
-                            }}
-                          />
-                          <Typography
-                            variant="subtitle1"
-                            fontWeight="bold"
-                            color="#e65100"
-                          >
-                            Review: High Spending
-                          </Typography>
-                        </Box>
-                        <Typography variant="body2" color="#bf360c" mb={1}>
-                          {transactions?.overview?.thisMonthExpensesPercentage}%
-                          increase in spending this month
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          color="#f57c00"
-                          fontWeight="600"
-                        >
-                          Consider budget review
-                        </Typography>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={12} md={4}>
-                      <Box
-                        p={3}
-                        sx={{
-                          backgroundColor: '#e8f5e8',
-                          borderRadius: 2,
-                          border: '1px solid #c8e6c9',
-                          boxShadow: '0 4px 12px rgba(56, 142, 60, 0.15)',
-                          transition: 'transform 0.2s ease',
-                          '&:hover': { transform: 'translateY(-2px)' },
-                        }}
-                      >
-                        <Box display="flex" alignItems="center" gap={1} mb={1}>
-                          <Box
-                            sx={{
-                              width: 8,
-                              height: 8,
-                              borderRadius: '50%',
-                              backgroundColor: '#388e3c',
-                            }}
-                          />
-                          <Typography
-                            variant="subtitle1"
-                            fontWeight="bold"
-                            color="#2e7d32"
-                          >
-                            Opportunity: Bulk Discount
-                          </Typography>
-                        </Box>
-                        <Typography variant="body2" color="#1b5e20" mb={1}>
-                          Regular high-volume purchases detected
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          color="#388e3c"
-                          fontWeight="600"
-                        >
-                          Negotiate better rates
-                        </Typography>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                </ShadowSection>
-              </Grid> */}
-
               {/* Recent Transactions Table */}
               <Grid item xs={12}>
                 <ShadowSection>
+                  <Tabs
+                    value={tabIndex}
+                    onChange={(e, value) => setTabIndex(value)}
+                  >
+                    <Tab label="Transactions" value="transactions" />
+                    <Tab label="Cheques" value="cheques" />
+                  </Tabs>
                   <Box
                     display="flex"
                     alignItems="center"
@@ -1081,7 +843,7 @@ export default function CardManagement() {
                       fontWeight="bold"
                       color={blueGrey[800]}
                     >
-                      Recent Transactions with {currentMethod?.name}
+                      {tabIndex === 'transactions' ? 'Transactions' : 'Cheques'}
                     </Typography>
                     <Box display="flex" alignItems="center" gap={2}>
                       {AddExpenseButton}
@@ -1181,7 +943,8 @@ export default function CardManagement() {
                     </Box>
                   </Box>
 
-                  <TransactionsTable
+                  {tabIndex === 'transactions' ? (
+                    <TransactionsTable
                     transactions={displayedTransactions || []}
                     handleUpdateStatus={handleUpdateStatus}
                     showNotification={showNotification}
@@ -1190,11 +953,17 @@ export default function CardManagement() {
                     handleSelectAll={handleSelectAll}
                     adminsAndDrivers={adminsAndDrivers}
                   />
+                  ) : (
+                    <MergeChequeTable
+                      mergeCheques={mergeCheques || []}
+                    />
+                  )}
                 </ShadowSection>
               </Grid>
             </Grid>
           </>
         ) : (
+          // non vendor expense dashboard
           <>
             <Grid container spacing={2} sx={{ height: 200 }}>
               <Grid item xs={12} md={8}>

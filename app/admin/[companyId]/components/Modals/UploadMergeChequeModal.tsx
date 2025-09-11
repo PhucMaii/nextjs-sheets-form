@@ -1,5 +1,4 @@
 import {
-  AlertColor,
   Box,
   Card,
   CardContent,
@@ -33,6 +32,7 @@ import { ShowNotificationType } from '@/hooks/useNotification';
 import SelectDateRange from '../Select/SelectDateRange';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import DateRange from './DateRangeModal';
+import { formatNumberWith2Decimal } from '@/app/utils/number';
 
 interface IProps extends ModalProps {
   showNotification: ShowNotificationType;
@@ -67,7 +67,6 @@ export default function UploadMergeChequeModal({
   const [chequeData, setChequeData] = useState({
     chequeNumber: '',
     amount: 0,
-    description: '',
   });
   const [forDateRange, setForDateRange] = useState<Date[]>([
     startDate,
@@ -135,7 +134,6 @@ export default function UploadMergeChequeModal({
       setChequeData({
         chequeNumber: '',
         amount: 0,
-        description: '',
       });
     }
   }, [open]);
@@ -158,7 +156,7 @@ export default function UploadMergeChequeModal({
     }
     setChequeData((prev) => ({
       ...prev,
-      amount: transactionStats.selectedAmount,
+      amount: formatNumberWith2Decimal(transactionStats.selectedAmount),
     }));
   }, [transactionStats.selectedAmount]);
 
@@ -215,12 +213,15 @@ export default function UploadMergeChequeModal({
     setIsLoading(true);
     try {
       const response = await axios.post(
-        getAdminApiUrl(companyId, '/merge-cheque'),
+        getAdminApiUrl(companyId, '/cheque/merge-cheque'),
         {
-          ...chequeData,
+          chequeNumber: chequeData.chequeNumber,
+          amount: formatNumberWith2Decimal(chequeData.amount),
           vendorId: vendor.id,
-          transactionIds: selectedTransactions,
-          fileKey: chequeFile,
+          transactionIds: selectedTransactions.map((t) => t.id),
+          fileKeyFront: chequeFile,
+          startDate: dayjs(forDateRange[0]).format('MM/DD/YYYY'),
+          endDate: dayjs(forDateRange[1]).format('MM/DD/YYYY'),
         },
       );
 
@@ -400,7 +401,7 @@ export default function UploadMergeChequeModal({
                   <Typography>Cheque File</Typography>
                   {chequeFile && <DisplayFile fileKey={chequeFile} isCheque />}
                   <PresignedFileUpload
-                    location={`cheques/vendor/${vendor?.name || 'temp'}/${startDate}to${endDate}`}
+                    location={`cheques/vendor/${vendor?.name || 'temp'}/${dayjs(forDateRange[0]).format('MM-DD-YYYY')}to${dayjs(forDateRange[1]).format('MM-DD-YYYY')}`}
                     isCheque={true}
                     maxFiles={1}
                     maxSize={10 * 1024 * 1024} // 10MB
