@@ -489,6 +489,7 @@ export default function CardManagement() {
           vendor={uploadMergeChequeProps.vendor}
           startDate={dateRange[0]}
           endDate={dateRange[1]}
+          mutateMergeCheques={mutateMergeCheques}
         />
       )}
       <LoadingModal open={isUpdating} />
