@@ -148,6 +148,7 @@ export interface Order {
   delivery?: any;
   startTripAt?: string;
   enteredOrderAt?: string;
+  isCODCheck?: boolean;
 }
 
 const ORDER_PER_PAGE = 10;
