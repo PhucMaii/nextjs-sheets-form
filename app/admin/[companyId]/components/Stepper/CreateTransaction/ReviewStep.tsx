@@ -31,7 +31,6 @@ export default function ReviewStep({
   smallExpenses: any;
 }) {
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
-  console.log(formData, 'formData');
   return (
     <Fade in timeout={500}>
       <Box>
@@ -58,7 +57,7 @@ export default function ReviewStep({
                   <Typography variant="body1" fontWeight="medium">
                     {transactionType === 'stock'
                       ? 'Stock Purchase'
-                      : 'Other Expense'}
+                      : formData?.type?.name|| 'Other Expense'}
                   </Typography>
                 </Grid>
                 <Grid item xs={6}>

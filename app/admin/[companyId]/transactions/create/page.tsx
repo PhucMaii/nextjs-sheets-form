@@ -376,6 +376,7 @@ export default function CreateTransaction() {
           spentBy: formData.spentBy,
           date: YYYYMMDDFormat(selectedDate.toDate()),
           paymentMethodId: formData.paymentMethodId,
+          typeId: formData.typeId > 0 ? formData.typeId : null,
           status: formData.status,
           discount: formData.discount,
           frontFileKey: formData?.isFrontCheque ? formData?.frontFileKey : null,

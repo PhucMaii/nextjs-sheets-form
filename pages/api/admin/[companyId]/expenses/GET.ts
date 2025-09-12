@@ -41,6 +41,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     // console.log(listOfDateString, 'listOfDateString');
 
+    // Fetch all expenses for the date range
     if (!id || Number(id) <= 0) {
       const expenses = await getTransactions({
         date: {
@@ -300,6 +301,7 @@ const getTransactions = async (condition: any) => {
           vendor: true,
         },
       },
+      type: true,
       cheques: true,
       codBoard: true,
       orderedItems: {

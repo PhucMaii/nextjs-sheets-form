@@ -24,7 +24,14 @@ import KPICard from '../components/Overview/KPICard';
 import PaidIcon from '@mui/icons-material/Paid';
 import { CardStyled } from '../components/OverviewCard/styled';
 import Image from 'next/image';
-import { CheckIcon, FilterIcon, Nfc, UploadIcon } from 'lucide-react';
+import {
+  CheckIcon,
+  EditIcon,
+  FilterIcon,
+  Nfc,
+  Trash2Icon,
+  UploadIcon,
+} from 'lucide-react';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import AreaChart from '../components/Charts/AreaChart';
 import { ShadowSection } from '../reports/styled';
@@ -48,8 +55,6 @@ import {
 import PaymentsIcon from '@mui/icons-material/Payments';
 import ErrorComponent from '../components/ErrorComponent';
 import { normalizeDate } from '@/pages/api/utils/date';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
 import EditPaymentMethod from '../components/Modals/edit/EditPaymentMethod';
 import axios from 'axios';
 import DeleteModal from '../components/Modals/delete/DeleteModal';
@@ -61,7 +66,9 @@ import UploadMergeChequeModal from '../components/Modals/UploadMergeChequeModal'
 import MergeChequeTable from '../components/Tables/MergeChequeTable';
 import { useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
-import SingleFieldEdit from '../components/Modals/edit/SingleFieldEdit';
+import AddTypeModal from '../components/Modals/edit/SingleFieldEdit';
+import EditTypeModal from '../components/Modals/edit/SingleFieldEdit';
+import ConfirmModal from '../components/Modals/ConfirmModal';
 
 const SpendingItem = ({
   item,
@@ -118,6 +125,14 @@ export default function CardManagement() {
     IPaymentMethod | any | null
   >(null);
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
+  const [editTypeProps, setEditTypeProps] = useState<any>({
+    open: false,
+    type: null,
+  });
+  const [deleteTypeProps, setDeleteTypeProps] = useState<any>({
+    open: false,
+    type: null,
+  });
   const [isOpenAddTypeModal, setIsOpenAddTypeModal] = useState<boolean>(false);
   const [openModal, setOpenModal] = useState<any>({
     addModal: false,
@@ -381,7 +396,7 @@ export default function CardManagement() {
     if (
       selectedViewObj.type === VIEW_TYPE.CUSTOM_PURCHASED ||
       selectedViewObj.type === VIEW_TYPE.STOCK_PURCHASED ||
-      selectedViewObj.type === VIEW_TYPE.FIXED_TRANSACTION ||   
+      selectedViewObj.type === VIEW_TYPE.FIXED_TRANSACTION ||
       selectedViewObj.type === VIEW_TYPE.EXPENSE_TYPE
     ) {
       return {
@@ -477,6 +492,50 @@ export default function CardManagement() {
     }
   };
 
+  const handleDeleteType = async (type: IExpenseType) => {
+    try {
+      const response = await axios.delete(
+        getAdminApiUrl(companyId, `/expenses/type?id=${type.id}`),
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      mutateExpenseTypes();
+      showNotification('success', response.data.message);
+      setDeleteTypeProps({ open: false, type: null });
+    } catch (error: any) {
+      console.log('Fail to delete type: ', error);
+      showNotification('error', 'Fail to delete type. Please try again later.');
+    }
+  };
+
+  const handleEditType = async (updateName: string) => {
+    try {
+      const response = await axios.put(
+        getAdminApiUrl(companyId, '/expenses/type'),
+        {
+          id: editTypeProps.type.id,
+          newName: updateName,
+        },
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      mutateExpenseTypes();
+      showNotification('success', response.data.message);
+      setEditTypeProps({ open: false, type: null });
+    } catch (error: any) {
+      console.log('Fail to edit type: ', error);
+      showNotification('error', 'Fail to edit type. Please try again later.');
+    }
+  };
+
   const handleSelectAll = () => {
     if (!transactions) {
       return;
@@ -556,7 +615,7 @@ export default function CardManagement() {
         }
       />
 
-      <SingleFieldEdit
+      <AddTypeModal
         open={isOpenAddTypeModal}
         onClose={() => setIsOpenAddTypeModal(false)}
         handleUpdate={handleAddType}
@@ -565,6 +624,29 @@ export default function CardManagement() {
         inputLabel="Type"
         buttonLabel="Add"
       />
+
+      {deleteTypeProps.type && (
+        <ConfirmModal
+          open={deleteTypeProps.open}
+          onClose={() => setDeleteTypeProps({ open: false, type: null })}
+          title={`Are you sure to delete ${deleteTypeProps.type?.name} ?`}
+          handleSubmit={() => handleDeleteType(deleteTypeProps.type)}
+          showNotification={showNotification}
+          color="error"
+        />
+      )}
+
+      {editTypeProps.type && (
+        <EditTypeModal
+          open={editTypeProps.open}
+          onClose={() => setEditTypeProps({ open: false, type: null })}
+          handleUpdate={handleEditType}
+          title={`Edit ${editTypeProps.type?.name} ?`}
+          renderField="name"
+          inputLabel="Type"
+          buttonLabel="Edit"
+        />
+      )}
 
       <Box
         display="flex"
@@ -616,7 +698,7 @@ export default function CardManagement() {
                   selectedViewObj.type === VIEW_TYPE.ALL
                 }
               >
-                <DeleteIcon />
+                <Trash2Icon />
               </IconButton>
             </Box>
           </Box>
@@ -679,8 +761,35 @@ export default function CardManagement() {
                       type: VIEW_TYPE.EXPENSE_TYPE,
                       id: type.id,
                     })}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
                   >
                     {type.name}
+                    <Box display="flex" alignItems="center">
+                      <IconButton
+                        color="primary"
+                        size="small"
+                        onClick={() =>
+                          setEditTypeProps({ open: true, type: type })
+                        }
+                      >
+                        <EditIcon size={12} />
+                      </IconButton>
+                      <IconButton
+                        color="error"
+                        size="small"
+                        onClick={(e: any) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          setDeleteTypeProps({ open: true, type: type });
+                        }}
+                      >
+                        <Trash2Icon size={12} />
+                      </IconButton>
+                    </Box>
                   </MenuItem>
                 ))}
               <MenuItem
