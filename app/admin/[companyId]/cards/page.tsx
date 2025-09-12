@@ -17,7 +17,7 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import { blueGrey } from '@mui/material/colors';
+import { blueGrey, grey } from '@mui/material/colors';
 import SelectDateRange from '../components/Select/SelectDateRange';
 import { generateListOfDateString, generateMonthRange } from '@/app/utils/time';
 import KPICard from '../components/Overview/KPICard';
@@ -39,7 +39,12 @@ import {
   VIEW_TYPE,
   getAdminApiUrl,
 } from '@/app/utils/enum';
-import { IExpense, IPaymentMethod, IVendor } from '@/app/utils/type';
+import {
+  IExpense,
+  IExpenseType,
+  IPaymentMethod,
+  IVendor,
+} from '@/app/utils/type';
 import PaymentsIcon from '@mui/icons-material/Payments';
 import ErrorComponent from '../components/ErrorComponent';
 import { normalizeDate } from '@/pages/api/utils/date';
@@ -56,6 +61,7 @@ import UploadMergeChequeModal from '../components/Modals/UploadMergeChequeModal'
 import MergeChequeTable from '../components/Tables/MergeChequeTable';
 import { useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
+import SingleFieldEdit from '../components/Modals/edit/SingleFieldEdit';
 
 const SpendingItem = ({
   item,
@@ -112,6 +118,7 @@ export default function CardManagement() {
     IPaymentMethod | any | null
   >(null);
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
+  const [isOpenAddTypeModal, setIsOpenAddTypeModal] = useState<boolean>(false);
   const [openModal, setOpenModal] = useState<any>({
     addModal: false,
     editModal: false,
@@ -161,11 +168,24 @@ export default function CardManagement() {
     queryKey: ['mergeCheques', selectedViewObj.id, dateRange[0], dateRange[1]],
     queryFn: async () => {
       const response = await axios.get(
-        getAdminApiUrl(companyId, `/cheque/merge-cheque?vendorId=${selectedViewObj.id}&year=${dayjs(dateRange[0]).format('YYYY')}`),
+        getAdminApiUrl(
+          companyId,
+          `/cheque/merge-cheque?vendorId=${selectedViewObj.id}&year=${dayjs(dateRange[0]).format('YYYY')}`,
+        ),
       );
       return response.data.data || [];
     },
     enabled: !!selectedViewObj.id,
+  });
+
+  const { data: expenseTypes, refetch: mutateExpenseTypes } = useQuery({
+    queryKey: ['expenseTypes', companyId],
+    queryFn: async () => {
+      const response = await axios.get(
+        getAdminApiUrl(companyId, '/expenses/type'),
+      );
+      return response.data.data || [];
+    },
   });
 
   const listOfDateString = useMemo(() => {
@@ -333,15 +353,6 @@ export default function CardManagement() {
     setVendors(vendors);
   };
 
-  // useEffect(() => {
-  //   fetchAdminsAndDrivers();
-  // }, []);
-
-  // const fetchAdminsAndDrivers = async () => {
-  //   const users: any = await getAdminsAndDrivers(showNotification);
-  //   setAdminsAndDrivers(users);
-  // };
-
   const getPaymentMethod = () => {
     if (selectedViewObj.id === -1) {
       return null;
@@ -370,7 +381,8 @@ export default function CardManagement() {
     if (
       selectedViewObj.type === VIEW_TYPE.CUSTOM_PURCHASED ||
       selectedViewObj.type === VIEW_TYPE.STOCK_PURCHASED ||
-      selectedViewObj.type === VIEW_TYPE.FIXED_TRANSACTION
+      selectedViewObj.type === VIEW_TYPE.FIXED_TRANSACTION ||   
+      selectedViewObj.type === VIEW_TYPE.EXPENSE_TYPE
     ) {
       return {
         id: -1,
@@ -379,7 +391,11 @@ export default function CardManagement() {
             ? 'Custom Purchased'
             : selectedViewObj.type === VIEW_TYPE.STOCK_PURCHASED
               ? 'Stock Purchased'
-              : 'Fixed Transaction',
+              : selectedViewObj.type === VIEW_TYPE.FIXED_TRANSACTION
+                ? 'Fixed Transaction'
+                : selectedViewObj.type === VIEW_TYPE.EXPENSE_TYPE
+                  ? 'Expense Type'
+                  : 'Other Purchased',
         type: selectedViewObj.type,
         transactions: [],
         balance: 0,
@@ -403,6 +419,26 @@ export default function CardManagement() {
       updatedBy: null,
       updatedAt: null,
     };
+  };
+
+  const handleAddType = async (type: string) => {
+    try {
+      const response = await axios.post(
+        getAdminApiUrl(companyId, '/expenses/type'),
+        { type },
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      mutateExpenseTypes();
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('Fail to add type: ', error);
+      showNotification('error', 'Fail to add type. Please try again later.');
+    }
   };
 
   const handleDeleteMethod = async (targetMethod: IPaymentMethod) => {
@@ -520,6 +556,16 @@ export default function CardManagement() {
         }
       />
 
+      <SingleFieldEdit
+        open={isOpenAddTypeModal}
+        onClose={() => setIsOpenAddTypeModal(false)}
+        handleUpdate={handleAddType}
+        title="Add Type"
+        renderField="name"
+        inputLabel="Type"
+        buttonLabel="Add"
+      />
+
       <Box
         display="flex"
         flexDirection="column"
@@ -583,7 +629,9 @@ export default function CardManagement() {
           >
             <Select
               value={JSON.stringify(selectedViewObj)}
-              onChange={(e) => setSelectedViewObj(JSON.parse(e.target.value))}
+              onChange={(e) =>
+                setSelectedViewObj(JSON.parse(e?.target?.value || '{}'))
+              }
               size="small"
             >
               <MenuItem disabled value={JSON.stringify({ type: null, id: -1 })}>
@@ -623,14 +671,41 @@ export default function CardManagement() {
               >
                 Fixed Transaction
               </MenuItem>
+              {expenseTypes &&
+                expenseTypes.map((type: IExpenseType) => (
+                  <MenuItem
+                    key={type.id}
+                    value={JSON.stringify({
+                      type: VIEW_TYPE.EXPENSE_TYPE,
+                      id: type.id,
+                    })}
+                  >
+                    {type.name}
+                  </MenuItem>
+                ))}
               <MenuItem
                 value={JSON.stringify({
                   type: VIEW_TYPE.CUSTOM_PURCHASED,
                   id: 1,
                 })}
               >
-                Custom Purchased
+                Other Purchased
               </MenuItem>
+              <Box
+                sx={{
+                  width: '100%',
+                  ml: 2,
+                  display: 'flex',
+                  justifyContent: 'flex-start',
+                }}
+              >
+                <Button
+                  sx={{ color: grey[800], fontWeight: 600 }}
+                  onClick={() => setIsOpenAddTypeModal(true)}
+                >
+                  + Add Type
+                </Button>
+              </Box>
               <Divider />
               <ListSubheader>Vendors</ListSubheader>
               {vendors &&
@@ -947,14 +1022,14 @@ export default function CardManagement() {
 
                   {tabIndex === 'transactions' ? (
                     <TransactionsTable
-                    transactions={displayedTransactions || []}
-                    handleUpdateStatus={handleUpdateStatus}
-                    showNotification={showNotification}
-                    selectedExpense={selectedExpenses}
-                    handleSelectExpense={handleSelectExpense}
-                    handleSelectAll={handleSelectAll}
-                    adminsAndDrivers={adminsAndDrivers}
-                  />
+                      transactions={displayedTransactions || []}
+                      handleUpdateStatus={handleUpdateStatus}
+                      showNotification={showNotification}
+                      selectedExpense={selectedExpenses}
+                      handleSelectExpense={handleSelectExpense}
+                      handleSelectAll={handleSelectAll}
+                      adminsAndDrivers={adminsAndDrivers}
+                    />
                   ) : (
                     <MergeChequeTable
                       mergeCheques={mergeCheques || []}

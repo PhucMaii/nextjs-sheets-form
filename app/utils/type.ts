@@ -10,6 +10,7 @@ import {
   Driver,
   Employee,
   Expense,
+  ExpenseType,
   Fifo,
   FixedTransaction,
   InventoryItem,
@@ -401,4 +402,8 @@ export interface IMergeCheque {
     amount: number;
     date: string;
   }>;
+}
+
+export interface IExpenseType extends ExpenseType {
+  transactions: IExpense[];
 }

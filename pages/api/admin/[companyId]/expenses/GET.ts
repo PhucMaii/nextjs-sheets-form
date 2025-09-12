@@ -94,13 +94,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     let expenses = [];
 
     if (type && type === VIEW_TYPE.VENDOR) {
-      console.log('listOfDateString', listOfDateString);
       expenses = await getExpenseWithVendorId(Number(id), {
         date: {
           in: listOfDateString,
         },
       });
-      console.log('expenses', expenses);
     } else if (type && type === VIEW_TYPE.STOCK_PURCHASED) {
       const stockPurchased = await getTransactions({
         date: {
@@ -128,6 +126,14 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       });
 
       expenses = [...stockPurchased];
+    } else if (type && type === VIEW_TYPE.EXPENSE_TYPE) {
+      expenses = await getTransactions({
+        date: {
+          in: listOfDateString,
+        },
+        typeId: Number(id),
+        companyId: Number(companyId),
+      });
     } else if (type && type === VIEW_TYPE.FIXED_TRANSACTION) {
       const fixedTransaction = await getTransactions({
         date: {

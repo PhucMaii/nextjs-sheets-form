@@ -53,6 +53,7 @@ model Company {
   deliveries        Delivery[]
   medias            Media[]
   batchTransactions BatchTransaction[]
+  expenseTypes      ExpenseType[]
 }
 
 model PageView {
@@ -593,6 +594,7 @@ model Expense {
   status             String?
   paidAt             String?
 
+  typeId             Int?
   fixedTransactionId Int?
   companyId          Int?
   batchTransactionId  Int?
@@ -603,6 +605,7 @@ model Expense {
   company          Company?          @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   batchTransaction  BatchTransaction?  @relation(fields: [batchTransactionId], references: [id], onDelete: Cascade)
   mergeCheque      Cheque?           @relation(fields: [mergeChequeId], references: [id])
+  type             ExpenseType?      @relation(fields: [typeId], references: [id])
 
   orderedItems     OrderedItems[]
   vendors          VendorExpense[]
@@ -611,6 +614,15 @@ model Expense {
   payrolls         Payroll[]
   cheques          Media[]
   fixedTransaction FixedTransaction? @relation(fields: [fixedTransactionId], references: [id])
+}
+
+model ExpenseType {
+  id             Int      @id    @default(autoincrement())
+  name           String
+  companyId      Int
+
+  transactions   Expense[]
+  company        Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
 }
 
 model BatchTransaction {
