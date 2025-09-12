@@ -340,6 +340,7 @@ model Orders {
   hasSubtractInventory Boolean?
   enteredOrderAt       String?
   reassignmentId       Int?
+  isCODCheck           Boolean?
 
   delivery Delivery? @relation("OrderDelivery")
 
