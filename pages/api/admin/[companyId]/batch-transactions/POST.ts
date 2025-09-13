@@ -47,6 +47,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         description: batchTransaction.description,
         companyId: Number(companyId),
         status: batchTransaction.status,
+        typeId: batchTransaction?.typeId,
       },
     });
 
@@ -66,6 +67,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         companyId: Number(companyId),
         paymentMethodId: createdBatchTransaction?.paymentMethodId || 0,
         batchTransactionId: createdBatchTransaction.id,
+        typeId: createdBatchTransaction?.typeId || 0,
         status: createdBatchTransaction?.status || TRANSACTION_STATUS.UNPAID,
       })),
     });

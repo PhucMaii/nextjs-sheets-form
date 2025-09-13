@@ -47,6 +47,7 @@ import {
   getAdminApiUrl,
 } from '@/app/utils/enum';
 import {
+  IBatchTransaction,
   IExpense,
   IExpenseType,
   IPaymentMethod,
@@ -219,8 +220,8 @@ export default function CardManagement() {
       return 0;
     }
 
-    return transactions?.data?.reduce((acc: number, transaction: IExpense) => {
-      return acc + transaction.amount;
+    return transactions?.data?.reduce((acc: number, transaction: any) => {
+      return acc + (transaction?.amount || transaction?.total);
     }, 0);
   }, [transactions]);
 

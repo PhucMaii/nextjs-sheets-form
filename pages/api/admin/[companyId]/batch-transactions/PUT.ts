@@ -25,6 +25,7 @@ interface IBody {
   frontFileType?: string;
   backFileKey?: string;
   backFileType?: string;
+  typeId?: number;
 }
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -48,6 +49,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       frontFileType,
       backFileKey,
       backFileType,
+      typeId,
     }: IBody = req.body;
 
     const existingBatchTransaction = await prisma.batchTransaction.findUnique({
@@ -76,6 +78,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         description,
         startDate,
         endDate,
+        typeId,
       },
       include: {
         transactions: true,
@@ -104,14 +107,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       // New Small Expense
       if (!existingSmallExpense) {
-        newSmallExpenses.push(expense);
+        newSmallExpenses.push({...expense, typeId: updatedBatchTransaction?.typeId});
         continue;
       }
 
       // Check if there is any change in the small expense
       if (
         existingSmallExpense.amount !== expense.amount ||
-        existingSmallExpense.subTotal !== expense.subTotal
+        existingSmallExpense.subTotal !== expense.subTotal ||
+        existingBatchTransaction?.typeId !== updatedBatchTransaction?.typeId
       ) {
         await prisma.expense.update({
           where: { id: existingSmallExpense.id },
@@ -120,6 +124,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             subTotal: expense.subTotal,
             GST: expense?.GST || 0,
             PST: expense?.PST || 0,
+            typeId: updatedBatchTransaction?.typeId,
           },
         });
       }

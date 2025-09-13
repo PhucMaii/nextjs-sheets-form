@@ -614,6 +614,11 @@ model Expense {
   payrolls         Payroll[]
   cheques          Media[]
   fixedTransaction FixedTransaction? @relation(fields: [fixedTransactionId], references: [id])
+
+  @@index([date])
+  @@index([typeId])
+  @@index([paymentMethodId])
+  @@index([companyId])
 }
 
 model ExpenseType {
@@ -622,6 +627,8 @@ model ExpenseType {
   companyId      Int
 
   transactions   Expense[]
+  batchTransactions  BatchTransaction[]
+  
   company        Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
 }
 
@@ -642,12 +649,17 @@ model BatchTransaction {
   spentBy         String
   paymentMethodId Int
   status          PaymentStatus?
+  typeId          Int?
 
   transactions    Expense[]
   cheques         Media[]
 
   company         Company?  @relation(fields: [companyId], references: [id])
   paymentMethod   PaymentMethod @relation(fields: [paymentMethodId], references: [id])
+  type            ExpenseType?   @relation(fields: [typeId], references: [id])
+
+  @@index([date])
+  @@index([typeId])
 }
 
 model VendorExpense {
@@ -657,6 +669,9 @@ model VendorExpense {
   vendor    Vendor  @relation(fields: [vendorId], references: [id], onDelete: Cascade)
 
   @@id([expenseId, vendorId])
+
+  @@index([vendorId])
+  @@index([expenseId])
 }
 
 model Vendor {

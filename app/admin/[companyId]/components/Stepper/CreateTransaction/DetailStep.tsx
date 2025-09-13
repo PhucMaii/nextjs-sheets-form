@@ -197,6 +197,7 @@ export default function DetailStep({
         total: totalPerMonth,
         GST: gstPerMonth,
         PST: pstPerMonth,
+        typeId: formData?.typeId || -1,
       }));
 
       setSmallExpenses(newSmallExpenses);
@@ -609,38 +610,40 @@ export default function DetailStep({
               </FormControl>
             </Grid>
 
-            <Grid item xs={12}>
-              <FormControl fullWidth>
-                <InputLabel htmlFor="assign-type" id="assign-type-label">
-                  Assign Type
-                </InputLabel>
-                <Select
-                  labelId="assign-type-label"
-                  id="assign-type"
-                  aria-labelledby="assign-type-label"
-                  value={formData.typeId}
-                  label="Assign Type"
-                  fullWidth
-                  onChange={(e) => {
-                    setFormData((prev: any) => ({
-                      ...prev,
-                      typeId: Number(e.target.value),
-                      type: expenseTypes?.find(
-                        (type: IExpenseType) =>
-                          type.id === Number(e.target.value),
-                      ),
-                    }));
-                  }}
-                >
-                  <MenuItem value={-1}>N/A</MenuItem>
-                  {expenseTypes?.map((type: IExpenseType) => (
-                    <MenuItem key={type.id} value={type.id}>
-                      {type.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
+            {transactionType !== 'stock' && (
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel htmlFor="assign-type" id="assign-type-label">
+                    Assign Type
+                  </InputLabel>
+                  <Select
+                    labelId="assign-type-label"
+                    id="assign-type"
+                    aria-labelledby="assign-type-label"
+                    value={formData.typeId}
+                    label="Assign Type"
+                    fullWidth
+                    onChange={(e) => {
+                      setFormData((prev: any) => ({
+                        ...prev,
+                        typeId: Number(e.target.value),
+                        type: expenseTypes?.find(
+                          (type: IExpenseType) =>
+                            type.id === Number(e.target.value),
+                        ),
+                      }));
+                    }}
+                  >
+                    <MenuItem value={-1}>N/A</MenuItem>
+                    {expenseTypes?.map((type: IExpenseType) => (
+                      <MenuItem key={type.id} value={type.id}>
+                        {type.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+            )}
 
             <Grid item xs={12}>
               <TextField

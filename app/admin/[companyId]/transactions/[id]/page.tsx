@@ -419,6 +419,7 @@ export default function EditTransaction() {
           GST: transactionData.GST,
           PST: transactionData.PST,
           spentBy: transactionData.spentBy,
+          typeId: transactionData.typeId > 0 ? transactionData.typeId : null,
           date: dayjs(selectedDate).format('MM/DD/YYYY'),
           paymentMethodId: transactionData.paymentMethodId,
           status: transactionData.status,
