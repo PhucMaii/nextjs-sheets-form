@@ -102,18 +102,20 @@ export default function DisplayFile({
           style={{
             width: width || '100px',
             height: height || '100px',
+            objectFit: 'contain',
             ...style,
           }}
-          objectFit="cover"
           onClick={onClick}
           onError={(e) => {
             console.error('DisplayFile: Image failed to load. URL:', url, 'FileKey:', fileKey, 'Event:', e);
             setError('Failed to load image');
           }}
-          width={100}
-          height={100}
+          width={0}
+          height={0}
+          sizes="100vw"
+          quality={95}
           loading="lazy"
-          // unoptimized={true}
+          unoptimized={true}
         />
       )}
     </>

@@ -31,7 +31,7 @@ export function createTheme() {
       },
       MuiTextField: {
         defaultProps: {
-          size: 'small', // Set default size to 'small'
+          size: 'small',
         },
       },
       MuiOutlinedInput: {
