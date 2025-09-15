@@ -177,10 +177,10 @@ export default function OrderComponent({
             open: false,
           })
         }
+        showNotification={showNotification}
         order={order}
         onConfirm={handleUpdateStatus}
         updatedStatus={confirmDeliveryModalProps.updatedStatus}
-        // showNotification={showNotification}
       />
       <ViewImg
         open={viewImgProps.open}

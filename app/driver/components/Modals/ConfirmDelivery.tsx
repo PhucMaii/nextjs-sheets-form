@@ -5,6 +5,7 @@ import { Order } from '@/app/admin/[companyId]/orders/page';
 import { PresignedFileUpload } from '@/app/components/PresignedFileUpload';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { YYYYMMDDFormat } from '@/app/utils/time';
+import { ShowNotificationType } from '@/hooks/useNotification';
 // import { ShowNotificationType } from '@/hooks/useNotification';
 import { Box, Button, IconButton, Modal, Typography } from '@mui/material';
 import { XIcon } from 'lucide-react';
@@ -18,7 +19,7 @@ interface IProps extends ModalProps {
     fileKey: string | null,
   ) => Promise<void>;
   updatedStatus: ORDER_STATUS;
-  // showNotification: ShowNotificationType;
+  showNotification: ShowNotificationType;
 }
 
 const ConfirmDelivery = ({
@@ -27,9 +28,10 @@ const ConfirmDelivery = ({
   order,
   onConfirm,
   updatedStatus,
-  // showNotification,
+  showNotification,
 }: IProps) => {
   const [fileKey, setFileKey] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState({
     confirm: false,
     confirmWithImg: false,
@@ -41,16 +43,17 @@ const ConfirmDelivery = ({
 
   // Reset fileKey when modal is closed
   useEffect(() => {
-    if (!open) {
+    if (open) {
       setFileKey(null);
     }
   }, [open]);
 
   const handleConfirm = async (fileKey: string | null = null) => {
-    // if (!fileKey) {
-    //   showNotification('error', 'Please upload the proof');
-    //   return;
-    // }
+    if (isUploading && !fileKey) {
+      showNotification('error', 'Please wait for the proof to be uploaded');
+      return;
+    }
+
     setIsLoading({
       confirm: fileKey ? false : true,
       confirmWithImg: fileKey ? true : false,
@@ -58,6 +61,7 @@ const ConfirmDelivery = ({
     });
     await onConfirm(order.id, updatedStatus, fileKey);
     onClose();
+    setFileKey(null);
     setIsLoading({
       confirm: false,
       confirmWithImg: false,
@@ -85,7 +89,6 @@ const ConfirmDelivery = ({
   const handleUploadSuccess = (
     uploadedFiles: Array<{ fileKey: string; fileName: string }>,
   ) => {
-    console.log('File uploaded:', uploadedFiles);
     setFileKey(uploadedFiles[0].fileKey);
   };
 
@@ -104,12 +107,11 @@ const ConfirmDelivery = ({
         </Box>
 
         {fileKey && <DisplayFile fileKey={fileKey} />}
-        <Typography variant="subtitle2">
-          Upload Proof
-        </Typography>
+        <Typography variant="subtitle2">Upload Proof</Typography>
         <PresignedFileUpload
           location={`delivery-proof/${formattedDate}/${order.id}`}
           onUploadComplete={handleUploadSuccess}
+          handleFlagUpload={setIsUploading}
         />
 
         <Typography variant="h6" fontWeight={600} textAlign="center">
@@ -140,7 +142,7 @@ const ConfirmDelivery = ({
           </Button>
 
           <Button
-            disabled={isLoading.isLoading}
+            disabled={(isUploading && !fileKey) || isLoading.isLoading}
             fullWidth
             variant="contained"
             color={
