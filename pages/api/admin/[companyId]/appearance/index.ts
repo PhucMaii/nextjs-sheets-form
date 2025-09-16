@@ -85,8 +85,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(404).json({ error: 'No data found' });
     }
 
-    console.log(dbTypes, 'dbTypes');
-
     // Check and update types
     await checkAndUpdateContainers(updatedTypes, dbTypes, 'itemType', 'name');
 
@@ -132,8 +130,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           inventoryItems: items,
         };
       });
-
-    console.log(updatedPromotions, 'updatedPromotions');
 
     const dbPromotions = await prisma.promotion.findMany({
       where: {

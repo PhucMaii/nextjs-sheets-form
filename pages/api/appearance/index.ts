@@ -23,6 +23,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
       include: {
         items: {
+          where: {
+            OR: [{ isInternal: null }, { isInternal: false }],
+          },
           orderBy: {
             promoIndexPos: 'asc',
           },
@@ -53,6 +56,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
       include: {
         inventoryItems: {
+          where: {
+            OR: [{ isInternal: null }, { isInternal: false }],
+          },
           orderBy: {
             indexPos: 'asc',
           },
