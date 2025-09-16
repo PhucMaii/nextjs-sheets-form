@@ -39,8 +39,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       sellingItems,
     }: IBody = req.body;
 
-
-
     const { companyId }: IQuery = req.query;
 
     if (!companyId) {
