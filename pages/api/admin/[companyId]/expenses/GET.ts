@@ -93,7 +93,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
+    console.log(type, 'type');
+
     if (type && type === VIEW_TYPE.VENDOR) {
+      console.log(id, 'acccess to vendor');
       const expenses = await getExpenseWithVendorId(
         Number(id),
         {
@@ -103,6 +106,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
         true,
       );
+
+      console.log(expenses, 'expenses');
 
       const sortedExpensesByDate = expenses.expenses;
 
@@ -315,8 +320,8 @@ const getTransactions = async (
   condition: any,
   isIncludeBatchTransaction: boolean = false,
 ) => {
-  // Fetching single expense
-  if (Object.keys(condition).length === 1) {
+  // Fetching single expense - only use findUnique when we have an 'id' field
+  if (Object.keys(condition).length === 1 && condition.id) {
     const singleExpense = await prisma.expense.findUnique({
       where: { ...condition, batchTransactionId: null },
       include: {
