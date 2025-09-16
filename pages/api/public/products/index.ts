@@ -11,6 +11,11 @@ export default async function handler(req: any, res: any) {
     const products = await prisma.item.findMany({
       where: {
         categoryId: websiteItemCategory,
+        inventoryItem: {
+          isInternal: {
+            not: true,
+          },
+        },
       },
       include: {
         inventoryItem: true,

@@ -29,6 +29,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const items = await prisma.item.findMany({
       where: {
         categoryId: existingUser.categoryId,
+        inventoryItem: {
+          isInternal: {
+            not: true,
+          },
+        },
       },
       include: {
         inventoryItem: {

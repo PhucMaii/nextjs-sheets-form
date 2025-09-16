@@ -9,13 +9,14 @@ interface IQuery {
   vendorId?: string;
   inventoryItemId?: string;
   companyId?: string;
+  isInternal?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { vendorId, inventoryItemId, companyId }: IQuery = req.query;
+    const { vendorId, inventoryItemId, companyId, isInternal }: IQuery = req.query;
 
     if (vendorId) {
       const vendorItems = await prisma.vendorItem.findMany({
@@ -150,6 +151,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const inventory: any = await prisma.inventoryItem.findMany({
       where: {
         companyId: Number(companyId),
+        isInternal: isInternal === 'true' ? true : {
+          not: true,
+        },
       },
       include: {
         fifo: {

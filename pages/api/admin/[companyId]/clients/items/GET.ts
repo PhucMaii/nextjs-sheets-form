@@ -22,6 +22,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       where: {
         categoryId: Number(categoryId),
         companyId: Number(companyId),
+        inventoryItem: {
+          isInternal: {
+            not: true,
+          },
+        }
       },
       include: {
         inventoryItem: {
