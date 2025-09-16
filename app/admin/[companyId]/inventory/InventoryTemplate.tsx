@@ -820,21 +820,48 @@ const InventoryTemplate = ({
           <Grid item xs={12}>
             <Divider sx={{ my: 1 }} />
           </Grid>
-          <Grid item xs={12} textAlign="right">
+          <Grid
+            item
+            xs={12}
+            textAlign="right"
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              justifyContent: 'flex-end',
+            }}
+          >
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={newInventoryItem?.isShowInventory || false}
+                  checked={newInventoryItem?.isInternal || false}
                   onChange={(e) =>
                     setNewInventoryItem((prev: any) => ({
                       ...prev,
-                      isShowInventory: e.target.checked,
+                      isInternal: e.target.checked,
+                      isShowInventory: false,
                     }))
                   }
                 />
               }
-              label="Show Low Stock Quantity"
+              label="Internal Use Only"
             />
+           
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={newInventoryItem?.isShowInventory || false}
+                    onChange={(e) =>
+                      setNewInventoryItem((prev: any) => ({
+                        ...prev,
+                        isShowInventory: e.target.checked,
+                      }))
+                    }
+                  />
+                }
+                disabled={newInventoryItem?.isInternal}
+                label="Show Low Stock Quantity"
+              />
           </Grid>
           <Grid
             item
@@ -1183,7 +1210,6 @@ const InventoryTemplate = ({
                     endAdornment={
                       <InputAdornment position="end">
                         <Box display="flex" alignItems="center" gap={1}>
-
                           <IconButton
                             onClick={() => handleApplyToAllItems('price')}
                           >

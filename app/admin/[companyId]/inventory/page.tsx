@@ -12,6 +12,8 @@ import {
   alpha,
   Fade,
   Skeleton,
+  Tabs,
+  Tab,
 } from '@mui/material';
 import StockItems from '../components/Inventory/StockItems';
 import useNotification from '@/hooks/useNotification';
@@ -26,6 +28,7 @@ import {
   AlertTriangle,
   AlertCircle,
   BarChart3,
+  Warehouse,
 } from 'lucide-react';
 import TrackInventoryRecord from '../components/Modals/TrackInventoryRecord';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
@@ -36,7 +39,7 @@ import axios from 'axios';
 import LoadingButton from '@mui/lab/LoadingButton';
 import ConfirmModal from '../components/Modals/ConfirmModal';
 import useDebounce from '@/hooks/useDebounce';
-
+import InternalItems from '../components/Inventory/InternalItems';
 // Enhanced styled components
 const PageContainer = ({ children }: { children: React.ReactNode }) => (
   <Box
@@ -177,6 +180,7 @@ export default function InventoryPage() {
   const [isOpenAddItem, setIsOpenAddItem] = useState<boolean>(false);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
+  const [tabIndex, setTabIndex] = useState<number>(0);
 
   const { showNotification, NotificationComp } = useNotification();
   const [inventoryItems] = SWRFetchData(
@@ -421,59 +425,68 @@ export default function InventoryPage() {
     </ActionCard>
   );
 
-  // const renderTabs = () => (
-  // 	<Box sx={{ mb: 3 }}>
-  // 		<Tabs
-  // 			value={tabIndex}
-  // 			onChange={(e, index) => setTabIndex(index)}
-  // 			variant={isMobile ? 'fullWidth' : 'standard'}
-  // 			sx={{
-  // 				'& .MuiTab-root': {
-  // 					textTransform: 'none',
-  // 					fontWeight: 600,
-  // 					fontSize: '1rem',
-  // 					minHeight: 48,
-  // 					borderRadius: '12px 12px 0 0',
-  // 				},
-  // 				'& .Mui-selected': {
-  // 					bgcolor: alpha('#3B82F6', 0.08),
-  // 				},
-  // 				'& .MuiTabs-indicator': {
-  // 					height: 3,
-  // 					borderRadius: '3px 3px 0 0',
-  // 					bgcolor: '#3B82F6',
-  // 				},
-  // 			}}
-  // 		>
-  // 			<Tab
-  // 				label="Stock Items"
-  // 				value={0}
-  // 				icon={<Package size={18} />}
-  // 				iconPosition="start"
-  // 			/>
-  // 			<Tab
-  // 				label="Order Stock"
-  // 				value={1}
-  // 				icon={<Plus size={18} />}
-  // 				iconPosition="start"
-  // 			/>
-  // 		</Tabs>
-  // 	</Box>
-  // );
+  const renderTabs = () => (
+    <Box sx={{ mb: 3 }}>
+      <Tabs
+        value={tabIndex}
+        onChange={(e, index) => setTabIndex(index)}
+        variant={isMobile ? 'fullWidth' : 'standard'}
+        sx={{
+          '& .MuiTab-root': {
+            textTransform: 'none',
+            fontWeight: 600,
+            fontSize: '1rem',
+            minHeight: 48,
+            borderRadius: '12px 12px 0 0',
+          },
+          '& .Mui-selected': {
+            bgcolor: alpha('#3B82F6', 0.08),
+          },
+          '& .MuiTabs-indicator': {
+            height: 3,
+            borderRadius: '3px 3px 0 0',
+            bgcolor: '#3B82F6',
+          },
+        }}
+      >
+        <Tab
+          label="Stock Items"
+          value={0}
+          icon={<Package size={18} />}
+          iconPosition="start"
+        />
+        <Tab
+          label="Internal Items"
+          value={1}
+          icon={<Warehouse size={18} />}
+          iconPosition="start"
+        />
+      </Tabs>
+    </Box>
+  );
 
   const renderContent = () => (
     <ShadowSection>
+      {tabIndex === 0 ? (
       <Fade in={true} timeout={300}>
         <Box>
-          <StockItems
+            <StockItems
             showNotification={showNotification}
             inventoryItems={inventoryItems}
             searchKeywords={searchKeywords}
             setSearchKeywords={setSearchKeywords}
             debouncedKeywords={debouncedKeywords || ''}
-          />
+            />
         </Box>
       </Fade>
+      ) : (
+        <Fade in={true} timeout={300}>
+         <Box>
+        <InternalItems
+        />
+        </Box>
+        </Fade>
+      )}
     </ShadowSection>
   );
 
@@ -508,6 +521,7 @@ export default function InventoryPage() {
         {/* Main Content */}
         {renderHeader()}
         {renderActions()}
+        {renderTabs()}
         {renderContent()}
       </PageContainer>
     </Sidebar>

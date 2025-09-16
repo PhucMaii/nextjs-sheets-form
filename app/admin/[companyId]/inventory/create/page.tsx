@@ -54,6 +54,7 @@ export default function CreateInventoryPage() {
       showNotification('error', 'Fail to create inventory item');
     }
   };
+  
   return (
     <>
       {NotificationComp}

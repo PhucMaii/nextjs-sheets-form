@@ -714,18 +714,20 @@ model InventoryItem {
   promoIndexPos   Int?
   companyId       Int?
   isShowInventory Boolean?
+  isInternal      Boolean?
+
+  item            Item[]
+  vendorItem      VendorItem[]
+  fifo             Fifo[]
+  OrderedItems    OrderedItems[]
+  preference      ItemPreference[]
+  options         Option[]
+  poItems         POItem[]
+  lossReports     LossReport[]
+  quoteItems      QuoteItem[]
+  subtractRules   AutomationRules[]
 
   company      Company?         @relation(fields: [companyId], references: [id])
-  item         Item[]
-  vendorItem   VendorItem[]
-  fifo         Fifo[]
-  OrderedItems OrderedItems[]
-  preference   ItemPreference[]
-  options      Option[]
-  poItems      POItem[]
-  lossReports  LossReport[]
-  quoteItems   QuoteItem[]
-
   promotion Promotion? @relation(fields: [promotionId], references: [id])
   type      ItemType?  @relation(fields: [typeId], references: [id])
   timeline  InventoryItemTimeline?  @relation("InventoryItemTimeline")
@@ -733,6 +735,16 @@ model InventoryItem {
   @@index([indexPos])
   @@index([promoIndexPos])
   @@index([typeId, indexPos])
+}
+
+model AutomationRules {
+  id                Int    @id  @default(autoincrement())
+  inventoryItemId   Int
+  subtractQty       Int
+  frequency         String
+  isActive          Boolean
+
+  inventoryItem    InventoryItem    @relation(fields:[inventoryItemId], references: [id], onDelete: Cascade)
 }
 
 model ItemPreference {
