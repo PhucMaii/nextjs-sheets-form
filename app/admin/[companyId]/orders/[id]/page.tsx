@@ -697,8 +697,9 @@ const OrderDetailsPage = () => {
                 Delivery Proof
               </Typography>
 
-              <DisplayFile
-                fileKey={order?.delivery?.medias[0].fileKey}
+              {/* {order?.delivery?.medias.map((media: any) => <DisplayFile
+                key={media.id}
+                fileKey={media.fileKey}
                 width="100%"
                 height="100%"
                 style={{
@@ -706,8 +707,21 @@ const OrderDetailsPage = () => {
                   border: '1px solid #e0e0e0',
                   padding: 10,
                   objectFit: 'contain',
+                  backgroundColor: '#fafafa',
                 }}
-              />
+              />)} */}
+              {order?.delivery?.medias[0]?.fileKey && <DisplayFile
+                fileKey={order?.delivery?.medias[0]?.fileKey}
+                width="100%"
+                height="100%"
+                style={{
+                  borderRadius: 10,
+                  border: '1px solid #e0e0e0',
+                  padding: 10,
+                  objectFit: 'contain',
+                  backgroundColor: '#fafafa',
+                }}
+              />}
             </ShadowSection>
           )}
           {isLoading ? (

@@ -7,7 +7,7 @@ import { CssBaseline, ThemeProvider } from '@mui/material';
 import '../styles/reactCalendar.css';
 import '../styles/animation.css';
 import UserContextAPI from './context/UserContextAPI';
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter';
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 import { theme } from '@/theme';
 import 'react-color-palette/css';
 
