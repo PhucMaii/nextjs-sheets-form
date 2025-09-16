@@ -30,9 +30,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       where: {
         categoryId: existingUser.categoryId,
         inventoryItem: {
-          isInternal: {
-            not: true,
-          },
+            OR: [{ isInternal: null }, { isInternal: false }],
         },
       },
       include: {

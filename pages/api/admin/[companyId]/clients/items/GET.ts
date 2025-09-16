@@ -23,13 +23,14 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         categoryId: Number(categoryId),
         companyId: Number(companyId),
         inventoryItem: {
-          isInternal: {
-            not: true,
-          },
-        }
+          OR: [{ isInternal: null }, { isInternal: false }],
+        },
       },
       include: {
         inventoryItem: {
+          where: {
+            OR: [{ isInternal: null }, { isInternal: false }],
+          },
           include: {
             type: {
               include: {
@@ -70,6 +71,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       const qtyLeft = calculateQtyLeft(item);
       return { ...item, qtyLeft };
     });
+
+    console.log(itemsWithQtyLeft, 'ITEMS WITH QTY LEFT');
 
     return res.status(200).json({
       data: itemsWithQtyLeft,

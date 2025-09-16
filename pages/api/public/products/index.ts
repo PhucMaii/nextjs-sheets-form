@@ -12,9 +12,7 @@ export default async function handler(req: any, res: any) {
       where: {
         categoryId: websiteItemCategory,
         inventoryItem: {
-          isInternal: {
-            not: true,
-          },
+          OR: [{ isInternal: null }, { isInternal: false }],
         },
       },
       include: {
