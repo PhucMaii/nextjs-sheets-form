@@ -249,50 +249,249 @@ const InventoryItemCard = ({
       <Collapse in={expanded}>
         <Divider sx={{ my: 2 }} />
         <Box>
-          <Typography variant="subtitle2" fontWeight={600} mb={2}>
-            Vendor Information
-          </Typography>
-          <Stack spacing={1}>
-            {item?.vendorItem?.map((vItem: any, index: number) => {
-              const smallestUnit = vItem?.unit.find(
-                (unit: any) => unit?.ratio === 1,
-              );
-              return (
+          {item?.isInternal ? (
+            // Automation Rules for Internal Items
+            <Box>
+              <Typography variant="subtitle2" fontWeight={600} mb={2}>
+                Automation Rules
+              </Typography>
+              {item?.automationRules && item.automationRules.length > 0 ? (
+                <Stack spacing={2}>
+                  {item.automationRules.map((rule: any, index: number) => (
+                    <Box
+                      key={rule.id || index}
+                      sx={{
+                        p: 2.5,
+                        bgcolor: alpha('#000', 0.02),
+                        borderRadius: 2,
+                        border: `1px solid ${alpha('#000', 0.06)}`,
+                        position: 'relative',
+                      }}
+                    >
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="space-between"
+                        mb={1.5}
+                      >
+                        <Typography variant="body2" fontWeight={600} color="primary">
+                          Rule #{index + 1}
+                        </Typography>
+                        <Box display="flex" alignItems="center" gap={1}>
+                          <Chip
+                            label={rule.isActive ? 'Active' : 'Inactive'}
+                            size="small"
+                            color={rule.isActive ? 'success' : 'default'}
+                            variant="outlined"
+                            sx={{ fontSize: '0.7rem', height: 20 }}
+                          />
+                        </Box>
+                      </Box>
+
+                      <Box
+                        sx={{
+                          p: 2,
+                          bgcolor: alpha('#000', 0.02),
+                          borderRadius: 1.5,
+                          border: '1px dashed',
+                          borderColor: 'divider',
+                        }}
+                      >
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Subtract {rule.subtractedQuantity}</strong> quantity{' '}
+                          {rule.dependentInventoryItemId && rule.dependentInventoryItem ? (
+                            <>
+                              when <strong>{rule.dependentInventoryItem.name}</strong> is used
+                              {rule.relationalQty && (
+                                <> with <strong>{rule.relationalQty}</strong> quantity</>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              <strong>{rule.frequency}</strong>
+                            </>
+                          )}
+                        </Typography>
+                      </Box>
+
+                      {/* Rule Details */}
+                      <Box
+                        display="grid"
+                        gridTemplateColumns={{ xs: '1fr', sm: 'repeat(2, 1fr)' }}
+                        gap={1.5}
+                        mt={1.5}
+                      >
+                        <Box>
+                          <Typography variant="caption" color="text.secondary" fontWeight={500}>
+                            SUBTRACT QTY
+                          </Typography>
+                          <Typography variant="body2" fontWeight={600}>
+                            {rule.subtractedQuantity}
+                          </Typography>
+                        </Box>
+                        
+                        {rule.dependentInventoryItemId && rule.dependentInventoryItem ? (
+                          <>
+                            <Box>
+                              <Typography variant="caption" color="text.secondary" fontWeight={500}>
+                                DEPENDENT ITEM
+                              </Typography>
+                              <Typography variant="body2" fontWeight={600} noWrap>
+                                {rule.dependentInventoryItem.name}
+                              </Typography>
+                            </Box>
+                            {rule.relationalQty && (
+                              <Box>
+                                <Typography variant="caption" color="text.secondary" fontWeight={500}>
+                                  RELATIONAL QTY
+                                </Typography>
+                                <Typography variant="body2" fontWeight={600}>
+                                  {rule.relationalQty}
+                                </Typography>
+                              </Box>
+                            )}
+                          </>
+                        ) : (
+                          <Box>
+                            <Typography variant="caption" color="text.secondary" fontWeight={500}>
+                              FREQUENCY
+                            </Typography>
+                            <Typography variant="body2" fontWeight={600}>
+                              {rule.frequency}
+                            </Typography>
+                          </Box>
+                        )}
+                      </Box>
+                    </Box>
+                  ))}
+                </Stack>
+              ) : (
                 <Box
-                  key={index}
                   sx={{
-                    p: 2,
-                    bgcolor: alpha('#000', 0.02),
+                    p: 3,
+                    textAlign: 'center',
+                    border: '2px dashed',
+                    borderColor: 'divider',
                     borderRadius: 2,
-                    border: `1px solid ${alpha('#000', 0.06)}`,
+                    bgcolor: alpha('#000', 0.02),
                   }}
                 >
-                  <Box
-                    display="flex"
-                    justifyContent="space-between"
-                    alignItems="center"
-                  >
-                    <Typography variant="body2" fontWeight={500}>
-                      {`${vItem?.supplierSku ? vItem?.supplierSku : 'N/A'} - ${
-                        vItem?.vendor?.name
-                      }`}
-                    </Typography>
-                    <Chip
-                      label={`$${smallestUnit?.unitPrice}`}
-                      size="small"
-                      variant="outlined"
-                    />
-                  </Box>
+                  <Typography variant="body2" color="text.secondary">
+                    No automation rules configured
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+                    Edit this item to add automation rules
+                  </Typography>
                 </Box>
-              );
-            })}
-          </Stack>
+              )}
+            </Box>
+          ) : (
+            // Vendor Information for Regular Items
+            <Box>
+              <Typography variant="subtitle2" fontWeight={600} mb={2}>
+                Vendor Information
+              </Typography>
+              <Stack spacing={1}>
+                {item?.vendorItem?.map((vItem: any, index: number) => {
+                  const smallestUnit = vItem?.unit.find(
+                    (unit: any) => unit?.ratio === 1,
+                  );
+                  return (
+                    <Box
+                      key={index}
+                      sx={{
+                        p: 2,
+                        bgcolor: alpha('#000', 0.02),
+                        borderRadius: 2,
+                        border: `1px solid ${alpha('#000', 0.06)}`,
+                      }}
+                    >
+                      <Box
+                        display="flex"
+                        justifyContent="space-between"
+                        alignItems="center"
+                      >
+                        <Typography variant="body2" fontWeight={500}>
+                          {`${vItem?.supplierSku ? vItem?.supplierSku : 'N/A'} - ${
+                            vItem?.vendor?.name
+                          }`}
+                        </Typography>
+                        <Chip
+                          label={`$${smallestUnit?.unitPrice}`}
+                          size="small"
+                          variant="outlined"
+                        />
+                      </Box>
+                    </Box>
+                  );
+                })}
+              </Stack>
+            </Box>
+          )}
         </Box>
       </Collapse>
     );
-  }, [item.vendorItem, expanded]);
+  }, [item.vendorItem, item.isInternal, item.automationRules, expanded]);
 
   const keyMetrics = useMemo(() => {
+    // If item is internal, show different metrics
+    if (item?.isInternal) {
+      return (
+        <Box
+          display="grid"
+          gridTemplateColumns={{ xs: 'repeat(1, 1fr)', md: 'repeat(3, 1fr)' }}
+          gap={2}
+          mb={2}
+        >
+          <Box>
+            <Typography variant="caption" color="text.secondary" fontWeight={500}>
+              QUANTITY
+            </Typography>
+            <Box display="flex" alignItems="center" gap={1}>
+              <Typography variant="h6" fontWeight={600}>
+                {item?.quantity} {unit?.unit}
+              </Typography>
+              <Tooltip title="Edit Batches">
+                <IconButton size="small" onClick={onViewBatch}>
+                  <EditIcon size={14} />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </Box>
+
+          <Box>
+            <Typography variant="caption" color="text.secondary" fontWeight={500}>
+              TOTAL VALUE
+            </Typography>
+            <Typography variant="h6" fontWeight={600}>
+              ${item?.totalValue?.toFixed(2)}
+            </Typography>
+          </Box>
+
+          <Box display="flex" flexDirection="column">
+            <Typography variant="caption" color="text.secondary" fontWeight={500}>
+              TYPE
+            </Typography>
+            <Select
+              value={item?.typeId || 0}
+              onChange={(e) => onChangeType(Number(e.target.value))}
+              size="small"
+              sx={{ minWidth: 120 }}
+              onClick={(e: any) => e.stopPropagation()}
+            >
+              {itemTypes.map((type: ItemType) => (
+                <MenuItem key={type.id} value={type.id}>
+                  {type.name}
+                </MenuItem>
+              ))}
+              <MenuItem value={0}>N/A</MenuItem>
+            </Select>
+          </Box>
+        </Box>
+      );
+    }
+
+    // Regular metrics for non-internal items
     return (
       <Box
         display="grid"
@@ -403,16 +602,31 @@ const InventoryItemCard = ({
               justifyContent: 'space-between',
             }}
           >
-            <Chip
-              label={stockStatus.label}
-              size="small"
-              sx={{
-                bgcolor: stockStatus.bgColor,
-                color: stockStatus.color,
-                fontWeight: 500,
-                fontSize: '0.75rem',
-              }}
-            />
+            <Box display="flex" alignItems="center" gap={1}>
+              {item?.isInternal && (
+                <Chip
+                  label="Internal"
+                  size="small"
+                  color="warning"
+                  variant="outlined"
+                  sx={{
+                    fontWeight: 500,
+                    fontSize: '0.7rem',
+                    height: 20,
+                  }}
+                />
+              )}
+              <Chip
+                label={stockStatus.label}
+                size="small"
+                sx={{
+                  bgcolor: stockStatus.bgColor,
+                  color: stockStatus.color,
+                  fontWeight: 500,
+                  fontSize: '0.75rem',
+                }}
+              />
+            </Box>
             <Box display="flex" alignItems="center" gap={1}>
               <Tooltip title="Edit Item">
                 <IconButton size="small" onClick={onEdit}>
@@ -447,6 +661,19 @@ const InventoryItemCard = ({
                 <Typography variant="h6" fontWeight={600} noWrap>
                   {item.name}
                 </Typography>
+                {item?.isInternal && (
+                  <Chip
+                    label="Internal"
+                    size="small"
+                    color="warning"
+                    variant="outlined"
+                    sx={{
+                      fontWeight: 500,
+                      fontSize: '0.7rem',
+                      height: 20,
+                    }}
+                  />
+                )}
                 {!mdDown && (
                   <Chip
                     label={stockStatus.label}

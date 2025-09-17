@@ -54,6 +54,7 @@ model Company {
   medias            Media[]
   batchTransactions BatchTransaction[]
   expenseTypes      ExpenseType[]
+  automationRules   AutomationRules[]
 }
 
 model PageView {
@@ -739,12 +740,17 @@ model InventoryItem {
 
 model AutomationRules {
   id                Int    @id  @default(autoincrement())
-  inventoryItemId   Int
-  subtractQty       Int
-  frequency         String
+  inventoryItemId   Int? // optional
+  companyId         Int
+  relationalQty     Float?
+  subtractQty       Float
+  frequency         String?
   isActive          Boolean
+  createdAt         String
+  createdBy         String
 
-  inventoryItem    InventoryItem    @relation(fields:[inventoryItemId], references: [id], onDelete: Cascade)
+  inventoryItem    InventoryItem?    @relation(fields:[inventoryItemId], references: [id], onDelete: Cascade)
+  company          Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
 }
 
 model ItemPreference {

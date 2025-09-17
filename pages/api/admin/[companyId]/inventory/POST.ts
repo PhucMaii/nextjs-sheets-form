@@ -18,6 +18,7 @@ interface IBody {
   vendorItems: any[];
   sellingItems?: any[];
   isInternal?: boolean;
+  automationRules: any[];
 }
 
 interface IQuery {
@@ -39,6 +40,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       vendorItems,
       sellingItems,
       isInternal,
+      automationRules,
     }: IBody = req.body;
 
     const { companyId }: IQuery = req.query;
@@ -82,7 +84,15 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    const { nextPos, newRows } = await calculateNextIndexPosAndRows(typeId, 1);
+    let nextPos: number[] | null = null;
+    let newRows: number | null = null;
+    if (typeId > 0) {
+      const { nextPos: nextPosResult, newRows: newRowsResult } =
+        await calculateNextIndexPosAndRows(typeId, 1);
+
+      nextPos = nextPosResult;
+      newRows = newRowsResult;
+    }
 
     // Create Main Inventory Item
     const newInventory = await prisma.inventoryItem.create({
@@ -98,20 +108,22 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         createdBy,
         color: infoBackground,
         typeId: typeId > 0 ? typeId : otherTypeId,
-        indexPos: nextPos[0],
+        indexPos: nextPos ? nextPos[0] : null,
         companyId: Number(companyId),
       },
     });
 
     // Update Rows in Item Type
-    await prisma.itemType.update({
-      where: {
-        id: typeId,
-      },
-      data: {
-        rows: newRows,
-      },
-    });
+    if (newRows) {
+      await prisma.itemType.update({
+        where: {
+          id: typeId,
+        },
+        data: {
+          rows: newRows,
+        },
+      });
+    }
 
     // Create Vendor Item
     const newVendorItems = vendorItems.map((vendorItem: any) => {
@@ -211,6 +223,26 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
       await prisma.item.createMany({
         data: newSellingItems.filter((item: any) => item !== null) as any,
+      });
+    }
+
+    // Create Automation Rules
+    if (automationRules && automationRules.length > 0) {
+      const newAutomationRules = automationRules.map((rule: any) => {
+        return {
+          inventoryItemId: rule.dependentInventoryItemId,
+          subtractQty: rule.subtractedQuantity,
+          relationalQty: rule?.relationalQty,
+          frequency: rule?.frequency,
+          isActive: rule.isActive,
+          createdAt,
+          createdBy,
+          companyId: Number(companyId),
+        };
+      });
+
+      await prisma.automationRules.createMany({
+        data: newAutomationRules,
       });
     }
 
