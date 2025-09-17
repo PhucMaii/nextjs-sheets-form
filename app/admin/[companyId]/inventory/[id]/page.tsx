@@ -40,6 +40,8 @@ const InventoryDetail = () => {
         hasPST: newInventoryItem.hasPST,
         hasGST: newInventoryItem.hasGST,
         isShowInventory: newInventoryItem.isShowInventory,
+        isInternal: newInventoryItem?.isInternal,
+        typeId: newInventoryItem.typeId,
         vendorItems: selectedVendors,
         updatedSellingItems: selectedSellingItems.map((item: any) => ({
           ...item,

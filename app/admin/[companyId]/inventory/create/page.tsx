@@ -34,10 +34,11 @@ export default function CreateInventoryPage() {
         {
           name: newInventoryItem.name,
           sku: newInventoryItem.sku,
-          typeId: newInventoryItem.typeId,
+          typeId: newInventoryItem?.typeId,
           hasGST: newInventoryItem.hasGST,
           hasPST: newInventoryItem.hasPST,
           isShowInventory: newInventoryItem.isShowInventory,
+          isInternal: newInventoryItem?.isInternal,
           vendorItems: selectedVendors,
           sellingItems,
         },

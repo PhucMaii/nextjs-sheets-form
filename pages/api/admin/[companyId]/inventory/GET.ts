@@ -151,9 +151,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const inventory: any = await prisma.inventoryItem.findMany({
       where: {
         companyId: Number(companyId),
-        isInternal: isInternal === 'true' ? true : {
-          not: true,
-        },
+        ...(isInternal ? { isInternal: true } : { OR: [{ isInternal: null }, { isInternal: false }] }),
       },
       include: {
         fifo: {

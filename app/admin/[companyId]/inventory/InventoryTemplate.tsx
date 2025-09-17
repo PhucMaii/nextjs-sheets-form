@@ -920,6 +920,7 @@ const InventoryTemplate = ({
               <MenuItem value={-1} disabled>
                 -- Choose type --
               </MenuItem>
+              <MenuItem value={0}>N/A</MenuItem>
               {itemTypes &&
                 itemTypes.map((type: any) => (
                   <MenuItem key={type.id} value={type.id}>

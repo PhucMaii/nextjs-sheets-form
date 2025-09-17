@@ -19,8 +19,6 @@ export default function InternalItems() {
       },
     });
 
-    console.log(internalItems, 'INTERNAL ITEMS');
-
     const { showNotification } = useNotification();
     
   return (

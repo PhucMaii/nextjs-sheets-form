@@ -19,6 +19,8 @@ interface IBody {
   vendorItems: any[];
   updatedSellingItems: any[];
   isShowInventory?: boolean;
+  isInternal?: boolean;
+  typeId: number;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
@@ -42,6 +44,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       updatedSellingItems,
       isShowInventory,
       // updatedSingleSellingItem,
+      isInternal,
+      typeId,
     }: IBody = req.body;
 
     // console.log('req.body', req.body);
@@ -130,6 +134,20 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           hasPST,
           hasGST,
         },
+      });
+    }
+
+    if (existingInventoryItem.isInternal !== isInternal) {
+      await prisma.inventoryItem.update({
+        where: { id },
+        data: { isInternal },
+      });
+    }
+
+    if (existingInventoryItem.typeId !== Number(typeId)) {
+      await prisma.inventoryItem.update({
+        where: { id },
+        data: { typeId: Number(typeId) > 0 ? Number(typeId) : null },
       });
     }
 

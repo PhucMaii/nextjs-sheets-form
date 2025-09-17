@@ -16,7 +16,8 @@ interface IBody {
   hasGST: boolean;
   isShowInventory: boolean;
   vendorItems: any[];
-  sellingItems: any[];
+  sellingItems?: any[];
+  isInternal?: boolean;
 }
 
 interface IQuery {
@@ -37,9 +38,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       isShowInventory,
       vendorItems,
       sellingItems,
+      isInternal,
     }: IBody = req.body;
-
-
 
     const { companyId }: IQuery = req.query;
 
@@ -88,6 +88,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const newInventory = await prisma.inventoryItem.create({
       data: {
         name,
+        isInternal,
         // supplierSku,
         sku,
         hasPST,
@@ -176,40 +177,42 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    // Create Selling Items
-    const newSellingItems = sellingItems.map((sellingItem: any) => {
-      const targetUnit = justCreatedUnits.find(
-        (unit: any) =>
-          unit.unit === sellingItem.inventoryUnit.unit &&
-          unit.ratio === sellingItem.inventoryUnit.ratio &&
-          unit.unitPrice === sellingItem.inventoryUnit.unitPrice,
-      );
-
-      if (!targetUnit) {
-        console.error(
-          `Conflict Unit not found for sellingItem ID: ${sellingItem.id}`,
+    if (sellingItems && sellingItems.length > 0) {
+      // Create Selling Items
+      const newSellingItems = sellingItems.map((sellingItem: any) => {
+        const targetUnit = justCreatedUnits.find(
+          (unit: any) =>
+            unit.unit === sellingItem.inventoryUnit.unit &&
+            unit.ratio === sellingItem.inventoryUnit.ratio &&
+            unit.unitPrice === sellingItem.inventoryUnit.unitPrice,
         );
-        return null; // Skip this sellingItem by returning null
-      }
 
-      return {
-        inventoryItemId: newInventory.id,
-        categoryId: sellingItem.categoryId,
-        name: sellingItem.name,
-        price: sellingItem.price,
-        inventoryUnitId: targetUnit.id,
-        isShowDiscount: sellingItem.isShowDiscount,
-        prevPrice: sellingItem.prevPrice,
-        availability: true,
-        createdAt,
-        createdBy,
-        companyId: Number(companyId),
-      };
-    });
+        if (!targetUnit) {
+          console.error(
+            `Conflict Unit not found for sellingItem ID: ${sellingItem.id}`,
+          );
+          return null; // Skip this sellingItem by returning null
+        }
 
-    await prisma.item.createMany({
-      data: newSellingItems.filter((item: any) => item !== null) as any,
-    });
+        return {
+          inventoryItemId: newInventory.id,
+          categoryId: sellingItem.categoryId,
+          name: sellingItem.name,
+          price: sellingItem.price,
+          inventoryUnitId: targetUnit.id,
+          isShowDiscount: sellingItem.isShowDiscount,
+          prevPrice: sellingItem.prevPrice,
+          availability: true,
+          createdAt,
+          createdBy,
+          companyId: Number(companyId),
+        };
+      });
+
+      await prisma.item.createMany({
+        data: newSellingItems.filter((item: any) => item !== null) as any,
+      });
+    }
 
     return res.status(201).json({
       data: newInventory,
