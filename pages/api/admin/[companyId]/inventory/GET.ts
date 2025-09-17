@@ -16,7 +16,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { vendorId, inventoryItemId, companyId, isInternal }: IQuery = req.query;
+    const { vendorId, inventoryItemId, companyId, isInternal }: IQuery =
+      req.query;
 
     if (vendorId) {
       const vendorItems = await prisma.vendorItem.findMany({
@@ -151,7 +152,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const inventory: any = await prisma.inventoryItem.findMany({
       where: {
         companyId: Number(companyId),
-        ...(isInternal ? { isInternal: true } : { OR: [{ isInternal: null }, { isInternal: false }] }),
+        ...(isInternal
+          ? { isInternal: true }
+          : { OR: [{ isInternal: null }, { isInternal: false }] }),
       },
       include: {
         fifo: {
