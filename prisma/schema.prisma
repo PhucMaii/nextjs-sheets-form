@@ -347,6 +347,7 @@ model Orders {
   delivery Delivery? @relation("OrderDelivery")
 
   items    OrderedItems[]
+  logs     InventoryLog[]
   timeline OrderTimeline? @relation("OrderTimeline")
 
   user     User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -614,6 +615,7 @@ model Expense {
   purchaseOrders   PO[]
   payrolls         Payroll[]
   cheques          Media[]
+  logs             InventoryLog[]
   fixedTransaction FixedTransaction? @relation(fields: [fixedTransactionId], references: [id])
 
   @@index([date])
@@ -726,6 +728,7 @@ model InventoryItem {
   poItems         POItem[]
   lossReports     LossReport[]
   quoteItems      QuoteItem[]
+  logs            InventoryLog[]
   subtractRules   AutomationRules[]   @relation("InventoryItemRules")
   dependentSubtractRules    AutomationRules[]    @relation("DependentInventoryItemRules")
 
@@ -754,6 +757,25 @@ model AutomationRules {
   inventoryItem    InventoryItem    @relation("InventoryItemRules", fields:[inventoryItemId], references: [id], onDelete: Cascade)
   dependentInventoryItem     InventoryItem?   @relation("DependentInventoryItemRules", fields: [dependentInventoryItemId], references: [id], onDelete: Cascade)
   company          Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model InventoryLog {
+  id                       Int      @id    @default(autoincrement())
+  inventoryItemId          Int
+  log                      String
+  type                     InventoryLogType
+  prevQty                  Float
+  afterQty                 Float
+  quantity                 Float
+  date                     String
+  createdAt                String
+  createdFrom              InventoryLogFrom
+  orderId                  Int?
+  transactionId            Int?
+
+  inventoryItem            InventoryItem  @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  order                    Orders?        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  transaction              Expense?       @relation(fields: [transactionId], references: [id], onDelete: Cascade)
 }
 
 model ItemPreference {
@@ -1165,4 +1187,15 @@ enum ReassignmentStatus {
   PENDING
   ACCEPTED
   REJECTED
+}
+
+enum InventoryLogType {
+  SUBTRACT
+  ADD
+}
+
+enum InventoryLogFrom {
+  ORDER
+  EDIT
+  TRANSACTION
 }

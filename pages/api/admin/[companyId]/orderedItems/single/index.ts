@@ -447,7 +447,7 @@ export const findProperFifoToSubtract = async (
 
   while (fifoIndex < sortedFifos.length - 1) {
     if (newSubtractedQuantity >= sortedFifos[fifoIndex].quantity) {
-      newSubtractedQuantity -= sortedFifos[fifoIndex].quantity;
+      newSubtractedQuantity += sortedFifos[fifoIndex].quantity;
       deletedFifoIds.push(sortedFifos[fifoIndex].id);
       fifoIndex++;
     } else {
