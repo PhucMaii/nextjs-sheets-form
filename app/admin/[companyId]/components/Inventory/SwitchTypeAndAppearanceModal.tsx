@@ -21,7 +21,6 @@ import { getAdminApiUrl } from '@/app/utils/enum';
 import { ColorPicker, useColor } from 'react-color-palette';
 import { infoBackground, primaryColor } from '@/theme/color';
 import { ItemButton } from '@/app/components/OrderView';
-import FileUpload from '../FileUpload';
 import { grey } from '@mui/material/colors';
 import { useParams } from 'next/navigation';
 import useImageGallery from '@/hooks/useImageGallery';
@@ -268,7 +267,7 @@ export default function SwitchTypeAndAppearanceModal({
         {uploadedImage.fileKey && (
           <Box>
             <Typography>Uploaded Image</Typography>
-            <DisplayFile fileKey={uploadedImage.fileKey} />
+            <DisplayFile fileKey={uploadedImage.fileKey} isDisableOnClick />
           </Box>
         )}
 

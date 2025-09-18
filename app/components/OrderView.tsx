@@ -288,6 +288,7 @@ export const ItemButton = ({
             fileKey={item?.image || item?.inventoryItem?.image}
             width="100%"
             height="100%"
+            isDisableOnClick
             style={{
               position: 'absolute',
               objectFit: 'cover',
