@@ -322,7 +322,7 @@ const InventoryTemplate = ({
       name: '',
       sku: '',
       typeId: -1,
-      automationRules: [],
+      subtractRules: [],
     },
   );
   const [itemToAllItems, setItemToAllItems] = useState<any>({
@@ -1118,11 +1118,11 @@ const InventoryTemplate = ({
               onClick={() => {
                 setNewInventoryItem((prev: any) => ({
                   ...prev,
-                  automationRules: [
-                    ...(prev.automationRules || []),
+                  subtractRules: [
+                    ...(prev.subtractRules || []),
                     {
                       id: crypto.randomUUID(),
-                      subtractedQuantity: 1,
+                      subtractQty: 1,
                       frequency: 'daily',
                       dependentInventoryItemId: -1,
                       isActive: true,
@@ -1136,10 +1136,10 @@ const InventoryTemplate = ({
             </Button>
           </Box>
 
-          {newInventoryItem.automationRules &&
-          newInventoryItem.automationRules.length > 0 ? (
+          {newInventoryItem.subtractRules &&
+          newInventoryItem.subtractRules.length > 0 ? (
             <Box display="flex" flexDirection="column" gap={2}>
-              {newInventoryItem.automationRules.map(
+              {newInventoryItem.subtractRules.map(
                 (rule: any, index: number) => (
                   <Box
                     key={rule.id}
@@ -1166,7 +1166,7 @@ const InventoryTemplate = ({
                         onClick={() => {
                           setNewInventoryItem((prev: any) => ({
                             ...prev,
-                            automationRules: prev.automationRules.filter(
+                            subtractRules: prev.subtractRules.filter(
                               (r: any) => r.id !== rule.id,
                             ),
                           }));
@@ -1188,15 +1188,15 @@ const InventoryTemplate = ({
                             id={`quantity-${rule.id}`}
                             label="Subtracted Quantity"
                             type="number"
-                            value={rule.subtractedQuantity}
+                            value={rule.subtractQty}
                             onChange={(e) => {
                               const newRules =
-                                newInventoryItem.automationRules.map(
+                                newInventoryItem.subtractRules.map(
                                   (r: any) =>
                                     r.id === rule.id
                                       ? {
                                           ...r,
-                                          subtractedQuantity: Math.max(
+                                          subtractQty: Math.max(
                                             1,
                                             +e.target.value,
                                           ),
@@ -1205,7 +1205,7 @@ const InventoryTemplate = ({
                                 );
                               setNewInventoryItem((prev: any) => ({
                                 ...prev,
-                                automationRules: newRules,
+                                subtractRules: newRules,
                               }));
                             }}
                             inputProps={{ min: 1 }}
@@ -1238,16 +1238,16 @@ const InventoryTemplate = ({
                                 (item: any) => item.id === +e.target.value,
                               );
                               const newRules =
-                                newInventoryItem.automationRules.map(
+                                newInventoryItem.subtractRules.map(
                                   (r: any) =>
                                     r.id === rule.id
                                       ? {
                                           ...r,
                                           dependentInventoryItemId:
-                                            e.target.value || null,
+                                            e.target.value || -1,
                                           dependentInventoryItem:
                                             targetInventoryItem,
-                                          frequency: e.target.value
+                                          frequency: e.target.value > 0
                                             ? null
                                             : 'daily',
                                         }
@@ -1255,7 +1255,7 @@ const InventoryTemplate = ({
                                 );
                               setNewInventoryItem((prev: any) => ({
                                 ...prev,
-                                automationRules: newRules,
+                                subtractRules: newRules,
                               }));
                             }}
                             displayEmpty
@@ -1292,7 +1292,7 @@ const InventoryTemplate = ({
                             value={rule.relationalQty}
                             onChange={(e) => {
                               const newRules =
-                                newInventoryItem.automationRules.map(
+                                newInventoryItem.subtractRules.map(
                                   (r: any) =>
                                     r.id === rule.id
                                       ? { ...r, relationalQty: +e.target.value }
@@ -1300,7 +1300,7 @@ const InventoryTemplate = ({
                                 );
                               setNewInventoryItem((prev: any) => ({
                                 ...prev,
-                                automationRules: newRules,
+                                subtractRules: newRules,
                               }));
                             }}
                           />
@@ -1317,7 +1317,7 @@ const InventoryTemplate = ({
                               value={rule.frequency || 'daily'}
                               onChange={(e) => {
                                 const newRules =
-                                  newInventoryItem.automationRules.map(
+                                  newInventoryItem.subtractRules.map(
                                     (r: any) =>
                                       r.id === rule.id
                                         ? { ...r, frequency: e.target.value }
@@ -1325,7 +1325,7 @@ const InventoryTemplate = ({
                                   );
                                 setNewInventoryItem((prev: any) => ({
                                   ...prev,
-                                  automationRules: newRules,
+                                  subtractRules: newRules,
                                 }));
                               }}
                             >
@@ -1348,7 +1348,7 @@ const InventoryTemplate = ({
                               checked={rule?.isActive || false}
                               onChange={(e) => {
                                 const newRules =
-                                  newInventoryItem.automationRules.map(
+                                  newInventoryItem.subtractRules.map(
                                     (r: any) =>
                                       r.id === rule.id
                                         ? { ...r, isActive: e.target.checked }
@@ -1356,7 +1356,7 @@ const InventoryTemplate = ({
                                   );
                                 setNewInventoryItem((prev: any) => ({
                                   ...prev,
-                                  automationRules: newRules,
+                                  subtractRules: newRules,
                                 }));
                               }}
                             />
@@ -1379,8 +1379,8 @@ const InventoryTemplate = ({
                     >
                       <Typography variant="body2" color="text.secondary">
                         <strong>Rule Summary:</strong> Subtract{' '}
-                        <strong>{rule.subtractedQuantity}</strong> quantity{' '}
-                        {rule.dependentInventoryItemId ? (
+                        <strong>{rule.subtractQty}</strong> quantity{' '}
+                        {rule.dependentInventoryItemId && rule.dependentInventoryItemId > 0 ? (
                           <>
                             when{' '}
                             <strong>{rule.dependentInventoryItem?.name}</strong>{' '}
@@ -1422,10 +1422,10 @@ const InventoryTemplate = ({
                 onClick={() => {
                   setNewInventoryItem((prev: any) => ({
                     ...prev,
-                    automationRules: [
+                    subtractRules: [
                       {
                         id: crypto.randomUUID(),
-                        subtractedQuantity: 1,
+                        subtractQty: 1,
                         frequency: 'daily',
                         dependentInventoryItemId: -1,
                         isActive: true,

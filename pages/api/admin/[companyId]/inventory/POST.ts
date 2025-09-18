@@ -18,7 +18,7 @@ interface IBody {
   vendorItems: any[];
   sellingItems?: any[];
   isInternal?: boolean;
-  automationRules: any[];
+  subtractRules: any[];
 }
 
 interface IQuery {
@@ -40,7 +40,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       vendorItems,
       sellingItems,
       isInternal,
-      automationRules,
+      subtractRules,
     }: IBody = req.body;
 
     const { companyId }: IQuery = req.query;
@@ -227,10 +227,11 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     }
 
     // Create Automation Rules
-    if (automationRules && automationRules.length > 0) {
-      const newAutomationRules = automationRules.map((rule: any) => {
+    if (subtractRules && subtractRules.length > 0) {
+      const newAutomationRules = subtractRules.map((rule: any) => {
         return {
-          inventoryItemId: rule.dependentInventoryItemId,
+          inventoryItemId: newInventory.id,
+          dependentInventoryItemId: rule.dependentInventoryItemId,
           subtractQty: rule.subtractedQuantity,
           relationalQty: rule?.relationalQty,
           frequency: rule?.frequency,

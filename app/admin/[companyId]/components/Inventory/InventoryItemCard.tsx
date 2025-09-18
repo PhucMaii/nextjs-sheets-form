@@ -255,9 +255,9 @@ const InventoryItemCard = ({
               <Typography variant="subtitle2" fontWeight={600} mb={2}>
                 Automation Rules
               </Typography>
-              {item?.automationRules && item.automationRules.length > 0 ? (
+              {item?.subtractRules && item.subtractRules.length > 0 ? (
                 <Stack spacing={2}>
-                  {item.automationRules.map((rule: any, index: number) => (
+                  {item.subtractRules.map((rule: any, index: number) => (
                     <Box
                       key={rule.id || index}
                       sx={{
@@ -274,7 +274,10 @@ const InventoryItemCard = ({
                         justifyContent="space-between"
                         mb={1.5}
                       >
-                        <Typography variant="body2" fontWeight={600} color="primary">
+                        <Typography
+                          variant="body2"
+                          fontWeight={600}
+                        >
                           Rule #{index + 1}
                         </Typography>
                         <Box display="flex" alignItems="center" gap={1}>
@@ -298,12 +301,24 @@ const InventoryItemCard = ({
                         }}
                       >
                         <Typography variant="body2" color="text.secondary">
-                          <strong>Subtract {rule.subtractedQuantity}</strong> quantity{' '}
-                          {rule.dependentInventoryItemId && rule.dependentInventoryItem ? (
+                          <strong>Subtract {rule.subtractQty}</strong>{' '}
+                          quantity{' '}
+                          {rule.dependentInventoryItemId &&
+                          rule.dependentInventoryItem ? (
                             <>
-                              when <strong>{rule.dependentInventoryItem.name}</strong> is used
+                              when{' '}
+                              <strong>
+                                {rule.dependentInventoryItem.name}
+                              </strong>{' '}
+                              is used
                               {rule.relationalQty && (
-                                <> with <strong>{rule.relationalQty}</strong> quantity</>
+                                <>
+                                  {' '}
+                                  with <strong>
+                                    {rule.relationalQty}
+                                  </strong>{' '}
+                                  quantity
+                                </>
                               )}
                             </>
                           ) : (
@@ -317,32 +332,52 @@ const InventoryItemCard = ({
                       {/* Rule Details */}
                       <Box
                         display="grid"
-                        gridTemplateColumns={{ xs: '1fr', sm: 'repeat(2, 1fr)' }}
+                        gridTemplateColumns={{
+                          xs: '1fr',
+                          sm: 'repeat(2, 1fr)',
+                        }}
                         gap={1.5}
                         mt={1.5}
                       >
                         <Box>
-                          <Typography variant="caption" color="text.secondary" fontWeight={500}>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            fontWeight={500}
+                          >
                             SUBTRACT QTY
                           </Typography>
                           <Typography variant="body2" fontWeight={600}>
-                            {rule.subtractedQuantity}
+                            {rule.subtractQty}
                           </Typography>
                         </Box>
-                        
-                        {rule.dependentInventoryItemId && rule.dependentInventoryItem ? (
+
+                        {rule.dependentInventoryItemId &&
+                        rule.dependentInventoryItem ? (
                           <>
                             <Box>
-                              <Typography variant="caption" color="text.secondary" fontWeight={500}>
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                fontWeight={500}
+                              >
                                 DEPENDENT ITEM
                               </Typography>
-                              <Typography variant="body2" fontWeight={600} noWrap>
+                              <Typography
+                                variant="body2"
+                                fontWeight={600}
+                                noWrap
+                              >
                                 {rule.dependentInventoryItem.name}
                               </Typography>
                             </Box>
                             {rule.relationalQty && (
                               <Box>
-                                <Typography variant="caption" color="text.secondary" fontWeight={500}>
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                  fontWeight={500}
+                                >
                                   RELATIONAL QTY
                                 </Typography>
                                 <Typography variant="body2" fontWeight={600}>
@@ -353,7 +388,11 @@ const InventoryItemCard = ({
                           </>
                         ) : (
                           <Box>
-                            <Typography variant="caption" color="text.secondary" fontWeight={500}>
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                              fontWeight={500}
+                            >
                               FREQUENCY
                             </Typography>
                             <Typography variant="body2" fontWeight={600}>
@@ -379,7 +418,11 @@ const InventoryItemCard = ({
                   <Typography variant="body2" color="text.secondary">
                     No automation rules configured
                   </Typography>
-                  <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ mt: 0.5, display: 'block' }}
+                  >
                     Edit this item to add automation rules
                   </Typography>
                 </Box>
@@ -431,65 +474,65 @@ const InventoryItemCard = ({
         </Box>
       </Collapse>
     );
-  }, [item.vendorItem, item.isInternal, item.automationRules, expanded]);
+  }, [item.vendorItem, item.isInternal, item.subtractRules, expanded]);
 
   const keyMetrics = useMemo(() => {
     // If item is internal, show different metrics
-    if (item?.isInternal) {
-      return (
-        <Box
-          display="grid"
-          gridTemplateColumns={{ xs: 'repeat(1, 1fr)', md: 'repeat(3, 1fr)' }}
-          gap={2}
-          mb={2}
-        >
-          <Box>
-            <Typography variant="caption" color="text.secondary" fontWeight={500}>
-              QUANTITY
-            </Typography>
-            <Box display="flex" alignItems="center" gap={1}>
-              <Typography variant="h6" fontWeight={600}>
-                {item?.quantity} {unit?.unit}
-              </Typography>
-              <Tooltip title="Edit Batches">
-                <IconButton size="small" onClick={onViewBatch}>
-                  <EditIcon size={14} />
-                </IconButton>
-              </Tooltip>
-            </Box>
-          </Box>
+    // if (item?.isInternal) {
+    //   return (
+    //     <Box
+    //       display="grid"
+    //       gridTemplateColumns={{ xs: 'repeat(1, 1fr)', md: 'repeat(3, 1fr)' }}
+    //       gap={2}
+    //       mb={2}
+    //     >
+    //       <Box>
+    //         <Typography variant="caption" color="text.secondary" fontWeight={500}>
+    //           QUANTITY
+    //         </Typography>
+    //         <Box display="flex" alignItems="center" gap={1}>
+    //           <Typography variant="h6" fontWeight={600}>
+    //             {item?.quantity} {unit?.unit}
+    //           </Typography>
+    //           <Tooltip title="Edit Batches">
+    //             <IconButton size="small" onClick={onViewBatch}>
+    //               <EditIcon size={14} />
+    //             </IconButton>
+    //           </Tooltip>
+    //         </Box>
+    //       </Box>
 
-          <Box>
-            <Typography variant="caption" color="text.secondary" fontWeight={500}>
-              TOTAL VALUE
-            </Typography>
-            <Typography variant="h6" fontWeight={600}>
-              ${item?.totalValue?.toFixed(2)}
-            </Typography>
-          </Box>
+    //       <Box>
+    //         <Typography variant="caption" color="text.secondary" fontWeight={500}>
+    //           TOTAL VALUE
+    //         </Typography>
+    //         <Typography variant="h6" fontWeight={600}>
+    //           ${item?.totalValue?.toFixed(2)}
+    //         </Typography>
+    //       </Box>
 
-          <Box display="flex" flexDirection="column">
-            <Typography variant="caption" color="text.secondary" fontWeight={500}>
-              TYPE
-            </Typography>
-            <Select
-              value={item?.typeId || 0}
-              onChange={(e) => onChangeType(Number(e.target.value))}
-              size="small"
-              sx={{ minWidth: 120 }}
-              onClick={(e: any) => e.stopPropagation()}
-            >
-              {itemTypes.map((type: ItemType) => (
-                <MenuItem key={type.id} value={type.id}>
-                  {type.name}
-                </MenuItem>
-              ))}
-              <MenuItem value={0}>N/A</MenuItem>
-            </Select>
-          </Box>
-        </Box>
-      );
-    }
+    //       <Box display="flex" flexDirection="column">
+    //         <Typography variant="caption" color="text.secondary" fontWeight={500}>
+    //           TYPE
+    //         </Typography>
+    //         <Select
+    //           value={item?.typeId || 0}
+    //           onChange={(e) => onChangeType(Number(e.target.value))}
+    //           size="small"
+    //           sx={{ minWidth: 120 }}
+    //           onClick={(e: any) => e.stopPropagation()}
+    //         >
+    //           {itemTypes.map((type: ItemType) => (
+    //             <MenuItem key={type.id} value={type.id}>
+    //               {type.name}
+    //             </MenuItem>
+    //           ))}
+    //           <MenuItem value={0}>N/A</MenuItem>
+    //         </Select>
+    //       </Box>
+    //     </Box>
+    //   );
+    // }
 
     // Regular metrics for non-internal items
     return (
@@ -524,56 +567,68 @@ const InventoryItemCard = ({
           </Typography>
         </Box>
 
-        <Box>
-          <Typography variant="caption" color="text.secondary" fontWeight={500}>
-            LISTINGS
-          </Typography>
-          <Box display="flex" alignItems="center" gap={1}>
-            <Typography variant="h6" fontWeight={600}>
-              {item?.listingCategories?.length || 0}
-            </Typography>
-            <Button
-              size="small"
-              variant="outlined"
-              endIcon={<ExternalLink size={14} />}
-              onClick={(e: any) => {
-                e.stopPropagation();
-                router.push(
-                  `/admin/${companyId}/inventory/bulk/selling-items/${item.id}`,
-                );
-              }}
-              sx={{
-                textTransform: 'none',
-                fontSize: '0.75rem',
-                px: 1,
-                py: 0.5,
-                minWidth: 'auto',
-              }}
-            >
-              Edit
-            </Button>
-          </Box>
-        </Box>
+        {!item.isInternal && (
+          <>
+            <Box>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                fontWeight={500}
+              >
+                LISTINGS
+              </Typography>
+              <Box display="flex" alignItems="center" gap={1}>
+                <Typography variant="h6" fontWeight={600}>
+                  {item?.listingCategories?.length || 0}
+                </Typography>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  endIcon={<ExternalLink size={14} />}
+                  onClick={(e: any) => {
+                    e.stopPropagation();
+                    router.push(
+                      `/admin/${companyId}/inventory/bulk/selling-items/${item.id}`,
+                    );
+                  }}
+                  sx={{
+                    textTransform: 'none',
+                    fontSize: '0.75rem',
+                    px: 1,
+                    py: 0.5,
+                    minWidth: 'auto',
+                  }}
+                >
+                  Edit
+                </Button>
+              </Box>
+            </Box>
 
-        <Box display="flex" flexDirection="column">
-          <Typography variant="caption" color="text.secondary" fontWeight={500}>
-            TYPE
-          </Typography>
-          <Select
-            value={item?.typeId || 0}
-            onChange={(e) => onChangeType(Number(e.target.value))}
-            size="small"
-            sx={{ minWidth: 120 }}
-            onClick={(e: any) => e.stopPropagation()}
-          >
-            {itemTypes.map((type: ItemType) => (
-              <MenuItem key={type.id} value={type.id}>
-                {type.name}
-              </MenuItem>
-            ))}
-            <MenuItem value={0}>N/A</MenuItem>
-          </Select>
-        </Box>
+            <Box display="flex" flexDirection="column">
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                fontWeight={500}
+              >
+                TYPE
+              </Typography>
+              <Select
+                value={item?.typeId || 0}
+                onChange={(e) => onChangeType(Number(e.target.value))}
+                size="small"
+                sx={{ minWidth: 120 }}
+                onClick={(e: any) => e.stopPropagation()}
+              >
+                {itemTypes.map((type: ItemType) => (
+                  <MenuItem key={type.id} value={type.id}>
+                    {type.name}
+                  </MenuItem>
+                ))}
+                <MenuItem value={0}>N/A</MenuItem>
+              </Select>
+            </Box>
+          </>
+        )}
       </Box>
     );
   }, [item, unit]);

@@ -49,7 +49,7 @@ const InventoryDetail = () => {
             id: item.category.id,
           },
         })),
-        automationRules: newInventoryItem?.automationRules || [],
+        subtractRules: newInventoryItem?.subtractRules || [],
       });
 
       if (res.data.error) {

@@ -36,6 +36,7 @@ import {
   Vendor,
   VendorExpense,
   VendorItem,
+  AutomationRules,
 } from '@prisma/client';
 import { Session } from 'next-auth';
 import { Order } from '../admin/[companyId]/orders/page';
@@ -255,6 +256,7 @@ export interface IInventoryItem extends InventoryItem {
   preference?: ItemPreference;
   type?: ItemType;
   listingCategories?: any;
+  subtractRules?: AutomationRules[];
 }
 
 export interface IItemType extends ItemType {

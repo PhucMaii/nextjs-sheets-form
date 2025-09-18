@@ -21,7 +21,7 @@ interface IBody {
   isShowInventory?: boolean;
   isInternal?: boolean;
   typeId: number;
-  automationRules: any[];
+  subtractRules: any[];
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
@@ -47,7 +47,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       // updatedSingleSellingItem,
       isInternal,
       typeId,
-      automationRules,
+      subtractRules,
     }: IBody = req.body;
 
     // console.log('req.body', req.body);
@@ -406,11 +406,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     }
 
     // Update automation rules
-    if (automationRules && automationRules.length > 0) {
-      const newRules = automationRules.filter((rule: any) =>
+    if (subtractRules && subtractRules.length > 0) {
+      const newRules = subtractRules.filter((rule: any) =>
         isNaN(Number(rule.id)),
       );
-      const updatedRules = automationRules.filter((rule: any) => {
+      const updatedRules = subtractRules.filter((rule: any) => {
         const existingRule = existingInventoryItem.subtractRules.find(
           (r: any) => r.id === rule.id,
         );
@@ -424,7 +424,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           existingRule.relationalQty !== rule.relationalQty ||
           existingRule.frequency !== rule.frequency ||
           existingRule.isActive !== rule.isActive ||
-          existingRule.inventoryItemId !== rule.dependentInventoryItemId
+          existingRule.dependentInventoryItemId !== rule.dependentInventoryItemId
         ) {
           return true;
         }
@@ -434,7 +434,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
       const deletedRules = existingInventoryItem.subtractRules.filter(
         (rule: any) => {
-          return !automationRules.some((r: any) => r.id === rule.id);
+          return !subtractRules.some((r: any) => r.id === rule.id);
         },
       );
 
@@ -442,10 +442,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         await prisma.automationRules.createMany({
           data: newRules.map((rule: any) => ({
             subtractQty: rule.subtractedQuantity,
+            inventoryItemId: existingInventoryItem.id,
             isActive: rule.isActive,
             relationalQty: rule?.relationalQty,
             frequency: rule?.frequency,
-            inventoryItemId: rule.dependentInventoryItemId,
+            dependentInventoryItemId: rule.dependentInventoryItemId,
             createdAt: updatedAt,
             createdBy,
             companyId: Number(companyId),
@@ -462,7 +463,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
               isActive: rule.isActive,
               relationalQty: rule?.relationalQty,
               frequency: rule?.frequency,
-              inventoryItemId: rule.dependentInventoryItemId,
+              dependentInventoryItemId: rule.dependentInventoryItemId,
             },
           });
         }

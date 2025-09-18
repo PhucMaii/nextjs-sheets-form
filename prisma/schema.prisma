@@ -726,7 +726,8 @@ model InventoryItem {
   poItems         POItem[]
   lossReports     LossReport[]
   quoteItems      QuoteItem[]
-  subtractRules   AutomationRules[]
+  subtractRules   AutomationRules[]   @relation("InventoryItemRules")
+  dependentSubtractRules    AutomationRules[]    @relation("DependentInventoryItemRules")
 
   company      Company?         @relation(fields: [companyId], references: [id])
   promotion Promotion? @relation(fields: [promotionId], references: [id])
@@ -739,17 +740,19 @@ model InventoryItem {
 }
 
 model AutomationRules {
-  id                Int    @id  @default(autoincrement())
-  inventoryItemId   Int? // optional
-  companyId         Int
-  relationalQty     Float?
-  subtractQty       Float
-  frequency         String?
-  isActive          Boolean
-  createdAt         String
-  createdBy         String
+  id                        Int    @id  @default(autoincrement())
+  inventoryItemId           Int
+  dependentInventoryItemId  Int?
+  companyId                 Int
+  relationalQty             Float?
+  subtractQty               Float
+  frequency                 String?
+  isActive                  Boolean
+  createdAt                 String
+  createdBy                 String
 
-  inventoryItem    InventoryItem?    @relation(fields:[inventoryItemId], references: [id], onDelete: Cascade)
+  inventoryItem    InventoryItem    @relation("InventoryItemRules", fields:[inventoryItemId], references: [id], onDelete: Cascade)
+  dependentInventoryItem     InventoryItem?   @relation("DependentInventoryItemRules", fields: [dependentInventoryItemId], references: [id], onDelete: Cascade)
   company          Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
 }
 

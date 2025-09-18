@@ -35,6 +35,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                 },
               },
               type: true,
+              subtractRules: true,
             },
           },
         },
@@ -69,6 +70,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           id: Number(inventoryItemId),
         },
         include: {
+          subtractRules: true,
           fifo: {
             include: {
               vendorItem: {
@@ -157,6 +159,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           : { OR: [{ isInternal: null }, { isInternal: false }] }),
       },
       include: {
+        subtractRules: true,
         fifo: {
           include: {
             vendorItem: {
