@@ -1,5 +1,7 @@
 import {
   Fifo,
+  InventoryLogFrom,
+  InventoryLogType,
   OrderedItems,
   PaymentStatus,
   PrismaClient,
@@ -12,6 +14,7 @@ import { getTodayDate } from '@/pages/api/utils/date';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { USER_ROLE } from '@/app/utils/enum';
 import { updateCheque } from '../../expenses/PUT';
+import { recordTransactionInventoryLog } from '@/pages/api/utils/logs';
 
 interface IPurchasedItem {
   id: number; // ordered items id
@@ -91,7 +94,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       include: {
         orderedItems: {
           include: {
-            fifo: true,
+            fifo: {
+              include: {
+                inventoryItem: true,
+              },
+            },
             inventoryUnit: true,
           },
         },
@@ -145,7 +152,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       include: {
         orderedItems: {
           include: {
-            fifo: true,
+            fifo: {
+              include: {
+                inventoryItem: true,
+              },
+            },
           },
         },
         cheques: true,
@@ -232,6 +243,16 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
               item.fifo,
               item.inventoryUnit,
               item.quantity,
+            );
+
+            // Record inventory log
+            await recordTransactionInventoryLog(
+              Number(id),
+              item.fifo.inventoryItemId,
+              item.fifo.quantity,
+              InventoryLogType.SUBTRACT,
+              InventoryLogFrom.EDIT_TRANSACTION,
+              `Subtract ${item.fifo.quantity} ${item.fifo.inventoryItem.name} from inventory due to edit item quantity in expense ${id} update`,
             );
           }
           continue;
@@ -404,6 +425,16 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
               removedItem.fifo,
               removedItem.inventoryUnit,
               removedItem.quantity,
+            );
+
+            // Record inventory log
+            await recordTransactionInventoryLog(
+              Number(id),
+              removedItem.fifo.inventoryItemId,
+              removedItem.quantity,
+              InventoryLogType.SUBTRACT,
+              InventoryLogFrom.DELETE_TRANSACTION,
+              `Subtract ${removedItem.quantity} ${removedItem.fifo.inventoryItem.name} from inventory due to remove item in expense ${id} update`,
             );
           }
         }

@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { InventoryLogFrom, InventoryLogType } from '@prisma/client';
+import prisma from '@/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
@@ -9,6 +10,7 @@ import {
 import { USER_ROLE } from '@/app/utils/enum';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { getTodayDate } from '@/pages/api/utils/date';
+import { recordOrderInventoryLog } from '@/pages/api/utils/logs';
 
 interface BodyPropTypes {
   orderId: number;
@@ -19,7 +21,6 @@ interface BodyPropTypes {
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
     const { orderId, deliveryDate, note, isAffectInventory } =
       req.body as BodyPropTypes;
 
@@ -71,7 +72,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       include: {
         items: {
           include: {
-            fifo: true,
+            fifo: {
+              include: {
+                inventoryItem: true,
+              },
+            },
             inventoryUnit: true,
           },
         },
@@ -126,44 +131,19 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             item.inventoryUnit,
             item.quantity,
           );
+
+          // record inventory log
+          await recordOrderInventoryLog(
+            orderId,
+            item.fifo.inventoryItemId,
+            item.quantity,
+            InventoryLogType.SUBTRACT,
+            InventoryLogFrom.EDIT_ORDER,
+            `Subtract ${item.quantity} ${item.fifo.inventoryItem.name} from inventory due to order ${orderId} delivery date from ${existingOrder.deliveryDate} to ${deliveryDate} update`,
+          );
         }
       }
     }
-
-    // Update Inventory Item
-    // From other status to VOID -> Inventory Item get restock
-    // if (
-    //   existingOrder.status !== ORDER_STATUS.VOID &&
-    //   updatedOrder.status === ORDER_STATUS.VOID
-    // ) {
-    //   for (const item of updatedOrder.items) {
-    //     if (item?.fifo && item?.inventoryUnit) {
-    //       await restockInventoryItem(
-    //         orderId,
-    //         item.fifo,
-    //         item.inventoryUnit,
-    //         item.quantity,
-    //       );
-    //     }
-    //   }
-    // }
-
-    // // From VOID to other status -> Inventory Item Stock Is Subtracted
-    // if (
-    //   existingOrder.status === ORDER_STATUS.VOID &&
-    //   updatedOrder.status !== ORDER_STATUS.VOID
-    // ) {
-    //   for (const item of updatedOrder.items) {
-    //     if (item?.fifo && item?.inventoryUnit) {
-    //       await subtractInventoryItem(
-    //         orderId,
-    //         item.fifo,
-    //         item.inventoryUnit,
-    //         item.quantity,
-    //       );
-    //     }
-    //   }
-    // }
 
     return res.status(200).json({
       data: updatedOrder,

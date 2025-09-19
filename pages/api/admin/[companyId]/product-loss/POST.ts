@@ -1,4 +1,8 @@
-import { PrismaClient } from '@prisma/client';
+import {
+  InventoryLogFrom,
+  InventoryLogType,
+  PrismaClient,
+} from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
@@ -6,6 +10,7 @@ import { getTodayDate } from '@/pages/api/utils/date';
 import { MEDIA_TYPE } from '@/app/utils/enum';
 import { InventoryUnit } from '@prisma/client';
 import { manuallySubtractInventoryItemQty } from '@/pages/api/utils/inventoryItem';
+import { recordInventoryItemLog } from '@/pages/api/utils/logs';
 interface ProductLoss {
   inventoryItemId: number;
   employeeId: number;
@@ -77,6 +82,16 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       productLoss.inventoryItemId,
       productLoss.quantityLost,
       productLoss?.inventoryUnit?.ratio || 1,
+    );
+
+    // Record inventory log
+    await recordInventoryItemLog(
+      newProductLoss.id,
+      productLoss.inventoryItemId,
+      productLoss.quantityLost,
+      InventoryLogType.LOST,
+      InventoryLogFrom.CREATE_LOSS_REPORT,
+      `Subtract ${productLoss.quantityLost} ${productLoss.inventoryItemId} from inventory due to lost report ${newProductLoss.id}`,
     );
 
     return res.status(200).json({

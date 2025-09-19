@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { PrismaClient } from '@prisma/client';
+import { InventoryLogFrom, InventoryLogType, PrismaClient } from '@prisma/client';
 import withDriverAuthGuard from '@/pages/api/utils/withDriverAuthGuar';
 import { getDriverInfo } from '@/pages/api/utils/auth';
 import {
@@ -7,6 +7,8 @@ import {
   updateSingleInventoryItem,
 } from '@/pages/api/admin/[companyId]/orderedItems/single';
 import { generateOrderTotalPrice } from '@/pages/api/admin/[companyId]/orderedItems/PUT';
+import { checkOrderValidToAffectInventory } from '@/pages/api/utils/order';
+import { recordOrderInventoryLog } from '../../utils/logs';
 
 interface IBody {
   id: number; // ordered item id
@@ -27,6 +29,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const existingOrderedItem = await prisma.orderedItems.findUnique({
       where: {
         id,
+      },
+      include: {
+        inventoryItem: true,
+        Orders: true,
       },
     });
 
@@ -54,14 +60,32 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
+    const isValidToAffectInventory = await checkOrderValidToAffectInventory(
+      existingOrderedItem?.companyId || -1,
+      existingOrderedItem?.Orders?.deliveryDate || '',
+    );
+
     // Update Inventory Item Quantity
-    if (updatedOrderedItem?.fifo && updatedOrderedItem?.inventoryUnit) {
+    if (updatedOrderedItem?.fifo && updatedOrderedItem?.inventoryUnit && isValidToAffectInventory) {
+      const difference = updatedOrderedItem.quantity - existingOrderedItem.quantity;
+      const isRestock = difference > 0;
+        
       await updateSingleInventoryItem(
         orderId,
         updatedOrderedItem.fifo,
         updatedOrderedItem.inventoryUnit,
         updatedOrderedItem.quantity,
         existingOrderedItem.quantity,
+      );
+
+      // Record inventory log
+      await recordOrderInventoryLog(
+        orderId,
+        updatedOrderedItem.fifo.inventoryItemId,
+        updatedOrderedItem.quantity,
+        isRestock ? InventoryLogType.RESTOCK : InventoryLogType.SUBTRACT,
+        InventoryLogFrom.EDIT_ORDER,
+        `${isRestock ? 'Restock' : 'Subtract'} ${Math.abs(difference)} ${existingOrderedItem.name} to inventory due to ordered item ${updatedOrderedItem.id} updated`,
       );
     }
 

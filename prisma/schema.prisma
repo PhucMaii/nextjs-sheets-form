@@ -55,6 +55,7 @@ model Company {
   batchTransactions BatchTransaction[]
   expenseTypes      ExpenseType[]
   automationRules   AutomationRules[]
+  inventoryLogs     InventoryLog[]
 }
 
 model PageView {
@@ -761,6 +762,7 @@ model AutomationRules {
 
 model InventoryLog {
   id                       Int      @id    @default(autoincrement())
+  companyId                Int
   inventoryItemId          Int
   log                      String
   type                     InventoryLogType
@@ -773,9 +775,10 @@ model InventoryLog {
   orderId                  Int?
   transactionId            Int?
 
-  inventoryItem            InventoryItem  @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
-  order                    Orders?        @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  transaction              Expense?       @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  inventoryItem            InventoryItem  @relation(fields: [inventoryItemId], references: [id])
+  company                  Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  order                    Orders?        @relation(fields: [orderId], references: [id])
+  transaction              Expense?       @relation(fields: [transactionId], references: [id])
 }
 
 model ItemPreference {
@@ -1191,11 +1194,19 @@ enum ReassignmentStatus {
 
 enum InventoryLogType {
   SUBTRACT
-  ADD
+  STOCK_IN
+  RESTOCK
+  LOST
 }
 
 enum InventoryLogFrom {
-  ORDER
-  EDIT
-  TRANSACTION
+  CREATE_ORDER
+  DELETE_ORDER
+  EDIT_ORDER
+  CREATE_TRANSACTION
+  EDIT_TRANSACTION
+  DELETE_TRANSACTION
+  CREATE_LOSS_REPORT
+  EDIT_LOSS_REPORT
+  DELETE_LOSS_REPORT
 }

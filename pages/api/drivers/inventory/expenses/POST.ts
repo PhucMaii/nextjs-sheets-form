@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { mainPaymentMethodId } from '@/app/lib/constant';
-import { TRANSACTION_STATUS } from '@/app/utils/enum';
+import { TRANSACTION_STATUS, USER_ROLE } from '@/app/utils/enum';
 import { IInventoryUnit } from '@/app/utils/type';
 import {
   checkAndUpdateUnits,
@@ -9,9 +9,12 @@ import {
   createOrderedItems,
   updateVendorItemQuantity,
 } from '@/pages/api/admin/[companyId]/inventory/expenses/POST';
+import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { getDriverInfo } from '@/pages/api/utils/auth';
-import { PrismaClient } from '@prisma/client';
+import { InventoryLogFrom, InventoryLogType } from '@prisma/client';
+import { recordTransactionInventoryLog } from '@/pages/api/utils/logs';
 import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@/client';
 
 interface IBody {
   date: string;
@@ -39,8 +42,6 @@ interface IBody {
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const {
       date,
       amount,
@@ -119,7 +120,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       }
     }
 
-    const createdBy = `Driver - ${driver.name}`;
+    const createdBy = await getCreatedBy(req, res, USER_ROLE.DRIVER);
 
     const newExpense = await prisma.expense.create({
       data: {
@@ -159,7 +160,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       for (const item of items) {
         // STEP 2: Update quantity in vendor items
         const existedItem: any = vendorItems.find(
-          (vendorItem) => vendorItem.id === item.id,
+          (vendorItem: any) => vendorItem.id === item.id,
         );
 
         await updateVendorItemQuantity(existedItem, item);
@@ -172,6 +173,16 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           item.id,
           createdAt,
           createdBy,
+        );
+
+        // Record inventory log
+        await recordTransactionInventoryLog(
+          newExpense.id,
+          existedItem.inventoryItemId,
+          item.quantity,
+          InventoryLogType.STOCK_IN,
+          InventoryLogFrom.CREATE_TRANSACTION,
+          `Create ${item.quantity} ${existedItem.inventoryItem.name} to inventory due to expense ${newExpense.id} created`,
         );
       }
       // STEP 4: Create OrderedItems

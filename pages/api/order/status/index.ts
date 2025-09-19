@@ -1,5 +1,5 @@
 import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
-import { PrismaClient } from '@prisma/client';
+import { InventoryLogFrom, InventoryLogType, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { pusherServer } from '@/app/pusher';
 import { getServerSession } from 'next-auth';
@@ -10,6 +10,8 @@ import { restockInventoryItem } from '@/pages/api/admin/[companyId]/orderedItems
 import { testAccountId } from '@/app/lib/constant';
 import { recordAction } from '@/pages/api/utils/timeline';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
+import { checkOrderValidToAffectInventory } from '@/pages/api/utils/order';
+import { recordOrderInventoryLog } from '../../utils/logs';
 
 interface BodyTypes {
   orderId: number;
@@ -62,6 +64,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           include: {
             fifo: true,
             inventoryUnit: true,
+            inventoryItem: true,
           },
         },
       },
@@ -118,17 +121,32 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         totalPrice: newItem.quantity * newItem.price,
       });
 
+      const isValidToAffectInventory = await checkOrderValidToAffectInventory(
+        existingUser.companyId,
+        existingOrder.deliveryDate,
+      );
+
       if (
         existingOrder.status !== ORDER_STATUS.VOID &&
         updatedStatus === ORDER_STATUS.VOID
       ) {
         // Restock inventory item
-        if (item?.fifo && item?.inventoryUnit) {
+        if (item?.fifo && item?.inventoryUnit && isValidToAffectInventory) {
           await restockInventoryItem(
             orderId,
             item.fifo,
             item?.inventoryUnit,
             item.quantity,
+          );
+
+          // Record inventory log
+          await recordOrderInventoryLog(
+            orderId,
+            item.fifo.inventoryItemId,
+            item.quantity,
+            InventoryLogType.RESTOCK,
+            InventoryLogFrom.EDIT_ORDER,
+            `Restock ${item.quantity} ${item?.inventoryItem?.name} to inventory due to order ${orderId} updated status from ${existingOrder.status} to ${updatedStatus}`,
           );
         }
       }

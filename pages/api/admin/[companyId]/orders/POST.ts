@@ -384,7 +384,6 @@ export const createOrder = async (
       items,
       createdBy,
     );
-    console.log(newOrderedItems);
 
     let comment = '### Items\n';
     for (const item of newOrderedItems) {

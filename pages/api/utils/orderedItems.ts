@@ -1,9 +1,15 @@
-import { Orders, PrismaClient } from '@prisma/client';
+import {
+  InventoryLogFrom,
+  InventoryLogType,
+  Orders,
+  PrismaClient,
+} from '@prisma/client';
 import { checkOrderValidToAffectInventory } from './order';
 import { getTodayDate, sortByDeliveryDate } from './date';
 import { getAllUnitsByInventoryItemId } from './units';
 import { checkAndUpdateUnits } from '../admin/[companyId]/inventory/expenses/POST';
 import { recordAction } from './timeline';
+import { recordOrderInventoryLog } from './logs';
 
 export const createOrderedItems = async (
   companyId: number,
@@ -66,7 +72,6 @@ export const createOrderedItems = async (
       continue;
     }
 
-
     if (!targetedItem) {
       console.error('Conflict Inventory Item Not Found');
       continue;
@@ -109,60 +114,62 @@ export const createOrderedItems = async (
     // CASE 1:Check if vendor item has no batch
     if (targetedItem.fifo.length === 0) {
       // if (isValidToCheckInventory) {
-        const newFifo = await prisma.fifo.create({
-          data: {
-            inventoryItemId: targetedItem.id,
-            vendorItemId: targetedItem.vendorItem[0].id,
-            quantity: isValidToCheckInventory
-              ? -(item.quantity * (itemUnit?.ratio || 1)) // quantity * ratio
-              : 0,
-            createdAt: order.orderTime,
-            createdBy: order?.createdBy || '',
-            companyId,
-          },
-          include: {
-            vendorItem: true,
-          },
-        });
-
-        comment += `x${item.quantity} ${item.name}\n`;
-
-        // Update vendor item quantity
-        await prisma.vendorItem.update({
-          where: {
-            id: targetedItem.vendorItem[0].id,
-          },
-          data: {
-            quantity: isValidToCheckInventory ? -item.quantity * (itemUnit?.ratio || 1) : 0,
-          },
-        });
-
-        // const unitRatioOf1 = targetedItem.vendorItem[0].unit.find((unit) => {
-        //   return unit.ratio === 1;
-        // });
-
-        // Because there is no batch, calculate profit based on unitPrice
-        newOrderedItems.push({
-          orderId: order.id,
-          fifoId: newFifo.id,
-          // optionId: item?.optionId || null,
-          option: {
-            name: item?.option?.name || '',
-            price: item?.option?.price || 0,
-            ratio: itemUnit?.ratio || 1,
-            prevPrice: item?.option?.prevPrice,
-            isShowDiscount: item?.option?.isShowDiscount,
-          },
-          cost: itemUnit?.unitPrice || 0,
-          profit: item.price - (itemUnit?.unitPrice || 0),
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          inventoryUnitId: unitId,
-          inventoryItemId: item.inventoryItemId,
-          isCustomAmount: item?.isCustomAmount || false,
+      const newFifo = await prisma.fifo.create({
+        data: {
+          inventoryItemId: targetedItem.id,
+          vendorItemId: targetedItem.vendorItem[0].id,
+          quantity: isValidToCheckInventory
+            ? -(item.quantity * (itemUnit?.ratio || 1)) // quantity * ratio
+            : 0,
+          createdAt: order.orderTime,
+          createdBy: order?.createdBy || '',
           companyId,
-        });
+        },
+        include: {
+          vendorItem: true,
+        },
+      });
+
+      comment += `x${item.quantity} ${item.name}\n`;
+
+      // Update vendor item quantity
+      await prisma.vendorItem.update({
+        where: {
+          id: targetedItem.vendorItem[0].id,
+        },
+        data: {
+          quantity: isValidToCheckInventory
+            ? -item.quantity * (itemUnit?.ratio || 1)
+            : 0,
+        },
+      });
+
+      // const unitRatioOf1 = targetedItem.vendorItem[0].unit.find((unit) => {
+      //   return unit.ratio === 1;
+      // });
+
+      // Because there is no batch, calculate profit based on unitPrice
+      newOrderedItems.push({
+        orderId: order.id,
+        fifoId: newFifo.id,
+        // optionId: item?.optionId || null,
+        option: {
+          name: item?.option?.name || '',
+          price: item?.option?.price || 0,
+          ratio: itemUnit?.ratio || 1,
+          prevPrice: item?.option?.prevPrice,
+          isShowDiscount: item?.option?.isShowDiscount,
+        },
+        cost: itemUnit?.unitPrice || 0,
+        profit: item.price - (itemUnit?.unitPrice || 0),
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        inventoryUnitId: unitId,
+        inventoryItemId: item.inventoryItemId,
+        isCustomAmount: item?.isCustomAmount || false,
+        companyId,
+      });
       // }
     } else {
       // CASE 2: Check if vendor item has batch
@@ -219,8 +226,6 @@ export const createOrderedItems = async (
           },
         });
 
-        console.log(targetVendorItem, 'targetVendorItem');
-
         if (!targetVendorItem) {
           console.error('COnflict vendor item');
           continue;
@@ -254,9 +259,6 @@ export const createOrderedItems = async (
           ? sortedFifo[fifoIndex].price * itemUnit.ratio
           : itemUnit?.unitPrice || 0;
 
-        console.log(itemUnit, 'item unit');
-        console.log(sortedFifo[fifoIndex].price, 'sortedFifo[fifoIndex].price');
-
         // STEP 6: Create ordered item with that fifo id attached
         newOrderedItems.push({
           orderId: order.id,
@@ -281,6 +283,16 @@ export const createOrderedItems = async (
           inventoryItemId: item.inventoryItemId,
           isCustomAmount: item?.isCustomAmount || false,
         });
+
+        // Record inventory log
+        await recordOrderInventoryLog(
+          order.id,
+          item.inventoryItemId,
+          itemQuantity,
+          InventoryLogType.SUBTRACT,
+          InventoryLogFrom.CREATE_ORDER,
+          `Subtract ${itemQuantity} ${item.name} from inventory due to order ${order.id} created or updated`,
+        );
       } else {
         // If no valid to check inventory, use the first fifo
         const cost = sortedFifo[0]?.price
@@ -329,7 +341,7 @@ export const createOrderedItems = async (
     (acc, item) => acc + item.quantity,
     0,
   );
-  
+
   if (isValidToCheckInventory && comment) {
     await recordAction(
       order.id,

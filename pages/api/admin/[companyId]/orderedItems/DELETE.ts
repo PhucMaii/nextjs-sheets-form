@@ -1,7 +1,9 @@
-import { PrismaClient } from '@prisma/client';
+import { InventoryLogFrom, InventoryLogType, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { restockInventoryItem } from './single';
 import { generateOrderTotalPrice } from './PUT';
+import { checkOrderValidToAffectInventory } from '@/pages/api/utils/order';
+import { recordOrderInventoryLog } from '@/pages/api/utils/logs';
 
 interface IQuery {
   id?: string;
@@ -71,12 +73,27 @@ export default async function DELETE(
       });
     }
 
-    if (existingItem.fifo && existingItem.inventoryUnit) {
+    const isValidToAffectInventory = await checkOrderValidToAffectInventory(
+      existingOrder?.companyId || 1,
+      existingOrder.deliveryDate,
+    );
+
+    if (existingItem.fifo && existingItem.inventoryUnit && isValidToAffectInventory) {
       await restockInventoryItem(
         existingItem.orderId,
         existingItem.fifo,
         existingItem.inventoryUnit,
         existingItem.quantity,
+      );
+
+      // Record inventory log
+      await recordOrderInventoryLog(
+        existingItem.orderId,
+        existingItem.fifo.inventoryItemId,
+        existingItem.quantity,
+        InventoryLogType.RESTOCK,
+        InventoryLogFrom.EDIT_ORDER,
+        `Restock ${existingItem.quantity} ${existingItem?.inventoryItem?.name} to inventory due to order ${existingOrder.id} removed item ${existingItem.name}`,
       );
     }
 

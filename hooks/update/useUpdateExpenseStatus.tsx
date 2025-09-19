@@ -15,13 +15,11 @@ import {
 } from '@mui/material';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import AddIcon from '@mui/icons-material/Add';
-import UploadIcon from '@mui/icons-material/Upload';
 import { errorColor, primaryColor, successColor } from '@/theme/color';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import { DropdownItemContainer } from '@/app/admin/[companyId]/orders/styled';
 import { useParams, useRouter } from 'next/navigation';
-import UploadMergeChequeModal from '@/app/admin/[companyId]/components/Modals/UploadMergeChequeModal';
 
 export const useUpdateExpenseStatus = (
   showNotification: (type: AlertColor, message: string) => void,
