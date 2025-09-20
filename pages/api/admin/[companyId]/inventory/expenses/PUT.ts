@@ -94,6 +94,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       include: {
         orderedItems: {
           include: {
+            inventoryItem: true,
             fifo: {
               include: {
                 inventoryItem: true,
@@ -288,8 +289,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             continue;
           }
 
+          const difference = item.quantity - existedItem.quantity;
+          const isRestock = difference > 0;
+
           const newFifoQuantity =
-            existedFifo.quantity - existedItem.quantity + item.quantity;
+            existedFifo.quantity + difference;
 
           await prisma.orderedItems.update({
             where: {
@@ -310,6 +314,16 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
                 price: item.unitPrice,
               },
             });
+
+            // Record inventory log
+            await recordTransactionInventoryLog(
+              Number(id),
+              existedItem.inventoryItemId || 0,
+              Math.abs(difference),
+              isRestock ? InventoryLogType.RESTOCK : InventoryLogType.SUBTRACT,
+              InventoryLogFrom.EDIT_TRANSACTION,
+              `${isRestock ? 'Restock' : 'Subtract'} ${Math.abs(difference)} ${existedItem?.inventoryItem?.name || ''} to inventory due to edit item quantity in expense ${id} update`,
+            );
           }
 
           // await prisma.vendorItem.update({

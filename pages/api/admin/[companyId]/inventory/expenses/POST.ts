@@ -160,6 +160,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     // 3 CASES for each item - Brand new item, New vendor item but inventory exists, Item already exists
 
     const itemsAlreadyExist = items.filter((item: any) => item.id > 0);
+    console.log('itemsAlreadyExist', itemsAlreadyExist);
     // const itemsToCreate = items.filter((item: any) => item.id === 0);
 
     // const newItems =
@@ -210,6 +211,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         },
         include: {
           unit: true,
+          inventoryItem: true,
         },
       });
 
