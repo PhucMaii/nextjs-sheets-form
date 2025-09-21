@@ -12,6 +12,7 @@ interface IProps extends ModalProps {
   buttonLabel?: string;
   showNotification: (type: AlertColor, message: string) => void;
   color?: AlertColor;
+  successMsg?: string;
 }
 
 export default function ConfirmModal({
@@ -22,6 +23,7 @@ export default function ConfirmModal({
   buttonLabel,
   showNotification,
   color,
+  successMsg,
 }: IProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -30,7 +32,7 @@ export default function ConfirmModal({
       setIsLoading(true);
       await handleSubmit();
       setIsLoading(false);
-      showNotification('success', 'Action Completed Successfully');
+      showNotification('success', successMsg ? successMsg : 'Action Completed Successfully');
       onClose();
     } catch (error: any) {
       console.log('Fail to confirm: ', error);
@@ -49,7 +51,7 @@ export default function ConfirmModal({
         gap={2}
       >
         <ErrorIcon sx={{ color: grey[600], fontSize: 50 }} />
-        <Typography variant="h6" sx={{ color: grey[600] }} fontWeight="bold">
+        <Typography textAlign="center" variant="h6" sx={{ color: grey[600] }} fontWeight="bold">
           {title}
         </Typography>
 
