@@ -71,6 +71,7 @@ const ExportCategory = forwardRef(({ items }: any, ref: any) => {
                     fileKey={item?.image || item?.inventoryItem?.image}
                     width="50px"
                     height="50px"
+                    isDisableOnClick
                   />
                 ) : null}
               </BorderTableCell>

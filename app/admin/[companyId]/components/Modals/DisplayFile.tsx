@@ -130,8 +130,8 @@ export default function DisplayFile({
             );
             setError('Failed to load image');
           }}
-          width={0}
-          height={0}
+          width={100}
+          height={100}
           sizes="100vw"
           quality={95}
           loading="lazy"
