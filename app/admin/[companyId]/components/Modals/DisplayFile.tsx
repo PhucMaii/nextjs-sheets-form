@@ -3,6 +3,7 @@ import { generateImgUrl } from '@/app/lib/s3';
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, CircularProgress } from '@mui/material';
 import Image from 'next/image';
+import ViewImg from '../ViewImg';
 
 interface IProps {
   fileKey: string;
@@ -11,7 +12,7 @@ interface IProps {
   height?: string;
   isCheque?: boolean;
   style?: any;
-  onClick?: () => void;
+  isDisableOnClick?: boolean;
 }
 
 export default function DisplayFile({
@@ -20,10 +21,11 @@ export default function DisplayFile({
   width,
   height,
   isCheque,
-  onClick,
   style,
+  isDisableOnClick = false,
 }: IProps) {
   const [url, setUrl] = useState('');
+  const [isOpenViewImg, setIsOpenViewImg] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,7 +44,12 @@ export default function DisplayFile({
         const url = await generateImgUrl(fileKey, isCheque);
         setUrl(url || '/images/not-found.png');
       } catch (err) {
-        console.error('DisplayFile: Failed to generate image URL for fileKey:', fileKey, 'Error:', err);
+        console.error(
+          'DisplayFile: Failed to generate image URL for fileKey:',
+          fileKey,
+          'Error:',
+          err,
+        );
         setError('Failed to load image');
         setUrl('/images/not-found.png');
       } finally {
@@ -93,6 +100,12 @@ export default function DisplayFile({
 
   return (
     <>
+      <ViewImg
+        fileKeyFront={fileKey}
+        open={isOpenViewImg}
+        onClose={() => setIsOpenViewImg(false)}
+        isCheque={isCheque}
+      />
       {fileKey.split('.')[1] === 'pdf' ? (
         <embed src={url} width={width || '100px'} height={height || '100px'} />
       ) : (
@@ -105,13 +118,20 @@ export default function DisplayFile({
             objectFit: 'contain',
             ...style,
           }}
-          onClick={onClick}
+          onClick={() => !isDisableOnClick && setIsOpenViewImg(true)}
           onError={(e) => {
-            console.error('DisplayFile: Image failed to load. URL:', url, 'FileKey:', fileKey, 'Event:', e);
+            console.error(
+              'DisplayFile: Image failed to load. URL:',
+              url,
+              'FileKey:',
+              fileKey,
+              'Event:',
+              e,
+            );
             setError('Failed to load image');
           }}
-          width={0}
-          height={0}
+          width={100}
+          height={100}
           sizes="100vw"
           quality={95}
           loading="lazy"

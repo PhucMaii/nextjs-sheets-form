@@ -267,7 +267,7 @@ export default function SwitchTypeAndAppearanceModal({
         {uploadedImage.fileKey && (
           <Box>
             <Typography>Uploaded Image</Typography>
-            <DisplayFile fileKey={uploadedImage.fileKey} />
+            <DisplayFile fileKey={uploadedImage.fileKey} isDisableOnClick />
           </Box>
         )}
 

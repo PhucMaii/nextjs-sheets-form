@@ -1,5 +1,5 @@
 import { Order } from '@/app/admin/[companyId]/orders/page';
-import { limitOrderHour } from '@/app/lib/constant';
+import { limitOrderHour, limitOrderMinutes } from '@/app/lib/constant';
 import { generateListOfDateString, YYYYMMDDFormat } from '@/app/utils/time';
 import { IBatchTransaction } from '@/app/utils/type';
 import { Expense } from '@prisma/client';
@@ -282,3 +282,28 @@ export const shiftMonth = (date: Date, offset: number) => {
   const targetYear = base.getFullYear();
   return monthRange(targetYear, targetMonth);
 };
+
+export const getNextOrderDate = () => {
+  const dateObj = new Date();
+  const pstTime = dateObj.toLocaleString('en-US', {
+    timeZone: 'America/Los_Angeles',
+    hour12: false,
+  });
+  
+  const hour = Number(pstTime.split(', ')[1].split(':')[0]);
+  const minute = Number(pstTime.split(', ')[1].split(':')[1]);
+  // if current hour is greater limit hour, then recommend the next day
+  if (hour > limitOrderHour) {
+    dateObj.setDate(dateObj.getDate() + 1);
+  }
+
+  if (hour === limitOrderHour) {
+    if (minute > limitOrderMinutes) {
+      dateObj.setDate(dateObj.getDate() + 1);
+    }
+  }
+
+  dateObj.setHours(0, 0, 0, 0)
+
+  return dateObj;
+}

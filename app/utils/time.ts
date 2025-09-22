@@ -2,6 +2,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import { days, limitOrderHour, months } from '../lib/constant';
 import moment from 'moment';
 import { PAYMENT_TYPE } from './enum';
+import { getTodayDate } from '@/pages/api/utils/date';
 
 export const YYYYMMDDFormat = (date: Date) => {
   const month = date.getMonth() + 1;
@@ -32,12 +33,14 @@ export const generateCurrentTime = () => {
 };
 
 export const generateMinDate = () => {
-  let today: any = dayjs();
+  let today: any = getTodayDate();
+  today = dayjs(today.dateAndTime, "MM/DD/YYYY HH:mm:ss");
   if (today.$H >= limitOrderHour) {
     today = today.add(1, 'day');
   }
 
   const minDate = today.startOf('day');
+  console.log(minDate, 'MIN DATE');
   return minDate;
 };
 
