@@ -17,7 +17,7 @@ import {
 } from '@/pages/api/admin/[companyId]/orderedItems/PUT';
 import { formatItemsWithTotalPrice } from '../utils/order';
 import { ORDER_STATUS } from '@/app/utils/enum';
-import { createOrderedItems } from '../utils/orderedItems';
+import { calculateProfit, createOrderedItems } from '../utils/orderedItems';
 import { recordAction } from '../utils/timeline';
 
 interface BodyProps {
@@ -122,6 +122,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           (item?.cost / item?.inventoryUnit?.ratio) * item.inventoryUnit.ratio;
 
         actionRecord.update.push(item);
+        const profit = await calculateProfit(item, cost);
 
         await prisma.orderedItems.update({
           where: {
@@ -131,7 +132,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             price: item.price,
             quantity: item.quantity,
             cost,
-            profit: item.price - cost,
+            profit,
             inventoryUnitId: item.inventoryUnitId,
             option: item.option,
           },

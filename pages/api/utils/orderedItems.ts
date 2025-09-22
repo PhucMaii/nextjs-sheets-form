@@ -4,6 +4,7 @@ import { getTodayDate, sortByDeliveryDate } from './date';
 import { getAllUnitsByInventoryItemId } from './units';
 import { checkAndUpdateUnits } from '../admin/[companyId]/inventory/expenses/POST';
 import { recordAction } from './timeline';
+import prisma from '@/client';
 
 export const createOrderedItems = async (
   companyId: number,
@@ -49,7 +50,8 @@ export const createOrderedItems = async (
     const targetedItem = inventoryItems.find(
       (inventoryItem) => inventoryItem.id === item.inventoryItemId,
     );
-    console.log(targetedItem, 'targetedItem');
+    
+    const profit = await calculateProfit(item, item?.cost || 0);
 
     // Custom Amount Not Link With Inventory
     if (!targetedItem && item.isCustomAmount) {
@@ -58,7 +60,7 @@ export const createOrderedItems = async (
         name: item.name,
         price: item.price,
         cost: item.cost,
-        profit: item.price - item.cost,
+        profit,
         quantity: item.quantity,
         isCustomAmount: item.isCustomAmount,
         companyId,
@@ -140,6 +142,9 @@ export const createOrderedItems = async (
         // const unitRatioOf1 = targetedItem.vendorItem[0].unit.find((unit) => {
         //   return unit.ratio === 1;
         // });
+        // const itemTaxGST = item.inventoryItem?.hasGST ? item.price * 0.05 : 0;
+        // const itemTaxPST = item.inventoryItem?.hasPST ? item.price * 0.07 : 0;
+        const profit = await calculateProfit(item, itemUnit?.unitPrice || 0);
 
         // Because there is no batch, calculate profit based on unitPrice
         newOrderedItems.push({
@@ -154,7 +159,7 @@ export const createOrderedItems = async (
             isShowDiscount: item?.option?.isShowDiscount,
           },
           cost: itemUnit?.unitPrice || 0,
-          profit: item.price - (itemUnit?.unitPrice || 0),
+          profit,
           name: item.name,
           price: item.price,
           quantity: item.quantity,
@@ -219,8 +224,6 @@ export const createOrderedItems = async (
           },
         });
 
-        console.log(targetVendorItem, 'targetVendorItem');
-
         if (!targetVendorItem) {
           console.error('COnflict vendor item');
           continue;
@@ -254,8 +257,7 @@ export const createOrderedItems = async (
           ? sortedFifo[fifoIndex].price * itemUnit.ratio
           : itemUnit?.unitPrice || 0;
 
-        console.log(itemUnit, 'item unit');
-        console.log(sortedFifo[fifoIndex].price, 'sortedFifo[fifoIndex].price');
+        const profit = await calculateProfit(item, cost);
 
         // STEP 6: Create ordered item with that fifo id attached
         newOrderedItems.push({
@@ -272,7 +274,7 @@ export const createOrderedItems = async (
           companyId,
           name: item.name,
           cost: cost,
-          profit: item.price - cost,
+          profit,
           price: item.price,
           quantity: item.quantity,
           isShowDiscount: item?.isShowDiscount,
@@ -287,6 +289,8 @@ export const createOrderedItems = async (
           ? sortedFifo[0].price * itemUnit?.ratio
           : itemUnit?.unitPrice || 0;
 
+        const profit = await calculateProfit(item, cost);
+
         newOrderedItems.push({
           orderId: order.id,
           fifoId: sortedFifo[0].id,
@@ -300,7 +304,7 @@ export const createOrderedItems = async (
           },
           name: item.name,
           cost: cost,
-          profit: item.price - cost,
+          profit,
           price: item.price,
           quantity: item.quantity,
           isShowDiscount: item?.isShowDiscount,
@@ -344,4 +348,20 @@ export const createOrderedItems = async (
   });
 
   return newOrderedItems;
+};
+
+
+export const calculateProfit = async (item: any, cost: number) => {
+  let targetInventoryItem = item.inventoryItem;
+  if (!targetInventoryItem) {
+    targetInventoryItem = await prisma.inventoryItem.findUnique({
+      where: {
+        id: item.inventoryItemId,
+      },
+    });
+  }
+
+  const itemTaxGST = targetInventoryItem?.hasGST ? item.price * 0.05 : 0;
+  const itemTaxPST = targetInventoryItem?.hasPST ? item.price * 0.07 : 0;
+  return item.price - cost - itemTaxGST - itemTaxPST;
 };

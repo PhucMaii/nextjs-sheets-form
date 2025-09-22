@@ -4,7 +4,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { restockInventoryItem, updateSingleInventoryItem } from './single';
 import { gstRate, pstRate } from '@/app/lib/constant';
 import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
-import { createOrderedItems } from '@/pages/api/utils/orderedItems';
+import { calculateProfit, createOrderedItems } from '@/pages/api/utils/orderedItems';
 import { getTodayDate } from '@/pages/api/utils/date';
 import { formatItemsWithTotalPrice } from '@/pages/api/utils/order';
 import { getServerSession } from 'next-auth';
@@ -151,6 +151,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
         actionRecord.update.push(item);
 
+        const profit = await calculateProfit(item, cost);
+
         await prisma.orderedItems.update({
           where: {
             id: item.id,
@@ -159,7 +161,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             price: item.price,
             quantity: item.quantity,
             cost,
-            profit: item.price - cost,
+            profit,
             inventoryUnitId: item.inventoryUnitId,
             option: item.option,
           },

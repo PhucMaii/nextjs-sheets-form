@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { PrismaClient } from '@prisma/client';
 import withDriverAuthGuard from '@/pages/api/utils/withDriverAuthGuar';
 import { getDriverInfo } from '@/pages/api/utils/auth';
 import {
@@ -7,6 +6,7 @@ import {
   updateSingleInventoryItem,
 } from '@/pages/api/admin/[companyId]/orderedItems/single';
 import { generateOrderTotalPrice } from '@/pages/api/admin/[companyId]/orderedItems/PUT';
+import prisma from '@/client';
 
 interface IBody {
   id: number; // ordered item id
@@ -21,7 +21,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(404).json({ error: 'Your method is not supported' });
     }
 
-    const prisma = new PrismaClient();
     const { id, orderId, quantity, price } = req.body as IBody;
 
     const existingOrderedItem = await prisma.orderedItems.findUnique({

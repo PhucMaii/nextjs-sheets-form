@@ -106,7 +106,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           quantity,
           price,
           cost: costAndProfit.cost,
-          profit: price - costAndProfit.cost,
+          profit: costAndProfit.profit,
         },
         include: {
           fifo: true,
@@ -197,6 +197,7 @@ export const generateCostAndProfit = async (orderedItemId: number) => {
         id: orderedItemId,
       },
       include: {
+        inventoryItem: true,
         fifo: {
           include: {
             vendorItem: {
@@ -230,7 +231,12 @@ export const generateCostAndProfit = async (orderedItemId: number) => {
         : itemUnit?.unitPrice || 0;
     }
 
-    return { cost: cost || 0, profit: existingItem.price - (cost || 0) };
+    const pst = existingItem.inventoryItem?.hasPST ? existingItem.price * 0.07 : 0;
+    const gst = existingItem.inventoryItem?.hasGST ? existingItem.price * 0.05 : 0;
+
+    const profit = existingItem.price - (cost || 0) - pst - gst;
+
+    return { cost: cost || 0, profit };
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     throw new Error('Fail to generate cost and profit: ', error);
