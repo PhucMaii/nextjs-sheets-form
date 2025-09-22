@@ -29,6 +29,7 @@ import {
   AlertCircle,
   BarChart3,
   Warehouse,
+  Logs,
 } from 'lucide-react';
 import TrackInventoryRecord from '../components/Modals/TrackInventoryRecord';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
@@ -40,6 +41,8 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import ConfirmModal from '../components/Modals/ConfirmModal';
 import useDebounce from '@/hooks/useDebounce';
 import InternalItems from '../components/Inventory/InternalItems';
+import InventoryLogs from '../components/Inventory/InventoryLogs';
+
 // Enhanced styled components
 const PageContainer = ({ children }: { children: React.ReactNode }) => (
   <Box
@@ -461,6 +464,12 @@ export default function InventoryPage() {
           icon={<Warehouse size={18} />}
           iconPosition="start"
         />
+        <Tab
+          label="Logs (Testing)"
+          value={2}
+          icon={<Logs size={18} />}
+          iconPosition="start"
+        />
       </Tabs>
     </Box>
   );
@@ -468,23 +477,28 @@ export default function InventoryPage() {
   const renderContent = () => (
     <ShadowSection>
       {tabIndex === 0 ? (
-      <Fade in={true} timeout={300}>
-        <Box>
+        <Fade in={true} timeout={300}>
+          <Box>
             <StockItems
-            showNotification={showNotification}
-            inventoryItems={inventoryItems}
-            searchKeywords={searchKeywords}
-            setSearchKeywords={setSearchKeywords}
-            debouncedKeywords={debouncedKeywords || ''}
+              showNotification={showNotification}
+              inventoryItems={inventoryItems}
+              searchKeywords={searchKeywords}
+              setSearchKeywords={setSearchKeywords}
+              debouncedKeywords={debouncedKeywords || ''}
             />
-        </Box>
-      </Fade>
+          </Box>
+        </Fade>
+      ) : tabIndex === 1 ? (
+        <Fade in={true} timeout={300}>
+          <Box>
+            <InternalItems />
+          </Box>
+        </Fade>
       ) : (
         <Fade in={true} timeout={300}>
-         <Box>
-        <InternalItems
-        />
-        </Box>
+          <Box>
+            <InventoryLogs />
+          </Box>
         </Fade>
       )}
     </ShadowSection>

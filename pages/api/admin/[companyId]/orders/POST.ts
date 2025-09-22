@@ -21,6 +21,7 @@ import { checkHasClientOrder } from '@/pages/api/import-sheets/utils';
 import { generateOrderTotalPrice } from '@/pages/api/admin/[companyId]/orderedItems/PUT';
 import { categorizeUser } from '@/pages/api/utils/user';
 import { createOrderedItems } from '@/pages/api/utils/orderedItems';
+import prisma from '@/client';
 
 export const config = {
   api: {
@@ -303,8 +304,6 @@ export const createOrder = async (
   enteredOrderAt: string = '',
 ) => {
   try {
-    const prisma = new PrismaClient();
-
     // Check if any item quantity is decimal number
     for (const item of items) {
       if (item.quantity % 1 !== 0) {

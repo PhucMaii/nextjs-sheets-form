@@ -2,7 +2,6 @@ import {
   InventoryLogFrom,
   InventoryLogType,
   Orders,
-  PrismaClient,
 } from '@prisma/client';
 import { checkOrderValidToAffectInventory } from './order';
 import { getTodayDate, sortByDeliveryDate } from './date';
@@ -10,6 +9,7 @@ import { getAllUnitsByInventoryItemId } from './units';
 import { checkAndUpdateUnits } from '../admin/[companyId]/inventory/expenses/POST';
 import { recordAction } from './timeline';
 import { recordOrderInventoryLog } from './logs';
+import prisma from '@/client';
 
 export const createOrderedItems = async (
   companyId: number,
@@ -17,8 +17,6 @@ export const createOrderedItems = async (
   items: any,
   createdBy: string = '',
 ) => {
-  const prisma = new PrismaClient();
-
   // STEP 1: Loop through each item
   const inventoryItems = await prisma.inventoryItem.findMany({
     where: {
@@ -55,7 +53,6 @@ export const createOrderedItems = async (
     const targetedItem = inventoryItems.find(
       (inventoryItem) => inventoryItem.id === item.inventoryItemId,
     );
-    console.log(targetedItem, 'targetedItem');
 
     // Custom Amount Not Link With Inventory
     if (!targetedItem && item.isCustomAmount) {
@@ -170,6 +167,18 @@ export const createOrderedItems = async (
         isCustomAmount: item?.isCustomAmount || false,
         companyId,
       });
+
+      if (isValidToCheckInventory) {
+        // Record inventory log
+        await recordOrderInventoryLog(
+          order.id,
+          item.inventoryItemId,
+          item.quantity,
+          InventoryLogType.SUBTRACT,
+          InventoryLogFrom.CREATE_ORDER,
+          `Subtract ${item.quantity} ${item.name} from inventory due to order ${order.id} created or updated`,
+        );
+      }
       // }
     } else {
       // CASE 2: Check if vendor item has batch
