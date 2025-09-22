@@ -293,6 +293,8 @@ export const createOrderedItems = async (
           isCustomAmount: item?.isCustomAmount || false,
         });
 
+        console.log('cross check');
+
         // Record inventory log
         await recordOrderInventoryLog(
           order.id,

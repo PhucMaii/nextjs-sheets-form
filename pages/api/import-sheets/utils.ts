@@ -270,6 +270,7 @@ export const getCreatedBy = async (
 
   if (
     createdByRole === USER_ROLE.DRIVER ||
+    createdByRole === USER_ROLE.WAREHOUSE ||
     createdByRole === USER_ROLE.ADMIN ||
     createdByRole === USER_ROLE.SUPER_ADMIN
   ) {

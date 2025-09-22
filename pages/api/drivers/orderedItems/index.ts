@@ -68,7 +68,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // Update Inventory Item Quantity
     if (updatedOrderedItem?.fifo && updatedOrderedItem?.inventoryUnit && isValidToAffectInventory) {
       const difference = updatedOrderedItem.quantity - existingOrderedItem.quantity;
-      const isRestock = difference > 0;
+      const isRestock = difference < 0;
         
       await updateSingleInventoryItem(
         orderId,
@@ -82,7 +82,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       await recordOrderInventoryLog(
         orderId,
         updatedOrderedItem.fifo.inventoryItemId,
-        updatedOrderedItem.quantity,
+        Math.abs(difference),
         isRestock ? InventoryLogType.RESTOCK : InventoryLogType.SUBTRACT,
         InventoryLogFrom.EDIT_ORDER,
         `${isRestock ? 'Restock' : 'Subtract'} ${Math.abs(difference)} ${existingOrderedItem.name} to inventory due to ordered item ${updatedOrderedItem.id} updated`,

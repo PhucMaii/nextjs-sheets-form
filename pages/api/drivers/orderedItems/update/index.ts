@@ -169,7 +169,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           isAffectInventory
         ) {
           const difference = item.quantity - item.prevQuantity;
-          const isRestock = difference > 0;
+          const isRestock = difference < 0;
 
           await updateSingleInventoryItem(
             item.orderId,
@@ -184,7 +184,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           await recordOrderInventoryLog(
             item.orderId,
             item.fifo.inventoryItemId,
-            item.quantity,
+            Math.abs(difference),
             isRestock ? InventoryLogType.RESTOCK : InventoryLogType.SUBTRACT,
             InventoryLogFrom.EDIT_ORDER,
             `${isRestock ? 'Restock' : 'Subtract'} ${Math.abs(difference)} ${item?.inventoryItem?.name} to inventory due to order ${item.orderId} updated ${item.name}`,
