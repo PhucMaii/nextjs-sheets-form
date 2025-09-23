@@ -27,6 +27,10 @@
     {
       "path": "/api/cron/create-transactions",
       "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/auto-subtract-internal",
+      "schedule": "0 7 * * *"
     }
   ],
   "functions": {

@@ -751,6 +751,8 @@ model AutomationRules {
   relationalQty             Float?
   subtractQty               Float
   frequency                 String?
+  nextSubtractDate          String?
+  lastSubtractAt            String?
   isActive                  Boolean
   createdAt                 String
   createdBy                 String
