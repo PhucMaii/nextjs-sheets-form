@@ -55,7 +55,7 @@ export const recordInventoryItemLog = async (
         afterQty,
         log,
         createdAt: today.dateAndTime,
-        date: existingLossReport.reportedDate,
+        date: today.date,
         createdFrom,
       },
     });
@@ -121,7 +121,7 @@ export const recordOrderInventoryLog = async (
         afterQty,
         log,
         createdAt: today.dateAndTime,
-        date: existingOrder.deliveryDate,
+        date: today.date,
         createdFrom,
       },
     });
@@ -185,7 +185,7 @@ export const recordTransactionInventoryLog = async (
         afterQty,
         log,
         createdAt: today.dateAndTime,
-        date: existingTransaction.date,
+        date: today.date,
         createdFrom,
       },
     });

@@ -38,6 +38,8 @@ import { IInventoryItem } from '@/app/utils/type';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import dayjs from 'dayjs';
 import { InventoryLogType } from '@prisma/client';
+import SelectDateRange from '../Select/SelectDateRange';
+import { generateMonthRange } from '@/app/utils/time';
 
 // Action type configurations
 const actionConfig = {
@@ -67,17 +69,6 @@ const actionConfig = {
   },
 };
 
-// // Helper functions
-// const formatDate = (dateString: string) => {
-//   const date = new Date(dateString);
-//   return date.toLocaleDateString('en-US', {
-//     weekday: 'long',
-//     year: 'numeric',
-//     month: 'long',
-//     day: 'numeric',
-//   });
-// };
-
 const groupLogsByDate = (logs: any[]) => {
   const grouped = logs.reduce((acc, log) => {
     const date = new Date(log.createdAt).toDateString();
@@ -106,6 +97,7 @@ export default function InventoryLogs() {
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [expandedDates, setExpandedDates] = useState<Set<string>>(new Set());
+  const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
 
   const { data: inventoryItems, isLoading: isLoadingInventoryItems } = useQuery(
     {
@@ -121,12 +113,12 @@ export default function InventoryLogs() {
 
   // Data Fetching
   const { data: logs, isLoading: isLoadingLogs } = useQuery({
-    queryKey: ['inventory-logs', selectedItem?.id],
+    queryKey: ['inventory-logs', selectedItem?.id, dateRange[0], dateRange[1]],
     queryFn: async () => {
       const response = await axios.get(
         getAdminApiUrl(
           companyId,
-          `/inventory/logs?inventoryItemId=${selectedItem?.id}`,
+          `/inventory/logs?inventoryItemId=${selectedItem?.id}&startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
         ),
       );
       return response.data.data;
@@ -144,6 +136,12 @@ export default function InventoryLogs() {
     }
     return groupLogsByDate(filteredLogs || []);
   }, [logs, typeFilter]);
+  
+  const sortedDate = useMemo(() => {
+    return Object.keys(groupedLogs).sort((a, b) => {
+      return new Date(b).getTime() - new Date(a).getTime();
+    });
+  }, [groupedLogs]);
 
   // Filter items based on search
   const filteredItems = useMemo(() => {
@@ -316,7 +314,7 @@ export default function InventoryLogs() {
           </Typography>
         </Box>
 
-        <Box display="flex" gap={2} flexWrap="wrap">
+        <Box display="flex" gap={2} flexWrap="wrap" alignItems="center">
           <FormControl size="small" sx={{ minWidth: 150 }}>
             <InputLabel>Log Type</InputLabel>
             <Select
@@ -331,6 +329,10 @@ export default function InventoryLogs() {
               <MenuItem value={InventoryLogType.LOST}>Lost</MenuItem>
             </Select>
           </FormControl>
+          <SelectDateRange 
+            dateRange={dateRange} 
+            setDateRange={setDateRange}
+          />
         </Box>
       </CardContent>
     </Card>
@@ -447,15 +449,6 @@ export default function InventoryLogs() {
                     </Typography>
                   </Box>
                 </Box>
-
-                {/* <Box display="flex" alignItems="center" gap={2}>
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <User size={16} color="#6B7280" />
-                    <Typography variant="caption" color="text.secondary">
-                      {log.user} ({log.userRole})
-                    </Typography>
-                  </Box>
-                </Box> */}
               </Box>
             </Box>
           </CardContent>
@@ -487,7 +480,8 @@ export default function InventoryLogs() {
 
     return (
       <Box>
-        {Object.entries(groupedLogs).map(([date, logs]) => {
+        {sortedDate.map((date) => {
+          const logs = groupedLogs[date];
           const isExpanded = expandedDates.has(date);
           const logsArray = logs as any[];
 
