@@ -168,161 +168,161 @@ export default function InventoryLogs() {
     return inventoryItems?.find((item: any) => item.id === itemId);
   };
 
-  const renderItemSelector = () => (
-    <Card
-      sx={{
-        mb: 3,
-        borderRadius: 3,
-        boxShadow: '0 2px 12px rgba(0, 0, 0, 0.04)',
-      }}
-    >
-      <CardContent sx={{ p: 3 }}>
-        <Box display="flex" alignItems="center" gap={2} mb={3}>
-          <Box
-            sx={{
-              width: 40,
-              height: 40,
-              borderRadius: 2,
-              bgcolor: alpha('#3B82F6', 0.1),
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Package size={20} color="#3B82F6" />
-          </Box>
-          <Box>
-            <Typography variant="h6" fontWeight={600}>
-              Select Item to View Logs
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Choose an item to track its inventory history
-            </Typography>
-          </Box>
-        </Box>
+   const renderItemSelector = () => (
+     <Card
+       sx={{
+         mb: 3,
+         borderRadius: 2,
+         border: '1px solid #E5E7EB',
+         boxShadow: 'none',
+       }}
+     >
+       <CardContent sx={{ p: 2 }}>
+         <Box display="flex" alignItems="center" gap={2} mb={2}>
+           <Box
+             sx={{
+               width: 32,
+               height: 32,
+               borderRadius: 1.5,
+               bgcolor: alpha('#3B82F6', 0.1),
+               display: 'flex',
+               alignItems: 'center',
+               justifyContent: 'center',
+             }}
+           >
+             <Package size={16} color="#3B82F6" />
+           </Box>
+           <Typography variant="subtitle1" fontWeight={600}>
+             Select Item to View Logs
+           </Typography>
+         </Box>
 
-        <TextField
-          fullWidth
-          placeholder="Search items by name or SKU..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search size={20} color="#9CA3AF" />
-              </InputAdornment>
-            ),
-          }}
-          sx={{
-            mb: 2,
-            '& .MuiOutlinedInput-root': {
-              borderRadius: 2,
-            },
-          }}
-        />
+         <Box display="flex" gap={2} mb={2}>
+           <TextField
+             fullWidth
+             placeholder="Search items..."
+             value={searchTerm}
+             onChange={(e) => setSearchTerm(e.target.value)}
+             size="small"
+             InputProps={{
+               startAdornment: (
+                 <InputAdornment position="start">
+                   <Search size={16} color="#9CA3AF" />
+                 </InputAdornment>
+               ),
+             }}
+             sx={{
+               '& .MuiOutlinedInput-root': {
+                 borderRadius: 1.5,
+               },
+             }}
+           />
+           {selectedItem && (
+             <Button
+               variant="outlined"
+               size="small"
+               onClick={() => setSelectedItem(null)}
+               sx={{ textTransform: 'none', minWidth: 100 }}
+             >
+               Clear
+             </Button>
+           )}
+         </Box>
 
-        {isLoadingInventoryItems ? (
-          <LoadingComponent />
-        ) : (
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: {
-                xs: '1fr',
-                sm: 'repeat(2, 1fr)',
-                md: 'repeat(3, 1fr)',
-              },
-              gap: 2,
-              maxHeight: 300,
-              overflowY: 'auto',
-            }}
-          >
-            {filteredItems.map((item: IInventoryItem) => (
-              <Card
-                key={item.id}
-                elevation={0}
-                sx={{
-                  p: 2,
-                  cursor: 'pointer',
-                  border:
-                    selectedItem?.id === item.id
-                      ? '2px solid #3B82F6'
-                      : '1px solid #E5E7EB',
-                  borderRadius: 2,
-                  transition: 'all 0.2s ease',
-                  // boxShadow: 'rgba(0, 0, 0, 0.24) 0px 3px 8px',
-                  '&:hover': {
-                    borderColor: '#3B82F6',
-                    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.15)',
-                  },
-                }}
-                onClick={() => setSelectedItem(item)}
-              >
-                <Box display="flex" alignItems="center" gap={2}>
-                  <Avatar
-                    sx={{
-                      width: 40,
-                      height: 40,
-                      bgcolor: alpha('#3B82F6', 0.1),
-                      color: '#3B82F6',
-                    }}
-                  >
-                    <Package size={20} />
-                  </Avatar>
-                  <Box flex={1}>
-                    <Typography variant="subtitle2" fontWeight={600}>
-                      {item.name}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {item.sku}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Card>
-            ))}
-          </Box>
-        )}
-
-        {selectedItem && (
-          <Box mt={2}>
-            <Button
-              variant="outlined"
-              onClick={() => setSelectedItem(null)}
-              sx={{ textTransform: 'none' }}
-            >
-              Clear Selection
-            </Button>
-          </Box>
-        )}
-      </CardContent>
-    </Card>
-  );
+         {isLoadingInventoryItems ? (
+           <LoadingComponent />
+         ) : (
+           <Box
+             sx={{
+               display: 'grid',
+               gridTemplateColumns: {
+                 xs: '1fr',
+                 sm: 'repeat(2, 1fr)',
+                 md: 'repeat(4, 1fr)',
+               },
+               gap: 1.5,
+               maxHeight: 200,
+               overflowY: 'auto',
+             }}
+           >
+             {filteredItems.map((item: IInventoryItem) => (
+               <Box
+                 key={item.id}
+                 sx={{
+                   p: 1.5,
+                   cursor: 'pointer',
+                   border:
+                     selectedItem?.id === item.id
+                       ? '2px solid #3B82F6'
+                       : '1px solid #E5E7EB',
+                   borderRadius: 1.5,
+                   transition: 'all 0.2s ease',
+                   bgcolor: selectedItem?.id === item.id ? alpha('#3B82F6', 0.05) : 'transparent',
+                   '&:hover': {
+                     borderColor: '#3B82F6',
+                     bgcolor: alpha('#3B82F6', 0.05),
+                   },
+                 }}
+                 onClick={() => setSelectedItem(item)}
+               >
+                 <Box display="flex" alignItems="center" gap={1.5}>
+                   <Box
+                     sx={{
+                       width: 28,
+                       height: 28,
+                       borderRadius: 1,
+                       bgcolor: alpha('#3B82F6', 0.1),
+                       display: 'flex',
+                       alignItems: 'center',
+                       justifyContent: 'center',
+                       flexShrink: 0,
+                     }}
+                   >
+                     <Package size={14} color="#3B82F6" />
+                   </Box>
+                   <Box flex={1} minWidth={0}>
+                     <Typography variant="caption" fontWeight={600} noWrap>
+                       {item.name}
+                     </Typography>
+                     <Typography variant="caption" color="text.secondary" display="block" noWrap>
+                       {item.sku}
+                     </Typography>
+                   </Box>
+                 </Box>
+               </Box>
+             ))}
+           </Box>
+         )}
+       </CardContent>
+     </Card>
+   );
 
   const renderFilters = () => (
     <Card
       sx={{
         mb: 3,
-        borderRadius: 3,
-        boxShadow: '0 2px 12px rgba(0, 0, 0, 0.04)',
+        borderRadius: 2,
+        border: '1px solid #E5E7EB',
+        boxShadow: 'none',
       }}
     >
-      <CardContent sx={{ p: 3 }}>
+      <CardContent sx={{ p: 2 }}>
         <Box display="flex" alignItems="center" gap={2} mb={2}>
-          <Filter size={20} color="#6B7280" />
-          <Typography variant="subtitle1" fontWeight={600}>
+          <Filter size={16} color="#6B7280" />
+          <Typography variant="subtitle2" fontWeight={600}>
             Filters
           </Typography>
         </Box>
 
         <Box display="flex" gap={2} flexWrap="wrap" alignItems="center">
-          <FormControl size="small" sx={{ minWidth: 150 }}>
-            <InputLabel>Log Type</InputLabel>
+          <FormControl size="small" sx={{ minWidth: 120 }}>
+            <InputLabel>Type</InputLabel>
             <Select
               value={typeFilter}
-              label="Log Type"
+              label="Type"
               onChange={(e) => setTypeFilter(e.target.value)}
             >
-              <MenuItem value="all">All Logs</MenuItem>
+              <MenuItem value="all">All</MenuItem>
               <MenuItem value={InventoryLogType.STOCK_IN}>Stock In</MenuItem>
               <MenuItem value={InventoryLogType.RESTOCK}>Restock</MenuItem>
               <MenuItem value={InventoryLogType.SUBTRACT}>Subtract</MenuItem>
@@ -338,124 +338,76 @@ export default function InventoryLogs() {
     </Card>
   );
 
-  const renderLogEntry = (log: any) => {
-    const item = getItemById(log.itemId);
-    const config = actionConfig[log.type as keyof typeof actionConfig];
-    const IconComponent = config.icon;
+   const renderLogEntry = (log: any) => {
+     const config = actionConfig[log.type as keyof typeof actionConfig];
+     const IconComponent = config.icon;
+     const isNegative = log.type === InventoryLogType.SUBTRACT || log.type === InventoryLogType.LOST;
 
-    return (
-      <Fade in={true} timeout={300}>
-        <Card
-          sx={{
-            mb: 2,
-            borderRadius: 2,
-            border: '1px solid #E5E7EB',
-            boxShadow: 'none',
-          }}
-        >
-          <CardContent sx={{ p: 3 }}>
-            <Box display="flex" alignItems="flex-start" gap={3}>
-              <Box
-                sx={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 2,
-                  bgcolor: config.bgColor,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                }}
-              >
-                <IconComponent size={24} color={config.color} />
-              </Box>
+     return (
+       <Fade in={true} timeout={300}>
+         <Box
+           sx={{
+             display: 'flex',
+             alignItems: 'center',
+             gap: 2,
+             p: 2,
+             borderRadius: 2,
+             border: '1px solid #E5E7EB',
+             mb: 1,
+             bgcolor: '#FFFFFF',
+             transition: 'all 0.2s ease',
+           }}
+         >
+           {/* Action Icon */}
+           <Box
+             sx={{
+               width: 36,
+               height: 36,
+               borderRadius: 1.5,
+               bgcolor: config.bgColor,
+               display: 'flex',
+               alignItems: 'center',
+               justifyContent: 'center',
+               flexShrink: 0,
+             }}
+           >
+             <IconComponent size={18} color={config.color} />
+           </Box>
 
-              <Box flex={1}>
-                <Box display="flex" alignItems="center" gap={2} mb={1}>
-                  <Typography variant="subtitle1" fontWeight={600}>
-                    {config.label}
-                  </Typography>
-                  <Chip
-                    label={config.label}
-                    size="small"
-                    sx={{
-                      bgcolor: config.bgColor,
-                      color: config.color,
-                      fontWeight: 500,
-                    }}
-                  />
-                  {!selectedItem && (
-                    <Chip
-                      label={item?.name}
-                      size="small"
-                      variant="outlined"
-                      sx={{ fontWeight: 500 }}
-                    />
-                  )}
-                </Box>
+           {/* Main Content */}
+           <Box flex={1} minWidth={0}>
+             <Box display="flex" alignItems="center" gap={1} mb={0.5}>
+               <Typography variant="body2" fontWeight={600} color={config.color}>
+                 {config.label}
+               </Typography>
+               <Typography variant="caption" color="text.secondary">
+                 {dayjs(log.createdAt).format('HH:mm')}
+               </Typography>
+             </Box>
+             
+             <Typography variant="caption" color="text.secondary" noWrap>
+               {log.log}
+             </Typography>
+           </Box>
 
-                <Typography variant="body2" color="text.secondary" mb={2}>
-                  {log.log}
-                </Typography>
-
-                <Box
-                  display="grid"
-                  gridTemplateColumns={{
-                    xs: '1fr',
-                    sm: 'repeat(2, 1fr)',
-                    md: 'repeat(4, 1fr)',
-                  }}
-                  gap={2}
-                  mb={2}
-                >
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">
-                      Quantity Change
-                    </Typography>
-                    <Typography variant="body2" fontWeight={600}>
-                      {log.type === InventoryLogType.SUBTRACT ||
-                      log.type === InventoryLogType.LOST
-                        ? '-'
-                        : '+'}
-                      {log.quantity}
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">
-                      Previous Quantity
-                    </Typography>
-                    <Typography variant="body2" fontWeight={600}>
-                      {log.prevQty}
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">
-                      New Quantity
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      fontWeight={600}
-                      color={config.color}
-                    >
-                      {log.afterQty}
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">
-                      Time
-                    </Typography>
-                    <Typography variant="body2" fontWeight={600}>
-                      {log.createdAt}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Box>
-            </Box>
-          </CardContent>
-        </Card>
-      </Fade>
-    );
-  };
+           {/* Quantity Change - Most Important Info */}
+           <Box textAlign="right" minWidth={80}>
+             <Typography 
+               variant="h6" 
+               fontWeight={700}
+               color={isNegative ? '#EF4444' : '#10B981'}
+               sx={{ lineHeight: 1 }}
+             >
+               {isNegative ? '-' : '+'}{log.quantity}
+             </Typography>
+             <Typography variant="caption" color="text.secondary">
+               {log.prevQty} → {log.afterQty}
+             </Typography>
+           </Box>
+         </Box>
+       </Fade>
+     );
+   };
 
   const renderLogsTimeline = () => {
     if (isLoadingLogs) {
@@ -478,82 +430,206 @@ export default function InventoryLogs() {
       );
     }
 
-    return (
-      <Box>
-        {sortedDate.map((date) => {
-          const logs = groupedLogs[date];
-          const isExpanded = expandedDates.has(date);
-          const logsArray = logs as any[];
+     return (
+       <Box>
+         {sortedDate.map((date) => {
+           const logs = groupedLogs[date];
+           const isExpanded = expandedDates.has(date);
+           const logsArray = logs as any[];
 
-          return (
-            <Card
-              key={date}
+           // Calculate summary for this date
+           const stockIn = logsArray.filter((log: any) => log.type === InventoryLogType.STOCK_IN || log.type === InventoryLogType.RESTOCK).reduce((sum: number, log: any) => sum + log.quantity, 0);
+           const stockOut = logsArray.filter((log: any) => log.type === InventoryLogType.SUBTRACT || log.type === InventoryLogType.LOST).reduce((sum: number, log: any) => sum + log.quantity, 0);
+
+           return (
+             <Card
+               key={date}
+               sx={{
+                 mb: 2,
+                 borderRadius: 2,
+                 border: '1px solid #E5E7EB',
+                 boxShadow: 'none',
+                 overflow: 'hidden',
+               }}
+             >
+               <Box
+                 sx={{
+                   p: 2,
+                   cursor: 'pointer',
+                   bgcolor: isExpanded ? alpha('#3B82F6', 0.02) : 'transparent',
+                   transition: 'all 0.2s ease',
+                   '&:hover': {
+                     bgcolor: alpha('#3B82F6', 0.05),
+                   },
+                 }}
+                 onClick={() => toggleDateExpansion(date)}
+               >
+                 <Box display="flex" alignItems="center" justifyContent="space-between">
+                   <Box display="flex" alignItems="center" gap={2}>
+                     <Box
+                       sx={{
+                         width: 32,
+                         height: 32,
+                         borderRadius: 1.5,
+                         bgcolor: alpha('#3B82F6', 0.1),
+                         display: 'flex',
+                         alignItems: 'center',
+                         justifyContent: 'center',
+                       }}
+                     >
+                       <Calendar size={16} color="#3B82F6" />
+                     </Box>
+                     <Box>
+                       <Typography variant="subtitle1" fontWeight={600}>
+                         {dayjs(date).format('MMM DD, YYYY')}
+                       </Typography>
+                       <Typography variant="caption" color="text.secondary">
+                         {logsArray.length} {logsArray.length === 1 ? 'entry' : 'entries'}
+                       </Typography>
+                     </Box>
+                   </Box>
+
+                   <Box display="flex" alignItems="center" gap={2}>
+                     {/* Quick Summary */}
+                     <Box display="flex" gap={1}>
+                       {stockIn > 0 && (
+                         <Chip
+                           label={`+${stockIn}`}
+                           size="small"
+                           sx={{
+                             bgcolor: alpha('#10B981', 0.1),
+                             color: '#10B981',
+                             fontWeight: 600,
+                             fontSize: '0.75rem',
+                             height: 24,
+                           }}
+                         />
+                       )}
+                       {stockOut > 0 && (
+                         <Chip
+                           label={`-${stockOut}`}
+                           size="small"
+                           sx={{
+                             bgcolor: alpha('#EF4444', 0.1),
+                             color: '#EF4444',
+                             fontWeight: 600,
+                             fontSize: '0.75rem',
+                             height: 24,
+                           }}
+                         />
+                       )}
+                     </Box>
+                     
+                     <IconButton size="small">
+                       {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                     </IconButton>
+                   </Box>
+                 </Box>
+               </Box>
+
+               <Collapse in={isExpanded}>
+                 <Box sx={{ p: 2, pt: 0 }}>
+                   {logsArray.map((log: any) => renderLogEntry(log))}
+                 </Box>
+               </Collapse>
+             </Card>
+           );
+         })}
+       </Box>
+     );
+  };
+
+  const renderQuickSummary = () => {
+    if (!selectedItem || !logs) return null;
+
+    const totalStockIn = logs.filter((log: any) => log.type === InventoryLogType.STOCK_IN || log.type === InventoryLogType.RESTOCK).reduce((sum: number, log: any) => sum + log.quantity, 0);
+    const totalStockOut = logs.filter((log: any) => log.type === InventoryLogType.SUBTRACT || log.type === InventoryLogType.LOST).reduce((sum: number, log: any) => sum + log.quantity, 0);
+    const netChange = totalStockIn - totalStockOut;
+    const latestLog = logs[0];
+    const currentStock = latestLog?.afterQty || 0;
+
+    return (
+      <Card
+        sx={{
+          mb: 3,
+          borderRadius: 2,
+          border: '1px solid #E5E7EB',
+          boxShadow: 'none',
+          bgcolor: alpha('#3B82F6', 0.02),
+        }}
+      >
+        <CardContent sx={{ p: 2 }}>
+          <Box display="flex" alignItems="center" gap={2} mb={2}>
+            <Box
               sx={{
-                mb: 3,
-                borderRadius: 3,
-                boxShadow: '0 2px 12px rgba(0, 0, 0, 0.04)',
+                width: 32,
+                height: 32,
+                borderRadius: 1.5,
+                bgcolor: alpha('#3B82F6', 0.1),
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
-              <CardContent sx={{ p: 0 }}>
-                <Box
-                  sx={{
-                    p: 3,
-                    borderBottom: '1px solid #E5E7EB',
-                    cursor: 'pointer',
-                  }}
-                  onClick={() => toggleDateExpansion(date)}
-                >
-                  <Box
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="space-between"
-                  >
-                    <Box display="flex" alignItems="center" gap={2}>
-                      <Box
-                        sx={{
-                          width: 40,
-                          height: 40,
-                          borderRadius: 2,
-                          bgcolor: alpha('#3B82F6', 0.1),
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        <Calendar size={20} color="#3B82F6" />
-                      </Box>
-                      <Box>
-                        <Typography variant="h6" fontWeight={600}>
-                          {dayjs(date).format('MMM DD, YYYY')}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {logsArray.length}{' '}
-                          {logsArray.length === 1 ? 'entry' : 'entries'}
-                        </Typography>
-                      </Box>
-                    </Box>
-                    <IconButton>
-                      {isExpanded ? <ChevronUp /> : <ChevronDown />}
-                    </IconButton>
-                  </Box>
-                </Box>
+              <Package size={16} color="#3B82F6" />
+            </Box>
+            <Box>
+              <Typography variant="subtitle1" fontWeight={600}>
+                {selectedItem.name}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {selectedItem.sku}
+              </Typography>
+            </Box>
+          </Box>
 
-                <Collapse in={isExpanded}>
-                  <Box sx={{ p: 3 }}>
-                    {logsArray.map((log: any) => renderLogEntry(log))}
-                  </Box>
-                </Collapse>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </Box>
+          <Box display="grid" gridTemplateColumns="repeat(4, 1fr)" gap={2}>
+            <Box textAlign="center">
+              <Typography variant="h6" fontWeight={700} color="#3B82F6">
+                {currentStock}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Current Stock
+              </Typography>
+            </Box>
+            <Box textAlign="center">
+              <Typography variant="h6" fontWeight={700} color="#10B981">
+                +{totalStockIn}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Total In
+              </Typography>
+            </Box>
+            <Box textAlign="center">
+              <Typography variant="h6" fontWeight={700} color="#EF4444">
+                -{totalStockOut}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Total Out
+              </Typography>
+            </Box>
+            <Box textAlign="center">
+              <Typography 
+                variant="h6" 
+                fontWeight={700} 
+                color={netChange >= 0 ? '#10B981' : '#EF4444'}
+              >
+                {netChange >= 0 ? '+' : ''}{netChange}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Net Change
+              </Typography>
+            </Box>
+          </Box>
+        </CardContent>
+      </Card>
     );
   };
 
   return (
     <Box>
       {renderItemSelector()}
+      {selectedItem && renderQuickSummary()}
       {renderFilters()}
       {renderLogsTimeline()}
     </Box>
