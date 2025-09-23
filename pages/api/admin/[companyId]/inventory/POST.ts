@@ -237,7 +237,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         return {
           inventoryItemId: newInventory.id,
           dependentInventoryItemId: rule.dependentInventoryItemId,
-          subtractQty: rule.subtractedQuantity,
+          subtractQty: rule.subtractQty,
           relationalQty: rule?.relationalQty,
           frequency: rule?.frequency,
           nextSubtractDate: nextSubtractDate,

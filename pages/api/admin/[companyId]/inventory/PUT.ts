@@ -420,7 +420,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         }
 
         if (
-          existingRule.subtractQty !== rule.subtractedQuantity ||
+          existingRule.subtractQty !== rule.subtractQty ||
           existingRule.relationalQty !== rule.relationalQty ||
           existingRule.frequency !== rule.frequency ||
           existingRule.isActive !== rule.isActive ||
@@ -441,7 +441,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       if (newRules.length > 0) {
         await prisma.automationRules.createMany({
           data: newRules.map((rule: any) => ({
-            subtractQty: rule.subtractedQuantity,
+            subtractQty: rule.subtractQty,
             inventoryItemId: existingInventoryItem.id,
             isActive: rule.isActive,
             relationalQty: rule?.relationalQty,
@@ -459,7 +459,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           await prisma.automationRules.update({
             where: { id: rule.id },
             data: {
-              subtractQty: rule.subtractedQuantity,
+              subtractQty: rule.subtractQty,
               isActive: rule.isActive,
               relationalQty: rule?.relationalQty,
               frequency: rule?.frequency,

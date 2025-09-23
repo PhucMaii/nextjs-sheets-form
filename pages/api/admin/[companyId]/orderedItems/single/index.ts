@@ -334,9 +334,6 @@ export const updateSingleInventoryItem = async (
         quantity: targetVendorItem?.quantity - fifo.quantity + updatedQuantity,
       },
     });
-
-    // Check if is there any automation rule to subtract the quantity
-    await subtractRelatedInternalItem(fifo.inventoryItemId, newFinalQuantity);
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
   }
@@ -357,6 +354,15 @@ export const restockInventoryItem = async (
       restockQuantity,
       null,
       // 'restock',
+    );
+
+    const newRestockQuantity = restockQuantity * (unit?.ratio || 1);
+
+    // Check if is there any automation rule to subtract the quantity
+    await subtractRelatedInternalItem(
+      fifo.inventoryItemId,
+      newRestockQuantity,
+      'restock',
     );
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
@@ -412,6 +418,13 @@ export const subtractInventoryItem = async (
       null,
       // 'subtract',
     );
+
+    // Check if is there any automation rule to subtract the quantity
+    await subtractRelatedInternalItem(
+      fifo.inventoryItemId,
+      newSubtractedQuantity,
+      'subtract',
+    );
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
   }
@@ -454,6 +467,7 @@ export const findProperFifoToSubtract = async (
 export const subtractRelatedInternalItem = async (
   inventoryItemId: number,
   subtractedQuantity: number,
+  type: 'subtract' | 'restock' = 'subtract',
 ) => {
   const automationRules = await prisma.automationRules.findMany({
     where: {
@@ -476,13 +490,17 @@ export const subtractRelatedInternalItem = async (
       if (rule.inventoryItem.fifo.length > 0) {
         await prisma.fifo.update({
           where: { id: rule.inventoryItem.fifo[0].id },
-          data: { quantity: { decrement: subtractQty } },
+          data: {
+            quantity: {
+              decrement: type === 'subtract' ? subtractQty : -subtractQty,
+            },
+          },
         });
       } else {
         await prisma.fifo.create({
           data: {
             inventoryItemId: rule.inventoryItemId,
-            quantity: -subtractQty,
+            quantity: type === 'subtract' ? -subtractQty : subtractQty,
             vendorItemId: rule.inventoryItem.vendorItem[0].id,
             createdAt: getTodayDate().date,
             createdBy: 'System',
