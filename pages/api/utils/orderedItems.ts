@@ -10,6 +10,7 @@ import { checkAndUpdateUnits } from '../admin/[companyId]/inventory/expenses/POS
 import { recordAction } from './timeline';
 import { recordOrderInventoryLog } from './logs';
 import prisma from '@/client';
+import { subtractRelatedInternalItem } from '../admin/[companyId]/orderedItems/single';
 
 export const createOrderedItems = async (
   companyId: number,
@@ -169,6 +170,9 @@ export const createOrderedItems = async (
       });
 
       if (isValidToCheckInventory) {
+        // Subtract related internal item
+        await subtractRelatedInternalItem(item.inventoryItemId, item.quantity);
+
         // Record inventory log
         await recordOrderInventoryLog(
           order.id,
@@ -293,7 +297,8 @@ export const createOrderedItems = async (
           isCustomAmount: item?.isCustomAmount || false,
         });
 
-        console.log('cross check');
+        // Subtract related internal item
+        await subtractRelatedInternalItem(item.inventoryItemId, item.quantity);
 
         // Record inventory log
         await recordOrderInventoryLog(

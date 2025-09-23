@@ -5,7 +5,8 @@ import { otherTypeId } from '@/app/lib/constant';
 import { calculateNextIndexPosAndRows } from '@/pages/api/utils/appearance';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { getTodayDate } from '@/pages/api/utils/date';
-import { USER_ROLE } from '@/app/utils/enum';
+import { RECURRENCE_TYPE, USER_ROLE } from '@/app/utils/enum';
+import { calculateNextDueDate } from '@/pages/api/cron/create-transactions';
 
 interface IBody {
   name: string;
@@ -229,12 +230,17 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     // Create Automation Rules
     if (subtractRules && subtractRules.length > 0) {
       const newAutomationRules = subtractRules.map((rule: any) => {
+        let nextSubtractDate = null;
+        if (!rule.dependentInventoryItemId) {
+          nextSubtractDate = calculateNextDueDate(today.date, rule.frequency as RECURRENCE_TYPE);
+        }
         return {
           inventoryItemId: newInventory.id,
           dependentInventoryItemId: rule.dependentInventoryItemId,
           subtractQty: rule.subtractedQuantity,
           relationalQty: rule?.relationalQty,
           frequency: rule?.frequency,
+          nextSubtractDate: nextSubtractDate,
           isActive: rule.isActive,
           createdAt,
           createdBy,

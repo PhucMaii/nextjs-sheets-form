@@ -20,6 +20,7 @@ export default async function handler(
       where: {
         companyId: 1,
         isActive: true,
+        dependentInventoryItemId: null,
       },
       include: {
         inventoryItem: {

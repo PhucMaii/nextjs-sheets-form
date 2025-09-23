@@ -1,8 +1,6 @@
 import { Fifo, InventoryUnit, PrismaClient } from '@prisma/client';
-import {
-  checkOrderValidToAffectInventory,
-} from '@/pages/api/utils/order';
-import { sortByDeliveryDate } from '@/pages/api/utils/date';
+import { checkOrderValidToAffectInventory } from '@/pages/api/utils/order';
+import { getTodayDate, sortByDeliveryDate } from '@/pages/api/utils/date';
 import { recordAction } from '@/pages/api/utils/timeline';
 import prisma from '@/client';
 import { getAllUnitsByInventoryItemId } from '@/pages/api/utils/units';
@@ -237,8 +235,6 @@ export const updateSingleInventoryItem = async (
   // type: 'subtract' | 'restock' | null = null,`
 ) => {
   try {
-    const prisma = new PrismaClient();
-
     // Handle if expense quantity change or admin just force update the inventory => orderId = -1
     // Only check if orderId is a valid id
     if (orderId > 0) {
@@ -338,6 +334,9 @@ export const updateSingleInventoryItem = async (
         quantity: targetVendorItem?.quantity - fifo.quantity + updatedQuantity,
       },
     });
+
+    // Check if is there any automation rule to subtract the quantity
+    await subtractRelatedInternalItem(fifo.inventoryItemId, newFinalQuantity);
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
   }
@@ -393,7 +392,7 @@ export const subtractInventoryItem = async (
           fifoId: properFifo.id,
         },
       });
-  
+
       // delete the old fifos
       await prisma.fifo.deleteMany({
         where: {
@@ -450,4 +449,47 @@ export const findProperFifoToSubtract = async (
     deletedFifoIds,
     newSubtractedQuantity,
   };
+};
+
+export const subtractRelatedInternalItem = async (
+  inventoryItemId: number,
+  subtractedQuantity: number,
+) => {
+  const automationRules = await prisma.automationRules.findMany({
+    where: {
+      dependentInventoryItemId: inventoryItemId,
+      isActive: true,
+    },
+    include: {
+      inventoryItem: {
+        include: {
+          fifo: true,
+          vendorItem: true,
+        },
+      },
+    },
+  });
+
+  if (automationRules.length > 0) {
+    for (const rule of automationRules) {
+      const subtractQty = subtractedQuantity / (rule?.relationalQty || 1);
+      if (rule.inventoryItem.fifo.length > 0) {
+        await prisma.fifo.update({
+          where: { id: rule.inventoryItem.fifo[0].id },
+          data: { quantity: { decrement: subtractQty } },
+        });
+      } else {
+        await prisma.fifo.create({
+          data: {
+            inventoryItemId: rule.inventoryItemId,
+            quantity: -subtractQty,
+            vendorItemId: rule.inventoryItem.vendorItem[0].id,
+            createdAt: getTodayDate().date,
+            createdBy: 'System',
+            companyId: rule.companyId,
+          },
+        });
+      }
+    }
+  }
 };
