@@ -174,6 +174,7 @@ export default function InventoryPage() {
   const router = useRouter();
   const searchParams: any = useSearchParams();
   const paramsKeywords = searchParams?.get('q');
+  const paramsTabIndex = searchParams?.get('tab');
 
   const [isTrackingInventory, setIsTrackingInventory] =
     useState<boolean>(false);
@@ -212,6 +213,26 @@ export default function InventoryPage() {
       setSearchKeywords(paramsKeywords);
     }
   }, [paramsKeywords]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    
+    if (tabIndex) {
+      params.set('tab', tabIndex.toString());
+    } else {
+      params.delete('tab');
+    }
+
+    router.replace(`/admin/${companyId}/inventory?${params.toString()}`, {
+      scroll: false,
+    });
+  }, [tabIndex]);
+
+  useEffect(() => {
+    if (paramsTabIndex) {
+      setTabIndex(Number(paramsTabIndex));
+    }
+  }, [paramsTabIndex]);
 
   const getInventoryStats = () => {
     const items = inventoryItems?.data || [];

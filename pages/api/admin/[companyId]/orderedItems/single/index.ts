@@ -1,4 +1,4 @@
-import { Fifo, InventoryUnit, PrismaClient } from '@prisma/client';
+import { Fifo, InventoryLogFrom, InventoryLogType, InventoryUnit, PrismaClient } from '@prisma/client';
 import { checkOrderValidToAffectInventory } from '@/pages/api/utils/order';
 import { getTodayDate, sortByDeliveryDate } from '@/pages/api/utils/date';
 import { recordAction } from '@/pages/api/utils/timeline';
@@ -508,6 +508,28 @@ export const subtractRelatedInternalItem = async (
           },
         });
       }
+
+      // Record inventory log
+      const today = getTodayDate();
+
+      // Because we take the inventoryItem before subtract stage, so prevQty is the total qty of fifo
+      const prevQty = rule.inventoryItem.fifo.reduce((acc, curr) => acc + curr.quantity, 0);
+      const afterQty = type === 'subtract' ? prevQty - subtractQty : prevQty + subtractQty;
+
+      await prisma.inventoryLog.create({
+        data: {
+          inventoryItemId: rule.inventoryItemId,
+          quantity: subtractQty,
+          type: type === 'subtract' ? InventoryLogType.SUBTRACT : InventoryLogType.RESTOCK,
+          createdFrom: InventoryLogFrom.DEPENDENT_INVENTORY,
+          log: `${type === 'subtract' ? 'Subtract' : 'Restock'} ${subtractQty} ${rule.inventoryItem.name} from inventory due to dependent inventory item ${inventoryItemId}`,
+          prevQty: prevQty,
+          afterQty: afterQty,
+          companyId: rule.companyId,
+          createdAt: today.dateAndTime,
+          date: today.date,
+        },
+      });
     }
   }
 };
