@@ -911,6 +911,7 @@ export default function DetailStep({
                               if (newValue && setCodDate) {
                                 setCodDate(newValue);
                                 setSelectedDate(newValue);
+                                setSelectedDate(newValue);
                               }
                             }}
                             slotProps={{

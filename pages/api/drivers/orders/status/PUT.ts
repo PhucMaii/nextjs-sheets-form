@@ -5,8 +5,10 @@ import {
 } from '@/pages/api/admin/[companyId]/orderedItems/single';
 import { getDriverInfo } from '@/pages/api/utils/auth';
 import { getTodayDate } from '@/pages/api/utils/date';
+import { recordOrderInventoryLog } from '@/pages/api/utils/logs';
+import { checkOrderValidToAffectInventory } from '@/pages/api/utils/order';
 import { recordAction } from '@/pages/api/utils/timeline';
-import { OrderedItems, PaymentStatus, PrismaClient } from '@prisma/client';
+import { InventoryLogType, InventoryLogFrom, OrderedItems, PaymentStatus, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IBody {
@@ -106,6 +108,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         items: {
           include: {
             fifo: true,
+            inventoryItem: true,
             inventoryUnit: true,
           },
         },
@@ -149,15 +152,19 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           `${updatedBy} uploaded delivery proof`,
         );
       }
-
     }
 
+    const isValidToAffectInventory = await checkOrderValidToAffectInventory(
+      existingOrder?.companyId || 1,
+      existingOrder.deliveryDate,
+    );
 
     // Inventory Item Update
     // From other status to VOID -> Inventory Item get restock
     if (
       existingOrder.status !== ORDER_STATUS.VOID &&
-      updatedOrder.status === ORDER_STATUS.VOID
+      updatedOrder.status === ORDER_STATUS.VOID &&
+      isValidToAffectInventory
     ) {
       for (const item of updatedOrder.items) {
         if (item?.fifo && item?.inventoryUnit) {
@@ -167,6 +174,16 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             item.inventoryUnit,
             item.quantity,
           );
+
+          // Record inventory log
+          await recordOrderInventoryLog(
+            updatedOrder.id,
+            item.fifo.inventoryItemId,
+            item.quantity,
+            InventoryLogType.RESTOCK,
+            InventoryLogFrom.EDIT_ORDER,
+            `Restock ${item.quantity} ${item?.inventoryItem?.name} to inventory due to order ${updatedOrder.id} updated status from ${existingOrder.status} to ${updatedOrder.status}`,
+          );
         }
       }
     }
@@ -174,7 +191,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     // From VOID to other status -> Inventory Item Stock Is Subtracted
     if (
       existingOrder.status === ORDER_STATUS.VOID &&
-      updatedOrder.status !== ORDER_STATUS.VOID
+      updatedOrder.status !== ORDER_STATUS.VOID &&
+      isValidToAffectInventory
     ) {
       for (const item of updatedOrder.items) {
         if (item?.fifo && item?.inventoryUnit) {
@@ -183,6 +201,16 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             item.fifo,
             item.inventoryUnit,
             item.quantity,
+          );
+
+          // Record inventory log
+          await recordOrderInventoryLog(
+            updatedOrder.id,
+            item.fifo.inventoryItemId,
+            item.quantity,
+            InventoryLogType.SUBTRACT,
+            InventoryLogFrom.EDIT_ORDER,
+            `Subtract ${item.quantity} ${item?.inventoryItem?.name} from inventory due to order ${updatedOrder.id} updated status from ${existingOrder.status} to ${updatedOrder.status}`,
           );
         }
       }

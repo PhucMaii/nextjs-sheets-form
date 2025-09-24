@@ -108,6 +108,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     const session = await getServerSession(req, res, authOptions);
+    console.log(session?.user.role, 'session?.user.role');
     const formattedCreatedBy = await getCreatedBy(
       req,
       res,

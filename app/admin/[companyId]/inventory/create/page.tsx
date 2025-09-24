@@ -23,23 +23,28 @@ export default function CreateInventoryPage() {
   }) => {
     try {
       // remove category field from selling items
-      const sellingItems = selectedSellingItems.map((item: any) => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { category, ...rest } = item;
-        return rest;
-      });
+      let sellingItems: any[] = [];
+      if (selectedSellingItems && selectedSellingItems.length > 0) {
+        sellingItems = selectedSellingItems.map((item: any) => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { category, ...rest } = item;
+          return rest;
+        });
+      }
 
       const response = await axios.post(
         getAdminApiUrl(companyId, '/inventory'),
         {
           name: newInventoryItem.name,
           sku: newInventoryItem.sku,
-          typeId: newInventoryItem.typeId,
+          typeId: newInventoryItem?.typeId,
           hasGST: newInventoryItem.hasGST,
           hasPST: newInventoryItem.hasPST,
           isShowInventory: newInventoryItem.isShowInventory,
+          isInternal: newInventoryItem?.isInternal,
           vendorItems: selectedVendors,
           sellingItems,
+          subtractRules: newInventoryItem?.subtractRules || [],
         },
       );
 
@@ -54,6 +59,7 @@ export default function CreateInventoryPage() {
       showNotification('error', 'Fail to create inventory item');
     }
   };
+
   return (
     <>
       {NotificationComp}

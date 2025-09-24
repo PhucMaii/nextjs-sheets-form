@@ -10,13 +10,14 @@ interface IQuery {
   inventoryItemId?: string;
   companyId?: string;
   isInternal?: string;
+  includedInternal?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { vendorId, inventoryItemId, companyId, isInternal }: IQuery =
+    const { vendorId, inventoryItemId, companyId, isInternal, includedInternal }: IQuery =
       req.query;
 
     if (vendorId) {
@@ -35,6 +36,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                 },
               },
               type: true,
+              subtractRules: {
+                include: {
+                  dependentInventoryItem: true,
+                },
+              },
             },
           },
         },
@@ -69,6 +75,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           id: Number(inventoryItemId),
         },
         include: {
+          subtractRules: {
+            include: {
+              dependentInventoryItem: true,
+            },
+          },
           fifo: {
             include: {
               vendorItem: {
@@ -149,14 +160,19 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       return res.status(400).json({ error: 'Company ID is required' });
     }
 
+    const internalQuery = isInternal ? { isInternal: true } : !includedInternal ? { OR: [{ isInternal: null }, { isInternal: false }] } : {};
+
     const inventory: any = await prisma.inventoryItem.findMany({
       where: {
         companyId: Number(companyId),
-        ...(isInternal
-          ? { isInternal: true }
-          : { OR: [{ isInternal: null }, { isInternal: false }] }),
+        ...internalQuery,
       },
       include: {
+        subtractRules: {
+          include: {
+            dependentInventoryItem: true,
+          },
+        },
         fifo: {
           include: {
             vendorItem: {

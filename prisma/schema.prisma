@@ -54,6 +54,8 @@ model Company {
   medias            Media[]
   batchTransactions BatchTransaction[]
   expenseTypes      ExpenseType[]
+  automationRules   AutomationRules[]
+  inventoryLogs     InventoryLog[]
 }
 
 model PageView {
@@ -346,6 +348,7 @@ model Orders {
   delivery Delivery? @relation("OrderDelivery")
 
   items    OrderedItems[]
+  logs     InventoryLog[]
   timeline OrderTimeline? @relation("OrderTimeline")
 
   user     User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -613,6 +616,7 @@ model Expense {
   purchaseOrders   PO[]
   payrolls         Payroll[]
   cheques          Media[]
+  logs             InventoryLog[]
   fixedTransaction FixedTransaction? @relation(fields: [fixedTransactionId], references: [id])
 
   @@index([date])
@@ -725,7 +729,9 @@ model InventoryItem {
   poItems         POItem[]
   lossReports     LossReport[]
   quoteItems      QuoteItem[]
-  subtractRules   AutomationRules[]
+  logs            InventoryLog[]
+  subtractRules   AutomationRules[]   @relation("InventoryItemRules")
+  dependentSubtractRules    AutomationRules[]    @relation("DependentInventoryItemRules")
 
   company      Company?         @relation(fields: [companyId], references: [id])
   promotion Promotion? @relation(fields: [promotionId], references: [id])
@@ -738,13 +744,49 @@ model InventoryItem {
 }
 
 model AutomationRules {
-  id                Int    @id  @default(autoincrement())
-  inventoryItemId   Int
-  subtractQty       Int
-  frequency         String
-  isActive          Boolean
+  id                        Int    @id  @default(autoincrement())
+  inventoryItemId           Int
+  dependentInventoryItemId  Int?
+  companyId                 Int
+  relationalQty             Float?
+  subtractQty               Float
+  frequency                 String?
+  nextSubtractDate          String?
+  lastSubtractAt            String?
+  isActive                  Boolean
+  createdAt                 String
+  createdBy                 String
 
-  inventoryItem    InventoryItem    @relation(fields:[inventoryItemId], references: [id], onDelete: Cascade)
+  inventoryItem    InventoryItem    @relation("InventoryItemRules", fields:[inventoryItemId], references: [id], onDelete: Cascade)
+  dependentInventoryItem     InventoryItem?   @relation("DependentInventoryItemRules", fields: [dependentInventoryItemId], references: [id], onDelete: Cascade)
+  company          Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([dependentInventoryItemId])
+  @@index([inventoryItemId])
+}
+
+model InventoryLog {
+  id                       Int      @id    @default(autoincrement())
+  companyId                Int
+  inventoryItemId          Int
+  log                      String
+  type                     InventoryLogType
+  prevQty                  Float
+  afterQty                 Float
+  quantity                 Float
+  date                     String
+  createdAt                String
+  createdFrom              InventoryLogFrom
+  orderId                  Int?
+  transactionId            Int?
+
+  inventoryItem            InventoryItem  @relation(fields: [inventoryItemId], references: [id])
+  company                  Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  order                    Orders?        @relation(fields: [orderId], references: [id])
+  transaction              Expense?       @relation(fields: [transactionId], references: [id])
+
+  @@index([inventoryItemId])
+  @@index([date])
 }
 
 model ItemPreference {
@@ -1156,4 +1198,26 @@ enum ReassignmentStatus {
   PENDING
   ACCEPTED
   REJECTED
+}
+
+enum InventoryLogType {
+  SUBTRACT
+  STOCK_IN
+  RESTOCK
+  LOST
+}
+
+enum InventoryLogFrom {
+  CREATE_ORDER
+  DELETE_ORDER
+  EDIT_ORDER
+  CREATE_TRANSACTION
+  EDIT_TRANSACTION
+  DELETE_TRANSACTION
+  CREATE_LOSS_REPORT
+  EDIT_LOSS_REPORT
+  DELETE_LOSS_REPORT
+  
+  DEPENDENT_INVENTORY
+  AUTOMATIC_SUBTRACT
 }

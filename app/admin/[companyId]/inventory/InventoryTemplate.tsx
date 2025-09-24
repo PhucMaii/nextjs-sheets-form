@@ -42,6 +42,7 @@ import { InventoryItemCardSkeleton } from '../components/Inventory/InventoryItem
 import { Skeleton } from '@mui/material';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
 import VariantTable from '../items/[itemId]/VariantTable';
+import useInventoryItems from '@/hooks/autocomplete/useInventoryItems';
 
 interface InventoryTemplateProps {
   onSubmit: (params: any) => Promise<void>;
@@ -196,6 +197,8 @@ const InventoryTemplate = ({
     },
   });
 
+  const { inventoryItems } = useInventoryItems();
+
   const handleOnSelectVendors = (vendors: any[]) => {
     const vendorsWithUnits = vendors.map((vendor) => {
       if (!vendor.units || vendor.units.length === 0) {
@@ -319,6 +322,7 @@ const InventoryTemplate = ({
       name: '',
       sku: '',
       typeId: -1,
+      subtractRules: [],
     },
   );
   const [itemToAllItems, setItemToAllItems] = useState<any>({
@@ -820,7 +824,33 @@ const InventoryTemplate = ({
           <Grid item xs={12}>
             <Divider sx={{ my: 1 }} />
           </Grid>
-          <Grid item xs={12} textAlign="right">
+          <Grid
+            item
+            xs={12}
+            textAlign="right"
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              justifyContent: 'flex-end',
+            }}
+          >
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={newInventoryItem?.isInternal || false}
+                  onChange={(e) =>
+                    setNewInventoryItem((prev: any) => ({
+                      ...prev,
+                      isInternal: e.target.checked,
+                      isShowInventory: false,
+                    }))
+                  }
+                />
+              }
+              label="Internal Use Only"
+            />
+
             <FormControlLabel
               control={
                 <Checkbox
@@ -833,6 +863,7 @@ const InventoryTemplate = ({
                   }
                 />
               }
+              disabled={newInventoryItem?.isInternal}
               label="Show Low Stock Quantity"
             />
           </Grid>
@@ -874,33 +905,36 @@ const InventoryTemplate = ({
               }
             />
           </Grid>
-          <Grid
-            item
-            xs={12}
-            sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
-          >
-            <Typography fontWeight={600}>Type</Typography>
-            <Select
-              onChange={(e) =>
-                setNewInventoryItem({
-                  ...newInventoryItem,
-                  typeId: +e.target.value,
-                })
-              }
-              fullWidth
-              value={newInventoryItem.typeId}
+          {newInventoryItem.isInternal !== true && (
+            <Grid
+              item
+              xs={12}
+              sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
             >
-              <MenuItem value={-1} disabled>
-                -- Choose type --
-              </MenuItem>
-              {itemTypes &&
-                itemTypes.map((type: any) => (
-                  <MenuItem key={type.id} value={type.id}>
-                    {type.name}
-                  </MenuItem>
-                ))}
-            </Select>
-          </Grid>
+              <Typography fontWeight={600}>Type</Typography>
+              <Select
+                onChange={(e) =>
+                  setNewInventoryItem({
+                    ...newInventoryItem,
+                    typeId: +e.target.value,
+                  })
+                }
+                fullWidth
+                value={newInventoryItem.typeId}
+              >
+                <MenuItem value={-1} disabled>
+                  -- Choose type --
+                </MenuItem>
+                <MenuItem value={0}>N/A</MenuItem>
+                {itemTypes &&
+                  itemTypes.map((type: any) => (
+                    <MenuItem key={type.id} value={type.id}>
+                      {type.name}
+                    </MenuItem>
+                  ))}
+              </Select>
+            </Grid>
+          )}
         </Grid>
       </ShadowSection>
 
@@ -1061,207 +1095,542 @@ const InventoryTemplate = ({
         </Box>
       </ShadowSection>
 
-      {/* Assign categories to this inventory */}
-      <ShadowSection>
-        <Box display="flex" alignItems="center" justifyContent="space-between">
-          <Box display="flex" flexDirection="column" gap={0.5}>
-            <Typography fontWeight={600}>Assign Categories</Typography>
-            <Box display="flex" alignItems="center" gap={1}>
-              <InfoIcon style={{ width: 16, height: 16, color: grey[700] }} />
-              <Typography variant="body2" color={grey[700]}>
-                Variants items must be edited at item page.
-              </Typography>
-            </Box>
-          </Box>
-          <Button
-            color="primary"
-            onClick={handleOpenCategorySelection}
-            disabled={selectedVendors.length === 0}
-          >
-            + Add Category
-          </Button>
-        </Box>
-
-        {/* {selectedSellingItems.length > 0 && (
+      {/* Assign automation subtract rules for internal use only */}
+      {newInventoryItem.isInternal ? (
+        <ShadowSection>
           <Box
             display="flex"
             alignItems="center"
-            gap={1}
-            sx={{ my: 1, justifyContent: 'flex-end' }}
+            justifyContent="space-between"
+            mb={3}
           >
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={applyToAllItems}
-                  onChange={(e) => setApplyToAllItems(e.target.checked)}
-                />
-              }
-              label="Apply to all items"
-            />
+            <Box>
+              <Typography fontWeight={600} variant="h6">
+                Automation Subtract Rules
+              </Typography>
+              <Typography variant="body2" color={grey[600]} sx={{ mt: 0.5 }}>
+                Set up automatic quantity reduction for internal use items
+              </Typography>
+            </Box>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={() => {
+                setNewInventoryItem((prev: any) => ({
+                  ...prev,
+                  subtractRules: [
+                    ...(prev.subtractRules || []),
+                    {
+                      id: crypto.randomUUID(),
+                      subtractQty: 1,
+                      frequency: 'daily',
+                      dependentInventoryItemId: -1,
+                      isActive: true,
+                    },
+                  ],
+                }));
+              }}
+              startIcon={<span style={{ fontSize: '18px' }}>+</span>}
+            >
+              Add Rule
+            </Button>
           </Box>
-        )} */}
 
-        {selectedSellingItems.length > 0 && (
-          <>
-            <Typography fontWeight={600} mt={2} mb={1}>
-              General Item Set
-            </Typography>
-            <Grid container spacing={2} alignItems="center">
-              <Grid item xs={12} md={3.3}>
-                <FormControl fullWidth>
-                  <InputLabel htmlFor="general-name-input">Name</InputLabel>
-                  <OutlinedInput
-                    id="general-name-input"
-                    label="Name"
-                    value={itemToAllItems.name}
-                    onChange={(e) =>
-                      setItemToAllItems((prev: any) => ({
-                        ...prev,
-                        name: e.target.value,
-                      }))
-                    }
-                    fullWidth
-                    endAdornment={
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={() => handleApplyToAllItems('name')}
-                        >
-                          <KeyboardDoubleArrowDownIcon />
-                        </IconButton>
-                      </InputAdornment>
-                    }
-                  />
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} md={1.5}>
-                <FormControl fullWidth>
-                  <InputLabel htmlFor="general-unit-input">Unit</InputLabel>
-                  <Select
-                    id="general-unit-input"
-                    label="Unit"
-                    value={JSON.stringify(itemToAllItems?.inventoryUnit || {})}
-                    onChange={(e) =>
-                      setItemToAllItems((prev: any) => ({
-                        ...prev,
-                        inventoryUnit: JSON.parse(e.target.value),
-                      }))
-                    }
-                    fullWidth
-                    endAdornment={
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={() => handleApplyToAllItems('inventoryUnit')}
-                        >
-                          <KeyboardDoubleArrowDownIcon />
-                        </IconButton>
-                      </InputAdornment>
-                    }
+          {newInventoryItem.subtractRules &&
+          newInventoryItem.subtractRules.length > 0 ? (
+            <Box display="flex" flexDirection="column" gap={2}>
+              {newInventoryItem.subtractRules.map(
+                (rule: any, index: number) => (
+                  <Box
+                    key={rule.id}
+                    sx={{
+                      p: 3,
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      borderRadius: 2,
+                      backgroundColor: 'background.paper',
+                      position: 'relative',
+                    }}
                   >
-                    {uniqueRatioUnits.map((unit: any) => (
-                      <MenuItem key={unit.id} value={JSON.stringify(unit)}>
-                        1:{unit.ratio} - {unit.unit}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} md={3.3}>
-                <FormControl fullWidth>
-                  <InputLabel htmlFor="general-price-input">Price</InputLabel>
-                  <OutlinedInput
-                    id="general-price-input"
-                    label="Price"
-                    fullWidth
-                    value={itemToAllItems.price}
-                    type="number"
-                    onChange={(e) =>
-                      setItemToAllItems((prev: any) => ({
-                        ...prev,
-                        price: +e.target.value,
-                      }))
-                    }
-                    endAdornment={
-                      <InputAdornment position="end">
-                        <Box display="flex" alignItems="center" gap={1}>
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="space-between"
+                      mb={2}
+                    >
+                      <Typography fontWeight={600}>
+                        Rule #{index + 1}
+                      </Typography>
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          setNewInventoryItem((prev: any) => ({
+                            ...prev,
+                            subtractRules: prev.subtractRules.filter(
+                              (r: any) => r.id !== rule.id,
+                            ),
+                          }));
+                        }}
+                        sx={{ color: 'error.main' }}
+                      >
+                        <Trash2Icon style={{ width: 16, height: 16 }} />
+                      </IconButton>
+                    </Box>
 
-                          <IconButton
-                            onClick={() => handleApplyToAllItems('price')}
-                          >
-                            <KeyboardDoubleArrowDownIcon />
-                          </IconButton>
-                        </Box>
-                      </InputAdornment>
-                    }
-                  />
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} md={3.9}>
-                <FormControl fullWidth>
-                  <InputLabel htmlFor="general-prev-price-input">
-                    Prev Price
-                  </InputLabel>
-                  <OutlinedInput
-                    id="general-prev-price-input"
-                    label="Prev Price"
-                    fullWidth
-                    value={itemToAllItems.prevPrice}
-                    type="number"
-                    onChange={(e) =>
-                      setItemToAllItems((prev: any) => ({
-                        ...prev,
-                        prevPrice: +e.target.value,
-                      }))
-                    }
-                    endAdornment={
-                      <InputAdornment position="end">
-                        <Box>
-                          <FormControlLabel
-                            control={
-                              <Checkbox
-                                checked={itemToAllItems.isShowDiscount}
-                                onChange={(e) =>
-                                  setItemToAllItems((prev: any) => ({
-                                    ...prev,
-                                    isShowDiscount: e.target.checked,
-                                  }))
-                                }
-                              />
+                    <Grid container spacing={2} alignItems="center">
+                      {/* Quantity Input */}
+                      <Grid item xs={12} md={4}>
+                        <FormControl fullWidth>
+                          <InputLabel htmlFor={`quantity-${rule.id}`}>
+                            Subtracted Quantity
+                          </InputLabel>
+                          <OutlinedInput
+                            id={`quantity-${rule.id}`}
+                            label="Subtracted Quantity"
+                            type="number"
+                            value={rule.subtractQty}
+                            onChange={(e) => {
+                              const newRules =
+                                newInventoryItem.subtractRules.map(
+                                  (r: any) =>
+                                    r.id === rule.id
+                                      ? {
+                                          ...r,
+                                          subtractQty: Math.max(
+                                            1,
+                                            +e.target.value,
+                                          ),
+                                        }
+                                      : r,
+                                );
+                              setNewInventoryItem((prev: any) => ({
+                                ...prev,
+                                subtractRules: newRules,
+                              }));
+                            }}
+                            inputProps={{ min: 1 }}
+                            startAdornment={
+                              <InputAdornment position="start">
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                >
+                                  Qty
+                                </Typography>
+                              </InputAdornment>
                             }
-                            label="Show Discount"
                           />
+                        </FormControl>
+                      </Grid>
+
+                      {/* Dependency Selection */}
+                      <Grid item xs={12} sm={6} md={3}>
+                        <FormControl fullWidth>
+                          <InputLabel htmlFor={`dependency-${rule.id}`}>
+                            Dependent Inventory Item (Optional)
+                          </InputLabel>
+                          <Select
+                            id={`dependency-${rule.id}`}
+                            label="Dependent Inventory Item (Optional)"
+                            value={rule.dependentInventoryItemId || -1}
+                            onChange={(e) => {
+                              const targetInventoryItem = inventoryItems?.find(
+                                (item: any) => item.id === +e.target.value,
+                              );
+                              const newRules =
+                                newInventoryItem.subtractRules.map(
+                                  (r: any) =>
+                                    r.id === rule.id
+                                      ? {
+                                          ...r,
+                                          dependentInventoryItemId:
+                                            e.target.value || -1,
+                                          dependentInventoryItem:
+                                            targetInventoryItem,
+                                          frequency: e.target.value > 0
+                                            ? null
+                                            : 'daily',
+                                        }
+                                      : r,
+                                );
+                              setNewInventoryItem((prev: any) => ({
+                                ...prev,
+                                subtractRules: newRules,
+                              }));
+                            }}
+                            displayEmpty
+                          >
+                            <MenuItem value={-1}>
+                              <em
+                                style={{
+                                  fontStyle: 'italic',
+                                  color: grey[500],
+                                }}
+                              >
+                                No dependency - Use frequency
+                              </em>
+                            </MenuItem>
+                            {inventoryItems &&
+                              inventoryItems.map((item: any) => (
+                                <MenuItem key={item.id} value={item.id}>
+                                  {item.name}
+                                </MenuItem>
+                              ))}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+
+                      {/* Frequency Selection - Only show if no dependency */}
+
+                      {rule.dependentInventoryItemId > 0 ? (
+                        <Grid item xs={12} sm={6} md={3}>
+                          <TextField
+                            id={`relational-qty-${rule.id}`}
+                            label="Relational Quantity"
+                            type="number"
+                            fullWidth
+                            value={rule.relationalQty}
+                            onChange={(e) => {
+                              const newRules =
+                                newInventoryItem.subtractRules.map(
+                                  (r: any) =>
+                                    r.id === rule.id
+                                      ? { ...r, relationalQty: +e.target.value }
+                                      : r,
+                                );
+                              setNewInventoryItem((prev: any) => ({
+                                ...prev,
+                                subtractRules: newRules,
+                              }));
+                            }}
+                          />
+                        </Grid>
+                      ) : (
+                        <Grid item xs={12} sm={6} md={3}>
+                          <FormControl fullWidth>
+                            <InputLabel htmlFor={`frequency-${rule.id}`}>
+                              Frequency
+                            </InputLabel>
+                            <Select
+                              id={`frequency-${rule.id}`}
+                              label="Frequency"
+                              value={rule.frequency || 'daily'}
+                              onChange={(e) => {
+                                const newRules =
+                                  newInventoryItem.subtractRules.map(
+                                    (r: any) =>
+                                      r.id === rule.id
+                                        ? { ...r, frequency: e.target.value }
+                                        : r,
+                                  );
+                                setNewInventoryItem((prev: any) => ({
+                                  ...prev,
+                                  subtractRules: newRules,
+                                }));
+                              }}
+                            >
+                              <MenuItem value="daily">Daily</MenuItem>
+                              <MenuItem value="weekly">Weekly</MenuItem>
+                              <MenuItem value="biweekly">Bi-Weekly</MenuItem>
+                              <MenuItem value="monthly">Monthly</MenuItem>
+                              <MenuItem value="yearly">Yearly</MenuItem>
+                            </Select>
+                          </FormControl>
+                        </Grid>
+                      )}
+
+                      {/* Is Active */}
+                      <Grid item xs={12} sm={6} md={2} textAlign="right">
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              id={`is-active-${rule.id}`}
+                              checked={rule?.isActive || false}
+                              onChange={(e) => {
+                                const newRules =
+                                  newInventoryItem.subtractRules.map(
+                                    (r: any) =>
+                                      r.id === rule.id
+                                        ? { ...r, isActive: e.target.checked }
+                                        : r,
+                                  );
+                                setNewInventoryItem((prev: any) => ({
+                                  ...prev,
+                                  subtractRules: newRules,
+                                }));
+                              }}
+                            />
+                          }
+                          label="Active"
+                        />
+                      </Grid>
+                    </Grid>
+
+                    {/* Rule Summary */}
+                    <Box
+                      sx={{
+                        mt: 2,
+                        p: 2,
+                        backgroundColor: 'action.hover',
+                        borderRadius: 1,
+                        border: '1px dashed',
+                        borderColor: 'divider',
+                      }}
+                    >
+                      <Typography variant="body2" color="text.secondary">
+                        <strong>Rule Summary:</strong> Subtract{' '}
+                        <strong>{rule.subtractQty}</strong> quantity{' '}
+                        {rule.dependentInventoryItemId && rule.dependentInventoryItemId > 0 ? (
+                          <>
+                            when{' '}
+                            <strong>{rule.dependentInventoryItem?.name}</strong>{' '}
+                            is used with <strong>{rule.relationalQty}</strong>{' '}
+                            quantity
+                          </>
+                        ) : (
+                          <>
+                            <strong>{rule.frequency}</strong>
+                          </>
+                        )}
+                      </Typography>
+                    </Box>
+                  </Box>
+                ),
+              )}
+            </Box>
+          ) : (
+            <Box
+              sx={{
+                p: 4,
+                textAlign: 'center',
+                border: '2px dashed',
+                borderColor: 'divider',
+                borderRadius: 2,
+                backgroundColor: 'action.hover',
+              }}
+            >
+              <Typography variant="h6" color="text.secondary" gutterBottom>
+                No automation rules set
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Add rules to automatically reduce inventory quantities based on
+                time or dependencies
+              </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => {
+                  setNewInventoryItem((prev: any) => ({
+                    ...prev,
+                    subtractRules: [
+                      {
+                        id: crypto.randomUUID(),
+                        subtractQty: 1,
+                        frequency: 'daily',
+                        dependentInventoryItemId: -1,
+                        isActive: true,
+                      },
+                    ],
+                  }));
+                }}
+                startIcon={<span style={{ fontSize: '18px' }}>+</span>}
+              >
+                Add Your First Rule
+              </Button>
+            </Box>
+          )}
+        </ShadowSection>
+      ) : (
+        <ShadowSection>
+          {/* Assign categories to this inventory */}
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Box display="flex" flexDirection="column" gap={0.5}>
+              <Typography fontWeight={600}>Assign Categories</Typography>
+              <Box display="flex" alignItems="center" gap={1}>
+                <InfoIcon style={{ width: 16, height: 16, color: grey[700] }} />
+                <Typography variant="body2" color={grey[700]}>
+                  Variants items must be edited at item page.
+                </Typography>
+              </Box>
+            </Box>
+            <Button
+              color="primary"
+              onClick={handleOpenCategorySelection}
+              disabled={selectedVendors.length === 0}
+            >
+              + Add Category
+            </Button>
+          </Box>
+
+          {selectedSellingItems.length > 0 && (
+            <>
+              <Typography fontWeight={600} mt={2} mb={1}>
+                General Item Set
+              </Typography>
+              <Grid container spacing={2} alignItems="center">
+                <Grid item xs={12} md={3.3}>
+                  <FormControl fullWidth>
+                    <InputLabel htmlFor="general-name-input">Name</InputLabel>
+                    <OutlinedInput
+                      id="general-name-input"
+                      label="Name"
+                      value={itemToAllItems.name}
+                      onChange={(e) =>
+                        setItemToAllItems((prev: any) => ({
+                          ...prev,
+                          name: e.target.value,
+                        }))
+                      }
+                      fullWidth
+                      endAdornment={
+                        <InputAdornment position="end">
                           <IconButton
-                            onClick={() => handleApplyToAllItems('prevPrice')}
+                            onClick={() => handleApplyToAllItems('name')}
                           >
                             <KeyboardDoubleArrowDownIcon />
                           </IconButton>
-                        </Box>
-                      </InputAdornment>
-                    }
-                  />
-                </FormControl>
-              </Grid>
+                        </InputAdornment>
+                      }
+                    />
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} md={1.5}>
+                  <FormControl fullWidth>
+                    <InputLabel htmlFor="general-unit-input">Unit</InputLabel>
+                    <Select
+                      id="general-unit-input"
+                      label="Unit"
+                      value={JSON.stringify(
+                        itemToAllItems?.inventoryUnit || {},
+                      )}
+                      onChange={(e) =>
+                        setItemToAllItems((prev: any) => ({
+                          ...prev,
+                          inventoryUnit: JSON.parse(e.target.value),
+                        }))
+                      }
+                      fullWidth
+                      endAdornment={
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={() =>
+                              handleApplyToAllItems('inventoryUnit')
+                            }
+                          >
+                            <KeyboardDoubleArrowDownIcon />
+                          </IconButton>
+                        </InputAdornment>
+                      }
+                    >
+                      {uniqueRatioUnits.map((unit: any) => (
+                        <MenuItem key={unit.id} value={JSON.stringify(unit)}>
+                          1:{unit.ratio} - {unit.unit}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} md={3.3}>
+                  <FormControl fullWidth>
+                    <InputLabel htmlFor="general-price-input">Price</InputLabel>
+                    <OutlinedInput
+                      id="general-price-input"
+                      label="Price"
+                      fullWidth
+                      value={itemToAllItems.price}
+                      type="number"
+                      onChange={(e) =>
+                        setItemToAllItems((prev: any) => ({
+                          ...prev,
+                          price: +e.target.value,
+                        }))
+                      }
+                      endAdornment={
+                        <InputAdornment position="end">
+                          <Box display="flex" alignItems="center" gap={1}>
+                            <IconButton
+                              onClick={() => handleApplyToAllItems('price')}
+                            >
+                              <KeyboardDoubleArrowDownIcon />
+                            </IconButton>
+                          </Box>
+                        </InputAdornment>
+                      }
+                    />
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} md={3.9}>
+                  <FormControl fullWidth>
+                    <InputLabel htmlFor="general-prev-price-input">
+                      Prev Price
+                    </InputLabel>
+                    <OutlinedInput
+                      id="general-prev-price-input"
+                      label="Prev Price"
+                      fullWidth
+                      value={itemToAllItems.prevPrice}
+                      type="number"
+                      onChange={(e) =>
+                        setItemToAllItems((prev: any) => ({
+                          ...prev,
+                          prevPrice: +e.target.value,
+                        }))
+                      }
+                      endAdornment={
+                        <InputAdornment position="end">
+                          <Box>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  checked={itemToAllItems.isShowDiscount}
+                                  onChange={(e) =>
+                                    setItemToAllItems((prev: any) => ({
+                                      ...prev,
+                                      isShowDiscount: e.target.checked,
+                                    }))
+                                  }
+                                />
+                              }
+                              label="Show Discount"
+                            />
+                            <IconButton
+                              onClick={() => handleApplyToAllItems('prevPrice')}
+                            >
+                              <KeyboardDoubleArrowDownIcon />
+                            </IconButton>
+                          </Box>
+                        </InputAdornment>
+                      }
+                    />
+                  </FormControl>
+                </Grid>
 
-              <Grid item xs={12} textAlign="right">
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => handleApplyToAllItems('all')}
-                >
-                  Apply
-                </Button>
+                <Grid item xs={12} textAlign="right">
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleApplyToAllItems('all')}
+                  >
+                    Apply
+                  </Button>
+                </Grid>
+                <Grid item xs={12}>
+                  <Divider flexItem sx={{ my: 1 }}>
+                    Selling Items
+                  </Divider>
+                </Grid>
               </Grid>
-              <Grid item xs={12}>
-                <Divider flexItem sx={{ my: 1 }}>
-                  Selling Items
-                </Divider>
-              </Grid>
-            </Grid>
-          </>
-        )}
-        <Box mt={4} display="flex" flexDirection="column" gap={2}>
-          {renderedSellingItems}
-        </Box>
-      </ShadowSection>
+            </>
+          )}
+          <Box mt={4} display="flex" flexDirection="column" gap={2}>
+            {renderedSellingItems}
+          </Box>
+        </ShadowSection>
+      )}
     </Sidebar>
   );
 };

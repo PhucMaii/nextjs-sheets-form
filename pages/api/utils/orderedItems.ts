@@ -1,10 +1,16 @@
-import { Orders, PrismaClient } from '@prisma/client';
+import {
+  InventoryLogFrom,
+  InventoryLogType,
+  Orders,
+} from '@prisma/client';
 import { checkOrderValidToAffectInventory } from './order';
 import { getTodayDate, sortByDeliveryDate } from './date';
 import { getAllUnitsByInventoryItemId } from './units';
 import { checkAndUpdateUnits } from '../admin/[companyId]/inventory/expenses/POST';
 import { recordAction } from './timeline';
+import { recordOrderInventoryLog } from './logs';
 import prisma from '@/client';
+import { subtractRelatedInternalItem } from '../admin/[companyId]/orderedItems/single';
 
 export const createOrderedItems = async (
   companyId: number,
@@ -12,8 +18,6 @@ export const createOrderedItems = async (
   items: any,
   createdBy: string = '',
 ) => {
-  const prisma = new PrismaClient();
-
   // STEP 1: Loop through each item
   const inventoryItems = await prisma.inventoryItem.findMany({
     where: {
@@ -67,7 +71,6 @@ export const createOrderedItems = async (
       });
       continue;
     }
-
 
     if (!targetedItem) {
       console.error('Conflict Inventory Item Not Found');
@@ -168,6 +171,62 @@ export const createOrderedItems = async (
           isCustomAmount: item?.isCustomAmount || false,
           companyId,
         });
+
+      comment += `x${item.quantity} ${item.name}\n`;
+
+      // Update vendor item quantity
+      await prisma.vendorItem.update({
+        where: {
+          id: targetedItem.vendorItem[0].id,
+        },
+        data: {
+          quantity: isValidToCheckInventory
+            ? -item.quantity * (itemUnit?.ratio || 1)
+            : 0,
+        },
+      });
+
+      // const unitRatioOf1 = targetedItem.vendorItem[0].unit.find((unit) => {
+      //   return unit.ratio === 1;
+      // });
+
+      // Because there is no batch, calculate profit based on unitPrice
+      newOrderedItems.push({
+        orderId: order.id,
+        fifoId: newFifo.id,
+        // optionId: item?.optionId || null,
+        option: {
+          name: item?.option?.name || '',
+          price: item?.option?.price || 0,
+          ratio: itemUnit?.ratio || 1,
+          prevPrice: item?.option?.prevPrice,
+          isShowDiscount: item?.option?.isShowDiscount,
+        },
+        cost: itemUnit?.unitPrice || 0,
+        profit: item.price - (itemUnit?.unitPrice || 0),
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        inventoryUnitId: unitId,
+        inventoryItemId: item.inventoryItemId,
+        isCustomAmount: item?.isCustomAmount || false,
+        companyId,
+      });
+
+      if (isValidToCheckInventory) {
+        // Subtract related internal item
+        await subtractRelatedInternalItem(item.inventoryItemId, item.quantity);
+
+        // Record inventory log
+        await recordOrderInventoryLog(
+          order.id,
+          item.inventoryItemId,
+          item.quantity,
+          InventoryLogType.SUBTRACT,
+          InventoryLogFrom.CREATE_ORDER,
+          `Subtract ${item.quantity} ${item.name} from inventory due to order ${order.id} created or updated`,
+        );
+      }
       // }
     } else {
       // CASE 2: Check if vendor item has batch
@@ -283,6 +342,19 @@ export const createOrderedItems = async (
           inventoryItemId: item.inventoryItemId,
           isCustomAmount: item?.isCustomAmount || false,
         });
+
+        // Subtract related internal item
+        await subtractRelatedInternalItem(item.inventoryItemId, item.quantity);
+
+        // Record inventory log
+        await recordOrderInventoryLog(
+          order.id,
+          item.inventoryItemId,
+          itemQuantity,
+          InventoryLogType.SUBTRACT,
+          InventoryLogFrom.CREATE_ORDER,
+          `Subtract ${itemQuantity} ${item.name} from inventory due to order ${order.id} created or updated`,
+        );
       } else {
         // If no valid to check inventory, use the first fifo
         const cost = sortedFifo[0]?.price
@@ -333,7 +405,7 @@ export const createOrderedItems = async (
     (acc, item) => acc + item.quantity,
     0,
   );
-  
+
   if (isValidToCheckInventory && comment) {
     await recordAction(
       order.id,

@@ -5,7 +5,8 @@ import { otherTypeId } from '@/app/lib/constant';
 import { calculateNextIndexPosAndRows } from '@/pages/api/utils/appearance';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { getTodayDate } from '@/pages/api/utils/date';
-import { USER_ROLE } from '@/app/utils/enum';
+import { RECURRENCE_TYPE, USER_ROLE } from '@/app/utils/enum';
+import { calculateNextDueDate } from '@/pages/api/cron/create-transactions';
 
 interface IBody {
   name: string;
@@ -16,7 +17,9 @@ interface IBody {
   hasGST: boolean;
   isShowInventory: boolean;
   vendorItems: any[];
-  sellingItems: any[];
+  sellingItems?: any[];
+  isInternal?: boolean;
+  subtractRules: any[];
 }
 
 interface IQuery {
@@ -37,6 +40,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       isShowInventory,
       vendorItems,
       sellingItems,
+      isInternal,
+      subtractRules,
     }: IBody = req.body;
 
     const { companyId }: IQuery = req.query;
@@ -80,12 +85,21 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    const { nextPos, newRows } = await calculateNextIndexPosAndRows(typeId, 1);
+    let nextPos: number[] | null = null;
+    let newRows: number | null = null;
+    if (typeId > 0) {
+      const { nextPos: nextPosResult, newRows: newRowsResult } =
+        await calculateNextIndexPosAndRows(typeId, 1);
+
+      nextPos = nextPosResult;
+      newRows = newRowsResult;
+    }
 
     // Create Main Inventory Item
     const newInventory = await prisma.inventoryItem.create({
       data: {
         name,
+        isInternal,
         // supplierSku,
         sku,
         hasPST,
@@ -95,20 +109,22 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         createdBy,
         color: infoBackground,
         typeId: typeId > 0 ? typeId : otherTypeId,
-        indexPos: nextPos[0],
+        indexPos: nextPos ? nextPos[0] : null,
         companyId: Number(companyId),
       },
     });
 
     // Update Rows in Item Type
-    await prisma.itemType.update({
-      where: {
-        id: typeId,
-      },
-      data: {
-        rows: newRows,
-      },
-    });
+    if (newRows) {
+      await prisma.itemType.update({
+        where: {
+          id: typeId,
+        },
+        data: {
+          rows: newRows,
+        },
+      });
+    }
 
     // Create Vendor Item
     const newVendorItems = vendorItems.map((vendorItem: any) => {
@@ -174,40 +190,68 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    // Create Selling Items
-    const newSellingItems = sellingItems.map((sellingItem: any) => {
-      const targetUnit = justCreatedUnits.find(
-        (unit: any) =>
-          unit.unit === sellingItem.inventoryUnit.unit &&
-          unit.ratio === sellingItem.inventoryUnit.ratio &&
-          unit.unitPrice === sellingItem.inventoryUnit.unitPrice,
-      );
-
-      if (!targetUnit) {
-        console.error(
-          `Conflict Unit not found for sellingItem ID: ${sellingItem.id}`,
+    if (sellingItems && sellingItems.length > 0) {
+      // Create Selling Items
+      const newSellingItems = sellingItems.map((sellingItem: any) => {
+        const targetUnit = justCreatedUnits.find(
+          (unit: any) =>
+            unit.unit === sellingItem.inventoryUnit.unit &&
+            unit.ratio === sellingItem.inventoryUnit.ratio &&
+            unit.unitPrice === sellingItem.inventoryUnit.unitPrice,
         );
-        return null; // Skip this sellingItem by returning null
-      }
 
-      return {
-        inventoryItemId: newInventory.id,
-        categoryId: sellingItem.categoryId,
-        name: sellingItem.name,
-        price: sellingItem.price,
-        inventoryUnitId: targetUnit.id,
-        isShowDiscount: sellingItem.isShowDiscount,
-        prevPrice: sellingItem.prevPrice,
-        availability: true,
-        createdAt,
-        createdBy,
-        companyId: Number(companyId),
-      };
-    });
+        if (!targetUnit) {
+          console.error(
+            `Conflict Unit not found for sellingItem ID: ${sellingItem.id}`,
+          );
+          return null; // Skip this sellingItem by returning null
+        }
 
-    await prisma.item.createMany({
-      data: newSellingItems.filter((item: any) => item !== null) as any,
-    });
+        return {
+          inventoryItemId: newInventory.id,
+          categoryId: sellingItem.categoryId,
+          name: sellingItem.name,
+          price: sellingItem.price,
+          inventoryUnitId: targetUnit.id,
+          isShowDiscount: sellingItem.isShowDiscount,
+          prevPrice: sellingItem.prevPrice,
+          availability: true,
+          createdAt,
+          createdBy,
+          companyId: Number(companyId),
+        };
+      });
+
+      await prisma.item.createMany({
+        data: newSellingItems.filter((item: any) => item !== null) as any,
+      });
+    }
+
+    // Create Automation Rules
+    if (subtractRules && subtractRules.length > 0) {
+      const newAutomationRules = subtractRules.map((rule: any) => {
+        let nextSubtractDate = null;
+        if (!rule.dependentInventoryItemId) {
+          nextSubtractDate = calculateNextDueDate(today.date, rule.frequency as RECURRENCE_TYPE);
+        }
+        return {
+          inventoryItemId: newInventory.id,
+          dependentInventoryItemId: rule.dependentInventoryItemId,
+          subtractQty: rule.subtractQty,
+          relationalQty: rule?.relationalQty,
+          frequency: rule?.frequency,
+          nextSubtractDate: nextSubtractDate,
+          isActive: rule.isActive,
+          createdAt,
+          createdBy,
+          companyId: Number(companyId),
+        };
+      });
+
+      await prisma.automationRules.createMany({
+        data: newAutomationRules,
+      });
+    }
 
     return res.status(201).json({
       data: newInventory,

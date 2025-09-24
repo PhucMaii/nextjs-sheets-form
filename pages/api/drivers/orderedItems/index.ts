@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import { InventoryLogFrom, InventoryLogType } from '@prisma/client';
 import withDriverAuthGuard from '@/pages/api/utils/withDriverAuthGuar';
 import { getDriverInfo } from '@/pages/api/utils/auth';
 import {
@@ -7,6 +8,8 @@ import {
 } from '@/pages/api/admin/[companyId]/orderedItems/single';
 import { generateOrderTotalPrice } from '@/pages/api/admin/[companyId]/orderedItems/PUT';
 import prisma from '@/client';
+import { checkOrderValidToAffectInventory } from '@/pages/api/utils/order';
+import { recordOrderInventoryLog } from '../../utils/logs';
 
 interface IBody {
   id: number; // ordered item id
@@ -27,6 +30,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       where: {
         id,
       },
+      include: {
+        inventoryItem: true,
+        Orders: true,
+      },
     });
 
     if (!existingOrderedItem) {
@@ -35,7 +42,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
     }
 
-    const { cost } = await generateCostAndProfit(id);
+    const { cost, profit } = await generateCostAndProfit(id);
 
     const updatedOrderedItem = await prisma.orderedItems.update({
       where: {
@@ -45,7 +52,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         quantity,
         price,
         cost,
-        profit: price - cost,
+        profit,
       },
       include: {
         fifo: true,
@@ -53,14 +60,32 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
+    const isValidToAffectInventory = await checkOrderValidToAffectInventory(
+      existingOrderedItem?.companyId || -1,
+      existingOrderedItem?.Orders?.deliveryDate || '',
+    );
+
     // Update Inventory Item Quantity
-    if (updatedOrderedItem?.fifo && updatedOrderedItem?.inventoryUnit) {
+    if (updatedOrderedItem?.fifo && updatedOrderedItem?.inventoryUnit && isValidToAffectInventory) {
+      const difference = updatedOrderedItem.quantity - existingOrderedItem.quantity;
+      const isRestock = difference < 0;
+        
       await updateSingleInventoryItem(
         orderId,
         updatedOrderedItem.fifo,
         updatedOrderedItem.inventoryUnit,
         updatedOrderedItem.quantity,
         existingOrderedItem.quantity,
+      );
+
+      // Record inventory log
+      await recordOrderInventoryLog(
+        orderId,
+        updatedOrderedItem.fifo.inventoryItemId,
+        Math.abs(difference),
+        isRestock ? InventoryLogType.RESTOCK : InventoryLogType.SUBTRACT,
+        InventoryLogFrom.EDIT_ORDER,
+        `${isRestock ? 'Restock' : 'Subtract'} ${Math.abs(difference)} ${existingOrderedItem.name} to inventory due to ordered item ${updatedOrderedItem.id} updated`,
       );
     }
 
