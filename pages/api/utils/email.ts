@@ -239,10 +239,7 @@ export const generateWelcomeEmail = (clientName: string) => {
   `;
 };
 
-
-export const generateApproveToBePartnerEmail = (
-  user: User
-) => {
+export const generateApproveToBePartnerEmail = (user: User) => {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; color: #333;">
       <h2 style="text-align: center;  background-color: #5cb85c; color: white; padding: 10px; border-radius: 5px;">Welcome to the Supreme Sprouts Family!</h2>
