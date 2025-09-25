@@ -4,12 +4,8 @@ import InvoiceDocument from '../../../app/admin/[companyId]/components/PDF/Invoi
 import React from 'react';
 import withAuthGuard from '../utils/withAuthGuard';
 
-const handler = async (
-  req: NextApiRequest,
-  res: NextApiResponse,
-) => {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { client, orders, debtData, sortDebtKeys, isOldInvoice } = req.body;
-  console.log({ client, orders, debtData, sortDebtKeys, isOldInvoice });
 
   const invoiceElement: any = React.createElement(InvoiceDocument, {
     client,
@@ -21,6 +17,6 @@ const handler = async (
   const stream = await renderToStream(invoiceElement);
   res.setHeader('Content-Type', 'application/pdf');
   stream.pipe(res);
-}
+};
 
 export default withAuthGuard(handler);

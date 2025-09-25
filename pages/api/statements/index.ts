@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate } from '../utils/date';
-import { PrismaClient } from '@prisma/client';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import withAuthGuard from '../utils/withAuthGuard';
 import { getServerSession } from 'next-auth';
@@ -11,14 +10,13 @@ import {
   sortKeys,
 } from '@/pages/api/admin/[companyId]/sendInvoicePdf';
 import { generateListOfDateString } from '@/app/utils/time';
+import prisma from '@/client';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method !== 'GET') {
       return res.status(404).json({ error: 'Your method is not supported' });
     }
-
-    const prisma = new PrismaClient();
 
     const session: any = await getServerSession(req, res, authOptions);
     const user: any = session?.user;
@@ -43,7 +41,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // Last day of the given month
     const lastDay = new Date(year, lastMonth + 1, 0);
 
-    const listOfDateString = generateListOfDateString(firstDay, lastDay);
+    const listOfDateString: string[] = generateListOfDateString(firstDay, lastDay);
 
     const orders = await prisma.orders.findMany({
       where: {
@@ -57,6 +55,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
       include: {
         items: true,
+        user: true,
       },
     });
 
@@ -67,6 +66,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         },
         userId: Number(userId),
       },
+      include: {
+        items: true,
+        user: true,
+      }
     });
 
     // Group by month
