@@ -44,6 +44,7 @@ export default function CreateInventoryPage() {
           isInternal: newInventoryItem?.isInternal,
           vendorItems: selectedVendors,
           sellingItems,
+          image: newInventoryItem?.image || '',
           subtractRules: newInventoryItem?.subtractRules || [],
         },
       );

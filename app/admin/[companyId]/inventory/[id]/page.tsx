@@ -42,6 +42,7 @@ const InventoryDetail = () => {
         isShowInventory: newInventoryItem.isShowInventory,
         isInternal: newInventoryItem?.isInternal,
         typeId: newInventoryItem.typeId,
+        image: newInventoryItem?.image || '',
         vendorItems: selectedVendors,
         updatedSellingItems: selectedSellingItems.map((item: any) => ({
           ...item,

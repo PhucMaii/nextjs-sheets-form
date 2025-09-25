@@ -21,6 +21,7 @@ interface IBody {
   isShowInventory?: boolean;
   isInternal?: boolean;
   typeId: number;
+  image: string;
   subtractRules: any[];
 }
 
@@ -47,6 +48,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       // updatedSingleSellingItem,
       isInternal,
       typeId,
+      image,
       subtractRules,
     }: IBody = req.body;
 
@@ -155,6 +157,13 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       await prisma.inventoryItem.update({
         where: { id },
         data: { typeId: Number(typeId) > 0 ? Number(typeId) : null },
+      });
+    }
+
+    if (existingInventoryItem.image !== image) {
+      await prisma.inventoryItem.update({
+        where: { id },
+        data: { image },
       });
     }
 

@@ -43,6 +43,8 @@ import { Skeleton } from '@mui/material';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
 import VariantTable from '../items/[itemId]/VariantTable';
 import useInventoryItems from '@/hooks/autocomplete/useInventoryItems';
+import { PresignedFileUpload } from '@/app/components/PresignedFileUpload';
+import DisplayFile from '../components/Modals/DisplayFile';
 
 interface InventoryTemplateProps {
   onSubmit: (params: any) => Promise<void>;
@@ -323,6 +325,7 @@ const InventoryTemplate = ({
       sku: '',
       typeId: -1,
       subtractRules: [],
+      image: '',
     },
   );
   const [itemToAllItems, setItemToAllItems] = useState<any>({
@@ -935,6 +938,26 @@ const InventoryTemplate = ({
               </Select>
             </Grid>
           )}
+
+          <Grid item xs={12} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Typography fontWeight={600}>Image</Typography>
+            {newInventoryItem.image && (
+              <DisplayFile fileKey={newInventoryItem.image} alt="product image" />
+            )}
+            <PresignedFileUpload
+              location={`products/${newInventoryItem?.name}`}
+              maxFiles={1}
+              maxSize={10 * 1024 * 1024} // 10MB
+              acceptedFileTypes={['image/*']}
+              onUploadComplete={(files: any) => {
+                setNewInventoryItem((prev: any) => ({
+                  ...prev,
+                  image: files[0].fileKey,
+                }));
+              }}
+              disabled={!newInventoryItem.name}
+            />
+          </Grid>
         </Grid>
       </ShadowSection>
 
@@ -1191,17 +1214,16 @@ const InventoryTemplate = ({
                             value={rule.subtractQty}
                             onChange={(e) => {
                               const newRules =
-                                newInventoryItem.subtractRules.map(
-                                  (r: any) =>
-                                    r.id === rule.id
-                                      ? {
-                                          ...r,
-                                          subtractQty: Math.max(
-                                            1,
-                                            +e.target.value,
-                                          ),
-                                        }
-                                      : r,
+                                newInventoryItem.subtractRules.map((r: any) =>
+                                  r.id === rule.id
+                                    ? {
+                                        ...r,
+                                        subtractQty: Math.max(
+                                          1,
+                                          +e.target.value,
+                                        ),
+                                      }
+                                    : r,
                                 );
                               setNewInventoryItem((prev: any) => ({
                                 ...prev,
@@ -1238,20 +1260,18 @@ const InventoryTemplate = ({
                                 (item: any) => item.id === +e.target.value,
                               );
                               const newRules =
-                                newInventoryItem.subtractRules.map(
-                                  (r: any) =>
-                                    r.id === rule.id
-                                      ? {
-                                          ...r,
-                                          dependentInventoryItemId:
-                                            e.target.value || -1,
-                                          dependentInventoryItem:
-                                            targetInventoryItem,
-                                          frequency: e.target.value > 0
-                                            ? null
-                                            : 'daily',
-                                        }
-                                      : r,
+                                newInventoryItem.subtractRules.map((r: any) =>
+                                  r.id === rule.id
+                                    ? {
+                                        ...r,
+                                        dependentInventoryItemId:
+                                          e.target.value || -1,
+                                        dependentInventoryItem:
+                                          targetInventoryItem,
+                                        frequency:
+                                          e.target.value > 0 ? null : 'daily',
+                                      }
+                                    : r,
                                 );
                               setNewInventoryItem((prev: any) => ({
                                 ...prev,
@@ -1292,11 +1312,10 @@ const InventoryTemplate = ({
                             value={rule.relationalQty}
                             onChange={(e) => {
                               const newRules =
-                                newInventoryItem.subtractRules.map(
-                                  (r: any) =>
-                                    r.id === rule.id
-                                      ? { ...r, relationalQty: +e.target.value }
-                                      : r,
+                                newInventoryItem.subtractRules.map((r: any) =>
+                                  r.id === rule.id
+                                    ? { ...r, relationalQty: +e.target.value }
+                                    : r,
                                 );
                               setNewInventoryItem((prev: any) => ({
                                 ...prev,
@@ -1380,7 +1399,8 @@ const InventoryTemplate = ({
                       <Typography variant="body2" color="text.secondary">
                         <strong>Rule Summary:</strong> Subtract{' '}
                         <strong>{rule.subtractQty}</strong> quantity{' '}
-                        {rule.dependentInventoryItemId && rule.dependentInventoryItemId > 0 ? (
+                        {rule.dependentInventoryItemId &&
+                        rule.dependentInventoryItemId > 0 ? (
                           <>
                             when{' '}
                             <strong>{rule.dependentInventoryItem?.name}</strong>{' '}

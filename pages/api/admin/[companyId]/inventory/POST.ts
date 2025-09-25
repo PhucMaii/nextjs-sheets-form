@@ -20,6 +20,7 @@ interface IBody {
   sellingItems?: any[];
   isInternal?: boolean;
   subtractRules: any[];
+  image: string;
 }
 
 interface IQuery {
@@ -42,6 +43,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       sellingItems,
       isInternal,
       subtractRules,
+      image,
     }: IBody = req.body;
 
     const { companyId }: IQuery = req.query;
@@ -105,6 +107,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         hasPST,
         hasGST,
         isShowInventory,
+        image,
         createdAt,
         createdBy,
         color: infoBackground,

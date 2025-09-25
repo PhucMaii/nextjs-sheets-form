@@ -19,6 +19,7 @@ interface PresignedFileUploadProps {
   onUploadError?: (error: string) => void;
   className?: string;
   isUploaded?: boolean;
+  disabled?: boolean;
 }
 
 export const PresignedFileUpload: React.FC<PresignedFileUploadProps> = ({
@@ -32,6 +33,7 @@ export const PresignedFileUpload: React.FC<PresignedFileUploadProps> = ({
   onUploadError,
   className = '',
   isUploaded = false,
+  disabled = false,
 }) => {
   const [isGeneratingUrl, setIsGeneratingUrl] = useState(false);
   const {
@@ -144,7 +146,7 @@ export const PresignedFileUpload: React.FC<PresignedFileUploadProps> = ({
       },
       {} as Record<string, string[]>,
     ),
-    disabled: isUploaded,
+    disabled: isUploaded || disabled,
   });
 
   const formatFileSize = (bytes: number): string => {
@@ -163,7 +165,7 @@ export const PresignedFileUpload: React.FC<PresignedFileUploadProps> = ({
         className={`
           border-2 border-dashed rounded-lg p-8 text-center transition-colors
           ${
-            isUploaded
+            isUploaded || disabled
               ? 'border-gray-200 bg-gray-50 cursor-not-allowed'
               : isDragActive
                 ? 'border-blue-500 bg-blue-50 cursor-pointer'
@@ -174,7 +176,7 @@ export const PresignedFileUpload: React.FC<PresignedFileUploadProps> = ({
       >
         <input
           {...getInputProps()}
-          disabled={isUploaded || isUploading || isGeneratingUrl}
+          disabled={isUploaded || isUploading || isGeneratingUrl || disabled}
         />
 
         <div className="space-y-4">
