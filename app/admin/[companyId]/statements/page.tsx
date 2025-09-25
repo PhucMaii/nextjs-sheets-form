@@ -29,6 +29,7 @@ import ConfirmModal from '../components/Modals/ConfirmModal';
 import { getTodayDate } from '@/pages/api/utils/date';
 import { useParams } from 'next/navigation';
 import { ClientStatementType } from '@/pages/api/admin/[companyId]/routes/GET';
+import { useQuery } from '@tanstack/react-query';
 
 export default function StatementsPage() {
   const { companyId }: any = useParams();
@@ -73,12 +74,21 @@ export default function StatementsPage() {
       `/routes?day=${selectedDay}&startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
     ),
   );
+
   const [clientStatements] = SWRFetchData(
     getAdminApiUrl(
       companyId,
       `/clientStatements?month=${months[selectedMonth.getMonth()]}`,
     ),
   );
+
+  const { data: groupedRoutesWithClients } = useQuery({
+    queryKey: ['groupedRoutesWithClients'],
+    queryFn: async () => {
+      const response = await axios.get(getAdminApiUrl(companyId, `/routes/for-statements-printing?startDate=${dateRange[0]}&endDate=${dateRange[1]}`));
+      return response.data.data;
+    },
+  });
 
   useEffect(() => {
     const today = getTodayDate();
