@@ -1,5 +1,5 @@
 import { ORDER_STATUS, USER_CATEGORIZED, USER_ROLE } from '@/app/utils/enum';
-import { PrismaClient } from '@prisma/client';
+import { InventoryLogFrom, InventoryLogType, PrismaClient } from '@prisma/client';
 import {
   restockInventoryItem,
   updateSingleInventoryItem,
@@ -11,8 +11,10 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { generateOrderTotalPrice } from '@/pages/api/admin/[companyId]/orderedItems/PUT';
 import { checkOrderDeliveryDateValid } from '../utils/date';
+import { checkOrderValidToAffectInventory } from '../utils/order';
 import { OrderedItems } from '@/app/utils/type';
 import { createOrderedItems } from '@/pages/api/utils/orderedItems';
+import { recordOrderInventoryLog } from '../utils/logs';
 
 export function calculateNextPos(currentPos: number, result: string[]): string {
   const columns = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -152,6 +154,11 @@ export const overrideOrder = async (
       }
     }
 
+    const isValidToAffectInventory = await checkOrderValidToAffectInventory(
+      order?.companyId || 1,
+      order.deliveryDate,
+    );
+
     // Delete and restock old items
     if (trackDeletedItems.length > 0) {
       for (const item of trackDeletedItems) {
@@ -169,6 +176,18 @@ export const overrideOrder = async (
             id: item.id,
           },
         });
+
+        // Record inventory log
+        if (isValidToAffectInventory) {
+          await recordOrderInventoryLog(
+            orderId,
+            item.fifo.inventoryItemId,
+            item.quantity,
+            InventoryLogType.RESTOCK,
+            InventoryLogFrom.EDIT_ORDER,
+            `Restock ${item.quantity} ${item?.inventoryItem?.name} to inventory due to order ${orderId} removed ${item.name}`,
+          );
+        }
       }
     }
 
@@ -251,6 +270,7 @@ export const getCreatedBy = async (
 
   if (
     createdByRole === USER_ROLE.DRIVER ||
+    createdByRole === USER_ROLE.WAREHOUSE ||
     createdByRole === USER_ROLE.ADMIN ||
     createdByRole === USER_ROLE.SUPER_ADMIN
   ) {

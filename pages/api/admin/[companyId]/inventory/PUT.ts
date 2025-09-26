@@ -19,6 +19,10 @@ interface IBody {
   vendorItems: any[];
   updatedSellingItems: any[];
   isShowInventory?: boolean;
+  isInternal?: boolean;
+  typeId: number;
+  image: string;
+  subtractRules: any[];
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
@@ -42,6 +46,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       updatedSellingItems,
       isShowInventory,
       // updatedSingleSellingItem,
+      isInternal,
+      typeId,
+      image,
+      subtractRules,
     }: IBody = req.body;
 
     // console.log('req.body', req.body);
@@ -63,6 +71,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         item: {
           include: {
             inventoryUnit: true,
+          },
+        },
+        subtractRules: {
+          include: {
+            dependentInventoryItem: true,
           },
         },
       },
@@ -130,6 +143,27 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           hasPST,
           hasGST,
         },
+      });
+    }
+
+    if (existingInventoryItem.isInternal !== isInternal) {
+      await prisma.inventoryItem.update({
+        where: { id },
+        data: { isInternal },
+      });
+    }
+
+    if (existingInventoryItem.typeId !== Number(typeId)) {
+      await prisma.inventoryItem.update({
+        where: { id },
+        data: { typeId: Number(typeId) > 0 ? Number(typeId) : null },
+      });
+    }
+
+    if (existingInventoryItem.image !== image) {
+      await prisma.inventoryItem.update({
+        where: { id },
+        data: { image },
       });
     }
 
@@ -381,6 +415,77 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         });
 
         await Promise.all(scheduledOrderItemPromises);
+      }
+    }
+
+    // Update automation rules
+    if (subtractRules && subtractRules.length > 0) {
+      const newRules = subtractRules.filter((rule: any) =>
+        isNaN(Number(rule.id)),
+      );
+      const updatedRules = subtractRules.filter((rule: any) => {
+        const existingRule = existingInventoryItem.subtractRules.find(
+          (r: any) => r.id === rule.id,
+        );
+
+        if (!existingRule) {
+          return false;
+        }
+
+        if (
+          existingRule.subtractQty !== rule.subtractQty ||
+          existingRule.relationalQty !== rule.relationalQty ||
+          existingRule.frequency !== rule.frequency ||
+          existingRule.isActive !== rule.isActive ||
+          existingRule.dependentInventoryItemId !== rule.dependentInventoryItemId
+        ) {
+          return true;
+        }
+
+        return false;
+      });
+
+      const deletedRules = existingInventoryItem.subtractRules.filter(
+        (rule: any) => {
+          return !subtractRules.some((r: any) => r.id === rule.id);
+        },
+      );
+
+      if (newRules.length > 0) {
+        await prisma.automationRules.createMany({
+          data: newRules.map((rule: any) => ({
+            subtractQty: rule.subtractQty,
+            inventoryItemId: existingInventoryItem.id,
+            isActive: rule.isActive,
+            relationalQty: rule?.relationalQty,
+            frequency: rule?.frequency,
+            dependentInventoryItemId: rule.dependentInventoryItemId,
+            createdAt: updatedAt,
+            createdBy,
+            companyId: Number(companyId),
+          })),
+        });
+      }
+
+      if (updatedRules.length > 0) {
+        for (const rule of updatedRules) {
+          await prisma.automationRules.update({
+            where: { id: rule.id },
+            data: {
+              subtractQty: rule.subtractQty,
+              isActive: rule.isActive,
+              relationalQty: rule?.relationalQty,
+              frequency: rule?.frequency,
+              dependentInventoryItemId: rule.dependentInventoryItemId,
+            },
+          });
+        }
+      }
+
+      if (deletedRules.length > 0) {
+        await prisma.automationRules.deleteMany({
+          where: { id: { in: deletedRules.map((rule: any) => rule.id) } },
+        });
       }
     }
 

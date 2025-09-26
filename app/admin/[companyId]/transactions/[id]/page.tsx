@@ -100,7 +100,7 @@ export default function EditTransaction() {
       return 'stock';
     }
 
-    return 'other';
+    return transactionData?.type?.name || 'other';
   }, [transactionData]);
 
   useEffect(() => {
@@ -116,8 +116,6 @@ export default function EditTransaction() {
           getAdminApiUrl(companyId, `/expenses?id=${id}&type=${type}`),
         );
         const transaction = res.data.data;
-
-        console.log('transaction', transaction);
 
         let frontFileKey = null;
         let frontFileType = null;
@@ -375,6 +373,7 @@ export default function EditTransaction() {
         GST: transactionData.GST,
         PST: transactionData.PST,
         description: transactionData.description,
+        typeId: transactionData.typeId > 0 ? transactionData.typeId : null,
         paymentMethodId: transactionData.paymentMethodId,
         spentBy: transactionData.spentBy,
         status: transactionData.status,
@@ -420,6 +419,7 @@ export default function EditTransaction() {
           GST: transactionData.GST,
           PST: transactionData.PST,
           spentBy: transactionData.spentBy,
+          typeId: transactionData.typeId > 0 ? transactionData.typeId : null,
           date: dayjs(selectedDate).format('MM/DD/YYYY'),
           paymentMethodId: transactionData.paymentMethodId,
           status: transactionData.status,
@@ -471,18 +471,17 @@ export default function EditTransaction() {
 
     try {
       setSaving(true);
-      // console.log('transactionType', transactionType);
       if (transactionType === 'stock') {
         await handleSaveStockPurchase();
-      }
-
-      if (transactionType === 'other') {
-        await handleSaveOtherExpense();
       }
 
       if (transactionType === 'batch') {
         // console.log('Saving batch transaction');
         await handleSaveBatchTransaction();
+      }
+
+      if (transactionType) {
+        await handleSaveOtherExpense();
       }
 
       setSaving(false);

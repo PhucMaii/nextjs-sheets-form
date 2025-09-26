@@ -3,6 +3,7 @@ import { generateImgUrl } from '@/app/lib/s3';
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, CircularProgress } from '@mui/material';
 import Image from 'next/image';
+import ViewImg from '../ViewImg';
 
 interface IProps {
   fileKey: string;
@@ -11,7 +12,7 @@ interface IProps {
   height?: string;
   isCheque?: boolean;
   style?: any;
-  onClick?: () => void;
+  isDisableOnClick?: boolean;
 }
 
 export default function DisplayFile({
@@ -20,18 +21,18 @@ export default function DisplayFile({
   width,
   height,
   isCheque,
-  onClick,
   style,
+  isDisableOnClick = false,
 }: IProps) {
   const [url, setUrl] = useState('');
+  const [isOpenViewImg, setIsOpenViewImg] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUrl = async () => {
-      console.log('DisplayFile: fileKey =', fileKey, 'isCheque =', isCheque);
-      
       if (!fileKey) {
+        console.warn('DisplayFile: No file key provided');
         setError('No file key provided');
         setIsLoading(false);
         return;
@@ -41,12 +42,16 @@ export default function DisplayFile({
         setIsLoading(true);
         setError(null);
         const url = await generateImgUrl(fileKey, isCheque);
-        console.log('DisplayFile: Generated URL =', url);
-        setUrl(url);
+        setUrl(url || '/images/not-found.png');
       } catch (err) {
-        console.error('Failed to generate image URL:', err);
+        console.error(
+          'DisplayFile: Failed to generate image URL for fileKey:',
+          fileKey,
+          'Error:',
+          err,
+        );
         setError('Failed to load image');
-        setUrl('');
+        setUrl('/images/not-found.png');
       } finally {
         setIsLoading(false);
       }
@@ -95,6 +100,12 @@ export default function DisplayFile({
 
   return (
     <>
+      <ViewImg
+        fileKeyFront={fileKey}
+        open={isOpenViewImg}
+        onClose={() => setIsOpenViewImg(false)}
+        isCheque={isCheque}
+      />
       {fileKey.split('.')[1] === 'pdf' ? (
         <embed src={url} width={width || '100px'} height={height || '100px'} />
       ) : (
@@ -104,13 +115,25 @@ export default function DisplayFile({
           style={{
             width: width || '100px',
             height: height || '100px',
+            objectFit: 'contain',
             ...style,
           }}
-          objectFit="cover"
-          onClick={onClick}
-          onError={() => setError('Failed to load image')}
+          onClick={() => !isDisableOnClick && setIsOpenViewImg(true)}
+          onError={(e) => {
+            console.error(
+              'DisplayFile: Image failed to load. URL:',
+              url,
+              'FileKey:',
+              fileKey,
+              'Event:',
+              e,
+            );
+            setError('Failed to load image');
+          }}
           width={100}
           height={100}
+          sizes="100vw"
+          quality={95}
           loading="lazy"
           unoptimized={true}
         />

@@ -38,7 +38,6 @@ export const useUpdateExpenseStatus = (
   const [actionButtonAnchor, setActionButtonAnchor] =
     useState<null | HTMLElement>(null);
   const openDropdown = Boolean(actionButtonAnchor);
-  // const [isOpenAddExpense, setIsOpenAddExpense] = useState<boolean>(false);
 
   const [paymentMethods] = SWRFetchData(
     getAdminApiUrl(companyId, '/paymentMethods'),

@@ -3,14 +3,18 @@ import React, { useContext, useEffect, useMemo, useState } from 'react';
 import Sidebar from '../../components/Sidebar';
 import {
   Box,
+  Button,
+  Card,
+  CardContent,
   CircularProgress,
-  Grid,
-  IconButton,
   Typography,
+  Divider,
+  Stack,
 } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
+import ReceiptIcon from '@mui/icons-material/Receipt';
+import DescriptionIcon from '@mui/icons-material/Description';
 import axios from 'axios';
-import { ShadowSection } from '../../admin/[companyId]/reports/styled';
 import { blueGrey, grey } from '@mui/material/colors';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { UserContext } from '../../context/UserContextAPI';
@@ -23,6 +27,7 @@ export default function StatementPage() {
   const [loading, setLoading] = useState<any>({
     month: null,
     isLoading: false,
+    individualInvoice: null,
   });
 
   const { showNotification, NotificationComp } = useNotification({
@@ -108,141 +113,300 @@ export default function StatementPage() {
   const downloadPDF = async (
     orders: any,
     fileName: string,
-    // isOldInvoice: boolean = false,
+    isOldInvoice: boolean = true,
   ) => {
     setLoading({
       month: fileName,
       isLoading: true,
-    });
-    const response = await fetch('/api/generate-pdf', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        client: user,
-        orders: orders,
-        debtData: debtData?.debt,
-        sortDebtKeys: debtData?.sortDebt,
-        isOldInvoice: true,
-      }), // pass whatever data you need
+      individualInvoice: null,
     });
 
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    a.click();
-    window.URL.revokeObjectURL(url);
+    try {
+      const response = await fetch('/api/generate-pdf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          client: user,
+          orders: orders,
+          debtData: debtData?.debt,
+          sortDebtKeys: debtData?.sortDebt,
+          isOldInvoice,
+        }),
+      });
 
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${fileName}.pdf`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+
+      showNotification('success', 'Statement downloaded successfully');
+    } catch (error) {
+      console.error('Error downloading statement:', error);
+      showNotification('error', 'Failed to download statement');
+    } finally {
+      setLoading({
+        month: null,
+        isLoading: false,
+        individualInvoice: null,
+      });
+    }
+  };
+
+  const donwloadInvoices = async (orders: any, fileName: string) => {
     setLoading({
       month: null,
       isLoading: false,
+      invoices: fileName,
     });
-    showNotification('success', 'Statement downloaded successfully');
+
+    try {
+      const response = await fetch('/api/generate-pdf/order-invoices', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orders,
+        }),
+      });
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${fileName}.pdf`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+
+      showNotification('success', 'Invoice downloaded successfully');
+    } catch (error) {
+      console.error('Error downloading invoice:', error);
+      showNotification('error', 'Failed to download invoice');
+    } finally {
+      setLoading({
+        month: null,
+        isLoading: false,
+        invoices: null,
+      });
+    }
   };
 
   return (
     <Sidebar>
       {NotificationComp}
-      <Typography variant="h5">Statements</Typography>
-
-      <ShadowSection display="flex" flexDirection="column" gap={1}>
+      <Box sx={{ mb: 3 }}>
         <Typography
-          variant="h6"
-          sx={{ fontWeight: 'semibold', color: blueGrey[800] }}
+          variant="h4"
+          sx={{ fontWeight: 'bold', color: blueGrey[800], mb: 1 }}
         >
-          Last Month
+          Statements & Invoices
         </Typography>
-        <Grid container alignItems="center">
-          <Grid item xs={3}>
-            <Typography>{lastMonth?.title}</Typography>
-          </Grid>
-          <Grid item xs={4}>
-            {currentMonthOrders?.length || 0} orders
-          </Grid>
-          <Grid item xs={4}>
-            ${lastMonth?.totalPrice || 0}
-          </Grid>
-          <Grid item xs={1}>
-            {/* <PDFDownloadLink
-              document={
-                <InvoiceDocument
-                  client={currentMonthOrders[0].user}
-                  orders={currentMonthOrders}
-                  sortDebtKeys={debtData?.sortDebt}
-                  debtData={debtData?.debt}
-                />
-              }
-              fileName='invoice.pdf'
-            > */}
-            <IconButton
-              color="primary"
-              onClick={() =>
-                downloadPDF(currentMonthOrders, `${lastMonth?.title}`)
-              }
-            >
-              {loading.isLoading && loading.month === lastMonth?.title ? (
-                <CircularProgress color="inherit" size={16} />
-              ) : (
-                <DownloadIcon />
-              )}
-            </IconButton>
-            {/* </PDFDownloadLink> */}
-          </Grid>
-        </Grid>
-      </ShadowSection>
-
-      <ShadowSection sx={{ mt: 2, mb: 6 }}>
-        <Typography
-          variant="h6"
-          sx={{ fontWeight: 'semibold', color: blueGrey[800] }}
-        >
-          Previous Months
+        <Typography variant="body1" sx={{ color: grey[600] }}>
+          Download your monthly statements or individual invoices
         </Typography>
+      </Box>
 
-        <Box display="flex" flexDirection="column" gap={2} sx={{ mt: 2 }}>
-          {sortedLatestGroupOrders.map((monthYear, index) => {
-            return (
-              <Box
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-                sx={{
-                  p: 2,
-                  width: '100%',
-                  borderRadius: 1,
-                  border: `1px solid ${grey[200]}`,
-                }}
-                key={index}
-              >
-                <Box display="flex" alignItems="center" gap={1}>
-                  <PictureAsPdfIcon />
-                  <Typography>{monthYear}</Typography>
-                </Box>
-                <Box display="flex" alignItems="center" gap={1}>
-                  <Typography>
-                    {prevStatements[monthYear].length} orders
-                  </Typography>
-                  <IconButton
-                    color="primary"
-                    onClick={() =>
-                      downloadPDF(prevStatements[monthYear], monthYear)
-                    }
-                  >
-                    {loading.isLoading && loading.month === monthYear ? (
-                      <CircularProgress color="inherit" size={16} />
-                    ) : (
-                      <DownloadIcon />
-                    )}
-                  </IconButton>
-                </Box>
+      {/* Current Month Statement */}
+      {lastMonth && (
+        <Card sx={{ mb: 3, boxShadow: 2 }}>
+          <CardContent>
+            <Box display="flex" alignItems="center" gap={2} sx={{ mb: 2 }}>
+              <DescriptionIcon sx={{ color: 'primary.main', fontSize: 28 }} />
+              <Box>
+                <Typography
+                  variant="h6"
+                  sx={{ fontWeight: 'semibold', color: blueGrey[800] }}
+                >
+                  Current Month Statement
+                </Typography>
+                <Typography variant="body2" sx={{ color: grey[600] }}>
+                  {lastMonth.title} • {currentMonthOrders?.length || 0} orders
+                </Typography>
               </Box>
-            );
-          })}
-        </Box>
-      </ShadowSection>
+            </Box>
+
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+              sx={{
+                mb: 2,
+                flexDirection: { xs: 'column', sm: 'row' },
+                gap: { xs: 2, sm: 0 },
+                alignItems: { xs: 'flex-start', sm: 'center' },
+              }}
+            >
+              <Box>
+                <Typography
+                  variant="h5"
+                  sx={{ fontWeight: 'bold', color: 'primary.main' }}
+                >
+                  ${lastMonth?.totalPrice?.toFixed(2) || '0.00'}
+                </Typography>
+                <Typography variant="body2" sx={{ color: grey[600] }}>
+                  Total amount for {lastMonth.title}
+                </Typography>
+              </Box>
+              <Button
+                variant="contained"
+                startIcon={
+                  loading.isLoading && loading.month === lastMonth?.title ? (
+                    <CircularProgress color="inherit" size={16} />
+                  ) : (
+                    <DownloadIcon />
+                  )
+                }
+                onClick={() =>
+                  downloadPDF(
+                    currentMonthOrders,
+                    `Statement-${lastMonth?.title}`,
+                  )
+                }
+                disabled={loading.isLoading}
+                sx={{
+                  minWidth: { xs: '100%', sm: 160 },
+                }}
+              >
+                Statement
+              </Button>
+            </Box>
+
+            {/* Individual Invoices Section */}
+            <Divider sx={{ my: 2 }} />
+            <Box display="flex" alignItems="center" gap={2} sx={{ mb: 2 }}>
+              <ReceiptIcon sx={{ color: 'primary.main', fontSize: 24 }} />
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 'semibold', color: blueGrey[800] }}
+              >
+                Individual Invoices
+              </Typography>
+            </Box>
+
+            <Typography variant="body2" sx={{ color: grey[600], mb: 2 }}>
+              Download individual invoices for each order in {lastMonth.title}
+            </Typography>
+
+            <Box display="flex" flexDirection="column" gap={2}>
+              <Button
+                variant="outlined"
+                startIcon={<DownloadIcon />}
+                onClick={() => {
+                  // Download all individual invoices for current month
+                  donwloadInvoices(currentMonthOrders, `Invoices-${lastMonth?.title}`);
+                }}
+                disabled={loading.isLoading || loading.invoices === `Invoices-${lastMonth?.title}`}
+                sx={{
+                  alignSelf: 'flex-start',
+                  minWidth: 160,
+                }}
+                fullWidth
+              >
+                Invoices
+              </Button>
+            </Box>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Previous Months */}
+      {sortedLatestGroupOrders.length > 0 && (
+        <Card sx={{ boxShadow: 2 }}>
+          <CardContent>
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: 'semibold', color: blueGrey[800], mb: 2 }}
+            >
+              Previous Months
+            </Typography>
+
+            <Stack spacing={2}>
+              {sortedLatestGroupOrders.map((monthYear, index) => {
+                const orders = prevStatements[monthYear];
+                const totalAmount = orders.reduce(
+                  (acc: number, order: any) => acc + order.totalPrice,
+                  0,
+                );
+
+                return (
+                  <Box
+                    key={index}
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      border: `1px solid ${grey[200]}`,
+                      '&:hover': { bgcolor: grey[50] },
+                    }}
+                  >
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="space-between"
+                      sx={{
+                        mb: 1,
+                        flexDirection: { xs: 'column', sm: 'row' },
+                        gap: { xs: 2, sm: 0 },
+                        alignItems: { xs: 'flex-start', sm: 'center' },
+                      }}
+                    >
+                      <Box display="flex" alignItems="center" gap={2}>
+                        <PictureAsPdfIcon sx={{ color: blueGrey[600] }} />
+                        <Box>
+                          <Typography
+                            variant="h6"
+                            sx={{ fontWeight: 'medium' }}
+                          >
+                            {monthYear}
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: grey[600] }}>
+                            {orders.length} orders • ${totalAmount.toFixed(2)}
+                          </Typography>
+                        </Box>
+                      </Box>
+
+                      <Box sx={{width: '100%'}} display="flex" gap={1} alignItems="center">
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          startIcon={
+                            loading.isLoading && loading.month === monthYear ? (
+                              <CircularProgress size={16} />
+                            ) : (
+                              <DownloadIcon />
+                            )
+                          }
+                          onClick={() =>
+                            downloadPDF(orders, `Statement-${monthYear}`)
+                          }
+                          disabled={loading.isLoading}
+                          fullWidth
+                        >
+                          Statement
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          startIcon={<DownloadIcon />}
+                          onClick={() => donwloadInvoices(orders, `Invoices-${monthYear}`)}
+                          disabled={loading.isLoading || loading.invoices === `Invoices-${monthYear}`}
+                          fullWidth
+                        >
+                          Invoices
+                        </Button>
+                      </Box>
+                    </Box>
+                  </Box>
+                );
+              })}
+            </Stack>
+          </CardContent>
+        </Card>
+      )}
     </Sidebar>
   );
 }

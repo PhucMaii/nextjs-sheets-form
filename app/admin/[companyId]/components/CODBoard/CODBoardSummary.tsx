@@ -22,9 +22,10 @@ import { Order } from '../../orders/page';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import EditIcon from '@mui/icons-material/Edit';
 import EditCashInput from '../Modals/edit/EditCashInput';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import ShowExpenses from '../Modals/ShowExpenses';
 import { PaymentStatus } from '@prisma/client';
+import ExceedingCODButton from '../ExceedingCODButton';
+import { useParams, useRouter } from 'next/navigation';
 
 interface IProps {
   boardData: IBoard;
@@ -39,6 +40,8 @@ export default function CODBoardSummary({
   handleDeleteBoard,
   showNotification,
 }: IProps) {
+  const router = useRouter();
+  const { companyId }: any = useParams();
   const [isOpenShowExpenses, setIsOpenShowExpenses] = useState<boolean>(false);
   const [isOpenEditCashInput, setIsOpenEditCashInput] =
     useState<boolean>(false);
@@ -62,9 +65,11 @@ export default function CODBoardSummary({
     }, 0);
   }, [boardData]);
 
-  const uncollectedOrders = useFilterOrders(orderWithoutVOID, [
-    PaymentStatus.Unpaid
-  ], 'payment');
+  const uncollectedOrders = useFilterOrders(
+    orderWithoutVOID,
+    [PaymentStatus.Unpaid],
+    'payment',
+  );
 
   const uncollectedAmount = uncollectedOrders.reduce(
     (acc: number, order: Order) => {
@@ -73,9 +78,11 @@ export default function CODBoardSummary({
     0,
   );
 
-  const collectedOrders = useFilterOrders(orderWithoutVOID, [
-    PaymentStatus.Paid,
-  ], 'payment');
+  const collectedOrders = useFilterOrders(
+    orderWithoutVOID,
+    [PaymentStatus.Paid],
+    'payment',
+  );
 
   const collectedAmount = collectedOrders.reduce(
     (acc: number, order: Order) => {
@@ -110,10 +117,13 @@ export default function CODBoardSummary({
               </Box>
 
               {boardData.cashDiff > 5 && (
-                <StatusText
-                  text={`Exceeding $${boardData.cashDiff.toFixed(2)} `}
-                  type="error"
-                  icon={<ErrorOutlineIcon fontSize="small" color="error" />}
+                <ExceedingCODButton
+                  cashDiff={boardData.cashDiff}
+                  onCheckCOD={() =>
+                    router.push(
+                      `/admin/${companyId}/codBoard/${boardData.id}/check-cod`,
+                    )
+                  }
                 />
               )}
             </Box>
@@ -155,7 +165,9 @@ export default function CODBoardSummary({
           <Grid item xs={12} md={8.9}>
             <Box>
               <Typography variant="h6">
-                {boardData?.employee?.name || boardData?.driver?.name || 'No Route Board'}
+                {boardData?.employee?.name ||
+                  boardData?.driver?.name ||
+                  'No Route Board'}
               </Typography>
               <Typography variant="body2" color={grey[500]}>
                 Delivered on: {boardData.date}

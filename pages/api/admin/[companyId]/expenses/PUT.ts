@@ -20,6 +20,7 @@ interface IBody {
   frontFileType?: string;
   backFileKey?: string;
   backFileType?: string;
+  typeId?: number;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
@@ -40,6 +41,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       frontFileType,
       backFileKey,
       backFileType,
+      typeId,
     }: IBody = req.body;
 
     const existingExpense = await prisma.expense.findUnique({
@@ -69,6 +71,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         discount,
         status,
         codBoardId,
+        typeId,
       },
       include: {
         cheques: true,

@@ -173,8 +173,6 @@ export default function AddOrder({
           totalPrice: 0,
         };
       });
-      console.log(quantitySetUp, 'QUANTITY SET UP');
-
       setBaseItems(quantitySetUp);
     }
   };

@@ -17,6 +17,7 @@ interface PropTypes {
   fullHeight?: boolean;
   helperTextStyle?: any;
   extraTextStyle?: any;
+  style?: any;
 }
 
 export default function OverviewCard({
@@ -33,6 +34,7 @@ export default function OverviewCard({
   fullHeight,
   helperTextStyle,
   extraTextStyle,
+  style,
 }: PropTypes) {
   return (
     <CardStyled
@@ -41,6 +43,7 @@ export default function OverviewCard({
         height: fullHeight ? '100%' : 'auto',
       }}
       onClick={onClick ? onClick : null}
+      style={style}
     >
       <Grid container spacing={2} margin={'auto'}>
         {!icon && (

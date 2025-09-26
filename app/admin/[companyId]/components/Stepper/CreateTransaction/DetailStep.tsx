@@ -55,6 +55,7 @@ import { calculateTaxWithDiscount } from '@/app/utils/item';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import { PresignedFileUpload } from '@/app/components/PresignedFileUpload';
 import DisplayFile from '../../Modals/DisplayFile';
+import { IExpenseType } from '@/app/utils/type';
 
 interface PropTypes {
   transactionType: TransactionType;
@@ -107,6 +108,7 @@ export default function DetailStep({
   const month = YYYYMMDDFormat(new Date()).split('/')[0];
   const year = YYYYMMDDFormat(new Date()).split('/')[2];
 
+  // Data Fetching
   const { data: codList } = useQuery({
     queryKey: ['codList', codDate.format('MM/DD/YYYY')],
     queryFn: () =>
@@ -118,6 +120,16 @@ export default function DetailStep({
           ),
         )
         .then((res) => res.data.data),
+  });
+
+  const { data: expenseTypes } = useQuery({
+    queryKey: ['expenseTypes', companyId],
+    queryFn: async () => {
+      const response = await axios.get(
+        getAdminApiUrl(companyId, '/expenses/type'),
+      );
+      return response.data.data || [];
+    },
   });
 
   useEffect(() => {
@@ -185,6 +197,7 @@ export default function DetailStep({
         total: totalPerMonth,
         GST: gstPerMonth,
         PST: pstPerMonth,
+        typeId: formData?.typeId || -1,
       }));
 
       setSmallExpenses(newSmallExpenses);
@@ -597,6 +610,41 @@ export default function DetailStep({
               </FormControl>
             </Grid>
 
+            {transactionType !== 'stock' && (
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel htmlFor="assign-type" id="assign-type-label">
+                    Assign Type
+                  </InputLabel>
+                  <Select
+                    labelId="assign-type-label"
+                    id="assign-type"
+                    aria-labelledby="assign-type-label"
+                    value={formData.typeId}
+                    label="Assign Type"
+                    fullWidth
+                    onChange={(e) => {
+                      setFormData((prev: any) => ({
+                        ...prev,
+                        typeId: Number(e.target.value),
+                        type: expenseTypes?.find(
+                          (type: IExpenseType) =>
+                            type.id === Number(e.target.value),
+                        ),
+                      }));
+                    }}
+                  >
+                    <MenuItem value={-1}>N/A</MenuItem>
+                    {expenseTypes?.map((type: IExpenseType) => (
+                      <MenuItem key={type.id} value={type.id}>
+                        {type.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+            )}
+
             <Grid item xs={12}>
               <TextField
                 fullWidth
@@ -863,6 +911,7 @@ export default function DetailStep({
                               if (newValue && setCodDate) {
                                 setCodDate(newValue);
                                 setSelectedDate(newValue);
+                                setSelectedDate(newValue);
                               }
                             }}
                             slotProps={{
@@ -1096,169 +1145,7 @@ export default function DetailStep({
                 </BorderSection>
               </Grid>
             </>
-          ) : transactionType === 'other' ? (
-            <Grid item xs={12}>
-              <BorderSection sx={{ p: 3 }}>
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  mb={2}
-                >
-                  <Typography
-                    variant="subtitle1"
-                    gutterBottom
-                    sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                  >
-                    <AttachMoney color="primary" />
-                    Amount Details
-                  </Typography>
-
-                  <Box>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={formData.hasGST}
-                          onChange={(e) => {
-                            setFormData((prev: any) => ({
-                              ...prev,
-                              hasGST: e.target.checked,
-                            }));
-                          }}
-                        />
-                      }
-                      label="GST (5%)"
-                    />
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={formData.hasPST}
-                          onChange={(e) => {
-                            setFormData((prev: any) => ({
-                              ...prev,
-                              hasPST: e.target.checked,
-                            }));
-                          }}
-                        />
-                      }
-                      label="PST (7%)"
-                    />
-                  </Box>
-                </Box>
-                <Divider sx={{ mb: 3 }} />
-
-                <Grid container spacing={3}>
-                  <Grid item xs={6} md={2}>
-                    <TextField
-                      fullWidth
-                      label="Discount"
-                      type="number"
-                      value={
-                        isShowDiscountPercent
-                          ? formData.discountPercentage
-                          : formData.discount
-                      }
-                      onChange={(e) => handleDiscountChange(e, 'other')}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            {isShowDiscountPercent ? '%' : '$'}
-                          </InputAdornment>
-                        ),
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <IconButton
-                              onClick={() => {
-                                setIsShowDiscountPercent(
-                                  !isShowDiscountPercent,
-                                );
-                              }}
-                            >
-                              <SyncAltIcon />
-                            </IconButton>
-                          </InputAdornment>
-                        ),
-                      }}
-                      inputProps={{ min: 0, step: 0.01 }}
-                    />
-                  </Grid>
-                  <Grid item xs={6} md={3}>
-                    <TextField
-                      fullWidth
-                      label="Subtotal"
-                      type="number"
-                      value={formData?.subTotal}
-                      onChange={(e) =>
-                        setFormData((prev: any) => ({
-                          ...prev,
-                          subTotal: Number(e.target.value),
-                          initialSubTotal: Number(e.target.value),
-                        }))
-                      }
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">$</InputAdornment>
-                        ),
-                      }}
-                    />
-                  </Grid>
-                  {formData.hasGST && (
-                    <Grid item xs={6} md={2}>
-                      <TextField
-                        fullWidth
-                        label="GST (5%)"
-                        value={formData?.GST?.toFixed(2) || 0}
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">$</InputAdornment>
-                          ),
-                          readOnly: true,
-                        }}
-                      />
-                    </Grid>
-                  )}
-                  {formData.hasPST && (
-                    <Grid item xs={6} md={2}>
-                      <TextField
-                        fullWidth
-                        label="PST (7%)"
-                        value={formData?.PST?.toFixed(2) || 0}
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">$</InputAdornment>
-                          ),
-                          readOnly: true,
-                        }}
-                      />
-                    </Grid>
-                  )}
-                  <Grid
-                    item
-                    xs={12}
-                    md={formData.hasGST || formData.hasPST ? 3 : 7}
-                  >
-                    <TextField
-                      fullWidth
-                      label="Total Amount"
-                      value={formData?.total?.toFixed(2) || 0}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">$</InputAdornment>
-                        ),
-                        readOnly: true,
-                      }}
-                      sx={{
-                        '& .MuiInputBase-root': {
-                          backgroundColor: blue[50],
-                          fontWeight: 'bold',
-                        },
-                      }}
-                    />
-                  </Grid>
-                </Grid>
-              </BorderSection>
-            </Grid>
-          ) : (
+          ) : transactionType === 'batch' ? (
             <Grid item xs={12}>
               <BorderSection sx={{ p: 3 }}>
                 <Box display="flex" alignItems="center" gap={1} mb={2}>
@@ -1614,6 +1501,168 @@ export default function DetailStep({
                       </Grid>
                     </Grid>
                   ))}
+              </BorderSection>
+            </Grid>
+          ) : (
+            <Grid item xs={12}>
+              <BorderSection sx={{ p: 3 }}>
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  mb={2}
+                >
+                  <Typography
+                    variant="subtitle1"
+                    gutterBottom
+                    sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                  >
+                    <AttachMoney color="primary" />
+                    Amount Details
+                  </Typography>
+
+                  <Box>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={formData.hasGST}
+                          onChange={(e) => {
+                            setFormData((prev: any) => ({
+                              ...prev,
+                              hasGST: e.target.checked,
+                            }));
+                          }}
+                        />
+                      }
+                      label="GST (5%)"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={formData.hasPST}
+                          onChange={(e) => {
+                            setFormData((prev: any) => ({
+                              ...prev,
+                              hasPST: e.target.checked,
+                            }));
+                          }}
+                        />
+                      }
+                      label="PST (7%)"
+                    />
+                  </Box>
+                </Box>
+                <Divider sx={{ mb: 3 }} />
+
+                <Grid container spacing={3}>
+                  <Grid item xs={6} md={2}>
+                    <TextField
+                      fullWidth
+                      label="Discount"
+                      type="number"
+                      value={
+                        isShowDiscountPercent
+                          ? formData.discountPercentage
+                          : formData.discount
+                      }
+                      onChange={(e) => handleDiscountChange(e, 'other')}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            {isShowDiscountPercent ? '%' : '$'}
+                          </InputAdornment>
+                        ),
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              onClick={() => {
+                                setIsShowDiscountPercent(
+                                  !isShowDiscountPercent,
+                                );
+                              }}
+                            >
+                              <SyncAltIcon />
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
+                      inputProps={{ min: 0, step: 0.01 }}
+                    />
+                  </Grid>
+                  <Grid item xs={6} md={3}>
+                    <TextField
+                      fullWidth
+                      label="Subtotal"
+                      type="number"
+                      value={formData?.subTotal}
+                      onChange={(e) =>
+                        setFormData((prev: any) => ({
+                          ...prev,
+                          subTotal: Number(e.target.value),
+                          initialSubTotal: Number(e.target.value),
+                        }))
+                      }
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">$</InputAdornment>
+                        ),
+                      }}
+                    />
+                  </Grid>
+                  {formData.hasGST && (
+                    <Grid item xs={6} md={2}>
+                      <TextField
+                        fullWidth
+                        label="GST (5%)"
+                        value={formData?.GST?.toFixed(2) || 0}
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">$</InputAdornment>
+                          ),
+                          readOnly: true,
+                        }}
+                      />
+                    </Grid>
+                  )}
+                  {formData.hasPST && (
+                    <Grid item xs={6} md={2}>
+                      <TextField
+                        fullWidth
+                        label="PST (7%)"
+                        value={formData?.PST?.toFixed(2) || 0}
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">$</InputAdornment>
+                          ),
+                          readOnly: true,
+                        }}
+                      />
+                    </Grid>
+                  )}
+                  <Grid
+                    item
+                    xs={12}
+                    md={formData.hasGST || formData.hasPST ? 3 : 7}
+                  >
+                    <TextField
+                      fullWidth
+                      label="Total Amount"
+                      value={formData?.total?.toFixed(2) || 0}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">$</InputAdornment>
+                        ),
+                        readOnly: true,
+                      }}
+                      sx={{
+                        '& .MuiInputBase-root': {
+                          backgroundColor: blue[50],
+                          fontWeight: 'bold',
+                        },
+                      }}
+                    />
+                  </Grid>
+                </Grid>
               </BorderSection>
             </Grid>
           )}

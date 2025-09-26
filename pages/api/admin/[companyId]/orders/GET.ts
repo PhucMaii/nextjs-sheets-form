@@ -1,8 +1,9 @@
 import { ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
-import { OrderedItems, PaymentStatus, PrismaClient } from '@prisma/client';
+import { OrderedItems, PaymentStatus } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { normalizeDate } from '@/pages/api/utils/date';
 import { days } from '@/app/lib/constant';
+import prisma from '@/client';
 
 interface RequestQuery {
   orderId?: string;
@@ -13,8 +14,6 @@ interface RequestQuery {
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { orderId, date, status, companyId } = req.query as RequestQuery;
 
     if (!companyId) {
@@ -27,6 +26,15 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       const order = await prisma.orders.findUnique({
         where: { id: Number(orderId) },
         include: {
+          reassignment: {
+            include: {
+              to: {
+                include: {
+                  employee: true,
+                },
+              },
+            },
+          },
           user: {
             include: {
               category: true,
@@ -81,6 +89,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
       // Get order route
       const orderRoute = getOrderRoute(order);
+      console.log(orderRoute, 'orderRoute');
 
       return res.status(200).json({
         message: 'Fetch Order Successfully',
@@ -116,6 +125,15 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
       ],
       include: {
+        reassignment: {
+          include: {
+            to: {
+              include: {
+                employee: true,
+              },
+            },
+          },
+        },
         user: {
           include: {
             routes: {
@@ -272,6 +290,10 @@ export const calculateOrderProfit = (items: OrderedItems[]) => {
 };
 
 export const getOrderRoute = (order: any) => {
+  console.log(order, 'order');
+  if (order?.reassignment) {
+    return `${order.reassignment.to.name} - ${order.reassignment.to.employee.name}`;
+  }
   const orderDeliveryDate: Date = normalizeDate(order.deliveryDate);
   const orderDayIndex = orderDeliveryDate.getDay();
   const orderDay = days[orderDayIndex];

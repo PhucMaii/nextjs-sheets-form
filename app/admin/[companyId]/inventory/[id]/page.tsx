@@ -40,6 +40,9 @@ const InventoryDetail = () => {
         hasPST: newInventoryItem.hasPST,
         hasGST: newInventoryItem.hasGST,
         isShowInventory: newInventoryItem.isShowInventory,
+        isInternal: newInventoryItem?.isInternal,
+        typeId: newInventoryItem.typeId,
+        image: newInventoryItem?.image || '',
         vendorItems: selectedVendors,
         updatedSellingItems: selectedSellingItems.map((item: any) => ({
           ...item,
@@ -47,6 +50,7 @@ const InventoryDetail = () => {
             id: item.category.id,
           },
         })),
+        subtractRules: newInventoryItem?.subtractRules || [],
       });
 
       if (res.data.error) {

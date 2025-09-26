@@ -93,11 +93,11 @@ export default function ViewImg({
               alt="front"
               style={{
                 maxWidth: '100%',
-                maxHeight: '45vh',
+                maxHeight: '100%',
                 objectFit: 'contain',
               }}
-              width={500}
-              height={500}
+              width={1000}
+              height={1000}
               loading="lazy"
             />
           )}

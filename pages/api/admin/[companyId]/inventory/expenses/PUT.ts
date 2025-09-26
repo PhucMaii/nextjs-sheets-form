@@ -1,5 +1,7 @@
 import {
   Fifo,
+  InventoryLogFrom,
+  InventoryLogType,
   OrderedItems,
   PaymentStatus,
   PrismaClient,
@@ -12,6 +14,7 @@ import { getTodayDate } from '@/pages/api/utils/date';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { USER_ROLE } from '@/app/utils/enum';
 import { updateCheque } from '../../expenses/PUT';
+import { recordTransactionInventoryLog } from '@/pages/api/utils/logs';
 
 interface IPurchasedItem {
   id: number; // ordered items id
@@ -91,7 +94,12 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       include: {
         orderedItems: {
           include: {
-            fifo: true,
+            inventoryItem: true,
+            fifo: {
+              include: {
+                inventoryItem: true,
+              },
+            },
             inventoryUnit: true,
           },
         },
@@ -145,7 +153,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       include: {
         orderedItems: {
           include: {
-            fifo: true,
+            fifo: {
+              include: {
+                inventoryItem: true,
+              },
+            },
           },
         },
         cheques: true,
@@ -233,6 +245,16 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
               item.inventoryUnit,
               item.quantity,
             );
+
+            // Record inventory log
+            await recordTransactionInventoryLog(
+              Number(id),
+              item.fifo.inventoryItemId,
+              item.fifo.quantity,
+              InventoryLogType.SUBTRACT,
+              InventoryLogFrom.EDIT_TRANSACTION,
+              `Subtract ${item.fifo.quantity} ${item.fifo.inventoryItem.name} from inventory due to edit item quantity in expense ${id} update`,
+            );
           }
           continue;
         }
@@ -267,8 +289,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             continue;
           }
 
+          const difference = item.quantity - existedItem.quantity;
+          const isRestock = difference > 0;
+
           const newFifoQuantity =
-            existedFifo.quantity - existedItem.quantity + item.quantity;
+            existedFifo.quantity + difference;
 
           await prisma.orderedItems.update({
             where: {
@@ -289,6 +314,16 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
                 price: item.unitPrice,
               },
             });
+
+            // Record inventory log
+            await recordTransactionInventoryLog(
+              Number(id),
+              existedItem.inventoryItemId || 0,
+              Math.abs(difference),
+              isRestock ? InventoryLogType.RESTOCK : InventoryLogType.SUBTRACT,
+              InventoryLogFrom.EDIT_TRANSACTION,
+              `${isRestock ? 'Restock' : 'Subtract'} ${Math.abs(difference)} ${existedItem?.inventoryItem?.name || ''} to inventory due to edit item quantity in expense ${id} update`,
+            );
           }
 
           // await prisma.vendorItem.update({
@@ -404,6 +439,16 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
               removedItem.fifo,
               removedItem.inventoryUnit,
               removedItem.quantity,
+            );
+
+            // Record inventory log
+            await recordTransactionInventoryLog(
+              Number(id),
+              removedItem.fifo.inventoryItemId,
+              removedItem.quantity,
+              InventoryLogType.SUBTRACT,
+              InventoryLogFrom.DELETE_TRANSACTION,
+              `Subtract ${removedItem.quantity} ${removedItem.fifo.inventoryItem.name} from inventory due to remove item in expense ${id} update`,
             );
           }
         }

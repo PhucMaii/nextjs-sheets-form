@@ -39,68 +39,166 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       formattedEndDate,
     );
 
-    // console.log(listOfDateString, 'listOfDateString');
-
+    // Fetch all expenses for the date range
     if (!id || Number(id) <= 0) {
-      const expenses = await getTransactions({
-        date: {
-          in: listOfDateString,
-        },
-        companyId: Number(companyId),
-      });
-
-      const batchTransactions: any = await prisma.batchTransaction.findMany({
-        where: {
+      const expenses = await getTransactions(
+        {
           date: {
             in: listOfDateString,
           },
           companyId: Number(companyId),
         },
-        include: {
-          transactions: true,
-          paymentMethod: true,
-          cheques: true,
-        },
-      });
-
-      const sortedExpensesByDate = sortExpenseByDate([
-        ...expenses,
-        ...batchTransactions,
-      ]);
-
-      const transactionBasedOnDate = sortedExpensesByDate.reduce(
-        (acc: any, expense: any) => {
-          if (!acc[expense.date]) {
-            acc[expense.date] = 0;
-          }
-
-          acc[expense.date] += expense?.amount || expense?.total;
-          return acc;
-        },
-        {},
+        true,
       );
-      const chartData = generateChartDataForm(
-        transactionBasedOnDate,
-        listOfDateString,
-      );
+
+      // const batchTransactions: any = await prisma.batchTransaction.findMany({
+      //   where: {
+      //     date: {
+      //       in: listOfDateString,
+      //     },
+      //     companyId: Number(companyId),
+      //   },
+      //   include: {
+      //     transactions: true,
+      //     paymentMethod: true,
+      //     cheques: true,
+      //   },
+      // });
+
+      // const sortedExpensesByDate = sortExpenseByDate([
+      //   ...expenses,
+      //   ...batchTransactions,
+      // ]);
+
+      // const transactionBasedOnDate = expenses.reduce(
+      //   (acc: any, expense: any) => {
+      //     if (!acc[expense.date]) {
+      //       acc[expense.date] = 0;
+      //     }
+
+      //     acc[expense.date] += expense?.amount || expense?.total;
+      //     return acc;
+      //   },
+      //   {},
+      // );
+      // const chartData = generateChartDataForm(
+      //   transactionBasedOnDate,
+      //   listOfDateString,
+      // );
 
       return res.status(200).json({
-        data: sortedExpensesByDate,
-        chartData,
+        data: expenses.expenses,
+        chartData: expenses.chartData,
         message: 'Fetch Expenses successfully',
       });
     }
 
-    let expenses = [];
+    console.log(type, 'type');
 
     if (type && type === VIEW_TYPE.VENDOR) {
-      console.log('listOfDateString', listOfDateString);
-      expenses = await getExpenseWithVendorId(Number(id), {
-        date: {
-          in: listOfDateString,
+      console.log(id, 'acccess to vendor');
+      const expenses = await getExpenseWithVendorId(
+        Number(id),
+        {
+          date: {
+            in: listOfDateString,
+          },
         },
+        true,
+      );
+
+      console.log(expenses, 'expenses');
+
+      const sortedExpensesByDate = expenses.expenses;
+
+      const totalSpent = sortedExpensesByDate.reduce(
+        (acc: any, expense: any) => {
+          return acc + expense?.amount || expense?.total;
+        },
+        0,
+      );
+
+      const unpaidExpenses = sortedExpensesByDate.filter(
+        (expense: any) => expense.status === TRANSACTION_STATUS.UNPAID,
+      );
+
+      const unpaidAmount = unpaidExpenses.reduce((acc: any, expense: any) => {
+        return acc + expense?.amount || expense?.total;
+      }, 0);
+
+      const paidExpenses = sortedExpensesByDate.filter(
+        (expense: any) => expense.status === TRANSACTION_STATUS.PAID,
+      );
+
+      const paidAmount = paidExpenses.reduce((acc: any, expense: any) => {
+        return acc + expense?.amount || expense?.total;
+      }, 0);
+
+      const monthRange = generateMonthRange();
+      const currentMonthListOfDateString = generateListOfDateString(
+        monthRange[0],
+        monthRange[1],
+      );
+      const overdueExpensesFromVendor = await getExpenseWithVendorId(
+        Number(id),
+        {
+          status: TRANSACTION_STATUS.UNPAID,
+          date: {
+            notIn: currentMonthListOfDateString,
+          },
+        },
+      );
+
+      const overdueExpenses = overdueExpensesFromVendor.expenses;
+
+      const overdueAmount = overdueExpenses.reduce((acc: any, expense: any) => {
+        return acc + expense?.amount || expense?.total;
+      }, 0);
+
+      const sortedOverdueExpenses = sortExpenseByDate(overdueExpenses);
+
+      // Top spending items
+      const topSpendingItems = getTopSpendingItems(sortedExpensesByDate);
+
+      // Payment delays
+      const paymentDelays = getPaymentDelays(sortedExpensesByDate);
+
+      // Compare with last month
+      const lastMonthExpenses = await getLastMonthExpenses(
+        Number(companyId),
+        formattedStartDate,
+      );
+
+      const overview = {
+        totalSpent,
+        unpaidAmount,
+        unpaidPercentage:
+          Math.round((unpaidAmount / totalSpent) * 100 * 100) / 100,
+        unpaidExpenses: unpaidExpenses.length,
+        paidExpenses: paidExpenses.length,
+        paidAmount,
+        paidPercentage: Math.round((paidAmount / totalSpent) * 100 * 100) / 100,
+        overdueExpenses: sortedOverdueExpenses,
+        overdueAmount,
+        topSpendingItems: topSpendingItems.sortedTopSpendingItems,
+        avgPaymentDelay: paymentDelays.avgPaymentDelay,
+        longestPaymentDelay: paymentDelays.longestPaymentDelay,
+        shortestPaymentDelay: paymentDelays.shortestPaymentDelay,
+        lastMonthExpenses: lastMonthExpenses.totalSpent,
+        lastMonthExpensesPercentage:
+          Math.round((lastMonthExpenses.totalSpent / totalSpent) * 100 * 100) /
+          100,
+        thisMonthExpensesPercentage:
+          Math.round((totalSpent / lastMonthExpenses.totalSpent) * 100 * 100) /
+          100,
+      };
+
+      return res.status(200).json({
+        data: sortedExpensesByDate,
+        chartData: expenses.chartData,
+        overview,
+        message: 'Fetch Expenses successfully',
       });
-      console.log('expenses', expenses);
     } else if (type && type === VIEW_TYPE.STOCK_PURCHASED) {
       const stockPurchased = await getTransactions({
         date: {
@@ -112,9 +210,14 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         companyId: Number(companyId),
       });
 
-      expenses = [...stockPurchased];
+      // expenses = stockPurchased;
+
+      return res.status(200).json({
+        data: stockPurchased.expenses,
+        message: 'Fetch Stock Purchased successfully',
+      });
     } else if (type && type === VIEW_TYPE.CUSTOM_PURCHASED) {
-      const stockPurchased = await getTransactions({
+      const otherPurchased = await getTransactions({
         date: {
           in: listOfDateString,
         },
@@ -127,7 +230,28 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         companyId: Number(companyId),
       });
 
-      expenses = [...stockPurchased];
+      // expenses = stockPurchased;
+
+      return res.status(200).json({
+        data: otherPurchased.expenses,
+        message: 'Fetch Stock Purchased successfully',
+      });
+    } else if (type && type === VIEW_TYPE.EXPENSE_TYPE) {
+      const expenses = await getTransactions(
+        {
+          date: {
+            in: listOfDateString,
+          },
+          typeId: Number(id),
+          companyId: Number(companyId),
+        },
+        true,
+      );
+
+      return res.status(200).json({
+        data: expenses.expenses,
+        message: 'Fetch Expenses successfully',
+      });
     } else if (type && type === VIEW_TYPE.FIXED_TRANSACTION) {
       const fixedTransaction = await getTransactions({
         date: {
@@ -138,9 +262,14 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
       });
 
-      expenses = [...fixedTransaction];
+      // expenses = fixedTransaction;
+
+      return res.status(200).json({
+        data: fixedTransaction.expenses,
+        message: 'Fetch Fixed Transaction successfully',
+      });
     } else if (type && type === VIEW_TYPE.PAYMENT_METHOD) {
-      expenses = await getTransactions({
+      const expenses = await getTransactions({
         date: {
           in: listOfDateString,
         },
@@ -148,7 +277,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       });
 
       return res.status(200).json({
-        data: expenses,
+        data: expenses.expenses,
         message: 'Fetch Expenses successfully',
       });
     } else if (id) {
@@ -170,122 +299,65 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         });
       }
 
-      expenses = await getTransactions({
+      const expenses = await getTransactions({
         id: Number(id),
       });
 
+      console.log(expenses.expenses[0], 'expenses');
+
       return res.status(200).json({
-        data: expenses[0],
+        data: expenses.expenses[0],
         message: 'Fetch Expenses successfully',
       });
     }
-
-    const sortedExpensesByDate = sortExpenseByDate(expenses);
-
-    const transactionBasedOnDate = sortedExpensesByDate.reduce(
-      (acc: any, expense: any) => {
-        if (!acc[expense.date]) {
-          acc[expense.date] = 0;
-        }
-
-        acc[expense.date] += expense.amount;
-        return acc;
-      },
-      {},
-    );
-    const chartData = generateChartDataForm(
-      transactionBasedOnDate,
-      listOfDateString,
-    );
-
-    const totalSpent = sortedExpensesByDate.reduce((acc: any, expense: any) => {
-      return acc + expense.amount;
-    }, 0);
-
-    const unpaidExpenses = sortedExpensesByDate.filter(
-      (expense: any) => expense.status === TRANSACTION_STATUS.UNPAID,
-    );
-
-    const unpaidAmount = unpaidExpenses.reduce((acc: any, expense: any) => {
-      return acc + expense.amount;
-    }, 0);
-
-    const paidExpenses = sortedExpensesByDate.filter(
-      (expense: any) => expense.status === TRANSACTION_STATUS.PAID,
-    );
-
-    const paidAmount = paidExpenses.reduce((acc: any, expense: any) => {
-      return acc + expense.amount;
-    }, 0);
-
-    const monthRange = generateMonthRange();
-    const currentMonthListOfDateString = generateListOfDateString(
-      monthRange[0],
-      monthRange[1],
-    );
-    const overdueExpenses = await getExpenseWithVendorId(Number(id), {
-      status: TRANSACTION_STATUS.UNPAID,
-      date: {
-        notIn: currentMonthListOfDateString,
-      },
-    });
-
-    const overdueAmount = overdueExpenses.reduce((acc: any, expense: any) => {
-      return acc + expense.amount;
-    }, 0);
-
-    const sortedOverdueExpenses = sortExpenseByDate(overdueExpenses);
-
-    // Top spending items
-    const topSpendingItems = getTopSpendingItems(sortedExpensesByDate);
-
-    // Payment delays
-    const paymentDelays = getPaymentDelays(sortedExpensesByDate);
-
-    // Compare with last month
-    const lastMonthExpenses = await getLastMonthExpenses(
-      Number(companyId),
-      formattedStartDate,
-    );
-
-    const overview = {
-      totalSpent,
-      unpaidAmount,
-      unpaidPercentage:
-        Math.round((unpaidAmount / totalSpent) * 100 * 100) / 100,
-      unpaidExpenses: unpaidExpenses.length,
-      paidExpenses: paidExpenses.length,
-      paidAmount,
-      paidPercentage: Math.round((paidAmount / totalSpent) * 100 * 100) / 100,
-      overdueExpenses: sortedOverdueExpenses,
-      overdueAmount,
-      topSpendingItems: topSpendingItems.sortedTopSpendingItems,
-      avgPaymentDelay: paymentDelays.avgPaymentDelay,
-      longestPaymentDelay: paymentDelays.longestPaymentDelay,
-      shortestPaymentDelay: paymentDelays.shortestPaymentDelay,
-      lastMonthExpenses: lastMonthExpenses.totalSpent,
-      lastMonthExpensesPercentage:
-        Math.round((lastMonthExpenses.totalSpent / totalSpent) * 100 * 100) /
-        100,
-      thisMonthExpensesPercentage:
-        Math.round((totalSpent / lastMonthExpenses.totalSpent) * 100 * 100) /
-        100,
-    };
-
-    return res.status(200).json({
-      data: sortedExpensesByDate,
-      chartData,
-      overview,
-      message: 'Fetch Expenses successfully',
-    });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({ error: 'Internal Server Error: ' + error });
   }
 }
 
-const getTransactions = async (condition: any) => {
-  const res = await prisma.expense.findMany({
+const getTransactions = async (
+  condition: any,
+  isIncludeBatchTransaction: boolean = false,
+) => {
+  // Fetching single expense - only use findUnique when we have an 'id' field
+  if (Object.keys(condition).length === 1 && condition.id) {
+    const singleExpense = await prisma.expense.findUnique({
+      where: { ...condition, batchTransactionId: null },
+      include: {
+        paymentMethod: true,
+        vendors: {
+          include: {
+            vendor: true,
+          },
+        },
+        type: true,
+        cheques: true,
+        codBoard: true,
+        orderedItems: {
+          include: {
+            inventoryItem: true,
+            inventoryUnit: true,
+            fifo: {
+              select: {
+                _count: {
+                  select: {
+                    orderedItems: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return {
+      expenses: [singleExpense],
+      chartData: [],
+    };
+  }
+  const singleExpenses = await prisma.expense.findMany({
     where: { ...condition, batchTransactionId: null },
     include: {
       paymentMethod: true,
@@ -294,6 +366,7 @@ const getTransactions = async (condition: any) => {
           vendor: true,
         },
       },
+      type: true,
       cheques: true,
       codBoard: true,
       orderedItems: {
@@ -314,13 +387,55 @@ const getTransactions = async (condition: any) => {
     },
   });
 
-  return res;
+  let batchTransactions: any = [];
+
+  if (isIncludeBatchTransaction) {
+    batchTransactions = await prisma.batchTransaction.findMany({
+      where: {
+        ...condition,
+      },
+      include: {
+        transactions: true,
+        paymentMethod: true,
+        cheques: true,
+        type: true,
+      },
+    });
+  }
+
+  const sortedExpensesByDate = sortExpenseByDate([
+    ...singleExpenses,
+    ...(batchTransactions ? batchTransactions : []),
+  ]);
+
+  const transactionBasedOnDate = sortedExpensesByDate.reduce(
+    (acc: any, expense: any) => {
+      if (!acc[expense.date]) {
+        acc[expense.date] = 0;
+      }
+
+      acc[expense.date] += expense?.amount || expense?.total;
+      return acc;
+    },
+    {},
+  );
+
+  const chartData = generateChartDataForm(
+    transactionBasedOnDate,
+    condition.date.in,
+  );
+
+  return {
+    expenses: sortedExpensesByDate,
+    chartData,
+  };
 };
 
 const generateChartDataForm = (
   transactionBasedOnDate: any,
   listOfDateString: any,
 ) => {
+  console.log(listOfDateString, 'listOfDateString');
   if (
     !transactionBasedOnDate ||
     Object.keys(transactionBasedOnDate).length === 0
@@ -348,37 +463,35 @@ const generateChartDataForm = (
   return returnData;
 };
 
-const getExpenseWithVendorId = async (vendorId: number, query: any) => {
-  const vendor = await prisma.vendor.findUnique({
+const getExpenseWithVendorId = async (
+  vendorId: number,
+  query: any,
+  isChartInclude: boolean = false,
+) => {
+  const expenses = await prisma.expense.findMany({
     where: {
-      id: vendorId,
+      ...query,
+      vendors: {
+        some: {
+          vendorId: vendorId,
+        },
+      },
     },
     include: {
-      expense: {
-        where: {
-          expense: query,
-        },
+      vendors: {
         include: {
-          expense: {
-            include: {
-              paymentMethod: true,
-              vendors: {
-                include: {
-                  vendor: true,
-                },
-              },
-              orderedItems: {
-                include: {
-                  inventoryUnit: true,
-                  fifo: {
-                    select: {
-                      _count: {
-                        select: {
-                          orderedItems: true,
-                        },
-                      },
-                    },
-                  },
+          vendor: true,
+        },
+      },
+      paymentMethod: true,
+      orderedItems: {
+        include: {
+          inventoryUnit: true,
+          fifo: {
+            select: {
+              _count: {
+                select: {
+                  orderedItems: true,
                 },
               },
             },
@@ -388,11 +501,29 @@ const getExpenseWithVendorId = async (vendorId: number, query: any) => {
     },
   });
 
-  if (!vendor || vendor?.expense?.length === 0) {
-    return [];
+  const transactionBasedOnDate = expenses.reduce((acc: any, expense: any) => {
+    if (!acc[expense.date]) {
+      acc[expense.date] = 0;
+    }
+    acc[expense.date] += expense?.amount || expense?.total;
+    return acc;
+  }, {});
+
+  if (isChartInclude) {
+    const chartData = generateChartDataForm(
+      transactionBasedOnDate,
+      query.date.in,
+    );
+
+    return {
+      expenses,
+      chartData,
+    };
   }
 
-  return vendor?.expense.map((expense: any) => expense.expense);
+  return {
+    expenses,
+  };
 };
 
 const getTopSpendingItems = (expenses: any) => {
@@ -476,9 +607,12 @@ const getLastMonthExpenses = async (companyId: number, startDate: any) => {
     },
   });
 
-  const totalSpent = lastMonthExpenses.reduce((acc: any, expense: any) => {
-    return acc + expense.amount;
-  }, 0);
+  const totalSpent = lastMonthExpenses.expenses.reduce(
+    (acc: any, expense: any) => {
+      return acc + expense?.amount || expense?.total;
+    },
+    0,
+  );
 
   return {
     totalSpent,

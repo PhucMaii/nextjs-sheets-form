@@ -26,6 +26,7 @@ interface PropTypes {
   backgroundColor?: string;
   renderText?: any;
   icon?: React.ReactNode;
+  action?: React.ReactNode;
 }
 
 interface TextColorType {
@@ -51,6 +52,7 @@ export default function StatusText({
   icon,
   backgroundColor,
   renderText,
+  action,
 }: PropTypes) {
   const [textColor, setTextColor] = useState<TextColorType>({
     backgroundColor: '',
@@ -108,6 +110,8 @@ export default function StatusText({
       {text && <Typography>{text}</Typography>}
 
       {renderText ? renderText() : null}
+
+      {action ? action : null}
     </Box>
   );
 }

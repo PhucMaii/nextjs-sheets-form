@@ -1,7 +1,6 @@
 import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/pages/api/auth/[...nextauth]';
-import { OrderedItems, PaymentStatus, PrismaClient } from '@prisma/client';
+import { InventoryLogFrom, InventoryLogType, OrderedItems, PaymentStatus } from '@prisma/client';
+import prisma from '@/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import {
   restockInventoryItem,
@@ -9,6 +8,8 @@ import {
 } from '../../orderedItems/single';
 import { recordAction } from '@/pages/api/utils/timeline';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
+import { checkOrderValidToAffectInventory } from '@/pages/api/utils/order';
+import { recordOrderInventoryLog } from '@/pages/api/utils/logs';
 
 interface IBody {
   id: number;
@@ -18,13 +19,9 @@ interface IBody {
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
-  const prisma = new PrismaClient();
   try {
+    const { companyId } = req.query;
     const { id, status, paymentStatus, updatedOrderIds } = req.body as IBody;
-    console.log({ status, paymentStatus });
-
-    const session: any = await getServerSession(req, res, authOptions);
-    const adminCreate: any = session?.user;
 
     const updateTime = new Date();
 
@@ -63,7 +60,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         });
       }
 
-      console.log(updateData, 'updateData');
 
       const updatedOrder = await prisma.orders.update({
         where: {
@@ -71,7 +67,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         },
         data: {
           ...updateData,
-          updatedBy: `Admin - ${adminCreate.name}`,
+          updatedBy: createdBy,
           updateTime,
         },
         include: {
@@ -79,6 +75,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             include: {
               fifo: true,
               inventoryUnit: true,
+              inventoryItem: true,
             },
           },
         },
@@ -112,12 +109,18 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           subCategory: true,
         },
       });
+      
+      const isValidToAffectInventory = await checkOrderValidToAffectInventory(
+        Number(companyId),
+        existingOrder.deliveryDate,
+      );
 
       // Inventory Item Update
       // From other status to VOID -> Inventory Item get restock
       if (
         existingOrder.status !== ORDER_STATUS.VOID &&
-        updatedOrder.status === ORDER_STATUS.VOID
+        updatedOrder.status === ORDER_STATUS.VOID &&  
+        isValidToAffectInventory
       ) {
         for (const item of updatedOrder.items) {
           if (item?.fifo && item?.inventoryUnit) {
@@ -127,6 +130,16 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
               item.inventoryUnit,
               item.quantity,
             );
+
+            // Record inventory log
+            await recordOrderInventoryLog(
+              existingOrder.id,
+              item.fifo.inventoryItemId,
+              item.quantity,
+              InventoryLogType.RESTOCK,
+              InventoryLogFrom.EDIT_ORDER,
+              `Restock ${item.quantity} ${item?.inventoryItem?.name} to inventory due to order ${existingOrder.id} updated status from ${existingOrder.status} to ${updatedOrder.status}`,
+            );
           }
         }
       }
@@ -134,7 +147,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       // From VOID to other status -> Inventory Item Stock Is Subtracted
       if (
         existingOrder.status === ORDER_STATUS.VOID &&
-        updatedOrder.status !== ORDER_STATUS.VOID
+        updatedOrder.status !== ORDER_STATUS.VOID &&
+        isValidToAffectInventory
       ) {
         for (const item of updatedOrder.items) {
           if (item?.fifo && item?.inventoryUnit) {
@@ -143,6 +157,16 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
               item.fifo,
               item.inventoryUnit,
               item.quantity,
+            );
+
+            // Record inventory log
+            await recordOrderInventoryLog(
+              existingOrder.id,
+              item.fifo.inventoryItemId,
+              item.quantity,
+              InventoryLogType.SUBTRACT,
+              InventoryLogFrom.EDIT_ORDER,
+              `Subtract ${item.quantity} ${item?.inventoryItem?.name} from inventory due to order ${existingOrder.id} updated status from ${existingOrder.status} to ${updatedOrder.status}`,
             );
           }
         }
@@ -154,6 +178,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
+    // Update multiple orders
     const updatedOrders = await prisma.orders.findMany({
       where: {
         id: {
@@ -173,6 +198,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     const idsToUpdate = updatedOrders.map((order: any) => order.id);
 
+
     await prisma.orders.updateMany({
       where: {
         id: {
@@ -181,7 +207,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       },
       data: {
         ...updateData,
-        updatedBy: `Admin - ${adminCreate.name}`,
+        updatedBy: createdBy,
         updateTime,
       },
     });
@@ -212,6 +238,16 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           `${createdBy} updated order ${title}`,
         );
 
+        // Check if order is valid to affect inventory
+        const isValidToAffectInventory = await checkOrderValidToAffectInventory(
+          Number(companyId),
+          order.deliveryDate,
+        );
+
+        if (!isValidToAffectInventory) {
+          continue;
+        }
+
         for (const item of order.items) {
           if (item.quantity === 0) {
             continue;
@@ -225,6 +261,16 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             item.fifo,
             item.inventoryUnit,
             item.quantity,
+          );
+
+          // Record inventory log
+          await recordOrderInventoryLog(
+            order.id,
+            item.fifo.inventoryItemId,
+            item.quantity,
+            InventoryLogType.RESTOCK,
+            InventoryLogFrom.EDIT_ORDER,
+            `Restock ${item.quantity} ${item?.inventoryItem?.name} to inventory due to order ${order.id} updated status from ${order.status} to ${updateData.status}`,
           );
         }
       }
@@ -243,7 +289,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         }
 
         // Record actions
-
         let title = '';
         if (updateData.status !== order.status) {
           title = `status: ${order.status} -> ${updateData.status}`;
@@ -256,6 +301,16 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           createdBy,
           `${createdBy} updated order ${title}`,
         );
+
+        // Check if order is valid to affect inventory
+        const isValidToAffectInventory = await checkOrderValidToAffectInventory(
+          Number(companyId),
+          order.deliveryDate,
+        );
+
+        if (!isValidToAffectInventory) {
+          continue;
+        }
 
         for (const item of order.items) {
           if (item.quantity === 0) {
@@ -272,6 +327,16 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             item.fifo,
             item.inventoryUnit,
             item.quantity,
+          );
+
+          // Record inventory log
+          await recordOrderInventoryLog(
+            order.id,
+            item.fifo.inventoryItemId,
+            item.quantity,
+            InventoryLogType.SUBTRACT,
+            InventoryLogFrom.EDIT_ORDER,
+            `Subtract ${item.quantity} ${item?.inventoryItem?.name} from inventory due to order ${order.id} updated status from ${order.status} to ${updateData.status}`,
           );
         }
       }

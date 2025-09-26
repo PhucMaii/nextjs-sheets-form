@@ -13,6 +13,7 @@ interface IBody {
   GST: number;
   subTotal: number;
   description: string;
+  typeId?: number;
   spentBy: string;
   date: string;
   paymentMethodId: number;
@@ -36,6 +37,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       subTotal,
       description,
       date,
+      typeId,
       spentBy,
       paymentMethodId,
       status,
@@ -93,6 +95,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         discount,
         companyId: Number(companyId),
         codBoardId,
+        typeId,
       },
     });
 

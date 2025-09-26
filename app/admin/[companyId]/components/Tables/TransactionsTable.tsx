@@ -237,7 +237,7 @@ const TransactionsTable = ({
                   ? 'batch'
                   : transaction?.orderedItems?.length > 0
                     ? 'stock'
-                    : 'other';
+                    : transaction?.type?.name || 'other';
 
                 // Define styling based on transaction type
 
@@ -283,7 +283,6 @@ const TransactionsTable = ({
                             const frontFileKey = transaction?.cheques?.find(
                               (cheque: any) => cheque.note === 'front',
                             )?.fileKey;
-                            console.log(frontFileKey, 'frontFileKey');
                             const backFileKey = transaction?.cheques?.find(
                               (cheque: any) => cheque.note === 'back',
                             )?.fileKey;

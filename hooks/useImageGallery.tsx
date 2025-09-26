@@ -19,12 +19,17 @@ const useImageGallery = (
 
   useEffect(() => {
     const getImages = async () => {
-      const images = await getAllS3Images(from);
-      setGalleryImages(images || []);
+      try {
+        const images = await getAllS3Images(from);
+        setGalleryImages(images || []);
+      } catch (error) {
+        console.error('Failed to load gallery images:', error);
+        setGalleryImages([]);
+      }
     };
-
+    
     getImages();
-  }, []);
+  }, [from]);
 
   const { showNotification } = useNotification();
 
@@ -50,7 +55,12 @@ const useImageGallery = (
         }}
       >
         {galleryImages.length > 0 &&
-          galleryImages.map((image: any, key: number) => (
+          galleryImages.map((image: any, key: number) => {
+            if (!image) {
+              console.log('image is not found', image);
+              return null;
+            };
+            return (
             <Box
               onClick={() => onSelectImage(image)}
               key={key}
@@ -93,14 +103,14 @@ const useImageGallery = (
                 }}
               />
             </Box>
-          ))}
+          )})}
       </Box>
 
       {isIncludeUploadImg && (
         <FileUpload
           showNotification={showNotification}
           fileName={`${folder + Date.now()}`}
-          uploadLocation={`products/export/${folder} + ${Date.now()}`}
+          uploadLocation={`products/${folder} + ${Date.now()}`}
           onUploadImageUI={(fileKey: string) => {
             setSelectedImage(fileKey);
           }}
@@ -113,6 +123,7 @@ const useImageGallery = (
     galleryImages,
     selectedImage,
     renderImageGallery,
+    setSelectedImage,
   };
 };
 

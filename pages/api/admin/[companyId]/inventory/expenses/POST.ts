@@ -1,24 +1,27 @@
-import { otherTypeId } from '@/app/lib/constant';
 import { TRANSACTION_STATUS } from '@/app/utils/enum';
 import { IInventoryUnit, IVendorItem } from '@/app/utils/type';
-import { calculateNextIndexPosAndRows } from '@/pages/api/utils/appearance';
 import { deleteInventoryUnit } from '@/pages/api/utils/inventoryUnit';
-import { infoBackground } from '@/theme/color';
-import { InventoryUnit, PrismaClient } from '@prisma/client';
+import {
+  InventoryLogFrom,
+  InventoryLogType,
+  InventoryUnit,
+  PrismaClient,
+} from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { getTodayDate } from '@/pages/api/utils/date';
 import { updateCheque } from '../../expenses/PUT';
+import { getCreatedBy } from '@/pages/api/import-sheets/utils';
+import { USER_ROLE } from '@/app/utils/enum';
+import { recordTransactionInventoryLog } from '@/pages/api/utils/logs';
 
 export interface IExpenseItem {
-    id: number;
-    quantity: number;
-    // unitPrice: number;
-    vendorId: number;
-    unit: IInventoryUnit | null;
-    units: IInventoryUnit[];
-    inventoryItemId: number;
+  id: number;
+  quantity: number;
+  // unitPrice: number;
+  vendorId: number;
+  unit: IInventoryUnit | null;
+  units: IInventoryUnit[];
+  inventoryItemId: number;
 }
 
 interface IBody {
@@ -83,9 +86,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       return res.status(404).json({ error: 'Payment Method Not Found' });
     }
 
-    const session: any = await getServerSession(req, res, authOptions);
-    const user: any = session?.user;
-
     const vendors = items.reduce((acc: any, item: any) => {
       if (!acc.includes(item.vendorId)) {
         acc.push(item.vendorId);
@@ -107,7 +107,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       }
     }
 
-    const createdBy = `Admin - ${user?.name}`;
+    const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
     const createdAt = getTodayDate().dateAndTime;
 
     const newExpense = await prisma.expense.create({
@@ -130,7 +130,14 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    await updateCheque(newExpense, frontFileKey, frontFileType, backFileKey, backFileType, createdBy);
+    await updateCheque(
+      newExpense,
+      frontFileKey,
+      frontFileType,
+      backFileKey,
+      backFileType,
+      createdBy,
+    );
 
     // Connect Vendors and Expense
     if (vendors.length > 0) {
@@ -144,47 +151,47 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    const inventoryItems = await prisma.inventoryItem.findMany({
-      where: {
-        companyId: Number(companyId),
-      },
-    });
+    // const inventoryItems = await prisma.inventoryItem.findMany({
+    //   where: {
+    //     companyId: Number(companyId),
+    //   },
+    // });
 
     // 3 CASES for each item - Brand new item, New vendor item but inventory exists, Item already exists
 
     const itemsAlreadyExist = items.filter((item: any) => item.id > 0);
     console.log('itemsAlreadyExist', itemsAlreadyExist);
-    const itemsToCreate = items.filter((item: any) => item.id === 0);
+    // const itemsToCreate = items.filter((item: any) => item.id === 0);
 
-    const newItems =
-      itemsToCreate.length > 0
-        ? itemsToCreate.reduce((acc: any, item: any) => {
-            if (!acc.brandNewItems) {
-              acc.brandNewItems = [];
-            }
+    // const newItems =
+    //   itemsToCreate.length > 0
+    //     ? itemsToCreate.reduce((acc: any, item: any) => {
+    //         if (!acc.brandNewItems) {
+    //           acc.brandNewItems = [];
+    //         }
 
-            if (!acc.itemsAlreadyHasInventoryItem) {
-              acc.itemsAlreadyHasInventoryItem = [];
-            }
+    //         if (!acc.itemsAlreadyHasInventoryItem) {
+    //           acc.itemsAlreadyHasInventoryItem = [];
+    //         }
 
-            const existedInventoryItem = inventoryItems.find(
-              (inventoryItem: any) => {
-                return inventoryItem.name === item.name;
-              },
-            );
+    //         const existedInventoryItem = inventoryItems.find(
+    //           (inventoryItem: any) => {
+    //             return inventoryItem.name === item.name;
+    //           },
+    //         );
 
-            if (existedInventoryItem) {
-              acc.itemsAlreadyHasInventoryItem.push({
-                ...item,
-                inventoryItemId: existedInventoryItem.id,
-              });
-            } else {
-              acc.brandNewItems.push(item);
-            }
+    //         if (existedInventoryItem) {
+    //           acc.itemsAlreadyHasInventoryItem.push({
+    //             ...item,
+    //             inventoryItemId: existedInventoryItem.id,
+    //           });
+    //         } else {
+    //           acc.brandNewItems.push(item);
+    //         }
 
-            return acc;
-          }, {})
-        : {};
+    //         return acc;
+    //       }, {})
+    //     : {};
 
     // CASE 1: ITEM ALREADY EXISTS
     if (itemsAlreadyExist.length > 0) {
@@ -204,6 +211,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         },
         include: {
           unit: true,
+          inventoryItem: true,
         },
       });
 
@@ -224,7 +232,18 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           createdAt,
           createdBy,
         );
+
+        // Record inventory log
+        await recordTransactionInventoryLog(
+          newExpense.id,
+          existedItem.inventoryItemId,
+          item.quantity,
+          InventoryLogType.STOCK_IN,
+          InventoryLogFrom.CREATE_TRANSACTION,
+          `Create ${item.quantity} ${existedItem.inventoryItem.name} to inventory due to expense ${newExpense.id} created`,
+        );
       }
+
       // STEP 4: Create OrderedItems
       // Use item already exist to easy to retrieve unitPrice
       const response = await createOrderedItems(
@@ -242,283 +261,283 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       }
     }
 
-    // CASE 2: BRAND NEW ITEMS
-    if (
-      Object.keys(newItems).length > 0 &&
-      newItems?.brandNewItems?.length > 0
-    ) {
-      const brandNewItems = newItems.brandNewItems;
+    // // CASE 2: BRAND NEW ITEMS
+    // if (
+    //   Object.keys(newItems).length > 0 &&
+    //   newItems?.brandNewItems?.length > 0
+    // ) {
+    //   const brandNewItems = newItems.brandNewItems;
 
-      // STEP 1: Create Inventory Items
-      const { nextPos, newRows } = await calculateNextIndexPosAndRows(
-        otherTypeId,
-        brandNewItems.length,
-      );
+    //   // STEP 1: Create Inventory Items
+    //   const { nextPos, newRows } = await calculateNextIndexPosAndRows(
+    //     otherTypeId,
+    //     brandNewItems.length,
+    //   );
 
-      for (let i = 0; i < brandNewItems.length; i++) {
-        const newItem = brandNewItems[i];
+    //   for (let i = 0; i < brandNewItems.length; i++) {
+    //     const newItem = brandNewItems[i];
 
-        await prisma.inventoryItem.create({
-          data: {
-            companyId: Number(companyId),
-            name: newItem.name,
-            createdAt,
-            createdBy,
-            color: infoBackground,
-            typeId: otherTypeId,
-            indexPos: nextPos[i],
-          },
-        });
-      }
+    //     await prisma.inventoryItem.create({
+    //       data: {
+    //         companyId: Number(companyId),
+    //         name: newItem.name,
+    //         createdAt,
+    //         createdBy,
+    //         color: infoBackground,
+    //         typeId: otherTypeId,
+    //         indexPos: nextPos[i],
+    //       },
+    //     });
+    //   }
 
-      // Update item type rows
-      await prisma.itemType.update({
-        where: {
-          id: otherTypeId,
-        },
-        data: {
-          rows: newRows,
-        },
-      });
+    //   // Update item type rows
+    //   await prisma.itemType.update({
+    //     where: {
+    //       id: otherTypeId,
+    //     },
+    //     data: {
+    //       rows: newRows,
+    //     },
+    //   });
 
-      // await prisma.inventoryItem.createMany({
-      //   data: brandNewItems.map((item: any) => {
-      //     return {
-      //       name: item.name,
-      //       createdAt,
-      //       createdBy,
-      //       color: infoBackground,
-      //       typeId: otherTypeId,
-      //       indexPos: 1,
-      //     };
-      //   }),
-      // });
+    //   // await prisma.inventoryItem.createMany({
+    //   //   data: brandNewItems.map((item: any) => {
+    //   //     return {
+    //   //       name: item.name,
+    //   //       createdAt,
+    //   //       createdBy,
+    //   //       color: infoBackground,
+    //   //       typeId: otherTypeId,
+    //   //       indexPos: 1,
+    //   //     };
+    //   //   }),
+    //   // });
 
-      // Get just created inventory items
-      const newInventoryItems = await prisma.inventoryItem.findMany({
-        where: {
-          companyId: Number(companyId),
-          createdAt,
-          createdBy,
-        },
-      });
+    //   // Get just created inventory items
+    //   const newInventoryItems = await prisma.inventoryItem.findMany({
+    //     where: {
+    //       companyId: Number(companyId),
+    //       createdAt,
+    //       createdBy,
+    //     },
+    //   });
 
-      // STEP 2: Create Vendor Items
-      const newVendorItems: any = brandNewItems.map((item: any) => {
-        const existedItem = newInventoryItems.find(
-          (inventoryItem) => inventoryItem.name === item.name,
-        );
+    //   // STEP 2: Create Vendor Items
+    //   const newVendorItems: any = brandNewItems.map((item: any) => {
+    //     const existedItem = newInventoryItems.find(
+    //       (inventoryItem) => inventoryItem.name === item.name,
+    //     );
 
-        if (!existedItem) {
-          return res.status(404).json({
-            error: 'Conflict Inventory Item Not Found',
-          });
-        }
+    //     if (!existedItem) {
+    //       return res.status(404).json({
+    //         error: 'Conflict Inventory Item Not Found',
+    //       });
+    //     }
 
-        return {
-          inventoryItemId: existedItem.id,
-          vendorId: item.vendorId,
-          quantity: item.quantity,
-          companyId: Number(companyId),
-          createdAt,
-          createdBy,
-        };
-      });
+    //     return {
+    //       inventoryItemId: existedItem.id,
+    //       vendorId: item.vendorId,
+    //       quantity: item.quantity,
+    //       companyId: Number(companyId),
+    //       createdAt,
+    //       createdBy,
+    //     };
+    //   });
 
-      await prisma.vendorItem.createMany({
-        data: newVendorItems,
-      });
+    //   await prisma.vendorItem.createMany({
+    //     data: newVendorItems,
+    //   });
 
-      // Get just created vendor items
-      const newVendorItemsCreated = await prisma.vendorItem.findMany({
-        where: {
-          companyId: Number(companyId),
-          createdAt,
-          createdBy,
-        },
-        include: {
-          inventoryItem: true,
-        },
-      });
+    //   // Get just created vendor items
+    //   const newVendorItemsCreated = await prisma.vendorItem.findMany({
+    //     where: {
+    //       companyId: Number(companyId),
+    //       createdAt,
+    //       createdBy,
+    //     },
+    //     include: {
+    //       inventoryItem: true,
+    //     },
+    //   });
 
-      // STEP 3: Create Inventory Units
-      const newUnits = brandNewItems
-        .map((item: any) => {
-          const existedVendorItem = newVendorItemsCreated.find(
-            (vendorItem) => vendorItem.inventoryItem.name === item.name,
-          );
+    //   // STEP 3: Create Inventory Units
+    //   const newUnits = brandNewItems
+    //     .map((item: any) => {
+    //       const existedVendorItem = newVendorItemsCreated.find(
+    //         (vendorItem) => vendorItem.inventoryItem.name === item.name,
+    //       );
 
-          if (!existedVendorItem) {
-            return res.status(404).json({
-              error: 'Conflict Inventory Item Not Found',
-            });
-          }
+    //       if (!existedVendorItem) {
+    //         return res.status(404).json({
+    //           error: 'Conflict Inventory Item Not Found',
+    //         });
+    //       }
 
-          return item.units.map((unit: IInventoryUnit) => {
-            return {
-              vendorItemId: existedVendorItem.id,
-              unit: unit.unit,
-              unitPrice: unit.unitPrice,
-              ratio: unit.ratio,
-              createdAt,
-              createdBy,
-              companyId: Number(companyId),
-            };
-          });
-        })
-        .flat();
+    //       return item.units.map((unit: IInventoryUnit) => {
+    //         return {
+    //           vendorItemId: existedVendorItem.id,
+    //           unit: unit.unit,
+    //           unitPrice: unit.unitPrice,
+    //           ratio: unit.ratio,
+    //           createdAt,
+    //           createdBy,
+    //           companyId: Number(companyId),
+    //         };
+    //       });
+    //     })
+    //     .flat();
 
-      await prisma.inventoryUnit.createMany({
-        data: newUnits,
-      });
+    //   await prisma.inventoryUnit.createMany({
+    //     data: newUnits,
+    //   });
 
-      // STEP 4: Create FIFO
+    //   // STEP 4: Create FIFO
 
-      const newItemsWithVendorItemId = brandNewItems.map((item: any) => {
-        const vendorItem = newVendorItemsCreated.find(
-          (vItem) => vItem.inventoryItem.name === item.name,
-        );
+    //   const newItemsWithVendorItemId = brandNewItems.map((item: any) => {
+    //     const vendorItem = newVendorItemsCreated.find(
+    //       (vItem) => vItem.inventoryItem.name === item.name,
+    //     );
 
-        if (!vendorItem) {
-          return res.status(404).json({
-            error: 'Conflict Inventory Item Not Found',
-          });
-        }
+    //     if (!vendorItem) {
+    //       return res.status(404).json({
+    //         error: 'Conflict Inventory Item Not Found',
+    //       });
+    //     }
 
-        return {
-          ...item,
-          id: vendorItem.id,
-          inventoryItemId: vendorItem.inventoryItemId,
-        };
-      });
-      await createFifo(
-        Number(companyId),
-        newItemsWithVendorItemId,
-        createdAt,
-        createdBy,
-      );
+    //     return {
+    //       ...item,
+    //       id: vendorItem.id,
+    //       inventoryItemId: vendorItem.inventoryItemId,
+    //     };
+    //   });
+    //   await createFifo(
+    //     Number(companyId),
+    //     newItemsWithVendorItemId,
+    //     createdAt,
+    //     createdBy,
+    //   );
 
-      // STEP 5: Create OrderedItems
-      const response = await createOrderedItems(
-        Number(companyId),
-        newItemsWithVendorItemId,
-        newExpense,
-        createdAt,
-        createdBy,
-      );
+    //   // STEP 5: Create OrderedItems
+    //   const response = await createOrderedItems(
+    //     Number(companyId),
+    //     newItemsWithVendorItemId,
+    //     newExpense,
+    //     createdAt,
+    //     createdBy,
+    //   );
 
-      if (!response.ok) {
-        return res.status(404).json({
-          error: response.error,
-        });
-      }
-    }
+    //   if (!response.ok) {
+    //     return res.status(404).json({
+    //       error: response.error,
+    //     });
+    //   }
+    // }
 
-    // CASE 3: UPDATE ITEMS ALREADY EXIST WITH INVENTORY ITEM
-    if (
-      Object.keys(newItems).length > 0 &&
-      newItems?.itemsAlreadyHasInventoryItem?.length > 0
-    ) {
-      const existedItems = newItems.itemsAlreadyHasInventoryItem;
+    // // CASE 3: UPDATE ITEMS ALREADY EXIST WITH INVENTORY ITEM
+    // if (
+    //   Object.keys(newItems).length > 0 &&
+    //   newItems?.itemsAlreadyHasInventoryItem?.length > 0
+    // ) {
+    //   const existedItems = newItems.itemsAlreadyHasInventoryItem;
 
-      // STEP 1: Create Vendor Items
-      await prisma.vendorItem.createMany({
-        data: existedItems.map((item: any) => {
-          return {
-            inventoryItemId: item?.inventoryItemId,
-            vendorId: item.vendorId,
-            quantity: item.quantity,
-            createdAt,
-            createdBy,
-            companyId: Number(companyId),
-          };
-        }),
-      });
+    //   // STEP 1: Create Vendor Items
+    //   await prisma.vendorItem.createMany({
+    //     data: existedItems.map((item: any) => {
+    //       return {
+    //         inventoryItemId: item?.inventoryItemId,
+    //         vendorId: item.vendorId,
+    //         quantity: item.quantity,
+    //         createdAt,
+    //         createdBy,
+    //         companyId: Number(companyId),
+    //       };
+    //     }),
+    //   });
 
-      // STEP 2: Create FIFO
-      // Get just created vendor items
-      const newVendorItemsCreated = await prisma.vendorItem.findMany({
-        where: {
-          createdAt,
-          createdBy,
-          companyId: Number(companyId),
-        },
-        include: {
-          inventoryItem: true,
-        },
-      });
+    //   // STEP 2: Create FIFO
+    //   // Get just created vendor items
+    //   const newVendorItemsCreated = await prisma.vendorItem.findMany({
+    //     where: {
+    //       createdAt,
+    //       createdBy,
+    //       companyId: Number(companyId),
+    //     },
+    //     include: {
+    //       inventoryItem: true,
+    //     },
+    //   });
 
-      const newItemsWithVendorItemId = existedItems.map((item: any) => {
-        const vendorItem = newVendorItemsCreated.find(
-          (vItem) => vItem.inventoryItem.name === item.name,
-        );
+    //   const newItemsWithVendorItemId = existedItems.map((item: any) => {
+    //     const vendorItem = newVendorItemsCreated.find(
+    //       (vItem) => vItem.inventoryItem.name === item.name,
+    //     );
 
-        if (!vendorItem) {
-          return res.status(404).json({
-            error: 'Conflict Inventory Item Not Found',
-          });
-        }
+    //     if (!vendorItem) {
+    //       return res.status(404).json({
+    //         error: 'Conflict Inventory Item Not Found',
+    //       });
+    //     }
 
-        return {
-          ...item,
-          id: vendorItem.id,
-          inventoryItemId: vendorItem.inventoryItemId,
-        };
-      });
+    //     return {
+    //       ...item,
+    //       id: vendorItem.id,
+    //       inventoryItemId: vendorItem.inventoryItemId,
+    //     };
+    //   });
 
-      await createFifo(
-        Number(companyId),
-        newItemsWithVendorItemId,
-        createdAt,
-        createdBy,
-      );
+    //   await createFifo(
+    //     Number(companyId),
+    //     newItemsWithVendorItemId,
+    //     createdAt,
+    //     createdBy,
+    //   );
 
-      // STEP 3: Create Inventory Units
-      const newUnits = existedItems
-        .map((item: any) => {
-          const existedVendorItem = newVendorItemsCreated.find(
-            (vendorItem) => vendorItem.inventoryItem.name === item.name,
-          );
+    //   // STEP 3: Create Inventory Units
+    //   const newUnits = existedItems
+    //     .map((item: any) => {
+    //       const existedVendorItem = newVendorItemsCreated.find(
+    //         (vendorItem) => vendorItem.inventoryItem.name === item.name,
+    //       );
 
-          if (!existedVendorItem) {
-            return res.status(404).json({
-              error: 'Conflict Inventory Item Not Found',
-            });
-          }
+    //       if (!existedVendorItem) {
+    //         return res.status(404).json({
+    //           error: 'Conflict Inventory Item Not Found',
+    //         });
+    //       }
 
-          return item.units.map((unit: IInventoryUnit) => {
-            return {
-              vendorItemId: existedVendorItem.id,
-              unit: unit.unit,
-              unitPrice: unit.unitPrice,
-              ratio: unit.ratio,
-              createdAt,
-              createdBy,
-              companyId: Number(companyId),
-            };
-          });
-        })
-        .flat();
+    //       return item.units.map((unit: IInventoryUnit) => {
+    //         return {
+    //           vendorItemId: existedVendorItem.id,
+    //           unit: unit.unit,
+    //           unitPrice: unit.unitPrice,
+    //           ratio: unit.ratio,
+    //           createdAt,
+    //           createdBy,
+    //           companyId: Number(companyId),
+    //         };
+    //       });
+    //     })
+    //     .flat();
 
-      await prisma.inventoryUnit.createMany({
-        data: newUnits,
-      });
+    //   await prisma.inventoryUnit.createMany({
+    //     data: newUnits,
+    //   });
 
-      // STEP 4: Create OrderedItems
-      const response = await createOrderedItems(
-        Number(companyId),
-        newItemsWithVendorItemId,
-        newExpense,
-        createdAt,
-        createdBy,
-      );
+    //   // STEP 4: Create OrderedItems
+    //   const response = await createOrderedItems(
+    //     Number(companyId),
+    //     newItemsWithVendorItemId,
+    //     newExpense,
+    //     createdAt,
+    //     createdBy,
+    //   );
 
-      if (!response.ok) {
-        return res.status(500).json({
-          message: response.error,
-        });
-      }
-    }
+    //   if (!response.ok) {
+    //     return res.status(500).json({
+    //       message: response.error,
+    //     });
+    //   }
+    // }
 
     return res.status(200).json({ message: 'Expense created successfully' });
   } catch (error: any) {
@@ -737,7 +756,6 @@ export const createFifo = async (
         continue;
       }
 
-      console.log({ unit: item.unit });
       const itemQuantity = item.quantity * item?.unit?.ratio;
       // itemQuantity > negativeFifo.quantity
       // Delete targeted fifo and create new fifo

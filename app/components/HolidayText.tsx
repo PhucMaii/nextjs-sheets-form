@@ -30,9 +30,9 @@ export default function HolidayText() {
           fontWeight="bold"
         >
           <strong style={highlightStyle}>
-            Liquid Egg
+            All Eggs
           </strong>{' '} price will be <br />
-          increased to $119 on July 15
+          increased by next week
         </Typography>
         <Typography sx={{ color: 'white', textAlign: 'center' }}>
           We truly appreciate <br /> your support and understanding! 💚

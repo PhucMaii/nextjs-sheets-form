@@ -1,6 +1,11 @@
 import { findCombinations } from '@/app/utils/array';
 import { COD_STATUS, ORDER_STATUS } from '@/app/utils/enum';
-import { OrderedItems, Orders, PaymentStatus, PrismaClient } from '@prisma/client';
+import {
+  OrderedItems,
+  Orders,
+  PaymentStatus,
+  PrismaClient,
+} from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { generateListOfDateString } from '@/app/utils/time';
 import { IBoard } from '@/app/utils/type';
@@ -144,9 +149,16 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
         0,
       );
+    
+      const totalAmount = boardOrdersWithTotalPriceItems.reduce(
+        (acc: number, order: Orders) => {
+          return acc + order.totalPrice;
+        },
+        0,
+      );
 
       const cashDiff = Math.abs(
-        codBoard.cash + expenseAmount - uncollectedAmount,
+        codBoard.cash + expenseAmount - totalAmount,
       );
 
       const expectedUnpaidOrders = boardOrdersWithTotalPriceItems.filter(
@@ -173,7 +185,49 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         cashDiff,
       );
 
-      console.log(expectedUnpaidAmount, expectedUnpaidCombinations);
+      // Find client position index for board
+      const boardDay = days[normalizeDate(codBoard.date).getDay()];
+      const boardRoute = await prisma.route.findFirst({
+        where: {
+          day: boardDay,
+          companyId: Number(companyId),
+          employeeId: codBoard.employeeId,
+        },
+        include: {
+          clients: {
+            include: {
+              user: {
+                include: {
+                  scheduleOrders: {
+                    where: {
+                      day: boardDay,
+                    },
+                    include: {
+                      positionIndex: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+
+      // Because one client only have one schedule order in one day, so we can sort by the position index of the first schedule order
+      const boardClientPositionIndex = boardRoute?.clients.sort(
+        (clientA: any, clientB: any) => {
+          return (
+            clientA.user.scheduleOrders[0]?.positionIndex.index -
+            clientB.user.scheduleOrders[0]?.positionIndex.index
+          );
+        },
+      ).map((client: any) => {
+        return {
+          userId: client.user.id,
+          positionIndex: client.user.scheduleOrders[0]?.positionIndex.index,
+        }
+      });
 
       return res.status(200).json({
         data: {
@@ -182,6 +236,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           expectedUnpaidOrders,
           expectedUnpaidCombinations,
           cashDiff,
+          boardClientPositionIndex,
         },
       });
     }

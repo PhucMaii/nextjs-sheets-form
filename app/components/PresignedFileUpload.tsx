@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useCallback, useState } from 'react';
+import React, { Dispatch, SetStateAction, useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { usePresignedUpload } from '../../hooks/usePresignedUpload';
+import { generateImgUrl } from '../lib/s3';
 
 interface PresignedFileUploadProps {
   location: string;
@@ -10,12 +11,15 @@ interface PresignedFileUploadProps {
   maxFiles?: number;
   maxSize?: number;
   acceptedFileTypes?: string[];
+  handleFlagUpload?: Dispatch<SetStateAction<boolean>>;
   onUploadComplete?: (
     uploadedFiles: Array<{ fileKey: string; fileName: string; fileType: string }>,
+    imgUrl: string,
   ) => void;
   onUploadError?: (error: string) => void;
   className?: string;
   isUploaded?: boolean;
+  disabled?: boolean;
 }
 
 export const PresignedFileUpload: React.FC<PresignedFileUploadProps> = ({
@@ -24,10 +28,12 @@ export const PresignedFileUpload: React.FC<PresignedFileUploadProps> = ({
   maxFiles = 1,
   maxSize = 10 * 1024 * 1024, // 10MB
   acceptedFileTypes = ['image/*', 'application/pdf'],
+  handleFlagUpload,
   onUploadComplete,
   onUploadError,
   className = '',
   isUploaded = false,
+  disabled = false,
 }) => {
   const [isGeneratingUrl, setIsGeneratingUrl] = useState(false);
   const {
@@ -87,6 +93,7 @@ export const PresignedFileUpload: React.FC<PresignedFileUploadProps> = ({
     async (acceptedFiles: File[]) => {
       try {
         clearError();
+        handleFlagUpload?.(true);
 
         const files = [];
         for (const file of acceptedFiles) {
@@ -100,12 +107,15 @@ export const PresignedFileUpload: React.FC<PresignedFileUploadProps> = ({
           });
         }
 
-        onUploadComplete?.(files as any);
+        const imgUrl = await generateImgUrl(files[0].fileKey);
+        onUploadComplete?.(files as any, imgUrl);
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : 'Upload failed';
         console.error('Upload error:', error);
         onUploadError?.(errorMessage);
+      } finally {
+        handleFlagUpload?.(false);
       }
     },
     [
@@ -136,10 +146,8 @@ export const PresignedFileUpload: React.FC<PresignedFileUploadProps> = ({
       },
       {} as Record<string, string[]>,
     ),
-    disabled: isUploaded,
+    disabled: isUploaded || disabled,
   });
-
-  console.log(uploadedFiles, 'uploadedFiles');
 
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
@@ -157,7 +165,7 @@ export const PresignedFileUpload: React.FC<PresignedFileUploadProps> = ({
         className={`
           border-2 border-dashed rounded-lg p-8 text-center transition-colors
           ${
-            isUploaded
+            isUploaded || disabled
               ? 'border-gray-200 bg-gray-50 cursor-not-allowed'
               : isDragActive
                 ? 'border-blue-500 bg-blue-50 cursor-pointer'
@@ -168,7 +176,7 @@ export const PresignedFileUpload: React.FC<PresignedFileUploadProps> = ({
       >
         <input
           {...getInputProps()}
-          disabled={isUploaded || isUploading || isGeneratingUrl}
+          disabled={isUploaded || isUploading || isGeneratingUrl || disabled}
         />
 
         <div className="space-y-4">

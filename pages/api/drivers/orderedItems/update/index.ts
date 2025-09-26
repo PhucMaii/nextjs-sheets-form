@@ -11,12 +11,14 @@ import {
 } from '@/pages/api/admin/[companyId]/orderedItems/single';
 import { getDriverInfo } from '@/pages/api/utils/auth';
 import { getTodayDate } from '@/pages/api/utils/date';
-import { formatItemsWithTotalPrice } from '@/pages/api/utils/order';
-import { createOrderedItems } from '@/pages/api/utils/orderedItems';
+import { calculateProfit, createOrderedItems } from '@/pages/api/utils/orderedItems';
+import { recordOrderInventoryLog } from '@/pages/api/utils/logs';
+import { checkOrderValidToAffectInventory, formatItemsWithTotalPrice } from '@/pages/api/utils/order';
 import { recordAction } from '@/pages/api/utils/timeline';
 import withDriverAuthGuard from '@/pages/api/utils/withDriverAuthGuar';
-import { PrismaClient } from '@prisma/client';
+import { InventoryLogType, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { InventoryLogFrom } from '@prisma/client';
 
 interface IBody {
   orderId: number;
@@ -84,6 +86,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       delete: [],
     };
 
+    const isAffectInventory = await checkOrderValidToAffectInventory(
+      existingOrder?.companyId || -1,
+      existingOrder.deliveryDate,
+    );
+
     for (const item of newItems) {
       // Check item categorize to create, update or delete
 
@@ -116,6 +123,18 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             item.inventoryUnit,
             item.quantity,
           );
+
+          // Record inventory log
+          if (isAffectInventory) {
+            await recordOrderInventoryLog(
+              item.orderId,
+              item.fifo.inventoryItemId,
+              item.quantity,
+              InventoryLogType.RESTOCK,
+              InventoryLogFrom.EDIT_ORDER,
+              `Restock ${item.quantity} ${item?.inventoryItem?.name} to inventory due to order ${item.orderId} removed ${item.name}`,
+            );
+          }
         }
 
         continue;
@@ -126,6 +145,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         const cost =
           (item?.cost / item?.inventoryUnit?.ratio) * item.inventoryUnit.ratio;
 
+        const profit = await calculateProfit(item, cost);
+
         await prisma.orderedItems.update({
           where: {
             id: item.id,
@@ -134,7 +155,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             price: item.price,
             quantity: item.quantity,
             cost,
-            profit: item.price - cost,
+            profit,
             inventoryUnitId: item.inventoryUnitId,
             option: item.option,
           },
@@ -146,8 +167,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         if (
           item?.fifo &&
           item.inventoryUnit &&
-          item?.Orders?.status !== ORDER_STATUS.VOID
+          item?.Orders?.status !== ORDER_STATUS.VOID &&
+          isAffectInventory
         ) {
+          const difference = item.quantity - item.prevQuantity;
+          const isRestock = difference < 0;
+
           await updateSingleInventoryItem(
             item.orderId,
             item.fifo,
@@ -155,6 +180,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             item.quantity,
             item.prevQuantity,
             item?.prevInventoryUnit,
+          );
+
+          // Record inventory log
+          await recordOrderInventoryLog(
+            item.orderId,
+            item.fifo.inventoryItemId,
+            Math.abs(difference),
+            isRestock ? InventoryLogType.RESTOCK : InventoryLogType.SUBTRACT,
+            InventoryLogFrom.EDIT_ORDER,
+            `${isRestock ? 'Restock' : 'Subtract'} ${Math.abs(difference)} ${item?.inventoryItem?.name} to inventory due to order ${item.orderId} updated ${item.name}`,
           );
         }
       }

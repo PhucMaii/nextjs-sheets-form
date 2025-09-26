@@ -21,11 +21,12 @@ import { getAdminApiUrl } from '@/app/utils/enum';
 import { ColorPicker, useColor } from 'react-color-palette';
 import { infoBackground, primaryColor } from '@/theme/color';
 import { ItemButton } from '@/app/components/OrderView';
-import FileUpload from '../FileUpload';
 import { grey } from '@mui/material/colors';
 import { useParams } from 'next/navigation';
 import useImageGallery from '@/hooks/useImageGallery';
 import Image from 'next/image';
+import { PresignedFileUpload } from '@/app/components/PresignedFileUpload';
+import DisplayFile from '../Modals/DisplayFile';
 
 interface IProps extends ModalProps {
   types: IItemType[];
@@ -47,6 +48,13 @@ export default function SwitchTypeAndAppearanceModal({
     item?.typeId || null,
   );
   const [itemImage, setItemImage] = useState<string>(item?.image || '');
+  const [uploadedImage, setUploadedImage] = useState<{
+    image: string;
+    fileKey: string;
+  }>({
+    image: '',
+    fileKey: '',
+  });
   // const [imageGallery, setImageGallery] = useState<string[]>([]);
   const [isUploadFile, setIsUploadFile] = useState<boolean>(false);
 
@@ -54,7 +62,23 @@ export default function SwitchTypeAndAppearanceModal({
 
   const [color, setColor] = useColor(item?.color || infoBackground);
 
-  const { selectedImage, renderImageGallery } = useImageGallery('products', item?.image || '', '100%');
+  const { selectedImage, renderImageGallery, setSelectedImage } =
+    useImageGallery('products', item?.image || '', '100%');
+
+
+  // reset uploaded image when modal is closed
+  useEffect(() => {
+    setUploadedImage({
+      image: '',
+      fileKey: '',
+    });
+  }, [open]);
+
+  useEffect(() => {
+    if (selectedImage) {
+      setItemImage(selectedImage);
+    }
+  }, [selectedImage]);
 
   // useEffect(() => {
   //   const fetchUrl = async () => {
@@ -95,6 +119,11 @@ export default function SwitchTypeAndAppearanceModal({
   const handleSave = async () => {
     setIsLoading(true);
     try {
+      let image = itemImage;
+      if (uploadedImage.fileKey) {
+        image = uploadedImage.fileKey;
+      }
+
       const actualId = item?.id?.toString().split(' - ')[1];
       const response = await axios.put(
         `${getAdminApiUrl(companyId, '/inventory/switch-type')}`,
@@ -102,7 +131,7 @@ export default function SwitchTypeAndAppearanceModal({
           id: Number(actualId),
           typeId: selectedType,
           color: color.hex,
-          image: selectedImage,
+          image: image,
         },
       );
 
@@ -135,7 +164,13 @@ export default function SwitchTypeAndAppearanceModal({
         <Box display="flex" alignItems="center" gap={1}>
           <Typography variant="h6">Appearance: </Typography>
           <ItemButton
-            item={{ ...item, price: 15.5, image: itemImage } as any}
+            item={
+              {
+                ...item,
+                price: 15.5,
+                image: uploadedImage.fileKey || itemImage,
+              } as any
+            }
             onClick={() => {}}
             style={{ width: 'fit-content', maxWidth: 300 }}
             containerStyle={{ backgroundColor: color.hex }}
@@ -162,10 +197,13 @@ export default function SwitchTypeAndAppearanceModal({
                 : `1px solid ${grey[100]}`,
               borderRadius: '10px',
             }}
-            onClick={() => setItemImage('')}
+            onClick={() => {
+              setSelectedImage('');
+              setItemImage('');
+            }}
           >
             <Image
-              src={itemImage || ''}
+              src={'/images/not-found.png'}
               width={100}
               height={100}
               alt={item?.name}
@@ -202,14 +240,35 @@ export default function SwitchTypeAndAppearanceModal({
         </Button>
 
         {isUploadFile && (
-          <FileUpload
-            showNotification={showNotification}
-            fileName={`${item?.name + Date.now()}`}
-            uploadLocation={`products/${item?.name}`}
-            onUploadImageUI={(fileKey: string) => {
-              setItemImage(fileKey);
+          <PresignedFileUpload
+            location={`products/${item?.name}`}
+            maxFiles={1}
+            maxSize={10 * 1024 * 1024} // 10MB
+            acceptedFileTypes={['image/*']}
+            onUploadComplete={(files: any, imgUrl: string) => {
+              console.log('Upload complete - files:', files);
+              console.log('Upload complete - imgUrl:', imgUrl);
+              console.log('Upload complete - fileKey:', files[0].fileKey);
+
+              // If imgUrl is not a proper URL, use the fileKey for DisplayFile components
+              const isUrl =
+                imgUrl.startsWith('http://') || imgUrl.startsWith('https://');
+              const imageValue = isUrl ? imgUrl : files[0].fileKey;
+
+              setItemImage(imageValue);
+              setUploadedImage({
+                image: imageValue,
+                fileKey: files[0].fileKey,
+              });
             }}
           />
+        )}
+
+        {uploadedImage.fileKey && (
+          <Box>
+            <Typography>Uploaded Image</Typography>
+            <DisplayFile fileKey={uploadedImage.fileKey} isDisableOnClick />
+          </Box>
         )}
 
         <Divider sx={{ my: 2 }} />

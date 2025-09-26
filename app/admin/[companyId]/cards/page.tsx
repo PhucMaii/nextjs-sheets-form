@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import {
   Box,
+  Button,
   Divider,
   Grid,
   IconButton,
@@ -11,17 +12,26 @@ import {
   Menu,
   MenuItem,
   Select,
+  Tab,
+  Tabs,
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import { blueGrey } from '@mui/material/colors';
+import { blueGrey, grey } from '@mui/material/colors';
 import SelectDateRange from '../components/Select/SelectDateRange';
 import { generateListOfDateString, generateMonthRange } from '@/app/utils/time';
 import KPICard from '../components/Overview/KPICard';
 import PaidIcon from '@mui/icons-material/Paid';
 import { CardStyled } from '../components/OverviewCard/styled';
 import Image from 'next/image';
-import { CheckIcon, FilterIcon, Nfc } from 'lucide-react';
+import {
+  CheckIcon,
+  EditIcon,
+  FilterIcon,
+  Nfc,
+  Trash2Icon,
+  UploadIcon,
+} from 'lucide-react';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import AreaChart from '../components/Charts/AreaChart';
 import { ShadowSection } from '../reports/styled';
@@ -36,12 +46,16 @@ import {
   VIEW_TYPE,
   getAdminApiUrl,
 } from '@/app/utils/enum';
-import { IExpense, IPaymentMethod, IVendor } from '@/app/utils/type';
+import {
+  IBatchTransaction,
+  IExpense,
+  IExpenseType,
+  IPaymentMethod,
+  IVendor,
+} from '@/app/utils/type';
 import PaymentsIcon from '@mui/icons-material/Payments';
 import ErrorComponent from '../components/ErrorComponent';
 import { normalizeDate } from '@/pages/api/utils/date';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
 import EditPaymentMethod from '../components/Modals/edit/EditPaymentMethod';
 import axios from 'axios';
 import DeleteModal from '../components/Modals/delete/DeleteModal';
@@ -49,7 +63,13 @@ import { useUpdateExpenseStatus } from '@/hooks/update/useUpdateExpenseStatus';
 import LoadingModal from '../components/Modals/LoadingModal';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { error, errorBackground, errorColor } from '@/theme/color';
-import moment from 'moment';
+import UploadMergeChequeModal from '../components/Modals/UploadMergeChequeModal';
+import MergeChequeTable from '../components/Tables/MergeChequeTable';
+import { useQuery } from '@tanstack/react-query';
+import dayjs from 'dayjs';
+import AddTypeModal from '../components/Modals/edit/SingleFieldEdit';
+import EditTypeModal from '../components/Modals/edit/SingleFieldEdit';
+import ConfirmModal from '../components/Modals/ConfirmModal';
 
 const SpendingItem = ({
   item,
@@ -58,8 +78,6 @@ const SpendingItem = ({
   item: any;
   transactions: any;
 }) => {
-  const color = blueGrey[700];
-
   return (
     <Box
       display="flex"
@@ -99,7 +117,6 @@ export default function CardManagement() {
   const [filterAnchorEl, setFilterAnchorEl] = useState<any>(null);
   const isOpenFilter = Boolean(filterAnchorEl);
   const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
-  // const [displayedTransactions, setDisplayedTransactions] = useState<IExpense[]>([]);
   const [selectedViewObj, setSelectedViewObj] = useState<any>({
     type: VIEW_TYPE.ALL,
     id: 0,
@@ -109,6 +126,15 @@ export default function CardManagement() {
     IPaymentMethod | any | null
   >(null);
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
+  const [editTypeProps, setEditTypeProps] = useState<any>({
+    open: false,
+    type: null,
+  });
+  const [deleteTypeProps, setDeleteTypeProps] = useState<any>({
+    open: false,
+    type: null,
+  });
+  const [isOpenAddTypeModal, setIsOpenAddTypeModal] = useState<boolean>(false);
   const [openModal, setOpenModal] = useState<any>({
     addModal: false,
     editModal: false,
@@ -117,7 +143,13 @@ export default function CardManagement() {
   const [paymentMethods, setPaymentMethods] = useState<IPaymentMethod[]>([]);
   const [vendors, setVendors] = useState<IVendor[]>([]);
   const [selectedExpenses, setSelectedExpenses] = useState<IExpense[]>([]);
-  // const [isOpenAddNewMethod, setIsOpenAddNewMethod] = useState<boolean>(false);
+  const [uploadMergeChequeProps, setUploadMergeChequeProps] = useState<any>({
+    open: false,
+    vendor: null,
+    startDate: dateRange[0],
+    endDate: dateRange[1],
+  });
+  const [tabIndex, setTabIndex] = useState<string>('transactions');
 
   const searchParams = useSearchParams();
   const paramStartDate = searchParams?.get('startDate');
@@ -132,7 +164,6 @@ export default function CardManagement() {
     isUpdating,
     Actions,
     AddExpenseButton,
-    // AddExpenseModal,
   } = useUpdateExpenseStatus(showNotification, selectedExpenses);
 
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
@@ -148,6 +179,30 @@ export default function CardManagement() {
   const [adminsAndDriversRes] = SWRFetchData(
     getAdminApiUrl(companyId, '/adminsAndDrivers'),
   );
+
+  const { data: mergeCheques, refetch: mutateMergeCheques } = useQuery({
+    queryKey: ['mergeCheques', selectedViewObj.id, dateRange[0], dateRange[1]],
+    queryFn: async () => {
+      const response = await axios.get(
+        getAdminApiUrl(
+          companyId,
+          `/cheque/merge-cheque?vendorId=${selectedViewObj.id}&year=${dayjs(dateRange[0]).format('YYYY')}`,
+        ),
+      );
+      return response.data.data || [];
+    },
+    enabled: !!selectedViewObj.id,
+  });
+
+  const { data: expenseTypes, refetch: mutateExpenseTypes } = useQuery({
+    queryKey: ['expenseTypes', companyId],
+    queryFn: async () => {
+      const response = await axios.get(
+        getAdminApiUrl(companyId, '/expenses/type'),
+      );
+      return response.data.data || [];
+    },
+  });
 
   const listOfDateString = useMemo(() => {
     const normalizedStartDate = normalizeDate(new Date(dateRange[0]));
@@ -165,8 +220,8 @@ export default function CardManagement() {
       return 0;
     }
 
-    return transactions?.data?.reduce((acc: number, transaction: IExpense) => {
-      return acc + transaction.amount;
+    return transactions?.data?.reduce((acc: number, transaction: any) => {
+      return acc + (transaction?.amount || transaction?.total);
     }, 0);
   }, [transactions]);
 
@@ -237,7 +292,7 @@ export default function CardManagement() {
 
   useEffect(() => {
     if (paramsViewType || paramsViewId) {
-      // const selectedType = 
+      // const selectedType =
       setSelectedViewObj({
         ...selectedViewObj,
         id: Number(paramsViewId) || selectedViewObj.id,
@@ -245,8 +300,6 @@ export default function CardManagement() {
       });
     }
   }, [paramsViewType, paramsViewId]);
-
-  console.log('selectedViewObj', selectedViewObj);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -291,6 +344,15 @@ export default function CardManagement() {
     });
   }, [dateRange]);
 
+  useEffect(() => {
+    if (selectedViewObj.type === VIEW_TYPE.VENDOR) {
+      setUploadMergeChequeProps({
+        ...uploadMergeChequeProps,
+        vendor: transactions?.data[0]?.vendors[0]?.vendor,
+      });
+    }
+  }, [transactions, selectedViewObj.type]);
+
   const fetchPaymentMethods = async () => {
     const paymentMethods: any = await fetchApi(
       getAdminApiUrl(companyId, '/paymentMethods'),
@@ -306,15 +368,6 @@ export default function CardManagement() {
     );
     setVendors(vendors);
   };
-
-  // useEffect(() => {
-  //   fetchAdminsAndDrivers();
-  // }, []);
-
-  // const fetchAdminsAndDrivers = async () => {
-  //   const users: any = await getAdminsAndDrivers(showNotification);
-  //   setAdminsAndDrivers(users);
-  // };
 
   const getPaymentMethod = () => {
     if (selectedViewObj.id === -1) {
@@ -344,7 +397,8 @@ export default function CardManagement() {
     if (
       selectedViewObj.type === VIEW_TYPE.CUSTOM_PURCHASED ||
       selectedViewObj.type === VIEW_TYPE.STOCK_PURCHASED ||
-      selectedViewObj.type === VIEW_TYPE.FIXED_TRANSACTION
+      selectedViewObj.type === VIEW_TYPE.FIXED_TRANSACTION ||
+      selectedViewObj.type === VIEW_TYPE.EXPENSE_TYPE
     ) {
       return {
         id: -1,
@@ -353,7 +407,11 @@ export default function CardManagement() {
             ? 'Custom Purchased'
             : selectedViewObj.type === VIEW_TYPE.STOCK_PURCHASED
               ? 'Stock Purchased'
-              : 'Fixed Transaction',
+              : selectedViewObj.type === VIEW_TYPE.FIXED_TRANSACTION
+                ? 'Fixed Transaction'
+                : selectedViewObj.type === VIEW_TYPE.EXPENSE_TYPE
+                  ? 'Expense Type'
+                  : 'Other Purchased',
         type: selectedViewObj.type,
         transactions: [],
         balance: 0,
@@ -377,6 +435,26 @@ export default function CardManagement() {
       updatedBy: null,
       updatedAt: null,
     };
+  };
+
+  const handleAddType = async (type: string) => {
+    try {
+      const response = await axios.post(
+        getAdminApiUrl(companyId, '/expenses/type'),
+        { type },
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      mutateExpenseTypes();
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('Fail to add type: ', error);
+      showNotification('error', 'Fail to add type. Please try again later.');
+    }
   };
 
   const handleDeleteMethod = async (targetMethod: IPaymentMethod) => {
@@ -415,6 +493,50 @@ export default function CardManagement() {
     }
   };
 
+  const handleDeleteType = async (type: IExpenseType) => {
+    try {
+      const response = await axios.delete(
+        getAdminApiUrl(companyId, `/expenses/type?id=${type.id}`),
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      mutateExpenseTypes();
+      showNotification('success', response.data.message);
+      setDeleteTypeProps({ open: false, type: null });
+    } catch (error: any) {
+      console.log('Fail to delete type: ', error);
+      showNotification('error', 'Fail to delete type. Please try again later.');
+    }
+  };
+
+  const handleEditType = async (updateName: string) => {
+    try {
+      const response = await axios.put(
+        getAdminApiUrl(companyId, '/expenses/type'),
+        {
+          id: editTypeProps.type.id,
+          newName: updateName,
+        },
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      mutateExpenseTypes();
+      showNotification('success', response.data.message);
+      setEditTypeProps({ open: false, type: null });
+    } catch (error: any) {
+      console.log('Fail to edit type: ', error);
+      showNotification('error', 'Fail to edit type. Please try again later.');
+    }
+  };
+
   const handleSelectAll = () => {
     if (!transactions) {
       return;
@@ -450,6 +572,22 @@ export default function CardManagement() {
     <Sidebar>
       {/* {AddExpenseModal} */}
       {UpdateExpenseStatusComp}
+      {currentMethod && (
+        <UploadMergeChequeModal
+          open={uploadMergeChequeProps.open}
+          onClose={() =>
+            setUploadMergeChequeProps({
+              ...uploadMergeChequeProps,
+              open: false,
+            })
+          }
+          showNotification={showNotification}
+          vendor={uploadMergeChequeProps.vendor}
+          startDate={dateRange[0]}
+          endDate={dateRange[1]}
+          mutateMergeCheques={mutateMergeCheques}
+        />
+      )}
       <LoadingModal open={isUpdating} />
       {NotificationComp}
       <AddPaymentMethod
@@ -477,6 +615,39 @@ export default function CardManagement() {
           handleDeleteMethod(targetMethod)
         }
       />
+
+      <AddTypeModal
+        open={isOpenAddTypeModal}
+        onClose={() => setIsOpenAddTypeModal(false)}
+        handleUpdate={handleAddType}
+        title="Add Type"
+        renderField="name"
+        inputLabel="Type"
+        buttonLabel="Add"
+      />
+
+      {deleteTypeProps.type && (
+        <ConfirmModal
+          open={deleteTypeProps.open}
+          onClose={() => setDeleteTypeProps({ open: false, type: null })}
+          title={`Are you sure to delete ${deleteTypeProps.type?.name} ?`}
+          handleSubmit={() => handleDeleteType(deleteTypeProps.type)}
+          showNotification={showNotification}
+          color="error"
+        />
+      )}
+
+      {editTypeProps.type && (
+        <EditTypeModal
+          open={editTypeProps.open}
+          onClose={() => setEditTypeProps({ open: false, type: null })}
+          handleUpdate={handleEditType}
+          title={`Edit ${editTypeProps.type?.name} ?`}
+          renderField="name"
+          inputLabel="Type"
+          buttonLabel="Edit"
+        />
+      )}
 
       <Box
         display="flex"
@@ -528,7 +699,7 @@ export default function CardManagement() {
                   selectedViewObj.type === VIEW_TYPE.ALL
                 }
               >
-                <DeleteIcon />
+                <Trash2Icon />
               </IconButton>
             </Box>
           </Box>
@@ -541,7 +712,9 @@ export default function CardManagement() {
           >
             <Select
               value={JSON.stringify(selectedViewObj)}
-              onChange={(e) => setSelectedViewObj(JSON.parse(e.target.value))}
+              onChange={(e) =>
+                setSelectedViewObj(JSON.parse(e?.target?.value || '{}'))
+              }
               size="small"
             >
               <MenuItem disabled value={JSON.stringify({ type: null, id: -1 })}>
@@ -581,14 +754,68 @@ export default function CardManagement() {
               >
                 Fixed Transaction
               </MenuItem>
+              {expenseTypes &&
+                expenseTypes.map((type: IExpenseType) => (
+                  <MenuItem
+                    key={type.id}
+                    value={JSON.stringify({
+                      type: VIEW_TYPE.EXPENSE_TYPE,
+                      id: type.id,
+                    })}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    {type.name}
+                    <Box display="flex" alignItems="center">
+                      <IconButton
+                        color="primary"
+                        size="small"
+                        onClick={() =>
+                          setEditTypeProps({ open: true, type: type })
+                        }
+                      >
+                        <EditIcon size={12} />
+                      </IconButton>
+                      <IconButton
+                        color="error"
+                        size="small"
+                        onClick={(e: any) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          setDeleteTypeProps({ open: true, type: type });
+                        }}
+                      >
+                        <Trash2Icon size={12} />
+                      </IconButton>
+                    </Box>
+                  </MenuItem>
+                ))}
               <MenuItem
                 value={JSON.stringify({
                   type: VIEW_TYPE.CUSTOM_PURCHASED,
                   id: 1,
                 })}
               >
-                Custom Purchased
+                Other Purchased
               </MenuItem>
+              <Box
+                sx={{
+                  width: '100%',
+                  ml: 2,
+                  display: 'flex',
+                  justifyContent: 'flex-start',
+                }}
+              >
+                <Button
+                  sx={{ color: grey[800], fontWeight: 600 }}
+                  onClick={() => setIsOpenAddTypeModal(true)}
+                >
+                  + Add Type
+                </Button>
+              </Box>
               <Divider />
               <ListSubheader>Vendors</ListSubheader>
               {vendors &&
@@ -630,7 +857,7 @@ export default function CardManagement() {
                   }}
                 > */}
                 <Typography variant="h4" fontWeight="bold" my={1}>
-                  {currentMethod?.name} Vendor Analysis
+                  {uploadMergeChequeProps.vendor?.name} Vendor Analysis
                 </Typography>
                 {/* </Box> */}
               </Grid>
@@ -780,267 +1007,19 @@ export default function CardManagement() {
                 </ShadowSection>
               </Grid>
 
-              {/* Payment Timeline */}
-              {/* <Grid item xs={12} md={6}>
-                <ShadowSection>
-                  <Typography
-                    variant="h6"
-                    fontWeight="bold"
-                    color={blueGrey[800]}
-                    mb={2}
-                  >
-                    Payment Timeline Insights
-                  </Typography>
-                  <Box display="flex" flexDirection="column" gap={2}>
-                    <Box
-                      p={3}
-                      sx={{
-                        backgroundColor: '#e3f2fd',
-                        borderRadius: 2,
-                        border: '1px solid #bbdefb',
-                        boxShadow: '0 2px 8px rgba(25, 118, 210, 0.1)',
-                      }}
-                    >
-                      <Typography
-                        variant="body1"
-                        fontWeight="600"
-                        color="#1565c0"
-                        mb={0.5}
-                      >
-                        Average Payment Delay
-                      </Typography>
-                      <Typography
-                        variant="h4"
-                        fontWeight="bold"
-                        color="#1976d2"
-                      >
-                        {transactions?.overview?.avgPaymentDelay?.toFixed(2)}{' '}
-                        days
-                      </Typography>
-                    </Box>
-                    <Box
-                      p={3}
-                      sx={{
-                        backgroundColor: '#fff3e0',
-                        borderRadius: 2,
-                        border: '1px solid #ffcc02',
-                        boxShadow: '0 2px 8px rgba(245, 124, 0, 0.1)',
-                      }}
-                    >
-                      <Typography
-                        variant="body1"
-                        fontWeight="600"
-                        color="#e65100"
-                        mb={0.5}
-                      >
-                        Longest Outstanding
-                      </Typography>
-                      <Typography
-                        variant="h4"
-                        fontWeight="bold"
-                        color="#f57c00"
-                      >
-                        {transactions?.overview?.longestPaymentDelay?.toFixed(
-                          2,
-                        )}{' '}
-                        days
-                      </Typography>
-                    </Box>
-                    <Box
-                      p={3}
-                      sx={{
-                        backgroundColor: '#e8f5e8',
-                        borderRadius: 2,
-                        border: '1px solid #c8e6c9',
-                        boxShadow: '0 2px 8px rgba(56, 142, 60, 0.1)',
-                      }}
-                    >
-                      <Typography
-                        variant="body1"
-                        fontWeight="600"
-                        color="#2e7d32"
-                        mb={0.5}
-                      >
-                        Fastest Payment
-                      </Typography>
-                      <Typography
-                        variant="h4"
-                        fontWeight="bold"
-                        color="#388e3c"
-                      >
-                        {transactions?.overview?.shortestPaymentDelay?.toFixed(
-                          2,
-                        )}{' '}
-                        days
-                      </Typography>
-                    </Box>
-                  </Box>
-                </ShadowSection>
-              </Grid> */}
-
-              {/* Action Items */}
-              {/* <Grid item xs={12}>
-                <ShadowSection>
-                  <Typography
-                    variant="h6"
-                    fontWeight="bold"
-                    color={blueGrey[800]}
-                    mb={3}
-                  >
-                    Action Items & Recommendations
-                  </Typography>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} md={4}>
-                      {transactions?.overview?.overdueExpenses.length > 0 && (
-                        <Box
-                          p={3}
-                          sx={{
-                            backgroundColor: '#ffebee',
-                            borderRadius: 2,
-                            border: '1px solid #ffcdd2',
-                            boxShadow: '0 4px 12px rgba(211, 47, 47, 0.15)',
-                            transition: 'transform 0.2s ease',
-                            '&:hover': { transform: 'translateY(-2px)' },
-                          }}
-                        >
-                          <Box
-                            display="flex"
-                            alignItems="center"
-                            gap={1}
-                            mb={1}
-                          >
-                            <Box
-                              sx={{
-                                width: 8,
-                                height: 8,
-                                borderRadius: '50%',
-                                backgroundColor: '#d32f2f',
-                              }}
-                            />
-                            <Typography
-                              variant="subtitle1"
-                              fontWeight="bold"
-                              color="#c62828"
-                            >
-                              Urgent: Overdue Payments
-                            </Typography>
-                          </Box>
-                          <Typography variant="body2" color="#7f1d1d" mb={1}>
-                            {transactions?.overview?.overdueExpenses.length}{' '}
-                            payments are overdue. Total amount: $
-                            {transactions?.overview?.overdueAmount?.toFixed(2)}
-                          </Typography>
-                          <Typography
-                            variant="caption"
-                            color="#d32f2f"
-                            fontWeight="600"
-                          >
-                            Oldest overdue:{' '}
-                            {Math.abs(
-                              moment(
-                                transactions?.overview?.overdueExpenses[
-                                  transactions?.overview?.overdueExpenses
-                                    .length - 1
-                                ]?.date,
-                              ).diff(moment(), 'days'),
-                            )}{' '}
-                            days
-                          </Typography>
-                        </Box>
-                      )}
-                    </Grid>
-                    <Grid item xs={12} md={4}>
-                      <Box
-                        p={3}
-                        sx={{
-                          backgroundColor: '#fff3e0',
-                          borderRadius: 2,
-                          border: '1px solid #ffcc02',
-                          boxShadow: '0 4px 12px rgba(245, 124, 0, 0.15)',
-                          transition: 'transform 0.2s ease',
-                          '&:hover': { transform: 'translateY(-2px)' },
-                        }}
-                      >
-                        <Box display="flex" alignItems="center" gap={1} mb={1}>
-                          <Box
-                            sx={{
-                              width: 8,
-                              height: 8,
-                              borderRadius: '50%',
-                              backgroundColor: '#f57c00',
-                            }}
-                          />
-                          <Typography
-                            variant="subtitle1"
-                            fontWeight="bold"
-                            color="#e65100"
-                          >
-                            Review: High Spending
-                          </Typography>
-                        </Box>
-                        <Typography variant="body2" color="#bf360c" mb={1}>
-                          {transactions?.overview?.thisMonthExpensesPercentage}%
-                          increase in spending this month
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          color="#f57c00"
-                          fontWeight="600"
-                        >
-                          Consider budget review
-                        </Typography>
-                      </Box>
-                    </Grid>
-                    <Grid item xs={12} md={4}>
-                      <Box
-                        p={3}
-                        sx={{
-                          backgroundColor: '#e8f5e8',
-                          borderRadius: 2,
-                          border: '1px solid #c8e6c9',
-                          boxShadow: '0 4px 12px rgba(56, 142, 60, 0.15)',
-                          transition: 'transform 0.2s ease',
-                          '&:hover': { transform: 'translateY(-2px)' },
-                        }}
-                      >
-                        <Box display="flex" alignItems="center" gap={1} mb={1}>
-                          <Box
-                            sx={{
-                              width: 8,
-                              height: 8,
-                              borderRadius: '50%',
-                              backgroundColor: '#388e3c',
-                            }}
-                          />
-                          <Typography
-                            variant="subtitle1"
-                            fontWeight="bold"
-                            color="#2e7d32"
-                          >
-                            Opportunity: Bulk Discount
-                          </Typography>
-                        </Box>
-                        <Typography variant="body2" color="#1b5e20" mb={1}>
-                          Regular high-volume purchases detected
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          color="#388e3c"
-                          fontWeight="600"
-                        >
-                          Negotiate better rates
-                        </Typography>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                </ShadowSection>
-              </Grid> */}
-
               {/* Recent Transactions Table */}
               <Grid item xs={12}>
                 <ShadowSection>
+                  <Tabs
+                    value={tabIndex}
+                    onChange={(e, value) => setTabIndex(value)}
+                  >
+                    <Tab label="Transactions" value="transactions" />
+                    <Tab label="Cheques" value="cheques" />
+                  </Tabs>
                   <Box
                     display="flex"
+                    flexDirection={smDown ? 'column' : 'row'}
                     alignItems="center"
                     justifyContent="space-between"
                     gap={2}
@@ -1051,10 +1030,22 @@ export default function CardManagement() {
                       fontWeight="bold"
                       color={blueGrey[800]}
                     >
-                      Recent Transactions with {currentMethod?.name}
+                      {tabIndex === 'transactions' ? 'Transactions' : 'Cheques'}
                     </Typography>
                     <Box display="flex" alignItems="center" gap={2}>
                       {AddExpenseButton}
+                      <Button
+                        variant="outlined"
+                        onClick={() =>
+                          setUploadMergeChequeProps({
+                            ...uploadMergeChequeProps,
+                            open: true,
+                          })
+                        }
+                        startIcon={<UploadIcon />}
+                      >
+                        Upload Merge Cheque
+                      </Button>
                       {Actions}
                       <IconButton
                         onClick={(e) => setFilterAnchorEl(e.currentTarget)}
@@ -1139,20 +1130,29 @@ export default function CardManagement() {
                     </Box>
                   </Box>
 
-                  <TransactionsTable
-                    transactions={displayedTransactions || []}
-                    handleUpdateStatus={handleUpdateStatus}
-                    showNotification={showNotification}
-                    selectedExpense={selectedExpenses}
-                    handleSelectExpense={handleSelectExpense}
-                    handleSelectAll={handleSelectAll}
-                    adminsAndDrivers={adminsAndDrivers}
-                  />
+                  {tabIndex === 'transactions' ? (
+                    <TransactionsTable
+                      transactions={displayedTransactions || []}
+                      handleUpdateStatus={handleUpdateStatus}
+                      showNotification={showNotification}
+                      selectedExpense={selectedExpenses}
+                      handleSelectExpense={handleSelectExpense}
+                      handleSelectAll={handleSelectAll}
+                      adminsAndDrivers={adminsAndDrivers}
+                    />
+                  ) : (
+                    <MergeChequeTable
+                      mergeCheques={mergeCheques || []}
+                      showNotification={showNotification}
+                      mutateMergeCheques={mutateMergeCheques}
+                    />
+                  )}
                 </ShadowSection>
               </Grid>
             </Grid>
           </>
         ) : (
+          // non vendor expense dashboard
           <>
             <Grid container spacing={2} sx={{ height: 200 }}>
               <Grid item xs={12} md={8}>
@@ -1178,7 +1178,8 @@ export default function CardManagement() {
                     sx={{ p: 2 }}
                   >
                     <Typography variant="h5" color="white">
-                      {currentMethod?.name}
+                      {currentMethod?.name ||
+                        uploadMergeChequeProps.vendor?.name}
                     </Typography>
                     {currentMethod?.type === PAYMENT_METHOD_TYPE.CASH ? (
                       <PaymentsIcon

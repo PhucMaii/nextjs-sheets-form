@@ -10,6 +10,7 @@ import {
   Driver,
   Employee,
   Expense,
+  ExpenseType,
   Fifo,
   FixedTransaction,
   InventoryItem,
@@ -35,6 +36,8 @@ import {
   Vendor,
   VendorExpense,
   VendorItem,
+  AutomationRules,
+  Reassignment,
 } from '@prisma/client';
 import { Session } from 'next-auth';
 import { Order } from '../admin/[companyId]/orders/page';
@@ -254,6 +257,7 @@ export interface IInventoryItem extends InventoryItem {
   preference?: ItemPreference;
   type?: ItemType;
   listingCategories?: any;
+  subtractRules?: AutomationRules[];
 }
 
 export interface IItemType extends ItemType {
@@ -378,4 +382,36 @@ export interface IOrderAction extends OrderAction {
 
 export interface IBatchTransaction extends BatchTransaction {
   transactions: IExpense[];
+}
+
+export interface IMergeCheque {
+  id: number;
+  chequeNumber: string;
+  amount: number;
+  startDate: string;
+  endDate: string;
+  fileKeyFront: string;
+  fileKeyBack?: string;
+  createdAt: string;
+  createdBy: string;
+  vendorId?: number;
+  vendor?: {
+    id: number;
+    name: string;
+  };
+  transactions?: Array<{
+    id: number;
+    description: string;
+    amount: number;
+    date: string;
+  }>;
+}
+
+export interface IExpenseType extends ExpenseType {
+  transactions: IExpense[];
+}
+
+export interface IReassignment extends Reassignment {
+  from: Route;
+  to: Route;
 }

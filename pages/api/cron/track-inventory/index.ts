@@ -1,10 +1,11 @@
-import { Fifo, PrismaClient } from '@prisma/client';
+import { Fifo, InventoryLogType, InventoryLogFrom, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate } from '@/pages/api/utils/date';
 import { ACTION, ORDER_STATUS } from '@/app/utils/enum';
 import { subtractInventoryItem } from '@/pages/api/admin/[companyId]/orderedItems/single';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import { recordAction } from '../../utils/timeline';
+import { recordOrderInventoryLog } from '../../utils/logs';
 
 interface ItemMap {
   [key: string]: {
@@ -146,6 +147,7 @@ export default async function handler(
       }
 
       const itemActionRecords: any[] = [];
+      const inventoryLogs: any[] = [];
       // Create a set of same items and quantity
       const itemMap: ItemMap = orderedItems.reduce((acc: any, item: any) => {
         if (!item.inventoryItemId || !item.inventoryUnitId) {
@@ -177,6 +179,17 @@ export default async function handler(
           orderId: item.orderId,
           createdBy: 'System',
           description: `Subtract ${item.quantity} ${item.name} from inventory during auto track inventory`,
+        });
+
+        inventoryLogs.push({
+          inventoryItemId: item.inventoryItemId,
+          quantity: item.quantity,
+          type: InventoryLogType.SUBTRACT,
+          createdFrom: InventoryLogFrom.CREATE_ORDER,
+          createdAt: `${date.time} ${date.date}`,
+          log: `Subtract ${item.quantity} ${item.name} from inventory during auto track inventory ${item.orderId}`,
+          date: date.date,
+          orderId: item.orderId,
         });
 
         return acc;
@@ -230,6 +243,18 @@ export default async function handler(
           itemActionRecord.orderId,
           itemActionRecord.createdBy,
           itemActionRecord.description,
+        );
+      }
+
+      // Record the inventory logs
+      for (const inventoryLog of inventoryLogs) {
+        await recordOrderInventoryLog(
+          inventoryLog.orderId,
+          inventoryLog.inventoryItemId,
+          inventoryLog.quantity,
+          inventoryLog.type,
+          inventoryLog.createdFrom,
+          inventoryLog.log,
         );
       }
     }

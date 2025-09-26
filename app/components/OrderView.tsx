@@ -288,6 +288,7 @@ export const ItemButton = ({
             fileKey={item?.image || item?.inventoryItem?.image}
             width="100%"
             height="100%"
+            isDisableOnClick
             style={{
               position: 'absolute',
               objectFit: 'cover',
@@ -424,7 +425,7 @@ interface IProps {
   defaultOrderedItems?: IItem[];
   defaultOrder?: Order;
   purpose?: ORDER_USAGE_PURPOSE; // If null, means for order
-  onSubmit: (order: Order) => Promise<void>;
+  onSubmit: (order: Order) => Promise<any>;
   isModal?: boolean;
   isPreOrder?: boolean;
   clientName?: string;
@@ -805,11 +806,14 @@ const OrderView = ({
 
     setIsLoading(true);
     try {
-      await onSubmit({
+      const res = await onSubmit({
         ...order,
         items: orderedItems,
       });
-      setOrderedItems([]);
+
+      if (res.ok) {
+        setOrderedItems([]);
+      }
       setIsLoading(false);
     } catch (error: any) {
       console.log('There was an error: ', error);

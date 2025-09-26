@@ -61,6 +61,7 @@ import OverviewBoard from '../../components/Overview/OverviewBoard';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import Sidebar from '../../components/Sidebar/Sidebar';
 import { generateCurrentTime } from '@/app/utils/time';
+import ExceedingCODButton from '../../components/ExceedingCODButton';
 
 export default function CODBoardDetailPage() {
   const { companyId, boardId }: any = useParams();
@@ -119,7 +120,7 @@ export default function CODBoardDetailPage() {
     if (boardResponse?.data?.date) {
       handleAutoAddBoard();
     }
-  }, [boardResponse?.data?.date]); 
+  }, [boardResponse?.data?.date]);
 
   useEffect(() => {
     if (debouncedKeywords) {
@@ -234,7 +235,6 @@ export default function CODBoardDetailPage() {
       }
 
       refetchBoard();
-
     } catch (error: any) {
       console.log('Internal Server Error: ', error);
       // showNotification('error', error.response.data.error);
@@ -550,6 +550,14 @@ export default function CODBoardDetailPage() {
           >
             <EditIcon fontSize="medium" />
           </IconButton>
+          {boardResponse?.data?.cashDiff > 5 && (
+            <ExceedingCODButton
+              cashDiff={boardResponse?.data?.cashDiff}
+              onCheckCOD={() =>
+                router.push(`/admin/${companyId}/codBoard/${boardId}/check-cod`)
+              }
+            />
+          )}
         </Box>
 
         {/* Overview Cards */}
@@ -608,21 +616,6 @@ export default function CODBoardDetailPage() {
             }
             label="Select All"
           />
-
-          {/* <Button
-              sx={{ color: yellow[800] }}
-              onClick={() =>
-                setUnsettledOrders({
-                  isOpen: true,
-                  orders: boardResponse.data.expectedUnpaidOrders,
-                })
-              }
-            >
-              <Box display="flex" alignItems="center" gap={2}>
-                <AutoAwesomeIcon />
-                <Typography fontWeight="bold">Unsettled Orders</Typography>
-              </Box>
-            </Button> */}
         </Box>
 
         {/* Orders */}
@@ -647,7 +640,9 @@ export default function CODBoardDetailPage() {
               selectedOrders={selectedOrders}
               handleSelectOrder={handleSelectOrder}
               mutateOrders={refetchBoard}
-              isMarkDateDifference={order.deliveryDate !== boardResponse?.data?.date}
+              isMarkDateDifference={
+                order.deliveryDate !== boardResponse?.data?.date
+              }
               handleRemoveOrder={handleRemoveOrders}
               showAddedBy
             />

@@ -1,16 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Orders, PrismaClient } from '@prisma/client';
+import { InventoryLogFrom, InventoryLogType, Orders, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { restockInventoryItem, updateSingleInventoryItem } from './single';
 import { gstRate, pstRate } from '@/app/lib/constant';
 import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
-import { createOrderedItems } from '@/pages/api/utils/orderedItems';
+import { calculateProfit, createOrderedItems } from '@/pages/api/utils/orderedItems';
 import { getTodayDate } from '@/pages/api/utils/date';
-import { formatItemsWithTotalPrice } from '@/pages/api/utils/order';
+import { checkOrderValidToAffectInventory, formatItemsWithTotalPrice } from '@/pages/api/utils/order';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { recordAction } from '@/pages/api/utils/timeline';
+import { recordOrderInventoryLog } from '@/pages/api/utils/logs';
 
 export enum ITEM_CATEGORIZED {
   REMAIN = 'remain',
@@ -109,6 +110,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       delete: [],
     };
 
+    const isValidToAffectInventory = await checkOrderValidToAffectInventory(
+      existingOrder?.companyId || 1,
+      existingOrder.deliveryDate,
+    );
+
     for (const item of newItems) {
       // Check item categorize to create, update or delete
 
@@ -130,12 +136,22 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
         actionRecord.delete.push(item);
 
-        if (item?.fifo && item?.inventoryUnit) {
+        if (item?.fifo && item?.inventoryUnit && isValidToAffectInventory) {
           await restockInventoryItem(
             item.orderId,
             item.fifo,
             item.inventoryUnit,
             item.quantity,
+          );
+
+          // Record inventory log
+          await recordOrderInventoryLog(
+            item.orderId,
+            item.fifo.inventoryItemId,
+            item.quantity,
+            InventoryLogType.RESTOCK,
+            InventoryLogFrom.EDIT_ORDER,
+            `Restock ${item.quantity} ${item?.inventoryItem?.name} to inventory due to order ${item.orderId} removed ${item.name}`,
           );
         }
 
@@ -151,6 +167,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
         actionRecord.update.push(item);
 
+        const profit = await calculateProfit(item, cost);
+
         await prisma.orderedItems.update({
           where: {
             id: item.id,
@@ -159,18 +177,25 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             price: item.price,
             quantity: item.quantity,
             cost,
-            profit: item.price - cost,
+            profit,
             inventoryUnitId: item.inventoryUnitId,
             option: item.option,
           },
         });
 
         // Inventory Update
+
         if (
           item?.fifo &&
           item.inventoryUnit &&
-          item?.Orders?.status !== ORDER_STATUS.VOID
+          item?.Orders?.status !== ORDER_STATUS.VOID && isValidToAffectInventory
         ) {
+          
+          // Identify the difference between the previous quantity and the new quantity
+          const difference = item.quantity - item.prevQuantity;
+
+          const isRestock = difference < 0;
+
           await updateSingleInventoryItem(
             item.orderId,
             item.fifo,
@@ -178,6 +203,16 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             item.quantity,
             item.prevQuantity,
             item?.prevInventoryUnit,
+          );
+
+          // Record inventory log
+          await recordOrderInventoryLog(
+            item.orderId,
+            item.fifo.inventoryItemId,
+            Math.abs(difference),
+            isRestock ? InventoryLogType.RESTOCK : InventoryLogType.SUBTRACT,
+            InventoryLogFrom.EDIT_ORDER,
+            `${isRestock ? 'Restock' : 'Subtract'} ${Math.abs(difference)} ${item?.inventoryItem?.name} to inventory due to order ${item.orderId} updated ${item.name}`,
           );
         }
       }

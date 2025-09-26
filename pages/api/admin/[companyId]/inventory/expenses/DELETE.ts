@@ -1,6 +1,7 @@
-import { PrismaClient } from '@prisma/client';
+import { InventoryLogFrom, InventoryLogType, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { subtractInventoryItem } from '../../orderedItems/single';
+import { recordTransactionInventoryLog } from '@/pages/api/utils/logs';
 
 export default async function DELETE(
   req: NextApiRequest,
@@ -22,7 +23,11 @@ export default async function DELETE(
       include: {
         orderedItems: {
           include: {
-            fifo: true,
+            fifo: {
+              include: {
+                inventoryItem: true,
+              }
+            },
             inventoryUnit: true,
           },
         },
@@ -60,28 +65,24 @@ export default async function DELETE(
       }
 
       if (item.fifo && item.inventoryUnit) {
+        // Subtract inventory item
         await subtractInventoryItem(
           -1,
           item.fifo,
           item.inventoryUnit,
           item.fifo.quantity,
         );
+
+        // Record inventory log
+        await recordTransactionInventoryLog(
+          Number(id),
+          item.fifo.inventoryItemId,
+          item.fifo.quantity,
+          InventoryLogType.SUBTRACT,
+          InventoryLogFrom.DELETE_TRANSACTION,
+          `Subtract ${item.fifo.quantity} ${item.fifo.inventoryItem.name} from inventory due to expense deletion`,
+        );
       }
-
-      // await prisma.vendorItem.update({
-      //   where: {
-      //     id: vendorItem.id,
-      //   },
-      //   data: {
-      //     quantity: newQuantity,
-      //   },
-      // });
-
-      // await prisma.fifo.delete({
-      //   where: {
-      //     id: item?.fifoId || -1,
-      //   },
-      // });
     }
 
     await prisma.expense.delete({

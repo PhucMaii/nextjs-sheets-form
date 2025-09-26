@@ -37,6 +37,7 @@ export enum VIEW_TYPE {
   PAYMENT_METHOD = 'paymentMethod',
   ALL = 'all',
   FIXED_TRANSACTION = 'fixed_transaction',
+  EXPENSE_TYPE = 'expense_type',
 }
 
 export enum COD_STATUS {

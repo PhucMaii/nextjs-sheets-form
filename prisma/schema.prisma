@@ -53,6 +53,9 @@ model Company {
   deliveries        Delivery[]
   medias            Media[]
   batchTransactions BatchTransaction[]
+  expenseTypes      ExpenseType[]
+  automationRules   AutomationRules[]
+  inventoryLogs     InventoryLog[]
 }
 
 model PageView {
@@ -295,7 +298,7 @@ model OrderedItems {
 
   Orders         Orders?         @relation(fields: [orderId], references: [id], onDelete: Cascade)
   expense        Expense?        @relation(fields: [expenseId], references: [id], onDelete: Cascade)
-  fifo            Fifo?           @relation(fields: [fifoId], references: [id])
+  fifo           Fifo?           @relation(fields: [fifoId], references: [id])
   inventoryUnit  InventoryUnit?  @relation(fields: [inventoryUnitId], references: [id])
   inventoryItem  InventoryItem?  @relation(fields: [inventoryItemId], references: [id])
   ScheduleOrders ScheduleOrders? @relation(fields: [scheduledOrderId], references: [id], onDelete: Cascade)
@@ -339,17 +342,18 @@ model Orders {
   companyId            Int?
   hasSubtractInventory Boolean?
   enteredOrderAt       String?
-  reassignmentId       Int?
+  isCODCheck           Boolean?
 
   delivery Delivery? @relation("OrderDelivery")
 
   items    OrderedItems[]
+  logs     InventoryLog[]
   timeline OrderTimeline? @relation("OrderTimeline")
 
-  user     User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  company  Company?  @relation(fields: [companyId], references: [id])
-  CodBoard CodBoard? @relation(fields: [codBoardId], references: [id])
-  reassignment   Reassignment?   @relation(fields: [reassignmentId], references: [id])
+  user         User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company      Company?      @relation(fields: [companyId], references: [id])
+  CodBoard     CodBoard?     @relation(fields: [codBoardId], references: [id])
+  reassignment Reassignment? @relation("OrderReassignment")
 
   @@index([deliveryDate, status])
   @@index([deliveryDate, status, paymentStatus])
@@ -427,42 +431,42 @@ model ScheduleOrders {
 }
 
 model PositionIndex {
-  id               Int            @id @default(autoincrement())
-  scheduledOrderId Int            @unique
+  id               Int @id @default(autoincrement())
+  scheduledOrderId Int @unique
   index            Int
 
-  scheduledOrder   ScheduleOrders @relation("ScheduledOrderIndex", fields: [scheduledOrderId], references: [id], onDelete: Cascade)
+  scheduledOrder ScheduleOrders @relation("ScheduledOrderIndex", fields: [scheduledOrderId], references: [id], onDelete: Cascade)
 }
 
 model Reassignment {
-  id              Int         @id @default(autoincrement())
-  fromRouteId    Int
-  toRouteId      Int
-  index          Int
-  date           String
-  reassignedAt    String
-  reassignedBy    String
-  reason          String?
-  status          ReassignmentStatus
+  id           Int                @id @default(autoincrement())
+  fromRouteId  Int
+  toRouteId    Int
+  index        Int
+  date         String
+  reassignedAt String
+  reassignedBy String
+  reason       String?
+  status       ReassignmentStatus
+  orderId      Int                @unique
 
-  orders          Orders[]
-
-  from      Route  @relation("FromRoute", fields: [fromRouteId], references: [id], onDelete: Cascade)
-  to        Route  @relation("ToRoute", fields: [toRouteId], references: [id], onDelete: Cascade)
+  from  Route  @relation("FromRoute", fields: [fromRouteId], references: [id], onDelete: Cascade)
+  to    Route  @relation("ToRoute", fields: [toRouteId], references: [id], onDelete: Cascade)
+  order Orders @relation("OrderReassignment", fields: [orderId], references: [id], onDelete: Cascade)
 }
 
 model Route {
-  id            Int            @id @default(autoincrement())
-  day           String
-  driverId      Int
-  employeeId    Int?
-  name          String
-  companyId     Int?
+  id         Int    @id @default(autoincrement())
+  day        String
+  driverId   Int
+  employeeId Int?
+  name       String
+  companyId  Int?
 
-  clients       UserRoute[]
-  shiftSessions ShiftSession[]
-  reassignmentFrom  Reassignment[] @relation("FromRoute")
-  reassignmentTo    Reassignment[] @relation("ToRoute")
+  clients          UserRoute[]
+  shiftSessions    ShiftSession[]
+  reassignmentFrom Reassignment[] @relation("FromRoute")
+  reassignmentTo   Reassignment[] @relation("ToRoute")
 
   driver   Driver    @relation(fields: [driverId], references: [id])
   employee Employee? @relation(fields: [employeeId], references: [id])
@@ -541,7 +545,7 @@ model PaymentMethod {
 
   transactions      Expense[]
   fixedTransactions FixedTransaction[]
-  batchTransactions  BatchTransaction[]
+  batchTransactions BatchTransaction[]
 
   company Company? @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
@@ -575,42 +579,64 @@ model FixedTransaction {
 }
 
 model Expense {
-  id                 Int     @id @default(autoincrement())
-  createdAt          String
-  createdBy          String
-  subTotal           Float?
-  PST                Float?
-  GST                Float?
-  amount             Float
-  discount           Float?
-  description        String
-  spentBy            String
-  paymentMethodId    Int
-  date               String
-  codBoardId         Int?
-  invoice            String?
-  status             String?
-  paidAt             String?
+  id              Int     @id @default(autoincrement())
+  createdAt       String
+  createdBy       String
+  subTotal        Float?
+  PST             Float?
+  GST             Float?
+  amount          Float
+  discount        Float?
+  description     String
+  spentBy         String
+  paymentMethodId Int
+  date            String
+  codBoardId      Int?
+  invoice         String?
+  status          String?
+  paidAt          String?
 
+  typeId             Int?
   fixedTransactionId Int?
   companyId          Int?
-  batchTransactionId  Int?
+  batchTransactionId Int?
+  mergeChequeId      Int?
 
   paymentMethod    PaymentMethod?    @relation(fields: [paymentMethodId], references: [id], onDelete: Cascade)
   codBoard         CodBoard?         @relation(fields: [codBoardId], references: [id])
   company          Company?          @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  batchTransaction  BatchTransaction?  @relation(fields: [batchTransactionId], references: [id], onDelete: Cascade)
+  batchTransaction BatchTransaction? @relation(fields: [batchTransactionId], references: [id], onDelete: Cascade)
+  mergeCheque      Cheque?           @relation(fields: [mergeChequeId], references: [id])
+  type             ExpenseType?      @relation(fields: [typeId], references: [id])
+
   orderedItems     OrderedItems[]
   vendors          VendorExpense[]
   shifts           ShiftSession[]
   purchaseOrders   PO[]
   payrolls         Payroll[]
   cheques          Media[]
+  logs             InventoryLog[]
   fixedTransaction FixedTransaction? @relation(fields: [fixedTransactionId], references: [id])
+
+  @@index([date])
+  @@index([typeId])
+  @@index([paymentMethodId])
+  @@index([companyId])
+}
+
+model ExpenseType {
+  id        Int    @id @default(autoincrement())
+  name      String
+  companyId Int
+
+  transactions      Expense[]
+  batchTransactions BatchTransaction[]
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 }
 
 model BatchTransaction {
-  id              Int       @id   @default(autoincrement())
+  id              Int            @id @default(autoincrement())
   createdAt       String
   createdBy       String
   description     String?
@@ -626,12 +652,17 @@ model BatchTransaction {
   spentBy         String
   paymentMethodId Int
   status          PaymentStatus?
+  typeId          Int?
 
-  transactions    Expense[]
-  cheques         Media[]
+  transactions Expense[]
+  cheques      Media[]
 
-  company         Company?  @relation(fields: [companyId], references: [id])
-  paymentMethod   PaymentMethod @relation(fields: [paymentMethodId], references: [id])
+  company       Company?      @relation(fields: [companyId], references: [id])
+  paymentMethod PaymentMethod @relation(fields: [paymentMethodId], references: [id])
+  type          ExpenseType?  @relation(fields: [typeId], references: [id])
+
+  @@index([date])
+  @@index([typeId])
 }
 
 model VendorExpense {
@@ -641,6 +672,8 @@ model VendorExpense {
   vendor    Vendor  @relation(fields: [vendorId], references: [id], onDelete: Cascade)
 
   @@id([expenseId, vendorId])
+  @@index([vendorId])
+  @@index([expenseId])
 }
 
 model Vendor {
@@ -656,10 +689,12 @@ model Vendor {
   email       String?
   companyId   Int?
 
-  company        Company?        @relation(fields: [companyId], references: [id])
+  company Company? @relation(fields: [companyId], references: [id])
+
   expense        VendorExpense[]
   vendorItem     VendorItem[]
   purchaseOrders PO[]
+  payments       Cheque[]
 }
 
 model InventoryItem {
@@ -680,25 +715,75 @@ model InventoryItem {
   promoIndexPos   Int?
   companyId       Int?
   isShowInventory Boolean?
+  isInternal      Boolean?
 
-  company      Company?         @relation(fields: [companyId], references: [id])
-  item         Item[]
-  vendorItem   VendorItem[]
-  fifo         Fifo[]
-  OrderedItems OrderedItems[]
-  preference   ItemPreference[]
-  options      Option[]
-  poItems      POItem[]
-  lossReports  LossReport[]
-  quoteItems   QuoteItem[]
+  item                   Item[]
+  vendorItem             VendorItem[]
+  fifo                   Fifo[]
+  OrderedItems           OrderedItems[]
+  preference             ItemPreference[]
+  options                Option[]
+  poItems                POItem[]
+  lossReports            LossReport[]
+  quoteItems             QuoteItem[]
+  logs                   InventoryLog[]
+  subtractRules          AutomationRules[] @relation("InventoryItemRules")
+  dependentSubtractRules AutomationRules[] @relation("DependentInventoryItemRules")
 
-  promotion Promotion? @relation(fields: [promotionId], references: [id])
-  type      ItemType?  @relation(fields: [typeId], references: [id])
-  timeline  InventoryItemTimeline?  @relation("InventoryItemTimeline")
+  company   Company?               @relation(fields: [companyId], references: [id])
+  promotion Promotion?             @relation(fields: [promotionId], references: [id])
+  type      ItemType?              @relation(fields: [typeId], references: [id])
+  timeline  InventoryItemTimeline? @relation("InventoryItemTimeline")
 
   @@index([indexPos])
   @@index([promoIndexPos])
   @@index([typeId, indexPos])
+}
+
+model AutomationRules {
+  id                       Int     @id @default(autoincrement())
+  inventoryItemId          Int
+  dependentInventoryItemId Int?
+  companyId                Int
+  relationalQty            Float?
+  subtractQty              Float
+  frequency                String?
+  nextSubtractDate         String?
+  lastSubtractAt           String?
+  isActive                 Boolean
+  createdAt                String
+  createdBy                String
+
+  inventoryItem          InventoryItem  @relation("InventoryItemRules", fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  dependentInventoryItem InventoryItem? @relation("DependentInventoryItemRules", fields: [dependentInventoryItemId], references: [id], onDelete: Cascade)
+  company                Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([dependentInventoryItemId])
+  @@index([inventoryItemId])
+}
+
+model InventoryLog {
+  id              Int              @id @default(autoincrement())
+  companyId       Int
+  inventoryItemId Int
+  log             String
+  type            InventoryLogType
+  prevQty         Float
+  afterQty        Float
+  quantity        Float
+  date            String
+  createdAt       String
+  createdFrom     InventoryLogFrom
+  orderId         Int?
+  transactionId   Int?
+
+  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  company       Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  order         Orders?       @relation(fields: [orderId], references: [id])
+  transaction   Expense?      @relation(fields: [transactionId], references: [id])
+
+  @@index([inventoryItemId])
+  @@index([date])
 }
 
 model ItemPreference {
@@ -747,7 +832,7 @@ model ItemType_Category {
 }
 
 model VendorItem {
-  id              Int    @id @default(autoincrement())
+  id              Int     @id @default(autoincrement())
   companyId       Int?
   inventoryItemId Int
   vendorId        Int
@@ -813,25 +898,24 @@ model InventoryUnit {
 }
 
 model InventoryItemTimeline {
-  id        Int    @id  @default(autoincrement())
-  inventoryItemId   Int? @unique
-  actions    Action[]
+  id              Int      @id @default(autoincrement())
+  inventoryItemId Int?     @unique
+  actions         Action[]
 
-  inventoryItem    InventoryItem? @relation("InventoryItemTimeline", fields: [inventoryItemId], references: [id])
+  inventoryItem InventoryItem? @relation("InventoryItemTimeline", fields: [inventoryItemId], references: [id])
 }
 
 model Action {
-  id          Int     @id @default(autoincrement())
-  name        String
-  description String? @db.Text
-  companyId   Int?
-  date        String
-  createdAt   String
-  createdBy   String?
-  inventoryItemTimelineId   Int?
+  id                      Int     @id @default(autoincrement())
+  name                    String
+  description             String? @db.Text
+  companyId               Int?
+  date                    String
+  createdAt               String
+  createdBy               String?
+  inventoryItemTimelineId Int?
 
-  iventoryItemTimeline    InventoryItemTimeline? @relation(fields: [inventoryItemTimelineId], references: [id], onDelete: Cascade)   
-  
+  iventoryItemTimeline InventoryItemTimeline? @relation(fields: [inventoryItemTimelineId], references: [id], onDelete: Cascade)
 
   company Company? @relation(fields: [companyId], references: [id])
 }
@@ -849,10 +933,15 @@ model Cheque {
   amount       Float
   createdAt    String
   createdBy    String
-  userId       Int
 
-  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   Int? // user pay to company
+  vendorId Int? // company pay to vendor
+
+  transactions Expense[]
+
   company Company? @relation(fields: [companyId], references: [id])
+  user    User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vendor  Vendor?  @relation(fields: [vendorId], references: [id])
 }
 
 model ClientStatement {
@@ -1055,24 +1144,24 @@ model LossReport {
 }
 
 model Media {
-  id                    Int    @id @default(autoincrement())
-  type                  String
-  fileKey                String
-  createdAt             String
-  createdBy             String
-  note                  String?
+  id        Int     @id @default(autoincrement())
+  type      String
+  fileKey   String
+  createdAt String
+  createdBy String
+  note      String?
 
-  companyId             Int?
-  lossReportId          Int?
-  deliveryId            Int?
-  expenseId             Int?
-  batchTransactionId    Int?
+  companyId          Int?
+  lossReportId       Int?
+  deliveryId         Int?
+  expenseId          Int?
+  batchTransactionId Int?
 
-  lossReport LossReport? @relation(fields: [lossReportId], references: [id], onDelete: Cascade)
-  delivery   Delivery?   @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
-  expense    Expense?    @relation(fields: [expenseId], references: [id], onDelete: Cascade)
-  company    Company?    @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  batchTransaction  BatchTransaction?  @relation(fields: [batchTransactionId], references: [id], onDelete: Cascade)
+  lossReport       LossReport?       @relation(fields: [lossReportId], references: [id], onDelete: Cascade)
+  delivery         Delivery?         @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+  expense          Expense?          @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  company          Company?          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  batchTransaction BatchTransaction? @relation(fields: [batchTransactionId], references: [id], onDelete: Cascade)
 
   @@index([deliveryId])
   @@index([lossReportId])
@@ -1105,4 +1194,26 @@ enum ReassignmentStatus {
   PENDING
   ACCEPTED
   REJECTED
+}
+
+enum InventoryLogType {
+  SUBTRACT
+  STOCK_IN
+  RESTOCK
+  LOST
+}
+
+enum InventoryLogFrom {
+  CREATE_ORDER
+  DELETE_ORDER
+  EDIT_ORDER
+  CREATE_TRANSACTION
+  EDIT_TRANSACTION
+  DELETE_TRANSACTION
+  CREATE_LOSS_REPORT
+  EDIT_LOSS_REPORT
+  DELETE_LOSS_REPORT
+
+  DEPENDENT_INVENTORY
+  AUTOMATIC_SUBTRACT
 }

@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
 import axios from 'axios';
 import { API_URL, FLAG_ORDER_TYPE, USER_ROLE } from '@/app/utils/enum';
@@ -19,6 +19,9 @@ import TourStartButton from './TourStartButton';
 // import { grey } from '@mui/material/colors';
 // import OldOrderVersion from './OldOrderVersion';
 import OverrideOrder from '../../components/Modals/OverrideOrder';
+import { getNextOrderDate } from '@/pages/api/utils/date';
+import ConfirmModal from '@/app/admin/[companyId]/components/Modals/ConfirmModal';
+import { UserContext } from '@/app/context/UserContextAPI';
 
 const steps = [
   {
@@ -45,10 +48,15 @@ const steps = [
 ];
 
 export default function OrderForm() {
+  const { user } = useContext(UserContext);
+
   const [itemList, setItemList] = useState<any>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [enteredOrderAt, setEnteredOrderAt] = useState<any>();
   // const [tabIdx, setTabIdx] = useState<number>(0);
+  const [isConfirmOrderFarNextDay, setIsConfirmOrderFarNextDay] = useState<boolean>(false);
+  const [isOpenConfirmOrder, setIsOpenConfirmOrder] = useState<boolean>(false);
+  const [order, setOrder] = useState<Order | null>(null);
   const [overrideOrderProps, setOverrideOrderProps] = useState<any>({
     open: false,
     lastOrder: null,
@@ -104,14 +112,14 @@ export default function OrderForm() {
     // Check if items are selected
     if (order.items.length === 0) {
       showNotification('error', 'Please select at least one item');
-      return;
+      return { ok: false, error: 'Please select at least one item' };
     }
 
     // Check if any item quantity is decimal number or less than 1
     for (const item of order.items) {
       if (item.quantity % 1 !== 0) {
         showNotification('error', 'Item quantity must be a whole number');
-        return;
+        return { ok: false, error: 'Item quantity must be a whole number' };
       }
     }
 
@@ -122,8 +130,23 @@ export default function OrderForm() {
       (deliveryDateObj.date() === 1 && deliveryDateObj.month() === 0)
     ) {
       showNotification('error', 'Delivery date is not valid');
-      return;
+      return { ok: false, error: 'Delivery date is not valid' };
     }
+
+    if (user?.role === USER_ROLE.CLIENT) {
+      const nextOrderDate = getNextOrderDate();
+      const deliveryDateObjPST = new Date(order.deliveryDate);
+      deliveryDateObjPST.setHours(0, 0, 0, 0);
+  
+      if (deliveryDateObjPST.getTime() > nextOrderDate.getTime() && !isConfirmOrderFarNextDay) {
+        setOrder(order);
+        setIsConfirmOrderFarNextDay(true);
+        setIsOpenConfirmOrder(true);
+        return { ok: false, error: 'Target delivery date is too far in the future' };
+      }
+
+    }
+
 
     try {
       const currentDate = new Date();
@@ -134,7 +157,7 @@ export default function OrderForm() {
 
       if (itemsNo0.length === 0) {
         showNotification('error', 'Please select at least one item');
-        return;
+        return { ok: false, error: 'Please select at least one item' };
       }
 
       // Format data to have the same structure as backend
@@ -155,7 +178,7 @@ export default function OrderForm() {
 
       if (response.data.error) {
         showNotification('error', response.data.error);
-        return response;
+        return { ok: false, error: response.data.error };
       }
 
       if (response.data.warning) {
@@ -168,7 +191,7 @@ export default function OrderForm() {
             newOrder: response.data.currentOrder,
           });
         }
-        return response;
+        return { ok: false, error: response.data.warning };
       }
       showNotification('success', response.data.message);
 
@@ -176,9 +199,12 @@ export default function OrderForm() {
       setTimeout(() => {
         router.push('/user/overview');
       }, 500);
+
+      return { ok: true }
     } catch (error: any) {
       console.log(error);
       showNotification('error', error.response.data.error);
+      return { ok: false, error: error.response.data.error };
     }
   };
 
@@ -219,6 +245,22 @@ export default function OrderForm() {
           }}
           anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         />
+
+        {order && <ConfirmModal
+          open={isOpenConfirmOrder}
+          onClose={() => {
+            setIsOpenConfirmOrder(false);
+            setOrder(null);
+            setIsConfirmOrderFarNextDay(false);
+          }}
+          handleSubmit={async () => {
+            await onSubmit(order as Order);
+          }}
+          showNotification={showNotification}
+          title={`Are you sure you want to order for ${order.deliveryDate}?`}
+          buttonLabel="CONFIRM"
+          successMsg="Order placed successfully"
+        />}
         {/* 
         <Tabs
           variant="fullWidth"

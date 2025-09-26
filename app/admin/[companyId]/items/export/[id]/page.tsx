@@ -90,9 +90,9 @@ const ItemExportPage = () => {
             fileKey={params.row?.image || params.row?.inventoryItem?.image}
             width="100%"
             height="100%"
-            onClick={() => {
-              setOpenEditImgProps({ open: true, item: params.row });
-            }}
+            // onClick={() => {
+            //   setOpenEditImgProps({ open: true, item: params.row });
+            // }}
           />
         );
       },
