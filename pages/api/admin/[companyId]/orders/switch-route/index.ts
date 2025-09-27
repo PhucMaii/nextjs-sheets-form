@@ -26,11 +26,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(404).json({ error: 'Order not found' });
     }
 
-    const existingRoute = await prisma.route.findUnique({
+    const existingNewRoute = await prisma.route.findUnique({
       where: { id: newRouteId },
+      include: {
+        employee: true,
+      },
     });
 
-    if (!existingRoute) {
+    if (!existingNewRoute) {
       return res.status(404).json({ error: 'Route not found' });
     }
 
@@ -54,7 +57,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       await recordAction(
         existingOrder.id,
         createdBy,
-        `${createdBy} switched order ${existingOrder.id} to route ${newRouteId}`,
+        `${createdBy} switched order ${existingOrder.id} to route ${existingNewRoute.name}`,
       );
 
       return res.status(200).json({ message: 'Order switched successfully' });
@@ -63,13 +66,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // Else, create a new reassignment
     await prisma.reassignment.create({
       data: {
-        fromRouteId: currentRouteId,
-        toRouteId: newRouteId,
         index: newIndex,
         date,
         reassignedAt: getTodayDate().dateAndTime,
         reassignedBy: createdBy,
         status: ReassignmentStatus.PENDING,
+        fromRouteId: currentRouteId || -1,
+        toRouteId: newRouteId,
+        orderId: existingOrder.id,
       },
     });
 
@@ -77,7 +81,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     await recordAction(
       existingOrder.id,
       createdBy,
-      `${createdBy} switched order ${existingOrder.id} to route ${newRouteId}`,
+      `${createdBy} switched order ${existingOrder.id} to route ${existingNewRoute.name}`,
     );
 
     return res.status(200).json({ message: 'Order switched successfully' });

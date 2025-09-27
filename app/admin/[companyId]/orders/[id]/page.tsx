@@ -51,7 +51,7 @@ const OrderDetailsPage = () => {
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   const queryClient = useQueryClient();
-  const { data: order, isLoading } = useQuery<Order>({
+  const { data: order, isLoading, refetch: refetchOrder } = useQuery<Order>({
     queryKey: ['order', Number(id)],
     queryFn: async () => {
       const response = await axios.get(
@@ -402,6 +402,7 @@ const OrderDetailsPage = () => {
         onClose={() => setIsOpenSwitchRouteModal(false)}
         order={order as Order}
         showNotification={showNotification}
+        refetchOrder={refetchOrder}
       />
       {/* Clean Header */}
       <Box

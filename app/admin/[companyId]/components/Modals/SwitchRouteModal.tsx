@@ -45,6 +45,7 @@ import ConfirmModal from './ConfirmModal';
 interface IProps extends ModalProps {
   order: Order;
   showNotification: ShowNotificationType;
+  refetchOrder: () => void;
 }
 
 interface Route {
@@ -84,6 +85,7 @@ export default function SwitchRouteModal({
   onClose,
   order,
   showNotification,
+  refetchOrder,
 }: IProps) {
   const { companyId }: any = useParams();
 
@@ -131,7 +133,7 @@ export default function SwitchRouteModal({
   };
 
   const handleSwitchRoute = async () => {
-    if (!selectedRouteId || !insertPosition) return;
+    if (!selectedRouteId || insertPosition === null) return;
 
     try {
       const response = await axios.post(
@@ -152,6 +154,7 @@ export default function SwitchRouteModal({
       }
 
       showNotification('success', response.data.message);
+      refetchOrder();
       onClose();
     } catch (error: any) {
       console.error('Error switching route:', error);
@@ -169,11 +172,10 @@ export default function SwitchRouteModal({
     );
   };
 
-  
   const currentRoute = getCurrentRoute();
   console.log(selectedRouteId, 'selectedRouteId');
   console.log(insertPosition, 'insertPosition');
-  
+
   return (
     <>
       <ConfirmModal
@@ -183,7 +185,6 @@ export default function SwitchRouteModal({
         showNotification={showNotification}
         title={isOpenConfirm.message}
         buttonLabel="Switch Route"
-        successMsg="Route switched successfully"
       />
       <Modal open={open} onClose={onClose}>
         <BoxModal

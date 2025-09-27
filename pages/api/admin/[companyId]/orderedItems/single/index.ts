@@ -1,4 +1,10 @@
-import { Fifo, InventoryLogFrom, InventoryLogType, InventoryUnit, PrismaClient } from '@prisma/client';
+import {
+  Fifo,
+  InventoryLogFrom,
+  InventoryLogType,
+  InventoryUnit,
+  PrismaClient,
+} from '@prisma/client';
 import { checkOrderValidToAffectInventory } from '@/pages/api/utils/order';
 import { getTodayDate, sortByDeliveryDate } from '@/pages/api/utils/date';
 import { recordAction } from '@/pages/api/utils/timeline';
@@ -219,8 +225,12 @@ export const generateCostAndProfit = async (orderedItemId: number) => {
         : itemUnit?.unitPrice || 0;
     }
 
-    const pst = existingItem.inventoryItem?.hasPST ? existingItem.price * 0.07 : 0;
-    const gst = existingItem.inventoryItem?.hasGST ? existingItem.price * 0.05 : 0;
+    const pst = existingItem.inventoryItem?.hasPST
+      ? existingItem.price * 0.07
+      : 0;
+    const gst = existingItem.inventoryItem?.hasGST
+      ? existingItem.price * 0.05
+      : 0;
 
     const profit = existingItem.price - (cost || 0) - pst - gst;
 
@@ -454,7 +464,11 @@ export const findProperFifoToSubtract = async (
   const deletedFifoIds: number[] = [];
 
   while (fifoIndex < sortedFifos.length - 1) {
-    if (newSubtractedQuantity >= sortedFifos[fifoIndex].quantity) {
+    // Ensure the fifo quantity is not a negative number
+    if (
+      sortedFifos[fifoIndex].quantity > 0 &&
+      newSubtractedQuantity >= sortedFifos[fifoIndex].quantity
+    ) {
       newSubtractedQuantity += sortedFifos[fifoIndex].quantity;
       deletedFifoIds.push(sortedFifos[fifoIndex].id);
       fifoIndex++;
@@ -519,14 +533,21 @@ export const subtractRelatedInternalItem = async (
       const today = getTodayDate();
 
       // Because we take the inventoryItem before subtract stage, so prevQty is the total qty of fifo
-      const prevQty = rule.inventoryItem.fifo.reduce((acc, curr) => acc + curr.quantity, 0);
-      const afterQty = type === 'subtract' ? prevQty - subtractQty : prevQty + subtractQty;
+      const prevQty = rule.inventoryItem.fifo.reduce(
+        (acc, curr) => acc + curr.quantity,
+        0,
+      );
+      const afterQty =
+        type === 'subtract' ? prevQty - subtractQty : prevQty + subtractQty;
 
       await prisma.inventoryLog.create({
         data: {
           inventoryItemId: rule.inventoryItemId,
           quantity: subtractQty,
-          type: type === 'subtract' ? InventoryLogType.SUBTRACT : InventoryLogType.RESTOCK,
+          type:
+            type === 'subtract'
+              ? InventoryLogType.SUBTRACT
+              : InventoryLogType.RESTOCK,
           createdFrom: InventoryLogFrom.DEPENDENT_INVENTORY,
           log: `${type === 'subtract' ? 'Subtract' : 'Restock'} ${subtractQty} ${rule.inventoryItem.name} from inventory due to dependent inventory item ${inventoryItemId}`,
           prevQty: prevQty,

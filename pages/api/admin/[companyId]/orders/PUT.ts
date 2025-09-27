@@ -1,8 +1,8 @@
 import { InventoryLogFrom, InventoryLogType } from '@prisma/client';
 import prisma from '@/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/pages/api/auth/[...nextauth]';
+// import { getServerSession } from 'next-auth';
+// import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import {
   // restockInventoryItem,
   subtractInventoryItem,
@@ -41,6 +41,12 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     if (deliveryDate) {
       updateData.deliveryDate = deliveryDate;
       comment += `Delivery date\n${existingOrder.deliveryDate} -> ${deliveryDate}\n`;
+      // If delivery date is changed, remove the reassignment if any
+      await prisma.reassignment.deleteMany({
+        where: {
+          orderId,
+        },
+      });
     }
 
     if (note) {
@@ -55,8 +61,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     }
 
     // Get person update info
-    const session: any = await getServerSession(req, res, authOptions);
-    const adminUpdate: any = session?.user;
+    // const session: any = await getServerSession(req, res, authOptions);
+    // const adminUpdate: any = session?.user;
+    const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
 
     const updateTime = new Date();
     const updatedOrder = await prisma.orders.update({
@@ -65,7 +72,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       },
       data: {
         ...updateData,
-        updatedBy: `Admin - ${adminUpdate.name}`,
+        updatedBy: createdBy,
         updateTime,
         isVoid: false,
       },
@@ -104,7 +111,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const today = getTodayDate();
-    const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
 
     // Create order action of update delivery date
     await prisma.orderAction.create({

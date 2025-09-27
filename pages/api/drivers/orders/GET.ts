@@ -100,7 +100,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    const arrangedOrders = await prisma.scheduleOrders.findMany({
+    const arrangedOrders: any = await prisma.scheduleOrders.findMany({
       where: {
         userId: {
           in: userIds,
@@ -126,9 +126,66 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
+    // Retrieve any reassignment orders for the orders
+    const reassignmentOrders = await prisma.reassignment.findMany({
+      where: {
+        date: deliveryDate,
+        toRouteId: targetRoute.id,
+      },
+      include: {
+        order: {
+          include: {
+            user: {
+              include: {
+                preference: true,
+                category: true,
+                routes: true,
+              },
+            },
+            delivery: {
+              include: {
+                medias: true,
+              },
+            },
+            items: {
+              include: {
+                inventoryItem: true,
+                inventoryUnit: true,
+                fifo: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Filter pending and accepted reassignment orders
+    // Pending for driver to accepted
+    // Accepted will be inserted into the arrangedOrders
+
+    // Insert the reassignment orders into the arrangedOrders
+    for (const reassignmentOrder of reassignmentOrders) {
+      arrangedOrders.splice(reassignmentOrder.index, 0, {
+        order: reassignmentOrder.order,
+        isReassignment: true,
+      });
+    }
+
     // Format the return orders
     const sortedDeliveryOrders = [];
     for (const order of arrangedOrders) {
+      // If the order is a reassignment order, add it to the sortedDeliveryOrders
+      if (order.isReassignment) {
+        sortedDeliveryOrders.push({
+          ...order.order,
+          items: order.order.items.map((item: OrderedItems) => {
+            const totalPrice = item.quantity * item.price;
+            return { ...item, totalPrice };
+          }),
+        });
+        continue;
+      }
+
       const deliveryOrder = deliveryOrders.find(
         (browsingOrder: any) => browsingOrder.userId === order.userId,
       );

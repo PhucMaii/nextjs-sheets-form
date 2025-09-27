@@ -304,6 +304,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
       if (deliveryDate !== existingOrder.deliveryDate) {
         comment += `### Delivery date\n${existingOrder.deliveryDate} -> ${deliveryDate}\n`;
+
+        // If delivery date is changed, remove the reassignment if any
       }
 
       if (note !== existingOrder.note) {

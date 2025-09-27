@@ -300,7 +300,15 @@ export const getOrderRoute = (order: any) => {
   const orderRoute = order.user.routes.find((route: any) => {
     return route?.route?.day === orderDay;
   });
+
+  console.log({
+    orderRoute,
+    orderDay,
+    orderDayIndex,
+    orderDeliveryDate,
+  });
   return (
-    `${orderRoute?.route?.name} - ${orderRoute?.route?.employee?.name}` || 'No route - N/A'
+    orderRoute ? `${orderRoute?.route?.name} - ${orderRoute?.route?.employee?.name}` :
+    'No route - N/A'
   );
 };

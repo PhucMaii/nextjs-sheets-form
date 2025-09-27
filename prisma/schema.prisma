@@ -440,7 +440,7 @@ model PositionIndex {
 
 model Reassignment {
   id           Int                @id @default(autoincrement())
-  fromRouteId  Int
+  fromRouteId  Int?
   toRouteId    Int
   index        Int
   date         String
@@ -450,7 +450,7 @@ model Reassignment {
   status       ReassignmentStatus
   orderId      Int                @unique
 
-  from  Route  @relation("FromRoute", fields: [fromRouteId], references: [id], onDelete: Cascade)
+  from  Route?  @relation("FromRoute", fields: [fromRouteId], references: [id], onDelete: Cascade)
   to    Route  @relation("ToRoute", fields: [toRouteId], references: [id], onDelete: Cascade)
   order Orders @relation("OrderReassignment", fields: [orderId], references: [id], onDelete: Cascade)
 }
