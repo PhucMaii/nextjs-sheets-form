@@ -414,4 +414,5 @@ export interface IExpenseType extends ExpenseType {
 export interface IReassignment extends Reassignment {
   from: Route;
   to: Route;
+  order: Order;
 }

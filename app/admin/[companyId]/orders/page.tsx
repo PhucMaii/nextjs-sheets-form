@@ -150,6 +150,7 @@ export interface Order {
   enteredOrderAt?: string;
   isCODCheck?: boolean;
   reassignment?: IReassignment;
+  isReassignment?: boolean;
 }
 
 const ORDER_PER_PAGE = 10;

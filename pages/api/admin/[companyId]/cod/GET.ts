@@ -136,13 +136,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         });
       }
 
-      const uncollectedAmount = uncollectedOrders.reduce(
-        (acc: number, order: Orders) => {
-          return acc + order.totalPrice;
-        },
-        0,
-      );
-
       const expenseAmount = codBoard.expense.reduce(
         (acc: number, item: any) => {
           return acc + item.amount;

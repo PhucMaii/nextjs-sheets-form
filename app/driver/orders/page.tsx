@@ -34,6 +34,8 @@ import useNotification from '@/hooks/useNotification';
 import InsertOrderToCodBoard from '@/app/admin/[companyId]/components/Modals/add/InsertOrderToCodBoard';
 import SwitchRole from '../components/Modals/SwitchRole';
 import { PaymentStatus } from '@prisma/client';
+import ConfirmModal from '@/app/admin/[companyId]/components/Modals/ConfirmModal';
+import ReassignmentBanner from '../components/ReassignmentBanner';
 
 function CircularProgressWithLabel(props: any) {
   const value = Math.round((props.currentValue / props.basedValue) * 100);
@@ -99,6 +101,8 @@ export default function OrdersPage() {
   const [isSearchModalOpen, setIsSearchModalOpen] = useState<boolean>(false);
   const [isOpenInsertToCOD, setIsOpenInsertToCOD] = useState<boolean>(false);
   const [isOpenSwitchRole, setIsOpenSwitchRole] = useState<boolean>(false);
+  const [isOpenAcceptPendingOrders, setIsOpenAcceptPendingOrders] =
+    useState<boolean>(false);
   const [orders, setOrders] = useState<Order[]>([]);
   const [displayOrders, setDisplayOrders] = useState<Order[]>([]);
   const [virtuosoHeight, setVirtuosoHeight] = useState<number>(0);
@@ -136,6 +140,12 @@ export default function OrdersPage() {
       initializeOrders();
     }
   }, [currentTab, ordersResponse, board]);
+
+  useEffect(() => {
+    if (ordersResponse?.data.pendingReassignmentOrders.length > 0) {
+      setIsOpenAcceptPendingOrders(true);
+    }
+  }, [ordersResponse]);
 
   const deliveredOrders = useMemo(() => {
     if (orders?.length === 0) {
@@ -232,6 +242,37 @@ export default function OrdersPage() {
       setDisplayOrders(newOrders);
     }
     setIsFetching(false);
+  };
+
+  const handleAcceptPendingOrders = async () => {
+    try {
+      if (ordersResponse?.data.pendingReassignmentOrders.length === 0) {
+        showNotification('error', 'No pending orders to accept');
+        return;
+      }
+
+      const response = await axios.post(
+        `${API_URL.DRIVER_ORDERS}/accept-orders`,
+        {
+          orderIds: ordersResponse?.data.pendingReassignmentOrders.map(
+            (order: Order) => order.id,
+          ),
+        },
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+      setIsOpenAcceptPendingOrders(false);
+      mutateOrders();
+      mutateBoard();
+    } catch (error: any) {
+      console.log('Internal Server Error: ', error);
+      showNotification('error', 'Internal Server Error: ' + error);
+    }
   };
 
   const handleUpdateStatus = async (
@@ -336,6 +377,18 @@ export default function OrdersPage() {
       <SwitchRole
         open={isOpenSwitchRole}
         onClose={() => setIsOpenSwitchRole(false)}
+      />
+      <ConfirmModal
+        open={isOpenAcceptPendingOrders}
+        onClose={() => setIsOpenAcceptPendingOrders(false)}
+        title={`
+          Accept orders:
+          ${ordersResponse?.data.pendingReassignmentOrders.map((order: Order) => `${order?.user?.clientName} from ${order.orderRoute}`).join(', ')}
+          `}
+        handleSubmit={handleAcceptPendingOrders}
+        showNotification={showNotification}
+        buttonLabel="ACCEPT"
+        color="success"
       />
       {currentTab === 'C.O.D' && board?.data?.id && (
         <InsertOrderToCodBoard
@@ -447,6 +500,16 @@ export default function OrdersPage() {
             />
           </ShadowSection>
         </Grid>
+
+        {ordersResponse?.data.acceptedReassignmentOrders.length > 0 && (
+          <Grid item xs={12}>
+            <ReassignmentBanner
+              ordersLength={
+                ordersResponse?.data.acceptedReassignmentOrders.length
+              }
+            />
+          </Grid>
+        )}
       </Grid>
       {displayOrders?.length > 0 ? (
         <Virtuoso

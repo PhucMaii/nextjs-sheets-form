@@ -1,4 +1,4 @@
-import { OrderedItems, PrismaClient, UserRoute } from '@prisma/client';
+import { OrderedItems, UserRoute } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getDriverInfo } from '../../utils/auth';
 import {
@@ -8,6 +8,7 @@ import {
 import { days } from '@/app/lib/constant';
 import { ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
 import { getWCODDay } from '@/app/utils/time';
+import prisma from '@/client';
 
 interface IQuery {
   date?: string;
@@ -15,8 +16,6 @@ interface IQuery {
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { date } = req.query as IQuery;
 
     if (!date) {
@@ -35,7 +34,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const codBoard: any = await prisma.codBoard.findFirst({
       where: {
         date,
-        // driverId: currentDriver.id,
         employeeId: currentDriver.id,
       },
       include: {

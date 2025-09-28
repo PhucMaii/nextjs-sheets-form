@@ -40,6 +40,7 @@ import { AttachMoney, MoneyOffOutlined } from '@mui/icons-material';
 import ConfirmDelivery from './Modals/ConfirmDelivery';
 import ImageSearchIcon from '@mui/icons-material/ImageSearch';
 import ViewImg from '@/app/admin/[companyId]/components/ViewImg';
+import { PackagePlusIcon } from 'lucide-react';
 
 interface IProps {
   order: Order;
@@ -60,7 +61,6 @@ export default function OrderComponent({
   handleUpdateStatus,
   showNotification,
 }: IProps) {
-
   console.log(order, 'order');
   const [confirmDeliveryModalProps, setConfirmDeliveryModalProps] =
     useState<any>({
@@ -214,21 +214,30 @@ export default function OrderComponent({
             alignItems="center"
             gap={1}
           >
-            <StatusText
-              text={order?.paymentStatus}
-              type={
-                order?.paymentStatus === PaymentStatus.Paid
-                  ? COLOR_TYPE.SUCCESS
-                  : COLOR_TYPE.ERROR
-              }
-              icon={
-                order?.paymentStatus === PaymentStatus.Paid ? (
-                  <AttachMoney color="success" sx={{ fontSize: 16 }} />
-                ) : (
-                  <MoneyOffOutlined color="error" sx={{ fontSize: 16 }} />
-                )
-              }
-            />
+            <Box display="flex" alignItems="center" gap={1}>
+              <StatusText
+                text={order?.paymentStatus}
+                type={
+                  order?.paymentStatus === PaymentStatus.Paid
+                    ? COLOR_TYPE.SUCCESS
+                    : COLOR_TYPE.ERROR
+                }
+                icon={
+                  order?.paymentStatus === PaymentStatus.Paid ? (
+                    <AttachMoney color="success" sx={{ fontSize: 16 }} />
+                  ) : (
+                    <MoneyOffOutlined color="error" sx={{ fontSize: 16 }} />
+                  )
+                }
+              />
+              {order?.isReassignment && (
+                <StatusText
+                  text="Re Assigned"
+                  type="info"
+                  icon={<PackagePlusIcon size={16} />}
+                />
+              )}
+            </Box>
 
             <Box display="flex" alignItems="center" gap={1}>
               {!isDateToday && (
@@ -323,7 +332,7 @@ export default function OrderComponent({
               </Fab>
             )}
             {order?.paymentStatus !== PaymentStatus.Paid &&
-              order?.user?.preference?.paymentType!== PAYMENT_TYPE.MONTHLY && (
+              order?.user?.preference?.paymentType !== PAYMENT_TYPE.MONTHLY && (
                 <Fab
                   sx={{ zIndex: 0 }}
                   onClick={() => {

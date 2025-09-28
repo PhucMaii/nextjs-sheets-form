@@ -1,4 +1,11 @@
-import { OrderedItems, PrismaClient, Route, UserRoute } from '@prisma/client';
+import {
+  OrderedItems,
+  PrismaClient,
+  Reassignment,
+  ReassignmentStatus,
+  Route,
+  UserRoute,
+} from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]';
@@ -6,6 +13,8 @@ import { days } from '@/app/lib/constant';
 import { convertDeliveryDateStringToDate } from '../../utils/date';
 import { ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
 import { generateManifest } from '../../utils/overview';
+import { getOrderRoute } from '../../admin/[companyId]/orders/GET';
+import { IReassignment } from '@/app/utils/type';
 
 interface IQuery {
   deliveryDate?: string;
@@ -127,7 +136,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     });
 
     // Retrieve any reassignment orders for the orders
-    const reassignmentOrders = await prisma.reassignment.findMany({
+    const reassignmentOrders: any[] = await prisma.reassignment.findMany({
       where: {
         date: deliveryDate,
         toRouteId: targetRoute.id,
@@ -160,11 +169,24 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     });
 
     // Filter pending and accepted reassignment orders
-    // Pending for driver to accepted
-    // Accepted will be inserted into the arrangedOrders
+    const pendingReassignmentOrders = reassignmentOrders.filter(
+      (reassignmentOrder: IReassignment) => {
+        return reassignmentOrder.status === ReassignmentStatus.PENDING;
+      },
+    ).map((reassignmentOrder: IReassignment) => {
+      return {
+        ...reassignmentOrder.order,
+        orderRoute: getOrderRoute(reassignmentOrder.order),
+      };
+    });
+    const acceptedReassignmentOrders = reassignmentOrders.filter(
+      (reassignmentOrder: Reassignment) => {
+        return reassignmentOrder.status === ReassignmentStatus.ACCEPTED;
+      },
+    );
 
     // Insert the reassignment orders into the arrangedOrders
-    for (const reassignmentOrder of reassignmentOrders) {
+    for (const reassignmentOrder of acceptedReassignmentOrders) {
       arrangedOrders.splice(reassignmentOrder.index, 0, {
         order: reassignmentOrder.order,
         isReassignment: true,
@@ -176,12 +198,15 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     for (const order of arrangedOrders) {
       // If the order is a reassignment order, add it to the sortedDeliveryOrders
       if (order.isReassignment) {
+        const orderRoute = getOrderRoute(order.order);
         sortedDeliveryOrders.push({
           ...order.order,
           items: order.order.items.map((item: OrderedItems) => {
             const totalPrice = item.quantity * item.price;
             return { ...item, totalPrice };
           }),
+          isReassignment: true,
+          orderRoute,
         });
         continue;
       }
@@ -218,6 +243,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       data: {
         employee: existingDriver,
         deliveryOrders: sortedDeliveryOrders,
+        pendingReassignmentOrders,
+        acceptedReassignmentOrders,
         manifest,
         codAmount,
       },

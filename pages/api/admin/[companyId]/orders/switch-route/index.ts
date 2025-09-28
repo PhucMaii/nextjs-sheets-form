@@ -70,7 +70,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         date,
         reassignedAt: getTodayDate().dateAndTime,
         reassignedBy: createdBy,
-        status: ReassignmentStatus.PENDING,
+        status: ReassignmentStatus.ACCEPTED,
         fromRouteId: currentRouteId || -1,
         toRouteId: newRouteId,
         orderId: existingOrder.id,
