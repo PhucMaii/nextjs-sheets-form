@@ -135,7 +135,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    // Retrieve any reassignment orders for the orders
+    // Retrieve any reassignment orders go to current route
     const reassignmentOrders: any[] = await prisma.reassignment.findMany({
       where: {
         date: deliveryDate,
@@ -168,17 +168,53 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
+    // Retrieve any reassignment orders go away from current route
+    const reassignmentOrdersAwayFromCurrentRoute: any[] =
+      await prisma.reassignment.findMany({
+        where: {
+          date: deliveryDate,
+          fromRouteId: targetRoute.id,
+        },
+        include: {
+          order: {
+            include: {
+              user: {
+                include: {
+                  preference: true,
+                  category: true,
+                  routes: true,
+                },
+              },
+              delivery: {
+                include: {
+                  medias: true,
+                },
+              },
+              items: {
+                include: {
+                  inventoryItem: true,
+                  inventoryUnit: true,
+                  fifo: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
     // Filter pending and accepted reassignment orders
-    const pendingReassignmentOrders = reassignmentOrders.filter(
-      (reassignmentOrder: IReassignment) => {
+    const pendingReassignmentOrders = reassignmentOrders
+      .filter((reassignmentOrder: IReassignment) => {
         return reassignmentOrder.status === ReassignmentStatus.PENDING;
-      },
-    ).map((reassignmentOrder: IReassignment) => {
-      return {
-        ...reassignmentOrder.order,
-        orderRoute: getOrderRoute(reassignmentOrder.order),
-      };
-    });
+      })
+      .map((reassignmentOrder: IReassignment) => {
+        const { order, ...reassignment } = reassignmentOrder;
+        return {
+          ...order,
+          orderRoute: getOrderRoute(reassignmentOrder.order),
+          reassignment: reassignment,
+        };
+      });
     const acceptedReassignmentOrders = reassignmentOrders.filter(
       (reassignmentOrder: Reassignment) => {
         return reassignmentOrder.status === ReassignmentStatus.ACCEPTED;
@@ -187,15 +223,27 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 
     // Insert the reassignment orders into the arrangedOrders
     for (const reassignmentOrder of acceptedReassignmentOrders) {
+      const { order, ...reassignment } = reassignmentOrder;
       arrangedOrders.splice(reassignmentOrder.index, 0, {
-        order: reassignmentOrder.order,
+        order: order,
         isReassignment: true,
+        reassignment: reassignment,
       });
     }
 
     // Format the return orders
     const sortedDeliveryOrders = [];
     for (const order of arrangedOrders) {
+      // If the order is a reassignment order go away from current route, skip it -> remove it from the arrangedOrders
+      if (
+        reassignmentOrdersAwayFromCurrentRoute.some(
+          (reassignmentOrder: IReassignment) =>
+            reassignmentOrder.order.userId === order.order.userId,
+        )
+      ) {
+        continue;
+      }
+
       // If the order is a reassignment order, add it to the sortedDeliveryOrders
       if (order.isReassignment) {
         const orderRoute = getOrderRoute(order.order);
@@ -206,6 +254,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             return { ...item, totalPrice };
           }),
           isReassignment: true,
+          reassignment: order.reassignment,
           orderRoute,
         });
         continue;

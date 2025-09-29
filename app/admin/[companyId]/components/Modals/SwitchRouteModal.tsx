@@ -29,7 +29,7 @@ import {
   Add as AddIcon,
   Badge as EmployeeIcon,
 } from '@mui/icons-material';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ModalProps } from './type';
 import { BoxModal } from './styled';
 import ModalHead from '@/app/lib/ModalHead';
@@ -45,7 +45,7 @@ import ConfirmModal from './ConfirmModal';
 interface IProps extends ModalProps {
   order: Order;
   showNotification: ShowNotificationType;
-  refetchOrder: () => void;
+  refetchOrder?: () => void;
 }
 
 interface Route {
@@ -154,7 +154,7 @@ export default function SwitchRouteModal({
       }
 
       showNotification('success', response.data.message);
-      refetchOrder();
+      refetchOrder?.();
       onClose();
     } catch (error: any) {
       console.error('Error switching route:', error);
@@ -172,9 +172,7 @@ export default function SwitchRouteModal({
     );
   };
 
-  const currentRoute = getCurrentRoute();
-  console.log(selectedRouteId, 'selectedRouteId');
-  console.log(insertPosition, 'insertPosition');
+  const currentRoute = useMemo(() => getCurrentRoute(), [routes, order.userId]);
 
   return (
     <>

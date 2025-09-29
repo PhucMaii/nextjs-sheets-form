@@ -40,7 +40,9 @@ import { AttachMoney, MoneyOffOutlined } from '@mui/icons-material';
 import ConfirmDelivery from './Modals/ConfirmDelivery';
 import ImageSearchIcon from '@mui/icons-material/ImageSearch';
 import ViewImg from '@/app/admin/[companyId]/components/ViewImg';
-import { PackagePlusIcon } from 'lucide-react';
+import { ArrowRightLeftIcon, PackagePlusIcon } from 'lucide-react';
+import { primary } from '@/theme/color';
+import SelectRouteModal from './Modals/SelectRouteModal';
 
 interface IProps {
   order: Order;
@@ -61,7 +63,6 @@ export default function OrderComponent({
   handleUpdateStatus,
   showNotification,
 }: IProps) {
-  console.log(order, 'order');
   const [confirmDeliveryModalProps, setConfirmDeliveryModalProps] =
     useState<any>({
       open: false,
@@ -74,6 +75,7 @@ export default function OrderComponent({
     updatedStatus: ORDER_STATUS.DELIVERED,
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isOpenSwitchRoute, setIsOpenSwitchRoute] = useState<boolean>(false);
   const [isOpenDetails, setIsOpenDetails] = useState<boolean>(false);
   const [isOpenClientDetails, setIsOpenClientDetails] =
     useState<boolean>(false);
@@ -181,6 +183,12 @@ export default function OrderComponent({
         order={order}
         onConfirm={handleUpdateStatus}
         updatedStatus={confirmDeliveryModalProps.updatedStatus}
+      />
+      <SelectRouteModal
+        open={isOpenSwitchRoute}
+        onClose={() => setIsOpenSwitchRoute(false)}
+        showNotification={showNotification}
+        orderId={order.id}
       />
       <ViewImg
         open={viewImgProps.open}
@@ -378,6 +386,9 @@ export default function OrderComponent({
                 Remove
               </LoadingButton>
             )}
+            <IconButton onClick={() => setIsOpenSwitchRoute(true)}>
+              <ArrowRightLeftIcon style={{ color: primary.main }} size={16} />
+            </IconButton>
             <a
               href={`https://www.google.com/maps/dir/?api=1&destination=${order.user.deliveryAddressLat},${order.user.deliveryAddressLng}`}
               target="_blank"
