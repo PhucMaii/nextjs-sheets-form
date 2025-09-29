@@ -424,6 +424,9 @@ export const createOrderedItems = async (
 
 
 export const calculateProfit = async (item: any, cost: number) => {
+  if (!item.inventoryItemId) {
+    return item.price - cost;
+  }
   let targetInventoryItem = item.inventoryItem;
   if (!targetInventoryItem) {
     targetInventoryItem = await prisma.inventoryItem.findUnique({

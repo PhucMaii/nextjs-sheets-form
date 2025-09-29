@@ -120,26 +120,15 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-  const roy2SepCODOrders = await prisma.orders.findMany({
-    where: {
-      companyId: 1,
-      codBoardId: 1742
-    },
-    include: {
-      user: true,
-    }
-  });
 
-  const formattedOrders = roy2SepCODOrders.map((order: any) => {
-    return {
-      id: order.id,
-      clientName: order.user.clientName,
-      insertedAt: order.insertedAt,
-      addeddToCodBy: order.addedToCodBy,
-    }
-  });
-
-  console.log(formattedOrders);
+await prisma.orders.update({
+  where: {
+    id: 58141,
+  },
+  data: {
+    totalPrice: 355.25,
+  },
+});
 }
 
 // async function main() {

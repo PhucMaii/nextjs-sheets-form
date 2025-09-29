@@ -147,7 +147,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           // Record inventory log
           await recordOrderInventoryLog(
             item.orderId,
-            item.fifo.inventoryItemId,
+            item?.fifo?.inventoryItemId,
             item.quantity,
             InventoryLogType.RESTOCK,
             InventoryLogFrom.EDIT_ORDER,
@@ -208,7 +208,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           // Record inventory log
           await recordOrderInventoryLog(
             item.orderId,
-            item.fifo.inventoryItemId,
+            item?.fifo?.inventoryItemId,
             Math.abs(difference),
             isRestock ? InventoryLogType.RESTOCK : InventoryLogType.SUBTRACT,
             InventoryLogFrom.EDIT_ORDER,
