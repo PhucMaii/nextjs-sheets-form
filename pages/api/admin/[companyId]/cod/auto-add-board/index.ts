@@ -1,10 +1,17 @@
 import { Order } from '@/app/admin/[companyId]/orders/page';
 import { days } from '@/app/lib/constant';
 import { filterByRoute } from '@/app/utils/array';
-import { COD_STATUS, ORDER_STATUS, PAYMENT_TYPE } from '@/app/utils/enum';
+import {
+  COD_STATUS,
+  ORDER_STATUS,
+  PAYMENT_TYPE,
+  USER_ROLE,
+} from '@/app/utils/enum';
 import { getWCODDay } from '@/app/utils/time';
 import { IBoard, IRoutes } from '@/app/utils/type';
+import prisma from '@/client';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
+import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import {
   generate7DaysBefore,
   getTodayDate,
@@ -12,7 +19,7 @@ import {
 } from '@/pages/api/utils/date';
 import { recordAction } from '@/pages/api/utils/timeline';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
-import { PrismaClient, User } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 
@@ -82,6 +89,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         },
       },
       include: {
+        reassignment: {
+          include: {
+            to: true,
+          },
+        },
         items: true,
         user: {
           include: {
@@ -114,6 +126,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         },
       },
       include: {
+        reassignment: {
+          include: {
+            to: true,
+          },
+        },
         items: true,
         user: {
           include: {
@@ -154,6 +171,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         clients: true,
       },
     });
+    
+    const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
 
     // If there are new orders that have not been added
     if (boards.length > 0 && newBoardOrders.length > 0) {
@@ -163,7 +182,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         boards,
         routeOnDate,
         todayString,
-        user,
+        createdBy,
       );
       return res.status(200).json({
         message: 'New orders are added already',
@@ -181,7 +200,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         note: '',
         status: COD_STATUS.IN_PROCESS,
         createdAt: `${date} ${time}`,
-        createdBy: `Admin - ${user.name}`,
+        createdBy: createdBy,
         companyId: Number(companyId),
       };
     });
@@ -216,6 +235,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         },
       },
       include: {
+        reassignment: {
+          include: {
+            to: true,
+          },
+        },
         items: true,
         user: {
           include: {
@@ -242,7 +266,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       newBoards,
       routeOnDate,
       todayString,
-      user,
+      createdBy,
     );
 
     // Get no route orders
@@ -293,10 +317,8 @@ export const insertOrdersToSelectedBoards = async (
   selectedBoards: IBoard[],
   routeOnDate: IRoutes[],
   date: string,
-  user: User | any,
+  createdBy: string,
 ) => {
-  const prisma = new PrismaClient();
-
   const today = normalizeDate(new Date(date));
 
   const pacificTime = getTodayDate();
@@ -306,6 +328,11 @@ export const insertOrdersToSelectedBoards = async (
 
   // Get has route orders
   const hasRouteOrders = orders.filter((order: any) => {
+    // If order has reassignment, check if the reassignment is to the same day
+    if (order?.reassignment) {
+      return order.reassignment.toRouteId && order.reassignment.to.day === day;
+    }
+
     const selectedDayRoute = order.user.routes.find(
       (route: any) => route.route.day === day,
     );
@@ -316,6 +343,7 @@ export const insertOrdersToSelectedBoards = async (
   const noRouteOrderIds = orders
     .filter((order: any) => {
       return (
+        !order.reassignment ||
         order.user.routes.length === 0 ||
         order.user.routes.find((route: any) => route.route.day !== day)
       );
@@ -346,7 +374,7 @@ export const insertOrdersToSelectedBoards = async (
           note: '',
           status: COD_STATUS.IN_PROCESS,
           createdAt: `${date} ${time}`,
-          createdBy: `Admin - ${user.clientName}`,
+          createdBy: createdBy,
           companyId,
         },
       });
@@ -361,7 +389,7 @@ export const insertOrdersToSelectedBoards = async (
       data: {
         codBoardId: noRouteBoard.id,
         insertedAt: pacificTime.dateAndTime,
-        insertedBy: user.clientName,
+        insertedBy: createdBy,
       },
     });
 
@@ -369,7 +397,7 @@ export const insertOrdersToSelectedBoards = async (
     for (const orderId of noRouteOrderIds) {
       await recordAction(
         orderId,
-        'System',
+        createdBy || 'System',
         `Order ${orderId} added to no route board with id of #${noRouteBoard.id} for ${date}`,
       );
     }
@@ -436,7 +464,7 @@ export const insertOrdersToSelectedBoards = async (
       data: {
         codBoardId: board.id,
         insertedAt: pacificTime.dateAndTime,
-        insertedBy: user.clientName,
+        insertedBy: createdBy || 'System',
       },
     });
 
@@ -444,7 +472,7 @@ export const insertOrdersToSelectedBoards = async (
     for (const orderId of orderIds) {
       await recordAction(
         orderId,
-        'System',
+        createdBy || 'System',
         `Order ${orderId} added to board with id of #${board.id} for ${date}`,
         `### Board: ${board?.id}\n### Route: ${board?.employee?.name}`,
       );

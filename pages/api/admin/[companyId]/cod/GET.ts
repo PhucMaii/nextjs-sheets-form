@@ -11,6 +11,7 @@ import { generateListOfDateString } from '@/app/utils/time';
 import { IBoard } from '@/app/utils/type';
 import { days } from '@/app/lib/constant';
 import { normalizeDate } from '@/pages/api/utils/date';
+import { getOrderRoute } from '../orders/GET';
 // import { IBoard } from '@/app/utils/type';
 
 interface IQuery {
@@ -43,6 +44,15 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           },
           orders: {
             include: {
+              reassignment: {
+                include: {
+                  to: {
+                    include: {
+                      employee: true,
+                    },
+                  },
+                },
+              },
               items: {
                 include: {
                   inventoryItem: true,
@@ -87,19 +97,18 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           });
 
           // Get order route
-          const orderDeliveryDate: Date = normalizeDate(order.deliveryDate);
-          const orderDayIndex = orderDeliveryDate.getDay();
-          const orderDay = days[orderDayIndex];
-          const orderRoute = order.user.routes.find((route: any) => {
-            return route.route.day === orderDay;
-          });
+          // const orderDeliveryDate: Date = normalizeDate(order.deliveryDate);
+          // const orderDayIndex = orderDeliveryDate.getDay();
+          // const orderDay = days[orderDayIndex];
+          // const orderRoute = order.user.routes.find((route: any) => {
+          //   return route.route.day === orderDay;
+          // });
+          const orderRoute = getOrderRoute(order);
 
           return {
             ...order,
             items: formattedItems,
-            orderRoute: orderRoute
-              ? `${orderRoute.route.name} - ${orderRoute?.route?.employee?.name}`
-              : 'No route - N/A',
+            orderRoute: orderRoute,
           };
         },
       );
@@ -256,6 +265,15 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           },
           orders: {
             include: {
+              reassignment: {
+                include: {
+                  to: {
+                    include: {
+                      employee: true,
+                    },
+                  },
+                },
+              },
               items: {
                 include: {
                   inventoryItem: true,
@@ -319,6 +337,15 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           },
           orders: {
             include: {
+              reassignment: {
+                include: {
+                  to: {
+                    include: {
+                      employee: true,
+                    },
+                  },
+                },
+              },
               items: true,
               user: {
                 include: {

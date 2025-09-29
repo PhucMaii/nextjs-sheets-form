@@ -79,7 +79,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     await recordAction(
       existingOrder.id,
       createdBy,
-      `${createdBy} switched order ${existingOrder.id} to route ${existingNewRoute.name}`,
+      `${createdBy} requested to switch order ${existingOrder.id} to route ${existingNewRoute.name}`,
     );
 
     return res.status(200).json({ message: 'Order switched successfully' });

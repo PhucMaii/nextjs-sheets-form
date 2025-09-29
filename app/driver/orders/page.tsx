@@ -148,7 +148,7 @@ export default function OrdersPage() {
   }, [currentTab, ordersResponse, board]);
 
   useEffect(() => {
-    if (ordersResponse?.data.pendingReassignmentOrders.length > 0) {
+    if (ordersResponse?.data?.pendingReassignmentOrders?.length > 0) {
       setOpenAcceptOrderModal({
         open: true,
         order: ordersResponse?.data.pendingReassignmentOrders[0],
@@ -488,7 +488,7 @@ export default function OrdersPage() {
           </ShadowSection>
         </Grid>
 
-        {ordersResponse?.data.acceptedReassignmentOrders.length > 0 && (
+        {ordersResponse?.data?.acceptedReassignmentOrders?.length > 0 && (
           <Grid item xs={12}>
             <ReassignmentBanner
               ordersLength={

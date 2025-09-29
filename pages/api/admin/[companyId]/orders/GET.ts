@@ -290,7 +290,6 @@ export const calculateOrderProfit = (items: OrderedItems[]) => {
 };
 
 export const getOrderRoute = (order: any) => {
-  console.log(order, 'order');
   if (order?.reassignment) {
     return `${order.reassignment.to.name} - ${order.reassignment.to.employee.name}`;
   }
@@ -301,12 +300,6 @@ export const getOrderRoute = (order: any) => {
     return route?.route?.day === orderDay;
   });
 
-  console.log({
-    orderRoute,
-    orderDay,
-    orderDayIndex,
-    orderDeliveryDate,
-  });
   return (
     orderRoute ? `${orderRoute?.route?.name} - ${orderRoute?.route?.employee?.name}` :
     'No route - N/A'

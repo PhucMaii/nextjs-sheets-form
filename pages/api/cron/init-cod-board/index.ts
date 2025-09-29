@@ -94,6 +94,11 @@ export default async function handler(req: any, res: any) {
         companyId: 1,
       },
       include: {
+        reassignment: {
+          include: {
+            to: true,
+          },
+        },
         items: true,
         user: {
           include: {
@@ -120,7 +125,7 @@ export default async function handler(req: any, res: any) {
       newBoards,
       routeOnDate,
       date,
-      { clientName: 'System' },
+      'System',
     );
 
     return res.status(200).json({

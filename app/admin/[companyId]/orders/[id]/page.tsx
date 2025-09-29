@@ -51,7 +51,11 @@ const OrderDetailsPage = () => {
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   const queryClient = useQueryClient();
-  const { data: order, isLoading, refetch: refetchOrder } = useQuery<Order>({
+  const {
+    data: order,
+    isLoading,
+    refetch: refetchOrder,
+  } = useQuery<Order>({
     queryKey: ['order', Number(id)],
     queryFn: async () => {
       const response = await axios.get(
@@ -98,7 +102,8 @@ const OrderDetailsPage = () => {
   const [isOpenDeleteModal, setIsOpenDeleteModal] = useState<boolean>(false);
   const [isUpdatingNotes, setIsUpdatingNotes] = useState<boolean>(false);
   const [isMarking, setIsMarking] = useState<boolean>(false);
-  const [isOpenSwitchRouteModal, setIsOpenSwitchRouteModal] = useState<boolean>(false);
+  const [isOpenSwitchRouteModal, setIsOpenSwitchRouteModal] =
+    useState<boolean>(false);
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -397,13 +402,15 @@ const OrderDetailsPage = () => {
           showNotification={showNotification}
         />
       )}
-      <SwitchRouteModal 
-        open={isOpenSwitchRouteModal} 
-        onClose={() => setIsOpenSwitchRouteModal(false)}
-        order={order as Order}
-        showNotification={showNotification}
-        refetchOrder={refetchOrder}
-      />
+      {order && (
+        <SwitchRouteModal
+          open={isOpenSwitchRouteModal}
+          onClose={() => setIsOpenSwitchRouteModal(false)}
+          order={order as Order}
+          showNotification={showNotification}
+          refetchOrder={refetchOrder}
+        />
+      )}
       {/* Clean Header */}
       <Box
         sx={{
@@ -454,9 +461,7 @@ const OrderDetailsPage = () => {
                   }}
                 >
                   <TruckIcon size={16} color="#666" />
-                  <Typography variant="caption">
-                    {order.orderRoute}
-                  </Typography>
+                  <Typography variant="caption">{order.orderRoute}</Typography>
                   <Button
                     color="primary"
                     size="small"
@@ -777,18 +782,20 @@ const OrderDetailsPage = () => {
                   backgroundColor: '#fafafa',
                 }}
               />)} */}
-              {order?.delivery?.medias[0]?.fileKey && <DisplayFile
-                fileKey={order?.delivery?.medias[0]?.fileKey}
-                width="100%"
-                height="100%"
-                style={{
-                  borderRadius: 10,
-                  border: '1px solid #e0e0e0',
-                  padding: 10,
-                  objectFit: 'contain',
-                  backgroundColor: '#fafafa',
-                }}
-              />}
+              {order?.delivery?.medias[0]?.fileKey && (
+                <DisplayFile
+                  fileKey={order?.delivery?.medias[0]?.fileKey}
+                  width="100%"
+                  height="100%"
+                  style={{
+                    borderRadius: 10,
+                    border: '1px solid #e0e0e0',
+                    padding: 10,
+                    objectFit: 'contain',
+                    backgroundColor: '#fafafa',
+                  }}
+                />
+              )}
             </ShadowSection>
           )}
           {isLoading ? (

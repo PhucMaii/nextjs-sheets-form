@@ -88,6 +88,11 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         companyId: Number(companyId),
       },
       include: {
+        reassignment: {
+          include: {
+            to: true,
+          },
+        },
         items: true,
         user: {
           include: {

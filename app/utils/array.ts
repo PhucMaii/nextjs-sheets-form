@@ -151,12 +151,21 @@ export const filterByRoute = (orders: Order[], currentRoute: any) => {
   // Get clients from that route -> get orders
   const filteredOrders = currentRoute?.clients
     .map((client: UserRoute) => {
+      // If order has reassignment -> order is changed to another route -> skip it
       const clientOrder = orders.find(
-        (order: Order) => order.userId === client.userId,
+        (order: Order) => order.userId === client.userId && !order.reassignment,
       );
       return clientOrder;
     })
     .filter((order: Order) => order !== undefined);
+
+  // Check if there is any order has reassignment to this route
+  const reassignmentOrders = orders.filter(
+    (order: Order) =>
+      order.reassignment && order.reassignment.toRouteId === currentRoute.id,
+  );
+
+  filteredOrders.push(...reassignmentOrders);
 
   return filteredOrders;
 };
