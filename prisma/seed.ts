@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 // const checkIsKorean = (text: string) => {
 //   // const koreanRange = /^[\uAC00-\uD7AF]+$/;
@@ -121,18 +120,33 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
+  const startDate = new Date('2025-04-01');
+  const endDate = new Date('2025-05-31');
+  const listOfDateString = generateListOfDateString(startDate, endDate);
 
-const password = await bcrypt.hash('driver123', 12);
-await prisma.employee.updateMany({
+const brpnOrders = await prisma.orders.findMany({
   where: {
-    id: {
-      in: [22, 23]
+    companyId: 1,
+    user: {
+      clientId: '00104'
+    },
+    deliveryDate: {
+      in: listOfDateString,
     },
   },
-  data: {
-    password,
-  },
 });
+
+const formattedBrpnOrders = brpnOrders.map((order) => {
+  return {
+    orderId: order.id,
+    deliveryDate: order.deliveryDate,
+    updateTime: order.updateTime,
+    updatedBy: order.updatedBy,
+  }
+});
+
+console.log(formattedBrpnOrders, 'formattedBrpnOrders');
+
 }
 
 // async function main() {

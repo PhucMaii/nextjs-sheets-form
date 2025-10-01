@@ -33,8 +33,7 @@ export default function HolidayText() {
             All Eggs
           </strong>{' '} price will be <br />
           increased by next week */}
-          Due to complications and shortage of Hawaii&apos;s Basil. We&apos;re currently
-          only able to supply Basil from Mexico and should be back to normal by Oct 15.
+          We are currently shortage of Basil. Please note that your Basil order may not be fulfilled today.
         </Typography>
         <Typography sx={{ color: 'white', textAlign: 'center' }}>
           We truly appreciate <br /> your support and understanding! 💚

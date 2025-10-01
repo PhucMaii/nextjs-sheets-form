@@ -191,73 +191,75 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           id: newOrder.id,
           category: existingUser.category,
         });
+      } else {
+
+        const lastOrderItems = userOrder.items.map((item: any) => {
+          const isInNewItems = items.find(
+            (newItem: any) => newItem.name === item.name,
+          );
+  
+          if (isInNewItems) {
+            return { ...item, quantity: isInNewItems.quantity };
+          }
+  
+          return item;
+        });
+  
+        const newItems = items.filter((item: any) => {
+          const isInLastOrder = lastOrderItems.find(
+            (lastItem: any) => lastItem.name === item.name,
+          );
+  
+          return !isInLastOrder;
+        });
+  
+        const lastOrderItemsWithNewValue = lastOrderItems.map((item: any) => {
+          const isInInputItems = items.find(
+            (newItem: any) => newItem.name === item.name,
+          );
+  
+          if (isInInputItems) {
+            return isInInputItems;
+          }
+  
+          return item;
+        });
+  
+        const lastOrderFinalItems = [...lastOrderItemsWithNewValue, ...newItems];
+  
+        const lastOrderTotalPrice = lastOrderFinalItems.reduce(
+          (total: number, item: any) => {
+            return total + item.quantity * item.price;
+          },
+          0,
+        );
+  
+        const currentOrderTotalPrice = items.reduce(
+          (total: number, item: any) => {
+            return total + item.quantity * item.price;
+          },
+          0,
+        );
+        // else if (createdBy !== USER_ROLE.CLIENT) {
+        return res.status(200).json({
+          warning: `Client ${existingUser.clientName} has ordered for ${deliveryDate}`,
+          lastOrder: {
+            ...userOrder,
+            items: lastOrderFinalItems,
+            totalPrice: lastOrderTotalPrice,
+            note,
+          },
+          currentOrder: {
+            ...userOrder,
+            totalPrice: currentOrderTotalPrice,
+            items,
+            note,
+            // createdBy: userOrder.createdBy,
+          },
+          flag: FLAG_ORDER_TYPE.ALREADY_ORDER,
+        });
       }
 
-      const lastOrderItems = userOrder.items.map((item: any) => {
-        const isInNewItems = items.find(
-          (newItem: any) => newItem.name === item.name,
-        );
-
-        if (isInNewItems) {
-          return { ...item, quantity: isInNewItems.quantity };
-        }
-
-        return item;
-      });
-
-      const newItems = items.filter((item: any) => {
-        const isInLastOrder = lastOrderItems.find(
-          (lastItem: any) => lastItem.name === item.name,
-        );
-
-        return !isInLastOrder;
-      });
-
-      const lastOrderItemsWithNewValue = lastOrderItems.map((item: any) => {
-        const isInInputItems = items.find(
-          (newItem: any) => newItem.name === item.name,
-        );
-
-        if (isInInputItems) {
-          return isInInputItems;
-        }
-
-        return item;
-      });
-
-      const lastOrderFinalItems = [...lastOrderItemsWithNewValue, ...newItems];
-
-      const lastOrderTotalPrice = lastOrderFinalItems.reduce(
-        (total: number, item: any) => {
-          return total + item.quantity * item.price;
-        },
-        0,
-      );
-
-      const currentOrderTotalPrice = items.reduce(
-        (total: number, item: any) => {
-          return total + item.quantity * item.price;
-        },
-        0,
-      );
-      // else if (createdBy !== USER_ROLE.CLIENT) {
-      return res.status(200).json({
-        warning: `Client ${existingUser.clientName} has ordered for ${deliveryDate}`,
-        lastOrder: {
-          ...userOrder,
-          items: lastOrderFinalItems,
-          totalPrice: lastOrderTotalPrice,
-          note,
-        },
-        currentOrder: {
-          ...userOrder,
-          totalPrice: currentOrderTotalPrice,
-          items,
-          note,
-          // createdBy: userOrder.createdBy,
-        },
-        flag: FLAG_ORDER_TYPE.ALREADY_ORDER,
-      });
       // }
 
       // const itemsWithNo0 = items.filter((item: any) => item.quantity > 0);

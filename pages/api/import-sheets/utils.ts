@@ -15,6 +15,7 @@ import { checkOrderValidToAffectInventory } from '../utils/order';
 import { OrderedItems } from '@/app/utils/type';
 import { createOrderedItems } from '@/pages/api/utils/orderedItems';
 import { recordOrderInventoryLog } from '../utils/logs';
+import prisma from '@/client';
 
 export function calculateNextPos(currentPos: number, result: string[]): string {
   const columns = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -31,8 +32,6 @@ export function calculateNextPos(currentPos: number, result: string[]): string {
 }
 
 export const checkHasClientOrder = async (id: number, deliveryDate: string) => {
-  const prisma = new PrismaClient();
-
   const userOrders = await prisma.orders.findFirst({
     where: {
       userId: id,
