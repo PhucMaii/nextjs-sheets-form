@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/client';
 import { Order } from '@/app/admin/[companyId]/orders/page';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import _ from 'lodash';
@@ -25,8 +25,6 @@ interface IBody {
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const prisma = new PrismaClient();
-
     if (req.method !== 'POST') {
       return res.status(404).json({
         error: 'Your method is not supported',
@@ -97,15 +95,22 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const routeMap = new Map(dayRoutes.map((route: any) => [route.id, route]));
     // console.log(routeMap, 'routeMap');
 
+    // Attach route id to orders
     const listOfOrdersWithRouteAttached = nonVoidOrders.map((order: Order) => {
       // Check if user has the related route
-      const relatedRoute = order.user?.routes?.find((route: any) =>
-        routeMap.has(route.routeId),
-      );
+      let relatedRouteId = -1;
+      if (order?.reassignment) {
+        console.log(order.reassignment, 'order.reassignment');
+        relatedRouteId = order.reassignment.toRouteId;
+      } else {
+        relatedRouteId = order.user?.routes?.find((route: any) =>
+          routeMap.has(route.routeId),
+        )?.routeId || -1;
+      }
       // console.log(relatedRoute, 'relatedRoute');
       const userRelatedRoute = {
         ...order,
-        routeId: relatedRoute?.routeId || -1,
+        routeId: relatedRouteId,
       };
       return userRelatedRoute;
     });
@@ -144,9 +149,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     let currentRouteOrders: any = []; // to get sort
 
     while (trackOrderByRoutesIndex <= orderByRoutes.length) {
-      // console.log(currentRouteOrders.length, 'currentRouteOrders');
+      // Reach the end of the orderByRoutes - Finalize the currentRouteOrders
       if (!orderByRoutes[trackOrderByRoutesIndex]?.routeId) {
-        // Reach the end of the orderByRoutes - Finalize the currentRouteOrders
         const sortedUserIds = userRoute[currentRouteId];
         currentRouteOrders.sort((orderA: Order, orderB: Order) => {
           return (

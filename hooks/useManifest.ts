@@ -7,6 +7,7 @@ import { days } from '@/app/lib/constant';
 import axios from 'axios';
 import { AlertColor } from '@mui/material';
 import { useParams } from 'next/navigation';
+import { YYYYMMDDFormat } from '@/app/utils/time';
 
 const useManifest = (
   orderList: Order[],
@@ -33,7 +34,7 @@ const useManifest = (
   const givenDay = days[formattedDate.getDay()];
 
   const { data: userRoute } = useSWR(
-    getAdminApiUrl(companyId, `/routes/clients?day=${givenDay}`),
+    getAdminApiUrl(companyId, `/routes/clients?day=${givenDay}&date=${YYYYMMDDFormat(formattedDate)}`),
   );
 
   useEffect(() => {

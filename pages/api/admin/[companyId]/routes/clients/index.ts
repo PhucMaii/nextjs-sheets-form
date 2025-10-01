@@ -1,8 +1,10 @@
-import { PrismaClient, UserRoute } from '@prisma/client';
+import prisma from '@/client';
+import { UserRoute } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IQuery {
   day?: string;
+  date?: string;
   companyId?: string;
 }
 
@@ -17,13 +19,11 @@ export default async function handler(
       });
     }
 
-    const prisma = new PrismaClient();
+    const { day, date, companyId }: IQuery = req.query;
 
-    const { day, companyId }: IQuery = req.query;
-
-    if (!day || !companyId) {
+    if (!day || !companyId || !date) {
       return res.status(404).json({
-        error: 'Day and Company ID is not provided',
+        error: 'Day and Company ID and Date are not provided',
       });
     }
 
@@ -57,6 +57,7 @@ export default async function handler(
       },
     });
 
+    // Group userIds by routeId
     const unsortedRouteListWithUserId = routeList.reduce(
       (acc: any, route: any) => {
         const routeKey = route.id;
@@ -105,6 +106,33 @@ export default async function handler(
           scheduleOrder.userId,
         ];
       }
+    }
+
+    // get reassignment orders
+    const reassignments = await prisma.reassignment.findMany({
+      where: {
+        date,
+        order: {
+          companyId: Number(companyId),
+        },
+      },
+      include: {
+        order: true,
+      },
+    });
+
+    if (reassignments.length > 0) {
+      // Insert reassignment userIds to sortedUserIds
+      reassignments.forEach((reassignment: any) => {
+        if (!sortedUserIds[reassignment.toRouteId]) {
+          sortedUserIds[reassignment.toRouteId] = [reassignment.order.userId];
+        } else {
+          sortedUserIds[reassignment.toRouteId].splice(
+            reassignment.index,
+            0, 
+          );
+        }
+      });
     }
 
     return res.status(200).json({

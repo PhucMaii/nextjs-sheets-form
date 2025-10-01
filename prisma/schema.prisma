@@ -1053,7 +1053,7 @@ model ScheduledShift {
 
 model ShiftSession {
   id         Int      @id @default(autoincrement())
-  driverId   Int
+  driverId   Int?
   employeeId Int?
   routeId    Int?
   date       String
@@ -1067,7 +1067,7 @@ model ShiftSession {
   role       String?
   companyId  Int?
 
-  driver   Driver    @relation(fields: [driverId], references: [id])
+  driver   Driver?    @relation(fields: [driverId], references: [id])
   employee Employee? @relation(fields: [employeeId], references: [id])
   expense  Expense?  @relation(fields: [expenseId], references: [id])
   company  Company?  @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
