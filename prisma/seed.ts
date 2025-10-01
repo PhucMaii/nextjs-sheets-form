@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 // const checkIsKorean = (text: string) => {
 //   // const koreanRange = /^[\uAC00-\uD7AF]+$/;
@@ -121,12 +122,15 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 
 async function main() {
 
-await prisma.orders.update({
+const password = await bcrypt.hash('driver123', 12);
+await prisma.employee.updateMany({
   where: {
-    id: 58141,
+    id: {
+      in: [22, 23]
+    },
   },
   data: {
-    totalPrice: 355.25,
+    password,
   },
 });
 }

@@ -56,6 +56,15 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           companyId: Number(companyId),
         },
         include: {
+          reassignment: {
+            include: {
+              to: {
+                include: {
+                  employee: true,
+                },
+              },
+            },
+          },
           items: {
             include: {
               inventoryItem: true,
@@ -119,6 +128,15 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           companyId: Number(companyId),
         },
         include: {
+          reassignment: {
+            include: {
+              to: {
+                include: {
+                  employee: true,
+                },
+              },
+            },
+          },
           items: {
             include: {
               inventoryItem: true,
