@@ -393,15 +393,17 @@ export const ItemButton = ({
                   ? `From $${options.lowestPrice.toFixed(2)}`
                   : `$${item.price?.toFixed(2) || 'N/A'}`}
               </Typography>
-              {(!item.options || item.options.length === 0) && item.isShowDiscount && item.prevPrice && (
-                <Typography
-                  fontWeight="bold"
-                  sx={{ textDecoration: 'line-through' }}
-                  color="error"
-                >
-                  ${item.prevPrice.toFixed(2)}
-                </Typography>
-              )}
+              {(!item.options || item.options.length === 0) &&
+                item.isShowDiscount &&
+                item.prevPrice && (
+                  <Typography
+                    fontWeight="bold"
+                    sx={{ textDecoration: 'line-through' }}
+                    color="error"
+                  >
+                    ${item.prevPrice.toFixed(2)}
+                  </Typography>
+                )}
             </>
           ) : (
             <Typography fontWeight="bold" sx={{ textTransform: 'none' }}>
@@ -1144,6 +1146,11 @@ const OrderView = ({
                   borderRadius: 1,
                 }}
               >
+                <DisplayFile
+                  fileKey={item?.image || item?.inventoryItem?.image}
+                  width="100px"
+                  height="100px"
+                />
                 <Box
                   display="flex"
                   alignItems="center"

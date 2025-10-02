@@ -1,5 +1,5 @@
-export function toCDN(urlOrPath: string) {
-    const host = process.env.NEXT_PUBLIC_S3_CDN_HOST;
+export function toCDN(urlOrPath: string, isCheque: boolean = false) {
+    const host = isCheque ? process.env.NEXT_PUBLIC_S3_CDN_HOST_CHEQUE : process.env.NEXT_PUBLIC_S3_CDN_HOST;
     if (!host) return urlOrPath;
   
     // If you pass a full S3 URL, swap its host to the CDN host

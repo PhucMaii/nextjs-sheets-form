@@ -1,6 +1,6 @@
 // import { getLoadUrl } from '@/app/lib/r2';
 import { generateImgUrl } from '@/app/lib/s3';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Box, Typography, CircularProgress } from '@mui/material';
 import Image from 'next/image';
 import ViewImg from '../ViewImg';
@@ -17,6 +17,66 @@ interface IProps {
   mode?: 'print' | 'view';
 }
 
+const CDN_HOSTS = process.env.NEXT_PUBLIC_CDN_HOSTNAME;
+
+function isCDNUrl(url: string): boolean {
+  try {
+    const u = new URL(url);
+    return (
+      CDN_HOSTS?.includes(u.hostname) ||
+      u.hostname.endsWith('.cloudfront.net')
+    );
+  } catch {
+    return false;
+  }
+}
+
+function PrintImgWithFallback({
+  srcPrimary,
+  alt,
+  width,
+  height,
+  style,
+  fileKey,
+  isCheque,
+}: {
+  srcPrimary: string;
+  alt?: string;
+  width?: string | number;
+  height?: string | number;
+  style?: React.CSSProperties;
+  fileKey: string;
+  isCheque?: boolean;
+}) {
+  const [src, setSrc] = useState(srcPrimary);
+  const [failedOnce, setFailedOnce] = useState(false);
+
+  const handleError = useCallback(async () => {
+    if (failedOnce) return; // avoid loops
+    setFailedOnce(true);
+    try {
+      const signed = await generateImgUrl(fileKey, isCheque);
+      if (signed) setSrc(signed);
+    } catch (e) {
+      // last resort: keep src as-is; the browser will show broken image
+      console.error('Print fallback failed to generate signed URL', e);
+    }
+  }, [failedOnce, fileKey, isCheque]);
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      width={Number(width)}
+      height={Number(height)}
+      loading="eager"
+      decoding="sync"
+      style={{ objectFit: 'contain', ...style }}
+      onError={handleError}
+    />
+  );
+}
+
 export default function DisplayFile({
   fileKey,
   alt,
@@ -27,24 +87,30 @@ export default function DisplayFile({
   isDisableOnClick = false,
   mode,
 }: IProps) {
-  // if (mode === 'print') {
-  //   const url = toCDN(fileKeyToBestGuessUrl(fileKey, isCheque || false));
-  //   if (fileKey.includes('NON-WOVEN')) {
-  //     console.log(toCDN(url), 'url');
-  //   }
-  //   // Use plain <img> to avoid hydration & styling cost
-  //   return (
-  //     <img
-  //       src={toCDN(url)}
-  //       alt={alt}
-  //       width={Number(width)}
-  //       height={Number(height)}
-  //       loading="eager"
-  //       decoding="sync"
-  //       style={{ objectFit: 'contain', ...style }}
-  //     />
-  //   );
-  // }
+  if (mode === 'print') {
+    // 1) build origin URL from fileKey
+    const originUrl = fileKeyToBestGuessUrl(fileKey, isCheque || false);
+    // 2) map to CDN exactly once (previous code applied toCDN twice)
+    const cdnUrl = toCDN(originUrl, isCheque);
+
+    if (fileKey.includes('NON-WOVEN')) {
+      // eslint-disable-next-line no-console
+      console.log('[DisplayFile:print] NON-WOVEN candidate URL:', cdnUrl);
+    }
+
+    // Use PrintImgWithFallback to auto-fallback to signed URL on error
+    return (
+      <PrintImgWithFallback
+        srcPrimary={cdnUrl}
+        alt={alt}
+        width={width}
+        height={height}
+        style={style}
+        fileKey={fileKey}
+        isCheque={isCheque}
+      />
+    );
+  }
   const [url, setUrl] = useState('');
   const [isOpenViewImg, setIsOpenViewImg] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -131,7 +197,7 @@ export default function DisplayFile({
         <embed src={url} width={width || '100px'} height={height || '100px'} />
       ) : (
         <Image
-          src={toCDN(url)}
+          src={toCDN(url, isCheque)}
           alt={alt || 'file'}
           style={{
             width: width || '100px',
@@ -161,8 +227,6 @@ export default function DisplayFile({
     </>
   );
 }
-
-
 
 function fileKeyToBestGuessUrl(fileKey: string, isCheque: boolean) {
   return isCheque

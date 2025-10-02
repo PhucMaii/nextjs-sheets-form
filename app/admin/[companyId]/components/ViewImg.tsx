@@ -90,7 +90,7 @@ export default function ViewImg({
         >
           {fileKeyFront && (
             <Image
-              src={toCDN(urlFront)}
+              src={toCDN(urlFront, isCheque)}
               alt="front"
               style={{
                 maxWidth: '100%',
@@ -104,7 +104,7 @@ export default function ViewImg({
           )}
           {fileKeyBack && (
             <Image
-              src={toCDN(urlBack)}
+              src={toCDN(urlBack, isCheque)}
               alt="back"
               style={{
                 maxWidth: '100%',

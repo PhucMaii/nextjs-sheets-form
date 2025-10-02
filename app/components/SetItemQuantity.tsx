@@ -17,6 +17,7 @@ import { ItemButton } from './OrderView';
 import { grey } from '@mui/material/colors';
 import { IOption } from '../utils/type';
 import { primaryColor } from '@/theme/color';
+import DisplayFile from '../admin/[companyId]/components/Modals/DisplayFile';
 
 interface IProps extends ModalProps {
   item: any;
@@ -56,6 +57,16 @@ export default function SetItemQuantity({
         />
 
         <Divider sx={{ my: 2 }} />
+
+        {
+          (item?.image || item?.inventoryItem?.image) && (
+            <DisplayFile 
+              fileKey={item?.image || item?.inventoryItem?.image}
+              width="100px"
+              height="100px"
+            />
+          )
+        }
 
         {item?.options && (
           <Grid container>

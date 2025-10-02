@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 
-const CDN_HOST = 'db3uf8fcaqsi.cloudfront.net';
+const CDN_HOST = process.env.NEXT_PUBLIC_S3_CDN_HOST;
+const CDN_HOST_CHEQUE = process.env.NEXT_PUBLIC_S3_CDN_HOST_CHEQUE;
 
 const cloudfrontDomainRegex = new RegExp(
   `^https://${CDN_HOST.replace(/\./g, '\\.')}\\/.*`,
@@ -67,6 +68,7 @@ const nextConfig = {
     remotePatterns: [
       // CloudFront (preferred)
       ...(CDN_HOST ? [{ protocol: 'https', hostname: CDN_HOST }] : []),
+      ...(CDN_HOST_CHEQUE ? [{ protocol: 'https', hostname: CDN_HOST_CHEQUE }] : []),
       // TEMP: keep S3 while migrating; remove once all URLs point to CloudFront
       {
         protocol: 'https',

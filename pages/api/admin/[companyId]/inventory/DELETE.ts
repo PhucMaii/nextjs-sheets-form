@@ -52,6 +52,25 @@ export default async function DELETE(
         inventoryItemId: Number(id),
       },
     });
+
+    // delete all item preference related
+    await prisma.itemPreference.deleteMany({
+      where: {
+        inventoryItemId: Number(id),
+      },
+    });
+
+    await prisma.option.deleteMany({
+      where: {
+        inventoryItemId: Number(id),
+      },
+    });
+    
+    await prisma.pOItem.deleteMany({
+      where: {
+        inventoryItemId: Number(id),
+      },
+    });
     
     await prisma.inventoryUnit.deleteMany({ 
       where: {
@@ -79,6 +98,7 @@ export default async function DELETE(
         id: Number(id),
       },
     });
+    
 
 
 
