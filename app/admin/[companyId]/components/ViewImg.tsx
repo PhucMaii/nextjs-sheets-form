@@ -5,6 +5,7 @@ import { ModalProps } from './Modals/type';
 import { grey } from '@mui/material/colors';
 import { XIcon } from 'lucide-react';
 import Image from 'next/image';
+import { toCDN } from '@/lib/cdn';
 // import { getLoadUrl } from '@/app/lib/r2';
 
 interface IProps extends ModalProps {
@@ -38,7 +39,7 @@ export default function ViewImg({
       // } else {
         if (fileKeyFront) {
           const urlFront = await generateImgUrl(fileKeyFront, isCheque);
-          console.log(urlFront, 'urlFront');
+          // console.log(urlFront, 'urlFront');
           setUrlFront(urlFront);
         }
 
@@ -89,7 +90,7 @@ export default function ViewImg({
         >
           {fileKeyFront && (
             <Image
-              src={urlFront}
+              src={toCDN(urlFront)}
               alt="front"
               style={{
                 maxWidth: '100%',
@@ -103,7 +104,7 @@ export default function ViewImg({
           )}
           {fileKeyBack && (
             <Image
-              src={urlBack}
+              src={toCDN(urlBack)}
               alt="back"
               style={{
                 maxWidth: '100%',

@@ -1,6 +1,45 @@
 /** @type {import('next').NextConfig} */
 
-const runtimeCaching = require('next-pwa/cache');
+const CDN_HOST = 'db3uf8fcaqsi.cloudfront.net';
+
+const cloudfrontDomainRegex = new RegExp(
+  `^https://${CDN_HOST.replace(/\./g, '\\.')}\\/.*`,
+);
+
+const runtimeCaching = [
+  ...(cloudfrontDomainRegex
+    ? [
+        {
+          urlPattern: cloudfrontDomainRegex,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'cdn-assets',
+            expiration: {
+              maxEntries: 2000,
+              maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+            },
+            cacheableResponse: {
+              statuses: [0, 200],
+            },
+          },
+        },
+      ]
+    : []),
+  {
+    urlPattern: /\/_next\/.*/,
+    handler: 'StaleWhileRevalidate',
+    options: {
+      cacheName: 'next-image',
+      expiration: {
+        maxEntries: 500,
+        maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+      },
+      cacheableResponse: {
+        statuses: [0, 200],
+      },
+    },
+  },
+];
 
 const nextConfig = {
   reactStrictMode: true,
@@ -16,11 +55,30 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // images: {
+  //   domains: [
+  //     'supreme-sprouts-products.s3.us-west-2.amazonaws.com',
+  //     'cheque-bucket.s3.us-west-2.amazonaws.com',
+  //   ],
+  // },
+  // Allow CloudFront (+ temporary S3 fallback) for next/image
   images: {
-    domains: [
-      'supreme-sprouts-products.s3.us-west-2.amazonaws.com',
-      'cheque-bucket.s3.us-west-2.amazonaws.com',
+    formats: ['image/avif', 'image/webp'],
+    remotePatterns: [
+      // CloudFront (preferred)
+      ...(CDN_HOST ? [{ protocol: 'https', hostname: CDN_HOST }] : []),
+      // TEMP: keep S3 while migrating; remove once all URLs point to CloudFront
+      {
+        protocol: 'https',
+        hostname: 'supreme-sprouts-products.s3.us-west-2.amazonaws.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cheque-bucket.s3.us-west-2.amazonaws.com',
+      },
     ],
+    // Optional: bump if you want longer CDN pulls for next/image
+    minimumCacheTTL: 60,
   },
 };
 

@@ -69,9 +69,10 @@ const ExportCategory = forwardRef(({ items }: any, ref: any) => {
                 {item?.image || item?.inventoryItem?.image ? (
                   <DisplayFile
                     fileKey={item?.image || item?.inventoryItem?.image}
-                    width="50px"
-                    height="50px"
+                    width={50}
+                    height={50}
                     isDisableOnClick
+                    mode="print"
                   />
                 ) : null}
               </BorderTableCell>

@@ -18,6 +18,7 @@
     "react-hooks/exhaustive-deps": "off",
     "prettier/prettier": "off",
     "@typescript-eslint/no-explicit-any": "off"
+    
   },
   "ignorePatterns": [
     "src/**/*.test.ts",

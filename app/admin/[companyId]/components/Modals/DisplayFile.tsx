@@ -4,15 +4,17 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, CircularProgress } from '@mui/material';
 import Image from 'next/image';
 import ViewImg from '../ViewImg';
+import { toCDN } from '@/lib/cdn';
 
 interface IProps {
   fileKey: string;
   alt?: string;
-  width?: string;
-  height?: string;
+  width?: string | number;
+  height?: string | number;
   isCheque?: boolean;
   style?: any;
   isDisableOnClick?: boolean;
+  mode?: 'print' | 'view';
 }
 
 export default function DisplayFile({
@@ -23,7 +25,26 @@ export default function DisplayFile({
   isCheque,
   style,
   isDisableOnClick = false,
+  mode,
 }: IProps) {
+  if (mode === 'print') {
+    const url = toCDN(fileKeyToBestGuessUrl(fileKey, isCheque || false));
+    if (fileKey.includes('NON-WOVEN')) {
+      console.log(toCDN(url), 'url');
+    }
+    // Use plain <img> to avoid hydration & styling cost
+    return (
+      <img
+        src={toCDN(url)}
+        alt={alt}
+        width={Number(width)}
+        height={Number(height)}
+        loading="eager"
+        decoding="sync"
+        style={{ objectFit: 'contain', ...style }}
+      />
+    );
+  }
   const [url, setUrl] = useState('');
   const [isOpenViewImg, setIsOpenViewImg] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -110,7 +131,7 @@ export default function DisplayFile({
         <embed src={url} width={width || '100px'} height={height || '100px'} />
       ) : (
         <Image
-          src={url}
+          src={toCDN(url)}
           alt={alt || 'file'}
           style={{
             width: width || '100px',
@@ -134,10 +155,17 @@ export default function DisplayFile({
           height={100}
           sizes="100vw"
           quality={95}
-          loading="lazy"
           unoptimized={true}
         />
       )}
     </>
   );
+}
+
+
+
+function fileKeyToBestGuessUrl(fileKey: string, isCheque: boolean) {
+  return isCheque
+    ? `https://cheque-bucket.s3.us-west-2.amazonaws.com/${fileKey}`
+    : `https://supreme-sprouts-products.s3.us-west-2.amazonaws.com/${fileKey}`;
 }
