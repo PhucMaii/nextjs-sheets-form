@@ -27,24 +27,24 @@ export default function DisplayFile({
   isDisableOnClick = false,
   mode,
 }: IProps) {
-  if (mode === 'print') {
-    const url = toCDN(fileKeyToBestGuessUrl(fileKey, isCheque || false));
-    if (fileKey.includes('NON-WOVEN')) {
-      console.log(toCDN(url), 'url');
-    }
-    // Use plain <img> to avoid hydration & styling cost
-    return (
-      <img
-        src={toCDN(url)}
-        alt={alt}
-        width={Number(width)}
-        height={Number(height)}
-        loading="eager"
-        decoding="sync"
-        style={{ objectFit: 'contain', ...style }}
-      />
-    );
-  }
+  // if (mode === 'print') {
+  //   const url = toCDN(fileKeyToBestGuessUrl(fileKey, isCheque || false));
+  //   if (fileKey.includes('NON-WOVEN')) {
+  //     console.log(toCDN(url), 'url');
+  //   }
+  //   // Use plain <img> to avoid hydration & styling cost
+  //   return (
+  //     <img
+  //       src={toCDN(url)}
+  //       alt={alt}
+  //       width={Number(width)}
+  //       height={Number(height)}
+  //       loading="eager"
+  //       decoding="sync"
+  //       style={{ objectFit: 'contain', ...style }}
+  //     />
+  //   );
+  // }
   const [url, setUrl] = useState('');
   const [isOpenViewImg, setIsOpenViewImg] = useState(false);
   const [isLoading, setIsLoading] = useState(true);

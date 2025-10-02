@@ -1,5 +1,5 @@
 export function toCDN(urlOrPath: string) {
-    const host = 'db3uf8fcaqsi.cloudfront.net';
+    const host = process.env.NEXT_PUBLIC_S3_CDN_HOST;
     if (!host) return urlOrPath;
   
     // If you pass a full S3 URL, swap its host to the CDN host
