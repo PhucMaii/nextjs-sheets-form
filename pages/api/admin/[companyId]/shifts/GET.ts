@@ -36,7 +36,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     };
 
     if (driverId && driverId > 0) {
-      queryFields.driverId = Number(driverId);
+      queryFields.employeeId = Number(driverId);
     }
 
     const shiftSession = await prisma.shiftSession.findMany({
