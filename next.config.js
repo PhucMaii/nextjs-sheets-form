@@ -6,6 +6,9 @@ const CDN_HOST_CHEQUE = process.env.NEXT_PUBLIC_S3_CDN_HOST_CHEQUE;
 const cloudfrontDomainRegex = new RegExp(
   `^https://${CDN_HOST.replace(/\./g, '\\.')}\\/.*`,
 );
+const cloudfrontDomainRegexCheque = new RegExp(
+  `^https://${CDN_HOST_CHEQUE.replace(/\./g, '\\.')}\\/.*`,
+);
 
 const runtimeCaching = [
   ...(cloudfrontDomainRegex
@@ -15,6 +18,24 @@ const runtimeCaching = [
           handler: 'CacheFirst',
           options: {
             cacheName: 'cdn-assets',
+            expiration: {
+              maxEntries: 2000,
+              maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+            },
+            cacheableResponse: {
+              statuses: [0, 200],
+            },
+          },
+        },
+      ]
+    : []),
+  ...(cloudfrontDomainRegexCheque
+    ? [
+        {
+          urlPattern: cloudfrontDomainRegexCheque,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'cdn-assets-cheque',
             expiration: {
               maxEntries: 2000,
               maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
