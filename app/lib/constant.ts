@@ -44,6 +44,7 @@ import { AccessTime } from '@mui/icons-material';
 import ReportIcon from '@mui/icons-material/Report';
 import BadgeIcon from '@mui/icons-material/Badge';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
+import YardIcon from '@mui/icons-material/Yard';
 
 export const mainPaymentMethodId = 4;
 export const otherPaymentMethodId = 9;
@@ -249,6 +250,12 @@ export const adminTabs = {
       icon: StoreIcon,
       path: '/admin/[companyId]/vendors',
     },
+    {
+      id: 24,
+      name: "Farm",
+      icon: YardIcon,
+      path: '/admin/[companyId]/farm',
+    }
   ],
   Others: [
     {

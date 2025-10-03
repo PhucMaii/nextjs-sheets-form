@@ -67,7 +67,6 @@
     "framer-motion": "^11.18.2",
     "fuse.js": "^7.0.0",
     "googleapis": "^128.0.0",
-    "hydrawise-api": "^1.2.1",
     "install": "^0.13.0",
     "iron-session": "^8.0.4",
     "jest-mock-axios": "^4.8.0",

@@ -119,34 +119,32 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
   return dates;
 };
 
+const today = getTodayDate();
 async function main() {
-  const startDate = new Date('2025-04-01');
-  const endDate = new Date('2025-05-31');
-  const listOfDateString = generateListOfDateString(startDate, endDate);
-
-const brpnOrders = await prisma.orders.findMany({
-  where: {
-    companyId: 1,
-    user: {
-      clientId: '00104'
+  const farmPage = await prisma.pageView.create({
+    data: {
+      title: 'Farm',
+      createdAt: today.dateAndTime,
     },
-    deliveryDate: {
-      in: listOfDateString,
+  });
+
+  await prisma.companyPage.create({
+    data: {
+      companyId: 1,
+      pageId: farmPage.id,
     },
-  },
-});
+  });
 
-const formattedBrpnOrders = brpnOrders.map((order) => {
-  return {
-    orderId: order.id,
-    deliveryDate: order.deliveryDate,
-    updateTime: order.updateTime,
-    updatedBy: order.updatedBy,
-  }
-});
+  const adminIds = [13, 14, 18, 5, 19]
 
-console.log(formattedBrpnOrders, 'formattedBrpnOrders');
-
+  await prisma.adminPage.createMany({
+    data: [
+      ...adminIds.map((adminId) => ({
+        employeeId: adminId,
+        pageId: farmPage.id,
+      })),
+    ]
+  });
 }
 
 // async function main() {
