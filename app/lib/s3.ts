@@ -53,7 +53,7 @@ export default async function uploadToS3(
   }
 }
 
-export const generateImgUrl = async (
+export const generateImgUrl = (
   fileKey: string,
   isCheque: boolean = false,
 ) => {
@@ -62,32 +62,34 @@ export const generateImgUrl = async (
     return '/images/not-found.png';
   }
 
-  try {
-    const bucketName = isCheque
-      ? process.env.NEXT_PUBLIC_S3_BUCKET_NAME_CHEQUE
-      : process.env.NEXT_PUBLIC_S3_BUCKET_NAME;
+  const cdnHost = isCheque ? process.env.NEXT_PUBLIC_S3_CDN_HOST_CHEQUE : process.env.NEXT_PUBLIC_S3_CDN_HOST;
+  return `https://${cdnHost}/${fileKey}`;
+  // try {
+  //   const bucketName = isCheque
+  //     ? process.env.NEXT_PUBLIC_S3_BUCKET_NAME_CHEQUE
+  //     : process.env.NEXT_PUBLIC_S3_BUCKET_NAME;
 
-    if (!bucketName) {
-      console.error('Missing S3 bucket name environment variable');
-      return '/images/not-found.png';
-    }
+  //   if (!bucketName) {
+  //     console.error('Missing S3 bucket name environment variable');
+  //     return '/images/not-found.png';
+  //   }
 
-    const command = new GetObjectCommand({
-      Bucket: bucketName,
-      Key: fileKey,
-    });
+  //   const command = new GetObjectCommand({
+  //     Bucket: bucketName,
+  //     Key: fileKey,
+  //   });
 
-    const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
-    return signedUrl;
-  } catch (error) {
-    console.error(
-      'Failed to generate image URL for fileKey:',
-      fileKey,
-      'Error:',
-      error,
-    );
-    return '/images/not-found.png';
-  }
+  //   const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+  //   return signedUrl;
+  // } catch (error) {
+  //   console.error(
+  //     'Failed to generate image URL for fileKey:',
+  //     fileKey,
+  //     'Error:',
+  //     error,
+  //   );
+  //   return '/images/not-found.png';
+  // }
 };
 
 export const getAllS3Images = async (folder: string = '') => {

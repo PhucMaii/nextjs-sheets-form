@@ -107,7 +107,7 @@ export const PresignedFileUpload: React.FC<PresignedFileUploadProps> = ({
           });
         }
 
-        const imgUrl = await generateImgUrl(files[0].fileKey);
+        const imgUrl = generateImgUrl(files[0].fileKey);
         onUploadComplete?.(files as any, imgUrl);
       } catch (error) {
         const errorMessage =

@@ -33,11 +33,8 @@ const Product = ({ itemPreference, showNotification }: IProps) => {
   });
 
   useEffect(() => {
-    const fetchImgUrl = async () => {
-      const url = await generateImgUrl(itemPreference?.image);
-      setImgUrl(url || '/images/landing/image_not_found.jpeg');
-    };
-    fetchImgUrl();
+    const url = generateImgUrl(itemPreference?.image, false);
+    setImgUrl(url || '/images/landing/image_not_found.jpeg');
   }, [itemPreference?.image]);
 
   const onDeleteItemPref = async () => {

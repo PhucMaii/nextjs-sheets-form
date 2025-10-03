@@ -93,9 +93,7 @@ export default function AddItemIntoType({
 
   useEffect(() => {
     if (promptedItem?.image) {
-      generateImgUrl(promptedItem?.image).then((img) => {
-        setImg(img);
-      });
+      setImg(generateImgUrl(promptedItem?.image, false));
     }
   }, [promptedItem?.image]);
 

@@ -14,11 +14,7 @@ const CartItemDisplay = ({item}: {item: any}) => {
   const [imgUrl, setImgUrl] = useState<string>('');
 
   useEffect(() => {
-    const fetchImgUrl = async () => {
-      const data = await generateImgUrl(item?.item?.image || item?.item?.inventoryItem?.image);
-      setImgUrl(data || '/images/landing/image_not_found.jpeg');
-    };
-    fetchImgUrl();
+    setImgUrl(generateImgUrl(item?.item?.image || item?.item?.inventoryItem?.image || '/images/landing/image_not_found.jpeg', false));
   }, [item]);
 
   return (

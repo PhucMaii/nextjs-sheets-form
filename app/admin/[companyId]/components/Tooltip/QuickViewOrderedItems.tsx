@@ -36,16 +36,16 @@ const QuickViewItem = ({ item }: { item: any }) => {
 
   useEffect(() => {
     if (item.inventoryItem.image) {
-      getImgUrl();
+      setImgUrl(generateImgUrl(item.inventoryItem.image, false));
     } else {
       setImgUrl('/images/not-found.png');
     }
   }, [item.inventoryItem.image]);
 
-  const getImgUrl = async () => {
-    const imgLink = await generateImgUrl(item.inventoryItem.image);
-    setImgUrl(imgLink);
-  };
+    // const getImgUrl = async () => {
+    //   const imgLink = await generateImgUrl(item.inventoryItem.image);
+    //   setImgUrl(imgLink);
+    // };
 
   return (
     <Grid container spacing={2} sx={{ width: `100%` }} alignItems="flex-start">

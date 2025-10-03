@@ -40,11 +40,7 @@ export default function ProductListing({
 
   useEffect(() => {
     if (product?.image || product?.inventoryItem?.image) {
-      generateImgUrl(product?.image || product?.inventoryItem?.image).then(
-        (img) => {
-          setImg(img);
-        },
-      );
+      setImg(generateImgUrl(product?.image || product?.inventoryItem?.image, false));
     }
   }, [product]);
 

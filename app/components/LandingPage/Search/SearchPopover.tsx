@@ -12,9 +12,7 @@ export const PopoverItem = ({ item, onClick }: { item: any, onClick: () => void 
   const [img, setImg] = useState<string | undefined>(undefined);
   useEffect(() => {
     if (item?.image || item?.inventoryItem?.image) {
-      generateImgUrl(item?.image || item?.inventoryItem?.image).then((img) => {
-        setImg(img);
-      });
+      setImg(generateImgUrl(item?.image || item?.inventoryItem?.image, false));
     }
   }, [item]);
 

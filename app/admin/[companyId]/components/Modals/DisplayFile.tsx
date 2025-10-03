@@ -17,19 +17,19 @@ interface IProps {
   mode?: 'print' | 'view';
 }
 
-const CDN_HOSTS = process.env.NEXT_PUBLIC_CDN_HOSTNAME;
+// const CDN_HOSTS = process.env.NEXT_PUBLIC_CDN_HOSTNAME;
 
-function isCDNUrl(url: string): boolean {
-  try {
-    const u = new URL(url);
-    return (
-      CDN_HOSTS?.includes(u.hostname) ||
-      u.hostname.endsWith('.cloudfront.net')
-    );
-  } catch {
-    return false;
-  }
-}
+// function isCDNUrl(url: string): boolean {
+//   try {
+//     const u = new URL(url);
+//     return (
+//       CDN_HOSTS?.includes(u.hostname) ||
+//       u.hostname.endsWith('.cloudfront.net')
+//     );
+//   } catch {
+//     return false;
+//   }
+// }
 
 function PrintImgWithFallback({
   srcPrimary,
@@ -55,7 +55,7 @@ function PrintImgWithFallback({
     if (failedOnce) return; // avoid loops
     setFailedOnce(true);
     try {
-      const signed = await generateImgUrl(fileKey, isCheque);
+      const signed = generateImgUrl(fileKey, isCheque);
       if (signed) setSrc(signed);
     } catch (e) {
       // last resort: keep src as-is; the browser will show broken image
@@ -128,7 +128,7 @@ export default function DisplayFile({
       try {
         setIsLoading(true);
         setError(null);
-        const url = await generateImgUrl(fileKey, isCheque);
+        const url = generateImgUrl(fileKey, isCheque);
         setUrl(url || '/images/not-found.png');
       } catch (err) {
         console.error(

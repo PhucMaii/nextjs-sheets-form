@@ -20,11 +20,10 @@ const ItemTypeDisplay = ({
   const [img, setImg] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    generateImgUrl(
+    setImg(generateImgUrl(
       itemType?.items[0]?.image || itemType?.items[0]?.inventoryItem?.image,
-    ).then((img) => {
-      setImg(img);
-    });
+      false,
+    ));
   }, [itemType]);
 
   return (

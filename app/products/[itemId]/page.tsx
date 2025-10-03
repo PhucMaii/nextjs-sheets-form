@@ -67,13 +67,7 @@ export default function ItemPage() {
   }, []);
 
   useEffect(() => {
-    const fetchImgUrl = async () => {
-      const data = await generateImgUrl(
-        itemData?.image || itemData?.inventoryItem?.image,
-      );
-      setImgUrl(data);
-    };
-    fetchImgUrl();
+    setImgUrl(generateImgUrl(itemData?.image || itemData?.inventoryItem?.image, false));
   }, [itemData]);
 
   const fetchItemData = async () => {

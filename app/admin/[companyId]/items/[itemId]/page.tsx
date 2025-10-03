@@ -64,9 +64,7 @@ export default function ItemPage() {
 
   useEffect(() => {
     if (item?.inventoryItem?.image) {
-      generateImgUrl(item?.inventoryItem?.image).then((img) => {
-        setImage(img);
-      });
+      setImage(generateImgUrl(item?.inventoryItem?.image, false));
     }
   }, [item]);
 
@@ -160,13 +158,11 @@ export default function ItemPage() {
         inventoryItemId: item?.inventoryItemId,
       });
 
-      generateImgUrl(image).then((img) => {
-        setImage(img);
-        setItem((prev: any) => ({
-          ...prev,
-          inventoryItem: { ...prev?.inventoryItem, image: img },
-        }));
-      });
+      setImage(generateImgUrl(image, false));
+      setItem((prev: any) => ({
+        ...prev,
+        inventoryItem: { ...prev?.inventoryItem, image: image },
+      }));
 
       setIsOpenUploadImgModal(false);
       showNotification('success', 'Image uploaded successfully');

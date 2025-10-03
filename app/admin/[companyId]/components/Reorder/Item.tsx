@@ -31,9 +31,7 @@ export default function Item({
 
   useEffect(() => {
     if (item?.image || item?.inventoryItem?.image) {
-      generateImgUrl(item?.image || item?.inventoryItem?.image).then((img) => {
-        setImg(img);
-      });
+      setImg(generateImgUrl(item?.image || item?.inventoryItem?.image, false));
     }
   }, [item]);
 

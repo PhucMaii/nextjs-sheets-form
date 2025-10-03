@@ -38,13 +38,13 @@ export default function ViewImg({
       //   }        
       // } else {
         if (fileKeyFront) {
-          const urlFront = await generateImgUrl(fileKeyFront, isCheque);
+          const urlFront = generateImgUrl(fileKeyFront, isCheque);
           // console.log(urlFront, 'urlFront');
           setUrlFront(urlFront);
         }
 
         if (fileKeyBack) {
-          const urlBack = await generateImgUrl(fileKeyBack, isCheque);
+          const urlBack = generateImgUrl(fileKeyBack, isCheque);
           setUrlBack(urlBack);
         }
       // }

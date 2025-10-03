@@ -32,9 +32,7 @@ export default function CheckoutItemRow({ item, showNotification }: IProps) {
 
   useEffect(() => {
     if (item?.item?.image || item?.item?.inventoryItem?.image) {
-      generateImgUrl(item?.item?.image || item?.item?.inventoryItem?.image).then((img) => {
-        setImg(img);
-      });
+      setImg(generateImgUrl(item?.item?.image || item?.item?.inventoryItem?.image, false));
     }
   }, [item]);
 

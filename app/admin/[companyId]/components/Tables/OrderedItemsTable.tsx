@@ -20,9 +20,7 @@ const OrderedItemRow = ({ item }: { item: OrderedItems }) => {
 
   useEffect(() => {
     if (item?.inventoryItem?.image) {
-      generateImgUrl(item?.inventoryItem?.image).then((url) => {
-        setImg(url);
-      });
+      setImg(generateImgUrl(item?.inventoryItem?.image, false));
     }
   }, [item?.inventoryItem]);
   return (

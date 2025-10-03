@@ -33,10 +33,8 @@ export default function ViewDelivery({ open, onClose, order, isDisableCloseOnCli
 
     useEffect(() => {
         if (order?.delivery?.medias?.length > 0) {
-            generateImgUrl(order?.delivery?.medias[0]?.fileKey).then((url) => {
-                console.log('url', url); 
-                setImageUrl(url);
-            });
+            setImageUrl(generateImgUrl(order?.delivery?.medias[0]?.fileKey, false));
+            console.log('url', imageUrl); 
         } else {
             setImageUrl('/images/not-found.png');
         }
