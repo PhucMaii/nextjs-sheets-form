@@ -31,6 +31,7 @@ export default function ItemRow({
   isLastItem: boolean;
   expenseItems: any[];
 }) {
+  console.log(item, 'item');
   //   useEffect(() => {
   //     if (item.id !== -1) {
   //       const targetItem = vendorItems.find(
@@ -57,6 +58,7 @@ export default function ItemRow({
                 isSelected: expenseItems.some(
                   (expenseItem: any) => expenseItem.id === item.id,
                 ) || false,
+                vendorItemId: item?.vendorItemId || item?.id,
               }}
               onChange={(e, value) => {
                 const targetItem = vendorItems.find(
@@ -66,11 +68,12 @@ export default function ItemRow({
                   (unit: any) => unit.ratio === 1,
                 );
                 handleItemChange(item.id, 'selectedItem', {
-                  id: Number(value?.id),
+                  id: Number(targetItem?.id),
                   unit: targetItem?.unit || [],
                   inventoryUnit: ratioOf1 || {},
                   inventoryItem: targetItem?.inventoryItem || {},
                   vendorId: targetItem?.vendorId || null,
+                  vendorItemId: targetItem?.id || null,
                 });
               }}
               fullWidth
@@ -78,23 +81,24 @@ export default function ItemRow({
               options={vendorItems.map((item: any) => ({
                 name: item?.inventoryItem?.name,
                 id: item.id,
+                vendorItemId: item.id,
                 sku: item?.inventoryItem?.sku || 'N/A',
                 isSelected: expenseItems.some(
                   (expenseItem: any) => expenseItem.id === item.id,
                 ),
               }))}
-              renderOption={(props, option) => (
+              renderOption={(props, option) => {
+                return (
                 <li {...props}>
                   <Typography variant="body2">
                     {option?.sku || 'N/A'} - {option.name}
                   </Typography>
                 </li>
-              )}
+              )}}
               getOptionLabel={(option) => {
                 return `${option?.sku || 'N/A'} - ${option.name}`;
               }}
               getOptionDisabled={(option) => {
-                console.log(option, 'option');
                 return option.isSelected;
               }}
               renderInput={(params) => <TextField {...params} />}

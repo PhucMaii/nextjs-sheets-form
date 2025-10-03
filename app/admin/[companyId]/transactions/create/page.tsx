@@ -356,7 +356,6 @@ export default function CreateTransaction() {
       }
 
       showNotification('success', response.data.message);
-      router.back();
     } catch (error: any) {
       console.log('Something went wrong: ', error);
       showNotification('error', 'Something went wrong: ' + error);
@@ -395,7 +394,6 @@ export default function CreateTransaction() {
       }
 
       showNotification('success', response.data.message);
-      router.back();
     } catch (error: any) {
       console.log('Something went wrong: ', error);
       showNotification('error', 'Something went wrong: ' + error);
@@ -434,7 +432,6 @@ export default function CreateTransaction() {
       }
 
       showNotification('success', response.data.message);
-      router.back();
     } catch (error: any) {
       console.log('Something went wrong: ', error);
       showNotification('error', 'Something went wrong: ' + error);
