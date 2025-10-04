@@ -81,24 +81,50 @@ export const createOrderedItems = async (
     let unitId = item?.option?.unitId || item.inventoryUnitId;
 
     if (item.inventoryUnitId < 1) {
+      let vendorItemId = item.inventoryUnit.vendorItemId;
+      if (vendorItemId < 1) {
+        const existingVendorItem = await prisma.vendorItem.findFirst({
+          where: {
+            inventoryItemId: item.inventoryItemId,
+          },
+        });
+
+        if (existingVendorItem) {
+          vendorItemId = existingVendorItem.id;
+        }
+      }
       const dbUnits = await prisma.inventoryUnit.findMany({
         where: {
-          vendorItemId: item.inventoryUnit.vendorItemId,
+          vendorItemId: vendorItemId,
         },
       });
+
+      // Map through item.units and update the vendorItemId if it is less than 1
+      const updatedUnits = item.units.map((unit: any) => {
+        if (unit.vendorItemId < 1) {
+          return { ...unit, vendorItemId: vendorItemId };
+        }
+        return unit;
+      });
+
+      console.log({
+        itemUnits: item.units,
+        itemInventoryUnitVendorItemId: vendorItemId,
+        dbUnits,
+      })
       const updatedAt = getTodayDate();
       await checkAndUpdateUnits(
         companyId,
         dbUnits,
-        item.units,
-        item.inventoryUnit.vendorItemId,
+        updatedUnits,
+        vendorItemId,
         `${updatedAt.date} ${updatedAt.time}`,
         createdBy,
       );
 
       const targetUnit = await prisma.inventoryUnit.findFirst({
         where: {
-          vendorItemId: item.inventoryUnit.vendorItemId,
+          vendorItemId: vendorItemId,
           ratio: item.inventoryUnit.ratio,
           companyId,
         },

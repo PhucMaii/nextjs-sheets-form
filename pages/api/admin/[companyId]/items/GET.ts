@@ -170,8 +170,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         return { ...item, qtyLeft };
       });
 
-      // console.log(itemsWithQtyLeft, 'ITEMS WITH QTY LEFT');
-
       return res.status(200).json({
         data: itemsWithQtyLeft,
         message: 'Fetch Items Successfully',
@@ -241,8 +239,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         const qtyLeft = calculateQtyLeft(item);
         return { ...item, qtyLeft };
       });
-
-      // console.log(itemsWithQtyLeft, 'ITEMS WITH QTY LEFT');
 
       return res.status(200).json({
         data: itemsWithQtyLeft,
