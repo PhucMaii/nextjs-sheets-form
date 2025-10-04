@@ -33,6 +33,7 @@ import {
   KeyboardArrowRight,
   LogoutOutlined,
   Circle,
+  SupervisedUserCircle,
 } from '@mui/icons-material';
 import { adminTabs } from '../../../../lib/constant';
 import { ListItemButtonStyled } from './styled';
@@ -45,11 +46,9 @@ import { Order } from '../../orders/page';
 import { pusherClient } from '@/app/pusher';
 import { primary } from '@/theme/color';
 import { UserContext } from '@/app/context/UserContextAPI';
-import { EMPLOYEE_ROLE, getAdminApiUrl } from '@/app/utils/enum';
-import { SWRFetchData } from '@/app/utils/db';
-import { LoadingButton } from '@mui/lab';
-import axios from 'axios';
+import { EMPLOYEE_ROLE, USER_ROLE } from '@/app/utils/enum';
 import Image from 'next/image';
+import useLocalStorage from '@/hooks/useLocalStorage';
 
 interface PropTypes {
   children: ReactNode;
@@ -66,6 +65,7 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
   const [singleOrder, setSingleOrder] = useState<Order | null>(null);
+  const [role, setRole] = useLocalStorage('role', null);
   const router = useRouter();
   const pathname: any = usePathname();
 
@@ -185,6 +185,10 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
       .join('')
       .toUpperCase()
       .slice(0, 2);
+  };
+
+  const handleSwitchRole = () => {
+    setRole(role !== USER_ROLE.DRIVER ? USER_ROLE.DRIVER : user?.role);
   };
 
   const renderTopSection = () => (
@@ -313,6 +317,14 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
                 fontWeight: 500,
               }}
             />
+            <Button
+              size="small"
+              sx={{ textTransform: 'none' }}
+              startIcon={<SupervisedUserCircle />}
+              onClick={handleSwitchRole}
+            >
+              Switch Role
+            </Button>
           </Box>
         )}
       </Box>
