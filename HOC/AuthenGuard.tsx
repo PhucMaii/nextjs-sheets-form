@@ -19,7 +19,7 @@ export default function AuthenGuard({ children }: any) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const [role, setRole] = useLocalStorage('role', null);
+  const [role, setRole, isRoleInitialized] = useLocalStorage('role', null);
 
   const {
     data: session,
@@ -30,6 +30,11 @@ export default function AuthenGuard({ children }: any) {
   });
 
   useEffect(() => {
+    // Don't run navigation logic until both session and role are properly initialized
+    if (!isRoleInitialized || isSessionValidating) {
+      return;
+    }
+
     if (session?.user && !role) {
       setRole(session?.user.role);
     }
@@ -68,7 +73,7 @@ export default function AuthenGuard({ children }: any) {
     ) {
       router.push('/driver/overview');
     }
-  }, [pathname, session, role]);
+  }, [pathname, session, role, isRoleInitialized]);
 
   if (!session) {
     return <LoadingComponent />;

@@ -75,7 +75,7 @@ export default function useCart(defaultNote?: string) {
       setNote(defaultNote);
     }
   }, [defaultNote]);
-
+  
   const renderDisplayTotal = useCallback(() => {
     return (
       <Box display="flex" flexDirection="column" gap={2} mt={4}>

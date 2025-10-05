@@ -14,7 +14,7 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import React, { ReactNode, useContext, useEffect, useState } from 'react';
+import React, { ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
@@ -59,7 +59,7 @@ export default function Sidebar({ children }: IProps) {
   const [shiftSession, setShiftSession] = useState<IShiftSession | null>(null);
   const [isOpenConfirm, setIsOpenConfirm] = useState<boolean>(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_, setRole] = useLocalStorage('role', null);
+  const [role, setRole] = useLocalStorage('role', null);
   const { user } = useContext(UserContext);
   
   // const [isAsked, setIsAsked, isInitialized] = useLocalStorage(
@@ -155,11 +155,11 @@ export default function Sidebar({ children }: IProps) {
     )
   }
 
-  const handleSwitchRole = () => {
+  const handleSwitchRole = useCallback(() => {
     setIsOpenConfirm(false);
     setRole(user?.role);
     router.push(`/admin/${user?.companyId}/orders`);
-  }
+  }, [role]);
 
   const content = (
     <>

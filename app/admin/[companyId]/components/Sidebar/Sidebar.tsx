@@ -20,6 +20,7 @@ import {
 import React, {
   Fragment,
   ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useRef,
@@ -191,10 +192,10 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
       .slice(0, 2);
   };
 
-  const handleSwitchRole = () => {
+  const handleSwitchRole = useCallback(() => {
     setRole(USER_ROLE.DRIVER);
     router.push(`/driver/overview`);
-  };
+  }, [role]);
 
   const renderTopSection = () => (
     <Box>
