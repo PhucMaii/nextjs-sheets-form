@@ -14,7 +14,7 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { ReactNode, useContext, useEffect, useState } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
@@ -27,7 +27,7 @@ import ShiftModal, { ShiftType } from './Modals/ShiftModal';
 import { IShiftSession } from '@/app/utils/type';
 import { API_URL } from '@/app/utils/enum';
 import ShiftBanner from './ShiftBanner';
-import { AccessTime } from '@mui/icons-material';
+import { AccessTime, SupervisedUserCircle } from '@mui/icons-material';
 // import useLocalStorage from '@/hooks/useLocalStorage';
 import SwitchRole from './Modals/SwitchRole';
 import NotificationRequest from '@/app/components/NotificationRequest';
@@ -39,6 +39,9 @@ import axios from 'axios';
 import useNotification from '@/hooks/useNotification';
 import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
+import ConfirmModal from '@/app/admin/[companyId]/components/Modals/ConfirmModal';
+import useLocalStorage from '@/hooks/useLocalStorage';
+import { UserContext } from '@/app/context/UserContextAPI';
 
 interface IProps {
   children: ReactNode;
@@ -54,6 +57,11 @@ export default function Sidebar({ children }: IProps) {
   });
   const [isOpenSwitchRole, setIsOpenSwitchRole] = useState<boolean>(false);
   const [shiftSession, setShiftSession] = useState<IShiftSession | null>(null);
+  const [isOpenConfirm, setIsOpenConfirm] = useState<boolean>(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_, setRole] = useLocalStorage('role', null);
+  const { user } = useContext(UserContext);
+  
   // const [isAsked, setIsAsked, isInitialized] = useLocalStorage(
   //   'isAskedClockIn',
   //   false,
@@ -136,6 +144,23 @@ export default function Sidebar({ children }: IProps) {
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
+  const renderSwitchRole = () => {
+    return (
+      <Button
+        onClick={() => setIsOpenConfirm(true)}
+        startIcon={<SupervisedUserCircle />}
+      >
+        Switch Role
+      </Button>
+    )
+  }
+
+  const handleSwitchRole = () => {
+    setIsOpenConfirm(false);
+    setRole(user?.role);
+    router.push(`/admin/${user?.companyId}/orders`);
+  }
+
   const content = (
     <>
       <Toolbar sx={{ mt: 4 }}>
@@ -200,6 +225,14 @@ export default function Sidebar({ children }: IProps) {
         {NotificationComp}
         <PushReSubscriber />
         <NotificationRequest />
+        <ConfirmModal
+        open={isOpenConfirm}
+        onClose={() => setIsOpenConfirm(false)}
+        handleSubmit={handleSwitchRole}
+        showNotification={showNotification}
+        title="Are you sure to switch to admin?"
+        buttonLabel="Yes, I'm sure"
+      />
 
         {shiftSession ? (
           <ShiftBanner
@@ -247,6 +280,7 @@ export default function Sidebar({ children }: IProps) {
         />
         <Box sx={{ pb: 8, m: 1 }}>
           {/* <Button onClick={sendNotification}>Send notification</Button> */}
+          {renderSwitchRole()}
           {children}
         </Box>
         <Paper
@@ -303,6 +337,15 @@ export default function Sidebar({ children }: IProps) {
   if (mdDown) {
     return (
       <>
+        {NotificationComp}
+        <ConfirmModal
+        open={isOpenConfirm}
+        onClose={() => setIsOpenConfirm(false)}
+        handleSubmit={handleSwitchRole}
+        showNotification={showNotification}
+        title="Are you sure to switch to admin?"
+        buttonLabel="Yes, I'm sure"
+      />
         <NotificationRequest />
 
         {shiftSession ? (
@@ -370,6 +413,7 @@ export default function Sidebar({ children }: IProps) {
               p={2}
               gap={2}
             >
+              {renderSwitchRole()}
               {children}
             </Box>
           </Box>
@@ -381,6 +425,14 @@ export default function Sidebar({ children }: IProps) {
   return (
     <>
       <NotificationRequest />
+      <ConfirmModal
+        open={isOpenConfirm}
+        onClose={() => setIsOpenConfirm(false)}
+        handleSubmit={handleSwitchRole}
+        showNotification={showNotification}
+        title="Are you sure to switch to admin?"
+        buttonLabel="Yes, I'm sure"
+      />
       {shiftSession ? (
         <ShiftBanner
           shift={shiftSession}
@@ -436,6 +488,7 @@ export default function Sidebar({ children }: IProps) {
         </Drawer>
         <Box width="100%">
           <Box display="flex" width="100%" flexDirection="column" m={1} gap={2}>
+            {renderSwitchRole()}
             {children}
           </Box>
         </Box>

@@ -9,7 +9,6 @@ import {
   List,
   ListItemIcon,
   ListItemText,
-  Toolbar,
   Typography,
   useMediaQuery,
   Avatar,
@@ -49,6 +48,8 @@ import { UserContext } from '@/app/context/UserContextAPI';
 import { EMPLOYEE_ROLE, USER_ROLE } from '@/app/utils/enum';
 import Image from 'next/image';
 import useLocalStorage from '@/hooks/useLocalStorage';
+import ConfirmModal from '../Modals/ConfirmModal';
+import useNotification from '@/hooks/useNotification';
 
 interface PropTypes {
   children: ReactNode;
@@ -66,8 +67,11 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
   const [singleOrder, setSingleOrder] = useState<Order | null>(null);
   const [role, setRole] = useLocalStorage('role', null);
+  const [isOpenConfirm, setIsOpenConfirm] = useState<boolean>(false);
   const router = useRouter();
   const pathname: any = usePathname();
+
+  const { showNotification, NotificationComp } = useNotification();
 
   const { user } = useContext(UserContext);
 
@@ -188,7 +192,8 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
   };
 
   const handleSwitchRole = () => {
-    setRole(role !== USER_ROLE.DRIVER ? USER_ROLE.DRIVER : user?.role);
+    setRole(USER_ROLE.DRIVER);
+    router.push(`/driver/overview`);
   };
 
   const renderTopSection = () => (
@@ -321,7 +326,7 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
               size="small"
               sx={{ textTransform: 'none' }}
               startIcon={<SupervisedUserCircle />}
-              onClick={handleSwitchRole}
+              onClick={() => setIsOpenConfirm(true)}
             >
               Switch Role
             </Button>
@@ -637,6 +642,14 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
   if (mdDown) {
     return (
       <>
+        <ConfirmModal
+          open={isOpenConfirm}
+          onClose={() => setIsOpenConfirm(false)}
+          handleSubmit={handleSwitchRole}
+          showNotification={showNotification}
+          title="Are you sure to switch to driver?"
+          buttonLabel="Yes, I'm sure"
+        />
         <IconButton
           onClick={() => {
             setIsNavOpen(true);
@@ -701,6 +714,15 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
     <Box
       sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#fafafa' }}
     >
+      {NotificationComp}
+      <ConfirmModal
+        open={isOpenConfirm}
+        onClose={() => setIsOpenConfirm(false)}
+        handleSubmit={handleSwitchRole}
+        showNotification={showNotification}
+        title="Are you sure to switch to driver?"
+        buttonLabel="Yes, I'm sure"
+      />
       <Drawer
         variant="permanent"
         anchor="left"

@@ -53,7 +53,7 @@ export default function AuthenGuard({ children }: any) {
       (session?.user.role === USER_ROLE.ADMIN ||
         session?.user.role === USER_ROLE.SUPER_ADMIN)
     ) {
-      console.log('accessing admin');
+      console.log('accessing admin', role);
       if (role === USER_ROLE.DRIVER && !pathname?.startsWith('/driver')) {
         console.log('accessing first admin');
         router.push('/driver/overview');
