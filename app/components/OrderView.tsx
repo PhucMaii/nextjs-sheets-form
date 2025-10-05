@@ -185,7 +185,7 @@ export const ItemButton = ({
 
     const highestDiscountPercent: any = item?.options
       ?.map((option) => {
-        if (option?.prevPrice && option?.isShowDiscount) {
+        if (option?.prevPrice && option?.prevPrice > 0 && option?.isShowDiscount) {
           return (1 - option.price / option.prevPrice) * 100;
         } else {
           return null;
@@ -359,7 +359,7 @@ export const ItemButton = ({
             // </Box>
           ) : null} */}
           </Box>
-          {((item?.isShowDiscount && item?.prevPrice) ||
+          {((item?.isShowDiscount && item?.prevPrice && item.prevPrice > 0) ||
             options?.highestDiscount) && (
             // If options, then not display the prev price
             <OnSaleBadge
@@ -395,7 +395,7 @@ export const ItemButton = ({
               </Typography>
               {(!item.options || item.options.length === 0) &&
                 item.isShowDiscount &&
-                item.prevPrice && (
+                item.prevPrice && item.prevPrice > 0 ? (
                   <Typography
                     fontWeight="bold"
                     sx={{ textDecoration: 'line-through' }}
@@ -403,7 +403,7 @@ export const ItemButton = ({
                   >
                     ${item.prevPrice.toFixed(2)}
                   </Typography>
-                )}
+                ) : null}
             </>
           ) : (
             <Typography fontWeight="bold" sx={{ textTransform: 'none' }}>
@@ -564,7 +564,7 @@ const OrderView = ({
   const orderDiscount = useMemo(() => {
     if (!orderedItems || orderedItems.length === 0) return 0;
     const discountItems = orderedItems.filter(
-      (item: any) => item.isShowDiscount && item.prevPrice,
+      (item: any) => item.isShowDiscount && item.prevPrice && item.prevPrice > 0,
     );
     const discount = discountItems.reduce((acc: number, item: any) => {
       return acc + (item.prevPrice - item.price) * item.quantity;
@@ -1198,7 +1198,7 @@ const OrderView = ({
                       <Typography>${item.price.toFixed(2)}</Typography>
                     )}
 
-                    {(item?.option?.isShowDiscount || item.isShowDiscount) && (
+                    {(item?.option?.isShowDiscount || item.isShowDiscount) && (item?.option?.prevPrice > 0 || item.prevPrice > 0) && (
                       <Typography
                         // fontWeight="bold"
                         sx={{ textDecoration: 'line-through' }}

@@ -184,7 +184,7 @@ export default function CheckoutItemRow({ item, showNotification }: IProps) {
       {/* Price */}
       <TableCell>
         <Box display="flex" alignItems="center" flexWrap="wrap" gap={1}>
-          {targetItem?.item?.isShowDiscount && (
+          {targetItem?.item?.isShowDiscount && targetItem?.item?.prevPrice && targetItem?.item?.prevPrice > 0 && (
             <Typography
               variant="h6"
               fontWeight="bold"

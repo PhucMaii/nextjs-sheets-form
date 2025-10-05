@@ -48,7 +48,7 @@ export default function ProductListing({
   const discountPercent = useMemo(() => {
     if (product?.options && product?.options?.length > 0) {
       return product?.options?.reduce((max, option) => {
-        if (option?.prevPrice && option?.isShowDiscount) {
+        if (option?.prevPrice && option?.prevPrice > 0 && option?.isShowDiscount) {
           return Math.max(
             max,
             Math.ceil((1 - option.price / option.prevPrice) * 100),
@@ -137,7 +137,7 @@ export default function ProductListing({
           flexDirection: "column"
         }}
       >
-        {(discountPercent || product?.isShowDiscount) && (
+        {(discountPercent || (product?.isShowDiscount && product?.prevPrice && product?.prevPrice > 0)) && (
           <Box position="absolute" top={30} right={20}>
             <OnSaleBadge
               discountPrice={product?.price}
@@ -175,7 +175,7 @@ export default function ProductListing({
             fontWeight="semibold"
             sx={{
               color:
-                product?.isShowDiscount && product?.prevPrice
+                product?.isShowDiscount && product?.prevPrice && product?.prevPrice > 0
                   ? red[600]
                   : green[900],
             }}
@@ -186,7 +186,7 @@ export default function ProductListing({
                 ? `From $${smallestOptionPrice?.toFixed(2)}`
                 : `$${product?.price?.toFixed(2) || 'N/A'}`}
           </Typography>
-          {product?.isShowDiscount && product?.prevPrice && (
+          {product?.isShowDiscount && product?.prevPrice && product?.prevPrice > 0 && (
             <Typography
               variant="body1"
               sx={{ color: green[900], textDecoration: 'line-through' }}
