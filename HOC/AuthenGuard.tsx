@@ -1,9 +1,11 @@
 import { useRouter, usePathname } from 'next/navigation';
-import { FC, useEffect } from 'react';
+import { FC, useEffect, useContext } from 'react';
 import LoadingComponent from '../app/components/LoadingComponent/LoadingComponent';
 import axios from 'axios';
 import { USER_ROLE } from '../app/utils/enum';
 import useSWR from 'swr';
+import { UserContext } from '@/app/context/UserContextAPI';
+import { DashboardMode } from '@prisma/client';
 
 export const SplashScreen: FC = () => (
   <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
@@ -18,6 +20,8 @@ export default function AuthenGuard({ children }: any) {
   const router = useRouter();
   const pathname = usePathname();
 
+  const { user } = useContext(UserContext);
+
   const {
     data: session,
     error: sessionError,
@@ -27,6 +31,11 @@ export default function AuthenGuard({ children }: any) {
   });
 
   useEffect(() => {
+    // Don't run navigation logic until both session and role are properly initialized
+    if (isSessionValidating) {
+      return;
+    }
+
     if (
       (sessionError ||
         (!isSessionValidating && Object.keys(session).length === 0)) &&
@@ -44,11 +53,16 @@ export default function AuthenGuard({ children }: any) {
     } else if (
       session?.user &&
       (session?.user.role === USER_ROLE.ADMIN ||
-        session?.user.role === USER_ROLE.SUPER_ADMIN) &&
-      (!pathname?.startsWith('/admin') ||
-        session?.user.companyId !== Number(pathname?.split('/')[2]))
+        session?.user.role === USER_ROLE.SUPER_ADMIN)
     ) {
-      router.push(`/admin/${session?.user.companyId}/orders`);
+      console.log('accessing admin', session?.user.role);
+      if (user?.dashboardMode === DashboardMode.driver && !pathname?.startsWith('/driver')) {
+        console.log('accessing first admin');
+        router.push('/driver/overview');
+      } else if (!pathname?.startsWith('/admin') && user?.dashboardMode !== DashboardMode.driver) {
+        console.log('accessing second admin');
+        router.push(`/admin/${session?.user.companyId}/orders`);
+      }
     } else if (
       session?.user &&
       (session?.user.role === USER_ROLE.DRIVER || session?.user.role === USER_ROLE.WAREHOUSE) &&
@@ -56,7 +70,7 @@ export default function AuthenGuard({ children }: any) {
     ) {
       router.push('/driver/overview');
     }
-  }, [pathname, session]);
+  }, [pathname, session, user, isSessionValidating]);
 
   if (!session) {
     return <LoadingComponent />;

@@ -13,6 +13,7 @@ import { BorderTableCell } from './ManifestPrint';
 import { CheckIcon, XIcon } from 'lucide-react';
 import DisplayFile from '../Modals/DisplayFile';
 import Image from 'next/image';
+import { IItem } from '@/app/utils/type';
 
 // eslint-disable-next-line react/display-name
 const ExportCategory = forwardRef(({ items }: any, ref: any) => {
@@ -63,7 +64,7 @@ const ExportCategory = forwardRef(({ items }: any, ref: any) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {items.map((item: any) => (
+          {items.map((item: IItem | any) => (
             <TableRow key={item.id} sx={{ height: 35 }}>
               <BorderTableCell align="center" sx={{ width: 50, height: 50 }}>
                 {item?.image || item?.inventoryItem?.image ? (
@@ -83,7 +84,7 @@ const ExportCategory = forwardRef(({ items }: any, ref: any) => {
               </BorderTableCell>
               <BorderTableCell align="center">{item?.uom}</BorderTableCell>
               <BorderTableCell align="center">
-                ${item?.price?.toFixed(2)}
+                ${item?.availability ? item?.price?.toFixed(2) : 'N/A'}
               </BorderTableCell>
               <BorderTableCell align="center">
                 {item?.availability ? <CheckIcon /> : <XIcon />}

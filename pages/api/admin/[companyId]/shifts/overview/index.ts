@@ -43,7 +43,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         companyId: Number(companyId),
       },
       include: {
-        driver: true,
         employee: true,
       },
     });
@@ -80,7 +79,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // Track the total hours for each driver
     const driverReports = shifts.reduce((acc: any, shift: any) => {
-      const { name } = shift.driver;
+      const { name } = shift.employee;
 
       const isExist = acc.find((accShift: any) => accShift.name === name);
 

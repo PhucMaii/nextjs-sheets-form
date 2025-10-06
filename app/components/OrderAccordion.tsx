@@ -73,11 +73,11 @@ export default function OrderAccordion({
 
   return (
     <>
-    <ViewDelivery
-      open={isOpenViewDelivery}
-      onClose={() => setIsOpenViewDelivery(false)}
-      order={order}
-    />
+      <ViewDelivery
+        open={isOpenViewDelivery}
+        onClose={() => setIsOpenViewDelivery(false)}
+        order={order}
+      />
       {isEdit &&
         handleUpdateOrderUI &&
         handleDeleteOrder &&
@@ -155,16 +155,17 @@ export default function OrderAccordion({
                 <Typography fontWeight="bold" variant="subtitle1">
                   #{order.id}
                 </Typography>
-                {order?.delivery?.medias?.length > 0 && <Button
-                  startIcon={<ImageSearchIcon sx={{ fontSize: 16 }} />}
-                  // variant="contained"
-                  size="small"
-                  sx={{ m: 0 }}
-                  onClick={(e: any) => {
-                    e.stopPropagation();
-                    setIsOpenViewDelivery(true);
-                  }}
-                >
+                {order?.delivery?.medias?.length > 0 && (
+                  <Button
+                    startIcon={<ImageSearchIcon sx={{ fontSize: 16 }} />}
+                    // variant="contained"
+                    size="small"
+                    sx={{ m: 0 }}
+                    onClick={(e: any) => {
+                      e.stopPropagation();
+                      setIsOpenViewDelivery(true);
+                    }}
+                  >
                     <Typography
                       variant="subtitle2"
                       fontSize={12}
@@ -172,7 +173,8 @@ export default function OrderAccordion({
                     >
                       Photo
                     </Typography>
-                </Button>}
+                  </Button>
+                )}
               </Box>
             </Grid>
             <Grid item xs={12} md={2} sx={{ mr: 2 }}>
@@ -254,6 +256,7 @@ export default function OrderAccordion({
                           <Box display="flex" flexDirection="row" gap={1}>
                             {item?.isShowDiscount &&
                               item?.prevPrice &&
+                              item.prevPrice > 0 &&
                               (item.prevPrice * item.quantity).toFixed(2) !==
                                 (item?.totalPrice?.toFixed(2) ||
                                   (item.quantity * item.price).toFixed(2)) && (

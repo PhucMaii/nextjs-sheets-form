@@ -232,9 +232,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       const manifestItem = groupItemRoutes[itemRoute].reduce(
         (acc: any, item: IItem | any) => {
-          const { inventoryItem } = item;
+          const { inventoryItem } = item || {};
 
           let itemKey = inventoryItem?.name || item?.name;
+
+          if (item.inventoryUnit?.ratio !== 1) {
+            itemKey = itemKey + ' - ' + item.inventoryUnit?.unit?.toUpperCase();
+          }
 
           if (checkIsKorean(itemKey.split(' - ')[0])) {
             itemKey = itemKey.split(' - ')[1];
@@ -275,7 +279,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             return acc;
           }
 
-          let itemKey = item?.inventoryItem?.name || item?.name;
+          let itemKey = item.inventoryItem?.name || item?.name;
+          if (item.inventoryUnit?.ratio !== 1) {
+            itemKey = itemKey + ' - ' + item.inventoryUnit?.unit?.toUpperCase();
+          }
 
           if (checkIsKorean(itemKey.split(' - ')[0])) {
             itemKey = itemKey.split(' - ')[1];

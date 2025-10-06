@@ -20,7 +20,7 @@ export default function HistoryShifts() {
 
   useEffect(() => {
     fetchShifts();
-  }, []);
+  }, [dateRange]);
 
   const shiftOverview = useMemo(() => {
     if (shifts.length === 0) {
