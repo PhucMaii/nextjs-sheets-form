@@ -191,6 +191,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           id: newOrder.id,
           category: existingUser.category,
         });
+
+        return res.status(200).json({
+          message: 'Order Placed Successfully',
+        });
       } else {
 
         const lastOrderItems = userOrder.items.map((item: any) => {
