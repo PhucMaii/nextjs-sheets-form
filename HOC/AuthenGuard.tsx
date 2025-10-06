@@ -1,10 +1,11 @@
 import { useRouter, usePathname } from 'next/navigation';
-import { FC, useEffect } from 'react';
+import { FC, useEffect, useContext } from 'react';
 import LoadingComponent from '../app/components/LoadingComponent/LoadingComponent';
 import axios from 'axios';
 import { USER_ROLE } from '../app/utils/enum';
 import useSWR from 'swr';
-import useLocalStorage from '@/hooks/useLocalStorage';
+import { UserContext } from '@/app/context/UserContextAPI';
+import { DashboardMode } from '@prisma/client';
 
 export const SplashScreen: FC = () => (
   <div className="flex flex-col gap-8 justify-center items-center pt-8 h-screen">
@@ -19,7 +20,7 @@ export default function AuthenGuard({ children }: any) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const [role, setRole, isRoleInitialized] = useLocalStorage('role', null);
+  const { user } = useContext(UserContext);
 
   const {
     data: session,
@@ -31,12 +32,8 @@ export default function AuthenGuard({ children }: any) {
 
   useEffect(() => {
     // Don't run navigation logic until both session and role are properly initialized
-    if (!isRoleInitialized || isSessionValidating) {
+    if (isSessionValidating) {
       return;
-    }
-
-    if (session?.user && !role) {
-      setRole(session?.user.role);
     }
 
     if (
@@ -58,11 +55,11 @@ export default function AuthenGuard({ children }: any) {
       (session?.user.role === USER_ROLE.ADMIN ||
         session?.user.role === USER_ROLE.SUPER_ADMIN)
     ) {
-      console.log('accessing admin', role);
-      if (role === USER_ROLE.DRIVER && !pathname?.startsWith('/driver')) {
+      console.log('accessing admin', session?.user.role);
+      if (user?.dashboardMode === DashboardMode.driver && !pathname?.startsWith('/driver')) {
         console.log('accessing first admin');
         router.push('/driver/overview');
-      } else if (!pathname?.startsWith('/admin') && role !== USER_ROLE.DRIVER) {
+      } else if (!pathname?.startsWith('/admin') && user?.dashboardMode !== DashboardMode.driver) {
         console.log('accessing second admin');
         router.push(`/admin/${session?.user.companyId}/orders`);
       }
@@ -73,7 +70,7 @@ export default function AuthenGuard({ children }: any) {
     ) {
       router.push('/driver/overview');
     }
-  }, [pathname, session, role, isRoleInitialized]);
+  }, [pathname, session, user, isSessionValidating]);
 
   if (!session) {
     return <LoadingComponent />;

@@ -46,11 +46,14 @@ import { Order } from '../../orders/page';
 import { pusherClient } from '@/app/pusher';
 import { primary } from '@/theme/color';
 import { UserContext } from '@/app/context/UserContextAPI';
-import { EMPLOYEE_ROLE, USER_ROLE } from '@/app/utils/enum';
+import { EMPLOYEE_ROLE, getAdminApiUrl, USER_ROLE } from '@/app/utils/enum';
 import Image from 'next/image';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import ConfirmModal from '../Modals/ConfirmModal';
 import useNotification from '@/hooks/useNotification';
+import axios from 'axios';
+import { DashboardMode } from '@prisma/client';
+import { TruckIcon } from 'lucide-react';
 
 interface PropTypes {
   children: ReactNode;
@@ -74,7 +77,7 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
 
   const { showNotification, NotificationComp } = useNotification();
 
-  const { user } = useContext(UserContext);
+  const { user, mutate } = useContext(UserContext);
 
   const { companyId }: any = useParams();
 
@@ -192,10 +195,19 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
       .slice(0, 2);
   };
 
-  const handleSwitchRole = useCallback(() => {
-    setRole(USER_ROLE.DRIVER);
+
+  const handleSwitchRole = useCallback(async () => {
+    if (user?.role === USER_ROLE.DRIVER) {
+      showNotification('error', 'You are not allowed to switch to driver');
+      return;
+    }
+    await axios.put(getAdminApiUrl(user?.companyId || 1, '/switch-mode'), {
+      mode: DashboardMode.driver,
+    });
+
+    await mutate();
     router.push(`/driver/overview`);
-  }, [role]);
+  }, [mutate]);
 
   const renderTopSection = () => (
     <Box>
@@ -326,10 +338,10 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
             <Button
               size="small"
               sx={{ textTransform: 'none' }}
-              startIcon={<SupervisedUserCircle />}
+              startIcon={<TruckIcon size={16} />}
               onClick={() => setIsOpenConfirm(true)}
             >
-              Switch Role
+              Switch To Driver
             </Button>
           </Box>
         )}

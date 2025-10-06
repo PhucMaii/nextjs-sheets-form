@@ -99,6 +99,7 @@ model Employee {
   companyId    Int
   createdAt    String?
   createdBy    String?
+  dashboardMode DashboardMode?
 
   shiftSessions   ShiftSession[]
   routes          Route[]
@@ -1216,4 +1217,9 @@ enum InventoryLogFrom {
 
   DEPENDENT_INVENTORY
   AUTOMATIC_SUBTRACT
+}
+
+enum DashboardMode {
+  auto
+  driver
 }

@@ -25,7 +25,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import { primary } from '@/theme/color';
 import ShiftModal, { ShiftType } from './Modals/ShiftModal';
 import { IShiftSession } from '@/app/utils/type';
-import { API_URL } from '@/app/utils/enum';
+import { API_URL, getAdminApiUrl, USER_ROLE } from '@/app/utils/enum';
 import ShiftBanner from './ShiftBanner';
 import { AccessTime, SupervisedUserCircle } from '@mui/icons-material';
 // import useLocalStorage from '@/hooks/useLocalStorage';
@@ -42,6 +42,7 @@ import { useQuery } from '@tanstack/react-query';
 import ConfirmModal from '@/app/admin/[companyId]/components/Modals/ConfirmModal';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { UserContext } from '@/app/context/UserContextAPI';
+import { DashboardMode } from '@prisma/client';
 
 interface IProps {
   children: ReactNode;
@@ -60,7 +61,7 @@ export default function Sidebar({ children }: IProps) {
   const [isOpenConfirm, setIsOpenConfirm] = useState<boolean>(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [role, setRole] = useLocalStorage('role', null);
-  const { user } = useContext(UserContext);
+  const { user, mutate } = useContext(UserContext);
   
   // const [isAsked, setIsAsked, isInitialized] = useLocalStorage(
   //   'isAskedClockIn',
@@ -145,21 +146,33 @@ export default function Sidebar({ children }: IProps) {
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   const renderSwitchRole = () => {
-    return (
-      <Button
-        onClick={() => setIsOpenConfirm(true)}
-        startIcon={<SupervisedUserCircle />}
-      >
-        Switch Role
-      </Button>
-    )
+    if (user?.role === USER_ROLE.ADMIN || user?.role === USER_ROLE.SUPER_ADMIN) {
+      return (
+        <Button
+          onClick={() => setIsOpenConfirm(true)}
+          startIcon={<SupervisedUserCircle />}
+        >
+          Switch To Admin
+        </Button>
+      )
+    }
+    
+    return null;
   }
 
-  const handleSwitchRole = useCallback(() => {
-    setIsOpenConfirm(false);
-    setRole(user?.role);
+  const handleSwitchRole = useCallback(async () => {
+    if (user?.role === USER_ROLE.DRIVER) {
+      showNotification('error', 'You are not allowed to switch to admin');
+      return;
+    }
+
+    await axios.put(getAdminApiUrl(user?.companyId || 1, '/switch-mode'), {
+      mode: DashboardMode.auto,
+    });
+
+    await mutate();
     router.push(`/admin/${user?.companyId}/orders`);
-  }, [role]);
+  }, [mutate]);
 
   const content = (
     <>
