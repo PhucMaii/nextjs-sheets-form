@@ -38,7 +38,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     const newZonePrograms = zonePrograms.map((zoneProgram) => {
       return {
-        zoneId: zoneProgram.zoneId,
+        zoneId: Number(zoneProgram.zoneId),
         duration: zoneProgram.duration,
         index: zoneProgram.index,
         createdAt,
@@ -64,8 +64,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       data: newZoneWater.map((zoneProgram) => ({
         zoneProgramId: zoneProgram.id,
         waterId: newWaterProgram.id,
-        createdAt,
-        createdBy,
       })),
     });
 

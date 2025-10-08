@@ -9,8 +9,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       { params: { api_key: process.env.HYDRAWISE_API_KEY } },
     );
 
-    console.log(data, 'data');
-
     return res.status(200).json({ data: data.relays });
   } catch (error) {
     console.log(error);

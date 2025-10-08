@@ -1,14 +1,19 @@
 export interface Program {
   id: string;
   name: string;
-  totalDays: number;
+  days: number;
   remainingDays?: number;
   isActive: boolean;
   nextScheduledRun?: Date;
-  zones: string[];
+  zoneWaterPrograms: any[];
   description?: string;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface ZoneWater {
+  zoneProgram: ZoneProgram;
+  waterProgram: Program;
 }
 
 export interface ZoneProgram {
@@ -21,8 +26,8 @@ export interface ZoneProgram {
 
 export interface CreateProgramData {
   name: string;
-  totalDays: number;
-  zones: string[];
+  days: number;
+  zoneWaterPrograms: ZoneProgram[];
   description?: string;
 }
 

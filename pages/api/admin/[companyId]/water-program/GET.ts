@@ -3,10 +3,28 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     try {
-        const { companyId } = req.query;
+        const { companyId, id } = req.query;
 
         if (!companyId) {
             return res.status(400).json({ error: 'Company ID is required' });
+        }
+
+        if (id) {
+            const waterProgram = await prisma.waterProgram.findUnique({
+                where: {
+                    id: Number(id),
+                    companyId: Number(companyId),
+                },
+                include: {
+                    zoneWaterPrograms: {
+                        include: {
+                            zoneProgram: true,
+                        }
+                    },
+                }
+            });
+
+            return res.status(200).json({ data: waterProgram });
         }
 
         const waterPrograms = await prisma.waterProgram.findMany({
@@ -14,7 +32,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                 companyId: Number(companyId),
             },
             include: {
-                zoneWaterPrograms: true,
+                zoneWaterPrograms: {
+                    include: {
+                        zoneProgram: true,
+                    }
+                },
             }
         });
 

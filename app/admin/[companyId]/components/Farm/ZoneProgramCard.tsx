@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Draggable } from '@hello-pangea/dnd';
 import {
   Card,
@@ -30,6 +30,7 @@ function ZoneProgramCard({
   setFormData: any;
   formData: any;
 }) {
+  const [durationHelperText, setDurationHelperText] = useState<string>('');
   const selectedZone = useMemo(
     () =>
       availableZones.find((zone: any) => zone.relay_id === zoneProgram.zoneId),
@@ -143,7 +144,9 @@ function ZoneProgramCard({
                       inputMode="numeric"
                       value={zoneProgram.durationStr}
                       onChange={(e) => {
-                        console.log('e.target.value', e.target.value);
+                        setDurationHelperText(
+                          `Duration: ${formatDuration(parseInt(e.target.value.replace(/[^\d]/g, '')))}`,
+                        );
                         updateZoneProgram(
                           index,
                           'durationStr',
@@ -155,7 +158,7 @@ function ZoneProgramCard({
                       helperText={
                         formData.zonePrograms[index].duration < 1
                           ? 'Duration must be at least 1 second'
-                          : `Duration: ${formatDuration(zoneProgram.duration)}`
+                          : durationHelperText
                       }
                       inputProps={{ min: 1 }}
                     />

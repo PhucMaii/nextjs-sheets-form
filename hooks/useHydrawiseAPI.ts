@@ -5,6 +5,7 @@ import { useState } from "react";
 
 export const useHydrawiseAPI = (companyId: string) => {
   const [zones, setZones] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);  
 
   useEffect(() => {
     getZones();
@@ -13,19 +14,16 @@ export const useHydrawiseAPI = (companyId: string) => {
   const getZones = async () => {
     const response = await axios.get(getAdminApiUrl(companyId, '/hydrawise'));
 
-    console.log(response, 'response');
-
     if (response.status !== 200) {
       throw new Error('Failed to fetch zones');
     }
 
     const data = await response.data.data;
-    console.log(data, 'data');
 
     setZones(data);
-
+    setIsLoading(false);
     return data;
   };
 
-  return { zones };
+  return { zones, isLoading };
 };
