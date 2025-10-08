@@ -65,16 +65,16 @@ function ZoneProgramCard({
     }));
   };
 
-  const commitDuration = (idx: number) => {
-    setFormData((prev: any) => ({
-      ...prev,
-      zonePrograms: prev.zonePrograms.map((zp: any, i: number) => {
-        if (i !== idx) return zp;
-        const n = Math.max(1, parseInt(zp.durationStr || '0', 10) || 0);
-        return { ...zp, duration: n, durationStr: String(n) };
-      }),
-    }));
-  };
+  // const commitDuration = (idx: number) => {
+  //   setFormData((prev: any) => ({
+  //     ...prev,
+  //     zonePrograms: prev.zonePrograms.map((zp: any, i: number) => {
+  //       if (i !== idx) return zp;
+  //       const n = Math.max(1, parseInt(zp.durationStr || '0', 10) || 0);
+  //       return { ...zp, duration: n, durationStr: String(n) };
+  //     }),
+  //   }));
+  // };
 
   return (
     <Draggable
@@ -140,20 +140,19 @@ function ZoneProgramCard({
                     <TextField
                       fullWidth
                       label="Duration (seconds)"
-                      type="text"
-                      inputMode="numeric"
-                      value={zoneProgram.durationStr}
+                      type="number"
+                      value={zoneProgram.duration}
                       onChange={(e) => {
                         setDurationHelperText(
-                          `Duration: ${formatDuration(parseInt(e.target.value.replace(/[^\d]/g, '')))}`,
+                          `Duration: ${formatDuration(parseInt(e.target.value))}`,
                         );
                         updateZoneProgram(
                           index,
-                          'durationStr',
-                          e.target.value.replace(/[^\d]/g, ''),
+                          'duration',
+                          +e.target.value,
                         );
                       }}
-                      onBlur={() => commitDuration(index)}
+                      // onBlur={() => commitDuration(index)}
                       error={formData.zonePrograms[index].duration < 1}
                       helperText={
                         formData.zonePrograms[index].duration < 1

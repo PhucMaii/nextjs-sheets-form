@@ -27,7 +27,6 @@ export default function ZonePrograms({
       uid: crypto.randomUUID(),
       zoneId: availableZones[0].relay_id,
       duration: 30, // Default 30 seconds
-      durationStr: '30',
       index: formData.zonePrograms.length + 1,
     };
     setFormData((prev) => ({

@@ -1,7 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
-import { PrismaClient } from '@prisma/client';
 import { FLAG_ORDER_TYPE, ORDER_STATUS, USER_CATEGORIZED, USER_ROLE } from '@/app/utils/enum';
 import {
   checkOrderDeliveryDateValid,
@@ -14,6 +13,7 @@ import { createOrder } from '@/pages/api/admin/[companyId]/orders/POST';
 import { pusherServer } from '@/app/pusher';
 import { sendEmail } from '../utils/email';
 import { formatItemsWithTotalPrice } from '../utils/order';
+import prisma from '@/client';
 
 interface RequestQuery {
   userId?: string;
@@ -36,7 +36,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 
   try {
-    const prisma = new PrismaClient();
     const { userId } = req.query as RequestQuery;
     const {
       deliveryDate,
@@ -191,6 +190,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           id: newOrder.id,
           category: existingUser.category,
         });
+
+        return res.status(200).json({
+          message: 'Order Placed Successfully',
+        });
       } else {
 
         const lastOrderItems = userOrder.items.map((item: any) => {
@@ -259,20 +262,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           flag: FLAG_ORDER_TYPE.ALREADY_ORDER,
         });
       }
-
-      // }
-
-      // const itemsWithNo0 = items.filter((item: any) => item.quantity > 0);
-      // await overrideOrder(
-      //   existingUser,
-      //   userOrder.id,
-      //   itemsWithNo0,
-      //   note,
-      //   formattedCreatedBy,
-      // );
-      // return res.status(201).json({
-      //   message: 'Order Submitted Successfully',
-      // });
     }
 
     // await createOrder(existingUser, items, deliveryDate,

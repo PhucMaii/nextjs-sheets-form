@@ -150,8 +150,6 @@ export default function AddOrder({
       return;
     }
 
-    console.log(clientValue, 'CLIENT VALUE');
-
     if (!clientValue) {
       showNotification('error', 'Please select a client');
       return;
@@ -190,7 +188,6 @@ export default function AddOrder({
         onClose={() => setIsOpenConfirmModal(false)}
         handleSubmit={async () => {
           await addOrder(cachedOrder, true, true);
-          onClose();
         }}
         title="This client already order for selected date, are you sure to create new order?"
         showNotification={showNotification}
