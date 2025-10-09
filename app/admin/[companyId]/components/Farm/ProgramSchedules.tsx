@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -26,6 +26,7 @@ import {
 } from '@mui/icons-material';
 import {
   DragDropContext,
+  Draggable,
   Droppable,
   DropResult,
 } from '@hello-pangea/dnd';
@@ -52,7 +53,7 @@ type ViewType = 'month' | 'week' | 'day';
 
 interface ScheduleItem {
   id: string;
-  programId: string;
+  programId: number;
   date: Date;
   time: string;
   status: 'scheduled' | 'active' | 'finished' | 'cancelled';
@@ -90,64 +91,64 @@ interface ScheduleItem {
 //   },
 // ];
 
-const mockSchedules: ScheduleItem[] = [
-  {
-    id: 's1',
-    programId: '1',
-    date: new Date(2024, 1, 15),
-    time: '08:00',
-    status: 'scheduled',
-  },
-  {
-    id: 's2',
-    programId: '2',
-    date: new Date(2024, 1, 15),
-    time: '18:00',
-    status: 'active',
-  },
-  {
-    id: 's3',
-    programId: '3',
-    date: new Date(2024, 1, 16),
-    time: '10:00',
-    status: 'scheduled',
-  },
-  {
-    id: 's4',
-    programId: '4',
-    date: new Date(2024, 1, 16),
-    time: '14:00',
-    status: 'finished',
-  },
-  {
-    id: 's5',
-    programId: '1',
-    date: new Date(2024, 1, 20),
-    time: '09:00',
-    status: 'scheduled',
-  },
-  {
-    id: 's6',
-    programId: '3',
-    date: new Date(2024, 1, 22),
-    time: '11:00',
-    status: 'active',
-  },
-  {
-    id: 's7',
-    programId: '2',
-    date: new Date(2024, 1, 25),
-    time: '19:00',
-    status: 'scheduled',
-  },
-  {
-    id: 's8',
-    programId: '4',
-    date: new Date(2024, 1, 28),
-    time: '15:00',
-    status: 'finished',
-  },
-];
+// const mockSchedules: ScheduleItem[] = [
+//   {
+//     id: 's1',
+//     programId: '1',
+//     date: new Date(2024, 1, 15),
+//     time: '08:00',
+//     status: 'scheduled',
+//   },
+//   {
+//     id: 's2',
+//     programId: '2',
+//     date: new Date(2024, 1, 15),
+//     time: '18:00',
+//     status: 'active',
+//   },
+//   {
+//     id: 's3',
+//     programId: '3',
+//     date: new Date(2024, 1, 16),
+//     time: '10:00',
+//     status: 'scheduled',
+//   },
+//   {
+//     id: 's4',
+//     programId: '4',
+//     date: new Date(2024, 1, 16),
+//     time: '14:00',
+//     status: 'finished',
+//   },
+//   {
+//     id: 's5',
+//     programId: '1',
+//     date: new Date(2024, 1, 20),
+//     time: '09:00',
+//     status: 'scheduled',
+//   },
+//   {
+//     id: 's6',
+//     programId: '3',
+//     date: new Date(2024, 1, 22),
+//     time: '11:00',
+//     status: 'active',
+//   },
+//   {
+//     id: 's7',
+//     programId: '2',
+//     date: new Date(2024, 1, 25),
+//     time: '19:00',
+//     status: 'scheduled',
+//   },
+//   {
+//     id: 's8',
+//     programId: '4',
+//     date: new Date(2024, 1, 28),
+//     time: '15:00',
+//     status: 'finished',
+//   },
+// ];
 
 export default function ProgramSchedules() {
   const theme = useTheme();
@@ -155,13 +156,6 @@ export default function ProgramSchedules() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const { zones } = useHydrawiseAPI(companyId);
   const { getPrograms } = usePrograms(companyId);
-  console.log('zones', zones);
-
-  const [viewType, setViewType] = useState<ViewType>('month');
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [schedules, setSchedules] = useState<ScheduleItem[]>(mockSchedules);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [draggedProgram, setDraggedProgram] = useState<string | null>(null);
 
   const { data: programs } = useQuery({
     queryKey: ['programs'],
@@ -182,10 +176,22 @@ export default function ProgramSchedules() {
     enabled: zones.length > 0,
   });
 
-  console.log('programs', programs);
+  const [displayedPrograms, setDisplayedPrograms] = useState<Program[]>(programs || []);
+  const [viewType, setViewType] = useState<ViewType>('month');
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [schedules, setSchedules] = useState<ScheduleItem[]>([]);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [draggedProgram, setDraggedProgram] = useState<string | null>(null);
 
-  const getProgramById = (id: string) =>
-    programs?.find((p: Program) => p.id === id);
+
+  useEffect(() => {
+    if (programs) {
+      setDisplayedPrograms(programs || []);
+    }
+  }, [programs]);
+
+  const getProgramById = (id: string | number) =>
+    programs?.find((p: Program) => p.id === Number(id));
 
   const getSchedulesForDate = (date: Date) => {
     return schedules.filter((schedule) => isSameDay(schedule.date, date));
@@ -223,25 +229,41 @@ export default function ProgramSchedules() {
     }
   };
 
+  // const testOnDragEnd = (result: DropResult) => {
+  //   console.log('result', result);
+  //   if(!result.destination) return;
+
+  //   const items = Array.from(displayedPrograms || []);
+  //   const [reorderedItem] = items.splice(result.source.index, 1);
+  //   items.splice(result.destination.index, 0, reorderedItem);
+
+  //   setDisplayedPrograms(items);
+  // };
+
   const handleDragEnd = (result: DropResult) => {
     setDraggedProgram(null);
 
     if (!result.destination) return;
 
+    console.log('result', result);
+
     const { droppableId } = result.destination;
     const [dateStr, time] = droppableId.split('|');
     const targetDate = new Date(dateStr);
+    console.log('targetDate', targetDate);
 
     if (result.source.droppableId.startsWith('program-')) {
       // Adding new schedule
-      const programId = result.source.droppableId.replace('program-', '');
+      const programId = result.draggableId.replace('program-', '');
       const newSchedule: ScheduleItem = {
         id: `s${Date.now()}`,
-        programId,
+        programId: Number(programId),
         date: targetDate,
         time: time || '09:00',
         status: 'scheduled',
       };
+
+      console.log('newSchedule', newSchedule);
       setSchedules((prev) => [...prev, newSchedule]);
     } else {
       // Moving existing schedule
@@ -256,6 +278,7 @@ export default function ProgramSchedules() {
     }
   };
 
+  console.log('schedules', schedules);
   const removeSchedule = (scheduleId: string) => {
     setSchedules((prev) => prev.filter((s) => s.id !== scheduleId));
   };
@@ -287,7 +310,8 @@ export default function ProgramSchedules() {
   };
 
   return (
-    <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+    <DragDropContext onDragEnd={handleDragEnd}>
+
       <Box sx={{ p: 3 }}>
         {/* Header */}
         <Paper
@@ -468,84 +492,96 @@ export default function ProgramSchedules() {
             />
           </Stack>
           <Stack direction="row" spacing={2} flexWrap="wrap">
-            {programs &&
-              programs.map((program: any) => (
-                <Droppable
-                  key={program.id}
-                  droppableId={`program-${program.id}`}
-                  isDropDisabled
-                >
-                  {(provided) => (
-                    <Paper
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                      elevation={0}
-                      sx={{
-                        p: 2,
-                        borderRadius: 2,
-                        border: `2px solid ${alpha(getProgramColor(program.id), 0.3)}`,
-                        backgroundColor: alpha(
-                          getProgramColor(program.id),
-                          0.1,
-                        ),
-                        minWidth: 220,
-                        cursor: 'grab',
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                        '&:hover': {
-                          transform: 'translateY(-2px)',
-                          boxShadow: `0 4px 12px ${alpha(getProgramColor(program.id), 0.3)}`,
-                          borderColor: getProgramColor(program.id),
-                          backgroundColor: alpha(
-                            getProgramColor(program.id),
-                            0.15,
-                          ),
-                        },
-                        '&:active': {
-                          cursor: 'grabbing',
-                          transform: 'translateY(0px)',
-                        },
-                      }}
-                    >
-                      <Stack direction="row" alignItems="center" spacing={2}>
-                        <Avatar
-                          sx={{
-                            backgroundColor: alpha(
-                              getProgramColor(program.id),
-                              0.2,
-                            ),
-                            color: getProgramColor(program.id),
-                            border: `2px solid ${alpha(getProgramColor(program.id), 0.3)}`,
-                          }}
-                        >
-                          <WaterIcon />
-                        </Avatar>
-                        <Box flex={1}>
-                          <Typography
-                            variant="body1"
-                            fontWeight={600}
-                            color={getProgramColor(program.id)}
+
+            <Droppable droppableId="program-list">
+              {(provided) => (
+                <Box {...provided.droppableProps} ref={provided.innerRef} sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 1 }}>
+                  {programs &&
+                    displayedPrograms.map((program: any, index: number) => (
+                      <Draggable
+                        key={program.id}
+                        draggableId={`program-${program.id}`}
+                        index={index}
+                        // isDragDisabled
+                      >
+                        {(provided) => (
+                          <Paper
+                            ref={provided.innerRef}
+                            {...provided.dragHandleProps}
+                            {...provided.draggableProps}
+                            elevation={0}
+                            sx={{
+                              p: 2,
+                              borderRadius: 2,
+                              border: `2px solid ${alpha(getProgramColor(program.id), 0.3)}`,
+                              backgroundColor: alpha(
+                                getProgramColor(program.id),
+                                0.1,
+                              ),
+                              minWidth: 220,
+                              cursor: 'grab',
+                              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                              '&:hover': {
+                                transform: 'translateY(-2px)',
+                                boxShadow: `0 4px 12px ${alpha(getProgramColor(program.id), 0.3)}`,
+                                borderColor: getProgramColor(program.id),
+                                backgroundColor: alpha(
+                                  getProgramColor(program.id),
+                                  0.15,
+                                ),
+                              },
+                              '&:active': {
+                                cursor: 'grabbing',
+                                transform: 'translateY(0px)',
+                              },
+                            }}
                           >
-                            {program.name}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {program.zoneWaterPrograms.length} zones
-                          </Typography>
-                        </Box>
-                        <Box
-                          sx={{
-                            width: 8,
-                            height: 8,
-                            borderRadius: '50%',
-                            backgroundColor: getProgramColor(program.id),
-                            opacity: 0.6,
-                          }}
-                        />
-                      </Stack>
-                      {provided.placeholder}
-                    </Paper>
-                  )}
-                </Droppable>
-              ))}
+                            <Stack direction="row" alignItems="center" spacing={2}>
+                              <Avatar
+                                sx={{
+                                  backgroundColor: alpha(
+                                    getProgramColor(program.id),
+                                    0.2,
+                                  ),
+                                  color: getProgramColor(program.id),
+                                  border: `2px solid ${alpha(getProgramColor(program.id), 0.3)}`,
+                                }}
+                              >
+                                <WaterIcon />
+                              </Avatar>
+                              <Box flex={1}>
+                                <Typography
+                                  variant="body1" 
+                                  fontWeight={600}
+                                  color={getProgramColor(program.id)}
+                                >
+                                  {program.name}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  {program.zoneWaterPrograms.length} zones
+                                </Typography>
+                              </Box>
+                              <Box
+                                sx={{
+                                  width: 8,
+                                  height: 8,
+                                  borderRadius: '50%',
+                                  backgroundColor: getProgramColor(program.id),
+                                  opacity: 0.6,
+                                }}
+                              />
+                            </Stack>
+                            {/* {provided.placeholder} */}
+                          </Paper>
+                        )}
+                      </Draggable>
+                    ))}
+                  {provided.placeholder}
+                </Box>
+              )}
+              
+            </Droppable>
+
           </Stack>
         </Paper>
 

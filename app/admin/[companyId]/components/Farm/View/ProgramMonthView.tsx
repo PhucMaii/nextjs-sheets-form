@@ -73,6 +73,7 @@ const ProgramMonthView = ({
               .slice(weekIndex * 7, (weekIndex + 1) * 7)
               .map((day, dayIndex) => {
                 const daySchedules = getSchedulesForDate(day);
+                console.log('daySchedules', daySchedules);
                 const isCurrentMonth = isSameMonth(day, currentDate);
                 const isCurrentDay = isToday(day);
                 const isWeekendDay = isWeekend(day);

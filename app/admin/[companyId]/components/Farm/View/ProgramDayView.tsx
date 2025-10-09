@@ -120,7 +120,7 @@ const ProgramDayView = ({
                                   elevation={0}
                                   sx={{
                                     minWidth: 200,
-                                    border: `1px solid ${alpha(program.color, 0.3)}`,
+                                    border: `1px solid ${alpha(getProgramColor(program.id), 0.3)}`,
                                     borderRadius: 2,
                                     opacity: snapshot.isDragging ? 0.5 : 1,
                                   }}
@@ -141,7 +141,7 @@ const ProgramDayView = ({
                                             getProgramColor(program.id),
                                             0.2,
                                           ),
-                                          color: program.color,
+                                          color: getProgramColor(program.id),
                                         }}
                                       >
                                         <WaterIcon fontSize="small" />
@@ -157,8 +157,8 @@ const ProgramDayView = ({
                                           variant="caption"
                                           color="text.secondary"
                                         >
-                                          {program.duration} min •{' '}
-                                          {program.zones.join(', ')}
+                                          {program.duration} sec •{' '}
+                                          {program.zoneWaterPrograms.map((zoneWaterProgram: any) => zoneWaterProgram.hydrawiseZone.name).join(', ')}
                                         </Typography>
                                       </Box>
                                       <Stack direction="row" spacing={0.5}>
