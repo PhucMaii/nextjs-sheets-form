@@ -19,7 +19,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                     zoneWaterPrograms: {
                         include: {
                             zoneProgram: true,
-                        }
+                        },
+                        orderBy: {
+                            zoneProgram: {
+                                index: 'asc',
+                            },
+                        },
                     },
                 }
             });
@@ -35,7 +40,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                 zoneWaterPrograms: {
                     include: {
                         zoneProgram: true,
-                    }
+                    },
+                    orderBy: {
+                        zoneProgram: {
+                            index: 'asc',
+                        },
+                    },
                 },
             }
         });

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Draggable } from '@hello-pangea/dnd';
 import {
   Card,
@@ -16,6 +16,7 @@ import {
 import { DragIndicator as DragIcon } from '@mui/icons-material';
 import { ZoneProgram } from './types';
 import { Delete as DeleteIcon } from '@mui/icons-material';
+import { formatDuration } from '@/app/utils/time';
 
 function ZoneProgramCard({
   zoneProgram,
@@ -30,18 +31,14 @@ function ZoneProgramCard({
   setFormData: any;
   formData: any;
 }) {
-  const [durationHelperText, setDurationHelperText] = useState<string>('');
+  const [durationHelperText, setDurationHelperText] = useState<string>(
+    `Duration: ${formatDuration(zoneProgram.duration)}`,
+  );
   const selectedZone = useMemo(
     () =>
       availableZones.find((zone: any) => zone.relay_id === zoneProgram.zoneId),
     [availableZones, zoneProgram.zoneId],
   );
-
-  const formatDuration = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
 
   const removeZoneProgram = (index: number) => {
     setFormData((prev: any) => ({
@@ -78,8 +75,8 @@ function ZoneProgramCard({
 
   return (
     <Draggable
-      key={zoneProgram.uid}
-      draggableId={zoneProgram.uid || ''}
+      key={zoneProgram.id}
+      draggableId={zoneProgram.id?.toString() || ''}
       index={index}
     >
       {(provided: any, snapshot: any) => (
@@ -146,11 +143,7 @@ function ZoneProgramCard({
                         setDurationHelperText(
                           `Duration: ${formatDuration(parseInt(e.target.value))}`,
                         );
-                        updateZoneProgram(
-                          index,
-                          'duration',
-                          +e.target.value,
-                        );
+                        updateZoneProgram(index, 'duration', +e.target.value);
                       }}
                       // onBlur={() => commitDuration(index)}
                       error={formData.zonePrograms[index].duration < 1}

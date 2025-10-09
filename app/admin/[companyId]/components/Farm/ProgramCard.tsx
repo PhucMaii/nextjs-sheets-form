@@ -339,6 +339,24 @@ const ProgramCard = ({ program, setPrograms, zones }: ProgramCardProps) => {
               ))}
             </Stack>
           </Box>
+
+          {/* <Box display="flex" justifyContent="flex-end">
+            <Tooltip title="Delete Program">
+              <IconButton
+                size="small"
+                onClick={() => handleDeleteProgram(program.id)}
+                sx={{
+                  backgroundColor: alpha(theme.palette.error.main, 0.1),
+                  color: theme.palette.error.main,
+                  '&:hover': {
+                    backgroundColor: alpha(theme.palette.error.main, 0.2),
+                  },
+                }}
+              >
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box> */}
         </CardContent>
       </Paper>
     </Fade>

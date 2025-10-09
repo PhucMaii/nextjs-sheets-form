@@ -2,6 +2,7 @@ import React, { Dispatch, SetStateAction, useMemo } from 'react';
 import { Paper, Typography, Divider, Box, TextField } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { CreateProgramForm } from '../../farm/program/create/page';
+import { formatDuration } from '@/app/utils/time';
 
 interface ProgramInfoProps {
   formData: CreateProgramForm;
@@ -15,12 +16,6 @@ const ProgramInfo = ({ formData, setFormData }: ProgramInfoProps) => {
     (total, zoneProgram) => total + zoneProgram.duration,
     0,
   ), [formData.zonePrograms]);
-
-  const formatDuration = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
 
   return (
     <Paper

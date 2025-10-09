@@ -17,7 +17,7 @@ export interface ZoneWater {
 }
 
 export interface ZoneProgram {
-  uid?: string;
+  id?: string | number;
   zoneId: string | number;
   duration: number;
   durationStr?: string;

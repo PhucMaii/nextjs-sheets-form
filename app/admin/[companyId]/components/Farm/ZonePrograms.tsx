@@ -24,7 +24,7 @@ export default function ZonePrograms({
 
   const addZoneProgram = () => {
     const newZoneProgram: ZoneProgram = {
-      uid: crypto.randomUUID(),
+      id: crypto.randomUUID(),
       zoneId: availableZones[0].relay_id,
       duration: 30, // Default 30 seconds
       index: formData.zonePrograms.length + 1,
@@ -111,7 +111,7 @@ export default function ZonePrograms({
               <Box {...provided.droppableProps} ref={provided.innerRef}>
                 {formData.zonePrograms.map((zoneProgram, index) => (
                   <ZoneProgramCard
-                    key={zoneProgram.uid}
+                    key={zoneProgram.id}
                     zoneProgram={zoneProgram}
                     index={index}
                     availableZones={availableZones}
