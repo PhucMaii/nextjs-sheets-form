@@ -4,6 +4,7 @@ import Sidebar from '../components/Sidebar/Sidebar'
 import { Tab, Tabs, Typography } from '@mui/material'
 import { blueGrey } from '@mui/material/colors'
 import Programs from '../components/Farm/Programs';
+import ProgramSchedules from '../components/Farm/ProgramSchedules';
 
 export default function Farm() {
   const [tab, setTab] = useState('programs');
@@ -19,6 +20,7 @@ export default function Farm() {
       </Tabs>
 
       {tab === 'programs' && <Programs />}
+      {tab === 'schedules' && <ProgramSchedules />}
     </Sidebar>
   )
 }

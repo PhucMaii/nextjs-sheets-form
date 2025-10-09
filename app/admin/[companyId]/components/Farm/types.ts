@@ -22,6 +22,7 @@ export interface ZoneProgram {
   duration: number;
   durationStr?: string;
   index: number;
+  hydrawiseZone?: any;
 }
 
 export interface CreateProgramData {
