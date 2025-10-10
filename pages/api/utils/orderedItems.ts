@@ -212,33 +212,6 @@ export const createOrderedItems = async (
         },
       });
 
-      // const unitRatioOf1 = targetedItem.vendorItem[0].unit.find((unit) => {
-      //   return unit.ratio === 1;
-      // });
-
-      // Because there is no batch, calculate profit based on unitPrice
-      newOrderedItems.push({
-        orderId: order.id,
-        fifoId: newFifo.id,
-        // optionId: item?.optionId || null,
-        option: {
-          name: item?.option?.name || '',
-          price: item?.option?.price || 0,
-          ratio: itemUnit?.ratio || 1,
-          prevPrice: item?.option?.prevPrice,
-          isShowDiscount: item?.option?.isShowDiscount,
-        },
-        cost: itemUnit?.unitPrice || 0,
-        profit: item.price - (itemUnit?.unitPrice || 0),
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity,
-        inventoryUnitId: unitId,
-        inventoryItemId: item.inventoryItemId,
-        isCustomAmount: item?.isCustomAmount || false,
-        companyId,
-      });
-
       if (isValidToCheckInventory) {
         // Subtract related internal item
         await subtractRelatedInternalItem(item.inventoryItemId, item.quantity);
