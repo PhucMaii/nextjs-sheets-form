@@ -56,6 +56,9 @@ model Company {
   expenseTypes      ExpenseType[]
   automationRules   AutomationRules[]
   inventoryLogs     InventoryLog[]
+  waterPrograms     WaterProgram[]
+  zonePrograms      ZoneProgram[]
+  programSchedules  ProgramSchedule[]
 }
 
 model PageView {
@@ -715,6 +718,7 @@ model InventoryItem {
   promotionId     Int?
   promoIndexPos   Int?
   companyId       Int?
+  isShowQuantity  Boolean?
   isShowInventory Boolean?
   isInternal      Boolean?
 
@@ -1169,6 +1173,63 @@ model Media {
   @@index([expenseId])
 }
 
+model ZoneProgram {
+  id         Int  @id @default(autoincrement())
+  zoneId     Int
+  duration   Int
+  index      Int
+  createdAt  String
+  createdBy  String
+  companyId  Int
+
+  zoneWaterPrograms  ZoneWater[]
+
+  company       Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model WaterProgram {
+  id                  Int   @id  @default(autoincrement())
+  name                String
+  days                Int
+  remainingDays       Int?
+  isActive            Boolean     @default(false)
+  createdAt           String
+  createdBy           String
+  companyId           Int
+
+  zoneWaterPrograms   ZoneWater[]
+  ProgramSchedules    ProgramSchedule[]
+
+  company             Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model ZoneWater {
+  id              Int      @id  @default(autoincrement())
+  zoneProgramId   Int
+  waterId         Int
+
+  zoneProgram     ZoneProgram    @relation(fields: [zoneProgramId], references: [id], onDelete: Cascade)
+  WaterProgram    WaterProgram   @relation(fields: [waterId], references: [id], onDelete: Cascade)
+
+  @@index([zoneProgramId])
+  @@index([waterId])          
+}
+
+model ProgramSchedule {
+  id              Int   @id   @default(autoincrement())
+  programId       Int
+  status          WaterStatus
+  date            String
+  time            String
+  createdAt       String
+  createdBy       String
+  companyId       Int
+
+  company         Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  waterProgram    WaterProgram    @relation(fields: [programId], references: [id], onDelete: Cascade)
+}
+
+
 enum QuoteStatus {
   DRAFT
   SENT
@@ -1222,4 +1283,10 @@ enum InventoryLogFrom {
 enum DashboardMode {
   auto
   driver
+}
+
+enum WaterStatus {
+  SCHEDULED
+  ACTIVE
+  FINISHED
 }

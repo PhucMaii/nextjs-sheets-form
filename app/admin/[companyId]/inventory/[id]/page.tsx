@@ -40,6 +40,7 @@ const InventoryDetail = () => {
         hasPST: newInventoryItem.hasPST,
         hasGST: newInventoryItem.hasGST,
         isShowInventory: newInventoryItem.isShowInventory,
+        isShowQuantity: newInventoryItem.isShowQuantity,
         isInternal: newInventoryItem?.isInternal,
         typeId: newInventoryItem.typeId,
         image: newInventoryItem?.image || '',

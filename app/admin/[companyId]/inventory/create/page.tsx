@@ -41,6 +41,7 @@ export default function CreateInventoryPage() {
           hasGST: newInventoryItem.hasGST,
           hasPST: newInventoryItem.hasPST,
           isShowInventory: newInventoryItem.isShowInventory,
+          isShowQuantity: newInventoryItem.isShowQuantity,
           isInternal: newInventoryItem?.isInternal,
           vendorItems: selectedVendors,
           sellingItems,
