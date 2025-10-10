@@ -19,6 +19,7 @@ interface IBody {
   vendorItems: any[];
   updatedSellingItems: any[];
   isShowInventory?: boolean;
+  isShowQuantity?: boolean;
   isInternal?: boolean;
   typeId: number;
   image: string;
@@ -45,6 +46,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       vendorItems,
       updatedSellingItems,
       isShowInventory,
+      isShowQuantity,
       // updatedSingleSellingItem,
       isInternal,
       typeId,
@@ -103,13 +105,17 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    if (existingInventoryItem?.isShowInventory !== isShowInventory) {
+    if (
+      existingInventoryItem?.isShowInventory !== isShowInventory ||
+      existingInventoryItem?.isShowQuantity !== isShowQuantity
+    ) {
       await prisma.inventoryItem.update({
         where: {
           id,
         },
         data: {
           isShowInventory,
+          isShowQuantity,
         },
       });
     }
@@ -437,7 +443,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           existingRule.relationalQty !== rule.relationalQty ||
           existingRule.frequency !== rule.frequency ||
           existingRule.isActive !== rule.isActive ||
-          existingRule.dependentInventoryItemId !== rule.dependentInventoryItemId
+          existingRule.dependentInventoryItemId !==
+            rule.dependentInventoryItemId
         ) {
           return true;
         }

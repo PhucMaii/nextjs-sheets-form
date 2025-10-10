@@ -718,6 +718,7 @@ model InventoryItem {
   promotionId     Int?
   promoIndexPos   Int?
   companyId       Int?
+  isShowQuantity  Boolean?
   isShowInventory Boolean?
   isInternal      Boolean?
 

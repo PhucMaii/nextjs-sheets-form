@@ -16,6 +16,7 @@ interface IBody {
   hasPST: boolean;
   hasGST: boolean;
   isShowInventory: boolean;
+  isShowQuantity?: boolean;
   vendorItems: any[];
   sellingItems?: any[];
   isInternal?: boolean;
@@ -39,6 +40,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       hasPST,
       hasGST,
       isShowInventory,
+      isShowQuantity,
       vendorItems,
       sellingItems,
       isInternal,
@@ -107,6 +109,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         hasPST,
         hasGST,
         isShowInventory,
+        isShowQuantity,
         image,
         createdAt,
         createdBy,

@@ -115,6 +115,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       existingOrder.deliveryDate,
     );
 
+    console.log({ newItems }, 'newItems');
     for (const item of newItems) {
       // Check item categorize to create, update or delete
 

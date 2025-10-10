@@ -33,7 +33,7 @@ export default function HolidayText() {
             All Eggs
           </strong>{' '} price will be <br />
           increased by next week */}
-          We are currently shortage of Basil. Please note that your Basil order may not be fulfilled today.
+          We've been working hard to improve our homegrown bean sprouts! This new batch is fresher and crunchier than ever! Please give it a try. $1 OFF for 10 lbs today.
         </Typography>
         <Typography sx={{ color: 'white', textAlign: 'center' }}>
           We truly appreciate <br /> your support and understanding! 💚

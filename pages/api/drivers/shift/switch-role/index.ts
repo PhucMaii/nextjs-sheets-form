@@ -5,12 +5,11 @@ import {
   convertDeliveryDateStringToDate,
   getTodayDate,
 } from '@/pages/api/utils/date';
-import { PayrollType, PrismaClient, Route } from '@prisma/client';
+import { PayrollType, Route } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { calculateHours } from '../clock-out';
 import withDriverAuthGuard from '@/pages/api/utils/withDriverAuthGuar';
-
-const prisma = new PrismaClient();
+import prisma from '@/client';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -50,7 +49,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       const shiftSession = await prisma.shiftSession.create({
         data: {
-          driverId: driver.id,
           employeeId: driver.id,
           date: today.date,
           startedAt: today.dateAndTime,

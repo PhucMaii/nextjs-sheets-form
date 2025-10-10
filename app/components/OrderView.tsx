@@ -185,7 +185,11 @@ export const ItemButton = ({
 
     const highestDiscountPercent: any = item?.options
       ?.map((option) => {
-        if (option?.prevPrice && option?.prevPrice > 0 && option?.isShowDiscount) {
+        if (
+          option?.prevPrice &&
+          option?.prevPrice > 0 &&
+          option?.isShowDiscount
+        ) {
           return (1 - option.price / option.prevPrice) * 100;
         } else {
           return null;
@@ -219,10 +223,11 @@ export const ItemButton = ({
       ref={ref}
       disabled={isDisabled}
     >
-      {item.inventoryItem?.isShowInventory &&
-      item?.qtyLeft &&
-      item?.qtyLeft > 0 &&
-      item?.qtyLeft <= 3 ? (
+      {(item.inventoryItem?.isShowQuantity && item?.qtyLeft && item?.qtyLeft > 0) ||
+      (item.inventoryItem?.isShowInventory &&
+        item?.qtyLeft &&
+        item?.qtyLeft > 0 &&
+        item?.qtyLeft <= 3) ? (
         <Box
           sx={{
             position: 'absolute',
@@ -394,16 +399,17 @@ export const ItemButton = ({
                   : `$${item.price?.toFixed(2) || 'N/A'}`}
               </Typography>
               {(!item.options || item.options.length === 0) &&
-                item.isShowDiscount &&
-                item.prevPrice && item.prevPrice > 0 ? (
-                  <Typography
-                    fontWeight="bold"
-                    sx={{ textDecoration: 'line-through' }}
-                    color="error"
-                  >
-                    ${item.prevPrice.toFixed(2)}
-                  </Typography>
-                ) : null}
+              item.isShowDiscount &&
+              item.prevPrice &&
+              item.prevPrice > 0 ? (
+                <Typography
+                  fontWeight="bold"
+                  sx={{ textDecoration: 'line-through' }}
+                  color="error"
+                >
+                  ${item.prevPrice.toFixed(2)}
+                </Typography>
+              ) : null}
             </>
           ) : (
             <Typography fontWeight="bold" sx={{ textTransform: 'none' }}>
@@ -564,7 +570,8 @@ const OrderView = ({
   const orderDiscount = useMemo(() => {
     if (!orderedItems || orderedItems.length === 0) return 0;
     const discountItems = orderedItems.filter(
-      (item: any) => item.isShowDiscount && item.prevPrice && item.prevPrice > 0,
+      (item: any) =>
+        item.isShowDiscount && item.prevPrice && item.prevPrice > 0,
     );
     const discount = discountItems.reduce((acc: number, item: any) => {
       return acc + (item.prevPrice - item.price) * item.quantity;
@@ -1198,17 +1205,18 @@ const OrderView = ({
                       <Typography>${item.price.toFixed(2)}</Typography>
                     )}
 
-                    {(item?.option?.isShowDiscount || item.isShowDiscount) && (item?.option?.prevPrice > 0 || item.prevPrice > 0) && (
-                      <Typography
-                        // fontWeight="bold"
-                        sx={{ textDecoration: 'line-through' }}
-                        color="error"
-                      >
-                        $
-                        {item?.option?.prevPrice?.toFixed(2) ||
-                          item.prevPrice.toFixed(2)}
-                      </Typography>
-                    )}
+                    {(item?.option?.isShowDiscount || item.isShowDiscount) &&
+                      (item?.option?.prevPrice > 0 || item.prevPrice > 0) && (
+                        <Typography
+                          // fontWeight="bold"
+                          sx={{ textDecoration: 'line-through' }}
+                          color="error"
+                        >
+                          $
+                          {item?.option?.prevPrice?.toFixed(2) ||
+                            item.prevPrice.toFixed(2)}
+                        </Typography>
+                      )}
                   </Box>
                   <Box
                     display="flex"

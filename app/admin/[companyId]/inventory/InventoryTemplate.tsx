@@ -869,6 +869,22 @@ const InventoryTemplate = ({
               disabled={newInventoryItem?.isInternal}
               label="Show Low Stock Quantity"
             />
+
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={newInventoryItem?.isShowQuantity || false}
+                  onChange={(e) =>
+                    setNewInventoryItem((prev: any) => ({
+                      ...prev,
+                      isShowQuantity: e.target.checked,
+                    }))
+                  }
+                />
+              }
+              disabled={newInventoryItem?.isInternal}
+              label="Show Quantity"
+            />
           </Grid>
           <Grid
             item

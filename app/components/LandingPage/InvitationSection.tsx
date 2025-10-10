@@ -18,7 +18,7 @@ export default function InvitationSection() {
         gap={2}
         p={4}
         sx={{
-          minHeight: '500px',
+          minHeight: '600px',
           position: 'relative',
 
           ':before': {
@@ -28,7 +28,7 @@ export default function InvitationSection() {
             left: 0,
             width: '100%',
             height: '100%',
-            backgroundImage: 'url("/images/invitation/spring-rolls.jpeg")',
+            backgroundImage: 'url("/images/invitation/gpt-beansprouts.png")',
             backgroundSize: 'cover',
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'center',
