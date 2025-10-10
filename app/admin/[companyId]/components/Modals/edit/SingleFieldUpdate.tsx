@@ -6,7 +6,7 @@ import {
   Select,
   Typography,
 } from '@mui/material';
-import React, { memo, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import { BoxModal } from '../styled';
 import { LoadingButton } from '@mui/lab';
 
@@ -19,6 +19,7 @@ export interface SingleFieldUpdateProps {
   onClose?: any;
   updatedField: string;
   renderField?: string;
+  defaultValue?: any;
 }
 
 const SingleFieldUpdate = ({
@@ -30,9 +31,22 @@ const SingleFieldUpdate = ({
   label,
   updatedField,
   renderField,
+  defaultValue,
 }: SingleFieldUpdateProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [value, setValue] = useState<any>('');
+
+  useEffect(() => {
+    if (!open) {
+      setValue('');
+    }
+  }, [open]);
+ 
+  useEffect(() => {
+    if (defaultValue && open) {
+      setValue(defaultValue);
+    }
+  }, [defaultValue, open]);
 
   const handleSavingUpdate = async () => {
     if (!handleUpdate) {

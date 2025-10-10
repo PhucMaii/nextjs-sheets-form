@@ -48,6 +48,7 @@ import { useHydrawiseAPI } from '@/hooks/useHydrawiseAPI';
 import ProgramMonthView from './View/ProgramMonthView';
 import ProgramWeekView from './View/ProgramWeekView';
 import ProgramDayView from './View/ProgramDayView';
+import TimeInputModal from '../Modals/edit/SingleFieldUpdate';
 
 type ViewType = 'month' | 'week' | 'day';
 
@@ -58,6 +59,8 @@ interface ScheduleItem {
   time: string;
   status: 'scheduled' | 'active' | 'finished' | 'cancelled';
 }
+
+const defaultTime = '09:00';
 
 export default function ProgramSchedules() {
   const theme = useTheme();
@@ -93,6 +96,21 @@ export default function ProgramSchedules() {
   const [schedules, setSchedules] = useState<ScheduleItem[]>([]);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [draggedProgram, setDraggedProgram] = useState<string | null>(null);
+  const [isTimeInputModalOpen, setIsTimeInputModalOpen] = useState<{
+    open: boolean;
+    targetId: string | null;
+  }>({
+    open: false,
+    targetId: null,
+  });
+
+  const times = Array.from({ length: 96 }, (_, i) => {
+    const time = `${Math.floor(i / 4) < 10 ? '0' + Math.floor(i / 4) : Math.floor(i / 4)}:${(i % 4) * 15 === 0 ? '00' : (i % 4) * 15}`;
+    return {
+      id: time,
+      time: time,
+    };
+  });
 
   useEffect(() => {
     if (programs) {
@@ -160,21 +178,30 @@ export default function ProgramSchedules() {
     const [dateStr, time] = droppableId.split('|');
     const targetDate = new Date(dateStr);
 
+    let scheduleId: any = null;
+
     if (result.source.droppableId.startsWith('program-')) {
       // Adding new schedule
+      scheduleId = `s${Date.now()}`;
       const programId = result.draggableId.replace('program-', '');
       const newSchedule: ScheduleItem = {
-        id: `s${Date.now()}`,
+        id: scheduleId,
         programId: Number(programId),
         date: targetDate,
-        time: time || '09:00',
+        time: time || defaultTime,
         status: 'scheduled',
       };
 
       setSchedules((prev) => [...prev, newSchedule]);
+
+      // Only ask for time if the schedule is new
+      setIsTimeInputModalOpen({
+        open: true,
+        targetId: scheduleId,
+      });
     } else {
       // Moving existing schedule
-      const scheduleId = result.draggableId;
+      scheduleId = result.draggableId;
       setSchedules((prev) =>
         prev.map((schedule) =>
           schedule.id === scheduleId
@@ -216,8 +243,32 @@ export default function ProgramSchedules() {
     }
   };
 
+  const handleUpdateTime = (id: string | number, value: any) => {
+    setSchedules((prev) =>
+      prev.map((schedule) =>
+        schedule.id === id ? { ...schedule, time: value } : schedule,
+      ),
+    );
+  };
+
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
+      <TimeInputModal
+        open={isTimeInputModalOpen.open}
+        onClose={() =>
+          setIsTimeInputModalOpen({
+            open: false,
+            targetId: null,
+          })
+        }
+        updatedField={isTimeInputModalOpen.targetId || ''}
+        title="Edit Time"
+        label="Time"
+        menuList={times}
+        renderField={'time'}
+        defaultValue={defaultTime}
+        handleUpdate={handleUpdateTime as any}
+      />
       <Box sx={{ p: 3 }}>
         {/* Header */}
         <Paper

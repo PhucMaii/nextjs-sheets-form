@@ -199,14 +199,6 @@ const InventoryTable = ({
               >
                 Bulk Edit
               </Button>
-              {/* <Button
-                variant="outlined"
-                color="error"
-                size="small"
-                sx={{ textTransform: 'none' }}
-              >
-                Delete Selected
-              </Button> */}
             </Box>
           )}
         </Box>

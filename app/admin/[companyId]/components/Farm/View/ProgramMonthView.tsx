@@ -1,11 +1,9 @@
-import { alpha, Box, Stack, Typography, useTheme } from '@mui/material';
-import { useState } from 'react';
+import { alpha, Box, Stack, Typography } from '@mui/material';
 import {
   format,
   isSameMonth,
   isToday,
   isWeekend,
-  addDays,
   endOfMonth,
   startOfMonth,
   startOfWeek,
@@ -73,7 +71,6 @@ const ProgramMonthView = ({
               .slice(weekIndex * 7, (weekIndex + 1) * 7)
               .map((day, dayIndex) => {
                 const daySchedules = getSchedulesForDate(day);
-                console.log('daySchedules', daySchedules);
                 const isCurrentMonth = isSameMonth(day, currentDate);
                 const isCurrentDay = isToday(day);
                 const isWeekendDay = isWeekend(day);
