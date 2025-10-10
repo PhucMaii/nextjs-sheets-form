@@ -15,7 +15,6 @@ import {
   CalendarMonth as CalendarMonthIcon,
   ViewWeek as ViewWeekIcon,
   Today as TodayIcon,
-  Add as AddIcon,
   PlayArrow as PlayIcon,
   Pause as PauseIcon,
   Water as WaterIcon,
@@ -39,6 +38,10 @@ import {
   endOfWeek,
   addDays,
   subDays,
+  startOfMonth,
+  endOfMonth,
+  endOfDay,
+  startOfDay,
 } from 'date-fns';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
@@ -49,20 +52,30 @@ import ProgramMonthView from './View/ProgramMonthView';
 import ProgramWeekView from './View/ProgramWeekView';
 import ProgramDayView from './View/ProgramDayView';
 import TimeInputModal from '../Modals/edit/SingleFieldUpdate';
+import axios from 'axios';
+import { getAdminApiUrl } from '@/app/utils/enum';
+import { ShowNotificationType } from '@/hooks/useNotification';
+import { WaterStatus } from '@prisma/client';
+import { LoadingButton } from '@mui/lab';
+import { times } from '@/app/lib/constant';
 
 type ViewType = 'month' | 'week' | 'day';
 
 interface ScheduleItem {
   id: string;
   programId: number;
-  date: Date;
+  date: string;
   time: string;
-  status: 'scheduled' | 'active' | 'finished' | 'cancelled';
+  status: WaterStatus;
 }
 
-const defaultTime = '09:00';
+export const defaultScheduleTime = '09:00';
 
-export default function ProgramSchedules() {
+interface IProps {
+  showNotification: ShowNotificationType;
+}
+
+export default function ProgramSchedules({ showNotification }: IProps) {
   const theme = useTheme();
   const { companyId }: any = useParams();
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -92,10 +105,9 @@ export default function ProgramSchedules() {
     programs || [],
   );
   const [viewType, setViewType] = useState<ViewType>('month');
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [schedules, setSchedules] = useState<ScheduleItem[]>([]);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [draggedProgram, setDraggedProgram] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isTimeInputModalOpen, setIsTimeInputModalOpen] = useState<{
     open: boolean;
     targetId: string | null;
@@ -104,12 +116,18 @@ export default function ProgramSchedules() {
     targetId: null,
   });
 
-  const times = Array.from({ length: 96 }, (_, i) => {
-    const time = `${Math.floor(i / 4) < 10 ? '0' + Math.floor(i / 4) : Math.floor(i / 4)}:${(i % 4) * 15 === 0 ? '00' : (i % 4) * 15}`;
-    return {
-      id: time,
-      time: time,
-    };
+  const { data: dbSchedules, refetch: refetchSchedules } = useQuery({
+    queryKey: ['schedules'],
+    queryFn: async () => {
+      const { startDate, endDate } = getStartAndEndDate();
+      const data = await axios.get(
+        getAdminApiUrl(
+          companyId,
+          `/water-program/schedule?startDate=${startDate}&endDate=${endDate}`,
+        ),
+      );
+      return data.data.data;
+    },
   });
 
   useEffect(() => {
@@ -118,16 +136,23 @@ export default function ProgramSchedules() {
     }
   }, [programs]);
 
-  const sortedSchedules = useMemo(
-    () =>
-      schedules.sort((a, b) => {
-        return (
-          new Date(`${format(a.date, 'yyyy-MM-dd')} ${a.time}`).getTime() -
-          new Date(`${format(b.date, 'yyyy-MM-dd')} ${b.time}`).getTime()
-        );
-      }),
-    [schedules],
-  );
+  useEffect(() => {
+    if (dbSchedules) {
+      const formattedSchedules = dbSchedules.map((schedule: any) => ({
+        ...schedule,
+        id: schedule.id.toString(),
+      }));
+      setSchedules(formattedSchedules || []);
+    }
+  }, [dbSchedules]);
+
+const sortedSchedules = useMemo(() => {
+  return [...schedules].sort((a, b) => {
+    const aDate = new Date(`${a.date} ${a.time}`);
+    const bDate = new Date(`${b.date} ${b.time}`);
+    return aDate.getTime() - bDate.getTime();
+  });
+}, [schedules]);
 
   const getProgramById = (id: string | number) =>
     programs?.find((p: Program) => p.id === Number(id));
@@ -147,24 +172,49 @@ export default function ProgramSchedules() {
     return program?.zoneWaterPrograms.length > 10 ? '#4CAF50' : '#2196F3';
   };
 
-  // const getProgramZones = (id: string) => {
-  //   const program = getProgramById(id);
-  //   return program?.zoneWaterPrograms.map((zone: ZoneProgram) => {
-  //     console.log('zone', zone);
-  //     return zone?.hydrawiseZone?.name
-  //   }).join(', ');
-  // };
+  const getStartAndEndDate = () => {
+    if (viewType === 'month') {
+      const startDate = startOfMonth(currentDate);
+      const endDate = endOfMonth(currentDate);
+      return { startDate, endDate };
+    } else if (viewType === 'week') {
+      const startDate = startOfWeek(currentDate);
+      const endDate = endOfWeek(currentDate);
+      return { startDate, endDate };
+    } else if (viewType === 'day') {
+      const startDate = startOfDay(currentDate);
+      const endDate = endOfDay(currentDate);
+      return { startDate, endDate };
+    }
 
-  const handleDragStart = (result: any) => {
-    if (result.source.droppableId.startsWith('program-')) {
-      const programId = result.source.droppableId.replace('program-', '');
-      setDraggedProgram(programId);
-    } else {
-      const schedule = schedules.find((s) => s.id === result.draggableId);
-      if (schedule) {
-        const program = getProgramById(schedule.programId);
-        setDraggedProgram(program?.id || null);
+    return { startDate: new Date(), endDate: new Date() };
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      const { startDate, endDate } = getStartAndEndDate();
+      const response = await axios.put(
+        getAdminApiUrl(companyId, '/water-program/schedule'),
+        {
+          updatedSchedules: schedules,
+          startDate,
+          endDate,
+        },
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
       }
+
+      showNotification('success', response.data.message);
+      refetchSchedules();
+    } catch (error: any) {
+      console.log('Internal Server Error: ', error);
+      showNotification('error', 'Something went wrong: ' + error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -187,9 +237,9 @@ export default function ProgramSchedules() {
       const newSchedule: ScheduleItem = {
         id: scheduleId,
         programId: Number(programId),
-        date: targetDate,
-        time: time || defaultTime,
-        status: 'scheduled',
+        date: format(targetDate, 'MM/dd/yyyy'),
+        time: time || defaultScheduleTime,
+        status: WaterStatus.SCHEDULED,
       };
 
       setSchedules((prev) => [...prev, newSchedule]);
@@ -205,14 +255,17 @@ export default function ProgramSchedules() {
       setSchedules((prev) =>
         prev.map((schedule) =>
           schedule.id === scheduleId
-            ? { ...schedule, date: targetDate, time: time || schedule.time }
+            ? {
+                ...schedule,
+                date: format(targetDate, 'MM/dd/yyyy'),
+                time: time || schedule.time,
+              }
             : schedule,
         ),
       );
     }
   };
 
-  console.log('schedules', schedules);
   const removeSchedule = (scheduleId: string) => {
     setSchedules((prev) => prev.filter((s) => s.id !== scheduleId));
   };
@@ -223,7 +276,10 @@ export default function ProgramSchedules() {
         schedule.id === scheduleId
           ? {
               ...schedule,
-              status: schedule.status === 'active' ? 'scheduled' : 'active',
+              status:
+                schedule.status === WaterStatus.ACTIVE
+                  ? WaterStatus.SCHEDULED
+                  : WaterStatus.ACTIVE,
             }
           : schedule,
       ),
@@ -266,7 +322,7 @@ export default function ProgramSchedules() {
         label="Time"
         menuList={times}
         renderField={'time'}
-        defaultValue={defaultTime}
+        defaultValue={defaultScheduleTime}
         handleUpdate={handleUpdateTime as any}
       />
       <Box sx={{ p: 3 }}>
@@ -316,7 +372,7 @@ export default function ProgramSchedules() {
                 </Typography>
               </Box>
             </Stack>
-            <Button
+            {/* <Button
               variant="contained"
               startIcon={<AddIcon />}
               onClick={() => setIsAddDialogOpen(true)}
@@ -338,7 +394,7 @@ export default function ProgramSchedules() {
               }}
             >
               Add Schedule
-            </Button>
+            </Button> */}
           </Stack>
         </Paper>
 
@@ -429,6 +485,7 @@ export default function ProgramSchedules() {
             p: 3,
             mb: 3,
             borderRadius: 3,
+            backgroundColor: 'white',
             border: `1px solid ${alpha(theme.palette.grey[200], 0.5)}`,
             background: `linear-gradient(135deg, ${alpha(theme.palette.grey[50], 0.5)}, ${alpha(theme.palette.grey[100], 0.2)})`,
           }}
@@ -567,6 +624,17 @@ export default function ProgramSchedules() {
             position: 'relative',
           }}
         >
+          <Box display="flex" justifyContent="flex-end" mb={2}>
+            <LoadingButton
+              variant="contained"
+              onClick={handleSave}
+              size="small"
+              loading={isSaving}
+            >
+              Save
+            </LoadingButton>
+          </Box>
+
           {viewType === 'month' && (
             <ProgramMonthView
               currentDate={currentDate}

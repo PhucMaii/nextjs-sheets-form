@@ -1,4 +1,4 @@
-import { alpha, Box, Stack, Typography } from '@mui/material';
+import { alpha, Box, IconButton, Stack, Typography } from '@mui/material';
 import {
   format,
   isSameMonth,
@@ -11,6 +11,11 @@ import {
   eachDayOfInterval,
 } from 'date-fns';
 import { Droppable, Draggable } from '@hello-pangea/dnd';
+import TimeInputModal from '../../Modals/edit/SingleFieldUpdate';
+import { useState } from 'react';
+import { times } from '@/app/lib/constant';
+import { defaultScheduleTime } from '../ProgramSchedules';
+import { DragIndicator as DragHandleIcon } from '@mui/icons-material';
 
 interface IProps {
   currentDate: Date;
@@ -28,11 +33,19 @@ const ProgramMonthView = ({
   getProgramColor,
 }: IProps) => {
   const monthStart = startOfMonth(currentDate);
-    const monthEnd = endOfMonth(currentDate);
-    const startDate = startOfWeek(monthStart);
-    const endDate = endOfWeek(monthEnd);
-    const days = eachDayOfInterval({ start: startDate, end: endDate });
-    
+  const monthEnd = endOfMonth(currentDate);
+  const startDate = startOfWeek(monthStart);
+  const endDate = endOfWeek(monthEnd);
+  const days = eachDayOfInterval({ start: startDate, end: endDate });
+
+  const [isTimeInputModalOpen, setIsTimeInputModalOpen] = useState<{
+    open: boolean;
+    targetId: string | null;
+  }>({
+    open: false,
+    targetId: null,
+  });
+
   return (
     <Box
       sx={{
@@ -41,6 +54,16 @@ const ProgramMonthView = ({
         overflow: 'hidden',
       }}
     >
+      <TimeInputModal
+        open={isTimeInputModalOpen.open}
+        onClose={() => setIsTimeInputModalOpen({ open: false, targetId: null })}
+        updatedField={isTimeInputModalOpen.targetId || ''}
+        title="Edit Time"
+        label="Time"
+        menuList={times}
+        renderField={'time'}
+        defaultValue={defaultScheduleTime}
+      />
       {/* Calendar Header */}
       <Box sx={{ display: 'flex' }}>
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
@@ -155,7 +178,12 @@ const ProgramMonthView = ({
                                   {(provided, snapshot) => (
                                     <Box
                                       ref={provided.innerRef}
-                                      {...provided.draggableProps}
+                                      onClick={() =>
+                                        setIsTimeInputModalOpen({
+                                          open: true,
+                                          targetId: schedule.id,
+                                        })
+                                      }
                                       {...provided.dragHandleProps}
                                       sx={{
                                         p: 0.5,
@@ -178,34 +206,45 @@ const ProgramMonthView = ({
                                             0.3,
                                           ),
                                         },
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
                                       }}
                                     >
-                                      <Typography
-                                        variant="caption"
-                                        sx={{
-                                          fontSize: '0.65rem',
-                                          fontWeight: 600,
-                                          color: getProgramColor(program.id),
-                                          display: 'block',
-                                          lineHeight: 1.2,
-                                        }}
+                                      <Box>
+                                        <Typography
+                                          variant="caption"
+                                          sx={{
+                                            fontSize: '0.65rem',
+                                            fontWeight: 600,
+                                            color: getProgramColor(program.id),
+                                            display: 'block',
+                                            lineHeight: 1.2,
+                                          }}
+                                        >
+                                          {schedule.time}
+                                        </Typography>
+                                        <Typography
+                                          variant="caption"
+                                          sx={{
+                                            fontSize: '0.6rem',
+                                            color: getProgramColor(program.id),
+                                            display: 'block',
+                                            lineHeight: 1.2,
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap',
+                                          }}
+                                        >
+                                          {program.name}
+                                        </Typography>
+                                      </Box>
+                                      <IconButton
+                                        {...provided.dragHandleProps}
+                                        size="small"
                                       >
-                                        {schedule.time}
-                                      </Typography>
-                                      <Typography
-                                        variant="caption"
-                                        sx={{
-                                          fontSize: '0.6rem',
-                                          color: getProgramColor(program.id),
-                                          display: 'block',
-                                          lineHeight: 1.2,
-                                          overflow: 'hidden',
-                                          textOverflow: 'ellipsis',
-                                          whiteSpace: 'nowrap',
-                                        }}
-                                      >
-                                        {program.name}
-                                      </Typography>
+                                        <DragHandleIcon fontSize="small" />
+                                      </IconButton>
                                     </Box>
                                   )}
                                 </Draggable>
