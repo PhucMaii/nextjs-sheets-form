@@ -37,10 +37,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         date: {
           in: listOfDateString,
         },
-        driverId: driver.id,
+        employeeId: driver.id,
       },
       include: {
-        driver: true,
         employee: true,
         route: true,
       },
