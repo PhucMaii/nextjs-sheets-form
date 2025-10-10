@@ -16,6 +16,8 @@ import { format } from 'date-fns';
 import { Droppable, Draggable } from '@hello-pangea/dnd';
 import { Program } from '../types';
 import { Water as WaterIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import ScheduleCard from '../ScheduleCard';
+import { ShowNotificationType } from '@/hooks/useNotification';
 
 interface IProps {
   currentDate: Date;
@@ -26,6 +28,8 @@ interface IProps {
   toggleScheduleStatus: (id: string) => void;
   removeSchedule: (id: string) => void;
   getStatusIcon: (status: string) => React.ReactNode;
+  showNotification: ShowNotificationType;
+  refetchSchedules: () => void;
 }
 
 const ProgramDayView = ({
@@ -37,6 +41,8 @@ const ProgramDayView = ({
   toggleScheduleStatus,
   removeSchedule,
   getStatusIcon,
+  showNotification,
+  refetchSchedules,
 }: IProps) => {
   const timeSlots = Array.from(
     { length: 24 },
@@ -113,75 +119,85 @@ const ProgramDayView = ({
                               index={0}
                             >
                               {(provided, snapshot) => (
-                                <Card
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                  elevation={0}
-                                  sx={{
-                                    minWidth: 200,
-                                    border: `1px solid ${alpha(getProgramColor(program.id), 0.3)}`,
-                                    borderRadius: 2,
-                                    opacity: snapshot.isDragging ? 0.5 : 1,
-                                  }}
-                                >
-                                  <CardContent
-                                    sx={{ p: 2, '&:last-child': { pb: 2 } }}
-                                  >
-                                    <Stack
-                                      direction="row"
-                                      alignItems="center"
-                                      spacing={1}
-                                    >
-                                      <Avatar
-                                        sx={{
-                                          width: 32,
-                                          height: 32,
-                                          backgroundColor: alpha(
-                                            getProgramColor(program.id),
-                                            0.2,
-                                          ),
-                                          color: getProgramColor(program.id),
-                                        }}
-                                      >
-                                        <WaterIcon fontSize="small" />
-                                      </Avatar>
-                                      <Box flex={1}>
-                                        <Typography
-                                          variant="body2"
-                                          fontWeight={600}
-                                        >
-                                          {program.name}
-                                        </Typography>
-                                        <Typography
-                                          variant="caption"
-                                          color="text.secondary"
-                                        >
-                                          {program.duration} sec •{' '}
-                                          {program.zoneWaterPrograms.map((zoneWaterProgram: any) => zoneWaterProgram.hydrawiseZone.name).join(', ')}
-                                        </Typography>
-                                      </Box>
-                                      <Stack direction="row" spacing={0.5}>
-                                        <IconButton
-                                          size="small"
-                                          onClick={() =>
-                                            toggleScheduleStatus(schedule.id)
-                                          }
-                                        >
-                                          {getStatusIcon(schedule.status)}
-                                        </IconButton>
-                                        <IconButton
-                                          size="small"
-                                          onClick={() =>
-                                            removeSchedule(schedule.id)
-                                          }
-                                        >
-                                          <DeleteIcon fontSize="small" />
-                                        </IconButton>
-                                      </Stack>
-                                    </Stack>
-                                  </CardContent>
-                                </Card>
+                                <ScheduleCard
+                                  provided={provided}
+                                  snapshot={snapshot}
+                                  schedule={schedule}
+                                  program={program}
+                                  getProgramColor={getProgramColor}
+                                  showNotification={showNotification}
+                                  refetchSchedules={refetchSchedules}
+                                  isDetailed
+                                />
+                                // <Card
+                                //   ref={provided.innerRef}
+                                //   {...provided.draggableProps}
+                                //   {...provided.dragHandleProps}
+                                //   elevation={0}
+                                //   sx={{
+                                //     minWidth: 200,
+                                //     border: `1px solid ${alpha(getProgramColor(program.id), 0.3)}`,
+                                //     borderRadius: 2,
+                                //     opacity: snapshot.isDragging ? 0.5 : 1,
+                                //   }}
+                                // >
+                                //   <CardContent
+                                //     sx={{ p: 2, '&:last-child': { pb: 2 } }}
+                                //   >
+                                //     <Stack
+                                //       direction="row"
+                                //       alignItems="center"
+                                //       spacing={1}
+                                //     >
+                                //       <Avatar
+                                //         sx={{
+                                //           width: 32,
+                                //           height: 32,
+                                //           backgroundColor: alpha(
+                                //             getProgramColor(program.id),
+                                //             0.2,
+                                //           ),
+                                //           color: getProgramColor(program.id),
+                                //         }}
+                                //       >
+                                //         <WaterIcon fontSize="small" />
+                                //       </Avatar>
+                                //       <Box flex={1}>
+                                //         <Typography
+                                //           variant="body2"
+                                //           fontWeight={600}
+                                //         >
+                                //           {program.name}
+                                //         </Typography>
+                                //         <Typography
+                                //           variant="caption"
+                                //           color="text.secondary"
+                                //         >
+                                //           {program.duration} sec •{' '}
+                                //           {program.zoneWaterPrograms.map((zoneWaterProgram: any) => zoneWaterProgram.hydrawiseZone.name).join(', ')}
+                                //         </Typography>
+                                //       </Box>
+                                //       <Stack direction="row" spacing={0.5}>
+                                //         <IconButton
+                                //           size="small"
+                                //           onClick={() =>
+                                //             toggleScheduleStatus(schedule.id)
+                                //           }
+                                //         >
+                                //           {getStatusIcon(schedule.status)}
+                                //         </IconButton>
+                                //         <IconButton
+                                //           size="small"
+                                //           onClick={() =>
+                                //             removeSchedule(schedule.id)
+                                //           }
+                                //         >
+                                //           <DeleteIcon fontSize="small" />
+                                //         </IconButton>
+                                //       </Stack>
+                                //     </Stack>
+                                //   </CardContent>
+                                // </Card>
                               )}
                             </Draggable>
                           );

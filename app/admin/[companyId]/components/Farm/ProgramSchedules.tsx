@@ -146,13 +146,13 @@ export default function ProgramSchedules({ showNotification }: IProps) {
     }
   }, [dbSchedules]);
 
-const sortedSchedules = useMemo(() => {
-  return [...schedules].sort((a, b) => {
-    const aDate = new Date(`${a.date} ${a.time}`);
-    const bDate = new Date(`${b.date} ${b.time}`);
-    return aDate.getTime() - bDate.getTime();
-  });
-}, [schedules]);
+  const sortedSchedules = useMemo(() => {
+    return [...schedules].sort((a, b) => {
+      const aDate = new Date(`${a.date} ${a.time}`);
+      const bDate = new Date(`${b.date} ${b.time}`);
+      return aDate.getTime() - bDate.getTime();
+    });
+  }, [schedules]);
 
   const getProgramById = (id: string | number) =>
     programs?.find((p: Program) => p.id === Number(id));
@@ -163,7 +163,9 @@ const sortedSchedules = useMemo(() => {
 
   const getSchedulesForTimeSlot = (date: Date, time: string) => {
     return sortedSchedules.filter(
-      (schedule) => isSameDay(schedule.date, date) && schedule.time === time,
+      (schedule) =>
+        isSameDay(schedule.date, date) &&
+        schedule.time.split(':')[0] === time.split(':')[0],
     );
   };
 
@@ -642,6 +644,8 @@ const sortedSchedules = useMemo(() => {
               getSchedulesForDate={getSchedulesForDate}
               getProgramById={getProgramById}
               getProgramColor={getProgramColor}
+              showNotification={showNotification}
+              refetchSchedules={refetchSchedules}
             />
           )}
           {viewType === 'week' && (
@@ -650,6 +654,8 @@ const sortedSchedules = useMemo(() => {
               getSchedulesForTimeSlot={getSchedulesForTimeSlot}
               getProgramById={getProgramById}
               getProgramColor={getProgramColor}
+              showNotification={showNotification}
+              refetchSchedules={refetchSchedules}
             />
           )}
           {viewType === 'day' && (

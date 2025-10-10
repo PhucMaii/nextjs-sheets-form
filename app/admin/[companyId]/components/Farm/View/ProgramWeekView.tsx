@@ -5,12 +5,16 @@ import { Droppable, Draggable } from '@hello-pangea/dnd';
 import { format, isToday } from 'date-fns';
 import { startOfWeek, addDays } from 'date-fns';
 import { Program } from '../types';
+import { ShowNotificationType } from '@/hooks/useNotification';
+import ScheduleCard from '../ScheduleCard';
 
 interface IProps {
-    currentDate: Date;
-    getSchedulesForTimeSlot: (date: Date, time: string) => any[];
-    getProgramById: (id: string) => any[];
-    getProgramColor: (id: string) => string;
+  currentDate: Date;
+  getSchedulesForTimeSlot: (date: Date, time: string) => any[];
+  getProgramById: (id: string) => any[];
+  getProgramColor: (id: string) => string;
+  showNotification: ShowNotificationType;
+  refetchSchedules: () => void;
 }
 
 const ProgramWeekView = ({
@@ -18,7 +22,10 @@ const ProgramWeekView = ({
   getSchedulesForTimeSlot,
   getProgramById,
   getProgramColor,
+  showNotification,
+  refetchSchedules,
 }: IProps) => {
+
   const weekStart = startOfWeek(currentDate);
   const theme = useTheme();
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
@@ -158,7 +165,9 @@ const ProgramWeekView = ({
                 >
                   <Stack spacing={0.5}>
                     {getSchedulesForTimeSlot(day, time).map((schedule) => {
-                      const program: Program | any = getProgramById(schedule.programId);
+                      const program: Program | any = getProgramById(
+                        schedule.programId,
+                      );
                       if (!program) return null;
 
                       return (
@@ -168,40 +177,89 @@ const ProgramWeekView = ({
                           index={0}
                         >
                           {(provided, snapshot) => (
-                            <Box
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              sx={{
-                                p: 0.5,
-                                borderRadius: 0.5,
-                                backgroundColor: alpha(getProgramColor(program.id), 0.2),
-                                border: `1px solid ${alpha(getProgramColor(program.id), 0.4)}`,
-                                borderLeft: `3px solid ${getProgramColor(program.id)}`,
-                                opacity: snapshot.isDragging ? 0.5 : 1,
-                                cursor: 'grab',
-                                '&:active': {
-                                  cursor: 'grabbing',
-                                },
-                                transition: 'all 0.2s ease',
-                                '&:hover': {
-                                  backgroundColor: alpha(getProgramColor(program.id), 0.3),
-                                },
-                              }}
-                            >
-                              <Typography
-                                variant="caption"
-                                sx={{
-                                  fontSize: '0.65rem',
-                                  fontWeight: 600,
-                                  color: getProgramColor(program.id),
-                                  display: 'block',
-                                  lineHeight: 1.2,
-                                }}
-                              >
-                                {program.name}
-                              </Typography>
-                            </Box>
+                            <ScheduleCard
+                              provided={provided}
+                              snapshot={snapshot}
+                              schedule={schedule}
+                              program={program}
+                              getProgramColor={getProgramColor}
+                              showNotification={showNotification}
+                              refetchSchedules={refetchSchedules}
+                            />
+                            
+                            // <Box
+                            //   ref={provided.innerRef}
+                            //   {...provided.draggableProps}
+                            //   {...provided.dragHandleProps}
+                            //   sx={{
+                            //     p: 0.5,
+                            //     borderRadius: 0.5,
+                            //     backgroundColor: alpha(
+                            //       getProgramColor(program.id),
+                            //       0.2,
+                            //     ),
+                            //     border: `1px solid ${alpha(getProgramColor(program.id), 0.4)}`,
+                            //     borderLeft: `3px solid ${getProgramColor(program.id)}`,
+                            //     opacity: snapshot.isDragging ? 0.5 : 1,
+                            //     cursor: 'grab',
+                            //     '&:active': {
+                            //       cursor: 'grabbing',
+                            //     },
+                            //     transition: 'all 0.2s ease',
+                            //     '&:hover': {
+                            //       backgroundColor: alpha(
+                            //         getProgramColor(program.id),
+                            //         0.3,
+                            //       ),
+                            //     },
+                            //   }}
+                            //   display="flex"
+                            //   alignItems="center"
+                            //   justifyContent="space-between"
+                            // >
+                            //   <Box>
+                            //     <Typography
+                            //       variant="caption"
+                            //       sx={{
+                            //         fontSize: '0.65rem',
+                            //         fontWeight: 600,
+                            //         color: getProgramColor(program.id),
+                            //         display: 'block',
+                            //         lineHeight: 1.2,
+                            //       }}
+                            //     >
+                            //       {schedule.time}
+                            //     </Typography>
+                            //     <Typography
+                            //       variant="caption"
+                            //       sx={{
+                            //         fontSize: '0.65rem',
+                            //         fontWeight: 600,
+                            //         color: getProgramColor(program.id),
+                            //         display: 'block',
+                            //         lineHeight: 1.2,
+                            //       }}
+                            //     >
+                            //       {program.name}
+                            //     </Typography>
+
+                            //   </Box>
+                            //   <IconButton
+                            //     onClick={(e: any) => {
+                            //       e.stopPropagation();
+                            //       e.preventDefault();
+                            //       setIsOpenConfirmModal({
+                            //         open: true,
+                            //         targetId: schedule.id,
+                            //       });
+                            //     }}
+                            //   >
+                            //     <Trash2Icon
+                            //       size={16}
+                            //       color={theme.palette.error.main}
+                            //     />
+                            //   </IconButton>
+                            // </Box>
                           )}
                         </Draggable>
                       );
