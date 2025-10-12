@@ -101,6 +101,7 @@ const useImageGallery = (
                       ? `4px solid ${primaryColor}`
                       : 'none',
                 }}
+                isDisableOnClick
               />
             </Box>
           )})}
