@@ -142,6 +142,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         itemParamsFifo,
         today.dateAndTime,
         createdBy,
+        newTransaction.id,
       );
 
       const response = await createOrderedItems(

@@ -5,7 +5,6 @@ import {
   InventoryLogFrom,
   InventoryLogType,
   InventoryUnit,
-  PrismaClient,
 } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate } from '@/pages/api/utils/date';
@@ -13,6 +12,7 @@ import { updateCheque } from '../../expenses/PUT';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { USER_ROLE } from '@/app/utils/enum';
 import { recordTransactionInventoryLog } from '@/pages/api/utils/logs';
+import prisma from '@/client';
 
 export interface IExpenseItem {
   id: number;
@@ -46,8 +46,6 @@ interface IBody {
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const {
       date,
       amount,
@@ -552,8 +550,6 @@ export const checkIsExpenseValid = async (
   date: string,
   vendors: number[],
 ) => {
-  const prisma = new PrismaClient();
-
   const existingVendorExpense = await prisma.expense.findMany({
     where: {
       invoice: invoice,
@@ -590,7 +586,6 @@ export const checkAndUpdateUnits = async (
   if (newUnits.length === 0) {
     return;
   }
-  const prisma = new PrismaClient();
 
   const sortedDBUnits = dbUnits.sort((a, b) => a?.ratio - b?.ratio);
   const sortedNewUnits = newUnits.sort((a, b) => a?.ratio - b?.ratio);
@@ -731,9 +726,8 @@ export const createFifo = async (
   vendorItemList: any,
   createdAt: string,
   createdBy: string,
+  newExpenseId?: number,
 ) => {
-  const prisma = new PrismaClient();
-
   const allNegativeFifo = await prisma.fifo.findMany({
     where: {
       companyId,
@@ -772,6 +766,18 @@ export const createFifo = async (
         },
       });
 
+      // record inventory log
+      if (newExpenseId) {
+        await recordTransactionInventoryLog(
+          newExpenseId || 0,
+          item?.inventoryItemId || item?.inventoryItem?.id,
+          item.quantity,
+          InventoryLogType.STOCK_IN,
+          InventoryLogFrom.CREATE_TRANSACTION,
+          `Create ${item.quantity} ${item.name} to inventory due to expense ${newExpenseId} created`,
+        );
+      }
+
       // Update all ordered items has targeted fifo id
       await prisma.orderedItems.updateMany({
         where: {
@@ -809,17 +815,30 @@ export const createFifo = async (
       };
     });
 
-  await prisma.fifo.createMany({
-    data: fifoItems,
-  });
+  if (fifoItems.length > 0) {
+    await prisma.fifo.createMany({
+      data: fifoItems,
+    });
+
+    for (const item of fifoItems) {
+      if (newExpenseId) {
+        await recordTransactionInventoryLog(
+          newExpenseId,
+          item.inventoryItemId,
+          item.quantity,
+          InventoryLogType.STOCK_IN,
+          InventoryLogFrom.CREATE_TRANSACTION,
+          `Create ${item.quantity} ${item.name} to inventory due to expense ${newExpenseId} created`,
+        );
+      }
+    }
+  }
 };
 
 export const updateVendorItemQuantity = async (
   existedItem: IVendorItem,
   vendorItem: any,
 ) => {
-  const prisma = new PrismaClient();
-
   await prisma.vendorItem.update({
     where: {
       id: vendorItem.id,
@@ -837,8 +856,6 @@ export const createOrderedItems = async (
   createdAt: string,
   createdBy: string,
 ) => {
-  const prisma = new PrismaClient();
-
   const inventoryUnits = await prisma.inventoryUnit.findMany({
     where: {
       vendorItemId: {

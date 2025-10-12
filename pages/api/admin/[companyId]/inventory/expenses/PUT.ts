@@ -363,6 +363,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           vendorItemList,
           updatedAt,
           createdBy,
+          Number(id),
         );
 
         // Get just created fifos
