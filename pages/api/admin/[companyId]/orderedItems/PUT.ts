@@ -1,12 +1,27 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { InventoryLogFrom, InventoryLogType, Orders, PrismaClient } from '@prisma/client';
+import {
+  InventoryLogFrom,
+  InventoryLogType,
+  Orders,
+  PrismaClient,
+} from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { restockInventoryItem, updateSingleInventoryItem } from './single';
+import {
+  restockInventoryItem,
+  subtractInventoryItem,
+  updateSingleInventoryItem,
+} from './single';
 import { gstRate, pstRate } from '@/app/lib/constant';
 import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
-import { calculateProfit, createOrderedItems } from '@/pages/api/utils/orderedItems';
+import {
+  calculateProfit,
+  createOrderedItems,
+} from '@/pages/api/utils/orderedItems';
 import { getTodayDate } from '@/pages/api/utils/date';
-import { checkOrderValidToAffectInventory, formatItemsWithTotalPrice } from '@/pages/api/utils/order';
+import {
+  checkOrderValidToAffectInventory,
+  formatItemsWithTotalPrice,
+} from '@/pages/api/utils/order';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
@@ -189,9 +204,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         if (
           item?.fifo &&
           item.inventoryUnit &&
-          item?.Orders?.status !== ORDER_STATUS.VOID && isValidToAffectInventory
+          item?.Orders?.status !== ORDER_STATUS.VOID &&
+          isValidToAffectInventory
         ) {
-          
           // Identify the difference between the previous quantity and the new quantity
           const difference = item.quantity - item.prevQuantity;
 
@@ -306,7 +321,82 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       if (deliveryDate !== existingOrder.deliveryDate) {
         comment += `### Delivery date\n${existingOrder.deliveryDate} -> ${deliveryDate}\n`;
 
+        // If delivery date is moved to the past and !hasSubtractInventory, subtract the inventory
+        if (
+          new Date(deliveryDate) < new Date(existingOrder.deliveryDate) &&
+          !orderUpdated.hasSubtractInventory
+        ) {
+          for (const item of orderUpdated.items) {
+            if (item?.fifo && item?.inventoryUnit) {
+              await subtractInventoryItem(
+                orderId,
+                item.fifo,
+                item.inventoryUnit,
+                item.quantity,
+              );
+
+              // Record inventory log
+              await recordOrderInventoryLog(
+                orderId,
+                item?.fifo?.inventoryItemId,
+                item.quantity,
+                InventoryLogType.SUBTRACT,
+                InventoryLogFrom.EDIT_ORDER,
+                `Subtract ${item.quantity} ${item?.inventoryItem?.name} from inventory due to order ${item.orderId} delivery date from ${existingOrder.deliveryDate} to ${deliveryDate} update`,
+              );
+            }
+          }
+
+          await prisma.orders.update({
+            where: {
+              id: orderId,
+            },
+            data: {
+              hasSubtractInventory: true,
+            },
+          });
+        }
+
+        // If delivery date is moved to the future, restock the inventory
+        if (new Date(deliveryDate) > new Date(existingOrder.deliveryDate)) {
+          for (const item of orderUpdated.items) {
+            if (item?.fifo && item?.inventoryUnit) {
+              await restockInventoryItem(
+                orderId,
+                item.fifo,
+                item.inventoryUnit,
+                item.quantity,
+              );
+
+              // Record inventory log
+              await recordOrderInventoryLog(
+                orderId,
+                item?.fifo?.inventoryItemId,
+                item.quantity,
+                InventoryLogType.RESTOCK,
+                InventoryLogFrom.EDIT_ORDER,
+                `Restock ${item.quantity} ${item?.inventoryItem?.name} to inventory due to order ${item.orderId} delivery date from ${existingOrder.deliveryDate} to ${deliveryDate} update`,
+              );
+            }
+          }
+
+          await prisma.orders.update({
+            where: {
+              id: orderId,
+            },
+            data: {
+              hasSubtractInventory: false,
+            },
+          });
+        }
+
         // If delivery date is changed, remove the reassignment if any
+        await prisma.reassignment.deleteMany({
+          where: {
+            orderId,
+            date: existingOrder.deliveryDate,
+          },
+        });
       }
 
       if (note !== existingOrder.note) {
