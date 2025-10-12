@@ -26,17 +26,28 @@ import { Program, ZoneWater } from './types';
 import { useTheme } from '@mui/material/styles';
 import { format } from 'date-fns';
 import { useParams, useRouter } from 'next/navigation';
+import { ShowNotificationType } from '@/hooks/useNotification';
+import { usePrograms } from '@/hooks/db-tables/usePrograms';
 
 interface ProgramCardProps {
   program: Program;
   setPrograms: any;
   zones: any;
+  showNotification: ShowNotificationType;
+  refetchPrograms: () => void;
 }
 
-const ProgramCard = ({ program, setPrograms, zones }: ProgramCardProps) => {
+const ProgramCard = ({
+  program,
+  setPrograms,
+  zones,
+  showNotification,
+  refetchPrograms,
+}: ProgramCardProps) => {
   const router = useRouter();
   const { companyId }: any = useParams();
   const theme = useTheme();
+  const { activateProgram, stopProgram } = usePrograms(companyId);
   const getProgressPercentage = (program: Program) => {
     if (!program.remainingDays) return 100;
     return ((program.days - program.remainingDays) / program.days) * 100;
@@ -59,15 +70,39 @@ const ProgramCard = ({ program, setPrograms, zones }: ProgramCardProps) => {
     );
   };
 
-  const handleDeleteProgram = (programId: string) => {
-    setPrograms((prev: Program[]) =>
-      prev.filter((program: Program) => program.id !== programId),
-    );
+  const handleActivateProgram = async (programId: string) => {
+    try {
+      const response = await activateProgram(programId);
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      refetchPrograms();
+
+      showNotification('success', 'Program activated successfully');
+    } catch (error: any) {
+      console.log('Error activating program: ', error);
+      showNotification('error', 'Error activating program: ' + error);
+    }
   };
 
-  const handleEditProgram = (programId: string) => {
-    // TODO: Implement edit functionality
-    console.log('Edit program:', programId);
+  const handleStopProgram = async (programId: string) => {
+    try {
+      const response = await stopProgram(programId);
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      refetchPrograms();
+      showNotification('success', 'Program stopped successfully');
+    } catch (error: any) {
+      console.log('Error stopping program: ', error);
+      showNotification('error', 'Error stopping program: ' + error);
+    }
   };
 
   return (
@@ -149,7 +184,9 @@ const ProgramCard = ({ program, setPrograms, zones }: ProgramCardProps) => {
                   onClick={(e) => {
                     e.stopPropagation();
                     e.preventDefault();
-                    handleToggleActive(program.id);
+                    program.isActive
+                      ? handleStopProgram(program.id)
+                      : handleActivateProgram(program.id);
                   }}
                   sx={{
                     backgroundColor: program.isActive

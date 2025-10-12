@@ -1,5 +1,5 @@
 export interface Program {
-  id: string | number;
+  id: string;
   name: string;
   days: number;
   remainingDays?: number;

@@ -24,12 +24,21 @@ import { getAdminApiUrl } from '@/app/utils/enum';
 import { useQuery } from '@tanstack/react-query';
 import { useHydrawiseAPI } from '@/hooks/useHydrawiseAPI';
 import ProgramCard from './ProgramCard';
+import { ShowNotificationType } from '@/hooks/useNotification';
 
-export default function Programs() {
+interface IProps {
+  showNotification: ShowNotificationType;
+}
+
+export default function Programs({ showNotification }: IProps) {
   const router = useRouter();
   const { companyId }: any = useParams();
 
-  const { data: fetchedPrograms, isLoading } = useQuery({
+  const {
+    data: fetchedPrograms,
+    isLoading,
+    refetch: refetchPrograms,
+  } = useQuery({
     queryKey: ['programs'],
     queryFn: async () => {
       const response = await axios.get(
@@ -57,7 +66,6 @@ export default function Programs() {
     () => programs.filter((p) => !p.isActive),
     [programs],
   );
-
 
   const handleAddProgram = () => {
     // Navigate to create program page
@@ -116,6 +124,8 @@ export default function Programs() {
                 program={program}
                 setPrograms={setPrograms}
                 zones={zones}
+                showNotification={showNotification}
+                refetchPrograms={refetchPrograms}
               />
             </Grid>
           ))}

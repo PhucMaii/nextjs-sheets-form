@@ -27,7 +27,7 @@ export default function Farm() {
         <Tab label="Schedules" value="schedules" />
       </Tabs>
 
-      {tab === 'programs' && <Programs />}
+      {tab === 'programs' && <Programs showNotification={showNotification} />}
       {tab === 'schedules' && (
         <ProgramSchedules showNotification={showNotification} />
       )}

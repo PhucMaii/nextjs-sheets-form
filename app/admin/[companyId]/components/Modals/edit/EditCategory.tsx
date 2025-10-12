@@ -6,7 +6,7 @@ import ModalHead from '@/app/lib/ModalHead';
 
 interface IProps extends ModalProps {
   updateCategory: (newName: string) => Promise<void>;
-  currentName: string;
+  currentName: string
 }
 
 export default function EditCategory({
