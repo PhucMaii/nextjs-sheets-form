@@ -260,22 +260,26 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         continue;
       }
 
-      const deliveryOrder = deliveryOrders.find(
+      // use filter to get the delivery orders for the user, in case user has multiple delivery orders
+      const userDeliveryOrders = deliveryOrders.filter(
         (browsingOrder: any) => browsingOrder.userId === order.userId,
       );
 
-      if (!deliveryOrder) {
+      if (userDeliveryOrders.length === 0) {
         continue;
       }
 
-      const newItems = deliveryOrder.items.map((item: OrderedItems) => {
-        const totalPrice = item.quantity * item.price;
-        return { ...item, totalPrice };
-      });
-      sortedDeliveryOrders.push({
-        ...deliveryOrder.user,
-        ...deliveryOrder,
-        items: newItems,
+      userDeliveryOrders.forEach((deliveryOrder: any) => {
+        const newItems = deliveryOrder.items.map((item: OrderedItems) => {
+          const totalPrice = item.quantity * item.price;
+          return { ...item, totalPrice };
+        });
+
+        sortedDeliveryOrders.push({
+          ...deliveryOrder.user,
+          ...deliveryOrder,
+          items: newItems,
+        });
       });
     }
 
