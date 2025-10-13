@@ -84,7 +84,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       return res.status(404).json({ error: 'Payment Method Not Found' });
     }
 
-    const vendors = items.reduce((acc: any, item: any) => {
+    const vendorIds = items.reduce((acc: any, item: any) => {
       if (!acc.includes(item.vendorId)) {
         acc.push(item.vendorId);
       }
@@ -97,7 +97,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         Number(companyId),
         invoice,
         date,
-        vendors,
+        vendorIds,
       );
 
       if (!isExpenseValid.ok) {
@@ -137,15 +137,13 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       createdBy,
     );
 
-    // Connect Vendors and Expense
-    if (vendors.length > 0) {
-      await prisma.vendorExpense.createMany({
-        data: vendors.map((vendor: any) => {
-          return {
-            expenseId: newExpense.id,
-            vendorId: vendor,
-          };
-        }),
+    // Connect Vendor and Expense
+    if (vendorIds[0]) {
+      await prisma.vendorExpense.create({
+        data: {
+          expenseId: newExpense.id,
+          vendorId: vendorIds[0], // Only connect one vendor to expense because one transaction only has one vendor
+        }
       });
     }
 
