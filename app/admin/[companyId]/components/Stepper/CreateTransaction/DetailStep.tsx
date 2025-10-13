@@ -18,11 +18,13 @@ import {
   Checkbox,
   FormControlLabel,
   useMediaQuery,
+  Paper,
+  Chip,
+  Fade,
 } from '@mui/material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import SyncAltIcon from '@mui/icons-material/SyncAlt';
-import { Fade } from '@mui/material';
 import {
   CalendarToday,
   Person,
@@ -30,6 +32,9 @@ import {
   Receipt,
   Add,
   AttachMoney,
+  CheckCircle,
+  RadioButtonUnchecked,
+  NavigateNext,
 } from '@mui/icons-material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
@@ -46,7 +51,7 @@ import { FoldersIcon, Trash2Icon } from 'lucide-react';
 import { primaryColor } from '@/theme/color';
 import { gstRate, pstRate } from '@/app/lib/constant';
 import DateRange from '../../Modals/DateRangeModal';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import ErrorComponent from '../../ErrorComponent';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
@@ -105,8 +110,112 @@ export default function DetailStep({
   const [isSelectRangeOpen, setIsSelectRangeOpen] = useState(false);
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
+  // Highlight system state
+  const [currentHighlightedSection, setCurrentHighlightedSection] = useState<string>('');
+  const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
+  const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
+
   const month = YYYYMMDDFormat(new Date()).split('/')[0];
   const year = YYYYMMDDFormat(new Date()).split('/')[2];
+
+  // Define sections based on transaction type
+  const getSections = () => {
+    const sections = [];
+    
+    if (transactionType === 'stock') {
+      sections.push(
+        { id: 'vendor-selection', title: 'Vendor Selection', icon: <Person /> },
+        { id: 'items', title: 'Items', icon: <Receipt /> },
+        { id: 'basic-info', title: 'Basic Information', icon: <CreditCardIcon /> },
+        { id: 'totals', title: 'Tax & Totals', icon: <AttachMoney /> }
+      );
+    } else if (transactionType === 'batch') {
+      sections.push(
+        { id: 'basic-info', title: 'Basic Information', icon: <CreditCardIcon /> },
+        { id: 'date-range', title: 'Date Range', icon: <CalendarToday /> },
+        { id: 'expenses', title: 'Expenses', icon: <FoldersIcon /> }
+      );
+    } else {
+      sections.push(
+        { id: 'basic-info', title: 'Basic Information', icon: <CreditCardIcon /> },
+        { id: 'amount-details', title: 'Amount Details', icon: <AttachMoney /> }
+      );
+    }
+    
+    if (transactionType !== 'batch') {
+      sections.push({ id: 'cod-assignment', title: 'COD Assignment', icon: <Payment /> });
+    }
+    
+    return sections;
+  };
+
+  const sections = getSections();
+
+  // Highlight system functions
+  const scrollToSection = (sectionId: string) => {
+    const element = sectionRefs.current[sectionId];
+    if (element) {
+      element.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center' 
+      });
+    }
+  };
+
+  const checkSectionCompletion = (sectionId: string): boolean => {
+    switch (sectionId) {
+      case 'vendor-selection':
+        return selectedVendorId !== -1;
+      case 'items':
+        return expenseItems.length > 0 && expenseItems.every((item: any) => 
+          item.selectedItem && item.quantity > 0
+        );
+      case 'basic-info':
+        return formData.spentBy && formData.paymentMethodId !== -1 && formData.status;
+      case 'totals':
+        return formData.subTotal > 0 && formData.total > 0;
+      case 'date-range':
+        return formData.dateRange && formData.dateRange.length === 2;
+      case 'expenses':
+        return formData.subTotal > 0 && smallExpenses.length > 0;
+      case 'amount-details':
+        return formData.subTotal > 0 && formData.total > 0;
+      case 'cod-assignment':
+        return !formData.isCOD || (formData.isCOD && formData.codBoardId !== -1);
+      default:
+        return false;
+    }
+  };
+
+  const moveToNextSection = () => {
+    const currentIndex = sections.findIndex(s => s.id === currentHighlightedSection);
+    if (currentIndex < sections.length - 1) {
+      const nextSection = sections[currentIndex + 1];
+      setCurrentHighlightedSection(nextSection.id);
+      setTimeout(() => scrollToSection(nextSection.id), 300);
+    }
+  };
+
+  // Auto-highlight first section on mount
+  useEffect(() => {
+    if (sections.length > 0 && !currentHighlightedSection) {
+      setCurrentHighlightedSection(sections[0].id);
+    }
+  }, [sections, currentHighlightedSection]);
+
+  // Check for section completion and auto-progress
+  useEffect(() => {
+    if (currentHighlightedSection) {
+      const isCompleted = checkSectionCompletion(currentHighlightedSection);
+      if (isCompleted && !completedSections.has(currentHighlightedSection)) {
+        setCompletedSections(prev => new Set(Array.from(prev).concat(currentHighlightedSection)));
+        // Auto-move to next section after a short delay
+        setTimeout(() => {
+          moveToNextSection();
+        }, 1000);
+      }
+    }
+  }, [formData, selectedVendorId, expenseItems, smallExpenses, currentHighlightedSection, completedSections]);
 
   // Data Fetching
   const { data: codList } = useQuery({
@@ -462,6 +571,119 @@ export default function DetailStep({
         prev.filter((item: any) => item.id !== id),
       );
     }
+  };
+
+  // Section wrapper component with highlight effects
+  const HighlightedSection = ({ 
+    sectionId, 
+    children, 
+    title, 
+    icon 
+  }: { 
+    sectionId: string; 
+    children: React.ReactNode; 
+    title: string; 
+    icon: React.ReactNode;
+  }) => {
+    const isCurrent = currentHighlightedSection === sectionId;
+    const isCompleted = completedSections.has(sectionId);
+    const isUpcoming = !isCurrent && !isCompleted && 
+      sections.findIndex(s => s.id === sectionId) > 
+      sections.findIndex(s => s.id === currentHighlightedSection);
+
+    return (
+      <Paper
+          ref={(el) => { sectionRefs.current[sectionId] = el; }}
+          elevation={isCurrent ? 2 : isCompleted ? 1 : 1}
+          sx={{
+            p: 3,
+            mb: 3,
+            position: 'relative',
+            border: isCurrent ? `1px solid ${primaryColor}40` : '1px solid transparent',
+            borderRadius: 2,
+            transition: 'all 0.2s ease-in-out',
+            backgroundColor: isCurrent 
+              ? `${primaryColor}03` 
+              : isCompleted 
+                ? `${primaryColor}02` 
+                : 'background.paper',
+          }}
+        >
+          {/* Section Header */}
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+            mb={2}
+            sx={{
+              opacity: isUpcoming ? 0.6 : 1,
+              transition: 'opacity 0.3s ease',
+            }}
+          >
+            <Box display="flex" alignItems="center" gap={2}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: 32,
+                  height: 32,
+                  borderRadius: '50%',
+                  backgroundColor: isCurrent 
+                    ? `${primaryColor}20` 
+                    : isCompleted 
+                      ? 'success.light' 
+                      : 'grey.200',
+                  color: isCurrent 
+                    ? primaryColor 
+                    : isCompleted 
+                      ? 'success.main' 
+                      : 'grey.500',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                {isCompleted ? <CheckCircle fontSize="small" /> : icon}
+              </Box>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: isCurrent ? primaryColor : 'text.primary',
+                  fontWeight: isCurrent ? 600 : 'normal',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                {title}
+              </Typography>
+            </Box>
+            
+            <Box display="flex" alignItems="center" gap={1}>
+              {isCompleted && (
+                <Chip
+                  icon={<CheckCircle fontSize="small" />}
+                  label="Done"
+                  color="success"
+                  size="small"
+                  variant="outlined"
+                  sx={{ fontSize: '0.75rem' }}
+                />
+              )}
+              {isCurrent && (
+                <Chip
+                  label="Current"
+                  color="primary"
+                  size="small"
+                  variant="outlined"
+                  sx={{ fontSize: '0.75rem' }}
+                />
+              )}
+            </Box>
+          </Box>
+          
+          <Box sx={{ opacity: isUpcoming ? 0.8 : 1, transition: 'opacity 0.2s ease' }}>
+            {children}
+          </Box>
+        </Paper>
+    );
   };
 
   const renderBasicInformation = () => {
@@ -848,25 +1070,129 @@ export default function DetailStep({
             }));
           }}
         />
-        <Typography variant="h6" gutterBottom color={blueGrey[800]}>
-          {transactionType === 'stock'
-            ? 'Stock Purchase Details'
-            : transactionType === 'batch'
-              ? 'Batch Expense Details'
-              : 'Expense Details'}
-        </Typography>
-        <Typography variant="body2" color="text.secondary" mb={3}>
-          Fill in the transaction information below
-        </Typography>
-
-        {/* Stock Transaction will attach basic information below items */}
-        {transactionType !== 'stock' ? renderBasicInformation() : null}
+        
+        {/* Progress Indicator */}
+        <Paper elevation={1} sx={{ p: 2, mb: 3, borderRadius: 2, backgroundColor: 'grey.50' }}>
+          <Typography variant="h6" gutterBottom color={blueGrey[800]} sx={{ mb: 1.5 }}>
+            {transactionType === 'stock'
+              ? 'Stock Purchase Details'
+              : transactionType === 'batch'
+                ? 'Batch Expense Details'
+                : 'Expense Details'}
+          </Typography>
+          
+          <Box display="flex" alignItems="center" gap={1.5} flexWrap="wrap">
+            {sections.map((section, index) => {
+              const isCurrent = currentHighlightedSection === section.id;
+              const isCompleted = completedSections.has(section.id);
+              const isUpcoming = !isCurrent && !isCompleted && 
+                sections.findIndex(s => s.id === section.id) > 
+                sections.findIndex(s => s.id === currentHighlightedSection);
+              
+              return (
+                <Box key={section.id} display="flex" alignItems="center">
+                  <Box
+                    onClick={() => {
+                      setCurrentHighlightedSection(section.id);
+                      scrollToSection(section.id);
+                    }}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1,
+                      p: 1,
+                      borderRadius: 1.5,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      backgroundColor: isCurrent 
+                        ? `${primaryColor}08` 
+                        : isCompleted 
+                          ? 'success.light' 
+                          : 'transparent',
+                      border: isCurrent ? `1px solid ${primaryColor}40` : '1px solid transparent',
+                      '&:hover': {
+                        backgroundColor: isCurrent 
+                          ? `${primaryColor}12` 
+                          : isCompleted 
+                            ? 'success.main' 
+                            : 'grey.100',
+                      },
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: 24,
+                        height: 24,
+                        borderRadius: '50%',
+                        backgroundColor: isCurrent 
+                          ? `${primaryColor}20` 
+                          : isCompleted 
+                            ? 'success.main' 
+                            : 'grey.300',
+                        color: isCurrent 
+                          ? primaryColor 
+                          : isCompleted 
+                            ? 'white' 
+                            : 'grey.600',
+                        transition: 'all 0.2s ease',
+                      }}
+                    >
+                      {isCompleted ? <CheckCircle sx={{ fontSize: 16 }} /> : section.icon}
+                    </Box>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontWeight: isCurrent ? 600 : 'normal',
+                        color: isCurrent ? primaryColor : 'text.primary',
+                        opacity: isUpcoming ? 0.7 : 1,
+                        fontSize: '0.875rem',
+                      }}
+                    >
+                      {section.title}
+                    </Typography>
+                  </Box>
+                  
+                  {index < sections.length - 1 && (
+                    <Box
+                      sx={{
+                        width: 16,
+                        height: 1,
+                        backgroundColor: isCompleted ? 'success.main' : 'grey.300',
+                        mx: 0.5,
+                        transition: 'background-color 0.2s ease',
+                      }}
+                    />
+                  )}
+                </Box>
+              );
+            })}
+          </Box>
+          
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 1.5, display: 'block' }}>
+            {currentHighlightedSection && (
+              <>
+                Step {sections.findIndex(s => s.id === currentHighlightedSection) + 1} of {sections.length}: {sections.find(s => s.id === currentHighlightedSection)?.title}
+                {completedSections.size > 0 && (
+                  <> • {completedSections.size} completed</>
+                )}
+              </>
+            )}
+          </Typography>
+        </Paper>
 
         <Grid container spacing={3}>
           {/* Assign COD */}
           {transactionType !== 'batch' && (
             <Grid item xs={12}>
-              <BorderSection>
+              <HighlightedSection
+                sectionId="cod-assignment"
+                title="COD Assignment"
+                icon={<Payment />}
+              >
+                <BorderSection>
                 <Box
                   display="flex"
                   justifyContent="space-between"
@@ -958,7 +1284,8 @@ export default function DetailStep({
                 ) : (
                   <ErrorComponent errorText="No COD assigned" />
                 )}
-              </BorderSection>
+                </BorderSection>
+              </HighlightedSection>
             </Grid>
           )}
 
@@ -966,88 +1293,114 @@ export default function DetailStep({
           {transactionType === 'stock' ? (
             <>
               <Grid item xs={12}>
-                <BorderSection sx={{ p: 3 }}>
-                  <Box
-                    display="flex"
-                    justifyContent="space-between"
-                    alignItems="center"
-                    mb={2}
-                  >
-                    <Typography
-                      variant="subtitle1"
-                      sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                    >
-                      <Receipt color="primary" />
-                      Items
-                    </Typography>
-                    <Button
-                      startIcon={<Add />}
-                      onClick={addExpenseItem}
-                      variant="outlined"
-                      size="small"
-                      disabled={selectedVendorId === -1}
-                    >
-                      Add Item
-                    </Button>
-                  </Box>
-                  {/* <Divider sx={{ mb: 3 }}>
-                  <Typography variant="subtitle1" gutterBottom>
-                    Select Vendor
-                  </Typography>
-                </Divider> */}
-
-                  <FormControl fullWidth disabled={!setSelectedVendorId}>
-                    <InputLabel sx={{ mb: 1 }} htmlFor="vendor-select">
-                      Vendor
-                    </InputLabel>
-                    <Select
-                      id="vendor-select"
-                      value={selectedVendorId}
-                      onChange={(e) =>
-                        setSelectedVendorId?.(Number(e.target.value))
-                      }
-                      fullWidth
-                      sx={{ mb: 3 }}
-                      label="Vendor"
-                    >
-                      <MenuItem value={-1}>
-                        <em>Select vendor</em>
-                      </MenuItem>
-                      {sortedVendors.map((vendor: any) => (
-                        <MenuItem key={vendor.id} value={vendor.id}>
-                          {vendor.name}
+                <HighlightedSection
+                  sectionId="vendor-selection"
+                  title="Vendor Selection"
+                  icon={<Person />}
+                >
+                  <BorderSection sx={{ p: 3 }}>
+                    <FormControl fullWidth disabled={!setSelectedVendorId}>
+                      <InputLabel sx={{ mb: 1 }} htmlFor="vendor-select">
+                        Vendor
+                      </InputLabel>
+                      <Select
+                        id="vendor-select"
+                        value={selectedVendorId}
+                        onChange={(e) =>
+                          setSelectedVendorId?.(Number(e.target.value))
+                        }
+                        fullWidth
+                        sx={{ mb: 3 }}
+                        label="Vendor"
+                      >
+                        <MenuItem value={-1}>
+                          <em>Select vendor</em>
                         </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  <Divider sx={{ mb: 3 }}>
-                    <Typography variant="subtitle1" gutterBottom>
-                      Items
-                    </Typography>
-                  </Divider>
-
-                  {selectedVendorId !== -1 &&
-                    expenseItems.map((item: any, index: number) => (
-                      <ItemRow
-                        key={item.id}
-                        item={item}
-                        index={index}
-                        isLastItem={expenseItems.length === 1}
-                        vendorItems={vendorItems}
-                        handleItemChange={handleItemChange}
-                        removeExpenseItem={removeExpenseItem}
-                        expenseItems={expenseItems}
-                      />
-                    ))}
-                </BorderSection>
+                        {sortedVendors.map((vendor: any) => (
+                          <MenuItem key={vendor.id} value={vendor.id}>
+                            {vendor.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </BorderSection>
+                </HighlightedSection>
               </Grid>
-              {renderBasicInformation()}
+
               <Grid item xs={12}>
-                <BorderSection sx={{ p: 3 }}>
-                  <Typography variant="subtitle1" gutterBottom>
-                    Tax Calculation & Totals
-                  </Typography>
-                  <Divider sx={{ mb: 3 }} />
+                <HighlightedSection
+                  sectionId="items"
+                  title="Items"
+                  icon={<Receipt />}
+                >
+                  <BorderSection sx={{ p: 3 }}>
+                    <Box
+                      display="flex"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      mb={2}
+                    >
+                      <Typography
+                        variant="subtitle1"
+                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                      >
+                        <Receipt color="primary" />
+                        Items
+                      </Typography>
+                      <Button
+                        startIcon={<Add />}
+                        onClick={addExpenseItem}
+                        variant="outlined"
+                        size="small"
+                        disabled={selectedVendorId === -1}
+                      >
+                        Add Item
+                      </Button>
+                    </Box>
+                    <Divider sx={{ mb: 3 }}>
+                      <Typography variant="subtitle1" gutterBottom>
+                        Items
+                      </Typography>
+                    </Divider>
+
+                    {selectedVendorId !== -1 &&
+                      expenseItems.map((item: any, index: number) => (
+                        <ItemRow
+                          key={item.id}
+                          item={item}
+                          index={index}
+                          isLastItem={expenseItems.length === 1}
+                          vendorItems={vendorItems}
+                          handleItemChange={handleItemChange}
+                          removeExpenseItem={removeExpenseItem}
+                          expenseItems={expenseItems}
+                        />
+                      ))}
+                  </BorderSection>
+                </HighlightedSection>
+              </Grid>
+
+              <Grid item xs={12}>
+                <HighlightedSection
+                  sectionId="basic-info"
+                  title="Basic Information"
+                  icon={<CreditCardIcon />}
+                >
+                  {renderBasicInformation()}
+                </HighlightedSection>
+              </Grid>
+
+              <Grid item xs={12}>
+                <HighlightedSection
+                  sectionId="totals"
+                  title="Tax Calculation & Totals"
+                  icon={<AttachMoney />}
+                >
+                  <BorderSection sx={{ p: 3 }}>
+                    <Typography variant="subtitle1" gutterBottom>
+                      Tax Calculation & Totals
+                    </Typography>
+                    <Divider sx={{ mb: 3 }} />
 
                   <Grid container spacing={2}>
                     <Grid item xs={6} md={2}>
@@ -1142,275 +1495,180 @@ export default function DetailStep({
                       />
                     </Grid>
                   </Grid>
-                </BorderSection>
+                  </BorderSection>
+                </HighlightedSection>
               </Grid>
             </>
           ) : transactionType === 'batch' ? (
-            <Grid item xs={12}>
-              <BorderSection sx={{ p: 3 }}>
-                <Box display="flex" alignItems="center" gap={1} mb={2}>
-                  <FoldersIcon
-                    style={{ width: 24, height: 24, color: primaryColor }}
-                  />
-                  <Typography variant="subtitle1">Expenses</Typography>
-                </Box>
+            <>
+              <Grid item xs={12}>
+                <HighlightedSection
+                  sectionId="basic-info"
+                  title="Basic Information"
+                  icon={<CreditCardIcon />}
+                >
+                  {renderBasicInformation()}
+                </HighlightedSection>
+              </Grid>
 
-                {/* Date Range */}
-                <Typography variant="subtitle1" sx={{ my: 2 }}>
-                  Date Range
-                </Typography>
+              <Grid item xs={12}>
+                <HighlightedSection
+                  sectionId="date-range"
+                  title="Date Range"
+                  icon={<CalendarToday />}
+                >
+                  <BorderSection sx={{ p: 3 }}>
+                    <Typography variant="subtitle1" sx={{ my: 2 }}>
+                      Date Range
+                    </Typography>
 
-                <Box display="flex" alignItems="center" gap={2}>
-                  <TextField
-                    fullWidth
-                    label="Start Date"
-                    value={
-                      formData?.dateRange
-                        ? formData?.dateRange[0]?.toDateString()
-                        : ''
-                    }
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <CalendarToday />
-                        </InputAdornment>
-                      ),
-                      readOnly: true,
-                    }}
-                    onClick={() => setIsSelectRangeOpen(true)}
-                  />
-                  {/* <FormControl fullWidth>
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <DatePicker
+                    <Box display="flex" alignItems="center" gap={2}>
+                      <TextField
+                        fullWidth
                         label="Start Date"
-                        value={dayjs(formData.startDate)}
-                        onChange={(e: any) => {
-                          setFormData((prev: any) => ({
-                            ...prev,
-                            startDate: e,
-                          }));
-                        }}
-                        sx={{
-                          width: '100%',
-                          height: '0.1%',
-                          borderRadius: 2,
-                        }}
-                      />
-                    </LocalizationProvider>
-                  </FormControl> */}
-
-                  <Typography variant="subtitle1"> - </Typography>
-
-                  <TextField
-                    fullWidth
-                    label="End Date"
-                    value={
-                      formData?.dateRange
-                        ? formData?.dateRange[1]?.toDateString()
-                        : ''
-                    }
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <CalendarToday />
-                        </InputAdornment>
-                      ),
-                      readOnly: true,
-                    }}
-                    onClick={() => setIsSelectRangeOpen(true)}
-                  />
-                </Box>
-
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="space-between"
-                  gap={1}
-                  sx={{ my: 2 }}
-                >
-                  <Typography variant="subtitle1">Total Expenses</Typography>
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={formData.hasGST}
-                          onChange={(e) => {
-                            setFormData((prev: any) => ({
-                              ...prev,
-                              hasGST: e.target.checked,
-                            }));
-                          }}
-                        />
-                      }
-                      label="GST (5%)"
-                    />
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={formData.hasPST}
-                          onChange={(e) => {
-                            setFormData((prev: any) => ({
-                              ...prev,
-                              hasPST: e.target.checked,
-                            }));
-                          }}
-                        />
-                      }
-                      label="PST (7%)"
-                    />
-                  </Box>
-                </Box>
-
-                <Grid container spacing={2}>
-                  <Grid item xs={6} md={2}>
-                    <TextField
-                      fullWidth
-                      label="Discount"
-                      value={
-                        isShowDiscountPercent
-                          ? formData.discountPercentage
-                          : formData.discount
-                      }
-                      type="number"
-                      onChange={(e) => handleDiscountChange(e, 'batch')}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            {isShowDiscountPercent ? '%' : '$'}
-                          </InputAdornment>
-                        ),
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <IconButton
-                              onClick={() => {
-                                setIsShowDiscountPercent(
-                                  !isShowDiscountPercent,
-                                );
-                              }}
-                            >
-                              <SyncAltIcon />
-                            </IconButton>
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={6} md={3}>
-                    <TextField
-                      fullWidth
-                      label="Subtotal"
-                      value={formData?.subTotal || 0}
-                      type="number"
-                      onChange={(e) => {
-                        setFormData((prev: any) => ({
-                          ...prev,
-                          subTotal: Number(e.target.value),
-                          initialSubTotal: Number(e.target.value),
-                        }));
-                      }}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">$</InputAdornment>
-                        ),
-                      }}
-                    />
-                  </Grid>
-                  {formData.hasGST && (
-                    <Grid item xs={12} md={2}>
-                      <TextField
-                        fullWidth
-                        label="GST (5%)"
-                        value={formData.GST || 0}
+                        value={
+                          formData?.dateRange
+                            ? formData?.dateRange[0]?.toDateString()
+                            : ''
+                        }
                         InputProps={{
                           startAdornment: (
-                            <InputAdornment position="start">$</InputAdornment>
+                            <InputAdornment position="start">
+                              <CalendarToday />
+                            </InputAdornment>
                           ),
                           readOnly: true,
                         }}
+                        onClick={() => setIsSelectRangeOpen(true)}
                       />
-                    </Grid>
-                  )}
-                  {formData.hasPST && (
-                    <Grid item xs={12} md={2}>
+                      <Typography variant="subtitle1"> - </Typography>
                       <TextField
                         fullWidth
-                        label="PST (7%)"
-                        value={formData.PST || 0}
+                        label="End Date"
+                        value={
+                          formData?.dateRange
+                            ? formData?.dateRange[1]?.toDateString()
+                            : ''
+                        }
                         InputProps={{
                           startAdornment: (
-                            <InputAdornment position="start">$</InputAdornment>
+                            <InputAdornment position="start">
+                              <CalendarToday />
+                            </InputAdornment>
                           ),
                           readOnly: true,
                         }}
+                        onClick={() => setIsSelectRangeOpen(true)}
                       />
-                    </Grid>
-                  )}
-                  <Grid
-                    item
-                    xs={12}
-                    md={formData.hasGST || formData.hasPST ? 3 : 7}
-                  >
-                    <TextField
-                      fullWidth
-                      label="Total"
-                      value={formData?.total || 0}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">$</InputAdornment>
-                        ),
-                        readOnly: true,
-                      }}
-                    />
-                  </Grid>
-                </Grid>
+                    </Box>
+                  </BorderSection>
+                </HighlightedSection>
+              </Grid>
 
-                <Divider sx={{ my: 1 }}>Expenses</Divider>
-
-                <Typography
-                  variant="subtitle1"
-                  sx={{ my: 1, fontWeight: 'bold' }}
+              <Grid item xs={12}>
+                <HighlightedSection
+                  sectionId="expenses"
+                  title="Expenses"
+                  icon={<FoldersIcon />}
                 >
-                  Small Expenses
-                </Typography>
-                {smallExpenses.length > 0 &&
-                  smallExpenses.map((expense: any, index: number) => (
-                    <Grid container spacing={2} mt={2} key={index}>
-                      <Grid item xs={12} md={2}>
-                        <FormControl fullWidth>
-                          <LocalizationProvider dateAdapter={AdapterDayjs}>
-                            <DatePicker
-                              label="Date"
-                              value={dayjs(expense.date)}
-                              onChange={(e: any) => {
-                                handleSmallExpenseChange(expense.id, 'date', e);
-                              }}
-                              sx={{
-                                width: '100%',
-                                height: '0.1%',
-                                borderRadius: 2,
+                  <BorderSection sx={{ p: 3 }}>
+                    <Box display="flex" alignItems="center" gap={1} mb={2}>
+                      <FoldersIcon
+                        style={{ width: 24, height: 24, color: primaryColor }}
+                      />
+                      <Typography variant="subtitle1">Expenses</Typography>
+                    </Box>
+
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="space-between"
+                      gap={1}
+                      sx={{ my: 2 }}
+                    >
+                      <Typography variant="subtitle1">Total Expenses</Typography>
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={formData.hasGST}
+                              onChange={(e) => {
+                                setFormData((prev: any) => ({
+                                  ...prev,
+                                  hasGST: e.target.checked,
+                                }));
                               }}
                             />
-                          </LocalizationProvider>
-                        </FormControl>
-                      </Grid>
-                      <Grid item xs={12} md={2}>
+                          }
+                          label="GST (5%)"
+                        />
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={formData.hasPST}
+                              onChange={(e) => {
+                                setFormData((prev: any) => ({
+                                  ...prev,
+                                  hasPST: e.target.checked,
+                                }));
+                              }}
+                            />
+                          }
+                          label="PST (7%)"
+                        />
+                      </Box>
+                    </Box>
+
+                    <Grid container spacing={2}>
+                      <Grid item xs={6} md={2}>
                         <TextField
                           fullWidth
-                          label="Subtotal"
-                          value={expense.subTotal}
+                          label="Discount"
+                          value={
+                            isShowDiscountPercent
+                              ? formData.discountPercentage
+                              : formData.discount
+                          }
                           type="number"
-                          onChange={(e) => {
-                            handleSmallExpenseChange(
-                              expense.id,
-                              'subTotal',
-                              +e.target.value,
-                            );
-                          }}
+                          onChange={(e) => handleDiscountChange(e, 'batch')}
                           InputProps={{
                             startAdornment: (
                               <InputAdornment position="start">
-                                $
+                                {isShowDiscountPercent ? '%' : '$'}
                               </InputAdornment>
+                            ),
+                            endAdornment: (
+                              <InputAdornment position="end">
+                                <IconButton
+                                  onClick={() => {
+                                    setIsShowDiscountPercent(
+                                      !isShowDiscountPercent,
+                                    );
+                                  }}
+                                >
+                                  <SyncAltIcon />
+                                </IconButton>
+                              </InputAdornment>
+                            ),
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={6} md={3}>
+                        <TextField
+                          fullWidth
+                          label="Subtotal"
+                          value={formData?.subTotal || 0}
+                          type="number"
+                          onChange={(e) => {
+                            setFormData((prev: any) => ({
+                              ...prev,
+                              subTotal: Number(e.target.value),
+                              initialSubTotal: Number(e.target.value),
+                            }));
+                          }}
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">$</InputAdornment>
                             ),
                           }}
                         />
@@ -1420,20 +1678,10 @@ export default function DetailStep({
                           <TextField
                             fullWidth
                             label="GST (5%)"
-                            value={expense.GST}
-                            type="number"
-                            onChange={(e) => {
-                              handleSmallExpenseChange(
-                                expense.id,
-                                'GST',
-                                Number(e.target.value),
-                              );
-                            }}
+                            value={formData.GST || 0}
                             InputProps={{
                               startAdornment: (
-                                <InputAdornment position="start">
-                                  $
-                                </InputAdornment>
+                                <InputAdornment position="start">$</InputAdornment>
                               ),
                               readOnly: true,
                             }}
@@ -1445,20 +1693,10 @@ export default function DetailStep({
                           <TextField
                             fullWidth
                             label="PST (7%)"
-                            value={expense.PST}
-                            type="number"
-                            onChange={(e) => {
-                              handleSmallExpenseChange(
-                                expense.id,
-                                'PST',
-                                Number(e.target.value),
-                              );
-                            }}
+                            value={formData.PST || 0}
                             InputProps={{
                               startAdornment: (
-                                <InputAdornment position="start">
-                                  $
-                                </InputAdornment>
+                                <InputAdornment position="start">$</InputAdornment>
                               ),
                               readOnly: true,
                             }}
@@ -1473,198 +1711,338 @@ export default function DetailStep({
                         <TextField
                           fullWidth
                           label="Total"
-                          value={expense.total}
-                          type="number"
-                          onChange={(e) => {
-                            handleSmallExpenseChange(
-                              expense.id,
-                              'total',
-                              Number(e.target.value),
-                            );
-                          }}
+                          value={formData?.total || 0}
                           InputProps={{
                             startAdornment: (
-                              <InputAdornment position="start">
-                                $
-                              </InputAdornment>
+                              <InputAdornment position="start">$</InputAdornment>
                             ),
                             readOnly: true,
                           }}
                         />
                       </Grid>
-                      <Grid item xs={1}>
-                        <IconButton
-                          onClick={() => removeSmallExpense(expense.id)}
-                        >
-                          <Trash2Icon />
-                        </IconButton>
-                      </Grid>
                     </Grid>
-                  ))}
-              </BorderSection>
-            </Grid>
-          ) : (
-            <Grid item xs={12}>
-              <BorderSection sx={{ p: 3 }}>
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  mb={2}
-                >
-                  <Typography
-                    variant="subtitle1"
-                    gutterBottom
-                    sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                  >
-                    <AttachMoney color="primary" />
-                    Amount Details
-                  </Typography>
 
-                  <Box>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={formData.hasGST}
-                          onChange={(e) => {
-                            setFormData((prev: any) => ({
-                              ...prev,
-                              hasGST: e.target.checked,
-                            }));
-                          }}
-                        />
-                      }
-                      label="GST (5%)"
-                    />
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={formData.hasPST}
-                          onChange={(e) => {
-                            setFormData((prev: any) => ({
-                              ...prev,
-                              hasPST: e.target.checked,
-                            }));
-                          }}
-                        />
-                      }
-                      label="PST (7%)"
-                    />
-                  </Box>
-                </Box>
-                <Divider sx={{ mb: 3 }} />
+                    <Divider sx={{ my: 1 }}>Expenses</Divider>
 
-                <Grid container spacing={3}>
-                  <Grid item xs={6} md={2}>
-                    <TextField
-                      fullWidth
-                      label="Discount"
-                      type="number"
-                      value={
-                        isShowDiscountPercent
-                          ? formData.discountPercentage
-                          : formData.discount
-                      }
-                      onChange={(e) => handleDiscountChange(e, 'other')}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            {isShowDiscountPercent ? '%' : '$'}
-                          </InputAdornment>
-                        ),
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <IconButton
-                              onClick={() => {
-                                setIsShowDiscountPercent(
-                                  !isShowDiscountPercent,
+                    <Typography
+                      variant="subtitle1"
+                      sx={{ my: 1, fontWeight: 'bold' }}
+                    >
+                      Small Expenses
+                    </Typography>
+                    {smallExpenses.length > 0 &&
+                      smallExpenses.map((expense: any, index: number) => (
+                        <Grid container spacing={2} mt={2} key={index}>
+                          <Grid item xs={12} md={2}>
+                            <FormControl fullWidth>
+                              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                <DatePicker
+                                  label="Date"
+                                  value={dayjs(expense.date)}
+                                  onChange={(e: any) => {
+                                    handleSmallExpenseChange(expense.id, 'date', e);
+                                  }}
+                                  sx={{
+                                    width: '100%',
+                                    height: '0.1%',
+                                    borderRadius: 2,
+                                  }}
+                                />
+                              </LocalizationProvider>
+                            </FormControl>
+                          </Grid>
+                          <Grid item xs={12} md={2}>
+                            <TextField
+                              fullWidth
+                              label="Subtotal"
+                              value={expense.subTotal}
+                              type="number"
+                              onChange={(e) => {
+                                handleSmallExpenseChange(
+                                  expense.id,
+                                  'subTotal',
+                                  +e.target.value,
                                 );
                               }}
+                              InputProps={{
+                                startAdornment: (
+                                  <InputAdornment position="start">
+                                    $
+                                  </InputAdornment>
+                                ),
+                              }}
+                            />
+                          </Grid>
+                          {formData.hasGST && (
+                            <Grid item xs={12} md={2}>
+                              <TextField
+                                fullWidth
+                                label="GST (5%)"
+                                value={expense.GST}
+                                type="number"
+                                onChange={(e) => {
+                                  handleSmallExpenseChange(
+                                    expense.id,
+                                    'GST',
+                                    Number(e.target.value),
+                                  );
+                                }}
+                                InputProps={{
+                                  startAdornment: (
+                                    <InputAdornment position="start">
+                                      $
+                                    </InputAdornment>
+                                  ),
+                                  readOnly: true,
+                                }}
+                              />
+                            </Grid>
+                          )}
+                          {formData.hasPST && (
+                            <Grid item xs={12} md={2}>
+                              <TextField
+                                fullWidth
+                                label="PST (7%)"
+                                value={expense.PST}
+                                type="number"
+                                onChange={(e) => {
+                                  handleSmallExpenseChange(
+                                    expense.id,
+                                    'PST',
+                                    Number(e.target.value),
+                                  );
+                                }}
+                                InputProps={{
+                                  startAdornment: (
+                                    <InputAdornment position="start">
+                                      $
+                                    </InputAdornment>
+                                  ),
+                                  readOnly: true,
+                                }}
+                              />
+                            </Grid>
+                          )}
+                          <Grid
+                            item
+                            xs={12}
+                            md={formData.hasGST || formData.hasPST ? 3 : 7}
+                          >
+                            <TextField
+                              fullWidth
+                              label="Total"
+                              value={expense.total}
+                              type="number"
+                              onChange={(e) => {
+                                handleSmallExpenseChange(
+                                  expense.id,
+                                  'total',
+                                  Number(e.target.value),
+                                );
+                              }}
+                              InputProps={{
+                                startAdornment: (
+                                  <InputAdornment position="start">
+                                    $
+                                  </InputAdornment>
+                                ),
+                                readOnly: true,
+                              }}
+                            />
+                          </Grid>
+                          <Grid item xs={1}>
+                            <IconButton
+                              onClick={() => removeSmallExpense(expense.id)}
                             >
-                              <SyncAltIcon />
+                              <Trash2Icon />
                             </IconButton>
-                          </InputAdornment>
-                        ),
-                      }}
-                      inputProps={{ min: 0, step: 0.01 }}
-                    />
-                  </Grid>
-                  <Grid item xs={6} md={3}>
-                    <TextField
-                      fullWidth
-                      label="Subtotal"
-                      type="number"
-                      value={formData?.subTotal}
-                      onChange={(e) =>
-                        setFormData((prev: any) => ({
-                          ...prev,
-                          subTotal: Number(e.target.value),
-                          initialSubTotal: Number(e.target.value),
-                        }))
-                      }
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">$</InputAdornment>
-                        ),
-                      }}
-                    />
-                  </Grid>
-                  {formData.hasGST && (
-                    <Grid item xs={6} md={2}>
-                      <TextField
-                        fullWidth
-                        label="GST (5%)"
-                        value={formData?.GST?.toFixed(2) || 0}
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">$</InputAdornment>
-                          ),
-                          readOnly: true,
-                        }}
-                      />
+                          </Grid>
+                        </Grid>
+                      ))}
+                  </BorderSection>
+                </HighlightedSection>
+              </Grid>
+            </>
+          ) : (
+            <>
+              <Grid item xs={12}>
+                <HighlightedSection
+                  sectionId="basic-info"
+                  title="Basic Information"
+                  icon={<CreditCardIcon />}
+                >
+                  {renderBasicInformation()}
+                </HighlightedSection>
+              </Grid>
+
+              <Grid item xs={12}>
+                <HighlightedSection
+                  sectionId="amount-details"
+                  title="Amount Details"
+                  icon={<AttachMoney />}
+                >
+                  <BorderSection sx={{ p: 3 }}>
+                    <Box
+                      display="flex"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      mb={2}
+                    >
+                      <Typography
+                        variant="subtitle1"
+                        gutterBottom
+                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                      >
+                        <AttachMoney color="primary" />
+                        Amount Details
+                      </Typography>
+
+                      <Box>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={formData.hasGST}
+                              onChange={(e) => {
+                                setFormData((prev: any) => ({
+                                  ...prev,
+                                  hasGST: e.target.checked,
+                                }));
+                              }}
+                            />
+                          }
+                          label="GST (5%)"
+                        />
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={formData.hasPST}
+                              onChange={(e) => {
+                                setFormData((prev: any) => ({
+                                  ...prev,
+                                  hasPST: e.target.checked,
+                                }));
+                              }}
+                            />
+                          }
+                          label="PST (7%)"
+                        />
+                      </Box>
+                    </Box>
+                    <Divider sx={{ mb: 3 }} />
+
+                    <Grid container spacing={3}>
+                      <Grid item xs={6} md={2}>
+                        <TextField
+                          fullWidth
+                          label="Discount"
+                          type="number"
+                          value={
+                            isShowDiscountPercent
+                              ? formData.discountPercentage
+                              : formData.discount
+                          }
+                          onChange={(e) => handleDiscountChange(e, 'other')}
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                {isShowDiscountPercent ? '%' : '$'}
+                              </InputAdornment>
+                            ),
+                            endAdornment: (
+                              <InputAdornment position="end">
+                                <IconButton
+                                  onClick={() => {
+                                    setIsShowDiscountPercent(
+                                      !isShowDiscountPercent,
+                                    );
+                                  }}
+                                >
+                                  <SyncAltIcon />
+                                </IconButton>
+                              </InputAdornment>
+                            ),
+                          }}
+                          inputProps={{ min: 0, step: 0.01 }}
+                        />
+                      </Grid>
+                      <Grid item xs={6} md={3}>
+                        <TextField
+                          fullWidth
+                          label="Subtotal"
+                          type="number"
+                          value={formData?.subTotal}
+                          onChange={(e) =>
+                            setFormData((prev: any) => ({
+                              ...prev,
+                              subTotal: Number(e.target.value),
+                              initialSubTotal: Number(e.target.value),
+                            }))
+                          }
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">$</InputAdornment>
+                            ),
+                          }}
+                        />
+                      </Grid>
+                      {formData.hasGST && (
+                        <Grid item xs={6} md={2}>
+                          <TextField
+                            fullWidth
+                            label="GST (5%)"
+                            value={formData?.GST?.toFixed(2) || 0}
+                            InputProps={{
+                              startAdornment: (
+                                <InputAdornment position="start">$</InputAdornment>
+                              ),
+                              readOnly: true,
+                            }}
+                          />
+                        </Grid>
+                      )}
+                      {formData.hasPST && (
+                        <Grid item xs={6} md={2}>
+                          <TextField
+                            fullWidth
+                            label="PST (7%)"
+                            value={formData?.PST?.toFixed(2) || 0}
+                            InputProps={{
+                              startAdornment: (
+                                <InputAdornment position="start">$</InputAdornment>
+                              ),
+                              readOnly: true,
+                            }}
+                          />
+                        </Grid>
+                      )}
+                      <Grid
+                        item
+                        xs={12}
+                        md={formData.hasGST || formData.hasPST ? 3 : 7}
+                      >
+                        <TextField
+                          fullWidth
+                          label="Total Amount"
+                          value={formData?.total?.toFixed(2) || 0}
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">$</InputAdornment>
+                            ),
+                            readOnly: true,
+                          }}
+                          sx={{
+                            '& .MuiInputBase-root': {
+                              backgroundColor: blue[50],
+                              fontWeight: 'bold',
+                            },
+                          }}
+                        />
+                      </Grid>
                     </Grid>
-                  )}
-                  {formData.hasPST && (
-                    <Grid item xs={6} md={2}>
-                      <TextField
-                        fullWidth
-                        label="PST (7%)"
-                        value={formData?.PST?.toFixed(2) || 0}
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">$</InputAdornment>
-                          ),
-                          readOnly: true,
-                        }}
-                      />
-                    </Grid>
-                  )}
-                  <Grid
-                    item
-                    xs={12}
-                    md={formData.hasGST || formData.hasPST ? 3 : 7}
-                  >
-                    <TextField
-                      fullWidth
-                      label="Total Amount"
-                      value={formData?.total?.toFixed(2) || 0}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">$</InputAdornment>
-                        ),
-                        readOnly: true,
-                      }}
-                      sx={{
-                        '& .MuiInputBase-root': {
-                          backgroundColor: blue[50],
-                          fontWeight: 'bold',
-                        },
-                      }}
-                    />
-                  </Grid>
-                </Grid>
-              </BorderSection>
-            </Grid>
+                  </BorderSection>
+                </HighlightedSection>
+              </Grid>
+            </>
           )}
         </Grid>
       </Box>
