@@ -15,7 +15,7 @@ import { recordTransactionInventoryLog } from '@/pages/api/utils/logs';
 import prisma from '@/client';
 
 export interface IExpenseItem {
-  id: number;
+  id: number
   quantity: number;
   // unitPrice: number;
   vendorId: number;

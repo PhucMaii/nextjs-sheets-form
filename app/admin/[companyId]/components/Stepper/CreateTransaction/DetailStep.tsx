@@ -348,7 +348,7 @@ export default function DetailStep({
   };
 
   const handleItemChange = (
-    id: number,
+    id: string | number,
     field: string,
     value: string | number | any,
   ) => {

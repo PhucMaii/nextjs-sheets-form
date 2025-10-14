@@ -31,7 +31,7 @@ export default function ItemRow({
   isLastItem: boolean;
   expenseItems: any[];
 }) {
-  console.log(item, 'item');
+  console.log(item.id, 'item');
   //   useEffect(() => {
   //     if (item.id !== -1) {
   //       const targetItem = vendorItems.find(
@@ -64,6 +64,11 @@ export default function ItemRow({
                 const targetItem = vendorItems.find(
                   (item: any) => item.id === Number(value?.id),
                 );
+
+                if (!targetItem) {
+                  return;
+                }
+
                 const ratioOf1 = targetItem?.unit.find(
                   (unit: any) => unit.ratio === 1,
                 );
