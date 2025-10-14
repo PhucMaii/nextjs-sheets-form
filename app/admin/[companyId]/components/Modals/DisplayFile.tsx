@@ -129,6 +129,7 @@ export default function DisplayFile({
         setIsLoading(true);
         setError(null);
         const url = generateImgUrl(fileKey, isCheque);
+        console.log(url, 'url in DisplayFile');
         setUrl(url || '/images/not-found.png');
       } catch (err) {
         console.error(
