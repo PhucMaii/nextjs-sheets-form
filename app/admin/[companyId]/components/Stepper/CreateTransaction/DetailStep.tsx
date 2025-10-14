@@ -45,7 +45,12 @@ import { BorderSection } from '../../../reports/styled';
 import CreditCardIcon from '@mui/icons-material/CreditCard';
 import ItemRow from './ItemRow';
 import { TransactionType } from './TransactionTypeStep';
-import { ArrowDownIcon, FoldersIcon, Trash2Icon } from 'lucide-react';
+import {
+  ArrowDownIcon,
+  FoldersIcon,
+  HelpCircleIcon,
+  Trash2Icon,
+} from 'lucide-react';
 import { primaryColor } from '@/theme/color';
 import { gstRate, pstRate } from '@/app/lib/constant';
 import DateRange from '../../Modals/DateRangeModal';
@@ -58,6 +63,8 @@ import { calculateTaxWithDiscount } from '@/app/utils/item';
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import { PresignedFileUpload } from '@/app/components/PresignedFileUpload';
 import DisplayFile from '../../Modals/DisplayFile';
+import HelpIcon from '@mui/icons-material/Help';
+import HideSourceIcon from '@mui/icons-material/HideSource';
 import { IExpenseType } from '@/app/utils/type';
 
 interface PropTypes {
@@ -114,6 +121,7 @@ export default function DetailStep({
   const [completedSections, setCompletedSections] = useState<Set<string>>(
     new Set(),
   );
+  const [isHelpMode, setIsHelpMode] = useState(false);
   const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
 
   const month = YYYYMMDDFormat(new Date()).split('/')[0];
@@ -568,7 +576,9 @@ export default function DetailStep({
       <Grid item xs={12}>
         <BorderSection
           sx={{ p: 3, mb: 3 }}
-          $isHighlighted={currentHighlightedSection === 'basic-info'}
+          $isHighlighted={
+            currentHighlightedSection === 'basic-info' && isHelpMode
+          }
           ref={(el) => {
             sectionRefs.current['basic-info'] = el as HTMLElement;
           }}
@@ -941,10 +951,13 @@ export default function DetailStep({
   };
 
   const nextButton = () => {
+    if (!isHelpMode) {
+      return null;
+    }
     return (
       <Box display="flex" justifyContent="flex-end" mt={2}>
         <Button
-          variant="contained"
+          variant="outlined"
           startIcon={<ArrowDownIcon />}
           onClick={moveToNextSection}
         >
@@ -969,167 +982,182 @@ export default function DetailStep({
           }}
         />
 
-        {/* Progress Indicator */}
-        <Paper
-          elevation={0}
-          sx={{
-            p: 2,
-            mb: 3,
-            borderRadius: 2,
-            backgroundColor: 'grey.50',
-            boxShadow: 'rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;',
-          }}
+        <Box
+          display="flex"
+          justifyContent="flex-end"
+          alignItems="center"
+          mb={2}
         >
-          <Typography
-            variant="h6"
-            gutterBottom
-            color={blueGrey[800]}
-            sx={{ mb: 1.5 }}
+          <Button
+            startIcon={isHelpMode ? <HideSourceIcon /> : <HelpIcon />}
+            onClick={() => setIsHelpMode(!isHelpMode)}
           >
-            {transactionType === 'stock'
-              ? 'Stock Purchase Details'
-              : transactionType === 'batch'
-                ? 'Batch Expense Details'
-                : 'Expense Details'}
-          </Typography>
+            {isHelpMode ? 'Hide Help' : 'Help me navigate'}
+          </Button>
+        </Box>
+        {/* Progress Indicator */}
+        {isHelpMode && (
+          <Paper
+            elevation={0}
+            sx={{
+              p: 2,
+              mb: 3,
+              borderRadius: 2,
+              backgroundColor: 'grey.50',
+              boxShadow: 'rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;',
+            }}
+          >
+            <Typography
+              variant="h6"
+              gutterBottom
+              color={blueGrey[800]}
+              sx={{ mb: 1.5 }}
+            >
+              {transactionType === 'stock'
+                ? 'Stock Purchase Details'
+                : transactionType === 'batch'
+                  ? 'Batch Expense Details'
+                  : 'Expense Details'}
+            </Typography>
 
-          <Box display="flex" alignItems="center" gap={1.5} flexWrap="wrap">
-            {sections.map((section, index) => {
-              const isCurrent = currentHighlightedSection === section.id;
-              const isCompleted = completedSections.has(section.id);
-              const isUpcoming =
-                !isCurrent &&
-                !isCompleted &&
-                sections.findIndex((s) => s.id === section.id) >
-                  sections.findIndex((s) => s.id === currentHighlightedSection);
+            <Box display="flex" alignItems="center" gap={1.5} flexWrap="wrap">
+              {sections.map((section, index) => {
+                const isCurrent = currentHighlightedSection === section.id;
+                const isCompleted = completedSections.has(section.id);
+                const isUpcoming =
+                  !isCurrent &&
+                  !isCompleted &&
+                  sections.findIndex((s) => s.id === section.id) >
+                    sections.findIndex(
+                      (s) => s.id === currentHighlightedSection,
+                    );
 
-              return (
-                <Box key={section.id} display="flex" alignItems="center">
-                  <Box
-                    onClick={() => {
-                      setCurrentHighlightedSection(section.id);
-                      scrollToSection(section.id);
-                    }}
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1,
-                      p: 1,
-                      borderRadius: 1.5,
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      backgroundColor: isCurrent
-                        ? `${primaryColor}08`
-                        : isCompleted
-                          ? 'success.light'
-                          : 'transparent',
-                      border: isCurrent
-                        ? `1px solid ${primaryColor}40`
-                        : '1px solid transparent',
-                      '&:hover': {
-                        backgroundColor: isCurrent
-                          ? `${primaryColor}12`
-                          : isCompleted
-                            ? 'success.main'
-                            : 'grey.100',
-                      },
-                    }}
-                  >
+                return (
+                  <Box key={section.id} display="flex" alignItems="center">
                     <Box
+                      onClick={() => {
+                        setCurrentHighlightedSection(section.id);
+                        scrollToSection(section.id);
+                      }}
                       sx={{
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        width: 24,
-                        height: 24,
-                        borderRadius: '50%',
+                        gap: 1,
+                        p: 1,
+                        borderRadius: 1.5,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
                         backgroundColor: isCurrent
-                          ? `${primaryColor}20`
+                          ? `${primaryColor}08`
                           : isCompleted
+                            ? 'success.light'
+                            : 'transparent',
+                        border: isCurrent
+                          ? `1px solid ${primaryColor}40`
+                          : '1px solid transparent',
+                        '&:hover': {
+                          backgroundColor: isCurrent
+                            ? `${primaryColor}12`
+                            : isCompleted
+                              ? 'success.main'
+                              : 'grey.100',
+                        },
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: 24,
+                          height: 24,
+                          borderRadius: '50%',
+                          backgroundColor: isCurrent
+                            ? `${primaryColor}20`
+                            : isCompleted
+                              ? 'success.main'
+                              : 'grey.300',
+                          color: isCurrent
+                            ? primaryColor
+                            : isCompleted
+                              ? 'white'
+                              : 'grey.600',
+                          transition: 'all 0.2s ease',
+                        }}
+                      >
+                        {isCompleted ? (
+                          <CheckCircle sx={{ fontSize: 16 }} />
+                        ) : (
+                          section.icon
+                        )}
+                      </Box>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: isCurrent ? 600 : 'normal',
+                          color: isCurrent ? primaryColor : 'text.primary',
+                          opacity: isUpcoming ? 0.7 : 1,
+                          fontSize: '0.875rem',
+                        }}
+                      >
+                        {section.title}
+                      </Typography>
+                    </Box>
+
+                    {index < sections.length - 1 && (
+                      <Box
+                        sx={{
+                          width: 16,
+                          height: 1,
+                          backgroundColor: isCompleted
                             ? 'success.main'
                             : 'grey.300',
-                        color: isCurrent
-                          ? primaryColor
-                          : isCompleted
-                            ? 'white'
-                            : 'grey.600',
-                        transition: 'all 0.2s ease',
-                      }}
-                    >
-                      {isCompleted ? (
-                        <CheckCircle sx={{ fontSize: 16 }} />
-                      ) : (
-                        section.icon
-                      )}
-                    </Box>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontWeight: isCurrent ? 600 : 'normal',
-                        color: isCurrent ? primaryColor : 'text.primary',
-                        opacity: isUpcoming ? 0.7 : 1,
-                        fontSize: '0.875rem',
-                      }}
-                    >
-                      {section.title}
-                    </Typography>
+                          mx: 0.5,
+                          transition: 'background-color 0.2s ease',
+                        }}
+                      />
+                    )}
                   </Box>
+                );
+              })}
+            </Box>
 
-                  {index < sections.length - 1 && (
-                    <Box
-                      sx={{
-                        width: 16,
-                        height: 1,
-                        backgroundColor: isCompleted
-                          ? 'success.main'
-                          : 'grey.300',
-                        mx: 0.5,
-                        transition: 'background-color 0.2s ease',
-                      }}
-                    />
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ mt: 1.5, display: 'block' }}
+            >
+              {currentHighlightedSection && (
+                <>
+                  Step{' '}
+                  {sections.findIndex(
+                    (s) => s.id === currentHighlightedSection,
+                  ) + 1}{' '}
+                  of {sections.length}:{' '}
+                  {
+                    sections.find((s) => s.id === currentHighlightedSection)
+                      ?.title
+                  }
+                  {completedSections.size > 0 && (
+                    <> • {completedSections.size} completed</>
                   )}
-                </Box>
-              );
-            })}
-          </Box>
-
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            sx={{ mt: 1.5, display: 'block' }}
-          >
-            {currentHighlightedSection && (
-              <>
-                Step{' '}
-                {sections.findIndex((s) => s.id === currentHighlightedSection) +
-                  1}{' '}
-                of {sections.length}:{' '}
-                {
-                  sections.find((s) => s.id === currentHighlightedSection)
-                    ?.title
-                }
-                {completedSections.size > 0 && (
-                  <> • {completedSections.size} completed</>
-                )}
-              </>
-            )}
-          </Typography>
-        </Paper>
+                </>
+              )}
+            </Typography>
+          </Paper>
+        )}
 
         <Grid container spacing={3}>
           {/* Assign COD */}
           {transactionType !== 'batch' && (
             <Grid item xs={12}>
-              {/* <HighlightedSection
-                  sectionId="cod-assignment"
-                  title="COD Assignment"
-                  icon={<Payment />}
-                > */}
               <BorderSection
                 ref={(el) => {
                   sectionRefs.current['cod-assignment'] = el as HTMLElement;
                 }}
-                $isHighlighted={currentHighlightedSection === 'cod-assignment'}
+                $isHighlighted={
+                  currentHighlightedSection === 'cod-assignment' && isHelpMode
+                }
               >
                 <Box
                   display="flex"
@@ -1240,7 +1268,8 @@ export default function DetailStep({
                 <BorderSection
                   sx={{ p: 3 }}
                   $isHighlighted={
-                    currentHighlightedSection === 'vendor-selection'
+                    currentHighlightedSection === 'vendor-selection' &&
+                    isHelpMode
                   }
                   ref={(el) => {
                     sectionRefs.current['vendor-selection'] = el as HTMLElement;
@@ -1284,7 +1313,9 @@ export default function DetailStep({
                 > */}
                 <BorderSection
                   sx={{ p: 3 }}
-                  $isHighlighted={currentHighlightedSection === 'items'}
+                  $isHighlighted={
+                    currentHighlightedSection === 'items' && isHelpMode
+                  }
                   ref={(el) => {
                     sectionRefs.current['items'] = el as HTMLElement;
                   }}
@@ -1355,7 +1386,9 @@ export default function DetailStep({
                 > */}
                 <BorderSection
                   sx={{ p: 3 }}
-                  $isHighlighted={currentHighlightedSection === 'totals'}
+                  $isHighlighted={
+                    currentHighlightedSection === 'totals' && isHelpMode
+                  }
                   ref={(el) => {
                     sectionRefs.current['totals'] = el as HTMLElement;
                   }}
@@ -1483,7 +1516,9 @@ export default function DetailStep({
                 > */}
                 <BorderSection
                   sx={{ p: 3 }}
-                  $isHighlighted={currentHighlightedSection === 'date-range'}
+                  $isHighlighted={
+                    currentHighlightedSection === 'date-range' && isHelpMode
+                  }
                   ref={(el) => {
                     sectionRefs.current['date-range'] = el as HTMLElement;
                   }}
@@ -1544,7 +1579,9 @@ export default function DetailStep({
                 > */}
                 <BorderSection
                   sx={{ p: 3 }}
-                  $isHighlighted={currentHighlightedSection === 'expenses'}
+                  $isHighlighted={
+                    currentHighlightedSection === 'expenses' && isHelpMode
+                  }
                   ref={(el) => {
                     sectionRefs.current['expenses'] = el as HTMLElement;
                   }}
@@ -1871,7 +1908,7 @@ export default function DetailStep({
                 <BorderSection
                   sx={{ p: 3 }}
                   $isHighlighted={
-                    currentHighlightedSection === 'amount-details'
+                    currentHighlightedSection === 'amount-details' && isHelpMode
                   }
                   ref={(el) => {
                     sectionRefs.current['amount-details'] = el as HTMLElement;
