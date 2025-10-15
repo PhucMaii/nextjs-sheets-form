@@ -60,6 +60,8 @@ import { LoadingButton } from '@mui/lab';
 import { times } from '@/app/lib/constant';
 import SmallProgramCard from './SmallProgramCard';
 import { getProgramById } from '@/app/utils/programs';
+// import useSyncProgramSchedules from '@/hooks/sync/useSyncProgramSchedules';
+// import { ITEM_CATEGORIZED } from '@/pages/api/admin/[companyId]/orderedItems/PUT';
 
 type ViewType = 'month' | 'week' | 'day';
 
@@ -115,10 +117,48 @@ export default function ProgramSchedules({ showNotification }: IProps) {
   const [isTimeInputModalOpen, setIsTimeInputModalOpen] = useState<{
     open: boolean;
     targetId: string | null;
+    defaultValue: string | null;
   }>({
     open: false,
     targetId: null,
+    defaultValue: null,
   });
+
+  const getStartAndEndDate = () => {
+    if (viewType === 'month') {
+      const startDate = startOfMonth(currentDate);
+      const endDate = endOfMonth(currentDate);
+      return { startDate, endDate };
+    } else if (viewType === 'week') {
+      const startDate = startOfWeek(currentDate);
+      const endDate = endOfWeek(currentDate);
+      return { startDate, endDate };
+    } else if (viewType === 'day') {
+      const startDate = startOfDay(currentDate);
+      const endDate = endOfDay(currentDate);
+      return { startDate, endDate };
+    }
+
+    return { startDate: new Date(), endDate: new Date() };
+  };
+  // const { startDate, endDate } = getStartAndEndDate();
+  // const handleSyncSuccess = (updatedSchedules: any[]) => {
+  //   showNotification('success', 'Program schedules synced successfully');
+  //   // refetchSchedules();
+  //   setSchedules(updatedSchedules);
+  // };
+  // const handleSyncError = (error: any) => {
+  //   showNotification('error', 'Failed to sync program schedules: ' + error);
+  // };
+
+  // const { triggerSync, getSyncStatus } = useSyncProgramSchedules(
+  //   companyId,
+  //   schedules,
+  //   startDate,
+  //   endDate,
+  //   handleSyncSuccess,
+  //   handleSyncError,
+  // );
 
   const { data: dbSchedules, refetch: refetchSchedules } = useQuery({
     queryKey: ['schedules'],
@@ -150,6 +190,12 @@ export default function ProgramSchedules({ showNotification }: IProps) {
     }
   }, [dbSchedules]);
 
+  // useEffect(() => {
+  //   if (schedules.length > 0) {
+  //     triggerSync(schedules);
+  //   }
+  // }, [schedules, triggerSync]);
+
   const sortedSchedules = useMemo(() => {
     return [...schedules].sort((a, b) => {
       const aDate = new Date(`${a.date} ${a.time}`);
@@ -177,24 +223,6 @@ export default function ProgramSchedules({ showNotification }: IProps) {
   //   const program = getProgramById(id);
   //   return program?.zoneWaterPrograms.length > 10 ? '#4CAF50' : '#2196F3';
   // };
-
-  const getStartAndEndDate = () => {
-    if (viewType === 'month') {
-      const startDate = startOfMonth(currentDate);
-      const endDate = endOfMonth(currentDate);
-      return { startDate, endDate };
-    } else if (viewType === 'week') {
-      const startDate = startOfWeek(currentDate);
-      const endDate = endOfWeek(currentDate);
-      return { startDate, endDate };
-    } else if (viewType === 'day') {
-      const startDate = startOfDay(currentDate);
-      const endDate = endOfDay(currentDate);
-      return { startDate, endDate };
-    }
-
-    return { startDate: new Date(), endDate: new Date() };
-  };
 
   const deleteSchedule = (id: string) => {
     setSchedules((prev) => prev.filter((s) => s.id !== id));
@@ -255,18 +283,23 @@ export default function ProgramSchedules({ showNotification }: IProps) {
         zoneWaterPrograms: program?.zoneWaterPrograms || [],
       };
 
-      setSchedules((prev) => [...prev, newSchedule]);
+      setSchedules((prev) => {
+        const newSchedules = [...prev, newSchedule];
+        // triggerSync(newSchedules);
+        return newSchedules;
+      });
 
       // Only ask for time if the schedule is new
       setIsTimeInputModalOpen({
         open: true,
         targetId: scheduleId,
+        defaultValue: time || defaultScheduleTime,
       });
     } else {
       // Moving existing schedule
       scheduleId = result.draggableId;
-      setSchedules((prev) =>
-        prev.map((schedule) =>
+      setSchedules((prev) => {
+        const updatedSchedules = prev.map((schedule) =>
           schedule.id === scheduleId
             ? {
                 ...schedule,
@@ -274,8 +307,10 @@ export default function ProgramSchedules({ showNotification }: IProps) {
                 time: time || schedule.time,
               }
             : schedule,
-        ),
-      );
+        );
+        // triggerSync(updatedSchedules);
+        return updatedSchedules;
+      });
     }
   };
 
@@ -324,6 +359,7 @@ export default function ProgramSchedules({ showNotification }: IProps) {
           setIsTimeInputModalOpen({
             open: false,
             targetId: null,
+            defaultValue: null,
           })
         }
         updatedField={isTimeInputModalOpen.targetId || ''}
@@ -331,7 +367,7 @@ export default function ProgramSchedules({ showNotification }: IProps) {
         label="Time"
         menuList={times}
         renderField={'time'}
-        defaultValue={defaultScheduleTime}
+        defaultValue={isTimeInputModalOpen.defaultValue || defaultScheduleTime}
         handleUpdate={handleUpdateTime as any}
       />
       <Box sx={{ p: 3 }}>
@@ -582,6 +618,8 @@ export default function ProgramSchedules({ showNotification }: IProps) {
               refetchSchedules={refetchSchedules}
               programs={displayedPrograms}
               removeSchedule={deleteSchedule}
+              handleSave={handleSave}
+              setSchedules={setSchedules}
             />
           )}
           {viewType === 'week' && (
@@ -592,19 +630,20 @@ export default function ProgramSchedules({ showNotification }: IProps) {
               refetchSchedules={refetchSchedules}
               programs={displayedPrograms}
               removeSchedule={deleteSchedule}
+              handleSave={handleSave}
+              setSchedules={setSchedules}
             />
           )}
           {viewType === 'day' && (
             <ProgramDayView
               currentDate={currentDate}
-              getSchedulesForDate={getSchedulesForDate}
               getSchedulesForTimeSlot={getSchedulesForTimeSlot}
-              toggleScheduleStatus={toggleScheduleStatus}
               removeSchedule={deleteSchedule}
-              getStatusIcon={getStatusIcon}
               showNotification={showNotification}
               refetchSchedules={refetchSchedules}
               programs={displayedPrograms}
+              handleSave={handleSave}
+              setSchedules={setSchedules}
             />
           )}
 

@@ -8,7 +8,9 @@ export const useHydrawiseAPI = (companyId: string) => {
   const [isLoading, setIsLoading] = useState(true);  
 
   useEffect(() => {
-    getZones();
+    if (zones.length === 0) {
+      getZones();
+    }
   }, []);
 
   const getZones = async () => {

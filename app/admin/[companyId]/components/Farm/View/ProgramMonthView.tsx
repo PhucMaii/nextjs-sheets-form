@@ -25,6 +25,8 @@ interface IProps {
   refetchSchedules: () => void;
   programs: Program[];
   removeSchedule: (id: string) => void;
+  handleSave: () => Promise<void>;
+  setSchedules: any;
 }
 
 const ProgramMonthView = ({
@@ -34,6 +36,8 @@ const ProgramMonthView = ({
   showNotification,
   refetchSchedules,
   removeSchedule,
+  handleSave,
+  setSchedules,
 }: IProps) => {
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -169,8 +173,9 @@ const ProgramMonthView = ({
                                       program={program}
                                       showNotification={showNotification}
                                       refetchSchedules={refetchSchedules}
-                                      programs={daySchedules}
                                       removeSchedule={removeSchedule}
+                                      handleSave={handleSave}
+                                      setSchedules={setSchedules}
                                     />
                                   )}
                                 </Draggable>

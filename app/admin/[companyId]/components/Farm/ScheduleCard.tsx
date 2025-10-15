@@ -21,8 +21,9 @@ interface IProps {
   showNotification: ShowNotificationType;
   refetchSchedules: () => void;
   isDetailed?: boolean;
-  programs: Program[];
   removeSchedule: (id: string) => void;
+  handleSave: () => Promise<void>;
+  setSchedules: any
 }
 
 function ScheduleCard({
@@ -33,10 +34,10 @@ function ScheduleCard({
   showNotification,
   refetchSchedules,
   isDetailed = false,
-  programs,
   removeSchedule,
+  handleSave,
+  setSchedules,
 }: IProps) {
-  console.log({program, schedule, programs});
   const { companyId }: any = useParams();
   const [isOpenConfirmModal, setIsOpenConfirmModal] = useState<{
     open: boolean;
@@ -66,6 +67,8 @@ function ScheduleCard({
         removeSchedule(id);
         return;
       }
+      
+      await handleSave();
       const response = await deleteProgramSchedule(id);
 
       if (response.data.error) {
@@ -83,6 +86,15 @@ function ScheduleCard({
 
   const handleUpdateTime = async (id: string, time: string) => {
     try {
+      if (isNaN(Number(id))) {
+        setSchedules((prev: any[]) =>
+          prev.map((schedule: any) =>
+            schedule.id === id ? { ...schedule, time: time } : schedule,
+          ),
+        );
+        return;
+      }
+      await handleSave();
       const response = await updateProgramScheduleTime(id, time);
 
       if (response.data.error) {

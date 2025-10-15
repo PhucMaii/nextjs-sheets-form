@@ -7,6 +7,7 @@ import { WaterStatus } from '@prisma/client';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { USER_ROLE } from '@/app/utils/enum';
 import { getTodayDate } from '@/pages/api/utils/date';
+import { formatReturnSchedules } from './GET';
 
 export default async function handler(
   req: NextApiRequest,
@@ -24,14 +25,17 @@ export default async function handler(
     const formattedStartDate = normalizeDate(startDate);
     const formattedEndDate = normalizeDate(endDate);
 
-    console.log({ formattedStartDate, formattedEndDate }, 'formattedStartDate, formattedEndDate');
+    console.log(
+      { formattedStartDate, formattedEndDate },
+      'formattedStartDate, formattedEndDate',
+    );
 
     const listOfDates = generateListOfDateString(
       formattedStartDate,
       formattedEndDate,
     );
 
-    console.log({ listOfDates }, 'listOfDates');
+    // console.log({ listOfDates }, 'listOfDates');
 
     const existingSchedules = await prisma.programSchedule.findMany({
       where: {
@@ -48,18 +52,18 @@ export default async function handler(
     const { createdSchedules, updateSchedules, deletedSchedules } =
       categorizeProgramSchedules(existingSchedules, updatedSchedules, 'id');
 
-      console.log({
-        createdSchedules,
-        updateSchedules,
-        deletedSchedules,
-      })
+    console.log({
+      createdSchedules,
+      updateSchedules,
+      deletedSchedules,
+    });
 
     // Create new schedules
     const today = getTodayDate();
     const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
     if (createdSchedules.length > 0) {
       await prisma.programSchedule.createMany({
-        data: createdSchedules.map((schedule) => ({
+        data: createdSchedules.map((schedule: any) => ({
           companyId: Number(companyId),
           date: schedule.date,
           time: schedule.time,
@@ -91,12 +95,38 @@ export default async function handler(
     if (deletedSchedules.length > 0) {
       await prisma.programSchedule.deleteMany({
         where: {
-          id: { in: deletedSchedules.map((schedule) => schedule.id) },
+          id: {
+            in: deletedSchedules.map((schedule: any) => schedule.id),
+          },
         },
       });
     }
 
-    return res.status(200).json({ message: 'Schedules updated successfully' });
+    const justUpdatedSchedules = await prisma.programSchedule.findMany({
+      where: {
+        companyId: Number(companyId),
+        date: { in: listOfDates },
+      },
+      include: {
+        waterProgram: {
+          include: {
+            zoneWaterPrograms: {
+              include: {
+                zoneProgram: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const formattedJustUpdatedSchedules =
+      formatReturnSchedules(justUpdatedSchedules);
+
+    return res.status(200).json({
+      message: 'Schedules updated successfully',
+      data: formattedJustUpdatedSchedules,
+    });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
     return res.status(500).json({ error: 'Internal Server Error: ' + error });
@@ -108,7 +138,7 @@ const categorizeProgramSchedules = (
   updatedSchedules: any[],
   comparedField: string = 'id',
 ) => {
-    const categorizedSchedules = [];
+  const categorizedSchedules = [];
   for (const schedule of updatedSchedules) {
     const existingSchedule = existingSchedules.find(
       (existingSchedule) =>
@@ -142,9 +172,15 @@ const categorizeProgramSchedules = (
     });
   }
 
-  const createdSchedules = categorizedSchedules.filter((schedule) => schedule.type === ITEM_CATEGORIZED.CREATE);
-  const updateSchedules = categorizedSchedules.filter((schedule) => schedule.type === ITEM_CATEGORIZED.UPDATE);
-  const deletedSchedules = categorizedSchedules.filter((schedule) => schedule.type === ITEM_CATEGORIZED.DELETE);
+  const createdSchedules = categorizedSchedules.filter(
+    (schedule) => schedule.type === ITEM_CATEGORIZED.CREATE,
+  );
+  const updateSchedules = categorizedSchedules.filter(
+    (schedule) => schedule.type === ITEM_CATEGORIZED.UPDATE,
+  );
+  const deletedSchedules = categorizedSchedules.filter(
+    (schedule) => schedule.type === ITEM_CATEGORIZED.DELETE,
+  );
 
   return {
     createdSchedules,

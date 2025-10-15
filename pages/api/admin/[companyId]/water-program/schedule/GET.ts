@@ -39,11 +39,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    const formattedSchedules = schedules.map((schedule) => ({
-      ...schedule,
-      name: schedule.waterProgram.name,
-      zoneWaterPrograms: schedule.waterProgram.zoneWaterPrograms,
-    }));
+    const formattedSchedules = formatReturnSchedules(schedules);
 
     return res.status(200).json({ data: formattedSchedules });
   } catch (error) {
@@ -51,3 +47,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     return res.status(500).json({ error: 'Internal Server Error' + error });
   }
 }
+
+export const formatReturnSchedules = (schedules: any) => {
+  return schedules.map((schedule: any) => ({
+    ...schedule,
+    name: schedule.waterProgram.name,
+    zoneWaterPrograms: schedule.waterProgram.zoneWaterPrograms,
+  }));
+};

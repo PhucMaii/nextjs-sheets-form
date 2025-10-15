@@ -16,6 +16,8 @@ interface IProps {
   showNotification: ShowNotificationType;
   refetchSchedules: () => void;
   removeSchedule: (id: string) => void;
+  handleSave: () => Promise<void>;
+  setSchedules: any;
 }
 
 const ProgramWeekView = ({
@@ -25,6 +27,8 @@ const ProgramWeekView = ({
   showNotification,
   refetchSchedules,
   removeSchedule,
+  handleSave,
+  setSchedules,
 }: IProps) => {
 
   const weekStart = startOfWeek(currentDate);
@@ -186,10 +190,11 @@ const ProgramWeekView = ({
                               snapshot={snapshot}
                               schedule={schedule}
                               program={program}
-                              programs={programs}
                               showNotification={showNotification}
                               refetchSchedules={refetchSchedules}
                               removeSchedule={removeSchedule}
+                              handleSave={handleSave}
+                              setSchedules={setSchedules}
                             />
                           )}
                         </Draggable>

@@ -1,47 +1,33 @@
 import React from 'react';
-import {
-  Grid,
-  Paper,
-  Typography,
-  Stack,
-  Box,
-  IconButton,
-  Avatar,
-  Card,
-  CardContent,
-  useTheme,
-} from '@mui/material';
+import { Grid, Paper, Typography, Stack, Box, useTheme } from '@mui/material';
 import { alpha } from '@mui/material';
 import { format } from 'date-fns';
 import { Droppable, Draggable } from '@hello-pangea/dnd';
 import { Program } from '../types';
-import { Water as WaterIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import ScheduleCard from '../ScheduleCard';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import { getProgramById } from '@/app/utils/programs';
 
 interface IProps {
   currentDate: Date;
-  getSchedulesForDate: (date: Date) => any[];
   getSchedulesForTimeSlot: (date: Date, time: string) => any[];
   programs: Program[];
-  toggleScheduleStatus: (id: string) => void;
   removeSchedule: (id: string) => void;
-  getStatusIcon: (status: string) => React.ReactNode;
   showNotification: ShowNotificationType;
   refetchSchedules: () => void;
+  handleSave: () => Promise<void>;
+  setSchedules: any;
 }
 
 const ProgramDayView = ({
   currentDate,
-  getSchedulesForDate,
   getSchedulesForTimeSlot,
   programs,
-  toggleScheduleStatus,
-  getStatusIcon,
   showNotification,
   refetchSchedules,
   removeSchedule,
+  handleSave,
+  setSchedules,
 }: IProps) => {
   const timeSlots = Array.from(
     { length: 24 },
@@ -127,8 +113,9 @@ const ProgramDayView = ({
                                   showNotification={showNotification}
                                   refetchSchedules={refetchSchedules}
                                   isDetailed
-                                  programs={programs}
                                   removeSchedule={removeSchedule}
+                                  handleSave={handleSave}
+                                  setSchedules={setSchedules}
                                 />
                                 // <Card
                                 //   ref={provided.innerRef}

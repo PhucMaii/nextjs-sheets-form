@@ -1186,6 +1186,8 @@ model ZoneProgram {
   dayBundlePrograms  DayProgram[]
 
   company       Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
 }
 
 model DayProgram {
@@ -1220,6 +1222,8 @@ model WaterProgram {
   ProgramSchedules    ProgramSchedule[]
 
   company             Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
 }
 
 model ZoneWater {
@@ -1231,7 +1235,7 @@ model ZoneWater {
   WaterProgram    WaterProgram   @relation(fields: [waterId], references: [id], onDelete: Cascade)
 
   @@index([zoneProgramId])
-  @@index([waterId])          
+  @@index([waterId])
 }
 
 model ProgramSchedule {
