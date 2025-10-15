@@ -58,15 +58,19 @@ import { ShowNotificationType } from '@/hooks/useNotification';
 import { WaterStatus } from '@prisma/client';
 import { LoadingButton } from '@mui/lab';
 import { times } from '@/app/lib/constant';
+import SmallProgramCard from './SmallProgramCard';
+import { getProgramById } from '@/app/utils/programs';
 
 type ViewType = 'month' | 'week' | 'day';
 
 interface ScheduleItem {
   id: string;
   programId: number;
+  name?: string;
   date: string;
   time: string;
   status: WaterStatus;
+  zoneWaterPrograms?: ZoneWater[];
 }
 
 export const defaultScheduleTime = '09:00';
@@ -80,7 +84,7 @@ export default function ProgramSchedules({ showNotification }: IProps) {
   const { companyId }: any = useParams();
   const [currentDate, setCurrentDate] = useState(new Date());
   const { zones } = useHydrawiseAPI(companyId);
-  const { getPrograms } = usePrograms(companyId);
+  const { getPrograms } = usePrograms(companyId, []);
 
   const { data: programs } = useQuery({
     queryKey: ['programs'],
@@ -154,8 +158,8 @@ export default function ProgramSchedules({ showNotification }: IProps) {
     });
   }, [schedules]);
 
-  const getProgramById = (id: string | number) =>
-    programs?.find((p: Program) => p.id === Number(id));
+  // const getProgramById = (id: string | number) =>
+  //   programs?.find((p: Program) => Number(p.id) === Number(id));
 
   const getSchedulesForDate = (date: Date) => {
     return sortedSchedules.filter((schedule) => isSameDay(schedule.date, date));
@@ -169,10 +173,10 @@ export default function ProgramSchedules({ showNotification }: IProps) {
     );
   };
 
-  const getProgramColor = (id: string) => {
-    const program = getProgramById(id);
-    return program?.zoneWaterPrograms.length > 10 ? '#4CAF50' : '#2196F3';
-  };
+  // const getProgramColor = (id: string) => {
+  //   const program = getProgramById(id);
+  //   return program?.zoneWaterPrograms.length > 10 ? '#4CAF50' : '#2196F3';
+  // };
 
   const getStartAndEndDate = () => {
     if (viewType === 'month') {
@@ -190,6 +194,10 @@ export default function ProgramSchedules({ showNotification }: IProps) {
     }
 
     return { startDate: new Date(), endDate: new Date() };
+  };
+
+  const deleteSchedule = (id: string) => {
+    setSchedules((prev) => prev.filter((s) => s.id !== id));
   };
 
   const handleSave = async () => {
@@ -236,12 +244,15 @@ export default function ProgramSchedules({ showNotification }: IProps) {
       // Adding new schedule
       scheduleId = `s${Date.now()}`;
       const programId = result.draggableId.replace('program-', '');
+      const program = getProgramById(programId, displayedPrograms);
       const newSchedule: ScheduleItem = {
         id: scheduleId,
         programId: Number(programId),
+        name: program?.name || '',
         date: format(targetDate, 'MM/dd/yyyy'),
         time: time || defaultScheduleTime,
         status: WaterStatus.SCHEDULED,
+        zoneWaterPrograms: program?.zoneWaterPrograms || [],
       };
 
       setSchedules((prev) => [...prev, newSchedule]);
@@ -266,10 +277,6 @@ export default function ProgramSchedules({ showNotification }: IProps) {
         ),
       );
     }
-  };
-
-  const removeSchedule = (scheduleId: string) => {
-    setSchedules((prev) => prev.filter((s) => s.id !== scheduleId));
   };
 
   const toggleScheduleStatus = (scheduleId: string) => {
@@ -529,82 +536,11 @@ export default function ProgramSchedules({ showNotification }: IProps) {
                         // isDragDisabled
                       >
                         {(provided) => (
-                          <Paper
-                            ref={provided.innerRef}
-                            {...provided.dragHandleProps}
-                            {...provided.draggableProps}
-                            elevation={0}
-                            sx={{
-                              p: 2,
-                              borderRadius: 2,
-                              border: `2px solid ${alpha(getProgramColor(program.id), 0.3)}`,
-                              backgroundColor: alpha(
-                                getProgramColor(program.id),
-                                0.1,
-                              ),
-                              minWidth: 220,
-                              cursor: 'grab',
-                              transition:
-                                'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                              '&:hover': {
-                                transform: 'translateY(-2px)',
-                                boxShadow: `0 4px 12px ${alpha(getProgramColor(program.id), 0.3)}`,
-                                borderColor: getProgramColor(program.id),
-                                backgroundColor: alpha(
-                                  getProgramColor(program.id),
-                                  0.15,
-                                ),
-                              },
-                              '&:active': {
-                                cursor: 'grabbing',
-                                transform: 'translateY(0px)',
-                              },
-                            }}
-                          >
-                            <Stack
-                              direction="row"
-                              alignItems="center"
-                              spacing={2}
-                            >
-                              <Avatar
-                                sx={{
-                                  backgroundColor: alpha(
-                                    getProgramColor(program.id),
-                                    0.2,
-                                  ),
-                                  color: getProgramColor(program.id),
-                                  border: `2px solid ${alpha(getProgramColor(program.id), 0.3)}`,
-                                }}
-                              >
-                                <WaterIcon />
-                              </Avatar>
-                              <Box flex={1}>
-                                <Typography
-                                  variant="body1"
-                                  fontWeight={600}
-                                  color={getProgramColor(program.id)}
-                                >
-                                  {program.name}
-                                </Typography>
-                                <Typography
-                                  variant="caption"
-                                  color="text.secondary"
-                                >
-                                  {program.zoneWaterPrograms.length} zones
-                                </Typography>
-                              </Box>
-                              <Box
-                                sx={{
-                                  width: 8,
-                                  height: 8,
-                                  borderRadius: '50%',
-                                  backgroundColor: getProgramColor(program.id),
-                                  opacity: 0.6,
-                                }}
-                              />
-                            </Stack>
-                            {/* {provided.placeholder} */}
-                          </Paper>
+                          <SmallProgramCard
+                            provided={provided}
+                            program={program}
+                            programs={displayedPrograms}
+                          />
                         )}
                       </Draggable>
                     ))}
@@ -642,20 +578,20 @@ export default function ProgramSchedules({ showNotification }: IProps) {
               currentDate={currentDate}
               theme={theme}
               getSchedulesForDate={getSchedulesForDate}
-              getProgramById={getProgramById}
-              getProgramColor={getProgramColor}
               showNotification={showNotification}
               refetchSchedules={refetchSchedules}
+              programs={displayedPrograms}
+              removeSchedule={deleteSchedule}
             />
           )}
           {viewType === 'week' && (
             <ProgramWeekView
               currentDate={currentDate}
               getSchedulesForTimeSlot={getSchedulesForTimeSlot}
-              getProgramById={getProgramById}
-              getProgramColor={getProgramColor}
               showNotification={showNotification}
               refetchSchedules={refetchSchedules}
+              programs={displayedPrograms}
+              removeSchedule={deleteSchedule}
             />
           )}
           {viewType === 'day' && (
@@ -663,11 +599,12 @@ export default function ProgramSchedules({ showNotification }: IProps) {
               currentDate={currentDate}
               getSchedulesForDate={getSchedulesForDate}
               getSchedulesForTimeSlot={getSchedulesForTimeSlot}
-              getProgramById={getProgramById}
-              getProgramColor={getProgramColor}
               toggleScheduleStatus={toggleScheduleStatus}
-              removeSchedule={removeSchedule}
+              removeSchedule={deleteSchedule}
               getStatusIcon={getStatusIcon}
+              showNotification={showNotification}
+              refetchSchedules={refetchSchedules}
+              programs={displayedPrograms}
             />
           )}
 

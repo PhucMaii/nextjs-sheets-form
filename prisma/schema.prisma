@@ -1183,8 +1183,27 @@ model ZoneProgram {
   companyId  Int
 
   zoneWaterPrograms  ZoneWater[]
+  dayBundlePrograms  DayProgram[]
 
   company       Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model DayProgram {
+  id                Int  @id  @default(autoincrement())
+  day               Int // count from 1
+  time              String
+  programId         Int
+  bundleProgramId   Int
+
+  program           ZoneProgram     @relation(fields: [programId], references: [id], onDelete: Cascade)
+  bundleProgram     BundleProgram   @relation(fields: [bundleProgramId], references: [id], onDelete: Cascade)
+}
+
+model BundleProgram {
+  id            Int     @id  @default(autoincrement())
+  name          String
+  
+  dayPrograms   DayProgram[]
 }
 
 model WaterProgram {

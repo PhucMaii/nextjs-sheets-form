@@ -11,16 +11,18 @@ import TimeInputModal from '../Modals/edit/SingleFieldUpdate';
 import ConfirmModal from '../Modals/ConfirmModal';
 import { times } from '@/app/lib/constant';
 import { ShowNotificationType } from '@/hooks/useNotification';
+import { getProgramColorByZoneWaterPrograms } from '@/app/utils/programs';
 
 interface IProps {
   provided: any;
   snapshot: any;
   schedule: ProgramSchedule;
   program: Program | any;
-  getProgramColor: (id: string) => string;
   showNotification: ShowNotificationType;
   refetchSchedules: () => void;
   isDetailed?: boolean;
+  programs: Program[];
+  removeSchedule: (id: string) => void;
 }
 
 function ScheduleCard({
@@ -28,11 +30,13 @@ function ScheduleCard({
   snapshot,
   schedule,
   program,
-  getProgramColor,
   showNotification,
   refetchSchedules,
   isDetailed = false,
+  programs,
+  removeSchedule,
 }: IProps) {
+  console.log({program, schedule, programs});
   const { companyId }: any = useParams();
   const [isOpenConfirmModal, setIsOpenConfirmModal] = useState<{
     open: boolean;
@@ -58,6 +62,10 @@ function ScheduleCard({
 
   const handleDeleteSchedule = async (id: string) => {
     try {
+      if (isNaN(Number(id))) {
+        removeSchedule(id);
+        return;
+      }
       const response = await deleteProgramSchedule(id);
 
       if (response.data.error) {
@@ -67,6 +75,7 @@ function ScheduleCard({
 
       refetchSchedules();
       showNotification('success', response.data.message);
+      removeSchedule(id);
     } catch (error: any) {
       console.log('Fail to delete schedule: ', error);
     }
@@ -131,9 +140,9 @@ function ScheduleCard({
         sx={{
           p: 0.5,
           borderRadius: 0.5,
-          backgroundColor: alpha(getProgramColor(program.id), 0.2),
-          border: `1px solid ${alpha(getProgramColor(program.id), 0.4)}`,
-          borderLeft: `3px solid ${getProgramColor(program.id)}`,
+          backgroundColor: alpha(getProgramColorByZoneWaterPrograms(program.zoneWaterPrograms), 0.2),
+          border: `1px solid ${alpha(getProgramColorByZoneWaterPrograms(program.zoneWaterPrograms), 0.4)}`,
+          borderLeft: `3px solid ${getProgramColorByZoneWaterPrograms(program.zoneWaterPrograms)}`,
           opacity: snapshot.isDragging ? 0.5 : 1,
           cursor: 'grab',
           '&:active': {
@@ -141,7 +150,7 @@ function ScheduleCard({
           },
           transition: 'all 0.2s ease',
           '&:hover': {
-            backgroundColor: alpha(getProgramColor(program.id), 0.3),
+            backgroundColor: alpha(getProgramColorByZoneWaterPrograms(program.zoneWaterPrograms), 0.3),
           },
           display: 'flex',
           alignItems: 'center',
@@ -160,7 +169,7 @@ function ScheduleCard({
               sx={{
                 fontSize: isDetailed ? '0.8rem' : '0.65rem',
                 fontWeight: 600,
-                color: isDetailed ? theme.palette.text.primary : getProgramColor(program.id),
+                color: isDetailed ? theme.palette.text.primary : getProgramColorByZoneWaterPrograms(program.zoneWaterPrograms),
                 display: 'block',
                 lineHeight: 1.2,
               }}
@@ -192,7 +201,7 @@ function ScheduleCard({
             variant={isDetailed ? 'subtitle1' : 'caption'}
             sx={{
               fontSize: isDetailed ? '0.9rem' : '0.6rem',
-              color: getProgramColor(program.id),
+              color: getProgramColorByZoneWaterPrograms(program.zoneWaterPrograms),
               display: 'block',
               lineHeight: 1.2,
               overflow: 'hidden',
@@ -200,7 +209,7 @@ function ScheduleCard({
               whiteSpace: 'nowrap',
             }}
           >
-            {program.name}
+            {program?.name || program?.waterProgram?.name}
           </Typography>
         </Box>
         <Box display="flex" alignItems="center" gap={1}>

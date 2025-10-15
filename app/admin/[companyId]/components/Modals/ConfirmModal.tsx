@@ -32,7 +32,9 @@ export default function ConfirmModal({
       setIsLoading(true);
       await handleSubmit();
       setIsLoading(false);
-      showNotification('success', successMsg ? successMsg : 'Action Completed Successfully');
+      if (successMsg) {
+        showNotification('success', successMsg);
+      }
       onClose();
     } catch (error: any) {
       console.log('Fail to confirm: ', error);

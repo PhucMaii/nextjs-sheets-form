@@ -13,25 +13,27 @@ import {
 import { Droppable, Draggable } from '@hello-pangea/dnd';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import ScheduleCard from '../ScheduleCard';
+import { memo } from 'react';
+import { getProgramById, getProgramColor } from '@/app/utils/programs';
+import { Program } from '../types';
 
 interface IProps {
   currentDate: Date;
   theme: any;
   getSchedulesForDate: (date: Date) => any[];
-  getProgramById: (id: string) => any[];
-  getProgramColor: (id: string) => string;
   showNotification: ShowNotificationType;
   refetchSchedules: () => void;
+  programs: Program[];
+  removeSchedule: (id: string) => void;
 }
 
 const ProgramMonthView = ({
   currentDate,
   theme,
   getSchedulesForDate,
-  getProgramById,
-  getProgramColor,
   showNotification,
   refetchSchedules,
+  removeSchedule,
 }: IProps) => {
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -148,7 +150,8 @@ const ProgramMonthView = ({
                             .slice(0, 3)
                             .map((schedule, scheduleIndex) => {
                               const program: any = getProgramById(
-                                schedule.programId,
+                                schedule.id,
+                                daySchedules,
                               );
                               if (!program) return null;
 
@@ -164,107 +167,11 @@ const ProgramMonthView = ({
                                       snapshot={snapshot}
                                       schedule={schedule}
                                       program={program}
-                                      getProgramColor={getProgramColor}
                                       showNotification={showNotification}
                                       refetchSchedules={refetchSchedules}
+                                      programs={daySchedules}
+                                      removeSchedule={removeSchedule}
                                     />
-                                    // <Box
-                                    //   ref={provided.innerRef}
-                                    //   onClick={() =>
-                                    //     setIsTimeInputModalOpen({
-                                    //       open: true,
-                                    //       targetId: schedule.id,
-                                    //       defaultValue: schedule.time,
-                                    //     })
-                                    //   }
-                                    //   {...provided.draggableProps}
-                                    //   sx={{
-                                    //     p: 0.5,
-                                    //     borderRadius: 0.5,
-                                    //     backgroundColor: alpha(
-                                    //       getProgramColor(program.id),
-                                    //       0.2,
-                                    //     ),
-                                    //     border: `1px solid ${alpha(getProgramColor(program.id), 0.4)}`,
-                                    //     borderLeft: `3px solid ${getProgramColor(program.id)}`,
-                                    //     opacity: snapshot.isDragging ? 0.5 : 1,
-                                    //     cursor: 'grab',
-                                    //     '&:active': {
-                                    //       cursor: 'grabbing',
-                                    //     },
-                                    //     transition: 'all 0.2s ease',
-                                    //     '&:hover': {
-                                    //       backgroundColor: alpha(
-                                    //         getProgramColor(program.id),
-                                    //         0.3,
-                                    //       ),
-                                    //     },
-                                    //     display: 'flex',
-                                    //     alignItems: 'center',
-                                    //     justifyContent: 'space-between',
-                                    //   }}
-                                    // >
-                                    //   <Box>
-                                    //     <Typography
-                                    //       variant="caption"
-                                    //       sx={{
-                                    //         fontSize: '0.65rem',
-                                    //         fontWeight: 600,
-                                    //         color: getProgramColor(program.id),
-                                    //         display: 'block',
-                                    //         lineHeight: 1.2,
-                                    //       }}
-                                    //     >
-                                    //       {schedule.time}
-                                    //     </Typography>
-                                    //     <Typography
-                                    //       variant="caption"
-                                    //       sx={{
-                                    //         fontSize: '0.6rem',
-                                    //         color: getProgramColor(program.id),
-                                    //         display: 'block',
-                                    //         lineHeight: 1.2,
-                                    //         overflow: 'hidden',
-                                    //         textOverflow: 'ellipsis',
-                                    //         whiteSpace: 'nowrap',
-                                    //       }}
-                                    //     >
-                                    //       {program.name}
-                                    //     </Typography>
-                                    //   </Box>
-                                    //   <Box
-                                    //     display="flex"
-                                    //     alignItems="center"
-                                    //     gap={1}
-                                    //   >
-                                    //     <Box
-                                    //       {...provided.dragHandleProps}
-                                    //       sx={{
-                                    //         cursor: 'grab',
-                                    //         display: 'flex',
-                                    //         alignItems: 'center',
-                                    //         '&:active': { cursor: 'grabbing' },
-                                    //       }}
-                                    //     >
-                                    //       <DragHandleIcon color="action" />
-                                    //     </Box>
-                                    //     <IconButton
-                                    //       onClick={(e: any) => {
-                                    //         e.stopPropagation();
-                                    //         e.preventDefault();
-                                    //         setIsOpenConfirmModal({
-                                    //           open: true,
-                                    //           targetId: schedule.id,
-                                    //         })
-                                    //       }}
-                                    //     >
-                                    //       <Trash2Icon
-                                    //         size={16}
-                                    //         color={theme.palette.error.main}
-                                    //       />
-                                    //     </IconButton>
-                                    //   </Box>
-                                    // </Box>
                                   )}
                                 </Draggable>
                               );

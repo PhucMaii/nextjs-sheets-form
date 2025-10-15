@@ -18,13 +18,13 @@ import { Program } from '../types';
 import { Water as WaterIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import ScheduleCard from '../ScheduleCard';
 import { ShowNotificationType } from '@/hooks/useNotification';
+import { getProgramById } from '@/app/utils/programs';
 
 interface IProps {
   currentDate: Date;
   getSchedulesForDate: (date: Date) => any[];
   getSchedulesForTimeSlot: (date: Date, time: string) => any[];
-  getProgramById: (id: string) => any[];
-  getProgramColor: (id: string) => string;
+  programs: Program[];
   toggleScheduleStatus: (id: string) => void;
   removeSchedule: (id: string) => void;
   getStatusIcon: (status: string) => React.ReactNode;
@@ -36,13 +36,12 @@ const ProgramDayView = ({
   currentDate,
   getSchedulesForDate,
   getSchedulesForTimeSlot,
-  getProgramById,
-  getProgramColor,
+  programs,
   toggleScheduleStatus,
-  removeSchedule,
   getStatusIcon,
   showNotification,
   refetchSchedules,
+  removeSchedule,
 }: IProps) => {
   const timeSlots = Array.from(
     { length: 24 },
@@ -109,6 +108,7 @@ const ProgramDayView = ({
                         {timeSchedules.map((schedule) => {
                           const program: Program | any = getProgramById(
                             schedule.programId,
+                            programs,
                           );
                           if (!program) return null;
 
@@ -124,10 +124,11 @@ const ProgramDayView = ({
                                   snapshot={snapshot}
                                   schedule={schedule}
                                   program={program}
-                                  getProgramColor={getProgramColor}
                                   showNotification={showNotification}
                                   refetchSchedules={refetchSchedules}
                                   isDetailed
+                                  programs={programs}
+                                  removeSchedule={removeSchedule}
                                 />
                                 // <Card
                                 //   ref={provided.innerRef}

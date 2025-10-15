@@ -6,11 +6,18 @@ import { blueGrey } from '@mui/material/colors';
 import Programs from '../components/Farm/Programs';
 import ProgramSchedules from '../components/Farm/ProgramSchedules';
 import useNotification from '@/hooks/useNotification';
+import BundlePrograms from '../components/Farm/BundlePrograms';
 
 export default function Farm() {
   const [tab, setTab] = useState('programs');
 
   const { showNotification, NotificationComp } = useNotification();
+
+  const renderedComponents: any = {
+    programs: <Programs showNotification={showNotification} />,
+    schedules: <ProgramSchedules showNotification={showNotification} />,
+    bundles: <BundlePrograms />,
+  }
 
   return (
     <Sidebar>
@@ -25,12 +32,11 @@ export default function Farm() {
       >
         <Tab label="Programs" value="programs" />
         <Tab label="Schedules" value="schedules" />
+        <Tab label="Bundle Programs" value="bundles" />
       </Tabs>
 
-      {tab === 'programs' && <Programs showNotification={showNotification} />}
-      {tab === 'schedules' && (
-        <ProgramSchedules showNotification={showNotification} />
-      )}
+      {renderedComponents[tab]}
+      
     </Sidebar>
   );
 }
