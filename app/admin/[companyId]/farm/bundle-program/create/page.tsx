@@ -1,14 +1,13 @@
 'use client';
-import { Box, InputAdornment, TextField, Typography } from '@mui/material';
-import React from 'react';
-import { BorderSection, ShadowSection } from '../../../reports/styled';
+import { Box, Button, InputAdornment, TextField, Typography } from '@mui/material';
+import React, { useState } from 'react';
+import { BorderSection } from '../../../reports/styled';
 import Sidebar from '../../../components/Sidebar/Sidebar';
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { getAdminApiUrl } from '@/app/utils/enum';
 import { useParams } from 'next/navigation';
-import ProgramCard from '../../../components/Farm/ProgramCard';
 import SmallProgramCard from '../../../components/Farm/SmallProgramCard';
 import {
   DragDropContext,
@@ -16,7 +15,7 @@ import {
   Droppable,
   DropResult,
 } from '@hello-pangea/dnd';
-import { usePrograms } from '@/hooks/db-tables/usePrograms';
+import AddIcon from '@mui/icons-material/Add';
 
 export default function CreateBundleProgram() {
   const { companyId }: any = useParams();
@@ -32,7 +31,7 @@ export default function CreateBundleProgram() {
     },
   });
 
-  const { getProgramColor } = usePrograms(companyId, programs || []);
+  const [daySchedules, setDaySchedules] = useState<any[]>([]);
 
   const onDragEnd = (result: DropResult) => {
     console.log(result);
@@ -61,14 +60,16 @@ export default function CreateBundleProgram() {
 
           <BorderSection>
             <Typography variant="subtitle1">Program List</Typography>
-            <Droppable droppableId="program-list">
+            <Droppable droppableId="program-list" isDropDisabled={true}>
               {(provided) => (
                 <Box
                   {...provided.droppableProps}
                   ref={provided.innerRef}
                   display="flex"
-                  flexDirection="column"
+                  flexDirection="row"
+                  alignItems="center"
                   gap={1}
+                  mt={2}
                 >
                   {programs?.map((program: any) => (
                     <Draggable
@@ -81,10 +82,48 @@ export default function CreateBundleProgram() {
                           provided={provided}
                           key={program.id}
                           program={program}
-                          getProgramColor={getProgramColor}
+                          programs={programs}
                         />
                       )}
                     </Draggable>
+                  ))}
+                </Box>
+              )}
+
+            </Droppable>
+
+            <Box display="flex" justifyContent="space-between" alignItems="center">
+              <Typography variant="subtitle1" my={2}>Schedule Programs</Typography>
+              <Button variant="outlined" color="primary" startIcon={<AddIcon />}>
+                Add Day
+              </Button>
+            </Box>
+
+            <Droppable droppableId="day-schedule-list">
+              {(provided) => (
+                <Box
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                  display="flex"
+                  flexDirection="row"
+                  alignItems="center"
+                  gap={1}
+                  mt={2}
+                >
+                  {daySchedules.map((daySchedule, index: any) => (
+                    <Box display="flex" flexDirection="column" gap={1}>
+                      <Typography variant="subtitle1">Day {index + 1}</Typography>
+                      <Box display="flex" flexDirection="row" gap={1}>
+                        {daySchedule.programs.map((program: any) => (
+                          <SmallProgramCard
+                            provided={provided}
+                            key={program.id}
+                            programs={programs}
+                            program={program}
+                          />
+                        ))}
+                      </Box>
+                    </Box>
                   ))}
                 </Box>
               )}

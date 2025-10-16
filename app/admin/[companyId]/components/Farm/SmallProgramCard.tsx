@@ -14,7 +14,7 @@ interface IProps {
 export default function SmallProgramCard({
     provided,
     program,
-    programs,
+    programs
 }: IProps) {
     
   return (

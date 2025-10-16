@@ -133,7 +133,7 @@ export default function DetailStep({
   });
 
   useEffect(() => {
-    if (defaultCodDate) {
+    if (defaultCodDate) { 
       setCodDate(dayjs(defaultCodDate));
     }
   }, [defaultCodDate]);
