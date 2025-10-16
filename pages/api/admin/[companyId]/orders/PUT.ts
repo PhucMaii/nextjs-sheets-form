@@ -4,6 +4,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 // import { getServerSession } from 'next-auth';
 // import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import {
+  restockInventoryItem,
   // restockInventoryItem,
   subtractInventoryItem,
 } from '../orderedItems/single';
@@ -85,6 +86,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
               },
             },
             inventoryUnit: true,
+            inventoryItem: true,
           },
         },
       },
@@ -124,6 +126,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
+    // If move order to the past -> Inventory Item get subtracted
     if (
       isAffectInventory &&
       updateData.deliveryDate &&
@@ -148,6 +151,46 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             `Subtract ${item.quantity} ${item.fifo.inventoryItem.name} from inventory due to order ${orderId} delivery date from ${existingOrder.deliveryDate} to ${deliveryDate} update`,
           );
         }
+      }
+    }
+
+    // If move order to the future -> Inventory Item get restock
+    if (updateData.deliveryDate) {
+      const normalizedNewDeliveryDate = new Date(updateData.deliveryDate);
+      const normalizedOldDeliveryDate = new Date(updatedOrder.deliveryDate);
+
+      if (
+        normalizedNewDeliveryDate > normalizedOldDeliveryDate &&
+        updatedOrder.hasSubtractInventory
+      ) {
+        for (const item of updatedOrder.items) {
+          if (item?.fifo && item?.inventoryUnit) {
+            await restockInventoryItem(
+              orderId,
+              item.fifo,
+              item.inventoryUnit,
+              item.quantity,
+            );
+          }
+          // Record inventory log
+          await recordOrderInventoryLog(
+            orderId,
+            item?.inventoryItemId || -1,
+            item.quantity,
+            InventoryLogType.RESTOCK,
+            InventoryLogFrom.EDIT_ORDER,
+            `Restock ${item.quantity} ${item?.inventoryItem?.name} to inventory due to order ${orderId} delivery date from ${existingOrder.deliveryDate} to ${deliveryDate} update`,
+          );
+        }
+
+        await prisma.orders.update({
+          where: {
+            id: orderId,
+          },
+          data: {
+            hasSubtractInventory: false,
+          },
+        });
       }
     }
 

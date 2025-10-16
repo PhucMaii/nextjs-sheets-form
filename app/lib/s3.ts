@@ -57,13 +57,15 @@ export const generateImgUrl = (
   fileKey: string,
   isCheque: boolean = false,
 ) => {
+  console.log(fileKey, 'fileKey in generateImgUrl');
   if (!fileKey) {
     console.warn('No file key provided to generateImgUrl');
     return '/images/not-found.png';
   }
 
+  const encodedFileKey = encodeURIComponent(fileKey).replace(/%2F/g, '/');
   const cdnHost = isCheque ? process.env.NEXT_PUBLIC_S3_CDN_HOST_CHEQUE : process.env.NEXT_PUBLIC_S3_CDN_HOST;
-  return `https://${cdnHost}/${fileKey}`;
+  return `https://${cdnHost}/${encodedFileKey}`;
   // try {
   //   const bucketName = isCheque
   //     ? process.env.NEXT_PUBLIC_S3_BUCKET_NAME_CHEQUE

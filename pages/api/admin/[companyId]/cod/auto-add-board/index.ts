@@ -343,9 +343,9 @@ export const insertOrdersToSelectedBoards = async (
   const noRouteOrderIds = orders
     .filter((order: any) => {
       return (
-        !order.reassignment ||
-        order.user.routes.length === 0 ||
-        order.user.routes.find((route: any) => route.route.day !== day)
+        !order.reassignment &&
+        (order.user.routes.length === 0 ||
+        order.user.routes.find((route: any) => route.route.day !== day))
       );
     })
     .map((order: any) => order.id);

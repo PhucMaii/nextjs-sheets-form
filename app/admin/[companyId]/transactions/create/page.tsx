@@ -87,9 +87,9 @@ export default function CreateTransaction() {
   });
 
   // Expense items for stock purchases
-  const [expenseItems, setExpenseItems] = useState<IExpenseItem[]>([
+  const [expenseItems, setExpenseItems] = useState<IExpenseItem[] | any[]>([
     {
-      id: 1,
+      id: Date.now().toString(),
       vendorId: 1,
       quantity: 1,
       units: [],
@@ -276,7 +276,7 @@ export default function CreateTransaction() {
   const clearExpenseItems = () => {
     setExpenseItems([
       {
-        id: -1,
+        id: Date.now().toString(),
         vendorId: 1,
         quantity: 1,
         units: [],

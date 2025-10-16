@@ -144,7 +144,13 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     // const vendorItems = await prisma.vendorItem.findMany({});
     // Create ordered items
     if (items.length > 0) {
-      await createFifo(driver?.companyId || -1, items, createdAt, createdBy);
+      await createFifo(
+        driver?.companyId || -1,
+        items,
+        createdAt,
+        createdBy,
+        newExpense.id,
+      );
 
       const vendorItems = await prisma.vendorItem.findMany({
         where: {

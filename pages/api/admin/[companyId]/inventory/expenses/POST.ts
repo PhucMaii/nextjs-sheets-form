@@ -5,7 +5,6 @@ import {
   InventoryLogFrom,
   InventoryLogType,
   InventoryUnit,
-  PrismaClient,
 } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate } from '@/pages/api/utils/date';
@@ -13,9 +12,10 @@ import { updateCheque } from '../../expenses/PUT';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { USER_ROLE } from '@/app/utils/enum';
 import { recordTransactionInventoryLog } from '@/pages/api/utils/logs';
+import prisma from '@/client';
 
 export interface IExpenseItem {
-  id: number;
+  id: number
   quantity: number;
   // unitPrice: number;
   vendorId: number;
@@ -46,8 +46,6 @@ interface IBody {
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const {
       date,
       amount,
@@ -86,7 +84,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       return res.status(404).json({ error: 'Payment Method Not Found' });
     }
 
-    const vendors = items.reduce((acc: any, item: any) => {
+    const vendorIds = items.reduce((acc: any, item: any) => {
       if (!acc.includes(item.vendorId)) {
         acc.push(item.vendorId);
       }
@@ -99,7 +97,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         Number(companyId),
         invoice,
         date,
-        vendors,
+        vendorIds,
       );
 
       if (!isExpenseValid.ok) {
@@ -139,15 +137,13 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       createdBy,
     );
 
-    // Connect Vendors and Expense
-    if (vendors.length > 0) {
-      await prisma.vendorExpense.createMany({
-        data: vendors.map((vendor: any) => {
-          return {
-            expenseId: newExpense.id,
-            vendorId: vendor,
-          };
-        }),
+    // Connect Vendor and Expense
+    if (vendorIds[0]) {
+      await prisma.vendorExpense.create({
+        data: {
+          expenseId: newExpense.id,
+          vendorId: vendorIds[0], // Only connect one vendor to expense because one transaction only has one vendor
+        }
       });
     }
 
@@ -552,8 +548,6 @@ export const checkIsExpenseValid = async (
   date: string,
   vendors: number[],
 ) => {
-  const prisma = new PrismaClient();
-
   const existingVendorExpense = await prisma.expense.findMany({
     where: {
       invoice: invoice,
@@ -590,7 +584,6 @@ export const checkAndUpdateUnits = async (
   if (newUnits.length === 0) {
     return;
   }
-  const prisma = new PrismaClient();
 
   const sortedDBUnits = dbUnits.sort((a, b) => a?.ratio - b?.ratio);
   const sortedNewUnits = newUnits.sort((a, b) => a?.ratio - b?.ratio);
@@ -731,9 +724,8 @@ export const createFifo = async (
   vendorItemList: any,
   createdAt: string,
   createdBy: string,
+  newExpenseId?: number,
 ) => {
-  const prisma = new PrismaClient();
-
   const allNegativeFifo = await prisma.fifo.findMany({
     where: {
       companyId,
@@ -772,6 +764,18 @@ export const createFifo = async (
         },
       });
 
+      // record inventory log
+      if (newExpenseId) {
+        await recordTransactionInventoryLog(
+          newExpenseId || 0,
+          item?.inventoryItemId || item?.inventoryItem?.id,
+          item.quantity,
+          InventoryLogType.STOCK_IN,
+          InventoryLogFrom.CREATE_TRANSACTION,
+          `Create ${item.quantity} ${item.name} to inventory due to expense ${newExpenseId} created`,
+        );
+      }
+
       // Update all ordered items has targeted fifo id
       await prisma.orderedItems.updateMany({
         where: {
@@ -809,17 +813,30 @@ export const createFifo = async (
       };
     });
 
-  await prisma.fifo.createMany({
-    data: fifoItems,
-  });
+  if (fifoItems.length > 0) {
+    await prisma.fifo.createMany({
+      data: fifoItems,
+    });
+
+    for (const item of fifoItems) {
+      if (newExpenseId) {
+        await recordTransactionInventoryLog(
+          newExpenseId,
+          item.inventoryItemId,
+          item.quantity,
+          InventoryLogType.STOCK_IN,
+          InventoryLogFrom.CREATE_TRANSACTION,
+          `Create ${item.quantity} ${item.name} to inventory due to expense ${newExpenseId} created`,
+        );
+      }
+    }
+  }
 };
 
 export const updateVendorItemQuantity = async (
   existedItem: IVendorItem,
   vendorItem: any,
 ) => {
-  const prisma = new PrismaClient();
-
   await prisma.vendorItem.update({
     where: {
       id: vendorItem.id,
@@ -837,8 +854,6 @@ export const createOrderedItems = async (
   createdAt: string,
   createdBy: string,
 ) => {
-  const prisma = new PrismaClient();
-
   const inventoryUnits = await prisma.inventoryUnit.findMany({
     where: {
       vendorItemId: {
