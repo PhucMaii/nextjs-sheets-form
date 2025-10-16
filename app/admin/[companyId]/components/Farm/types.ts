@@ -9,6 +9,7 @@ export interface Program {
   description?: string;
   createdAt: Date;
   updatedAt: Date;
+  time?: string;
 }
 
 export interface ZoneWater {

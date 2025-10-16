@@ -13,7 +13,7 @@ import { LoadingButton } from '@mui/lab';
 export interface SingleFieldUpdateProps {
   title: string;
   label: string;
-  handleUpdate?: (key: string, value: any) => Promise<void>;
+  handleUpdate?: (key: string, value: any) => Promise<void> | void;
   menuList: any;
   open: boolean;
   onClose?: any;

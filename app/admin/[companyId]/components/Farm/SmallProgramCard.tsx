@@ -6,17 +6,18 @@ import { Water as WaterIcon } from '@mui/icons-material';
 import { getProgramColor } from '@/app/utils/programs';
 
 interface IProps {
-    provided: any;
-    program: Program;
-    programs: Program[];
+  provided: any;
+  program: Program;
+  programs: Program[];
+  isSmall?: boolean;
 }
 
 export default function SmallProgramCard({
-    provided,
-    program,
-    programs
+  provided,
+  program,
+  programs,
+  isSmall = false,
 }: IProps) {
-    
   return (
     <Paper
       ref={provided.innerRef}
@@ -28,7 +29,7 @@ export default function SmallProgramCard({
         borderRadius: 2,
         border: `2px solid ${alpha(getProgramColor(program.id, programs), 0.3)}`,
         backgroundColor: alpha(getProgramColor(program.id, programs), 0.1),
-        minWidth: 220,
+        minWidth: isSmall ? 150 : 220,
         cursor: 'grab',
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         '&:hover': {
@@ -61,9 +62,18 @@ export default function SmallProgramCard({
           >
             {program.name}
           </Typography>
-          <Typography variant="caption" color="text.secondary">
-            {program.zoneWaterPrograms.length} zones
-          </Typography>
+          <Box display="flex" alignItems="center" gap={1}>
+            {
+              program.time && (
+                <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                  {program.time} •
+                </Typography>
+              )
+            }
+            <Typography variant="caption" color="text.secondary">
+              {program?.zoneWaterPrograms?.length} zones
+            </Typography>
+          </Box>
         </Box>
         <Box
           sx={{
