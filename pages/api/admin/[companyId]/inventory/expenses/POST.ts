@@ -15,7 +15,7 @@ import { recordTransactionInventoryLog } from '@/pages/api/utils/logs';
 import prisma from '@/client';
 
 export interface IExpenseItem {
-  id: number
+  id: number;
   quantity: number;
   // unitPrice: number;
   vendorId: number;
@@ -143,7 +143,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         data: {
           expenseId: newExpense.id,
           vendorId: vendorIds[0], // Only connect one vendor to expense because one transaction only has one vendor
-        }
+        },
       });
     }
 
@@ -752,6 +752,7 @@ export const createFifo = async (
       // itemQuantity > negativeFifo.quantity
       // Delete targeted fifo and create new fifo
       deletedFifoIds.push(negativeFifo.id);
+      console.log(itemQuantity + negativeFifo.quantity, 'New Fifo Quantity');
       const newFifo = await prisma.fifo.create({
         data: {
           quantity: itemQuantity + negativeFifo.quantity, // subtract to negative mean subtract
@@ -764,18 +765,6 @@ export const createFifo = async (
         },
       });
 
-      // record inventory log
-      if (newExpenseId) {
-        await recordTransactionInventoryLog(
-          newExpenseId || 0,
-          item?.inventoryItemId || item?.inventoryItem?.id,
-          item.quantity,
-          InventoryLogType.STOCK_IN,
-          InventoryLogFrom.CREATE_TRANSACTION,
-          `Create ${item.quantity} ${item.name} to inventory due to expense ${newExpenseId} created`,
-        );
-      }
-
       // Update all ordered items has targeted fifo id
       await prisma.orderedItems.updateMany({
         where: {
@@ -786,16 +775,34 @@ export const createFifo = async (
         },
       });
 
+      await prisma.fifo.delete({
+        where: {
+          id: negativeFifo.id,
+        },
+      });
+
+      // record inventory log
+      if (newExpenseId) {
+        await recordTransactionInventoryLog(
+          newExpenseId || 0,
+          item?.inventoryItemId || item?.inventoryItem?.id,
+          itemQuantity,
+          InventoryLogType.STOCK_IN,
+          InventoryLogFrom.CREATE_TRANSACTION,
+          `Create ${item.quantity} ${item.name} to inventory due to expense ${newExpenseId} created`,
+        );
+      }
+
       itemHasAlreadyUpdateIds.push(item.id);
     }
 
-    await prisma.fifo.deleteMany({
-      where: {
-        id: {
-          in: deletedFifoIds,
-        },
-      },
-    });
+    // await prisma.fifo.deleteMany({
+    //   where: {
+    //     id: {
+    //       in: deletedFifoIds,
+    //     },
+    //   },
+    // });
   }
 
   // Create new fifo for items that have positive fifo

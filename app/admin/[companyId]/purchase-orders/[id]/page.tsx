@@ -144,45 +144,6 @@ export default function PurchaseOrder() {
     }
   };
 
-  // const onSelectItem = (newItems: any) => {
-  //   const itemWithCostAndTax = newItems.map((item: any) => {
-  //     // Check if the item is already in the PO
-  //     const existingItem = selectedItems.find(
-  //       (poItem: any) => poItem.inventoryItemId === item.inventoryItemId,
-  //     );
-
-  //     if (existingItem) {
-  //       return { ...existingItem };
-  //     }
-
-  //     const inventoryUnit = item?.unit[0];
-
-  //     const isGST = item.inventoryItem.hasGST;
-  //     const isPST = item.inventoryItem.hasPST;
-
-  //     const tax =
-  //       inventoryUnit?.unitPrice * (isGST ? gstRate : 0) +
-  //       inventoryUnit?.unitPrice * (isPST ? pstRate : 0);
-
-  //     return {
-  //       ...item,
-  //       orderedQty: 1,
-  //       costPerItem: inventoryUnit?.unitPrice,
-  //       tax,
-  //       total: (inventoryUnit?.unitPrice + tax) * 1,
-  //       inventoryUnit: item?.unit[0],
-  //       note: '',
-  //     };
-  //   });
-
-  //   setSelectedItems(itemWithCostAndTax);
-
-  //   // setPO((prevState: any) => ({
-  //   //   ...prevState,
-  //   //   poItems: itemWithCostAndTax,
-  //   // }));
-  // };
-
   const handleSaveItems = async () => {
     setIsSaving(true);
     try {
