@@ -18,7 +18,7 @@ import {
   Schedule as ScheduleIcon,
   Water as WaterIcon,
 } from '@mui/icons-material';
-import { Program } from './types';
+import { Program } from '../types';
 import axios from 'axios';
 import { getAdminApiUrl } from '@/app/utils/enum';
 import { useQuery } from '@tanstack/react-query';

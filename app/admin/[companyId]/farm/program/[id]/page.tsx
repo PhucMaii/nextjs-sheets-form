@@ -9,7 +9,7 @@ import { useParams, useRouter } from 'next/navigation';
 import useNotification from '@/hooks/useNotification';
 import ProgramInfo from '../../../components/Farm/ProgramInfo';
 import { CreateProgramForm } from '../create/page';
-import ZonePrograms from '../../../components/Farm/ZonePrograms';
+import ZonePrograms from '../../../components/Farm/Programs/ZonePrograms';
 import { useHydrawiseAPI } from '@/hooks/useHydrawiseAPI';
 import axios from 'axios';
 import { getAdminApiUrl } from '@/app/utils/enum';

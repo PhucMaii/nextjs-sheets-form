@@ -4,7 +4,6 @@ import { useRouter, useParams } from 'next/navigation';
 import {
   Box,
   Typography,
-  IconButton,
   Grid,
 } from '@mui/material';
 import {
@@ -17,9 +16,9 @@ import { useHydrawiseAPI } from '@/hooks/useHydrawiseAPI';
 import { getAdminApiUrl } from '@/app/utils/enum';
 import axios from 'axios';
 import useNotification from '@/hooks/useNotification';
-import ProgramInfo from '../../../components/Farm/ProgramInfo';
-import ZonePrograms from '../../../components/Farm/ZonePrograms';
+import ZonePrograms from '../../../components/Farm/Programs/ZonePrograms';
 import BackButton from '../../../components/BackButton';
+import ProgramInfo from '../../../components/Farm/Programs/ProgramInfo';
 
 export interface CreateProgramForm {
   name: string;

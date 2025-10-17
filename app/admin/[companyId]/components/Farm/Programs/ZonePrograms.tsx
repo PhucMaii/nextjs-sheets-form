@@ -1,11 +1,11 @@
 import React, { Dispatch, SetStateAction } from 'react';
 import { Paper, Typography, Box, Button } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { CreateProgramForm } from '../../farm/program/create/page';
+import { CreateProgramForm } from '../../../farm/program/create/page';
 import { Add as AddIcon } from '@mui/icons-material';
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd';
 import ZoneProgramCard from './ZoneProgramCard';
-import { ZoneProgram } from './types';
+import { ZoneProgram } from '../types';
 
 interface ZoneProgramsProps {
   formData: CreateProgramForm;

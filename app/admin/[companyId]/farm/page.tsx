@@ -3,10 +3,10 @@ import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import { Tab, Tabs, Typography } from '@mui/material';
 import { blueGrey } from '@mui/material/colors';
-import Programs from '../components/Farm/Programs';
-import ProgramSchedules from '../components/Farm/ProgramSchedules';
+import Programs from '../components/Farm/Programs/Programs';
+import ProgramSchedules from '../components/Farm/Schedule/ProgramSchedules';
 import useNotification from '@/hooks/useNotification';
-import BundlePrograms from '../components/Farm/BundlePrograms';
+import BundlePrograms from '../components/Farm/Bundle/BundlePrograms';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 
 export default function Farm() {
