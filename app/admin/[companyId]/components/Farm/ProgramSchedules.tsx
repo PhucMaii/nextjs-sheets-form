@@ -9,17 +9,13 @@ import {
   useTheme,
   alpha,
   Chip,
-  Avatar,
 } from '@mui/material';
 import {
   CalendarMonth as CalendarMonthIcon,
   ViewWeek as ViewWeekIcon,
   Today as TodayIcon,
-  PlayArrow as PlayIcon,
-  Pause as PauseIcon,
   Water as WaterIcon,
   Schedule as ScheduleIcon,
-  Timer as TimerIcon,
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
 } from '@mui/icons-material';
@@ -311,35 +307,6 @@ export default function ProgramSchedules({ showNotification }: IProps) {
         // triggerSync(updatedSchedules);
         return updatedSchedules;
       });
-    }
-  };
-
-  const toggleScheduleStatus = (scheduleId: string) => {
-    setSchedules((prev) =>
-      prev.map((schedule) =>
-        schedule.id === scheduleId
-          ? {
-              ...schedule,
-              status:
-                schedule.status === WaterStatus.ACTIVE
-                  ? WaterStatus.SCHEDULED
-                  : WaterStatus.ACTIVE,
-            }
-          : schedule,
-      ),
-    );
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'active':
-        return <PlayIcon fontSize="small" />;
-      case 'finished':
-        return <TimerIcon fontSize="small" />;
-      case 'cancelled':
-        return <PauseIcon fontSize="small" />;
-      default:
-        return <ScheduleIcon fontSize="small" />;
     }
   };
 

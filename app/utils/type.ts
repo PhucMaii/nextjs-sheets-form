@@ -41,6 +41,7 @@ import {
   DayProgram,
   BundleProgram,
   ZoneProgram,
+  ZoneWater,
 } from '@prisma/client';
 import { Session } from 'next-auth';
 import { Order } from '../admin/[companyId]/orders/page';

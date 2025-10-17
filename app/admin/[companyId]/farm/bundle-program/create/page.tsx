@@ -45,6 +45,7 @@ import useBundleProgram from '@/hooks/db-tables/useBundleProgram';
 
 export default function CreateBundleProgram() {
   const { companyId }: any = useParams();
+
   const router = useRouter();
   const theme = useTheme();
   const { showNotification, NotificationComp } = useNotification();
@@ -180,11 +181,16 @@ export default function CreateBundleProgram() {
       return;
     }
     if (daySchedules.length === 0) {
-      showNotification('error', 'Please add at least one day to the bundle program');
+      showNotification(
+        'error',
+        'Please add at least one day to the bundle program',
+      );
       return;
     }
 
-    if (daySchedules.some((daySchedule: any) => daySchedule.programs.length === 0)) {
+    if (
+      daySchedules.some((daySchedule: any) => daySchedule.programs.length === 0)
+    ) {
       showNotification('error', 'Please add at least one program to each day');
       return;
     }
@@ -196,7 +202,7 @@ export default function CreateBundleProgram() {
         throw new Error(response.data.error);
       }
       showNotification('success', response.data.message);
-      router.push(`/admin/${companyId}/farm`);
+      router.push(`/admin/${companyId}/farm?tab=bundles`);
     } catch (error: any) {
       console.log('Failed to create bundle program: ', error);
       showNotification(
@@ -629,7 +635,8 @@ export default function CreateBundleProgram() {
                     No days scheduled yet
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Click &quot;Add Day&quot; to start creating your bundle schedule
+                    Click &quot;Add Day&quot; to start creating your bundle
+                    schedule
                   </Typography>
                 </Box>
               )}

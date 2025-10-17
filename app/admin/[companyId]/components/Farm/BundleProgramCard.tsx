@@ -11,7 +11,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import { blue } from '@mui/material/colors';
+import { blue, grey } from '@mui/material/colors';
 import React, { useMemo } from 'react';
 import {
   Water as WaterIcon,
@@ -45,13 +45,14 @@ function BundleProgramCard({ bundleProgram, zones }: IProps) {
       zones: Array.from(new Set(zones)),
     };
   }, [bundleProgram]);
+
   return (
     <Card
       elevation={0}
       sx={{
         height: '100%',
         borderRadius: 3,
-        border: `1px solid ${alpha(theme.palette.grey[200], 0.5)}`,
+        border: `1px solid ${grey[200]}`,
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         '&:hover': {
           transform: 'translateY(-4px)',

@@ -353,55 +353,6 @@ export default function Orders() {
     ordersState.setIsLoading(true);
   }, []);
 
-  // Single effect to handle all URL parameter synchronization
-  // useEffect(() => {
-  // 	// Only update URL if we're not in the middle of a URL change
-  // 	const currentUrl = window.location.search;
-  // 	const urlParams = new URLSearchParams(currentUrl);
-
-  // 	let hasChanges = false;
-
-  // 	// Check if date needs to be updated in URL
-  // 	if (date && urlParams.get('date') !== date) {
-  // 		urlParams.set('date', date);
-  // 		hasChanges = true;
-  // 	}
-
-  // 	// Check if status needs to be updated in URL
-  // 	const currentStatus = statusTabs[ordersState.tabIndex].value;
-  // 	if (urlParams.get('status') !== currentStatus) {
-  // 		urlParams.set('status', currentStatus);
-  // 		hasChanges = true;
-  // 	}
-
-  // 	// Check if search keywords need to be updated in URL
-  // 	if (debouncedKeywords && urlParams.get('q') !== debouncedKeywords) {
-  // 		urlParams.set('q', debouncedKeywords);
-  // 		hasChanges = true;
-  // 	} else if (!debouncedKeywords && urlParams.get('q')) {
-  // 		urlParams.delete('q');
-  // 		hasChanges = true;
-  // 	}
-
-  // 	// Only push to router if there are actual changes
-  // 	if (hasChanges) {
-  // 		const search = urlParams.toString();
-  // 		const queryTerm = search ? `?${search}` : '';
-  // 		router.push(`/admin/${companyId}/orders${queryTerm}`, { scroll: false });
-  // 	}
-  // }, [date, ordersState.tabIndex, debouncedKeywords, router, companyId]);
-
-  // Handle URL parameter changes -> update local state
-  // useEffect(() => {
-  // 	if (queryDate && queryDate !== date) {
-  // 		setDate(queryDate);
-  // 	}
-
-  // 	if (queryStatus) {
-  // 		ordersState.setCurrentStatus(queryStatus as ORDER_STATUS | PaymentStatus);
-  // 	}
-  // }, [queryDate, queryStatus]);
-
   useEffect(() => {
     if (paramsDate) {
       setDate(YYYYMMDDFormat(new Date(paramsDate)));

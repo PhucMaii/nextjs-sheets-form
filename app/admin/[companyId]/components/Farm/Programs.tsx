@@ -122,7 +122,6 @@ export default function Programs({ showNotification }: IProps) {
             <Grid item xs={12} sm={6} lg={4} key={program.id}>
               <ProgramCard
                 program={program}
-                setPrograms={setPrograms}
                 zones={zones}
                 showNotification={showNotification}
                 refetchPrograms={refetchPrograms}

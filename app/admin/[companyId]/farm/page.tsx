@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import { Tab, Tabs, Typography } from '@mui/material';
 import { blueGrey } from '@mui/material/colors';
@@ -7,11 +7,38 @@ import Programs from '../components/Farm/Programs';
 import ProgramSchedules from '../components/Farm/ProgramSchedules';
 import useNotification from '@/hooks/useNotification';
 import BundlePrograms from '../components/Farm/BundlePrograms';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 
 export default function Farm() {
+  const { companyId }: any = useParams();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [tab, setTab] = useState('programs');
+  const paramsTab = searchParams?.get('tab');
 
   const { showNotification, NotificationComp } = useNotification();
+
+  useEffect(() => {
+    if (paramsTab) {
+      setTab(paramsTab);
+    } else {
+      setTab('programs');
+    }
+  }, [paramsTab]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (tab) {
+      params.set('tab', tab);
+    } else {
+      params.delete('tab');
+    }
+
+    router.replace(`/admin/${companyId}/farm?${params.toString()}`, {
+      scroll: false,
+    });
+  }, [tab]);
 
   const renderedComponents: any = {
     programs: <Programs showNotification={showNotification} />,
