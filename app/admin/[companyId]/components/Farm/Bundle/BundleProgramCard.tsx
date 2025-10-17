@@ -21,6 +21,7 @@ import {
 } from '@mui/icons-material';
 import { IBundleProgram, IZoneWater } from '@/app/utils/type';
 import { IZone } from '@/hooks/useHydrawiseAPI';
+import { useRouter, useParams } from 'next/navigation';
 
 interface IProps {
   bundleProgram: IBundleProgram;
@@ -28,7 +29,8 @@ interface IProps {
 }
 
 function BundleProgramCard({ bundleProgram, zones }: IProps) {
-  console.log(bundleProgram);
+  const { companyId }: any = useParams();
+  const router = useRouter();
   const stats = useMemo(() => {
     const highestDay = bundleProgram.dayPrograms.reduce(
       (acc, dayProgram) => Math.max(acc, dayProgram.day),
@@ -60,6 +62,11 @@ function BundleProgramCard({ bundleProgram, zones }: IProps) {
           borderColor: alpha(blue[500], 0.3),
         },
       }}
+      onClick={() =>
+        router.push(
+          `/admin/${companyId}/farm/bundle-program/${bundleProgram.id}`,
+        )
+      }
     >
       <CardContent sx={{ p: 3, pb: 2 }}>
         <Stack spacing={2}>

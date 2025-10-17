@@ -4,7 +4,7 @@ import { alpha } from '@mui/material';
 import { format } from 'date-fns';
 import { Droppable, Draggable } from '@hello-pangea/dnd';
 import { Program } from '../types';
-import ScheduleCard from '../ScheduleCard';
+import ScheduleCard from '../Schedule/ScheduleCard';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import { getProgramById } from '@/app/utils/programs';
 
