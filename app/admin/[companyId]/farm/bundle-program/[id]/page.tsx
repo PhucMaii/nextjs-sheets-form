@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Sidebar from '../../../components/Sidebar/Sidebar';
 import { grey } from '@mui/material/colors';
-import { Box, Chip, Typography } from '@mui/material';
+import { Box, Button, Chip, Typography } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useRouter } from 'next/navigation';
 import axios from 'axios';
@@ -13,11 +13,16 @@ import InputNameSection from '../../../components/Farm/Bundle/InputNameSection';
 import SchedulePrograms from '../../../components/Farm/Bundle/SchedulePrograms';
 import useNotification from '@/hooks/useNotification';
 import BackButton from '../../../components/BackButton';
+import { Trash2Icon } from 'lucide-react';
+import ConfirmModal from '../../../components/Modals/ConfirmModal';
+import useBundleProgram from '@/hooks/db-tables/useBundleProgram';
 
 export default function BundleProgramDetails() {
   const { companyId, id }: any = useParams();
   const { showNotification, NotificationComp } = useNotification();
   const router = useRouter();
+  const { deleteBundleProgram } = useBundleProgram(companyId);
+
   // Data Fetching
   const { data: programs } = useQuery({
     queryKey: ['programs'],
@@ -40,7 +45,8 @@ export default function BundleProgramDetails() {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [daySchedules, setDaySchedules] = useState<any[]>([]);
   const [updatedName, setUpdatedName] = useState<string>('');
-
+  const [isOpenConfirmModal, setIsOpenConfirmModal] = useState<boolean>(false);
+  
   const formatDayProgram = (dayProgram: any) => {
     return {
       ...dayProgram,
@@ -128,9 +134,34 @@ export default function BundleProgramDetails() {
     }
   };
 
+  const handleDeleteBundleProgram = async () => {
+    try {
+      const response = await deleteBundleProgram(id);
+      if (response.data.error) {
+        throw new Error(response.data.error);
+      }
+
+      showNotification('success', response.data.message);
+      router.push(`/admin/${companyId}/farm?tab=bundles`);
+    } catch (error: any) {
+      console.log('Error deleting bundle program: ', error);
+      showNotification('error', 'Error deleting bundle program: ' + error);
+    } finally {
+      setIsOpenConfirmModal(false);
+    }
+  };
+
   return (
     <Sidebar>
       {NotificationComp}
+      <ConfirmModal 
+        title="Are you sure to delete this bundle program?"
+        handleSubmit={handleDeleteBundleProgram}
+        showNotification={showNotification}
+        open={isOpenConfirmModal}
+        onClose={() => setIsOpenConfirmModal(false)}
+        color="error"
+        />
       <Box p={3}>
         <Box
           sx={{
@@ -151,7 +182,20 @@ export default function BundleProgramDetails() {
               <Typography variant="h4" fontWeight={800} color="text.primary">
                 Edit Bundle Program
               </Typography>
-              <Chip size="small" sx={{width: 'fit-content', p: 1}} label={`Bundle Program ID: ${id}`} />
+              <Box display="flex" alignItems="center" gap={1}>
+                <Chip size="small" sx={{width: 'fit-content', p: 1}} label={`ID: ${id}`} />
+                <Button
+                  variant="outlined"
+                  color="error"
+                  startIcon={<Trash2Icon size={16} />}
+                  onClick={() => setIsOpenConfirmModal(true)}
+                  disabled={false}
+                  size="small"
+                  sx={{borderRadius: 2 }}
+                >
+                  Delete
+                </Button>
+              </Box>
             </Box>
           </Box>
           <LoadingButton

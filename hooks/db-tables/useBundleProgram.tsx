@@ -17,7 +17,12 @@ const useBundleProgram = (companyId: string) => {
     return response.data.data;
   };
 
-  return { createBundleProgram, getBundlePrograms };
+  const deleteBundleProgram = async (id: string) => {
+    const response = await axios.delete(getAdminApiUrl(companyId, `/bundle-program?id=${id}`));
+    return response;
+  };
+
+  return { createBundleProgram, getBundlePrograms, deleteBundleProgram };
 };
 
 export default useBundleProgram;

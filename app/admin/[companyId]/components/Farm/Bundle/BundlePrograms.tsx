@@ -121,7 +121,7 @@ export default function BundlePrograms() {
             <Skeleton variant="rounded" height={200} />
           </Grid>
         </Grid>
-      ) : (
+      ) : bundlePrograms && bundlePrograms.length > 0 ? (
         <Grid container spacing={3}>
           {bundlePrograms &&
             bundlePrograms?.map((bundleProgram: IBundleProgram) => (
@@ -133,6 +133,23 @@ export default function BundlePrograms() {
               </Grid>
             ))}
         </Grid>
+      ) : (
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Typography variant="h6" color="text.secondary">
+            No bundle programs found
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Create your first bundle program to get started with automated
+            irrigation
+          </Typography>
+        </Box>
       )}
 
       {/* Bundle Programs Grid */}

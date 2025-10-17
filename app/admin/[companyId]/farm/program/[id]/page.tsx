@@ -7,7 +7,7 @@ import { LoadingButton } from '@mui/lab';
 import { Save as SaveIcon } from '@mui/icons-material';
 import { useParams, useRouter } from 'next/navigation';
 import useNotification from '@/hooks/useNotification';
-import ProgramInfo from '../../../components/Farm/ProgramInfo';
+import ProgramInfo from '../../../components/Farm/Programs/ProgramInfo';
 import { CreateProgramForm } from '../create/page';
 import ZonePrograms from '../../../components/Farm/Programs/ZonePrograms';
 import { useHydrawiseAPI } from '@/hooks/useHydrawiseAPI';
@@ -126,7 +126,21 @@ const ProgramDetailsPage = () => {
             >
               Edit Water Program
             </Typography>
-            <Chip size="small" label={`Program ID: ${id}`} />
+            <Box display="flex" alignItems="center" gap={1}>
+              <Chip size="small" label={`Program ID: ${id}`} />
+
+              <Button
+                variant="outlined"
+                color="error"
+                startIcon={<Trash2Icon size={16} />}
+                onClick={() => setIsOpenConfirmModal(true)}
+                disabled={false}
+                size="small"
+                sx={{ borderRadius: 2 }}
+              >
+                Delete
+              </Button>
+            </Box>
           </Box>
         </Box>
 
@@ -140,16 +154,6 @@ const ProgramDetailsPage = () => {
           >
             Save Program
           </LoadingButton>
-
-          <Button
-            variant="outlined"
-            color="error"
-            startIcon={<Trash2Icon size={16} />}
-            onClick={() => setIsOpenConfirmModal(true)}
-            disabled={false}
-          >
-            Delete
-          </Button>
         </Box>
       </Box>
 
