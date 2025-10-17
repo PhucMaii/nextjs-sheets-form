@@ -33,7 +33,7 @@ export default function HolidayText() {
             All Eggs
           </strong>{' '} price will be <br />
           increased by next week */}
-          We've been working hard to improve our homegrown bean sprouts! This new batch is fresher and crunchier than ever! Please give it a try. $1 OFF for 10 lbs today.
+          We&apos;ve been working hard to improve our homegrown bean sprouts! This new batch is fresher and crunchier than ever! Please give it a try. $1 OFF for 10 lbs today.
         </Typography>
         <Typography sx={{ color: 'white', textAlign: 'center' }}>
           We truly appreciate <br /> your support and understanding! 💚

@@ -6,13 +6,12 @@ import { format, isToday } from 'date-fns';
 import { startOfWeek, addDays } from 'date-fns';
 import { Program } from '../types';
 import { ShowNotificationType } from '@/hooks/useNotification';
-import ScheduleCard from '../ScheduleCard';
+import ScheduleCard from '../Schedule/ScheduleCard';
 import { getProgramById } from '@/app/utils/programs';
 
 interface IProps {
   currentDate: Date;
   getSchedulesForTimeSlot: (date: Date, time: string) => any[];
-  programs: Program[];
   showNotification: ShowNotificationType;
   refetchSchedules: () => void;
   removeSchedule: (id: string) => void;
@@ -23,7 +22,6 @@ interface IProps {
 const ProgramWeekView = ({
   currentDate,
   getSchedulesForTimeSlot,
-   programs,
   showNotification,
   refetchSchedules,
   removeSchedule,

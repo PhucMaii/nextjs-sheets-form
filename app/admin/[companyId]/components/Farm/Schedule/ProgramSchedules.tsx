@@ -42,19 +42,19 @@ import {
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { usePrograms } from '@/hooks/db-tables/usePrograms';
-import { Program, ZoneWater } from './types';
+import { Program, ZoneWater } from '../types';
 import { useHydrawiseAPI } from '@/hooks/useHydrawiseAPI';
-import ProgramMonthView from './View/ProgramMonthView';
-import ProgramWeekView from './View/ProgramWeekView';
-import ProgramDayView from './View/ProgramDayView';
-import TimeInputModal from '../Modals/edit/SingleFieldUpdate';
+import ProgramMonthView from '../View/ProgramMonthView';
+import ProgramWeekView from '../View/ProgramWeekView';
+import ProgramDayView from '../View/ProgramDayView';
+import TimeInputModal from '../../Modals/edit/SingleFieldUpdate';
 import axios from 'axios';
 import { getAdminApiUrl } from '@/app/utils/enum';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import { WaterStatus } from '@prisma/client';
 import { LoadingButton } from '@mui/lab';
 import { times } from '@/app/lib/constant';
-import SmallProgramCard from './SmallProgramCard';
+import SmallProgramCard from '../SmallProgramCard';
 import { getProgramById } from '@/app/utils/programs';
 // import useSyncProgramSchedules from '@/hooks/sync/useSyncProgramSchedules';
 // import { ITEM_CATEGORIZED } from '@/pages/api/admin/[companyId]/orderedItems/PUT';
@@ -595,7 +595,6 @@ export default function ProgramSchedules({ showNotification }: IProps) {
               getSchedulesForTimeSlot={getSchedulesForTimeSlot}
               showNotification={showNotification}
               refetchSchedules={refetchSchedules}
-              programs={displayedPrograms}
               removeSchedule={deleteSchedule}
               handleSave={handleSave}
               setSchedules={setSchedules}

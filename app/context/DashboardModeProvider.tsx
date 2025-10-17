@@ -19,7 +19,7 @@ export const DashboardModeProvider = ({ children }: { children: React.ReactNode 
     console.log(m, 'm');
     setModeState(JSON.parse(m));
     // keep in sync if another tab changes it
-    const onStorage = (e: StorageEvent) => {
+    const onStorage = () => {
       const modeLs = localStorage.getItem('dashboardMode') as Mode;
       console.log(modeLs, 'modeLs');
       setModeState(JSON.parse(modeLs));

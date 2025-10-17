@@ -19,7 +19,6 @@ import {
   FormControlLabel,
   useMediaQuery,
   Paper,
-  Chip,
   Fade,
 } from '@mui/material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -32,7 +31,6 @@ import {
   Receipt,
   Add,
   AttachMoney,
-  CheckCircle,
 } from '@mui/icons-material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
@@ -45,12 +43,7 @@ import { BorderSection } from '../../../reports/styled';
 import CreditCardIcon from '@mui/icons-material/CreditCard';
 import ItemRow from './ItemRow';
 import { TransactionType } from './TransactionTypeStep';
-import {
-  ArrowDownIcon,
-  FoldersIcon,
-  HelpCircleIcon,
-  Trash2Icon,
-} from 'lucide-react';
+import { ArrowDownIcon, FoldersIcon, Trash2Icon } from 'lucide-react';
 import { primaryColor } from '@/theme/color';
 import { gstRate, pstRate } from '@/app/lib/constant';
 import DateRange from '../../Modals/DateRangeModal';
@@ -118,9 +111,6 @@ export default function DetailStep({
   // Highlight system state
   const [currentHighlightedSection, setCurrentHighlightedSection] =
     useState<string>('');
-  const [completedSections, setCompletedSections] = useState<Set<string>>(
-    new Set(),
-  );
   const [isHelpMode, setIsHelpMode] = useState(true);
   const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
 
@@ -240,7 +230,7 @@ export default function DetailStep({
   });
 
   useEffect(() => {
-    if (defaultCodDate) { 
+    if (defaultCodDate) {
       setCodDate(dayjs(defaultCodDate));
     }
   }, [defaultCodDate]);
@@ -1023,10 +1013,8 @@ export default function DetailStep({
             <Box display="flex" alignItems="center" gap={1.5} flexWrap="wrap">
               {sections.map((section, index) => {
                 const isCurrent = currentHighlightedSection === section.id;
-                const isCompleted = completedSections.has(section.id);
                 const isUpcoming =
                   !isCurrent &&
-                  !isCompleted &&
                   sections.findIndex((s) => s.id === section.id) >
                     sections.findIndex(
                       (s) => s.id === currentHighlightedSection,
@@ -1049,18 +1037,14 @@ export default function DetailStep({
                         transition: 'all 0.2s ease',
                         backgroundColor: isCurrent
                           ? `${primaryColor}08`
-                          : isCompleted
-                            ? 'success.light'
-                            : 'transparent',
+                          : 'transparent',
                         border: isCurrent
                           ? `1px solid ${primaryColor}40`
                           : '1px solid transparent',
                         '&:hover': {
                           backgroundColor: isCurrent
                             ? `${primaryColor}12`
-                            : isCompleted
-                              ? 'success.main'
-                              : 'grey.100',
+                            : 'grey.100',
                         },
                       }}
                     >
@@ -1074,22 +1058,14 @@ export default function DetailStep({
                           borderRadius: '50%',
                           backgroundColor: isCurrent
                             ? `${primaryColor}20`
-                            : isCompleted
-                              ? 'success.main'
-                              : 'grey.300',
+                            : 'grey.300',
                           color: isCurrent
                             ? primaryColor
-                            : isCompleted
-                              ? 'white'
-                              : 'grey.600',
+                            : 'grey.600',
                           transition: 'all 0.2s ease',
                         }}
                       >
-                        {isCompleted ? (
-                          <CheckCircle sx={{ fontSize: 16 }} />
-                        ) : (
-                          section.icon
-                        )}
+                        {section.icon}
                       </Box>
                       <Typography
                         variant="body2"
@@ -1109,9 +1085,7 @@ export default function DetailStep({
                         sx={{
                           width: 16,
                           height: 1,
-                          backgroundColor: isCompleted
-                            ? 'success.main'
-                            : 'grey.300',
+                          backgroundColor: 'grey.300',
                           mx: 0.5,
                           transition: 'background-color 0.2s ease',
                         }}
@@ -1138,9 +1112,6 @@ export default function DetailStep({
                     sections.find((s) => s.id === currentHighlightedSection)
                       ?.title
                   }
-                  {completedSections.size > 0 && (
-                    <> • {completedSections.size} completed</>
-                  )}
                 </>
               )}
             </Typography>

@@ -12,9 +12,8 @@ import {
 } from 'date-fns';
 import { Droppable, Draggable } from '@hello-pangea/dnd';
 import { ShowNotificationType } from '@/hooks/useNotification';
-import ScheduleCard from '../ScheduleCard';
-import { memo } from 'react';
-import { getProgramById, getProgramColor } from '@/app/utils/programs';
+import ScheduleCard from '../Schedule/ScheduleCard';
+import { getProgramById } from '@/app/utils/programs';
 import { Program } from '../types';
 
 interface IProps {
