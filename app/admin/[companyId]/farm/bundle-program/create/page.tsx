@@ -19,9 +19,7 @@ import React, { useMemo, useState } from 'react';
 import Sidebar from '../../../components/Sidebar/Sidebar';
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
-import { getAdminApiUrl } from '@/app/utils/enum';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import SmallProgramCard from '../../../components/Farm/SmallProgramCard';
 import TimeInputModal from '../../../components/Modals/edit/SingleFieldUpdate';
 import {
@@ -32,7 +30,6 @@ import {
 } from '@hello-pangea/dnd';
 import {
   Add as AddIcon,
-  Water as WaterIcon,
   Schedule as ScheduleIcon,
   CalendarToday as CalendarIcon,
   SaveAs as SaveAsIcon,
@@ -42,23 +39,30 @@ import { times } from '@/app/lib/constant';
 import { LoadingButton } from '@mui/lab';
 import { Trash2Icon } from 'lucide-react';
 import { grey } from '@mui/material/colors';
+import useNotification from '@/hooks/useNotification';
+import { usePrograms } from '@/hooks/db-tables/usePrograms';
+import useBundleProgram from '@/hooks/db-tables/useBundleProgram';
 
 export default function CreateBundleProgram() {
   const { companyId }: any = useParams();
+  const router = useRouter();
   const theme = useTheme();
+  const { showNotification, NotificationComp } = useNotification();
+  const { getPrograms } = usePrograms(companyId, []);
+  const { createBundleProgram } = useBundleProgram(companyId);
 
   // Data Fetching
-  const { data: programs, refetch: refetchPrograms } = useQuery({
+  const { data: programs } = useQuery({
     queryKey: ['programs'],
     queryFn: async () => {
-      const response = await axios.get(
-        getAdminApiUrl(companyId, '/water-program'),
-      );
-      return response.data.data;
+      const data = await getPrograms();
+      return data;
     },
   });
 
   const [daySchedules, setDaySchedules] = useState<any[]>([]);
+  const [name, setName] = useState<string>('');
+  const [isCreating, setIsCreating] = useState<boolean>(false);
   const [isTimeInputModalOpen, setIsTimeInputModalOpen] = useState<{
     open: boolean;
     targetId: string | null;
@@ -170,7 +174,39 @@ export default function CreateBundleProgram() {
     }
   };
 
-  console.log(sortedDaySchedules, 'sortedDaySchedules');
+  const handleCreateBundleProgram = async () => {
+    if (!name) {
+      showNotification('error', 'Please enter a name for the bundle program');
+      return;
+    }
+    if (daySchedules.length === 0) {
+      showNotification('error', 'Please add at least one day to the bundle program');
+      return;
+    }
+
+    if (daySchedules.some((daySchedule: any) => daySchedule.programs.length === 0)) {
+      showNotification('error', 'Please add at least one program to each day');
+      return;
+    }
+
+    setIsCreating(true);
+    try {
+      const response = await createBundleProgram(name, sortedDaySchedules);
+      if (response.data.error) {
+        throw new Error(response.data.error);
+      }
+      showNotification('success', response.data.message);
+      router.push(`/admin/${companyId}/farm`);
+    } catch (error: any) {
+      console.log('Failed to create bundle program: ', error);
+      showNotification(
+        'error',
+        error.message || 'Failed to create bundle program',
+      );
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   const handleUpdateTime = (id: string, value: string) => {
     setDaySchedules((prev: any) =>
@@ -197,6 +233,7 @@ export default function CreateBundleProgram() {
 
   return (
     <Sidebar>
+      {NotificationComp}
       <TimeInputModal
         open={isTimeInputModalOpen.open}
         onClose={() =>
@@ -238,6 +275,8 @@ export default function CreateBundleProgram() {
               variant="contained"
               color="primary"
               startIcon={<SaveAsIcon />}
+              onClick={handleCreateBundleProgram}
+              loading={isCreating}
             >
               Create Bundle
             </LoadingButton>
@@ -283,6 +322,8 @@ export default function CreateBundleProgram() {
                     borderRadius: 2,
                   },
                 }}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
               />
             </Stack>
           </Paper>
@@ -588,7 +629,7 @@ export default function CreateBundleProgram() {
                     No days scheduled yet
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Click "Add Day" to start creating your bundle schedule
+                    Click &quot;Add Day&quot; to start creating your bundle schedule
                   </Typography>
                 </Box>
               )}

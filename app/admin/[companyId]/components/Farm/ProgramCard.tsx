@@ -13,8 +13,6 @@ import {
   LinearProgress,
 } from '@mui/material';
 import {
-  Edit as EditIcon,
-  Delete as DeleteIcon,
   PlayArrow as PlayIcon,
   Pause as PauseIcon,
   LocationOn as LocationIcon,
@@ -28,18 +26,17 @@ import { format } from 'date-fns';
 import { useParams, useRouter } from 'next/navigation';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import { usePrograms } from '@/hooks/db-tables/usePrograms';
+import { IZone } from '@/hooks/useHydrawiseAPI';
 
 interface ProgramCardProps {
   program: Program;
-  setPrograms: any;
-  zones: any;
+  zones: IZone[];
   showNotification: ShowNotificationType;
   refetchPrograms: () => void;
 }
 
 const ProgramCard = ({
   program,
-  setPrograms,
   zones,
   showNotification,
   refetchPrograms,
@@ -47,7 +44,7 @@ const ProgramCard = ({
   const router = useRouter();
   const { companyId }: any = useParams();
   const theme = useTheme();
-  const { activateProgram, stopProgram } = usePrograms(companyId);
+  const { activateProgram, stopProgram } = usePrograms(companyId, []);
   const getProgressPercentage = (program: Program) => {
     if (!program.remainingDays) return 100;
     return ((program.days - program.remainingDays) / program.days) * 100;
@@ -58,16 +55,6 @@ const ProgramCard = ({
     if (program.remainingDays === 0) return 'success';
     if (program.remainingDays && program.remainingDays <= 3) return 'warning';
     return 'primary';
-  };
-
-  const handleToggleActive = (programId: string) => {
-    setPrograms((prev: Program[]) =>
-      prev.map((program: Program) =>
-        program.id === programId
-          ? { ...program, isActive: !program.isActive }
-          : program,
-      ),
-    );
   };
 
   const handleActivateProgram = async (programId: string) => {
@@ -185,8 +172,8 @@ const ProgramCard = ({
                     e.stopPropagation();
                     e.preventDefault();
                     program.isActive
-                      ? handleStopProgram(program.id)
-                      : handleActivateProgram(program.id);
+                      ? handleStopProgram(program.id.toString())
+                      : handleActivateProgram(program.id.toString());
                   }}
                   sx={{
                     backgroundColor: program.isActive

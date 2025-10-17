@@ -59,6 +59,7 @@ model Company {
   waterPrograms     WaterProgram[]
   zonePrograms      ZoneProgram[]
   programSchedules  ProgramSchedule[]
+  bundlePrograms    BundleProgram[]
 }
 
 model PageView {
@@ -1183,7 +1184,6 @@ model ZoneProgram {
   companyId  Int
 
   zoneWaterPrograms  ZoneWater[]
-  dayBundlePrograms  DayProgram[]
 
   company       Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
@@ -1197,15 +1197,21 @@ model DayProgram {
   programId         Int
   bundleProgramId   Int
 
-  program           ZoneProgram     @relation(fields: [programId], references: [id], onDelete: Cascade)
+  program           WaterProgram     @relation(fields: [programId], references: [id], onDelete: Cascade)
   bundleProgram     BundleProgram   @relation(fields: [bundleProgramId], references: [id], onDelete: Cascade)
 }
 
 model BundleProgram {
   id            Int     @id  @default(autoincrement())
   name          String
+  createdAt     String
+  createdBy     String
+  companyId     Int
   
   dayPrograms   DayProgram[]
+  
+
+  company       Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
 }
 
 model WaterProgram {
@@ -1219,7 +1225,9 @@ model WaterProgram {
   companyId           Int
 
   zoneWaterPrograms   ZoneWater[]
-  ProgramSchedules    ProgramSchedule[]
+  programSchedules    ProgramSchedule[]
+  dayBundlePrograms   DayProgram[]
+
 
   company             Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
 

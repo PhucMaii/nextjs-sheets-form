@@ -3,8 +3,13 @@ import { getAdminApiUrl } from "@/app/utils/enum";
 import { useEffect } from "react";
 import { useState } from "react";
 
+export interface IZone {
+  name: string;
+  relay_id: number;
+}
+
 export const useHydrawiseAPI = (companyId: string) => {
-  const [zones, setZones] = useState<any[]>([]);
+  const [zones, setZones] = useState<IZone[]>([]);
   const [isLoading, setIsLoading] = useState(true);  
 
   useEffect(() => {

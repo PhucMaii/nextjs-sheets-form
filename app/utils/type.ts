@@ -38,10 +38,14 @@ import {
   VendorItem,
   AutomationRules,
   Reassignment,
+  DayProgram,
+  BundleProgram,
+  ZoneProgram,
 } from '@prisma/client';
 import { Session } from 'next-auth';
 import { Order } from '../admin/[companyId]/orders/page';
 import { STOCK_STATUS, USER_CATEGORIZED, USER_ROLE } from './enum';
+import { Program } from '../admin/[companyId]/components/Farm/types';
 
 export interface IDayRange extends DayRange {}
 
@@ -415,4 +419,18 @@ export interface IReassignment extends Reassignment {
   from: Route;
   to: Route;
   order: Order;
+}
+
+export interface IZoneWater extends ZoneWater {
+  zoneProgram: ZoneProgram;
+  waterProgram: Program;
+}
+
+export interface IBundleProgram extends BundleProgram {
+  dayPrograms: IDayProgram[];
+}
+
+export interface IDayProgram extends DayProgram {
+  bundleProgram: IBundleProgram;
+  program: Program
 }
