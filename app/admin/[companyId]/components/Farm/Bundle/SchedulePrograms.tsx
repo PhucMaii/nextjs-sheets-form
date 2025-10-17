@@ -27,12 +27,14 @@ import TimeInputModal from '../../Modals/edit/SingleFieldUpdate';
 import { times } from '@/app/lib/constant';
 import { getProgramById } from '@/app/utils/programs';
 import ProgramsSection from './ProgramsSection';
+import { ShowNotificationType } from '@/hooks/useNotification';
 
 interface IProps {
   daySchedules: any[];
   sortedDaySchedules: any[];
   setDaySchedules: any;
   programs: any[];
+  showNotification: ShowNotificationType;
 }
 
 export default function SchedulePrograms({
@@ -40,6 +42,7 @@ export default function SchedulePrograms({
   sortedDaySchedules,
   setDaySchedules,
   programs,
+  showNotification,
 }: IProps) {
   const [isTimeInputModalOpen, setIsTimeInputModalOpen] = useState<{
     open: boolean;
@@ -69,7 +72,7 @@ export default function SchedulePrograms({
       prev.map((schedule: any) => {
         if (schedule.day === isTimeInputModalOpen.day) {
           const programs = schedule.programs.map((program: any) => {
-            if (program.id === id) {
+            if (program.id.toString() === id) {
               return { ...program, time: value };
             }
             return program;
@@ -131,7 +134,7 @@ export default function SchedulePrograms({
       const program = sourceDaySchedule?.programs.find(
         (p: any) => p.id.toString() === programId,
       );
-      console.log({program});
+      console.log({ program });
       if (!program) return;
 
       setDaySchedules((prev: any) => {
@@ -158,6 +161,14 @@ export default function SchedulePrograms({
     }
   };
 
+  const handleDeleteProgram = (id: string) => {
+    setDaySchedules((prev: any) =>
+      prev.map((daySchedule: any) => ({
+        ...daySchedule,
+        programs: daySchedule.programs.filter((p: any) => p.id !== id),
+      })),
+    );
+  };
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <TimeInputModal
@@ -178,7 +189,7 @@ export default function SchedulePrograms({
         handleUpdate={handleUpdateTime}
       />
       {/* Available Programs */}
-      <ProgramsSection programs={programs} />
+      <ProgramsSection programs={programs} showNotification={showNotification} />
       <Paper
         elevation={0}
         sx={{
@@ -355,11 +366,20 @@ export default function SchedulePrograms({
                                 {(draggableProvided: any) => {
                                   return (
                                     <SmallProgramCard
+                                      handleDelete={() =>
+                                        handleDeleteProgram(program.id)
+                                      }
+                                      showNotification={showNotification}
                                       provided={draggableProvided}
                                       key={program.id}
                                       programs={programs}
                                       program={program}
                                       isSmall
+                                      onClick={() => setIsTimeInputModalOpen({
+                                        open: true,
+                                        targetId: program.id.toString(),
+                                        day: daySchedule.day,
+                                      })}
                                     />
                                   );
                                 }}

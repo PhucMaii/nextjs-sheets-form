@@ -6,12 +6,14 @@ import { Schedule as ScheduleIcon } from '@mui/icons-material';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
 import { Program } from '../types';
 import SmallProgramCard from '../SmallProgramCard';
+import { ShowNotificationType } from '@/hooks/useNotification';
 
 interface ProgramsSectionProps {
   programs: Program[];
+  showNotification: ShowNotificationType;
 }
 
-export default function ProgramsSection({ programs }: ProgramsSectionProps) {
+export default function ProgramsSection({ programs, showNotification }: ProgramsSectionProps) {
   return (
     <Paper
       elevation={0}
@@ -81,6 +83,7 @@ export default function ProgramsSection({ programs }: ProgramsSectionProps) {
                       key={program.id}
                       program={program}
                       programs={programs}
+                      showNotification={showNotification}
                     />
                   )}
                 </Draggable>

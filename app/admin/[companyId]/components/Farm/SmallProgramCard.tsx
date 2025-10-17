@@ -1,15 +1,28 @@
 import { alpha } from '@mui/material/styles';
-import { Avatar, Box, Paper, Stack, Typography } from '@mui/material';
-import React from 'react';
+import {
+  Avatar,
+  Box,
+  IconButton,
+  Paper,
+  Stack,
+  Typography,
+} from '@mui/material';
+import React, { useState } from 'react';
 import { Program } from './types';
 import { Water as WaterIcon } from '@mui/icons-material';
 import { getProgramColor } from '@/app/utils/programs';
+import { Trash2Icon } from 'lucide-react';
+import ConfirmModal from '../Modals/ConfirmModal';
+import { ShowNotificationType } from '@/hooks/useNotification';
 
 interface IProps {
   provided: any;
   program: Program;
   programs: Program[];
   isSmall?: boolean;
+  onClick?: () => void;
+  handleDelete?: (id: string) => void;
+  showNotification: ShowNotificationType;
 }
 
 export default function SmallProgramCard({
@@ -17,13 +30,27 @@ export default function SmallProgramCard({
   program,
   programs,
   isSmall = false,
+  handleDelete,
+  onClick,
+  showNotification,
 }: IProps) {
+  const [isOpenConfirmModal, setIsOpenConfirmModal] = useState<boolean>(false);
   return (
+    <>
+    {handleDelete && <ConfirmModal 
+      open={isOpenConfirmModal}
+      onClose={() => setIsOpenConfirmModal(false)}
+      title="Are you sure to delete this program?"
+      handleSubmit={() => handleDelete?.(program.id.toString())}
+      showNotification={showNotification}
+      color="error"
+    />}
     <Paper
       ref={provided.innerRef}
       {...provided.dragHandleProps}
       {...provided.draggableProps}
       elevation={0}
+      onClick={onClick}
       sx={{
         p: 2,
         borderRadius: 2,
@@ -63,28 +90,33 @@ export default function SmallProgramCard({
             {program.name}
           </Typography>
           <Box display="flex" alignItems="center" gap={1}>
-            {
-              program.time && (
-                <Typography variant="caption" color="text.secondary" fontWeight={600}>
-                  {program.time} •
-                </Typography>
-              )
-            }
+            {program.time && (
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                fontWeight={600}
+              >
+                {program.time} •
+              </Typography>
+            )}
             <Typography variant="caption" color="text.secondary">
               {program?.zoneWaterPrograms?.length} zones
             </Typography>
           </Box>
         </Box>
-        <Box
-          sx={{
-            width: 8,
-            height: 8,
-            borderRadius: '50%',
-            backgroundColor: getProgramColor(program.id, programs),
-            opacity: 0.6,
-          }}
-        />
+        {handleDelete && (
+          <Box>
+            <IconButton color="error" onClick={(e) => {
+              e.stopPropagation();
+              setIsOpenConfirmModal(true);
+            }}>
+              <Trash2Icon size={16} />
+            </IconButton>
+          </Box>
+        )}
       </Stack>
     </Paper>
+    </>
+
   );
 }

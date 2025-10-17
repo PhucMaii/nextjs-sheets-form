@@ -543,6 +543,7 @@ export default function ProgramSchedules({ showNotification }: IProps) {
                             provided={provided}
                             program={program}
                             programs={displayedPrograms}
+                            showNotification={showNotification}
                           />
                         )}
                       </Draggable>

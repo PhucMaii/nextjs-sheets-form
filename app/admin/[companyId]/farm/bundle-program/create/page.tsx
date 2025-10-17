@@ -130,6 +130,7 @@ export default function CreateBundleProgram() {
             setDaySchedules={setDaySchedules}
             programs={programs}
             daySchedules={daySchedules}
+            showNotification={showNotification} 
           />
         </Box>
     </Sidebar>

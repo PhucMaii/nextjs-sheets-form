@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Sidebar from '../../../components/Sidebar/Sidebar';
 import { grey } from '@mui/material/colors';
-import { Box, Typography } from '@mui/material';
+import { Box, Chip, Typography } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useRouter } from 'next/navigation';
 import axios from 'axios';
@@ -146,11 +146,13 @@ export default function BundleProgramDetails() {
           alignItems="center"
         >
           <Box display="flex" alignItems="center" gap={1}>
-            <BackButton />
-            <Typography variant="h4" fontWeight={800} color="text.primary">
-              Edit Bundle Program
-            </Typography>
-            
+            <BackButton noText />
+            <Box display="flex" flexDirection="column" gap={1}>
+              <Typography variant="h4" fontWeight={800} color="text.primary">
+                Edit Bundle Program
+              </Typography>
+              <Chip size="small" sx={{width: 'fit-content', p: 1}} label={`Bundle Program ID: ${id}`} />
+            </Box>
           </Box>
           <LoadingButton
             variant="contained"
@@ -170,6 +172,7 @@ export default function BundleProgramDetails() {
           setDaySchedules={setDaySchedules}
           programs={programs}
           daySchedules={daySchedules}
+          showNotification={showNotification}
         />
       </Box>
     </Sidebar>
