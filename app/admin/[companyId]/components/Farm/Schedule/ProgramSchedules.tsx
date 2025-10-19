@@ -20,7 +20,6 @@ import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
   ExpandMore as ExpandMoreIcon,
-  ExpandLess as ExpandLessIcon,
   CopyAll as CopyAllIcon,
   Save as SaveIcon,
 } from '@mui/icons-material';
@@ -49,7 +48,6 @@ import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { usePrograms } from '@/hooks/db-tables/usePrograms';
 import { Program, ZoneWater } from '../types';
-import { useHydrawiseAPI } from '@/hooks/useHydrawiseAPI';
 import ProgramMonthView from '../View/ProgramMonthView';
 import ProgramWeekView from '../View/ProgramWeekView';
 import ProgramDayView from '../View/ProgramDayView';
@@ -131,7 +129,6 @@ export default function ProgramSchedules({ showNotification }: IProps) {
   const [showAvailablePrograms, setShowAvailablePrograms] =
     useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [isCopyingLastMonth, setIsCopyingLastMonth] = useState<boolean>(false);
   const [isCopyingPrevPeriod, setIsCopyingPrevPeriod] =
     useState<boolean>(false);
   const [isTimeInputModalOpen, setIsTimeInputModalOpen] = useState<{
@@ -663,7 +660,6 @@ export default function ProgramSchedules({ showNotification }: IProps) {
                               <SmallBundleProgramCard
                                 provided={provided}
                                 bundleProgram={bundleProgram}
-                                showNotification={showNotification}
                               />
                             )}
                           </Draggable>
@@ -752,7 +748,6 @@ export default function ProgramSchedules({ showNotification }: IProps) {
                             <SmallProgramCard
                               provided={provided}
                               program={program}
-                              programs={displayedPrograms}
                               showNotification={showNotification}
                             />
                           )}

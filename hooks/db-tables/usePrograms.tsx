@@ -7,12 +7,6 @@ export const usePrograms = (companyId: string, programs: Program[]) => {
   const getProgramById = (id: string): Program | undefined =>
     programs?.find((p: Program) => Number(p.id) === Number(id));
 
-  const getProgramColor = (id: string) => {
-    const program = getProgramById(id);
-    console.log(program);
-    return program?.zoneWaterPrograms?.length || 0 > 10 ? '#4CAF50' : '#2196F3';
-  };
-
   const getPrograms = async () => {
     const response = await axios.get(
       getAdminApiUrl(companyId, '/water-program'),
@@ -41,6 +35,5 @@ export const usePrograms = (companyId: string, programs: Program[]) => {
     activateProgram,
     stopProgram,
     getProgramById,
-    getProgramColor,
   };
 };

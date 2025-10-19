@@ -81,7 +81,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
 export default withAdminAuthGuard(handler);
 
-const runZonesSequentially = async (programId: number, zoneWaterPrograms: ZoneWater[] | any[]) => {
+export const runZonesSequentially = async (programId: number, zoneWaterPrograms: ZoneWater[] | any[]) => {
   let delayMs = 0;
   for (const zone of zoneWaterPrograms) {
     const { duration, zoneId } = zone.zoneProgram;

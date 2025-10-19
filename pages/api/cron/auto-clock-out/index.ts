@@ -1,10 +1,9 @@
-import { PayrollType, PrismaClient } from '@prisma/client';
+import { PayrollType } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate } from '@/pages/api/utils/date';
 import { calculateHours } from '@/pages/api/drivers/shift/clock-out';
 import { IScheduledShift } from '@/app/utils/type';
-
-const prisma = new PrismaClient();
+import prisma from '@/client';
 
 export default async function handler(
   req: NextApiRequest,

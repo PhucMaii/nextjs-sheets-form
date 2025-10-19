@@ -31,6 +31,10 @@
     {
       "path": "/api/cron/auto-subtract-internal",
       "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/activate-water-program",
+      "schedule": "*/15 * * * *"
     }
   ],
   "functions": {

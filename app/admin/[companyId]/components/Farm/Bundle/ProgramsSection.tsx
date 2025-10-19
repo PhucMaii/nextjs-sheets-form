@@ -82,7 +82,6 @@ export default function ProgramsSection({ programs, showNotification }: Programs
                       provided={provided}
                       key={program.id}
                       program={program}
-                      programs={programs}
                       showNotification={showNotification}
                     />
                   )}

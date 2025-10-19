@@ -372,7 +372,6 @@ export default function SchedulePrograms({
                                       showNotification={showNotification}
                                       provided={draggableProvided}
                                       key={program.id}
-                                      programs={programs}
                                       program={program}
                                       isSmall
                                       onClick={() => setIsTimeInputModalOpen({

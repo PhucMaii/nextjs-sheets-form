@@ -3,7 +3,6 @@ import { prisma } from '@/lib/prisma';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { generateListOfDateString, YYYYMMDDFormat } from '@/app/utils/time';
 import {
-  formatDate,
   getTodayDate,
   normalizeDate,
 } from '@/pages/api/utils/date';

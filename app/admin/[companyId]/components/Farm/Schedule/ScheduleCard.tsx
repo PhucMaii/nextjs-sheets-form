@@ -11,7 +11,7 @@ import TimeInputModal from '../../Modals/edit/SingleFieldUpdate';
 import ConfirmModal from '../../Modals/ConfirmModal';
 import { times } from '@/app/lib/constant';
 import { ShowNotificationType } from '@/hooks/useNotification';
-import { getProgramColor, getProgramColorByZoneWaterPrograms, primaryProgramColor } from '@/app/utils/programs';
+import { getScheduleProgramColor } from '@/app/utils/programs';
 
 interface IProps {
   provided: any;
@@ -152,9 +152,9 @@ function ScheduleCard({
         sx={{
           p: 0.5,
           borderRadius: 0.5,
-          backgroundColor: alpha(primaryProgramColor, 0.2),
-          border: `1px solid ${alpha(primaryProgramColor, 0.4)}`,
-          borderLeft: `3px solid ${primaryProgramColor}`,
+          backgroundColor: alpha(getScheduleProgramColor(schedule), 0.2),
+          border: `1px solid ${alpha(getScheduleProgramColor(schedule), 0.4)}`,
+          borderLeft: `3px solid ${getScheduleProgramColor(schedule)}`,
           opacity: snapshot.isDragging ? 0.5 : 1,
           cursor: 'grab',
           '&:active': {
@@ -162,7 +162,7 @@ function ScheduleCard({
           },
           transition: 'all 0.2s ease',
           '&:hover': {
-            backgroundColor: alpha(primaryProgramColor, 0.3),
+            backgroundColor: alpha(getScheduleProgramColor(schedule), 0.3),
           },
           display: 'flex',
           alignItems: 'center',
@@ -181,7 +181,7 @@ function ScheduleCard({
               sx={{
                 fontSize: isDetailed ? '0.8rem' : '0.7rem',
                 fontWeight: 600,
-                color: isDetailed ? theme.palette.text.primary : primaryProgramColor,
+                color: isDetailed ? theme.palette.text.primary : getScheduleProgramColor(schedule),
                 display: 'block',
                 lineHeight: 1.2,
               }}
@@ -213,7 +213,7 @@ function ScheduleCard({
             variant={isDetailed ? 'subtitle1' : 'caption'}
             sx={{
               fontSize: isDetailed ? '0.9rem' : '0.7rem',
-              color: primaryProgramColor,
+              color: getScheduleProgramColor(schedule),
               display: 'block',
               lineHeight: 1.2,
               overflow: 'hidden',

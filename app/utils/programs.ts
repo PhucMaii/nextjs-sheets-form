@@ -1,4 +1,6 @@
-import { Program, ZoneWater } from '../admin/[companyId]/components/Farm/types';
+import { ProgramSchedule, WaterStatus } from '@prisma/client';
+import { Program } from '../admin/[companyId]/components/Farm/types';
+import { green } from '@mui/material/colors';
 
 export const primaryProgramColor = '#2196F3';
 
@@ -7,10 +9,15 @@ export const getProgramById = (id: string | number, programs: Program[]) => {
   return program;
 };
 
-export const getProgramColor = (id: string | number, programs: Program[] | any[]) => {
-  return '#2196F3';
-};
-
-export const getProgramColorByZoneWaterPrograms = (zoneWaterPrograms: ZoneWater[]) => {
-  return zoneWaterPrograms?.length > 10 ? '#4CAF50' : '#2196F3';
+export const getScheduleProgramColor = (scheduleProgram: ProgramSchedule) => {
+  switch (scheduleProgram?.status || WaterStatus.SCHEDULED) {
+    case WaterStatus.SCHEDULED:
+      return primaryProgramColor;
+    case WaterStatus.ACTIVE:
+      return green[500];
+    case WaterStatus.FINISHED:
+      return green[700];
+    default:
+      return primaryProgramColor;
+  }
 };

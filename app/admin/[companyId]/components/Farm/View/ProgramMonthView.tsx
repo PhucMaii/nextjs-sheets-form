@@ -3,7 +3,6 @@ import {
   format,
   isSameMonth,
   isToday,
-  isWeekend,
   endOfMonth,
   startOfMonth,
   startOfWeek,
