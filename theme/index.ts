@@ -1,6 +1,6 @@
 // eslint-disable @typescript-eslint/no-explicit-any
 'use client';
-import { createTheme as createMuiTheme } from '@mui/material';
+import { alpha, createTheme as createMuiTheme } from '@mui/material';
 import { createTypography } from './create-typography';
 import { createPalette } from './create-palette';
 
@@ -26,7 +26,13 @@ export function createTheme() {
     components: {
       MuiButton: {
         defaultProps: {
-          size: 'small',
+          size: 'medium',
+          sx: {
+            textTransform: 'none',
+            fontWeight: 600,
+            borderRadius: 2,
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',  
+          },
         },
       },
       MuiTextField: {
