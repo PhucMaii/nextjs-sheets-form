@@ -14,7 +14,7 @@ import {
 import { blue, grey } from '@mui/material/colors';
 import React, { useMemo } from 'react';
 import {
-  Water as WaterIcon,
+  FolderCopy as FolderCopyIcon,
   ViewList as ViewListIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
@@ -86,7 +86,7 @@ function BundleProgramCard({ bundleProgram, zones }: IProps) {
                   height: 48,
                 }}
               >
-                <WaterIcon />
+                <FolderCopyIcon />
               </Avatar>
               <Typography
                 variant="h6"

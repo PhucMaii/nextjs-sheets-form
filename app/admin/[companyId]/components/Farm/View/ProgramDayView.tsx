@@ -35,6 +35,7 @@ const ProgramDayView = ({
   );
 
   const theme = useTheme();
+  
   return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -46,6 +47,7 @@ const ProgramDayView = ({
             backgroundColor: alpha(theme.palette.primary.main, 0.1),
             borderRadius: 2,
             mb: 2,
+            transition: 'all 0.2s ease',
           }}
         >
           <Typography variant="h5" fontWeight={700} color="primary">

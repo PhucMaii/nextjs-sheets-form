@@ -26,6 +26,10 @@ interface IProps {
   removeSchedule: (id: string) => void;
   handleSave: () => Promise<void>;
   setSchedules: any;
+  draggedBundleProgram?: any;
+  hoveredDate?: Date | null;
+  setHoveredDate?: (date: Date | null) => void;
+  isDateOccupiedByBundle?: (date: Date, bundleProgram: any, startDate: Date) => boolean;
 }
 
 const ProgramMonthView = ({
@@ -37,6 +41,10 @@ const ProgramMonthView = ({
   removeSchedule,
   handleSave,
   setSchedules,
+  draggedBundleProgram,
+  hoveredDate,
+  setHoveredDate,
+  isDateOccupiedByBundle,
 }: IProps) => {
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -85,6 +93,10 @@ const ProgramMonthView = ({
                 const isCurrentMonth = isSameMonth(day, currentDate);
                 const isCurrentDay = isToday(day);
                 const isWeekendDay = isWeekend(day);
+                
+                // Check if this day would be occupied by the dragged bundle program
+                const isOccupiedByBundle = draggedBundleProgram && hoveredDate && 
+                  isDateOccupiedByBundle ? isDateOccupiedByBundle(day, draggedBundleProgram, hoveredDate) : false;
 
                 return (
                   <Droppable
@@ -95,6 +107,16 @@ const ProgramMonthView = ({
                       <Box
                         ref={provided.innerRef}
                         {...provided.droppableProps}
+                        onMouseEnter={() => {
+                          if (draggedBundleProgram && setHoveredDate) {
+                            setHoveredDate(day);
+                          }
+                        }}
+                        onMouseLeave={() => {
+                          if (draggedBundleProgram && setHoveredDate) {
+                            setHoveredDate(null);
+                          }
+                        }}
                         sx={{
                           flex: 1,
                           minHeight: 120,
@@ -107,18 +129,22 @@ const ProgramMonthView = ({
                             weekIndex < Math.ceil(days.length / 7) - 1
                               ? `1px solid ${theme.palette.grey[300]}`
                               : 'none',
-                          backgroundColor: isCurrentDay
-                            ? alpha(theme.palette.primary.main, 0.1)
-                            : isWeekendDay
-                              ? alpha(theme.palette.grey[50], 0.5)
-                              : 'white',
+                          backgroundColor: isOccupiedByBundle
+                            ? alpha(theme.palette.primary.dark, 0.2)
+                            : isCurrentDay
+                              ? alpha(theme.palette.primary.main, 0.1)
+                              : isWeekendDay
+                                ? alpha(theme.palette.grey[50], 0.5)
+                                : 'white',
                           opacity: isCurrentMonth ? 1 : 0.4,
                           transition: 'all 0.2s ease',
                           position: 'relative',
                           '&:hover': {
-                            backgroundColor: isCurrentDay
-                              ? alpha(theme.palette.primary.main, 0.15)
-                              : alpha(theme.palette.primary.main, 0.05),
+                            backgroundColor: isOccupiedByBundle
+                              ? alpha(theme.palette.primary.dark, 0.3)
+                              : isCurrentDay
+                                ? alpha(theme.palette.primary.main, 0.15)
+                                : alpha(theme.palette.primary.main, 0.05),
                           },
                           ...(snapshot.isDraggingOver && {
                             backgroundColor: alpha(
@@ -126,6 +152,10 @@ const ProgramMonthView = ({
                               0.1,
                             ),
                             border: `2px dashed ${theme.palette.primary.main}`,
+                          }),
+                          ...(isOccupiedByBundle && {
+                            border: `2px solid ${theme.palette.primary.dark}`,
+                            boxShadow: `0 0 8px ${alpha(theme.palette.primary.dark, 0.3)}`,
                           }),
                         }}
                       >

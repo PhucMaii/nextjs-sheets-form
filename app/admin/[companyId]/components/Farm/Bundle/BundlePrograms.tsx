@@ -31,6 +31,7 @@ export default function BundlePrograms() {
       const data = await getBundlePrograms();
       return data;
     },
+    enabled: !!companyId,
   });
 
   return (

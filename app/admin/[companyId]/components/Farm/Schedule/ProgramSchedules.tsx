@@ -15,9 +15,12 @@ import {
   ViewWeek as ViewWeekIcon,
   Today as TodayIcon,
   Water as WaterIcon,
+  FolderCopy as FolderCopyIcon,
   Schedule as ScheduleIcon,
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
+  ExpandMore as ExpandMoreIcon,
+  ExpandLess as ExpandLessIcon,
 } from '@mui/icons-material';
 import {
   DragDropContext,
@@ -55,12 +58,10 @@ import { WaterStatus } from '@prisma/client';
 import { LoadingButton } from '@mui/lab';
 import { times } from '@/app/lib/constant';
 import SmallProgramCard from '../SmallProgramCard';
+import SmallBundleProgramCard from '../SmallBundleProgramCard';
 import { getProgramById } from '@/app/utils/programs';
-// import useSyncProgramSchedules from '@/hooks/sync/useSyncProgramSchedules';
-// import { ITEM_CATEGORIZED } from '@/pages/api/admin/[companyId]/orderedItems/PUT';
 
 type ViewType = 'month' | 'week' | 'day';
-
 interface ScheduleItem {
   id: string;
   programId: number;
@@ -81,8 +82,19 @@ export default function ProgramSchedules({ showNotification }: IProps) {
   const theme = useTheme();
   const { companyId }: any = useParams();
   const [currentDate, setCurrentDate] = useState(new Date());
-  const { zones } = useHydrawiseAPI(companyId);
+  // const { zones } = useHydrawiseAPI(companyId);
   const { getPrograms } = usePrograms(companyId, []);
+
+  const { data: bundlePrograms } = useQuery({
+    queryKey: ['bundlePrograms'],
+    queryFn: async () => {
+      const data = await axios.get(
+        getAdminApiUrl(companyId, '/bundle-program'),
+      );
+      return data.data.data;
+    },
+    enabled: !!companyId,
+  });
 
   const { data: programs } = useQuery({
     queryKey: ['programs'],
@@ -93,14 +105,14 @@ export default function ProgramSchedules({ showNotification }: IProps) {
         zoneWaterPrograms: program.zoneWaterPrograms.map(
           (zoneProgram: ZoneWater) => ({
             ...zoneProgram,
-            hydrawiseZone: zones.find(
-              (zone: any) => zone.relay_id === zoneProgram.zoneProgram.zoneId,
-            ),
+            // hydrawiseZone: zones.find(
+            //   (zone: any) => zone.relay_id === zoneProgram.zoneProgram.zoneId,
+            // ),
           }),
         ),
       }));
     },
-    enabled: zones.length > 0,
+    // enabled: zones.length > 0,
   });
 
   const [displayedPrograms, setDisplayedPrograms] = useState<Program[]>(
@@ -109,6 +121,9 @@ export default function ProgramSchedules({ showNotification }: IProps) {
   const [viewType, setViewType] = useState<ViewType>('month');
   const [schedules, setSchedules] = useState<ScheduleItem[]>([]);
   const [draggedProgram, setDraggedProgram] = useState<string | null>(null);
+  const [draggedBundleProgram, setDraggedBundleProgram] = useState<any | null>(null);
+  const [hoveredDate, setHoveredDate] = useState<Date | null>(null);
+  const [showAvailablePrograms, setShowAvailablePrograms] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isTimeInputModalOpen, setIsTimeInputModalOpen] = useState<{
     open: boolean;
@@ -137,24 +152,6 @@ export default function ProgramSchedules({ showNotification }: IProps) {
 
     return { startDate: new Date(), endDate: new Date() };
   };
-  // const { startDate, endDate } = getStartAndEndDate();
-  // const handleSyncSuccess = (updatedSchedules: any[]) => {
-  //   showNotification('success', 'Program schedules synced successfully');
-  //   // refetchSchedules();
-  //   setSchedules(updatedSchedules);
-  // };
-  // const handleSyncError = (error: any) => {
-  //   showNotification('error', 'Failed to sync program schedules: ' + error);
-  // };
-
-  // const { triggerSync, getSyncStatus } = useSyncProgramSchedules(
-  //   companyId,
-  //   schedules,
-  //   startDate,
-  //   endDate,
-  //   handleSyncSuccess,
-  //   handleSyncError,
-  // );
 
   const { data: dbSchedules, refetch: refetchSchedules } = useQuery({
     queryKey: ['schedules'],
@@ -254,11 +251,12 @@ export default function ProgramSchedules({ showNotification }: IProps) {
 
   const handleDragEnd = (result: DropResult) => {
     setDraggedProgram(null);
+    setDraggedBundleProgram(null);
 
     if (!result.destination) return;
 
     const { droppableId } = result.destination;
-    if (!droppableId || droppableId === 'program-list') return;
+    if (!droppableId || droppableId === 'program-list' || droppableId === 'bundle-program-list') return;
     const [dateStr, time] = droppableId.split('|');
     const targetDate = new Date(dateStr);
 
@@ -291,6 +289,31 @@ export default function ProgramSchedules({ showNotification }: IProps) {
         targetId: scheduleId,
         defaultValue: time || defaultScheduleTime,
       });
+    } else if (result.source.droppableId.startsWith('bundle-program-')) {
+      // Adding bundle program schedules
+      const bundleProgramId = result.draggableId.replace('bundle-program-', '');
+      const bundleProgram = bundlePrograms?.find((bp: any) => bp.id.toString() === bundleProgramId);
+      
+      if (bundleProgram) {
+        const newSchedules: ScheduleItem[] = bundleProgram.dayPrograms.map((dayProgram: any, index: number) => {
+          const scheduleDate = addDays(targetDate, dayProgram.day - 1);
+          return {
+            id: `s${Date.now()}_${index}`,
+            programId: dayProgram.program.id,
+            name: dayProgram.program.name,
+            date: format(scheduleDate, 'MM/dd/yyyy'),
+            time: dayProgram.time,
+            status: WaterStatus.SCHEDULED,
+            zoneWaterPrograms: dayProgram.program.zoneWaterPrograms || [],
+          };
+        });
+
+        setSchedules((prev) => {
+          const updatedSchedules = [...prev, ...newSchedules];
+          // triggerSync(updatedSchedules);
+          return updatedSchedules;
+        });
+      }
     } else {
       // Moving existing schedule
       scheduleId = result.draggableId;
@@ -318,8 +341,34 @@ export default function ProgramSchedules({ showNotification }: IProps) {
     );
   };
 
+  const handleDragStart = (result: any) => {
+    if (result.draggableId.startsWith('bundle-program-')) {
+      const bundleProgramId = result.draggableId.replace('bundle-program-', '');
+      const bundleProgram = bundlePrograms?.find((bp: any) => bp.id.toString() === bundleProgramId);
+      setDraggedBundleProgram(bundleProgram);
+    } else {
+      setDraggedProgram(result.draggableId);
+    }
+  };
+
+  const getBundleDuration = (bundleProgram: any) => {
+    if (!bundleProgram?.dayPrograms) return 0;
+    return Math.max(...bundleProgram.dayPrograms.map((dp: any) => dp.day));
+  };
+
+  const getBundleOccupiedDates = (bundleProgram: any, startDate: Date) => {
+    if (!bundleProgram?.dayPrograms) return [];
+    return bundleProgram.dayPrograms.map((dp: any) => addDays(startDate, dp.day - 1));
+  };
+
+  const isDateOccupiedByBundle = (date: Date, bundleProgram: any, startDate: Date) => {
+    if (!bundleProgram || !startDate) return false;
+    const occupiedDates = getBundleOccupiedDates(bundleProgram, startDate);
+    return occupiedDates.some((occupiedDate: Date) => isSameDay(occupiedDate, date));
+  };
+
   return (
-    <DragDropContext onDragEnd={handleDragEnd}>
+    <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <TimeInputModal
         open={isTimeInputModalOpen.open}
         onClose={() =>
@@ -490,6 +539,69 @@ export default function ProgramSchedules({ showNotification }: IProps) {
           </Stack>
         </Paper>
 
+        {/* Available Bundle Programs */}
+        {viewType === 'month' && <Paper
+          elevation={0}
+          sx={{
+            p: 3,
+            mb: 3,
+            borderRadius: 3,
+            backgroundColor: 'white',
+            border: `1px solid ${alpha(theme.palette.grey[200], 0.5)}`,
+            background: `linear-gradient(135deg, ${alpha(theme.palette.primary.dark, 0.05)}, ${alpha(theme.palette.primary.light, 0.02)})`,
+          }}
+        >
+          <Stack direction="row" alignItems="center" spacing={2} mb={2}>
+            <FolderCopyIcon sx={{ color: theme.palette.primary.dark }} />
+            <Typography variant="h6" fontWeight={600}>
+              Available Bundle Programs
+            </Typography>
+            <Chip
+              label="Drag to schedule from start date"
+              size="small"
+              sx={{
+                backgroundColor: alpha(theme.palette.primary.dark, 0.1),
+                color: theme.palette.primary.dark,
+                fontWeight: 500,
+              }}
+            />
+          </Stack>
+          <Stack direction="row" spacing={2} flexWrap="wrap">
+            <Droppable droppableId="bundle-program-list">
+              {(provided) => (
+                <Box
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                    gap: 1,
+                  }}
+                >
+                  {bundlePrograms &&
+                    bundlePrograms.map((bundleProgram: any, index: number) => (
+                      <Draggable
+                        key={bundleProgram.id}
+                        draggableId={`bundle-program-${bundleProgram.id}`}
+                        index={index}
+                      >
+                        {(provided) => (
+                          <SmallBundleProgramCard
+                            provided={provided}
+                            bundleProgram={bundleProgram}
+                            showNotification={showNotification}
+                          />
+                        )}
+                      </Draggable>
+                    ))}
+                  {provided.placeholder}
+                </Box>
+              )}
+            </Droppable>
+          </Stack>
+        </Paper>}
+
         {/* Available Programs */}
         <Paper
           elevation={0}
@@ -502,57 +614,79 @@ export default function ProgramSchedules({ showNotification }: IProps) {
             background: `linear-gradient(135deg, ${alpha(theme.palette.grey[50], 0.5)}, ${alpha(theme.palette.grey[100], 0.2)})`,
           }}
         >
-          <Stack direction="row" alignItems="center" spacing={2} mb={2}>
-            <WaterIcon sx={{ color: theme.palette.primary.main }} />
-            <Typography variant="h6" fontWeight={600}>
-              Available Programs
-            </Typography>
-            <Chip
-              label="Drag to schedule"
+          <Stack 
+            direction="row" 
+            alignItems="center" 
+            justifyContent="space-between" 
+            mb={showAvailablePrograms ? 2 : 0}
+            sx={{ cursor: 'pointer' }}
+            onClick={() => setShowAvailablePrograms(!showAvailablePrograms)}
+          >
+            <Stack direction="row" alignItems="center" spacing={2}>
+              <WaterIcon sx={{ color: theme.palette.primary.main }} />
+              <Typography variant="h6" fontWeight={600}>
+                Available Programs
+              </Typography>
+              <Chip
+                label="Drag to schedule"
+                size="small"
+                sx={{
+                  backgroundColor: alpha(theme.palette.info.main, 0.1),
+                  color: theme.palette.info.main,
+                  fontWeight: 500,
+                }}
+              />
+            </Stack>
+            <IconButton
               size="small"
               sx={{
-                backgroundColor: alpha(theme.palette.info.main, 0.1),
-                color: theme.palette.info.main,
-                fontWeight: 500,
+                color: theme.palette.primary.main,
+                transition: 'transform 0.2s ease',
+                transform: showAvailablePrograms ? 'rotate(180deg)' : 'rotate(0deg)',
               }}
-            />
+            >
+              <ExpandMoreIcon />
+            </IconButton>
           </Stack>
-          <Stack direction="row" spacing={2} flexWrap="wrap">
-            <Droppable droppableId="program-list">
-              {(provided) => (
-                <Box
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    flexWrap: 'wrap',
-                    gap: 1,
-                  }}
-                >
-                  {programs &&
-                    displayedPrograms.map((program: any, index: number) => (
-                      <Draggable
-                        key={program.id}
-                        draggableId={`program-${program.id}`}
-                        index={index}
-                        // isDragDisabled
-                      >
-                        {(provided) => (
-                          <SmallProgramCard
-                            provided={provided}
-                            program={program}
-                            programs={displayedPrograms}
-                            showNotification={showNotification}
-                          />
-                        )}
-                      </Draggable>
-                    ))}
-                  {provided.placeholder}
-                </Box>
-              )}
-            </Droppable>
-          </Stack>
+          
+          {showAvailablePrograms && (
+            <Stack direction="row" spacing={2} flexWrap="wrap">
+              <Droppable droppableId="program-list">
+                {(provided) => (
+                  <Box
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      flexWrap: 'wrap',
+                      gap: 1,
+                    }}
+                  >
+                    {programs &&
+                      displayedPrograms.map((program: any, index: number) => (
+                        <Draggable
+                          key={program.id}
+                          draggableId={`program-${program.id}`}
+                          index={index}
+                          // isDragDisabled
+                        >
+                          {(provided) => (
+                            <SmallProgramCard
+                              provided={provided}
+                              program={program}
+                              programs={displayedPrograms}
+                              showNotification={showNotification}
+                            />
+                          )}
+                        </Draggable>
+                      ))}
+                    {provided.placeholder}
+                  </Box>
+                )}
+              </Droppable>
+            </Stack>
+          )}
         </Paper>
 
         {/* Calendar View */}
@@ -588,6 +722,10 @@ export default function ProgramSchedules({ showNotification }: IProps) {
               removeSchedule={deleteSchedule}
               handleSave={handleSave}
               setSchedules={setSchedules}
+              draggedBundleProgram={draggedBundleProgram}
+              hoveredDate={hoveredDate}
+              setHoveredDate={setHoveredDate}
+              isDateOccupiedByBundle={isDateOccupiedByBundle}
             />
           )}
           {viewType === 'week' && (
@@ -615,7 +753,7 @@ export default function ProgramSchedules({ showNotification }: IProps) {
           )}
 
           {/* Drag Overlay */}
-          {draggedProgram && (
+          {(draggedProgram || draggedBundleProgram) && (
             <Box
               sx={{
                 position: 'absolute',
@@ -623,8 +761,13 @@ export default function ProgramSchedules({ showNotification }: IProps) {
                 left: 0,
                 right: 0,
                 bottom: 0,
-                backgroundColor: alpha(theme.palette.primary.main, 0.05),
-                border: `2px dashed ${theme.palette.primary.main}`,
+                backgroundColor: alpha(
+                  draggedBundleProgram ? theme.palette.primary.dark : theme.palette.primary.main, 
+                  0.05
+                ),
+                border: `2px dashed ${
+                  draggedBundleProgram ? theme.palette.primary.dark : theme.palette.primary.main
+                }`,
                 borderRadius: 3,
                 display: 'flex',
                 alignItems: 'center',
@@ -639,19 +782,37 @@ export default function ProgramSchedules({ showNotification }: IProps) {
                   p: 3,
                   borderRadius: 2,
                   backgroundColor: 'white',
-                  border: `2px solid ${theme.palette.primary.main}`,
+                  border: `2px solid ${
+                    draggedBundleProgram ? theme.palette.primary.dark : theme.palette.primary.main
+                  }`,
                 }}
               >
                 <Stack direction="row" alignItems="center" spacing={2}>
-                  <WaterIcon
-                    sx={{ color: theme.palette.primary.main, fontSize: 32 }}
-                  />
+                  {draggedBundleProgram ? (
+                    <FolderCopyIcon
+                      sx={{ 
+                        color: theme.palette.primary.dark, 
+                        fontSize: 32 
+                      }}
+                    />
+                  ) : (
+                    <WaterIcon
+                      sx={{ color: theme.palette.primary.main, fontSize: 32 }}
+                    />
+                  )}
                   <Box>
-                    <Typography variant="h6" fontWeight={600} color="primary">
-                      Dragging Program
+                    <Typography 
+                      variant="h6" 
+                      fontWeight={600} 
+                      color={'primary'}
+                    >
+                      {draggedBundleProgram ? 'Dragging Bundle Program' : 'Dragging Program'}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Drop on any date to schedule
+                      {draggedBundleProgram 
+                        ? `Will schedule ${draggedBundleProgram.dayPrograms.length} programs over ${getBundleDuration(draggedBundleProgram)} days`
+                        : 'Drop on any date to schedule'
+                      }
                     </Typography>
                   </Box>
                 </Stack>

@@ -6,8 +6,7 @@ export const getProgramById = (id: string | number, programs: Program[]) => {
 };
 
 export const getProgramColor = (id: string | number, programs: Program[] | any[]) => {
-  const program = getProgramById(id, programs);
-  return (program?.zoneWaterPrograms?.length || 0) > 10 ? '#4CAF50' : '#2196F3';
+  return '#2196F3';
 };
 
 export const getProgramColorByZoneWaterPrograms = (zoneWaterPrograms: ZoneWater[]) => {

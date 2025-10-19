@@ -64,39 +64,42 @@ const ProgramWeekView = ({
         </Box>
 
         {/* Day headers */}
-        {days.map((day) => (
-          <Box
-            key={day.toISOString()}
-            sx={{
-              flex: 1,
-              p: 2,
-              textAlign: 'center',
-              backgroundColor: isToday(day)
-                ? alpha(theme.palette.primary.main, 0.1)
-                : theme.palette.grey[100],
-              borderRight:
-                day !== days[days.length - 1]
-                  ? `1px solid ${theme.palette.grey[300]}`
-                  : 'none',
-              borderBottom: `1px solid ${theme.palette.grey[300]}`,
-            }}
-          >
-            <Typography
-              variant="body2"
-              fontWeight={600}
-              color={isToday(day) ? 'primary' : 'text.primary'}
+        {days.map((day) => {
+          return (
+            <Box
+              key={day.toISOString()}
+              sx={{
+                flex: 1,
+                p: 2,
+                textAlign: 'center',
+                backgroundColor: isToday(day)
+                  ? alpha(theme.palette.primary.main, 0.1)
+                  : theme.palette.grey[100],
+                borderRight:
+                  day !== days[days.length - 1]
+                    ? `1px solid ${theme.palette.grey[300]}`
+                    : 'none',
+                borderBottom: `1px solid ${theme.palette.grey[300]}`,
+                transition: 'all 0.2s ease',
+              }}
             >
-              {format(day, 'EEE')}
-            </Typography>
-            <Typography
-              variant="h6"
-              fontWeight={700}
-              color={isToday(day) ? 'primary' : 'text.primary'}
-            >
-              {format(day, 'd')}
-            </Typography>
-          </Box>
-        ))}
+              <Typography
+                variant="body2"
+                fontWeight={600}
+                color={isToday(day) ? 'primary' : 'text.primary'}
+              >
+                {format(day, 'EEE')}
+              </Typography>
+              <Typography
+                variant="h6"
+                fontWeight={700}
+                color={isToday(day) ? 'primary' : 'text.primary'}
+              >
+                {format(day, 'd')}
+              </Typography>
+            </Box>
+          );
+        })}
       </Box>
 
       {/* Time slots rows */}
