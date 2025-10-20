@@ -1,12 +1,11 @@
-import { PO_STATUS, TRANSACTION_STATUS } from '@/app/utils/enum';
+import { PO_STATUS, TRANSACTION_STATUS, USER_ROLE } from '@/app/utils/enum';
 import { IPOItem } from '@/app/utils/type';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { getTodayDate } from '@/pages/api/utils/date';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createFifo, createOrderedItems } from '../../inventory/expenses/POST';
+import prisma from '@/client';
+import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 
 interface IBody {
   poId: number;
@@ -24,8 +23,6 @@ interface IBody {
     discount?: number;
   };
 }
-
-const prisma = new PrismaClient();
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -67,10 +64,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     await Promise.all(poItemPromises);
 
     const today = getTodayDate();
-    const session: any = await getServerSession(req, res, authOptions);
-    const adminUser: any = session?.user;
 
-    const createdBy = `Admin - ${adminUser.name}`;
+    const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
     // Convert to transaction
     const newTransaction = await prisma.expense.create({
       data: {
@@ -119,6 +114,21 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         },
       });
 
+      const isExistingInItemParamsFifo = itemParamsFifo.find(
+        (item) => item.inventoryItemId === poItem.inventoryItemId,
+      );
+
+      if (!vendorItem) {
+        console.error('Vendor Item Not Found in receive purchase order');
+        continue;
+      }
+
+      // If item already exists in itemParamsFifo, update the quantity
+      if (isExistingInItemParamsFifo) {
+        isExistingInItemParamsFifo.quantity += poItem.receivedQty;
+        continue;
+      }
+
       if (vendorItem) {
         itemParamsFifo.push({
           id: vendorItem.id,
@@ -135,6 +145,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         });
       }
     }
+
     // Create items for the transaction
     if (itemParamsFifo.length > 0) {
       await createFifo(
