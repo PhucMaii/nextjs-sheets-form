@@ -194,7 +194,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         lastMonthRevenueReport.revenue) *
       100;
 
-    // EXPENSES
+    // EXPENSES & PRODUCT LOSS
     const expenses = await prisma.expense.findMany({
       where: {
         companyId: Number(companyId),
@@ -203,9 +203,24 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         },
       },
     });
+
+    const productLosses = await prisma.lossReport.findMany({
+      where: {
+        companyId: Number(companyId),
+        reportedDate: {
+          in: datesInRange,
+        },
+      },
+    });
+
+    const totalProductLoss = productLosses.reduce((acc: number, loss: any) => {
+      return acc + (loss.totalCost || 0);
+    }, 0);
+
     const totalExpenses = expenses.reduce((acc: number, expense: any) => {
       return acc + expense.amount;
-    }, 0);
+    }, 0) + totalProductLoss;
+    
     const lastMonthExpenses: any = await getLastMonthExpenses(
       Number(companyId),
       formattedStartDate,

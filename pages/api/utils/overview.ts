@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client';
 import { checkIsKorean } from './korean';
 import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
 import { Order } from '@/app/admin/[companyId]/orders/page';
@@ -166,7 +165,6 @@ export const getLastMonthExpenses = async (
   companyId: number,
   startDate: Date,
 ) => {
-  const prisma = new PrismaClient();
   const lastMonth = startDate.getMonth();
 
   const lastMonthStart = new Date(startDate.getFullYear(), lastMonth - 2, 1);
@@ -190,9 +188,22 @@ export const getLastMonthExpenses = async (
     },
   });
 
+  const productLosses = await prisma.lossReport.findMany({
+    where: {
+      companyId,
+      reportedDate: {
+        in: datesInRange,
+      },
+    },
+  });
+
+  const totalProductLoss = productLosses.reduce((acc: number, loss: any) => {
+    return acc + (loss.totalCost || 0);
+  }, 0);
+
   const totalExpenses = transactions.reduce((acc: number, transaction: any) => {
     return acc + transaction.amount;
   }, 0);
 
-  return totalExpenses;
+  return totalExpenses + totalProductLoss;
 };

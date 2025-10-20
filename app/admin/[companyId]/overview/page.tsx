@@ -28,8 +28,6 @@ import { useReactToPrint } from 'react-to-print';
 import PrintIcon from '@mui/icons-material/Print';
 import useNotification from '@/hooks/useNotification';
 import CustomersProfitTable from '../components/Tables/CustomersProfitTable';
-import StatusText from '../components/StatusText';
-import DriverTablesReport from '../components/Tables/DriverTablesReport';
 import { useParams } from 'next/navigation';
 
 // New chart components

@@ -1,8 +1,9 @@
 import { generateListOfDateString } from '@/app/utils/time';
 import { IProductLoss } from '@/app/utils/type';
+import prisma from '@/client';
 import { formatDate } from '@/pages/api/utils/date';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
-import { LossReport, PrismaClient } from '@prisma/client';
+import { LossReport } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IQuery {
@@ -10,8 +11,6 @@ interface IQuery {
   endDate?: string;
   companyId?: string;
 }
-
-const prisma = new PrismaClient();
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
