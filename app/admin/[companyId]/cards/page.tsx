@@ -221,7 +221,7 @@ export default function CardManagement() {
     }
 
     return transactions?.data?.reduce((acc: number, transaction: any) => {
-      return acc + (transaction?.amount || transaction?.total);
+      return acc + (transaction?.amount || transaction?.total || 0);
     }, 0);
   }, [transactions]);
 
