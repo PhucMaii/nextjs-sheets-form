@@ -27,6 +27,7 @@ import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { recordAction } from '@/pages/api/utils/timeline';
 import { recordOrderInventoryLog } from '@/pages/api/utils/logs';
+import emailHandler, { sendEmail } from '@/pages/api/utils/email';
 
 export enum ITEM_CATEGORIZED {
   REMAIN = 'remain',
@@ -235,8 +236,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
-    const today = getTodayDate();
-
     let comment = '';
 
     if (actionRecord.create.length > 0) {
@@ -257,13 +256,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     );
 
     // Get admin update info
-    const session: any = await getServerSession(req, res, authOptions);
-    const adminUpdate: any = session?.user;
-    // await updateOrderTotalPrice(
-    //   orderId,
-    //   newTotalPrice,
-    //   `Admin - ${adminUpdate.clientName}`,
-    // );
+    const updatedBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
 
     const orderedItems = await prisma.orderedItems.findMany({
       where: {
@@ -291,7 +284,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         PST: orderTotalPrice.PST,
         GST: orderTotalPrice.GST,
         discount: orderTotalPrice.discount,
-        updatedBy: `Admin - ${adminUpdate.name}`,
+        updatedBy,
         updateTime,
       },
       include: {
@@ -311,6 +304,22 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         },
       },
     });
+
+    // Notify Email for client
+    if (
+      existingOrder?.user?.email &&
+      !existingOrder?.user?.email.includes('INACTIVE')
+    ) {
+      await sendEmail(
+        existingOrder?.user,
+        existingOrder,
+        orderId,
+        deliveryDate,
+        true,
+        note,
+        'EDIT ORDER',
+      );
+    }
 
     if (
       deliveryDate !== existingOrder.deliveryDate ||

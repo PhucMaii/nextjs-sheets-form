@@ -52,7 +52,6 @@ const emailHandler = async (
       });
     }
 
-    console.log(cc, 'CC');
     await emailTransporter.sendMail({
       from: process.env.NODEMAILER_EMAIL,
       to: email,
@@ -76,6 +75,7 @@ export const sendEmail = async (
   deliveryDate: string,
   sendToAdmin: boolean,
   note = '',
+  flag?: string,
 ) => {
   // const orderDetails: any = {};
   // for (const item of items) {
@@ -99,6 +99,7 @@ export const sendEmail = async (
     user.contactNumber,
     user.deliveryAddress,
     invoiceId,
+    flag,
   );
 
   const isToAdmin =

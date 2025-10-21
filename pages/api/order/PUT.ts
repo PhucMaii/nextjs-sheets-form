@@ -1,4 +1,8 @@
-import { InventoryLogFrom, InventoryLogType, OrderedItems } from '@prisma/client';
+import {
+  InventoryLogFrom,
+  InventoryLogType,
+  OrderedItems,
+} from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
@@ -162,7 +166,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           item?.Orders?.status !== ORDER_STATUS.VOID &&
           isValidToAffectInventory
         ) {
-
           const difference = item.quantity - item.prevQuantity;
           const isRestock = difference < 0;
 
@@ -265,12 +268,23 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       'REPLACEMENT ORDER',
     );
 
+    // To Admin
     await emailHandler(
       emailSendTo,
       'Order Supreme Sprouts',
       'Supreme Sprouts LTD',
       htmlTemplate,
     );
+
+    // To Client
+    if (existingUser.email && !existingUser.email.includes('INACTIVE')) {
+      await emailHandler(
+        existingUser.email,
+        'Order Supreme Sprouts',
+        'Supreme Sprouts LTD',
+        htmlTemplate,
+      );
+    }
 
     const itemsWithTotalPrice = formatItemsWithTotalPrice(updatedOrderedItems);
 
