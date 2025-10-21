@@ -62,7 +62,7 @@ export default function AddItem({
   const [inventoryItems] = SWRFetchData(
     `${getAdminApiUrl(companyId, '/inventory')}`,
   );
-  const [categories] = SWRFetchData(getAdminApiUrl(companyId, '/categories'));
+  const [categories] = SWRFetchData(getAdminApiUrl(companyId, '/categories?all=true'));
 
   useEffect(() => {
     if (defaultItem && inventoryItems) {

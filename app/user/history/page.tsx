@@ -13,6 +13,14 @@ import {
   TextField,
   Typography,
   useMediaQuery,
+  Card,
+  CardContent,
+  Chip,
+  Stack,
+  Paper,
+  Fade,
+  Slide,
+  useTheme,
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
@@ -21,7 +29,6 @@ import { generateMonthRange } from '@/app/utils/time';
 import { Order } from '@/app/admin/[companyId]/orders/page';
 import TuneIcon from '@mui/icons-material/Tune';
 import { ORDER_STATUS } from '@/app/utils/enum';
-import { Virtuoso } from 'react-virtuoso';
 import useDebounce from '@/hooks/useDebounce';
 import { DropdownItemContainer } from '@/app/admin/[companyId]/orders/styled';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
@@ -34,15 +41,14 @@ import {
 import { blue } from '@mui/material/colors';
 import { getWindowDimensions } from '@/hooks/useWindowDimensions';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import ErrorComponent from '@/app/admin/[companyId]/components/ErrorComponent';
 import { SWRFetchData } from '@/app/utils/db';
 import { filterDateRangeOrders } from '@/pages/api/utils/date';
-import OverviewCard from '@/app/admin/[companyId]/components/OverviewCard/OverviewCard';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import SelectDateRange from '@/app/admin/[companyId]/components/Select/SelectDateRange';
 // import OrderAccordion from '@/app/admin/[companyId]/components/OrderAccordion';
 import { PaymentStatus } from '@prisma/client';
 import OrderAccordion from '@/app/components/OrderAccordion';
+import UserHeader from '@/app/components/UserHeader';
 
 const totalYPosition = 250;
 export default function HistoryPage() {
@@ -61,13 +67,14 @@ export default function HistoryPage() {
   const [tabIdx, setTabIdx] = useState<number>(0);
   const debouncedKeywords = useDebounce(searchKeywords, 800);
 
-  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   // const monthRange = useMemo(() => {
   //   return generateMonthRange();
   // }, []);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [orderData, _mutateOrders, isValidating] = SWRFetchData(
+  const [orderData, _mutateOrders, isValidating]: any = SWRFetchData(
     `/api/order?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
   );
 
@@ -106,7 +113,10 @@ export default function HistoryPage() {
     }
   }, [debouncedKeywords, baseClientOrders]);
 
-  const filterOrder = (status: ORDER_STATUS | PaymentStatus, type: 'fulfillment' | 'payment') => {
+  const filterOrder = (
+    status: ORDER_STATUS | PaymentStatus,
+    type: 'fulfillment' | 'payment',
+  ) => {
     const newClientOrders = baseClientOrders.filter((order: Order) => {
       if (type === 'fulfillment') {
         return order.status === status;
@@ -242,87 +252,352 @@ export default function HistoryPage() {
 
   return (
     <Sidebar>
-      <Grid
-        container
-        columnSpacing={2}
-        alignItems="center"
-        spacing={2}
-        sx={{ position: 'sticky' }}
-      >
-        <Grid item xs={12} md={6}>
-          <Typography variant="h4">History</Typography>
-        </Grid>
-        <Grid item xs={12} md={6} textAlign={!mdDown ? 'right' : 'left'}>
-          <SelectDateRange dateRange={dateRange} setDateRange={setDateRange} />
-        </Grid>
-        <Grid item xs={12}>
-          <OverviewCard
-            text="Over Due"
-            value={orderData?.data?.dueAmount?.toFixed(2) || 0}
-            icon={
-              <AttachMoneyIcon
-                sx={{ fontSize: 50 }}
-                fontSize="large"
-                color="primary"
-              />
-            }
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <OverviewCard
-            text="Current Month ($)"
-            value={orderData?.data?.currentMonthBill?.toFixed(2) || 0}
-            // icon={<MonetizationOnIcon fontSize="large" color="primary" />}
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <OverviewCard
-            text="Total Orders"
-            value={baseClientOrders.length}
-            // icon={<ReceiptLongIcon sx={{fontSize: 50}} fontSize="large" color="primary" />}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <Tabs
-            value={tabIdx}
-            variant="fullWidth"
-            sx={{ borderBottom: 1, borderColor: 'divider' }}
-            onChange={(e: any, value) => setTabIdx(value)}
+      {/* Modern Header Section */}
+      {/* <Fade in timeout={800}> */}
+        {/* <Paper
+          elevation={0}
+          sx={{
+            background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+            color: 'white',
+            p: isMobile ? 2.5 : 3,
+            mb: isMobile ? 1.5 : 2,
+            borderRadius: isMobile ? 1.5 : 2,
+            position: 'relative',
+            overflow: 'hidden',
+            width: '100%',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(10px)',
+            },
+          }}
+        >
+          <Box position="relative" zIndex={1}>
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs={12} sm={8}>
+                <Box>
+                  <Typography
+                    variant={isMobile ? 'h6' : 'h5'}
+                    fontWeight="300"
+                    sx={{
+                      mb: 0.5,
+                      opacity: 0.9,
+                      fontSize: isMobile ? '1rem' : '1.25rem',
+                    }}
+                  >
+                    Order History
+                  </Typography>
+                  <Typography
+                    variant={isMobile ? 'h5' : 'h4'}
+                    fontWeight="600"
+                    sx={{ mb: 1, fontSize: isMobile ? '1.25rem' : '1.5rem' }}
+                  >
+                    {tabIdx === 0 ? 'Current Month' : 'Overdue Orders'}
+                  </Typography>
+                </Box>
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <Box
+                  display="flex"
+                  justifyContent={isMobile ? 'flex-start' : 'flex-end'}
+                  gap={1}
+                >
+                  <Chip
+                    label={`${baseClientOrders.length} orders`}
+                    sx={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                      color: 'white',
+                      fontWeight: 500,
+                      backdropFilter: 'blur(10px)',
+                      fontSize: isMobile ? '0.7rem' : '0.8rem',
+                      height: isMobile ? 24 : 28,
+                    }}
+                  />
+                </Box>
+              </Grid>
+            </Grid>
+          </Box>
+        </Paper> */}
+        <UserHeader 
+          title="Order History"
+          subtitle={tabIdx === 0 ? 'Current Month' : 'Overdue Orders'}
+          chipLabel={`${baseClientOrders.length} orders`}
+        />
+      {/* </Fade> */}
+
+      {/* Compact Stats Section */}
+      <Slide direction="up" in timeout={1000}>
+        <Box sx={{ mb: isMobile ? 1.5 : 2 }}>
+          <Typography
+            variant={isMobile ? 'subtitle1' : 'h6'}
+            fontWeight="600"
+            sx={{ mb: isMobile ? 1.5 : 2, color: 'text.primary' }}
           >
-            <Tab value={0} label="Current Month" />
-            <Tab value={1} label="Over Due" />
-          </Tabs>
-        </Grid>
-        <Grid item xs={11}>
-          <TextField
-            fullWidth
-            variant="filled"
-            placeholder="Search by invoice id, date or status"
-            value={searchKeywords}
-            onChange={(e) => setSearchKeywords(e.target.value)}
-          />
-        </Grid>
-        <Grid item xs={1} textAlign="right">
-          {filterDropdown}
-        </Grid>
-        <Grid item xs={12}>
+            Financial Overview
+          </Typography>
+
+          <Grid container spacing={isMobile ? 1 : 1.5}>
+            {/* Overdue Amount Card */}
+            <Grid item xs={6}>
+              <Card
+                elevation={0}
+                sx={{
+                  background:
+                    'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+                  color: 'white',
+                  borderRadius: isMobile ? 1.5 : 2,
+                  transition: 'all 0.3s ease',
+                  height: isMobile ? 80 : 90,
+                  '&:hover': {
+                    transform: isMobile ? 'none' : 'translateY(-2px)',
+                    boxShadow: isMobile
+                      ? '0 2px 8px rgba(25, 118, 210, 0.2)'
+                      : '0 8px 16px rgba(25, 118, 210, 0.3)',
+                  },
+                }}
+              >
+                <CardContent
+                  sx={{
+                    p: isMobile ? 1.5 : 2,
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                  >
+                    <Box sx={{ flex: 1 }}>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          fontSize: isMobile ? '0.65rem' : '0.7rem',
+                          lineHeight: 1,
+                        }}
+                      >
+                        Overdue
+                      </Typography>
+                      <Typography
+                        variant={isMobile ? 'h6' : 'h5'}
+                        fontWeight="700"
+                        sx={{
+                          fontSize: isMobile ? '1.25rem' : '1.5rem',
+                          lineHeight: 1.2,
+                        }}
+                      >
+                        ${orderData?.data?.dueAmount?.toFixed(2) || '0.00'}
+                      </Typography>
+                    </Box>
+                    <AttachMoneyIcon
+                      sx={{ fontSize: isMobile ? 20 : 24, opacity: 0.8 }}
+                    />
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            {/* Current Month Bill Card */}
+            <Grid item xs={6}>
+              <Card
+                elevation={0}
+                sx={{
+                  background:
+                    'linear-gradient(135deg, #42a5f5 0%, #1976d2 100%)',
+                  color: 'white',
+                  borderRadius: isMobile ? 1.5 : 2,
+                  transition: 'all 0.3s ease',
+                  height: isMobile ? 80 : 90,
+                  '&:hover': {
+                    transform: isMobile ? 'none' : 'translateY(-2px)',
+                    boxShadow: isMobile
+                      ? '0 2px 8px rgba(66, 165, 245, 0.2)'
+                      : '0 8px 16px rgba(66, 165, 245, 0.3)',
+                  },
+                }}
+              >
+                <CardContent
+                  sx={{
+                    p: isMobile ? 1.5 : 2,
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                  >
+                    <Box sx={{ flex: 1 }}>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          fontSize: isMobile ? '0.65rem' : '0.7rem',
+                          lineHeight: 1,
+                        }}
+                      >
+                        This Month
+                      </Typography>
+                      <Typography
+                        variant={isMobile ? 'h6' : 'h5'}
+                        fontWeight="700"
+                        sx={{
+                          fontSize: isMobile ? '1.25rem' : '1.5rem',
+                          lineHeight: 1.2,
+                        }}
+                      >
+                        $
+                        {orderData?.data?.currentMonthBill?.toFixed(2) ||
+                          '0.00'}
+                      </Typography>
+                    </Box>
+                    <ReceiptLongIcon
+                      sx={{ fontSize: isMobile ? 20 : 24, opacity: 0.8 }}
+                    />
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+        </Box>
+      </Slide>
+
+      {/* Controls Section */}
+      <Slide direction="up" in timeout={1200}>
+        <Box sx={{ mb: isMobile ? 1.5 : 2 }}>
+          <Grid container spacing={isMobile ? 1 : 1.5} alignItems="center">
+            <Grid item xs={12} md={6}>
+              <SelectDateRange
+                dateRange={dateRange}
+                setDateRange={setDateRange}
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Tabs
+                value={tabIdx}
+                variant={isMobile ? 'fullWidth' : 'standard'}
+                sx={{
+                  borderBottom: 1,
+                  borderColor: 'divider',
+                  minHeight: isMobile ? 40 : 48,
+                  '& .MuiTab-root': {
+                    minHeight: isMobile ? 40 : 48,
+                    fontSize: isMobile ? '0.75rem' : '0.875rem',
+                  },
+                }}
+                onChange={(e: any, value) => setTabIdx(value)}
+              >
+                <Tab value={0} label="Current Month" />
+                <Tab value={1} label="Over Due" />
+              </Tabs>
+            </Grid>
+          </Grid>
+        </Box>
+      </Slide>
+
+      {/* Search and Filter Section */}
+      <Slide direction="up" in timeout={1400}>
+        <Box sx={{ mb: isMobile ? 1.5 : 2 }}>
+          <Grid container spacing={isMobile ? 1 : 1.5} alignItems="center">
+            <Grid item xs={11}>
+              <TextField
+                fullWidth
+                variant="outlined"
+                size="small"
+                placeholder="Search by invoice id, date or status"
+                value={searchKeywords}
+                onChange={(e) => setSearchKeywords(e.target.value)}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: isMobile ? 1.5 : 2,
+                  },
+                }}
+              />
+            </Grid>
+            <Grid item xs={1} textAlign="right">
+              {filterDropdown}
+            </Grid>
+          </Grid>
+        </Box>
+      </Slide>
+
+      {/* Orders List Section */}
+      <Slide direction="up" in timeout={1600}>
+        <Box>
           {isValidating && !clientOrders ? (
             <SplashScreen />
           ) : clientOrders.length > 0 ? (
-            <Virtuoso
-              totalCount={clientOrders.length}
-              style={{ height: virtuosoHeight }}
-              data={clientOrders}
-              itemContent={(index: number, order: Order) => (
-                // <OrderAccordion key={index} order={order} />
-                <OrderAccordion key={index} order={order} />
-              )}
-            />
+            <Stack spacing={isMobile ? 1 : 1.5}>
+              {clientOrders.map((order: Order, index: number) => (
+                <Fade in timeout={1800 + index * 200} key={order.id}>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      borderRadius: isMobile ? 1.5 : 2,
+                      overflow: 'hidden',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        boxShadow: isMobile
+                          ? '0 2px 8px rgba(0, 0, 0, 0.06)'
+                          : '0 4px 12px rgba(0, 0, 0, 0.08)',
+                        borderColor: blue[300],
+                      },
+                    }}
+                  >
+                    <OrderAccordion order={order} />
+                  </Paper>
+                </Fade>
+              ))}
+            </Stack>
           ) : (
-            <ErrorComponent errorText="No Order Found" />
+            <Paper
+              elevation={0}
+              sx={{
+                p: isMobile ? 4 : 6,
+                textAlign: 'center',
+                border: '2px dashed',
+                borderColor: 'divider',
+                borderRadius: isMobile ? 1.5 : 2,
+                backgroundColor: 'grey.50',
+              }}
+            >
+              <ReceiptLongIcon
+                sx={{
+                  fontSize: isMobile ? 48 : 64,
+                  color: 'grey.400',
+                  mb: 2,
+                }}
+              />
+              <Typography
+                variant={isMobile ? 'h6' : 'h5'}
+                fontWeight="500"
+                color="text.secondary"
+                sx={{ mb: 1 }}
+              >
+                No Orders Found
+              </Typography>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ fontSize: isMobile ? '0.875rem' : undefined }}
+              >
+                Try adjusting your search criteria or date range
+              </Typography>
+            </Paper>
           )}
-        </Grid>
-      </Grid>
+        </Box>
+      </Slide>
     </Sidebar>
   );
 }
