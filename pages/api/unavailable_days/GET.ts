@@ -3,6 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { convertToPSTDate, normalizeDate } from '../utils/date';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
+import prisma from '@/client';
 
 interface IQuery {
   userId?: string;
@@ -25,17 +26,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     }
 
     if (userId === 'All Clients' && date) {
-      const allRanges = await prisma.dayRange.findMany({
-        where: {
-          companyId,
-        },
-        include: {
-          user: true,
-        },
-      });
-
-      // Formatted Range By Client For Result
-      const filteredRange = filterRangeByDate(date, allRanges);
+      const filteredRange = await getBlockingRangesByDate(companyId, date);
 
       return res.status(200).json({
         data: filteredRange,
@@ -91,22 +82,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export const filterRangeByDate = (date: string, rangeList: DayRange[]) => {
+export const filterRangeByDate = (date: string, rangeList: DayRange[]): Record<string, DayRange[]> => {
   const selectedDate = normalizeDate(new Date(date));
-  // const selectedDate = convertToPSTDate(date);
-  console.log('selectedDate: ', selectedDate);
-  // Filter range that include the selected date
-  const rangesInDate = rangeList.filter((range: DayRange) => {
-    // const normalizedStartDate = normalizeDate(range.startDate); // Normalize start date
-    // const normalizedEndDate = normalizeDate(range.endDate);
 
+  const rangesInDate = rangeList.filter((range: DayRange) => {
     const pstStartDate = convertToPSTDate(range.startDate);
     const pstEndDate = convertToPSTDate(range.endDate);
-
-    // console.log('pstEndDate: ', pstEndDate);
-    // console.log('pstStartDate: ', pstStartDate);
-
-    // normalizedEndDate.setDate(normalizedEndDate.getDate() - 1);
     return selectedDate >= pstStartDate && selectedDate <= pstEndDate;
   });
 
@@ -124,4 +105,23 @@ export const filterRangeByDate = (date: string, rangeList: DayRange[]) => {
   }, {});
 
   return formattedResult;
+};
+
+export const getBlockingRangesByDate = async (
+  companyId: number,
+  date: string,
+) => {
+  const allRanges = await prisma.dayRange.findMany({
+    where: {
+      companyId,
+    },
+    include: {
+      user: true,
+    },
+  });
+
+  // Formatted Range By Client For Result
+  const filteredRange = filterRangeByDate(date, allRanges);
+
+  return filteredRange;
 };

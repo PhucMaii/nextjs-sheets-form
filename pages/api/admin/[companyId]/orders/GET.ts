@@ -296,12 +296,14 @@ export const getOrderRoute = (order: any) => {
   const orderDeliveryDate: Date = normalizeDate(order.deliveryDate);
   const orderDayIndex = orderDeliveryDate.getDay();
   const orderDay = days[orderDayIndex];
+  if (!order.user.routes || order.user.routes.length === 0) {
+    return 'No route - N/A';
+  }
   const orderRoute = order.user.routes.find((route: any) => {
     return route?.route?.day === orderDay;
   });
 
-  return (
-    orderRoute ? `${orderRoute?.route?.name} - ${orderRoute?.route?.employee?.name}` :
-    'No route - N/A'
-  );
+  return orderRoute
+    ? `${orderRoute?.route?.name} - ${orderRoute?.route?.employee?.name}`
+    : 'No route - N/A';
 };

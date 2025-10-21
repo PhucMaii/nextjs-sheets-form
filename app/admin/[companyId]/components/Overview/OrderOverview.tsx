@@ -22,6 +22,7 @@ import WCODInfo from '../Modals/WCODInfo';
 import AddTempCOD from '../Modals/AddTempCod/AddTempCOD';
 import { minifyNumber } from '@/app/utils/number';
 import { useParams } from 'next/navigation';
+import MissedOrders from '../MissedOrders';
 
 interface IProps {
   allRouteOrderData: Order[];
@@ -157,7 +158,10 @@ export default function OrderOverview({
         showNotification={showNotification}
       />
       {/* Select Routes */}
-      <Box display="flex" justifyContent="flex-end" mb={2}>
+      <Box display="flex" justifyContent="space-between" mb={2}>
+        <Box>
+          <MissedOrders />
+        </Box>
         <Select
           label="Routes"
           sx={{ background: 'white', width: '200px' }}
@@ -362,9 +366,7 @@ export default function OrderOverview({
                 fontWeight="bold"
                 sx={{ color: `${primaryColor} !important` }}
               >
-                {smDown
-                  ? minifyNumber(openBill.length)
-                  : openBill.length}
+                {smDown ? minifyNumber(openBill.length) : openBill.length}
               </Typography>
             </Box>
             <Box
@@ -382,9 +384,7 @@ export default function OrderOverview({
                 fontWeight="bold"
                 sx={{ color: `${primaryColor} !important` }}
               >
-                {smDown
-                  ? minifyNumber(totalBill)
-                  : totalBill.toFixed(2)}
+                {smDown ? minifyNumber(totalBill) : totalBill.toFixed(2)}
               </Typography>
             </Box>
           </Box>

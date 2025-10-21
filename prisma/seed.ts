@@ -120,36 +120,12 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-  const startDate = new Date('2025-08-01');
-  const endDate = new Date('2025-10-10');
-  const dates = generateListOfDateString(startDate, endDate);
-  const orderedItems: any = await prisma.orderedItems.findMany({
+  const phoDen = await prisma.user.findFirst({
     where: {
-      companyId: 1,
-      Orders: {
-        deliveryDate: {
-          in: dates,
-        },
-      },
-    },
-    include: {
-      Orders: true,
+      clientId: '00001',
     },
   });
-
-
-  const checkMap: any = orderedItems.reduce((acc: any, orderedItem: any) => {
-    const itemKey = `${orderedItem.inventoryItemId}-${orderedItem.orderId}-${orderedItem.Orders.deliveryDate}-${orderedItem.quantity}-${orderedItem.price}`;
-    if (!acc[itemKey]) {
-      acc[itemKey] = [];
-    }
-    acc[itemKey].push(orderedItem.id);
-    return acc;
-  }, {});
-
-  // Only filter the pair has more than 1 ordered item
-  const filteredCheckMap = Object.keys(checkMap).filter((key) => checkMap[key].length > 1);
-  console.log(filteredCheckMap);
+  console.log(phoDen);
 }
 
 // async function main() {

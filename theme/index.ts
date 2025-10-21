@@ -1,8 +1,9 @@
 // eslint-disable @typescript-eslint/no-explicit-any
 'use client';
-import { alpha, createTheme as createMuiTheme } from '@mui/material';
+import { createTheme as createMuiTheme } from '@mui/material';
 import { createTypography } from './create-typography';
 import { createPalette } from './create-palette';
+import { grey } from '@mui/material/colors';
 
 export function createTheme() {
   const typography: any = createTypography();
@@ -32,6 +33,14 @@ export function createTheme() {
             fontWeight: 600,
             borderRadius: 2,
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',  
+            '&:hover': {
+              transform: 'translateY(-1px)',
+              boxShadow: `0 4px 12px ${grey[200]}`,
+            },
+            '&:active': {
+              transform: 'translateY(0px)',
+              boxShadow: `0 2px 6px ${grey[200]}`,
+            },
           },
         },
       },

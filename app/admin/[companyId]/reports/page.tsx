@@ -551,21 +551,21 @@ export default function ReportPage() {
   const renderTabContent = () => {
     if (reportState.tabIndex === 0) {
       return (
-        <OrderInReportPage
-          clientOrders={reportState.clientOrders}
-          setClientOrders={reportState.setClientOrders}
-          showNotification={showNotification}
-          isFetching={reportState.isFetching}
-          clientValue={reportState.clientValue}
-          dateRange={reportState.dateRange}
-          setUnpaidOrders={reportState.setUnpaidOrders}
-          mutateOrders={mutateOrders}
-          datePicker={datePicker}
-          baseClientOrders={reportState.baseClientOrders}
-          setBaseClientOrders={reportState.setBaseClientOrders}
-          searchKeywords={reportState.searchKeywords}
-          setSearchKeywords={reportState.setSearchKeywords}
-        />
+          <OrderInReportPage
+            clientOrders={reportState.clientOrders}
+            setClientOrders={reportState.setClientOrders}
+            showNotification={showNotification}
+            isFetching={reportState.isFetching}
+            clientValue={reportState.clientValue}
+            dateRange={reportState.dateRange}
+            setUnpaidOrders={reportState.setUnpaidOrders}
+            mutateOrders={mutateOrders}
+            datePicker={datePicker}
+            baseClientOrders={reportState.baseClientOrders}
+            setBaseClientOrders={reportState.setBaseClientOrders}
+            searchKeywords={reportState.searchKeywords}
+            setSearchKeywords={reportState.setSearchKeywords}
+          />
       );
     }
 

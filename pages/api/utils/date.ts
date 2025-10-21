@@ -96,15 +96,11 @@ export const generate7DaysBefore = (deliveryDate: string) => {
   return dayList;
 };
 
-export const getTodayDate = (
-  dateStyle: 'short' | 'long' | 'full' | 'medium' | undefined = 'short',
-  timeStyle: 'short' | 'long' = 'long',
-) => {
+export const getTodayDate = () => {
   const pstDate = new Intl.DateTimeFormat('en-US', {
     timeZone: 'America/Los_Angeles',
-    dateStyle,
-    timeStyle,
-    // timeStyle,
+    dateStyle: 'short',
+    timeStyle: 'long',
   }).format(new Date());
 
   const date = pstDate.split(',')[0];
@@ -119,6 +115,16 @@ export const getTodayDate = (
 
   return { date: dateRes, time, dateAndTime: `${dateRes} ${time}` };
 };
+
+export const getTodayDay = () => {
+  const pstDate = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Los_Angeles',
+    dateStyle: 'full',
+    timeStyle: 'full',
+  }).format(new Date());
+
+  return pstDate.split(',')[0]
+}
 
 export const formatDateString = (inputDate: Date | string) => {
   let inputDateTypeDate: Date;
