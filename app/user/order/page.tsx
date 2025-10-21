@@ -4,7 +4,7 @@ import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent
 import axios from 'axios';
 import { API_URL, FLAG_ORDER_TYPE, USER_ROLE } from '@/app/utils/enum';
 import dayjs from 'dayjs';
-import { Box, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import moment from 'moment';
 import { limitOrderHour } from '@/app/lib/constant';
 import { Order } from '@/app/admin/[companyId]/orders/page';
@@ -15,13 +15,11 @@ import OrderView, { ORDER_USAGE_PURPOSE } from '@/app/components/OrderView';
 import NotificationPopup from '@/app/admin/[companyId]/components/Notification';
 import { useRouter } from 'next/navigation';
 import { TourProvider } from '@reactour/tour';
-import TourStartButton from './TourStartButton';
-// import { grey } from '@mui/material/colors';
-// import OldOrderVersion from './OldOrderVersion';
 import OverrideOrder from '../../components/Modals/OverrideOrder';
 import { getNextOrderDate } from '@/pages/api/utils/date';
 import ConfirmModal from '@/app/admin/[companyId]/components/Modals/ConfirmModal';
 import { UserContext } from '@/app/context/UserContextAPI';
+import UserHeader from '@/app/components/UserHeader';
 
 const steps = [
   {
@@ -54,7 +52,8 @@ export default function OrderForm() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [enteredOrderAt, setEnteredOrderAt] = useState<any>();
   // const [tabIdx, setTabIdx] = useState<number>(0);
-  const [isConfirmOrderFarNextDay, setIsConfirmOrderFarNextDay] = useState<boolean>(false);
+  const [isConfirmOrderFarNextDay, setIsConfirmOrderFarNextDay] =
+    useState<boolean>(false);
   const [isOpenConfirmOrder, setIsOpenConfirmOrder] = useState<boolean>(false);
   const [order, setOrder] = useState<Order | null>(null);
   const [overrideOrderProps, setOverrideOrderProps] = useState<any>({
@@ -137,16 +136,20 @@ export default function OrderForm() {
       const nextOrderDate = getNextOrderDate();
       const deliveryDateObjPST = new Date(order.deliveryDate);
       deliveryDateObjPST.setHours(0, 0, 0, 0);
-  
-      if (deliveryDateObjPST.getTime() > nextOrderDate.getTime() && !isConfirmOrderFarNextDay) {
+
+      if (
+        deliveryDateObjPST.getTime() > nextOrderDate.getTime() &&
+        !isConfirmOrderFarNextDay
+      ) {
         setOrder(order);
         setIsConfirmOrderFarNextDay(true);
         setIsOpenConfirmOrder(true);
-        return { ok: false, error: 'Target delivery date is too far in the future' };
+        return {
+          ok: false,
+          error: 'Target delivery date is too far in the future',
+        };
       }
-
     }
-
 
     try {
       const currentDate = new Date();
@@ -200,7 +203,7 @@ export default function OrderForm() {
         router.push('/user/overview');
       }, 500);
 
-      return { ok: true }
+      return { ok: true };
     } catch (error: any) {
       console.log(error);
       showNotification('error', error.response.data.error);
@@ -246,40 +249,33 @@ export default function OrderForm() {
           anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         />
 
-        {order && <ConfirmModal
-          open={isOpenConfirmOrder}
-          onClose={() => {
-            setIsOpenConfirmOrder(false);
-            setOrder(null);
-            setIsConfirmOrderFarNextDay(false);
-          }}
-          handleSubmit={async () => {
-            await onSubmit(order as Order);
-          }}
-          showNotification={showNotification}
-          title={`Are you sure you want to order for ${order.deliveryDate}?`}
-          buttonLabel="CONFIRM"
-          successMsg="Order placed successfully"
-        />}
-        {/* 
-        <Tabs
-          variant="fullWidth"
-          sx={{ backgroundColor: grey[50] }}
-          value={tabIdx}
-          onChange={(e, value) => setTabIdx(value)}
-        >
-          <Tab value={0} label="New Version ✨" />
-          <Tab value={1} label="Old Version 👴🏼" />
-        </Tabs> */}
+        {order && (
+          <ConfirmModal
+            open={isOpenConfirmOrder}
+            onClose={() => {
+              setIsOpenConfirmOrder(false);
+              setOrder(null);
+              setIsConfirmOrderFarNextDay(false);
+            }}
+            handleSubmit={async () => {
+              await onSubmit(order as Order);
+            }}
+            showNotification={showNotification}
+            title={`Are you sure you want to order for ${order.deliveryDate}?`}
+            buttonLabel="CONFIRM"
+            successMsg="Order placed successfully"
+          />
+        )}
+        {/* <Typography textAlign="center" variant="h5" fontWeight="medium">
+          Order
+        </Typography> */}
+        <UserHeader
+          title="Order"
+          subtitle="Place a new order"
+          chipLabel={`${itemList.length} items available`}
+        />
 
-        {/* {tabIdx === 0 ? ( */}
-        {/* <Box display="flex" justifyContent="center" alignItems="center"> */}
-          <Typography textAlign="center" variant="h5" fontWeight="medium">Order</Typography>
-        {/* </Box> */}
         <Box display="flex" flexDirection="column" gap={2} width="100%">
-          <Box display="flex" justifyContent="flex-end">
-            <TourStartButton />
-          </Box>
           <Box
             sx={{
               height: '80vh',
@@ -297,14 +293,6 @@ export default function OrderForm() {
             />
           </Box>
         </Box>
-        {/* // ) : (
-        //   <OldOrderVersion
-        //     onSubmit={onSubmit}
-        //     itemList={itemList}
-        //     setItemList={setItemList}
-        //     minDate={minDate}
-        //   />
-        // )} */}
       </Sidebar>
     </TourProvider>
   );
