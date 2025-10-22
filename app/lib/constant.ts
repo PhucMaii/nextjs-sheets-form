@@ -8,7 +8,6 @@ import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import PeopleIcon from '@mui/icons-material/People';
 // import MessageIcon from '@mui/icons-material/Message';
 import SettingsIcon from '@mui/icons-material/Settings';
-import KitchenIcon from '@mui/icons-material/Kitchen';
 import LanguageIcon from '@mui/icons-material/Language';
 import LocalMallIcon from '@mui/icons-material/LocalMall';
 import {
@@ -45,6 +44,7 @@ import ReportIcon from '@mui/icons-material/Report';
 import BadgeIcon from '@mui/icons-material/Badge';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import YardIcon from '@mui/icons-material/Yard';
+import CardMembershipIcon from '@mui/icons-material/CardMembership';
 
 export const mainPaymentMethodId = 4;
 export const otherPaymentMethodId = 9;
@@ -307,6 +307,12 @@ export const adminTabs = {
       id: 22,
     },
     {
+      name: 'Credit',
+      icon: CardMembershipIcon,
+      path: '/admin/[companyId]/credit-reports',
+      id: 25,
+    },
+    {
       name: 'Promotions',
       icon: CampaignIcon,
       path: '/admin/[companyId]/promotions',
@@ -332,44 +338,6 @@ export const adminTabs = {
     },
   ],
 };
-
-export const tabs = [
-  {
-    name: 'Overview',
-    icon: DashboardIcon,
-    path: '/admin/overview',
-  },
-  {
-    name: 'Orders',
-    icon: ReceiptLongIcon,
-    path: '/admin/orders',
-  },
-  {
-    name: 'Items',
-    icon: KitchenIcon,
-    path: '/admin/items',
-  },
-  {
-    name: 'Reports',
-    icon: ArticleIcon,
-    path: '/admin/reports',
-  },
-  {
-    name: 'Clients',
-    icon: PeopleIcon,
-    path: '/admin/clients',
-  },
-  {
-    name: 'Blocking',
-    icon: AppBlockingIcon,
-    path: '/admin/blocking',
-  },
-  {
-    name: 'Pre Orders',
-    icon: PendingActionsIcon,
-    path: '/admin/pre-orders',
-  },
-];
 
 export const clientTabs = [
   {

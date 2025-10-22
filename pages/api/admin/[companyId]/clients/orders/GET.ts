@@ -1,10 +1,11 @@
+import prisma from '@/client';
 import { generateListOfDateString } from '@/app/utils/time';
 import { normalizeDate } from '@/pages/api/utils/date';
 import {
   formatItemsWithTotalPrice,
   getOverdueOrders,
 } from '@/pages/api/utils/order';
-import { Orders, PrismaClient } from '@prisma/client';
+import { Orders } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { calculateOrderProfit } from '../../orders/GET';
 
@@ -18,7 +19,6 @@ interface RequestQuery {
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
     const { userId, deliveryDate, startDate, endDate, companyId } =
       req.query as RequestQuery;
 

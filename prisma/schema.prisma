@@ -60,6 +60,8 @@ model Company {
   zonePrograms      ZoneProgram[]
   programSchedules  ProgramSchedule[]
   bundlePrograms    BundleProgram[]
+  creditReports     CreditReport[]
+  creditItems       CreditItem[]
 }
 
 model PageView {
@@ -188,6 +190,7 @@ model User {
   cart                Cart[]
   cheques             Cheque[]
   quotes              Quote[]
+  creditReports       CreditReport[]
 
   @@index([userPreferenceId])
   @@index([categoryId])
@@ -308,6 +311,7 @@ model OrderedItems {
   inventoryItem  InventoryItem?  @relation(fields: [inventoryItemId], references: [id])
   ScheduleOrders ScheduleOrders? @relation(fields: [scheduledOrderId], references: [id], onDelete: Cascade)
   company        Company?        @relation(fields: [companyId], references: [id])
+  creditItem     CreditItem?      @relation("CreditOrderedItem")
 
   @@index([orderId])
   @@index([companyId])
@@ -315,6 +319,40 @@ model OrderedItems {
   @@index([scheduledOrderId])
   @@index([inventoryItemId])
   @@index([orderId, inventoryItemId])
+}
+
+model CreditReport {
+  id                    Int     @id @default(autoincrement())
+  companyId             Int
+  userId                Int
+  orderId               Int
+  type                  CreditType
+  reportedDate          String
+  reason                String
+  createdAt             String
+  createdBy             String
+
+  creditItems          CreditItem[]
+
+  company               Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user                  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order                 Orders     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model CreditItem {
+  id                    Int     @id @default(autoincrement())
+  companyId             Int
+  creditReportId        Int
+  inventoryItemId       Int
+  orderedItemId         Int   @unique
+  actualPrice           Float // price before creditted
+  priceDifference       Float
+  quantity              Int
+
+  company               Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  creditReport          CreditReport    @relation(fields: [creditReportId], references: [id], onDelete: Cascade)
+  orderedItem           OrderedItems    @relation("CreditOrderedItem", fields: [orderedItemId], references: [id], onDelete: Cascade)
+  inventoryItem         InventoryItem   @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)  
 }
 
 model Orders {
@@ -351,10 +389,11 @@ model Orders {
 
   delivery Delivery? @relation("OrderDelivery")
 
-  items    OrderedItems[]
-  logs     InventoryLog[]
-  timeline OrderTimeline? @relation("OrderTimeline")
-
+  items                OrderedItems[]
+  logs                 InventoryLog[]
+  creditReports        CreditReport[]
+  
+  timeline     OrderTimeline? @relation("OrderTimeline")
   user         User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
   company      Company?      @relation(fields: [companyId], references: [id])
   CodBoard     CodBoard?     @relation(fields: [codBoardId], references: [id])
@@ -733,6 +772,7 @@ model InventoryItem {
   lossReports            LossReport[]
   quoteItems             QuoteItem[]
   logs                   InventoryLog[]
+  creditItems            CreditItem[]
   subtractRules          AutomationRules[] @relation("InventoryItemRules")
   dependentSubtractRules AutomationRules[] @relation("DependentInventoryItemRules")
 
@@ -1320,4 +1360,12 @@ enum WaterStatus {
   SCHEDULED
   ACTIVE
   FINISHED
+}
+
+enum CreditType {
+  QUALITY_ISSUE
+  PRICING_ERROR
+  CUSTOMER_SATISFACTION
+  SERVICE_ISSUE
+  DELIVERY_ISSUE
 }

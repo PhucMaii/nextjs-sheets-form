@@ -1,5 +1,5 @@
 import { USER_ROLE } from '@/app/utils/enum';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface QueryTypes {
@@ -10,8 +10,6 @@ interface QueryTypes {
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { dayRoute, companyId, role }: QueryTypes = req.query;
 
     if (!companyId) {

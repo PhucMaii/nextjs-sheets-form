@@ -120,12 +120,6 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-  const phoDen = await prisma.user.findFirst({
-    where: {
-      clientId: '00001',
-    },
-  });
-  console.log(phoDen);
 }
 
 // async function main() {
