@@ -7,7 +7,6 @@ import {
   Typography,
   Grid,
   IconButton,
-  Divider,
   useMediaQuery,
 } from '@mui/material';
 import { ArrowBack, Receipt, Save } from '@mui/icons-material';
@@ -32,6 +31,7 @@ import useSelectCreditType from '@/hooks/select/useSelectCreditType';
 import { LoadingButton } from '@mui/lab';
 import OrderSelection from '../../components/CreditReport/OrderSelection';
 import ItemsAndGenInfo from '../../components/CreditReport/ItemsAndGenInfo';
+import CreditSummary from '../../components/CreditReport/CreditSummary';
 
 export default function CreateCreditReport() {
   const { companyId }: any = useParams();
@@ -238,132 +238,20 @@ export default function CreateCreditReport() {
                 />
               </Grid>
             )}
-            {/* <BorderSection display="flex" flexDirection="column" gap={1}>
-              <Box
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-                gap={1}
-              >
-                <Typography variant="subtitle1">Credit Items</Typography>
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  startIcon={<Add />}
-                  disabled={!selectedOrder}
-                  onClick={handleAddCreditItem}
-                >
-                  Add Item
-                </Button>
-              </Box>
-
-              {creditItems.length > 0 ? (
-                <>
-                  {creditItems.map((item: ICreditItem | any) => {
-                    return (
-                      <CreditItem
-                        key={item.id}
-                        item={item}
-                        categoryItems={categoryItems || []}
-                        creditItems={creditItems as ICreditItem[]}
-                        setCreditItems={setCreditItems}
-                      />
-                    );
-                  })}
-                </>
-              ) : (
-                <ErrorComponent errorText="Add the items you want to credit" />
-              )}
-
-              <Divider sx={{ my: 2 }} />
-
-              <Typography variant="subtitle1">General Information</Typography>
-              <Grid container spacing={2} mt={2}>
-                <Grid item xs={12} md={6}>
-                  {renderCreditTypeSearch()}
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                      label="Reported Date"
-                      value={dayjs(formData.reportedDate)}
-                      onChange={(value) =>
-                        setFormData({
-                          ...formData,
-                          reportedDate: value?.toISOString(),
-                        })
-                      }
-                      sx={{ width: '100%' }}
-                    />
-                  </LocalizationProvider>
-                </Grid>
-
-                <Grid item xs={12}>
-                  <TextField
-                    label="Reason"
-                    fullWidth
-                    value={formData.reason}
-                    onChange={(e) =>
-                      setFormData({ ...formData, reason: e.target.value })
-                    }
-                    multiline
-                    rows={4}
-                    placeholder="Please provide a detailed description of the credit report"
-                  />
-                </Grid>
-              </Grid>
-            </BorderSection> */}
-            <ItemsAndGenInfo
-              selectedOrder={selectedOrder}
-              creditItems={creditItems as ICreditItem[]}
-              setCreditItems={setCreditItems}
-              categoryItems={categoryItems || []}
-              renderCreditTypeSearch={renderCreditTypeSearch}
-              formData={formData}
-              setFormData={setFormData}
-            />
+            <BorderSection display="flex" flexDirection="column" gap={1}>
+              <ItemsAndGenInfo
+                selectedOrder={selectedOrder}
+                creditItems={creditItems as ICreditItem[]}
+                setCreditItems={setCreditItems}
+                categoryItems={categoryItems || []}
+                renderCreditTypeSearch={renderCreditTypeSearch}
+                formData={formData}
+                setFormData={setFormData}
+              />
+            </BorderSection>
 
             <BorderSection display="flex" flexDirection="column" gap={1}>
-              <Typography variant="subtitle1">Credit Summary</Typography>
-
-              <Box
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-                mt={2}
-              >
-                <Typography variant="subtitle2">Number of items</Typography>
-                <Typography variant="body1" fontWeight="bold">
-                  {creditSummary.totalQuantity || 0} items
-                </Typography>
-              </Box>
-              <Divider sx={{ my: 1 }} />
-              <Box
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <Typography variant="subtitle2">Total Credit Amount</Typography>
-                <Typography variant="body1" fontWeight="bold">
-                  ${creditSummary.totalCreditAmount?.toFixed(2)}
-                </Typography>
-              </Box>
-              <Divider sx={{ my: 1 }} />
-              <Box
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <Typography variant="subtitle2">Total Loss</Typography>
-                <Typography
-                  variant="h6"
-                  fontWeight="bold"
-                  sx={{ fontSize: '1.5rem' }}
-                  color="error"
-                >
-                  ${creditSummary.totalLoss?.toFixed(2)}
-                </Typography>
-              </Box>
+              <CreditSummary creditSummary={creditSummary} />
             </BorderSection>
           </Grid>
           {!mdDown && (

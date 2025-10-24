@@ -1,5 +1,4 @@
 import React from 'react';
-import { BorderSection } from '../../reports/styled';
 import { Box, Button, Divider, Grid, TextField, Typography } from '@mui/material';
 import { Add } from '@mui/icons-material';
 import { ICreditItem } from '@/app/utils/type';
@@ -17,6 +16,7 @@ interface IProps {
   renderCreditTypeSearch: () => React.ReactNode;
   formData: any;
   setFormData: (data: any) => void;
+  baseItems?: ICreditItem[];
 }
 
 export default function ItemsAndGenInfo({
@@ -27,6 +27,7 @@ export default function ItemsAndGenInfo({
   renderCreditTypeSearch,
   formData,
   setFormData,
+  baseItems,
 }: IProps) {
 
   const handleAddCreditItem = () => {
@@ -45,7 +46,7 @@ export default function ItemsAndGenInfo({
   };
 
   return (
-    <BorderSection display="flex" flexDirection="column" gap={1}>
+    <>
       <Box
         display="flex"
         justifyContent="space-between"
@@ -74,6 +75,7 @@ export default function ItemsAndGenInfo({
                 categoryItems={categoryItems || []}
                 creditItems={creditItems as ICreditItem[]}
                 setCreditItems={setCreditItems}
+                baseItems={baseItems || []}
               />
             );
           })}
@@ -119,6 +121,6 @@ export default function ItemsAndGenInfo({
           />
         </Grid>
       </Grid>
-    </BorderSection>
+    </>
   );
 }

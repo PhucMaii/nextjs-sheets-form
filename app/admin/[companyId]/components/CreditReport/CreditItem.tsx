@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Grid,
   Typography,
@@ -17,6 +17,7 @@ interface IProps {
   categoryItems: any[];
   creditItems: ICreditItem[];
   setCreditItems: (items: ICreditItem[]) => void;
+  baseItems?: ICreditItem[];
 }
 
 export default function CreditItem({
@@ -24,21 +25,55 @@ export default function CreditItem({
   categoryItems,
   creditItems,
   setCreditItems,
+  baseItems,
 }: IProps) {
-
   const handleRemoveCreditItem = (id: number) => {
-    setCreditItems(creditItems.filter((creditItem: ICreditItem) => creditItem.id !== id));
+    setCreditItems(
+      creditItems.filter((creditItem: ICreditItem) => creditItem.id !== id),
+    );
   };
+
+  const updateFlag = useMemo(() => {
+    if (!baseItems) {
+      return null;
+    }
+
+    const baseItem = baseItems.find(
+      (baseItem: ICreditItem) => baseItem.id === item.id,
+    );
+    if (!baseItem) {
+      return 'New';
+    }
+
+    if (baseItem.orderedItem.price !== item.price || baseItem.orderedItem.quantity !== item.quantity) {
+      return 'Edited';
+    }
+
+    return null;
+  }, [baseItems, item]);
 
   return (
     <Grid key={item.id} container spacing={2}>
       <Grid item xs={12}>
-        <Divider sx={{ my: 2 }} />
+        <Divider sx={{ my: 1 }} />
       </Grid>
+      {updateFlag && (
+        <Grid item xs={12}>
+          <Typography variant="caption" fontWeight="bold" color="info">{updateFlag}</Typography>
+        </Grid>
+      )}
       <Grid item xs={12} md={4}>
         <Autocomplete
           options={categoryItems || []}
           getOptionLabel={(option: any) => option.name}
+          filterOptions={(options, state) => {
+            console.log({ options, state }, 'options in filterOptions');
+            return options.filter((option: any) => {
+              return option.name
+                .toLowerCase()
+                .includes(state.inputValue.toLowerCase());
+            });
+          }}
           renderInput={(params) => <TextField {...params} label="Item" />}
           value={item.categoryItem}
           onChange={(e, newValue: any) => {
@@ -49,11 +84,16 @@ export default function CreditItem({
                       ...creditItem,
                       categoryItem: newValue,
                       actualPrice: newValue.price,
-                      isShowDiscount: true,
-                      prevPrice: newValue.price,
-                      priceDifference: newValue.price,
-                      name: `${newValue.name} CREDIT`,
+                      orderedItem: {
+                        ...newValue,
+                        isShowDiscount: true,
+                        prevPrice: newValue.price,
+                        name: `${newValue.name} CREDIT`,
+                      },
+                      price: 0,
+                      inventoryItemId: newValue.inventoryItemId,
                       inventoryItem: newValue.inventoryItem,
+                      priceDifference: newValue.price,
                     }
                   : creditItem,
               ),

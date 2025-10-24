@@ -45,6 +45,7 @@ const useClients = (companyId: string) => {
         clients,
         renderClientSearch,
         selectedClient,
+        setSelectedClient,
     };
 }
 

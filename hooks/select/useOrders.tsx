@@ -36,7 +36,7 @@ const useOrders = (listOfOrders: Orders[]) => {
           });
         }}
         getOptionLabel={(option: any) =>
-          `${option.id} - ${option.clientName} - ${option.clientId}`
+          `${option.id} - ${option?.clientName || option?.user?.clientName} - ${option.clientId || option?.user?.clientId}`
         }
         renderOption={(props, option) => (
           <li {...props}>
@@ -67,8 +67,12 @@ const useOrders = (listOfOrders: Orders[]) => {
               </Grid>
               <Grid item xs={6} md={4}>
                 <Box>
-                  <Typography>{option.clientName}</Typography>
-                  <Typography>{option.clientId}</Typography>
+                  <Typography>
+                    {option?.clientName || option?.user?.clientName}
+                  </Typography>
+                  <Typography>
+                    {option?.clientId || option?.user?.clientId}
+                  </Typography>
                 </Box>
               </Grid>
               <Grid item xs={4} md={3}>
@@ -89,6 +93,7 @@ const useOrders = (listOfOrders: Orders[]) => {
 
   return {
     selectedOrder,
+    setSelectedOrder,
     renderOrderSearch,
   };
 };

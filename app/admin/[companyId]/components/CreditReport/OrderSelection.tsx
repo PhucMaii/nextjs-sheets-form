@@ -16,6 +16,7 @@ interface IProps {
   creditItems: ICreditItem[];
   renderOrderSearch: () => React.ReactNode;
   selectedOrder: any;
+  isDisabledSearch?: boolean;
 }
 
 export default function OrderSelection({
@@ -23,6 +24,7 @@ export default function OrderSelection({
   creditItems,
   renderOrderSearch,
   selectedOrder,
+  isDisabledSearch = false,
 }: IProps) {
   const totalQuantity = useMemo(
     () =>
@@ -34,17 +36,21 @@ export default function OrderSelection({
   );
 
   const orderViewItems = useMemo(() => {
-    return [...(selectedOrder?.items || []), ...creditItems];
+    const orderedItems = selectedOrder?.items?.filter((item: IItem | any) => {
+      return !creditItems.some(
+        (creditItem: ICreditItem | any) => creditItem.orderedItemId === item.id,
+      );
+    });
+    return [...(orderedItems || []), ...(creditItems || [])];
   }, [selectedOrder, creditItems]);
 
   const orderDiscount = useMemo(
     () =>
       orderViewItems.reduce((acc: number, item: IItem | any) => {
-        console.log(item, acc);
-        if (item?.option?.prevPrice || item.prevPrice > 0) {
+        if (item?.orderedItem?.prevPrice || item.prevPrice > 0) {
           return (
             acc +
-            ((item?.option?.prevPrice || item.prevPrice) - item.price) *
+            ((item?.orderedItem?.prevPrice || item.prevPrice) - item.price) *
               item.quantity
           );
         }
@@ -140,8 +146,13 @@ export default function OrderSelection({
       <ShadowSection display="flex" flexDirection="column" gap={1}>
         {/* Only admin can affect inventory for an order in edit mode */}
         <Typography variant="h6" textAlign="center">
-          {selectedClient?.clientName || 'N/A'}&apos; Order
+          {selectedClient?.clientName || 'N/A'}&apos;s Order
         </Typography>
+        {isDisabledSearch && (
+          <Typography variant="caption" textAlign="center">
+            Order ID: {selectedOrder?.id} - {selectedOrder?.deliveryDate}
+          </Typography>
+        )}
 
         {orderViewItems.length > 0 ? (
           orderViewItems.map((item: IItem | any) => {
@@ -168,7 +179,9 @@ export default function OrderSelection({
                   gap={1}
                   justifyContent="space-between"
                 >
-                  <Typography fontWeight="bold">{item.name}</Typography>
+                  <Typography fontWeight="bold">
+                    {item.name || item.orderedItem?.name}
+                  </Typography>
                 </Box>
                 {item?.option && (
                   <Typography sx={{ color: grey[700] }}>
@@ -185,8 +198,12 @@ export default function OrderSelection({
                 >
                   <Box display="flex" alignItems="center" gap={1}>
                     <Typography>${item?.price?.toFixed(2) || 0.0}</Typography>
-                    {(item?.option?.isShowDiscount || item.isShowDiscount) &&
-                      (item?.option?.prevPrice > 0 || item.prevPrice > 0) && (
+                    {(item?.option?.isShowDiscount ||
+                      item.isShowDiscount ||
+                      item?.orderedItem?.isShowDiscount) &&
+                      (item?.option?.prevPrice > 0 ||
+                        item.prevPrice > 0 ||
+                        item?.orderedItem?.prevPrice > 0) && (
                         <Typography
                           // fontWeight="bold"
                           sx={{ textDecoration: 'line-through' }}
@@ -194,7 +211,8 @@ export default function OrderSelection({
                         >
                           $
                           {item?.option?.prevPrice?.toFixed(2) ||
-                            item.prevPrice.toFixed(2)}
+                            item?.prevPrice?.toFixed(2) ||
+                            item?.orderedItem?.prevPrice?.toFixed(2)}
                         </Typography>
                       )}
                   </Box>
@@ -212,7 +230,10 @@ export default function OrderSelection({
 
                     <Typography variant="h6">
                       Total: $
-                      {((item?.quantity || 1) * item?.price)?.toFixed(2)}
+                      {(
+                        (item?.quantity || 1) *
+                        (item?.price || item?.orderedItem?.price)
+                      )?.toFixed(2)}
                     </Typography>
                   </Box>
                 </Box>
@@ -229,7 +250,7 @@ export default function OrderSelection({
   };
   return (
     <BorderSection display="flex" flexDirection="column" gap={1}>
-      {renderOrderSearch()}
+      {!isDisabledSearch && renderOrderSearch()}
       {selectedOrder && renderOrderView()}
     </BorderSection>
   );

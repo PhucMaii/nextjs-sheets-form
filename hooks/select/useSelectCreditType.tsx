@@ -30,6 +30,7 @@ const useSelectCreditType = () => {
   return {
     selectedCreditType,
     renderCreditTypeSearch,
+    setSelectedCreditType,
   };
 };
 
