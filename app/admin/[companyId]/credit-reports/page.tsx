@@ -257,11 +257,6 @@ export default function CreditPage() {
               subtitle="Clients with credits"
               icon={<People />}
               color="info"
-              trend={{
-                value: 8.3,
-                isPositive: true,
-                label: 'vs last year',
-              }}
               variant="gradient"
             />
           </Grid>

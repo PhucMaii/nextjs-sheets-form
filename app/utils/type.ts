@@ -444,6 +444,9 @@ export interface ICreditReport extends CreditReport {
 }
 
 export interface ICreditItem extends CreditItem {
+  id: number;
   inventoryItem: IInventoryItem;
   orderedItem: OrderedItems;
+  categoryItem?: any;
+  price?: number;
 }

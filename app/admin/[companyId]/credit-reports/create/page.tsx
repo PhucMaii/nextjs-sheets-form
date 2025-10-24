@@ -8,19 +8,14 @@ import {
   Grid,
   IconButton,
   Divider,
-  Button,
-  TextField,
-  Autocomplete,
-  InputAdornment,
+  useMediaQuery,
 } from '@mui/material';
-import { Add, ArrowBack, Receipt, Save } from '@mui/icons-material';
+import { ArrowBack, Receipt, Save } from '@mui/icons-material';
 import { alpha } from '@mui/material/styles';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import dayjs from 'dayjs';
 
 // Import theme colors
-import { error, neutral, primary } from '@/theme/color';
+import { error, neutral } from '@/theme/color';
 
 // Import existing components and utilities
 import Sidebar from '../../components/Sidebar/Sidebar';
@@ -28,18 +23,15 @@ import useNotification from '@/hooks/useNotification';
 import { getAdminApiUrl } from '@/app/utils/enum';
 import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
-import { BorderSection, ShadowSection } from '../../reports/styled';
+import { BorderSection } from '../../reports/styled';
 import useClients from '@/hooks/select/useClients';
-import { CreditItem, CreditReport, CreditType } from '@prisma/client';
+import { CreditReport, CreditType } from '@prisma/client';
 import useOrders from '@/hooks/select/useOrders';
-import ErrorComponent from '../../components/ErrorComponent';
-import { IItem } from '@/app/utils/type';
-import DisplayFile from '../../components/Modals/DisplayFile';
-import { grey } from '@mui/material/colors';
+import { ICreditItem } from '@/app/utils/type';
 import useSelectCreditType from '@/hooks/select/useSelectCreditType';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { Trash2Icon } from 'lucide-react';
 import { LoadingButton } from '@mui/lab';
+import OrderSelection from '../../components/CreditReport/OrderSelection';
+import ItemsAndGenInfo from '../../components/CreditReport/ItemsAndGenInfo';
 
 export default function CreateCreditReport() {
   const { companyId }: any = useParams();
@@ -49,7 +41,7 @@ export default function CreateCreditReport() {
   const { renderCreditTypeSearch, selectedCreditType } = useSelectCreditType();
 
   // State management
-  const [creditItems, setCreditItems] = useState<CreditItem[] | any[]>([]);
+  const [creditItems, setCreditItems] = useState<ICreditItem[] | any[]>([]);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [formData, setFormData] = useState<CreditReport | any>({
     userId: 0,
@@ -65,6 +57,8 @@ export default function CreateCreditReport() {
   const endDate = useMemo(() => {
     return dayjs().add(1, 'month').format('YYYY-MM-DD');
   }, []);
+
+  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   // Data Fetching
   const { data: orders } = useQuery({
@@ -99,7 +93,8 @@ export default function CreateCreditReport() {
 
   const isQualifyToCreate = useMemo(() => {
     return (
-      creditItems.length > 0 && creditItems.every((item: CreditItem | any) => item.categoryItem) &&
+      creditItems.length > 0 &&
+      creditItems.every((item: ICreditItem | any) => item.categoryItem) &&
       selectedOrder &&
       selectedClient &&
       selectedCreditType &&
@@ -107,68 +102,22 @@ export default function CreateCreditReport() {
     );
   }, [creditItems, selectedOrder, selectedClient, formData]);
 
-  const totalQuantity = useMemo(
-    () =>
-      selectedOrder?.items?.reduce(
-        (acc: number, item: IItem) => acc + (item.quantity || 0),
-        0,
-      ),
-    [selectedOrder],
-  );
-
-  const orderViewItems = useMemo(() => {
-    return [...(selectedOrder?.items || []), ...creditItems];
-  }, [selectedOrder, creditItems]);
-
-  const orderDiscount = useMemo(
-    () =>
-      selectedOrder?.orderedItems?.reduce(
-        (acc: number, item: IItem | any) =>
-          acc +
-          ((item?.option?.prevPrice || item.prevPrice) - item.price) *
-            item.quantity,
-        0,
-      ),
-    [selectedOrder],
-  );
-
   const creditSummary = useMemo(() => {
     return {
       totalQuantity: creditItems.reduce(
-        (acc: number, item: CreditItem | any) => acc + item.quantity,
+        (acc: number, item: ICreditItem | any) => acc + item.quantity,
         0,
       ),
       totalCreditAmount: creditItems.reduce(
-        (acc: number, item: CreditItem | any) =>
+        (acc: number, item: ICreditItem | any) =>
           acc + item.price * item.quantity,
         0,
       ),
-      totalLoss: creditItems.reduce((acc: number, item: CreditItem | any) => {
+      totalLoss: creditItems.reduce((acc: number, item: ICreditItem | any) => {
         return acc + item.priceDifference * item.quantity;
       }, 0),
     };
   }, [creditItems]);
-
-  const handleAddCreditItem = () => {
-    setCreditItems([
-      ...creditItems,
-      {
-        id: Date.now().toString(),
-        inventoryItemId: 0,
-        orderedItemId: 0,
-        actualPrice: 0,
-        priceDifference: 0,
-        quantity: 1,
-        price: 0,
-      },
-    ]);
-  };
-
-  const handleRemoveCreditItem = (id: string | number) => {
-    setCreditItems(
-      creditItems.filter((item: CreditItem | any) => item.id !== id),
-    );
-  };
 
   const handleCreateCreditReport = async () => {
     if (!isQualifyToCreate) {
@@ -206,494 +155,232 @@ export default function CreateCreditReport() {
     }
   };
 
-  const renderTotal = () => {
-    return (
-      <Grid container spacing={1} mt={2}>
-        <Grid item xs={12} mt={4} textAlign="center">
-          <Typography fontWeight="bold" variant="h6" textAlign="center">
-            TOTAL
-          </Typography>
-        </Grid>
-        <Grid item xs={4} textAlign="left" ml={2}>
-          <Typography>Number of items</Typography>
-        </Grid>
-        <Grid item xs={6} textAlign="right">
-          <Typography fontWeight="bold">{totalQuantity} items</Typography>
-        </Grid>
-        <Grid item xs={12}>
-          <Divider />
-        </Grid>
-        {orderDiscount && orderDiscount > 0 ? (
-          <>
-            <Grid item xs={4} textAlign="left" ml={2}>
-              <Typography>Discount ($)</Typography>
-            </Grid>
-            <Grid item xs={6} textAlign="right">
-              <Typography fontWeight="bold">
-                -${orderDiscount?.toFixed(2)}
-              </Typography>
-            </Grid>
-            <Grid item xs={12}>
-              <Divider />
-            </Grid>
-          </>
-        ) : null}
-        <Grid item xs={4} textAlign="left" ml={2}>
-          <Typography>Subtotal</Typography>
-        </Grid>
-        <Grid item xs={6} textAlign="right">
-          <Typography fontWeight="bold">
-            $
-            {selectedOrder?.subTotal?.toFixed(2) ||
-              selectedOrder?.totalPrice?.toFixed(2) ||
-              0}
-          </Typography>
-        </Grid>
-        <Grid item xs={12}>
-          <Divider />
-        </Grid>
-        <Grid item xs={4} textAlign="left" ml={2}>
-          <Typography>GST (5%)</Typography>
-        </Grid>
-        <Grid item xs={6} textAlign="right">
-          <Typography fontWeight="bold">
-            ${selectedOrder?.GST?.toFixed(2) || 0}
-          </Typography>
-        </Grid>
-        <Grid item xs={12}>
-          <Divider />
-        </Grid>
-        <Grid item xs={4} textAlign="left" ml={2}>
-          <Typography>PST (7%)</Typography>
-        </Grid>
-        <Grid item xs={6} textAlign="right">
-          <Typography fontWeight="bold">
-            ${selectedOrder?.PST?.toFixed(2) || 0}
-          </Typography>
-        </Grid>
-        <Grid item xs={12}>
-          <Divider />
-        </Grid>
-        <Grid item xs={4} textAlign="left" ml={2}>
-          <Typography>Total</Typography>
-        </Grid>
-        <Grid item xs={6} textAlign="right">
-          <Typography fontWeight="bold">
-            ${selectedOrder?.totalPrice?.toFixed(2)}
-          </Typography>
-        </Grid>
-        {/* <Grid item xs={12}> */}
-        {/* </Grid> */}
-      </Grid>
-    );
-  };
-
-  const renderOrderView = () => {
-    return (
-      <ShadowSection display="flex" flexDirection="column" gap={1}>
-        {/* Only admin can affect inventory for an order in edit mode */}
-        <Typography variant="h6" textAlign="center">
-          {selectedClient?.clientName || 'N/A'}&apos; Order
-        </Typography>
-
-        {orderViewItems.length > 0 ? (
-          orderViewItems.map((item: IItem | any) => {
-            return (
-              <Box
-                key={item.id}
-                display="flex"
-                flexDirection="column"
-                gap={1}
-                sx={{
-                  p: 1,
-                  backgroundColor: primary.lightest,
-                  borderRadius: 1,
-                }}
-              >
-                <DisplayFile
-                  fileKey={item?.image || item?.inventoryItem?.image}
-                  width="100px"
-                  height="100px"
-                />
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  gap={1}
-                  justifyContent="space-between"
-                >
-                  <Typography fontWeight="bold">{item.name}</Typography>
-                </Box>
-                {item?.option && (
-                  <Typography sx={{ color: grey[700] }}>
-                    {item.option.name}
-                  </Typography>
-                )}
-
-                <Box
-                  display="flex"
-                  alignItems="flex-start"
-                  // justifyContent="space-between"
-                  flexDirection="column"
-                  gap={2}
-                >
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <Typography>${item?.price?.toFixed(2) || 0.0}</Typography>
-                    {(item?.option?.isShowDiscount || item.isShowDiscount) &&
-                      (item?.option?.prevPrice > 0 || item.prevPrice > 0) && (
-                        <Typography
-                          // fontWeight="bold"
-                          sx={{ textDecoration: 'line-through' }}
-                          color="error"
-                        >
-                          $
-                          {item?.option?.prevPrice?.toFixed(2) ||
-                            item.prevPrice.toFixed(2)}
-                        </Typography>
-                      )}
-                  </Box>
-                  <Box
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="space-between"
-                    width="100%"
-                  >
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Typography variant="h6">
-                        Qty: <strong>{item.quantity}</strong>
-                      </Typography>
-                    </Box>
-
-                    <Typography variant="h6">
-                      Total: $
-                      {((item?.quantity || 1) * item?.price)?.toFixed(2)}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Box>
-            );
-          })
-        ) : (
-          <ErrorComponent errorText="Your order is empty" />
-        )}
-
-        {renderTotal()}
-      </ShadowSection>
-    );
-  };
-
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Sidebar>
-        <Box sx={{ p: 3 }}>
-          {/* Header */}
-          <Box display="flex" alignItems="center" gap={2} mb={4}>
-            <IconButton
-              onClick={() => router.back()}
-              sx={{
-                p: 1.5,
-                borderRadius: 2,
-                background: alpha(neutral[200], 0.5),
-                '&:hover': {
-                  background: alpha(neutral[300], 0.7),
-                },
-              }}
-            >
-              <ArrowBack />
-            </IconButton>
-            <Box
-              sx={{
-                p: 2,
-                borderRadius: 2,
-                background: `linear-gradient(135deg, ${error.main} 0%, ${error.dark} 100%)`,
-                color: 'white',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: `0 4px 6px -1px ${alpha(error.main, 0.25)}`,
-              }}
-            >
-              <Receipt fontSize="large" />
+    <Sidebar>
+      <Box sx={{ p: 3 }}>
+        {/* Header */}
+        <Box display="flex" alignItems="center" gap={2} mb={4}>
+          <IconButton
+            onClick={() => router.back()}
+            sx={{
+              p: 1.5,
+              borderRadius: 2,
+              background: alpha(neutral[200], 0.5),
+              '&:hover': {
+                background: alpha(neutral[300], 0.7),
+              },
+            }}
+          >
+            <ArrowBack />
+          </IconButton>
+          <Box
+            sx={{
+              p: 2,
+              borderRadius: 2,
+              background: `linear-gradient(135deg, ${error.main} 0%, ${error.dark} 100%)`,
+              color: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: `0 4px 6px -1px ${alpha(error.main, 0.25)}`,
+            }}
+          >
+            <Receipt fontSize="large" />
+          </Box>
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+            width="100%"
+          >
+            <Box>
+              <Typography variant="h4" fontWeight="bold" color={error.dark}>
+                Create Credit Report
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                Create a new credit report for customer refunds
+              </Typography>
             </Box>
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="space-between"
-              width="100%"
+
+            <LoadingButton
+              loading={isSubmitting}
+              onClick={handleCreateCreditReport}
+              variant="contained"
+              color="primary"
+              startIcon={<Save />}
+              disabled={!isQualifyToCreate}
             >
-              <Box>
-                <Typography variant="h4" fontWeight="bold" color={error.dark}>
-                  Create Credit Report
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  Create a new credit report for customer refunds
-                </Typography>
+              Create
+            </LoadingButton>
+          </Box>
+        </Box>
+
+        <Grid container spacing={2}>
+          <Grid
+            item
+            md={8}
+            xs={12}
+            display="flex"
+            flexDirection="column"
+            gap={1}
+          >
+            <BorderSection display="flex" flexDirection="column" gap={1}>
+              <Typography variant="subtitle1">Selected Client</Typography>
+              {renderClientSearch()}
+            </BorderSection>
+            {mdDown && (
+              <Grid item xs={12}>
+                <OrderSelection
+                  selectedClient={selectedClient}
+                  creditItems={creditItems as ICreditItem[]}
+                  renderOrderSearch={renderOrderSearch}
+                  selectedOrder={selectedOrder}
+                />
+              </Grid>
+            )}
+            {/* <BorderSection display="flex" flexDirection="column" gap={1}>
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                gap={1}
+              >
+                <Typography variant="subtitle1">Credit Items</Typography>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  startIcon={<Add />}
+                  disabled={!selectedOrder}
+                  onClick={handleAddCreditItem}
+                >
+                  Add Item
+                </Button>
               </Box>
 
-              <LoadingButton
-                loading={isSubmitting}
-                onClick={handleCreateCreditReport}
-                variant="contained"
-                color="primary"
-                startIcon={<Save />}
-                disabled={!isQualifyToCreate}
-              >
-                Create
-              </LoadingButton>
-            </Box>
-          </Box>
-
-          <Grid container spacing={2}>
-            <Grid
-              item
-              md={8}
-              xs={12}
-              display="flex"
-              flexDirection="column"
-              gap={1}
-            >
-              <BorderSection display="flex" flexDirection="column" gap={1}>
-                <Typography variant="subtitle1">Selected Client</Typography>
-                {renderClientSearch()}
-              </BorderSection>
-              <BorderSection display="flex" flexDirection="column" gap={1}>
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  gap={1}
-                >
-                  <Typography variant="subtitle1">Credit Items</Typography>
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    startIcon={<Add />}
-                    disabled={!selectedOrder}
-                    onClick={handleAddCreditItem}
-                  >
-                    Add Item
-                  </Button>
-                </Box>
-
-                {creditItems.length > 0 ? (
-                  <>
-                    {creditItems.map((item: CreditItem | any) => {
-                      return (
-                        <Grid key={item.id} container spacing={2}>
-                          <Grid item xs={12}>
-                            <Divider sx={{ my: 2 }} />
-                          </Grid>
-                          <Grid item xs={12} md={4}>
-                            <Autocomplete
-                              options={categoryItems || []}
-                              getOptionLabel={(option: any) => option.name}
-                              renderInput={(params) => (
-                                <TextField {...params} label="Item" />
-                              )}
-                              value={item.categoryItem}
-                              onChange={(e, newValue: any) => {
-                                setCreditItems(
-                                  creditItems.map(
-                                    (creditItem: CreditItem | any) =>
-                                      creditItem.id === item.id
-                                        ? {
-                                            ...creditItem,
-                                            categoryItem: newValue,
-                                            actualPrice: newValue.price,
-                                            isShowDiscount: true,
-                                            prevPrice: newValue.price,
-                                            priceDifference: newValue.price,
-                                            name: `${newValue.name} CREDIT`,
-                                            inventoryItem:
-                                              newValue.inventoryItem,
-                                          }
-                                        : creditItem,
-                                  ),
-                                );
-                              }}
-                              sx={{ width: '100%' }}
-                            />
-                          </Grid>
-                          <Grid item xs={12} md={2}>
-                            <TextField
-                              label="Quantity"
-                              value={item.quantity}
-                              onChange={(e) => {
-                                setCreditItems(
-                                  creditItems.map(
-                                    (creditItem: CreditItem | any) =>
-                                      creditItem.id === item.id
-                                        ? {
-                                            ...creditItem,
-                                            quantity: Number(e.target.value),
-                                          }
-                                        : creditItem,
-                                  ),
-                                );
-                              }}
-                              sx={{ width: '100%' }}
-                              type="number"
-                              InputProps={{
-                                startAdornment: (
-                                  <InputAdornment position="start">
-                                    <Typography>Qty</Typography>
-                                  </InputAdornment>
-                                ),
-                              }}
-                            />
-                          </Grid>
-                          <Grid item xs={12} md={5}>
-                            <TextField
-                              label="Price"
-                              value={item.price}
-                              onChange={(e) => {
-                                setCreditItems(
-                                  creditItems.map(
-                                    (creditItem: CreditItem | any) =>
-                                      creditItem.id === item.id
-                                        ? {
-                                            ...creditItem,
-                                            price: Number(e.target.value),
-                                          }
-                                        : creditItem,
-                                  ),
-                                );
-                              }}
-                              sx={{ width: '100%' }}
-                              type="number"
-                              InputProps={{
-                                startAdornment: (
-                                  <InputAdornment position="start">
-                                    <Typography>$</Typography>
-                                  </InputAdornment>
-                                ),
-                                endAdornment: (
-                                  <InputAdornment position="end">
-                                    <Typography
-                                      color="error"
-                                      sx={{ textDecoration: 'line-through' }}
-                                    >
-                                      ${item?.actualPrice}
-                                    </Typography>
-                                  </InputAdornment>
-                                ),
-                              }}
-                            />
-                          </Grid>
-                          <Grid item xs={12} md={1}>
-                            <Box display="flex" justifyContent="center">
-                              <IconButton
-                                onClick={() => handleRemoveCreditItem(item.id)}
-                                color="error"
-                              >
-                                <Trash2Icon style={{ width: 20, height: 20 }} />
-                              </IconButton>
-                            </Box>
-                          </Grid>
-                        </Grid>
-                      );
-                    })}
-                  </>
-                ) : (
-                  <ErrorComponent errorText="Add the items you want to credit" />
-                )}
-
-                <Divider sx={{ my: 2 }} />
-
-                <Typography variant="subtitle1">General Information</Typography>
-                <Grid container spacing={2} mt={2}>
-                  <Grid item xs={12} md={6}>
-                    {renderCreditTypeSearch()}
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <DatePicker
-                        label="Reported Date"
-                        value={dayjs(formData.reportedDate)}
-                        onChange={(value) =>
-                          setFormData({
-                            ...formData,
-                            reportedDate: value?.toISOString(),
-                          })
-                        }
-                        sx={{ width: '100%' }}
+              {creditItems.length > 0 ? (
+                <>
+                  {creditItems.map((item: ICreditItem | any) => {
+                    return (
+                      <CreditItem
+                        key={item.id}
+                        item={item}
+                        categoryItems={categoryItems || []}
+                        creditItems={creditItems as ICreditItem[]}
+                        setCreditItems={setCreditItems}
                       />
-                    </LocalizationProvider>
-                  </Grid>
+                    );
+                  })}
+                </>
+              ) : (
+                <ErrorComponent errorText="Add the items you want to credit" />
+              )}
 
-                  <Grid item xs={12}>
-                    <TextField
-                      label="Reason"
-                      fullWidth
-                      value={formData.reason}
-                      onChange={(e) =>
-                        setFormData({ ...formData, reason: e.target.value })
-                      }
-                      multiline
-                      rows={4}
-                      placeholder="Please provide a detailed description of the credit report"
-                    />
-                  </Grid>
+              <Divider sx={{ my: 2 }} />
+
+              <Typography variant="subtitle1">General Information</Typography>
+              <Grid container spacing={2} mt={2}>
+                <Grid item xs={12} md={6}>
+                  {renderCreditTypeSearch()}
                 </Grid>
-              </BorderSection>
+                <Grid item xs={12} md={6}>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      label="Reported Date"
+                      value={dayjs(formData.reportedDate)}
+                      onChange={(value) =>
+                        setFormData({
+                          ...formData,
+                          reportedDate: value?.toISOString(),
+                        })
+                      }
+                      sx={{ width: '100%' }}
+                    />
+                  </LocalizationProvider>
+                </Grid>
 
-              <BorderSection display="flex" flexDirection="column" gap={1}>
-                <Typography variant="subtitle1">Credit Summary</Typography>
+                <Grid item xs={12}>
+                  <TextField
+                    label="Reason"
+                    fullWidth
+                    value={formData.reason}
+                    onChange={(e) =>
+                      setFormData({ ...formData, reason: e.target.value })
+                    }
+                    multiline
+                    rows={4}
+                    placeholder="Please provide a detailed description of the credit report"
+                  />
+                </Grid>
+              </Grid>
+            </BorderSection> */}
+            <ItemsAndGenInfo
+              selectedOrder={selectedOrder}
+              creditItems={creditItems as ICreditItem[]}
+              setCreditItems={setCreditItems}
+              categoryItems={categoryItems || []}
+              renderCreditTypeSearch={renderCreditTypeSearch}
+              formData={formData}
+              setFormData={setFormData}
+            />
 
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  mt={2}
+            <BorderSection display="flex" flexDirection="column" gap={1}>
+              <Typography variant="subtitle1">Credit Summary</Typography>
+
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                mt={2}
+              >
+                <Typography variant="subtitle2">Number of items</Typography>
+                <Typography variant="body1" fontWeight="bold">
+                  {creditSummary.totalQuantity || 0} items
+                </Typography>
+              </Box>
+              <Divider sx={{ my: 1 }} />
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+              >
+                <Typography variant="subtitle2">Total Credit Amount</Typography>
+                <Typography variant="body1" fontWeight="bold">
+                  ${creditSummary.totalCreditAmount?.toFixed(2)}
+                </Typography>
+              </Box>
+              <Divider sx={{ my: 1 }} />
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+              >
+                <Typography variant="subtitle2">Total Loss</Typography>
+                <Typography
+                  variant="h6"
+                  fontWeight="bold"
+                  sx={{ fontSize: '1.5rem' }}
+                  color="error"
                 >
-                  <Typography variant="subtitle2">Number of items</Typography>
-                  <Typography variant="body1" fontWeight="bold">
-                    {creditSummary.totalQuantity || 0} items
-                  </Typography>
-                </Box>
-                <Divider sx={{ my: 1 }} />
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-                  <Typography variant="subtitle2">
-                    Total Credit Amount
-                  </Typography>
-                  <Typography variant="body1" fontWeight="bold">
-                    ${creditSummary.totalCreditAmount?.toFixed(2)}
-                  </Typography>
-                </Box>
-                <Divider sx={{ my: 1 }} />
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-                  <Typography variant="subtitle2">Total Loss</Typography>
-                  <Typography
-                    variant="h6"
-                    fontWeight="bold"
-                    sx={{ fontSize: '1.5rem' }}
-                    color="error"
-                  >
-                    ${creditSummary.totalLoss?.toFixed(2)}
-                  </Typography>
-                </Box>
-              </BorderSection>
-            </Grid>
-            <Grid item md={4} xs={12}>
-              <BorderSection display="flex" flexDirection="column" gap={1}>
-                <Typography variant="subtitle1">Selected Order</Typography>
-                {renderOrderSearch()}
-                {selectedOrder && renderOrderView()}
-              </BorderSection>
-            </Grid>
+                  ${creditSummary.totalLoss?.toFixed(2)}
+                </Typography>
+              </Box>
+            </BorderSection>
           </Grid>
+          {!mdDown && (
+            <Grid item md={4}>
+              <OrderSelection
+                selectedClient={selectedClient}
+                creditItems={creditItems as ICreditItem[]}
+                renderOrderSearch={renderOrderSearch}
+                selectedOrder={selectedOrder}
+              />
+            </Grid>
+          )}
+        </Grid>
 
-          {/* Notification Component */}
-          {NotificationComp}
-        </Box>
-      </Sidebar>
-    </LocalizationProvider>
+        {/* Notification Component */}
+        {NotificationComp}
+      </Box>
+    </Sidebar>
   );
 }
