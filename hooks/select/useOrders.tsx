@@ -1,6 +1,13 @@
 import StatusText from '@/app/admin/[companyId]/components/StatusText';
 import { ORDER_STATUS } from '@/app/utils/enum';
-import { Autocomplete, Box, Checkbox, Grid, TextField, Typography } from '@mui/material';
+import {
+  Autocomplete,
+  Box,
+  Checkbox,
+  Grid,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { Orders } from '@prisma/client';
 import { useState } from 'react';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
@@ -13,7 +20,24 @@ const useOrders = (listOfOrders: Orders[]) => {
     return (
       <Autocomplete
         options={listOfOrders}
-        getOptionLabel={(option: any) => `${option.id} - ${option.clientName} - ${option.clientId}`}
+        filterOptions={(options, state) => {
+          return options.filter((option: any) => {
+            return (
+              option.clientName
+                .toLowerCase()
+                .includes(state.inputValue.toLowerCase()) ||
+              option.clientId
+                .toLowerCase()
+                .includes(state.inputValue.toLowerCase()) ||
+              option.deliveryDate
+                .toLowerCase()
+                .includes(state.inputValue.toLowerCase())
+            );
+          });
+        }}
+        getOptionLabel={(option: any) =>
+          `${option.id} - ${option.clientName} - ${option.clientId}`
+        }
         renderOption={(props, option) => (
           <li {...props}>
             <Grid container alignItems="center">
@@ -66,7 +90,7 @@ const useOrders = (listOfOrders: Orders[]) => {
   return {
     selectedOrder,
     renderOrderSearch,
-  }
+  };
 };
 
 export default useOrders;

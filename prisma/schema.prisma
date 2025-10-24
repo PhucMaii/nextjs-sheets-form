@@ -329,6 +329,7 @@ model CreditReport {
   type                  CreditType
   reportedDate          String
   reason                String
+  totalLoss             Float
   createdAt             String
   createdBy             String
 

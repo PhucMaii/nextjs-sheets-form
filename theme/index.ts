@@ -3,7 +3,7 @@
 import { createTheme as createMuiTheme } from '@mui/material';
 import { createTypography } from './create-typography';
 import { createPalette } from './create-palette';
-import { grey } from '@mui/material/colors';
+import { blue, grey } from '@mui/material/colors';
 
 export function createTheme() {
   const typography: any = createTypography();
@@ -32,7 +32,8 @@ export function createTheme() {
             textTransform: 'none',
             fontWeight: 600,
             borderRadius: 2,
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',  
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            boxShadow: `0 4px 20px ${blue[500]}, 0.4)}`,
             '&:hover': {
               transform: 'translateY(-1px)',
               boxShadow: `0 4px 12px ${grey[200]}`,

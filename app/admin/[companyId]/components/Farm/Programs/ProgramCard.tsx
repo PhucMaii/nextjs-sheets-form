@@ -20,13 +20,14 @@ import {
   Timer as TimerIcon,
   Water as WaterIcon,
 } from '@mui/icons-material';
-import { Program, ZoneWater } from './types';
+import { Program, ZoneWater } from '../types';
 import { useTheme } from '@mui/material/styles';
 import { format } from 'date-fns';
 import { useParams, useRouter } from 'next/navigation';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import { usePrograms } from '@/hooks/db-tables/usePrograms';
 import { IZone } from '@/hooks/useHydrawiseAPI';
+import { getProgramStatusColor } from '@/lib/statusColor';
 
 interface ProgramCardProps {
   program: Program;
@@ -48,13 +49,6 @@ const ProgramCard = ({
   const getProgressPercentage = (program: Program) => {
     if (!program.remainingDays) return 100;
     return ((program.days - program.remainingDays) / program.days) * 100;
-  };
-
-  const getStatusColor = (program: Program) => {
-    if (!program.isActive) return 'default';
-    if (program.remainingDays === 0) return 'success';
-    if (program.remainingDays && program.remainingDays <= 3) return 'warning';
-    return 'primary';
   };
 
   const handleActivateProgram = async (programId: string) => {
@@ -233,7 +227,7 @@ const ProgramCard = ({
           <Stack direction="row" alignItems="center" spacing={2} mb={3}>
             <Chip
               label={program.isActive ? 'Active' : 'Inactive'}
-              color={getStatusColor(program)}
+              color={getProgramStatusColor(program)}
               size="small"
               icon={program.isActive ? <PlayIcon /> : <PauseIcon />}
               sx={{

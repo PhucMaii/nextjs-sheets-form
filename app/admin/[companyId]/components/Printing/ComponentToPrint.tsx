@@ -78,7 +78,9 @@ export const ComponentToPrint = forwardRef(
                 gap={1}
                 flexDirection="column"
               >
-                {item?.isShowDiscount && item?.prevPrice && item?.prevPrice > 0 && (
+                {item?.isShowDiscount &&
+                item?.prevPrice &&
+                item?.prevPrice > 0 ? (
                   <Typography
                     sx={{
                       textDecoration: 'line-through',
@@ -87,7 +89,7 @@ export const ComponentToPrint = forwardRef(
                   >
                     ${item.prevPrice}
                   </Typography>
-                )}
+                ) : null}
                 <Typography fontWeight="bold">${item.price}</Typography>
               </Box>
             </TableCell>

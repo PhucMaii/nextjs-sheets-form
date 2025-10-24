@@ -18,7 +18,7 @@ import {
   Button,
   InputAdornment,
 } from '@mui/material';
-import { blueGrey, blue, green, red } from '@mui/material/colors';
+import { blueGrey, blue } from '@mui/material/colors';
 import { generateMonthRange } from '@/app/utils/time';
 import SelectDateRange from '../components/Select/SelectDateRange';
 import { SWRFetchData } from '@/app/utils/db';
@@ -39,6 +39,7 @@ import {
 import LoadingModal from '../components/Modals/LoadingModal';
 import { useUpdateExpenseStatus } from '@/hooks/update/useUpdateExpenseStatus';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { getTransactionStatusColor } from '@/lib/statusColor';
 
 export default function Transactions() {
   const { companyId }: any = useParams();
@@ -225,19 +226,6 @@ export default function Transactions() {
     return searchKeywords || filterStatus !== 'All';
   }, [searchKeywords, filterStatus]);
 
-  const getStatusColor = useMemo(() => {
-    return (status: string) => {
-      switch (status) {
-        case 'Paid':
-          return green[600];
-        case 'Unpaid':
-          return red[600];
-        default:
-          return blueGrey[600];
-      }
-    };
-  }, []);
-
   return (
     <Sidebar>
       {UpdateExpenseStatusComp}
@@ -372,11 +360,11 @@ export default function Transactions() {
                   color:
                     filterStatus === 'All'
                       ? blueGrey[600]
-                      : getStatusColor(filterStatus),
+                      : getTransactionStatusColor(filterStatus),
                   borderColor:
                     filterStatus === 'All'
                       ? blueGrey[300]
-                      : getStatusColor(filterStatus),
+                      : getTransactionStatusColor(filterStatus),
                 }}
               >
                 {filterStatus}
@@ -410,7 +398,9 @@ export default function Transactions() {
                     )}
                     <Typography
                       color={
-                        status === 'All' ? 'inherit' : getStatusColor(status)
+                        status === 'All'
+                          ? 'inherit'
+                          : getTransactionStatusColor(status)
                       }
                     >
                       {status}
@@ -491,8 +481,8 @@ export default function Transactions() {
                     size="small"
                     onDelete={() => setFilterStatus('All')}
                     sx={{
-                      color: getStatusColor(filterStatus),
-                      borderColor: getStatusColor(filterStatus),
+                      color: getTransactionStatusColor(filterStatus),
+                      borderColor: getTransactionStatusColor(filterStatus),
                     }}
                     variant="outlined"
                   />

@@ -38,4 +38,4 @@ export const formatCurrency = (value: number) =>
   `$${value.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
 
 export const formatNumberWith2Decimal = (value: number) =>
-  Math.round(value * 100) / 100;
+  value ? Math.round(value * 100) / 100 : 0;

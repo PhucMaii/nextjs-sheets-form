@@ -42,6 +42,8 @@ import {
   BundleProgram,
   ZoneProgram,
   ZoneWater,
+  CreditReport,
+  CreditItem,
 } from '@prisma/client';
 import { Session } from 'next-auth';
 import { Order } from '../admin/[companyId]/orders/page';
@@ -239,7 +241,7 @@ export interface IExpense extends Expense {
   paymentMethod: IPaymentMethod;
   vendors?: VendorExpense[];
   orderedItems?: OrderedItems[];
-  hasGST?: boolean; 
+  hasGST?: boolean;
   hasPST?: boolean;
 }
 
@@ -371,7 +373,6 @@ export interface IPayroll extends Payroll {
   employee: IEmployee;
   shifts?: number;
   company?: Company;
-
 }
 
 export interface IOrderTimeline extends OrderTimeline {
@@ -433,5 +434,16 @@ export interface IBundleProgram extends BundleProgram {
 
 export interface IDayProgram extends DayProgram {
   bundleProgram: IBundleProgram;
-  program: Program
+  program: Program;
+}
+
+export interface ICreditReport extends CreditReport {
+  user: UserType;
+  creditItems: ICreditItem[];
+  order: Order;
+}
+
+export interface ICreditItem extends CreditItem {
+  inventoryItem: IInventoryItem;
+  orderedItem: OrderedItems;
 }
