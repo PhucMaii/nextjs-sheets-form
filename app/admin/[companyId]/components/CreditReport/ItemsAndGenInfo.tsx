@@ -7,6 +7,7 @@ import ErrorComponent from '../ErrorComponent';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
+import { ShowNotificationType } from '@/hooks/useNotification';
 
 interface IProps {
   selectedOrder: any;
@@ -17,6 +18,8 @@ interface IProps {
   formData: any;
   setFormData: (data: any) => void;
   baseItems?: ICreditItem[];
+  showNotification?: ShowNotificationType;
+  refetchCreditReport?: () => void;
 }
 
 export default function ItemsAndGenInfo({
@@ -28,6 +31,8 @@ export default function ItemsAndGenInfo({
   formData,
   setFormData,
   baseItems,
+  showNotification,
+  refetchCreditReport,
 }: IProps) {
 
   const handleAddCreditItem = () => {
@@ -76,6 +81,8 @@ export default function ItemsAndGenInfo({
                 creditItems={creditItems as ICreditItem[]}
                 setCreditItems={setCreditItems}
                 baseItems={baseItems || []}
+                showNotification={showNotification}
+                refetchCreditReport={refetchCreditReport}
               />
             );
           })}

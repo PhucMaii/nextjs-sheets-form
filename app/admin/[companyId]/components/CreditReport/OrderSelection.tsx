@@ -14,7 +14,7 @@ import ErrorComponent from '../ErrorComponent';
 interface IProps {
   selectedClient: UserType;
   creditItems: ICreditItem[];
-  renderOrderSearch: () => React.ReactNode;
+  renderOrderSearch?: () => React.ReactNode;
   selectedOrder: any;
   isDisabledSearch?: boolean;
 }
@@ -250,7 +250,7 @@ export default function OrderSelection({
   };
   return (
     <BorderSection display="flex" flexDirection="column" gap={1}>
-      {!isDisabledSearch && renderOrderSearch()}
+      {!isDisabledSearch && renderOrderSearch && renderOrderSearch()}
       {selectedOrder && renderOrderView()}
     </BorderSection>
   );

@@ -26,13 +26,14 @@ import useSelectCreditType from '@/hooks/select/useSelectCreditType';
 import { ICreditItem } from '@/app/utils/type';
 import { CreditReport, CreditType } from '@prisma/client';
 import CreditSummary from '../../components/CreditReport/CreditSummary';
+import useNotification from '@/hooks/useNotification';
 
 export default function CreditReportPage() {
   const { companyId, id }: any = useParams();
   const router = useRouter();
-
+  const { NotificationComp, showNotification } = useNotification();
   // Data Fetching
-  const { data: creditReport } = useQuery({
+  const { data: creditReport, refetch: refetchCreditReport } = useQuery({
     queryKey: ['creditReport', companyId, id],
     queryFn: async () => {
       const response = await axios.get(
@@ -43,48 +44,21 @@ export default function CreditReportPage() {
     enabled: !!companyId && !!id,
   });
 
-  const { renderClientSearch, selectedClient, setSelectedClient } =
-    useClients(companyId);
   const { renderCreditTypeSearch, setSelectedCreditType } =
     useSelectCreditType();
-
-  const startDate = useMemo(() => {
-    return dayjs().subtract(1, 'month').format('YYYY-MM-DD');
-  }, []);
-  const endDate = useMemo(() => {
-    return dayjs().add(1, 'month').format('YYYY-MM-DD');
-  }, []);
-  const { data: orders } = useQuery({
-    queryKey: ['orders', companyId, selectedClient?.id],
-    queryFn: async () => {
-      const response = await axios.get(
-        getAdminApiUrl(
-          companyId,
-          `/clients/orders?userId=${selectedClient?.id}&startDate=${startDate}&endDate=${endDate}`,
-        ),
-      );
-      return response.data.data;
-    },
-    enabled: !!selectedClient?.id,
-  });
-
   const { data: categoryItems } = useQuery({
-    queryKey: ['categoryItems', companyId, selectedClient?.categoryId],
+    queryKey: ['categoryItems', companyId, creditReport?.user?.categoryId],
     queryFn: async () => {
       const response = await axios.get(
         getAdminApiUrl(
           companyId,
-          `/clients/items?categoryId=${selectedClient?.categoryId}`,
+          `/clients/items?categoryId=${creditReport?.user?.categoryId}`,
         ),
       );
       return response.data.data;
     },
-    enabled: !!selectedClient?.categoryId,
+    enabled: !!creditReport?.user?.categoryId,
   });
-
-  const { renderOrderSearch, selectedOrder, setSelectedOrder } = useOrders(
-    orders || [],
-  );
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
@@ -124,9 +98,7 @@ export default function CreditReportPage() {
         type: creditReport?.type,
         reason: creditReport?.reason,
       });
-      setSelectedOrder(creditReport?.order);
       setSelectedCreditType(creditReport?.type);
-      setSelectedClient(creditReport?.user);
     }
 
     if (categoryItems) {
@@ -148,10 +120,9 @@ export default function CreditReportPage() {
     }
   }, [creditReport, categoryItems]);
 
-  console.log(creditItems, 'credit items');
-
   return (
     <Sidebar>
+      {NotificationComp}
       <Box sx={{ p: 3 }}>
         <Box display="flex" alignItems="center" gap={2} mb={4}>
           <IconButton
@@ -219,22 +190,24 @@ export default function CreditReportPage() {
             <BorderSection display="flex" flexDirection="column" gap={1}>
               <Typography variant="subtitle1">Selected Client</Typography>
               {/* {renderClientSearch()} */}
-              <Typography variant="h6">{creditReport?.user?.clientName} - {creditReport?.user?.clientId}</Typography>
+              <Typography variant="h6">
+                {creditReport?.user?.clientName} -{' '}
+                {creditReport?.user?.clientId}
+              </Typography>
             </BorderSection>
             {mdDown && (
               <Grid item xs={12}>
                 <OrderSelection
-                  selectedClient={selectedClient}
+                  selectedClient={creditReport?.user}
                   creditItems={creditItems || []}
-                  renderOrderSearch={renderOrderSearch}
-                  selectedOrder={selectedOrder}
+                  selectedOrder={creditReport?.order}
                   isDisabledSearch
                 />
               </Grid>
             )}
             <BorderSection display="flex" flexDirection="column" gap={1}>
               <ItemsAndGenInfo
-                selectedOrder={selectedOrder}
+                selectedOrder={creditReport?.order}
                 creditItems={creditItems || []}
                 setCreditItems={setCreditItems}
                 categoryItems={categoryItems || []}
@@ -242,9 +215,11 @@ export default function CreditReportPage() {
                 formData={formData}
                 setFormData={setFormData}
                 baseItems={creditReport?.creditItems || []}
+                showNotification={showNotification}
+                refetchCreditReport={refetchCreditReport}
               />
             </BorderSection>
- 
+
             <BorderSection display="flex" flexDirection="column" gap={1}>
               <CreditSummary creditSummary={creditSummary} />
             </BorderSection>
@@ -252,10 +227,9 @@ export default function CreditReportPage() {
           {!mdDown && (
             <Grid item md={4}>
               <OrderSelection
-                selectedClient={selectedClient}
+                selectedClient={creditReport?.user}
                 creditItems={creditItems || []}
-                renderOrderSearch={renderOrderSearch}
-                selectedOrder={selectedOrder}
+                selectedOrder={creditReport?.order}
                 isDisabledSearch
               />
             </Grid>

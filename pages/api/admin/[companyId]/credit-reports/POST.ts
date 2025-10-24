@@ -89,8 +89,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         price: existCreditItem?.price || 0,
         quantity: existCreditItem?.quantity || 1,
         companyId: Number(companyId),
-        isCustomAmount: existCreditItem?.isCustomAmount || false,
-        prevPrice: existCreditItem?.prevPrice || 0,
+        isCustomAmount: true,
+        prevPrice: existCreditItem?.orderedItem?.prevPrice || 0,
         isShowDiscount: true,
       };
     });
