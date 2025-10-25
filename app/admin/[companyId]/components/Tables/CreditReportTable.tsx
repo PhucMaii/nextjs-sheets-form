@@ -7,6 +7,7 @@ import {
   Box,
   Button,
   Chip,
+  IconButton,
   Table,
   TableBody,
   TableCell,
@@ -20,23 +21,67 @@ import React, { useState } from 'react';
 import CreditItemDetailsModal from '../Modals/CreditItemDetailsModal';
 import { getCreditReportTypeColor } from '@/lib/statusColor';
 import { useParams, useRouter } from 'next/navigation';
+import { Trash2Icon } from 'lucide-react';
+import ConfirmModal from '../Modals/ConfirmModal';
+import { ShowNotificationType } from '@/hooks/useNotification';
+import { getAdminApiUrl } from '@/app/utils/enum';
+import axios from 'axios';
 
 interface IProps {
   creditReports: ICreditReport[];
+  showNotification: ShowNotificationType;
+  refetchCreditReports: any;
 }
 
-export default function CreditReportTable({ creditReports }: IProps) {
+export default function CreditReportTable({
+  creditReports,
+  showNotification,
+  refetchCreditReports,
+}: IProps) {
   const { companyId }: any = useParams();
   const router = useRouter();
 
+  const [deleteProps, setDeleteProps] = useState<any>({
+    open: false,
+    creditId: 0,
+  });
   const [creditItemProps, setCreditItemProps] = useState<any>({
     open: false,
     creditId: 0,
     items: [],
   });
 
+  const handleDeleteCreditReport = async (creditId: number) => {
+    try {
+      const response = await axios.delete(
+        getAdminApiUrl(companyId, `/credit-reports?id=${creditId}`),
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      await refetchCreditReports();
+      showNotification('success', response.data.message);
+      setDeleteProps({ open: false, creditId: 0 });
+    } catch (error: any) {
+      console.log('Fail to delete credit report: ' + error);
+      showNotification('error', 'Fail to delete credit report: ' + error);
+    }
+  };
+
   return (
     <>
+      <ConfirmModal
+        open={deleteProps.open}
+        onClose={() => setDeleteProps({ open: false, creditId: 0 })}
+        title="Are you sure to delete this credit report?"
+        handleSubmit={() => handleDeleteCreditReport(deleteProps.creditId)}
+        showNotification={showNotification}
+        color="error"
+        buttonLabel="Yes, I'm sure"
+      />
       <CreditItemDetailsModal
         open={creditItemProps.open}
         onClose={() =>
@@ -57,6 +102,7 @@ export default function CreditReportTable({ creditReports }: IProps) {
               <TableCell>Created By</TableCell>
               <TableCell align="center">Items</TableCell>
               <TableCell align="right">Total Loss</TableCell>
+              <TableCell align="center">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -149,6 +195,18 @@ export default function CreditReportTable({ creditReports }: IProps) {
                   >
                     {formatCurrency(credit.totalLoss)}
                   </Typography>
+                </TableCell>
+                <TableCell align="center">
+                  <IconButton
+                    onClick={(e: any) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      setDeleteProps({ open: true, creditId: credit.id });
+                    }}
+                    color="error"
+                  >
+                    <Trash2Icon />
+                  </IconButton>
                 </TableCell>
               </TableRow>
             ))}

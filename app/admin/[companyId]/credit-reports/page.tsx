@@ -50,7 +50,7 @@ export default function CreditPage() {
   const { companyId }: any = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { NotificationComp } = useNotification();
+  const { showNotification, NotificationComp } = useNotification();
 
   // State management
   const [selectedYear, setSelectedYear] = useState<number>(
@@ -62,7 +62,7 @@ export default function CreditPage() {
   const debouncedSearchKeywords = useDebounce(searchKeywords, 500);
 
   // Data Fetching
-  const { data: creditReports } = useQuery({
+  const { data: creditReports, refetch: refetchCreditReports } = useQuery({
     queryKey: ['creditReports', companyId, selectedYear],
     queryFn: async () => {
       const response = await axios.get(
@@ -316,7 +316,11 @@ export default function CreditPage() {
                 </Alert>
               </Box>
             ) : (
-              <CreditReportTable creditReports={filteredCredits} />
+              <CreditReportTable
+                creditReports={filteredCredits}
+                showNotification={showNotification}
+                refetchCreditReports={refetchCreditReports}
+              />
             )}
           </CardContent>
         </ShadowSection>
