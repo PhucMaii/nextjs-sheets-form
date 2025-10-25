@@ -10,6 +10,7 @@ import { primary } from '@/theme/color';
 import DisplayFile from '../Modals/DisplayFile';
 import { grey } from '@mui/material/colors';
 import ErrorComponent from '../ErrorComponent';
+import { generateOrderTotalPrice } from '@/app/utils/orders';
 
 interface IProps {
   selectedClient: UserType;
@@ -59,6 +60,11 @@ export default function OrderSelection({
     [orderViewItems],
   );
 
+  const orderTotal = useMemo(() => {
+    const total = generateOrderTotalPrice(orderViewItems);
+    return total;
+  }, [orderViewItems]);
+
   const renderTotal = () => {
     return (
       <Grid container spacing={1} mt={2}>
@@ -97,8 +103,8 @@ export default function OrderSelection({
         <Grid item xs={6} textAlign="right">
           <Typography fontWeight="bold">
             $
-            {selectedOrder?.subTotal?.toFixed(2) ||
-              selectedOrder?.totalPrice?.toFixed(2) ||
+            {orderTotal?.subTotal?.toFixed(2) ||
+              orderTotal?.totalPrice?.toFixed(2) ||
               0}
           </Typography>
         </Grid>
@@ -110,7 +116,7 @@ export default function OrderSelection({
         </Grid>
         <Grid item xs={6} textAlign="right">
           <Typography fontWeight="bold">
-            ${selectedOrder?.GST?.toFixed(2) || 0}
+            ${orderTotal?.GST?.toFixed(2) || 0}
           </Typography>
         </Grid>
         <Grid item xs={12}>
@@ -121,7 +127,7 @@ export default function OrderSelection({
         </Grid>
         <Grid item xs={6} textAlign="right">
           <Typography fontWeight="bold">
-            ${selectedOrder?.PST?.toFixed(2) || 0}
+            ${orderTotal?.PST?.toFixed(2) || 0}
           </Typography>
         </Grid>
         <Grid item xs={12}>
@@ -132,7 +138,7 @@ export default function OrderSelection({
         </Grid>
         <Grid item xs={6} textAlign="right">
           <Typography fontWeight="bold">
-            ${selectedOrder?.totalPrice?.toFixed(2)}
+            ${orderTotal?.totalPrice?.toFixed(2)}
           </Typography>
         </Grid>
         {/* <Grid item xs={12}> */}

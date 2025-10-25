@@ -17,8 +17,6 @@ import { getAdminApiUrl } from '@/app/utils/enum';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { BorderSection } from '../../reports/styled';
-import useClients from '@/hooks/select/useClients';
-import useOrders from '@/hooks/select/useOrders';
 import OrderSelection from '../../components/CreditReport/OrderSelection';
 import ItemsAndGenInfo from '../../components/CreditReport/ItemsAndGenInfo';
 import dayjs from 'dayjs';
@@ -44,7 +42,7 @@ export default function CreditReportPage() {
     enabled: !!companyId && !!id,
   });
 
-  const { renderCreditTypeSearch, setSelectedCreditType } =
+  const { renderCreditTypeSearch, selectedCreditType, setSelectedCreditType } =
     useSelectCreditType();
   const { data: categoryItems } = useQuery({
     queryKey: ['categoryItems', companyId, creditReport?.user?.categoryId],
@@ -63,6 +61,7 @@ export default function CreditReportPage() {
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   const [creditItems, setCreditItems] = useState<ICreditItem[] | any[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [formData, setFormData] = useState<CreditReport | any>({
     userId: 0,
     orderId: 0,
@@ -120,6 +119,37 @@ export default function CreditReportPage() {
     }
   }, [creditReport, categoryItems]);
 
+  const handleSave = async () => {
+    setIsLoading(true);
+    try {
+      const response = await axios.put(
+        getAdminApiUrl(companyId, `/credit-reports`),
+        {
+          id: creditReport?.id,
+          creditType: selectedCreditType,
+          reportedDate: formData.reportedDate,
+          reason: formData.reason,
+          creditItems: creditItems,
+        },
+      );
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+      showNotification('success', response.data.message);
+      await refetchCreditReport();
+      router.push(`/admin/${companyId}/credit-reports`);
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      showNotification(
+        'error',
+        'There was an error: ' + error.response.data.error,
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Sidebar>
       {NotificationComp}
@@ -168,10 +198,11 @@ export default function CreditReportPage() {
             </Box>
 
             <LoadingButton
-              loading={false}
+              loading={isLoading}
               variant="contained"
               color="primary"
               startIcon={<Save />}
+              onClick={handleSave}
             >
               Save
             </LoadingButton>

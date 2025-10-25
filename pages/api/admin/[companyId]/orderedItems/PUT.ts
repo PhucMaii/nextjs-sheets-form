@@ -552,7 +552,7 @@ export const generateOrderTotalPrice = (
         acc.GST += item.price * item.quantity * gstRate;
       }
 
-      if (item?.isShowDiscount && item?.prevPrice) {
+      if (item?.isShowDiscount && item?.prevPrice > 0) {
         acc.discount += (item.prevPrice - item.price) * item.quantity;
       }
 

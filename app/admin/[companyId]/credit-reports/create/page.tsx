@@ -247,6 +247,7 @@ export default function CreateCreditReport() {
                 renderCreditTypeSearch={renderCreditTypeSearch}
                 formData={formData}
                 setFormData={setFormData}
+                showNotification={showNotification}
               />
             </BorderSection>
 

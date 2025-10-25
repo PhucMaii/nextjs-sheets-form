@@ -37,6 +37,7 @@ export default function CreditItem({
   showNotification,
 }: IProps) {
   const { companyId }: any = useParams();
+
   const [confirmDeleteProps, setConfirmDeleteProps] = useState<{
     open: boolean;
     id: number;
@@ -134,6 +135,7 @@ export default function CreditItem({
                   .includes(state.inputValue.toLowerCase());
               });
             }}
+            disabled={updateFlag !== 'New' && !!baseItems}
             renderInput={(params) => <TextField {...params} label="Item" />}
             value={item.categoryItem}
             onChange={(e, newValue: any) => {
@@ -146,8 +148,10 @@ export default function CreditItem({
                         actualPrice: newValue.price,
                         orderedItem: {
                           ...newValue,
+                          price: 0,
                           isShowDiscount: true,
                           prevPrice: newValue.price,
+                          quantity: 1,
                           name: `${newValue.name} CREDIT`,
                         },
                         name: `${newValue.name} CREDIT`,
@@ -232,7 +236,7 @@ export default function CreditItem({
             <IconButton
               onClick={(e) => {
                 e.stopPropagation();
-                setConfirmDeleteProps({ open: true, id: item.id });
+                setConfirmDeleteProps({ open: true, id: Number(item.id) });
               }}
               color="error"
             >

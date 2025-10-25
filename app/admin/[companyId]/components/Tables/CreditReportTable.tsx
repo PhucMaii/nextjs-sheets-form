@@ -19,12 +19,16 @@ import {
 import React, { useState } from 'react';
 import CreditItemDetailsModal from '../Modals/CreditItemDetailsModal';
 import { getCreditReportTypeColor } from '@/lib/statusColor';
+import { useParams, useRouter } from 'next/navigation';
 
 interface IProps {
   creditReports: ICreditReport[];
 }
 
 export default function CreditReportTable({ creditReports }: IProps) {
+  const { companyId }: any = useParams();
+  const router = useRouter();
+
   const [creditItemProps, setCreditItemProps] = useState<any>({
     open: false,
     creditId: 0,
@@ -57,7 +61,13 @@ export default function CreditReportTable({ creditReports }: IProps) {
           </TableHead>
           <TableBody>
             {creditReports.map((credit: ICreditReport) => (
-              <TableRow key={credit.id} hover>
+              <TableRow
+                key={credit.id}
+                hover
+                onClick={() =>
+                  router.push(`/admin/${companyId}/credit-reports/${credit.id}`)
+                }
+              >
                 <TableCell>
                   <Typography variant="body2" fontWeight="medium">
                     #{credit.id}
@@ -74,7 +84,7 @@ export default function CreditReportTable({ creditReports }: IProps) {
                   <Box display="flex" alignItems="center" gap={1}>
                     <DateRange fontSize="small" color="action" />
                     <Typography variant="body2">
-                      {new Date(credit.createdAt).toLocaleDateString()}
+                      {new Date(credit.reportedDate).toLocaleDateString()}
                     </Typography>
                   </Box>
                 </TableCell>
@@ -118,13 +128,15 @@ export default function CreditReportTable({ creditReports }: IProps) {
                       py: 0.5,
                       borderRadius: 2,
                     }}
-                    onClick={() =>
+                    onClick={(e: any) => {
+                      e.stopPropagation();
+                      e.preventDefault();
                       setCreditItemProps({
                         open: true,
                         creditId: credit.id,
                         items: credit.creditItems,
-                      })
-                    }
+                      });
+                    }}
                   >
                     {credit.creditItems.length}
                   </Button>

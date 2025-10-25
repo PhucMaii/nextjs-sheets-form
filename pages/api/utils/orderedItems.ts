@@ -248,6 +248,8 @@ export const createOrderedItems = async (
         const itemRatio =
           itemUnit?.ratio || item?.option?.ratio || item.inventoryUnit.ratio;
 
+        console.log(itemRatio, 'itemRatio');
+
         let itemQuantity = item.quantity * itemRatio; // Check from the unit ratio
 
         // If item quantity is greater than the fifo quantity, delete the fifo, and move to next fifo with new quantity subtracted

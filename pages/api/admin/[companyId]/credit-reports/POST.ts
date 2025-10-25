@@ -3,8 +3,9 @@ import { generateOrderTotalPrice } from '@/app/utils/orders';
 import prisma from '@/client';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { getTodayDate } from '@/pages/api/utils/date';
+import { recordOrderInventoryLog } from '@/pages/api/utils/logs';
 import { createOrderedItems } from '@/pages/api/utils/orderedItems';
-import { CreditType } from '@prisma/client';
+import { CreditType, InventoryLogFrom, InventoryLogType } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IBody {
@@ -21,14 +22,17 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const { userId, orderId, creditItems, type, reason } = req.body as IBody;
 
     if (!companyId) {
+      console.log('Company ID is required');
       return res.status(400).json({ message: 'Company ID is required' });
     }
 
     if (!orderId) {
+      console.log('Order ID is required');
       return res.status(400).json({ message: 'Order ID is required' });
     }
 
     if (!creditItems) {
+      console.log('Credit items are required');
       return res.status(400).json({ message: 'Credit items are required' });
     }
 
@@ -81,19 +85,11 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    const formattedOrderedItems = categoryItems.map((item: any) => {
-      const existCreditItem = creditItems.find((creditItem: any) => creditItem.categoryItem.id === item.id);
-      return {
-        ...item,
-        name: existCreditItem?.name || item.name,
-        price: existCreditItem?.price || 0,
-        quantity: existCreditItem?.quantity || 1,
-        companyId: Number(companyId),
-        isCustomAmount: true,
-        prevPrice: existCreditItem?.orderedItem?.prevPrice || 0,
-        isShowDiscount: true,
-      };
-    });
+    const formattedOrderedItems = formatCreditItemsToOrderedItems(
+      Number(companyId),
+      creditItems,
+      categoryItems,
+    );
 
     // Inject credit items to ordered items
     await createOrderedItems(
@@ -118,20 +114,24 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       return res.status(400).json({ message: 'Order not found' });
     }
 
-    const formattedCreditItems = creditItems.map((item: any) => {
-      const existingOrderedItem = orderedItems.find(
-        (orderedItem: any) => orderedItem.name === item.name,
+    // Record inventory log
+    for (const orderedItem of orderedItems) {
+      await recordOrderInventoryLog(
+        orderId,
+        orderedItem.inventoryItemId,
+        orderedItem.quantity,
+        InventoryLogType.SUBTRACT,
+        InventoryLogFrom.EDIT_ORDER,
+        `Subtract ${orderedItem.quantity} ${orderedItem.inventoryItem.name} from inventory due to credit report ${newCreditReport.id} created`,
       );
-      return {
-        companyId: Number(companyId),
-        creditReportId: newCreditReport.id,
-        inventoryItemId: item.inventoryItem.id,
-        actualPrice: item.actualPrice,
-        priceDifference: item.priceDifference,
-        quantity: item.quantity,
-        orderedItemId: existingOrderedItem?.id,
-      };
-    });
+    }
+
+    const formattedCreditItems = formatCreditItems(
+      Number(companyId),
+      creditItems,
+      orderedItems,
+      newCreditReport.id,
+    );
 
     // Create credit items
     await prisma.creditItem.createMany({
@@ -162,3 +162,51 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     res.status(500).json({ message: 'Internal server error' });
   }
 }
+
+export const formatCreditItemsToOrderedItems = (
+  companyId: number,
+  creditItems: any[],
+  categoryItems: any[],
+) => {
+  const formattedOrderedItems = categoryItems.map((item: any) => {
+    const existCreditItem = creditItems.find(
+      (creditItem: any) => creditItem.categoryItem.id === item.id,
+    );
+    return {
+      ...item,
+      name: existCreditItem?.name || item.name,
+      price: existCreditItem?.price || 0,
+      quantity: existCreditItem?.quantity || 1,
+      companyId: companyId,
+      isCustomAmount: true,
+      prevPrice: existCreditItem?.orderedItem?.prevPrice || 0,
+      isShowDiscount: true,
+    };
+  });
+
+  return formattedOrderedItems;
+};
+
+export const formatCreditItems = (
+  companyId: number,
+  creditItems: any[],
+  orderedItems: any[],
+  creditReportId: number,
+) => {
+  const formattedCreditItems = creditItems.map((item: any) => {
+    const existingOrderedItem = orderedItems.find(
+      (orderedItem: any) => orderedItem.name === item.name,
+    );
+    return {
+      companyId: Number(companyId),
+      creditReportId: creditReportId,
+      inventoryItemId: item.inventoryItem.id,
+      actualPrice: item.actualPrice,
+      priceDifference: item.priceDifference,
+      quantity: item.quantity,
+      orderedItemId: existingOrderedItem?.id,
+    };
+  });
+
+  return formattedCreditItems;
+};
