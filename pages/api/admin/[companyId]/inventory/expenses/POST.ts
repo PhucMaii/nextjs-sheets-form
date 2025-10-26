@@ -913,7 +913,7 @@ export const createOrderedItems = async (
       fifoId: fifoItem.id,
       quantity: item.quantity,
       expenseId: newExpense.id,
-      price: item.unit.unitPrice,
+      price: Math.round((item.unit.unitPrice / item.unit.ratio) * 100) / 100,
       name: fifoItem.inventoryItem.name,
       inventoryItemId: fifoItem.inventoryItemId,
       inventoryUnitId: selectedUnit?.id,

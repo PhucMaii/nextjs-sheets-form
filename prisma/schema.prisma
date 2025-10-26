@@ -828,7 +828,7 @@ model InventoryLog {
   orderId         Int?
   transactionId   Int?
 
-  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
   company       Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
   order         Orders?       @relation(fields: [orderId], references: [id])
   transaction   Expense?      @relation(fields: [transactionId], references: [id])
@@ -1072,7 +1072,7 @@ model Option {
 
   unit          InventoryUnit @relation(fields: [unitId], references: [id])
   item          Item          @relation(fields: [itemId], references: [id], onDelete: Cascade)
-  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
 }
 
 model ScheduledShift {
@@ -1164,7 +1164,7 @@ model POItem {
   note            String?
   inventoryUnitId Int
 
-  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
   inventoryUnit InventoryUnit @relation(fields: [inventoryUnitId], references: [id])
   po            PO            @relation(fields: [poId], references: [id], onDelete: Cascade)
   company       Company?      @relation(fields: [companyId], references: [id])
@@ -1189,7 +1189,7 @@ model LossReport {
 
   medias Media[]
 
-  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
   inventoryUnit InventoryUnit @relation(fields: [inventoryUnitId], references: [id])
   company       Company?      @relation(fields: [companyId], references: [id])
 }

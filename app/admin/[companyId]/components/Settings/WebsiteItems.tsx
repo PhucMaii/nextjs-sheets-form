@@ -2,7 +2,7 @@ import { Box, Button, Divider, TextField, Typography } from '@mui/material';
 import React, { Fragment, useEffect, useState } from 'react';
 import useNotification from '@/hooks/useNotification';
 import { useMultipleBoolean } from '@/hooks/useMultipleBoolean';
-import { API_URL, getAdminApiUrl } from '@/app/utils/enum';
+import { getAdminApiUrl } from '@/app/utils/enum';
 import { SWRFetchData } from '@/app/utils/db';
 import ErrorComponent from '../ErrorComponent';
 import Item from '../Reorder/Item';
@@ -73,7 +73,7 @@ export default function WebsiteItems() {
 
   const handleDeleteItem = async (targetItem: IItem) => {
     try {
-      const response = await axios.delete(API_URL.ITEM, {
+      const response = await axios.delete(getAdminApiUrl(companyId, '/items'), {
         data: { removedId: targetItem.id },
       });
 
@@ -92,7 +92,7 @@ export default function WebsiteItems() {
   const handleAddItem = async (newItem: IItem, selectedCategories: any[]) => {
     try {
       const createdAt = generateCurrentTime();
-      const response = await axios.post(API_URL.ITEM, {
+      const response = await axios.post(getAdminApiUrl(companyId, '/items'), {
         newItem,
         createdAt,
         categoryIds: selectedCategories,
