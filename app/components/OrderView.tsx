@@ -53,11 +53,12 @@ import EditIcon from '@mui/icons-material/Edit';
 import EditOffIcon from '@mui/icons-material/EditOff';
 import { blackColor } from '@/theme/create-palette';
 import { Discount } from '@mui/icons-material';
+import { Add } from '@mui/icons-material';
 // import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import SetItemQuantity from './SetItemQuantity';
 import DisplayFile from '../admin/[companyId]/components/Modals/DisplayFile';
 import { generateOrderTotalPrice } from '@/app/utils/orders';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 
 export const WhiteSpace = () => {
   return (
@@ -223,7 +224,9 @@ export const ItemButton = ({
       ref={ref}
       disabled={isDisabled}
     >
-      {(item.inventoryItem?.isShowQuantity && item?.qtyLeft && item?.qtyLeft > 0) ||
+      {(item.inventoryItem?.isShowQuantity &&
+        item?.qtyLeft &&
+        item?.qtyLeft > 0) ||
       (item.inventoryItem?.isShowInventory &&
         item?.qtyLeft &&
         item?.qtyLeft > 0 &&
@@ -455,6 +458,7 @@ const OrderView = ({
   hideButton,
 }: IProps) => {
   const { companyId }: any = useParams();
+  const router = useRouter();
   const [displayItems, setDisplayItems] = useState<IItem[]>(items);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [orderedItems, setOrderedItems] = useState<IItem[]>(
@@ -470,12 +474,14 @@ const OrderView = ({
   );
   const [order, setOrder] = useState<any | null>({
     id: defaultOrder?.id || -1,
+    userId: defaultOrder?.userId || -1,
     subTotal: 0,
     totalPrice: 0,
     shippingFee: defaultOrder?.shippingFee || 0,
     PST: defaultOrder?.PST || 0,
     GST: defaultOrder?.GST || 0,
     note: defaultOrder?.note || '',
+    creditReport: defaultOrder?.creditReport || null,
     deliveryDate:
       defaultOrder?.deliveryDate ||
       defaultDeliveryDate ||
@@ -633,6 +639,8 @@ const OrderView = ({
       totalPrice: newSubtotal?.totalPrice || 0,
       PST: defaultOrder?.PST || newSubtotal?.PST || 0,
       GST: defaultOrder?.GST || newSubtotal?.GST || 0,
+      userId: defaultOrder?.userId || order?.userId || -1,
+      creditReport: defaultOrder?.creditReport || order?.creditReport || null,
     });
   }, [orderedItems]);
 
@@ -743,6 +751,14 @@ const OrderView = ({
   //   });
   //   setOrderedItems(newItems);
   // };
+
+  const navigateToCreditReport = () => {
+    if (!order?.creditReport) {
+      router.push(`/admin/${companyId}/credit-reports/create?userId=${order?.userId}&orderId=${order?.id}`);
+    } else {
+      router.push(`/admin/${companyId}/credit-reports/${order?.creditReport?.id}`);
+    }
+  }
 
   const onDateChange = (e: any) => {
     const formattedDate = formatDateChanged(e);
@@ -1118,17 +1134,28 @@ const OrderView = ({
         {role === USER_ROLE.ADMIN &&
           purpose === ORDER_USAGE_PURPOSE.ITEM &&
           !isPreOrder && (
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={isAffectInventory}
-                  onChange={onAvoidInventory}
-                />
-              }
-              label={
-                isUpdatingAvoidInventory ? 'Updating...' : 'Affect Inventory'
-              }
-            />
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+              gap={1}
+            >
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={isAffectInventory}
+                    onChange={onAvoidInventory}
+                  />
+                }
+                label={
+                  isUpdatingAvoidInventory ? 'Updating...' : 'Affect Inventory'
+                }
+              />
+
+              <Button variant="outlined" startIcon={order.creditReport ? <EditIcon /> : <Add />} onClick={navigateToCreditReport}>
+                {order.creditReport ? 'Edit Credit' : 'Add Credit'}
+              </Button>
+            </Box>
           )}
 
         {renderWarning()}
@@ -1139,7 +1166,6 @@ const OrderView = ({
 
         {orderedItems.length > 0 ? (
           orderedItems.map((item: IItem | any) => {
-            // console.log('item', item);
             return (
               <Box
                 key={item.id}

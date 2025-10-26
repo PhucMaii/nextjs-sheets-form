@@ -94,6 +94,7 @@ export default async function handler(req: any, res: any) {
         companyId: 1,
       },
       include: {
+        creditReport: true,
         reassignment: {
           include: {
             to: true,

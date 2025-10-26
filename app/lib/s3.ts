@@ -21,7 +21,6 @@ export default async function uploadToS3(
   location: string,
   isCheque: boolean = false,
 ) {
-  console.log(file.name, 'file name in upload to s3');
   try {
     if (
       !process.env.NEXT_PUBLIC_S3_BUCKET_NAME ||
@@ -45,7 +44,6 @@ export default async function uploadToS3(
 
     const command = new PutObjectCommand(params);
     await s3.send(command);
-    console.log('File uploaded successfully', fileKey);
 
     return { fileKey, fileName: file.name, name };
   } catch (error) {
@@ -57,7 +55,6 @@ export const generateImgUrl = (
   fileKey: string,
   isCheque: boolean = false,
 ) => {
-  console.log(fileKey, 'fileKey in generateImgUrl');
   if (!fileKey) {
     console.warn('No file key provided to generateImgUrl');
     return '/images/not-found.png';
@@ -125,7 +122,6 @@ export const getAllS3Images = async (folder: string = '') => {
       continuationToken = response.NextContinuationToken;
     } while (continuationToken);
 
-    console.log(`Found ${allImages.length} images in folder: ${folder}`);
     return allImages;
   } catch (error) {
     console.error('Failed to get images from S3:', error);

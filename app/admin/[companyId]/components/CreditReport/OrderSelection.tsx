@@ -11,6 +11,7 @@ import DisplayFile from '../Modals/DisplayFile';
 import { grey } from '@mui/material/colors';
 import ErrorComponent from '../ErrorComponent';
 import { generateOrderTotalPrice } from '@/app/utils/orders';
+import { useParams, useRouter } from 'next/navigation';
 
 interface IProps {
   selectedClient: UserType;
@@ -27,6 +28,8 @@ export default function OrderSelection({
   selectedOrder,
   isDisabledSearch = false,
 }: IProps) {
+  const { companyId }: any = useParams();
+  const router = useRouter();
   const totalQuantity = useMemo(
     () =>
       selectedOrder?.items?.reduce(
@@ -155,7 +158,17 @@ export default function OrderSelection({
           {selectedClient?.clientName || 'N/A'}&apos;s Order
         </Typography>
         {isDisabledSearch && (
-          <Typography variant="caption" textAlign="center">
+          <Typography
+            variant="caption"
+            textAlign="center"
+            sx={{
+              cursor: 'pointer',
+              '&:hover': { textDecoration: 'underline', color: primary.main },
+            }}
+            onClick={() =>
+              router.push(`/admin/${companyId}/orders/${selectedOrder?.id}`)
+            }
+          >
             Order ID: {selectedOrder?.id} - {selectedOrder?.deliveryDate}
           </Typography>
         )}

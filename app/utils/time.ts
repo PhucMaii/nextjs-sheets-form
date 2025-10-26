@@ -40,7 +40,6 @@ export const generateMinDate = () => {
   }
 
   const minDate = today.startOf('day');
-  console.log(minDate, 'MIN DATE');
   return minDate;
 };
 
@@ -114,8 +113,6 @@ export const generateListOfDateString = (
 ) => {
   const formattedStartDate = startDate;
   const formattedEndDate = endDate;
-
-  console.log({ startDate, endDate });
 
   // if (startDate.getTimezoneOffset() === 0 || endDate.getTimezoneOffset() === 0) {
   //   formattedStartDate = convertToPSTDate(startDate);

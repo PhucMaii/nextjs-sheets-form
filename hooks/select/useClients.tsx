@@ -41,11 +41,19 @@ const useClients = (companyId: string) => {
         );
     };
 
+    const handleSelectClientById = (id: number) => {
+        const client = clients?.find((client: any) => client.id === id);
+        if (client) {
+            setSelectedClient(client);
+        }
+    };
+
     return {
         clients,
         renderClientSearch,
         selectedClient,
         setSelectedClient,
+        handleSelectClientById,
     };
 }
 

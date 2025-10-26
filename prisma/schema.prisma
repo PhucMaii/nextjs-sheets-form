@@ -325,7 +325,7 @@ model CreditReport {
   id                    Int     @id @default(autoincrement())
   companyId             Int
   userId                Int
-  orderId               Int
+  orderId               Int     @unique
   type                  CreditType
   reportedDate          String
   reason                String
@@ -337,7 +337,9 @@ model CreditReport {
 
   company               Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
   user                  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  order                 Orders     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order                 Orders     @relation("OrderCreditReport", fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
 }
 
 model CreditItem {
@@ -354,6 +356,8 @@ model CreditItem {
   creditReport          CreditReport    @relation(fields: [creditReportId], references: [id], onDelete: Cascade)
   orderedItem           OrderedItems    @relation("CreditOrderedItem", fields: [orderedItemId], references: [id], onDelete: Cascade)
   inventoryItem         InventoryItem   @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)  
+
+  @@index([creditReportId])
 }
 
 model Orders {
@@ -392,7 +396,7 @@ model Orders {
 
   items                OrderedItems[]
   logs                 InventoryLog[]
-  creditReports        CreditReport[]
+  creditReport        CreditReport?   @relation("OrderCreditReport")
   
   timeline     OrderTimeline? @relation("OrderTimeline")
   user         User?         @relation(fields: [userId], references: [id], onDelete: Cascade)

@@ -106,7 +106,7 @@ export default function ItemsAndGenInfo({
               onChange={(value) =>
                 setFormData({
                   ...formData,
-                  reportedDate: value?.toISOString(),
+                  reportedDate: value?.format('MM/DD/YYYY'),
                 })
               }
               sx={{ width: '100%' }}

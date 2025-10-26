@@ -91,10 +91,18 @@ const useOrders = (listOfOrders: Orders[]) => {
     );
   };
 
+  const handleSelectOrderById = (id: number) => {
+    const order = listOfOrders.find((order: any) => order.id === id);
+    if (order) {
+      setSelectedOrder(order);
+    }
+  };
+
   return {
     selectedOrder,
     setSelectedOrder,
     renderOrderSearch,
+    handleSelectOrderById,
   };
 };
 

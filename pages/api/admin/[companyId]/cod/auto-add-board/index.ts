@@ -89,6 +89,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         },
       },
       include: {
+        creditReport: true,
         reassignment: {
           include: {
             to: true,
@@ -126,6 +127,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         },
       },
       include: {
+        creditReport: true,
         reassignment: {
           include: {
             to: true,
@@ -235,6 +237,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         },
       },
       include: {
+        creditReport: true,
         reassignment: {
           include: {
             to: true,

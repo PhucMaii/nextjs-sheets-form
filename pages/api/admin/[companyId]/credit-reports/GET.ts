@@ -1,26 +1,44 @@
+import { generateListOfDateString } from '@/app/utils/time';
 import prisma from '@/client';
+import { normalizeDate } from '@/pages/api/utils/date';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IQuery {
   companyId?: string;
-  year?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { companyId, year } = req.query as IQuery;
+    const { companyId, startDate, endDate } = req.query as IQuery;
 
-    if (!companyId || !year) {
+    if (!companyId || !startDate || !endDate) {
       return res
         .status(400)
-        .json({ error: 'Company ID and year are required' });
+        .json({ error: 'Company ID, startDate and endDate are required' });
     }
+
+    const formattedStartDate = normalizeDate(new Date(startDate));
+    const formattedEndDate = normalizeDate(new Date(endDate));
+    const listOfDateString = generateListOfDateString(
+      formattedStartDate,
+      formattedEndDate,
+    );
+
+    console.log({
+      startDate,
+      endDate,
+      formattedStartDate,
+      formattedEndDate,
+      listOfDateString,
+    });
 
     const creditReports = await prisma.creditReport.findMany({
       where: {
         companyId: Number(companyId),
         reportedDate: {
-          contains: year,
+          in: listOfDateString,
         },
       },
       include: {

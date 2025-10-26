@@ -44,6 +44,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           },
           orders: {
             include: {
+              creditReport: true,
               reassignment: {
                 include: {
                   to: {
@@ -265,6 +266,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           },
           orders: {
             include: {
+              creditReport: true,
               reassignment: {
                 include: {
                   to: {
@@ -337,6 +339,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           },
           orders: {
             include: {
+              creditReport: true,
               reassignment: {
                 include: {
                   to: {

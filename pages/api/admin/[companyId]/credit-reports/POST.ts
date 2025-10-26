@@ -14,12 +14,13 @@ interface IBody {
   creditItems: any[];
   type: CreditType;
   reason: string;
+  reportedDate: string;
 }
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { companyId } = req.query;
-    const { userId, orderId, creditItems, type, reason } = req.body as IBody;
+    const { userId, orderId, creditItems, type, reason, reportedDate } = req.body as IBody;
 
     if (!companyId) {
       console.log('Company ID is required');
@@ -49,7 +50,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         orderId: Number(orderId),
         userId: Number(userId),
         type: type,
-        reportedDate: today.dateAndTime,
+        reportedDate,
         reason: reason,
         totalLoss: totalLoss,
         createdAt: today.dateAndTime,

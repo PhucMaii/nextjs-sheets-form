@@ -26,6 +26,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       const order = await prisma.orders.findUnique({
         where: { id: Number(orderId) },
         include: {
+          creditReport: true,
           reassignment: {
             include: {
               to: {
@@ -125,6 +126,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
       ],
       include: {
+        creditReport: true,
         reassignment: {
           include: {
             to: {

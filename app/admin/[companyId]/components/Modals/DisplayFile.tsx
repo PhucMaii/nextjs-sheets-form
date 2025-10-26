@@ -93,11 +93,6 @@ export default function DisplayFile({
     // 2) map to CDN exactly once (previous code applied toCDN twice)
     const cdnUrl = toCDN(originUrl, isCheque);
 
-    if (fileKey.includes('NON-WOVEN')) {
-      // eslint-disable-next-line no-console
-      console.log('[DisplayFile:print] NON-WOVEN candidate URL:', cdnUrl);
-    }
-
     // Use PrintImgWithFallback to auto-fallback to signed URL on error
     return (
       <PrintImgWithFallback
@@ -129,7 +124,6 @@ export default function DisplayFile({
         setIsLoading(true);
         setError(null);
         const url = generateImgUrl(fileKey, isCheque);
-        console.log(url, 'url in DisplayFile');
         setUrl(url || '/images/not-found.png');
       } catch (err) {
         console.error(

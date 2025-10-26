@@ -25,13 +25,14 @@ import { ICreditItem } from '@/app/utils/type';
 import { CreditReport, CreditType } from '@prisma/client';
 import CreditSummary from '../../components/CreditReport/CreditSummary';
 import useNotification from '@/hooks/useNotification';
+import CreditReportSkeleton from '../../components/CreditReport/CreditReportSkeleton';
 
 export default function CreditReportPage() {
   const { companyId, id }: any = useParams();
   const router = useRouter();
   const { NotificationComp, showNotification } = useNotification();
   // Data Fetching
-  const { data: creditReport, refetch: refetchCreditReport } = useQuery({
+  const { data: creditReport, refetch: refetchCreditReport, isLoading: isLoadingCreditReport } = useQuery({
     queryKey: ['creditReport', companyId, id],
     queryFn: async () => {
       const response = await axios.get(
@@ -44,7 +45,7 @@ export default function CreditReportPage() {
 
   const { renderCreditTypeSearch, selectedCreditType, setSelectedCreditType } =
     useSelectCreditType();
-  const { data: categoryItems } = useQuery({
+  const { data: categoryItems, isLoading: isLoadingCategoryItems   } = useQuery({
     queryKey: ['categoryItems', companyId, creditReport?.user?.categoryId],
     queryFn: async () => {
       const response = await axios.get(
@@ -149,6 +150,15 @@ export default function CreditReportPage() {
       setIsLoading(false);
     }
   };
+
+  if (isLoadingCreditReport || isLoadingCategoryItems) {
+    return (
+      <Sidebar>
+        {NotificationComp}
+        <CreditReportSkeleton />
+      </Sidebar>
+    );
+  }
 
   return (
     <Sidebar>

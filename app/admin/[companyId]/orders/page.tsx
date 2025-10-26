@@ -34,7 +34,7 @@ import {
 } from '@/app/utils/enum';
 import axios from 'axios';
 import LoadingComponent from '@/app/components/LoadingComponent/LoadingComponent';
-import { IItem, IOrderTimeline, IRoutes, IReassignment } from '@/app/utils/type';
+import { IItem, IOrderTimeline, IRoutes, IReassignment, ICreditReport } from '@/app/utils/type';
 import {
   generateRecommendDate,
   getWCODDay,
@@ -151,6 +151,7 @@ export interface Order {
   isCODCheck?: boolean;
   reassignment?: IReassignment;
   isReassignment?: boolean;
+  creditReport?: ICreditReport;
 }
 
 const ORDER_PER_PAGE = 10;

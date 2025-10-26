@@ -8,10 +8,6 @@ import {
   Typography,
   Grid,
   Button,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   TextField,
   InputAdornment,
   CircularProgress,
@@ -23,7 +19,6 @@ import {
   People,
   Assessment,
   Search,
-  CalendarToday,
   AttachMoney,
   Add,
 } from '@mui/icons-material';
@@ -44,39 +39,64 @@ import axios from 'axios';
 import { getAdminApiUrl } from '@/app/utils/enum';
 import { ICreditReport } from '@/app/utils/type';
 import CreditReportTable from '../components/Tables/CreditReportTable';
+import { generateMonthRange } from '@/app/utils/time';
+import SelectDateRange from '../components/Select/SelectDateRange';
 
 // Main Component
 export default function CreditPage() {
   const { companyId }: any = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const paramStartDate = searchParams?.get('startDate');
+  const paramEndDate = searchParams?.get('endDate');
   const { showNotification, NotificationComp } = useNotification();
 
   // State management
-  const [selectedYear, setSelectedYear] = useState<number>(
-    new Date().getFullYear(),
-  );
+  const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
   const [searchKeywords, setSearchKeywords] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const debouncedSearchKeywords = useDebounce(searchKeywords, 500);
 
   // Data Fetching
-  const { data: creditReports, refetch: refetchCreditReports } = useQuery({
-    queryKey: ['creditReports', companyId, selectedYear],
+  const { data: creditReports, refetch: refetchCreditReports, isLoading } = useQuery({
+    queryKey: ['creditReports', companyId, dateRange],
     queryFn: async () => {
       const response = await axios.get(
-        getAdminApiUrl(companyId, `/credit-reports?year=${selectedYear}`),
+        getAdminApiUrl(
+          companyId,
+          `/credit-reports?startDate=${dateRange[0]}&endDate=${dateRange[1]}`,
+        ),
       );
       return response.data.data;
     },
+    enabled: !!dateRange[0] && !!dateRange[1],
   });
 
-  // Generate year options (current year ± 5 years)
-  const yearOptions = useMemo(() => {
-    const currentYear = new Date().getFullYear();
-    return Array.from({ length: 11 }, (_, i) => currentYear - 5 + i);
-  }, []);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (dateRange[0] && dateRange[1]) {
+      params.set('startDate', dateRange[0]);
+      params.set('endDate', dateRange[1]);
+    } else {
+      params.delete('startDate');
+      params.delete('endDate');
+    }
+
+    router.replace(`/admin/${companyId}/credit-reports?${params.toString()}`, {
+      scroll: false,
+    });
+  }, [dateRange]);
+
+  useEffect(() => {
+    if (paramStartDate && paramEndDate) {
+      setDateRange([
+        new Date(paramStartDate || ''),
+        new Date(paramEndDate || ''),
+      ]);
+    } else {
+      setDateRange(generateMonthRange());
+    }
+  }, [searchParams]);
 
   // Filter credits based on search
   const filteredCredits = useMemo(() => {
@@ -104,54 +124,33 @@ export default function CreditPage() {
         totalLoss: 0,
         totalCredits: 0,
         uniqueClients: 0,
-        averageCreditsPerMonth: 0,
+        avgCredits: 0,
       };
 
+    const totalLoss = creditReports.reduce(
+      (acc: number, credit: ICreditReport) => acc + credit.totalLoss,
+      0,
+    );
+    const totalCredits = creditReports.length;
+    const uniqueClients = creditReports.reduce(
+      (acc: number[], credit: ICreditReport) => {
+        if (!acc.includes(credit.user.id)) {
+          return [...acc, credit.user.id];
+        }
+        return acc;
+      },
+      [],
+    );
+
+    const avgCredits =
+      Math.round((totalCredits / uniqueClients.length) * 100) / 100;
     return {
-      totalLoss: creditReports.reduce(
-        (acc: number, credit: ICreditReport) => acc + credit.totalLoss,
-        0,
-      ),
-      totalCredits: creditReports.length,
-      uniqueClients: creditReports.reduce(
-        (acc: number, credit: ICreditReport) => acc + credit.user.id,
-        0,
-      ),
-      averageCreditsPerMonth:
-        creditReports.reduce(
-          (acc: number, credit: ICreditReport) => acc + credit.createdAt,
-          0,
-        ) / creditReports.length,
+      totalLoss,
+      totalCredits,
+      uniqueClients,
+      avgCredits,
     };
   }, [creditReports]);
-
-  // Handle year change
-  const handleYearChange = (year: number) => {
-    setSelectedYear(year);
-    // Update URL parameters
-    const params = new URLSearchParams(window.location.search);
-    params.set('year', year.toString());
-    router.replace(`/admin/${companyId}/credit-reports?${params.toString()}`, {
-      scroll: false,
-    });
-  };
-
-  // Loading state - simulate loading for demo
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000); // Simulate 1 second loading
-
-    return () => clearTimeout(timer);
-  }, [selectedYear]);
-
-  // URL parameter handling
-  useEffect(() => {
-    const urlYear = searchParams?.get('year');
-    if (urlYear) {
-      setSelectedYear(parseInt(urlYear));
-    }
-  }, [searchParams]);
 
   return (
     <Sidebar>
@@ -200,32 +199,13 @@ export default function CreditPage() {
           </Button>
         </ShadowSection>
 
-        {/* Year Selector */}
         <Box
           display="flex"
           justifyContent="space-between"
           alignItems="center"
           mb={3}
         >
-          <FormControl size="small" sx={{ minWidth: 120 }}>
-            <InputLabel>Select Year</InputLabel>
-            <Select
-              value={selectedYear}
-              label="Select Year"
-              onChange={(e) => handleYearChange(e.target.value as number)}
-              startAdornment={
-                <InputAdornment position="start">
-                  <CalendarToday fontSize="small" />
-                </InputAdornment>
-              }
-            >
-              {yearOptions.map((year) => (
-                <MenuItem key={year} value={year}>
-                  {year}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <SelectDateRange dateRange={dateRange} setDateRange={setDateRange} />
         </Box>
 
         {/* Overview Section */}
@@ -253,7 +233,7 @@ export default function CreditPage() {
           <Grid item xs={12} sm={6} md={3}>
             <KPICard
               title="Unique Clients"
-              value={overview.uniqueClients}
+              value={overview.uniqueClients.length}
               subtitle="Clients with credits"
               icon={<People />}
               color="info"
@@ -263,7 +243,7 @@ export default function CreditPage() {
           <Grid item xs={12} sm={6} md={3}>
             <KPICard
               title="Avg Credits/Month"
-              value={formatNumberWith2Decimal(overview.averageCreditsPerMonth)}
+              value={formatNumberWith2Decimal(overview.avgCredits || 0)}
               subtitle="Monthly average"
               icon={<Assessment />}
               color="warning"

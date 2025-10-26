@@ -4,7 +4,7 @@ import { ModalProps } from './type';
 import { BoxModal } from './styled';
 import { Order } from '../../orders/page';
 import { USER_ROLE, getAdminApiUrl } from '@/app/utils/enum';
-import SingleFieldEdit from './edit/SingleFieldEdit';
+// import SingleFieldEdit from './edit/SingleFieldEdit';
 import axios from 'axios';
 import DeleteModal from './delete/DeleteModal';
 // import { SWRFetchData } from '@/app/utils/db';
@@ -47,7 +47,7 @@ const OrderDetails = ({
     },
   });
 
-  const [isOpenEditNote, setIsOpenEditNote] = useState<boolean>(false);
+  // const [isOpenEditNote, setIsOpenEditNote] = useState<boolean>(false);
   const [isOpenClearNote, setIsOpenClearNote] = useState<boolean>(false);
   const [clientItems, setClientItems] = useState<any>([]);
 
@@ -100,28 +100,28 @@ const OrderDetails = ({
     }
   };
 
-  const onUpdateNote = async (updatedNote: string) => {
-    if (updatedNote === order?.note) {
-      showNotification('error', 'No update provided to note');
-      return;
-    }
-    try {
-      const response = await axios.put(getAdminApiUrl(companyId, '/orders'), {
-        orderId: order.id,
-        note: updatedNote,
-      });
+  // const onUpdateNote = async (updatedNote: string) => {
+  //   if (updatedNote === order?.note) {
+  //     showNotification('error', 'No update provided to note');
+  //     return;
+  //   }
+  //   try {
+  //     const response = await axios.put(getAdminApiUrl(companyId, '/orders'), {
+  //       orderId: order.id,
+  //       note: updatedNote,
+  //     });
 
-      if (response.data.error) {
-        showNotification('error', response.data.error);
-        return;
-      }
+  //     if (response.data.error) {
+  //       showNotification('error', response.data.error);
+  //       return;
+  //     }
 
-      showNotification('success', response.data.message);
-    } catch (error: any) {
-      console.log('Fail to update note: ', error);
-      showNotification('error', error?.response?.data?.error || error);
-    }
-  };
+  //     showNotification('success', response.data.message);
+  //   } catch (error: any) {
+  //     console.log('Fail to update note: ', error);
+  //     showNotification('error', error?.response?.data?.error || error);
+  //   }
+  // };
 
   return (
     <>
@@ -147,7 +147,7 @@ const OrderDetails = ({
       {/* <div style={{ display: 'none' }}>
         <ComponentToPrint order={order} ref={billPrintRef} />
       </div> */}
-      <SingleFieldEdit
+      {/* <SingleFieldEdit
         open={isOpenEditNote}
         onClose={() => setIsOpenEditNote(false)}
         handleUpdate={onUpdateNote}
@@ -155,7 +155,7 @@ const OrderDetails = ({
         inputLabel="Note"
         renderField="Note"
         defaultValue={order?.note || ''}
-      />
+      /> */}
       <Modal open={open} onClose={onClose}>
         <BoxModal
           display="flex"

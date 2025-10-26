@@ -88,6 +88,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         companyId: Number(companyId),
       },
       include: {
+        creditReport: true,
         reassignment: {
           include: {
             to: true,

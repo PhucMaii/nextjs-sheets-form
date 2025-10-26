@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import {
   Box,
   Typography,
@@ -35,9 +35,13 @@ import CreditSummary from '../../components/CreditReport/CreditSummary';
 
 export default function CreateCreditReport() {
   const { companyId }: any = useParams();
+  const searchParams = useSearchParams();
+  const userId: any = searchParams?.get('userId');
+  const orderId: any = searchParams?.get('orderId');
+
   const router = useRouter();
   const { NotificationComp, showNotification } = useNotification();
-  const { renderClientSearch, selectedClient } = useClients(companyId);
+  const { clients, renderClientSearch, selectedClient, handleSelectClientById } = useClients(companyId);
   const { renderCreditTypeSearch, selectedCreditType } = useSelectCreditType();
 
   // State management
@@ -89,7 +93,32 @@ export default function CreateCreditReport() {
     enabled: !!selectedClient?.categoryId,
   });
 
-  const { renderOrderSearch, selectedOrder } = useOrders(orders || []);
+  const { renderOrderSearch, selectedOrder, handleSelectOrderById } = useOrders(orders || []);
+
+  useEffect(() => {
+    if (userId && !selectedClient?.id && clients?.length > 0) {
+      handleSelectClientById(Number(userId));
+    }
+    if (orderId && !selectedOrder?.id && orders?.length > 0) {
+      handleSelectOrderById(Number(orderId));
+    }
+
+  }, [userId, orderId, clients, orders]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (selectedOrder) {
+      params.set('orderId', selectedOrder?.id.toString());
+    }
+
+    if (selectedClient) {
+      params.set('userId', selectedClient?.id.toString());
+    }
+
+    router.replace(`/admin/${companyId}/credit-reports/create?${params.toString()}`, {
+      scroll: false,
+    });
+  }, [selectedClient, selectedOrder]);
 
   const isQualifyToCreate = useMemo(() => {
     return (
