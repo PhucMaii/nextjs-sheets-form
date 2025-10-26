@@ -7,13 +7,14 @@ import { NextApiRequest, NextApiResponse } from 'next';
 interface IQuery {
   inventoryItemId?: string;
   categoryId?: string;
+  all?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { inventoryItemId, categoryId } = req.query as IQuery;
+    const { inventoryItemId, categoryId, all } = req.query as IQuery;
     const { companyId } = req.query;
 
     if (categoryId) {
@@ -186,7 +187,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const categories = await prisma.category.findMany({
       where: {
         companyId: Number(companyId),
-        id: {
+        id: all === 'true' ? undefined : {
           not: websiteItemCategoryId,
         },
       },

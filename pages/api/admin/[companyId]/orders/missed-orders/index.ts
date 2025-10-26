@@ -4,6 +4,7 @@ import { getBlockingRangesByDate } from '@/pages/api/unavailable_days/GET';
 import { NextApiRequest, NextApiResponse } from 'next';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import { getRouteByUserIdAndDay } from '@/pages/api/utils/route';
+import { ORDER_STATUS, USER_CATEGORIZED } from '@/app/utils/enum';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -24,6 +25,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       where: {
         companyId: Number(companyId),
         day: todayDay,
+        user: {
+          companyId: Number(companyId),
+          type: {
+            not: USER_CATEGORIZED.INACTIVE
+          }
+        }
       },
       include: {
         user: {
@@ -46,6 +53,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       where: {
         companyId: Number(companyId),
         deliveryDate: today.date,
+        status: {
+          not: ORDER_STATUS.VOID
+        }
       },
       include: {
         user: {
