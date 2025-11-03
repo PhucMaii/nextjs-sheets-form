@@ -120,9 +120,13 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
+  const listOfDates = generateListOfDateString(new Date('10/01/2025'), new Date('10/31/2025'));
+  console.log(listOfDates);
   const targetOrders = await prisma.orders.findMany({
     where: {
-        deliveryDate: '10/22/2025'
+        deliveryDate: {
+          in: listOfDates,
+        }
     },
     include: {
       items: true,
@@ -151,6 +155,8 @@ async function main() {
   });
 
   console.log(returnOrders);
+
+ 
 }
 
 // async function main() {

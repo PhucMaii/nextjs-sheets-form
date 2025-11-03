@@ -1,6 +1,6 @@
 import { PayrollType, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { SHIFT_STATUS, USER_ROLE, WORKING_ROLE } from '@/app/utils/enum';
+import { SHIFT_STATUS, WORKING_ROLE } from '@/app/utils/enum';
 import { calculateHours } from '@/pages/api/drivers/shift/clock-out';
 
 const prisma = new PrismaClient();
@@ -28,7 +28,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const existingDriver = await prisma.employee.findUnique({
       where: {
         id: driverId,
-        role: USER_ROLE.DRIVER,
       },
     });
 
