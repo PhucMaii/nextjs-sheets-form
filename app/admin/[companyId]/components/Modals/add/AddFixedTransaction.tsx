@@ -30,6 +30,7 @@ import { gstRate, mainPaymentMethodId, pstRate } from '@/app/lib/constant';
 import dayjs from 'dayjs';
 import { fetchApi } from '@/app/utils/db';
 import { useParams } from 'next/navigation';
+import useSelectExpenseType from '@/hooks/select/useSelectExpenseType';
 interface IProps extends ModalProps {
   defaultDate?: string;
   showNotification: ShowNotificationType;
@@ -52,6 +53,7 @@ export default function AddFixedTransaction({
   >({
     title: '',
     recurrence: RECURRENCE_TYPE.MONTHLY,
+    typeId: -1,
     paymentMethodId: -1,
     defaultSubtotal: 0,
     defaultPST: 0,
@@ -62,6 +64,7 @@ export default function AddFixedTransaction({
   });
 
   const { selectedEmployee, renderEmployeeSearch } = useEmployee();
+  const { selectedExpenseType, renderExpenseTypeSearch } = useSelectExpenseType(companyId);
 
   const { date: initialDueDate, SelectDate } = useSelectDate(
     defaultDate || '',
@@ -79,6 +82,7 @@ export default function AddFixedTransaction({
       setNewFixedTransaction({
         title: '',
         recurrence: RECURRENCE_TYPE.MONTHLY,
+        typeId: -1,
         paymentMethodId: mainPaymentMethodId,
         defaultSubtotal: 0,
         defaultPST: 0,
@@ -90,24 +94,7 @@ export default function AddFixedTransaction({
     }
   }, [open]);
 
-  // useEffect(() => {
-  //   // if (newFixedTransaction?.defaultSubtotal) {
-  //   setNewFixedTransaction({
-  //     ...newFixedTransaction,
-  //     defaultAmount:
-  //       (newFixedTransaction?.defaultSubtotal || 0) +
-  //       (newFixedTransaction.defaultPST || 0) +
-  //       (newFixedTransaction.defaultGST || 0),
-  //   });
-  //   // }
-  // }, [
-  //   newFixedTransaction?.defaultSubtotal,
-  //   newFixedTransaction?.defaultPST,
-  //   newFixedTransaction?.defaultGST,
-  // ]);
-
   useEffect(() => {
-    // if (newFixedTransaction?.defaultSubtotal) {
       const gst =
         Math.round(
           (newFixedTransaction?.hasGST
@@ -127,7 +114,6 @@ export default function AddFixedTransaction({
         defaultPST: pst,
         defaultAmount: prevState?.defaultSubtotal + gst + pst - (prevState?.discount || 0),
       }));
-    // }
   }, [
     newFixedTransaction?.defaultSubtotal,
     newFixedTransaction?.hasGST,
@@ -148,6 +134,7 @@ export default function AddFixedTransaction({
           ...newFixedTransaction,
           defaultSpentBy: selectedEmployee,
           initialDueDate: dayjs(initialDueDate).format('MM/DD/YYYY'),
+          typeId: selectedExpenseType?.id,
         },
       );
 
@@ -200,6 +187,10 @@ export default function AddFixedTransaction({
               placeholder="Rent, Hydro, etc."
             />
           </Grid>
+          <Grid item xs={12} display="flex" gap={1} flexDirection="column">
+            <Typography variant="body1">Expense Type</Typography>
+            {renderExpenseTypeSearch()}
+          </Grid>
 
           <Grid item xs={12} display="flex" gap={1} flexDirection="column">
             <Typography variant="body1">Recurrence</Typography>
@@ -232,20 +223,6 @@ export default function AddFixedTransaction({
         <Divider sx={{ my: 2 }}>Payment Info</Divider>
 
         <Grid container spacing={2}>
-          {/* <Grid
-            item
-            xs={12}
-            display="flex"
-            alignItems="flex-end"
-            gap={1}
-            flexDirection="column"
-          >
-            <FormControlLabel
-              control={<Checkbox />}
-              label="Is Dynamic Amount"
-            />
-          </Grid> */}
-
           <Grid item xs={12} display="flex" gap={1} flexDirection="column">
             <Box
               display="flex"
@@ -310,38 +287,6 @@ export default function AddFixedTransaction({
               </Typography>
             </Grid>
           )}
-
-          {/* <Grid item xs={6} display="flex" gap={1} flexDirection="column">
-            <Typography variant="body1">Default PST</Typography>
-            <TextField
-              label="PST"
-              fullWidth
-              value={newFixedTransaction.defaultPST}
-              onChange={(e) =>
-                setNewFixedTransaction({
-                  ...newFixedTransaction,
-                  defaultPST: +e.target.value,
-                })
-              }
-              type="number"
-            />
-          </Grid>
-
-          <Grid item xs={6} display="flex" gap={1} flexDirection="column">
-            <Typography variant="body1">Default GST</Typography>
-            <TextField
-              label="GST"
-              fullWidth
-              value={newFixedTransaction.defaultGST}
-              onChange={(e) =>
-                setNewFixedTransaction({
-                  ...newFixedTransaction,
-                  defaultGST: +e.target.value,
-                })
-              }
-              type="number"
-            />
-          </Grid> */}
 
           <Grid item xs={12} display="flex" gap={1} flexDirection="column">
             <Typography variant="body1">Default Total</Typography>

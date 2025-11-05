@@ -44,6 +44,9 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
         companyId: Number(companyId),
       },
+      include: {
+        type: true,
+      }
     });
 
     const alreadyTransactions = await prisma.expense.findMany({

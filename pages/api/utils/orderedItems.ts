@@ -107,11 +107,6 @@ export const createOrderedItems = async (
         return unit;
       });
 
-      console.log({
-        itemUnits: item.units,
-        itemInventoryUnitVendorItemId: vendorItemId,
-        dbUnits,
-      })
       const updatedAt = getTodayDate();
       await checkAndUpdateUnits(
         companyId,

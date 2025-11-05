@@ -107,8 +107,6 @@ export default function ConvertToTransaction({
       const discountPercent =
         Math.round((Number(value) / (expenseData?.subTotal + Number(value))) * 100 * 100) / 100;
 
-      console.log(discountPercent, 'discountPercent');
-
       const newSubtotal = updatedPOItems.reduce((acc: number, item: IPOItem) => {
         return acc + item.costPerItem * (item.receivedQty || 0);
       }, 0) - Number(value);
@@ -117,8 +115,6 @@ export default function ConvertToTransaction({
         formatPOItems(updatedPOItems),
         discountPercent,
       );
-
-      console.log(gstTotal, 'gstTotal');
 
       setExpenseData((prevState: any) => ({
         ...prevState,

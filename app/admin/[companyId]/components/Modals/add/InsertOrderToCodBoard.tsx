@@ -91,7 +91,6 @@ export default function InsertOrderToCodBoard({
   }, [tabIndex]);
 
   const onChangeSelectOrders = (e: any, value: Order[]) => {
-    console.log('value: ', value);
     setSelectedOrders(value.length ? value : []);
   };
 

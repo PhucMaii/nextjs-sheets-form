@@ -617,15 +617,17 @@ model FixedTransaction {
   createdBy                String
   updatedAt                String?
   updatedBy                String?
-  status                   String
+status                   String
   defaultSpentBy           String?
   defaultTransactionStatus String? // Paid & Unpaid
   paymentMethodId          Int
+  typeId                   Int?
 
   transactions Expense[]
 
-  paymentMethod PaymentMethod @relation(fields: [paymentMethodId], references: [id])
   company       Company?      @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  paymentMethod PaymentMethod @relation(fields: [paymentMethodId], references: [id])
+  type          ExpenseType?   @relation(fields: [typeId], references: [id], onDelete: Cascade)
 }
 
 model Expense {
@@ -681,6 +683,7 @@ model ExpenseType {
 
   transactions      Expense[]
   batchTransactions BatchTransaction[]
+  fixedTransactions  FixedTransaction[]
 
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 }

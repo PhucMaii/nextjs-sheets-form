@@ -12,7 +12,6 @@ import {
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { ModalProps } from '../type';
-import { FixedTransaction } from '@prisma/client';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
 import {
@@ -30,8 +29,10 @@ import { grey } from '@mui/material/colors';
 import { useParams } from 'next/navigation';
 import { pstRate } from '@/app/lib/constant';
 import { gstRate } from '@/app/lib/constant';
+import useSelectExpenseType from '@/hooks/select/useSelectExpenseType';
+import { IFixedTransaction } from '@/app/utils/type';
 interface IProps extends ModalProps {
-  fixedTransaction: FixedTransaction;
+  fixedTransaction: IFixedTransaction;
   showNotification: ShowNotificationType;
   refresh: () => Promise<void>;
 }
@@ -48,12 +49,14 @@ export default function EditFixedTransaction({
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [updatedTransaction, setUpdatedTransaction] = useState<
-    FixedTransaction | any
+    IFixedTransaction | any
   >(fixedTransaction);
 
   const { selectedEmployee, renderEmployeeSearch } = useEmployee(
     updatedTransaction?.defaultSpentBy || undefined,
   );
+
+  const { selectedExpenseType, renderExpenseTypeSearch } = useSelectExpenseType(companyId, fixedTransaction?.type);
 
   useEffect(() => {
     if (fixedTransaction) {
@@ -71,26 +74,7 @@ export default function EditFixedTransaction({
     }
   }, [fixedTransaction]);
 
-  console.log(updatedTransaction);
-
-  // useEffect(() => {
-  //   if (updatedTransaction?.defaultSubtotal) {
-  //     setUpdatedTransaction({
-  //       ...updatedTransaction,
-  //       defaultAmount:
-  //         updatedTransaction.defaultSubtotal +
-  //         (updatedTransaction.defaultPST || 0) +
-  //         (updatedTransaction.defaultGST || 0),
-  //     });
-  //   }
-  // }, [
-  //   updatedTransaction?.defaultSubtotal,
-  //   updatedTransaction?.defaultPST,
-  //   updatedTransaction?.defaultGST,
-  // ]);
-
   useEffect(() => {
-    // if (updatedTransaction && updatedTransaction?.defaultSubtotal) {
       const gst =
       Math.round(
         (updatedTransaction?.hasGST
@@ -109,9 +93,7 @@ export default function EditFixedTransaction({
         defaultPST: pst,
         defaultAmount: prevState?.defaultSubtotal + gst + pst - (updatedTransaction?.discount || 0) ,
       }));
-    // }
   }, [
-    // updatedTransaction?.defaultSubtotal,
     updatedTransaction?.hasGST,
     updatedTransaction?.hasPST,
   ]);
@@ -151,6 +133,7 @@ export default function EditFixedTransaction({
           updatedTransaction: {
             ...updatedTransaction,
             defaultSpentBy: selectedEmployee,
+            typeId: selectedExpenseType?.id,
           },
         },
       );
@@ -189,6 +172,11 @@ export default function EditFixedTransaction({
           <Grid item xs={12} display="flex" flexDirection="column" gap={1}>
             <Typography variant="body1">Title</Typography>
             <Typography variant="h5">{fixedTransaction?.title}</Typography>
+          </Grid>
+
+          <Grid item xs={12} display="flex" flexDirection="column" gap={1}>
+            <Typography variant="body1">Expense Type</Typography>
+            {renderExpenseTypeSearch()}
           </Grid>
 
           <Grid item xs={12} display="flex" flexDirection="column" gap={1}>
