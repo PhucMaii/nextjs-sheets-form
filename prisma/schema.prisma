@@ -62,6 +62,7 @@ model Company {
   bundlePrograms    BundleProgram[]
   creditReports     CreditReport[]
   creditItems       CreditItem[]
+  inventoryReports  InventoryReport[]
 }
 
 model PageView {
@@ -778,6 +779,7 @@ model InventoryItem {
   quoteItems             QuoteItem[]
   logs                   InventoryLog[]
   creditItems            CreditItem[]
+  inventoryCount         InventoryCount[]
   subtractRules          AutomationRules[] @relation("InventoryItemRules")
   dependentSubtractRules AutomationRules[] @relation("DependentInventoryItemRules")
 
@@ -835,6 +837,35 @@ model InventoryLog {
 
   @@index([inventoryItemId])
   @@index([date])
+}
+
+model InventoryReport {
+  id                Int         @id @default(autoincrement())
+  companyId         Int
+  type              InventoryReportType
+  note              String?
+  queryDate         String
+  createdAt         String
+  createdBy         String
+
+  inventoryCount    InventoryCount[]
+  company           Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, queryDate])
+}
+
+model InventoryCount {
+  id                Int     @id @default(autoincrement())
+  inventoryItemId   Int
+  inventoryUnitId   Int
+  reportId          Int
+  countedQty        Float
+
+  inventoryItem     InventoryItem      @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  inventoryUnit     InventoryUnit      @relation(fields: [inventoryUnitId], references: [id], onDelete: Cascade)
+  inventoryReports  InventoryReport    @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@index([reportId])
 }
 
 model ItemPreference {
@@ -944,6 +975,7 @@ model InventoryUnit {
   poItems         POItem[]
   lossReports     LossReport[]
   quoteItems      QuoteItem[]
+  inventoryCount  InventoryCount[]
 
   @@index([vendorItemId])
 }
@@ -1373,4 +1405,10 @@ enum CreditType {
   CUSTOMER_SATISFACTION
   SERVICE_ISSUE
   DELIVERY_ISSUE
+}
+
+enum InventoryReportType {
+  COUNT
+  DRIVER_RETURN
+
 }

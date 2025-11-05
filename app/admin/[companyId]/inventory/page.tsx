@@ -30,6 +30,7 @@ import {
   BarChart3,
   Warehouse,
   Logs,
+  MessageSquare,
 } from 'lucide-react';
 import TrackInventoryRecord from '../components/Modals/TrackInventoryRecord';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
@@ -42,6 +43,7 @@ import ConfirmModal from '../components/Modals/ConfirmModal';
 import useDebounce from '@/hooks/useDebounce';
 import InternalItems from '../components/Inventory/InternalItems';
 import InventoryLogs from '../components/Inventory/InventoryLogs';
+import InventoryReports from '../components/Inventory/InventoryReports';
 
 // Enhanced styled components
 const PageContainer = ({ children }: { children: React.ReactNode }) => (
@@ -184,7 +186,7 @@ export default function InventoryPage() {
   const [isOpenAddItem, setIsOpenAddItem] = useState<boolean>(false);
   const [searchKeywords, setSearchKeywords] = useState<string>('');
   const debouncedKeywords = useDebounce(searchKeywords, 1000);
-  const [tabIndex, setTabIndex] = useState<number>(0);
+  const [tabIndex, setTabIndex] = useState<string>('stock');
 
   const { showNotification, NotificationComp } = useNotification();
   const [inventoryItems] = SWRFetchData(
@@ -216,7 +218,7 @@ export default function InventoryPage() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    
+
     if (tabIndex) {
       params.set('tab', tabIndex.toString());
     } else {
@@ -230,7 +232,7 @@ export default function InventoryPage() {
 
   useEffect(() => {
     if (paramsTabIndex) {
-      setTabIndex(Number(paramsTabIndex));
+      setTabIndex(paramsTabIndex);
     }
   }, [paramsTabIndex]);
 
@@ -475,20 +477,26 @@ export default function InventoryPage() {
       >
         <Tab
           label="Stock Items"
-          value={0}
+          value={'stock'}
           icon={<Package size={18} />}
           iconPosition="start"
         />
         <Tab
           label="Internal Items"
-          value={1}
+          value={'internal'}
           icon={<Warehouse size={18} />}
           iconPosition="start"
         />
         <Tab
           label="Logs (Testing)"
-          value={2}
+          value={'logs'}
           icon={<Logs size={18} />}
+          iconPosition="start"
+        />
+        <Tab
+          label="Reports"
+          value={'reports'}
+          icon={<MessageSquare size={18} />}
           iconPosition="start"
         />
       </Tabs>
@@ -497,7 +505,7 @@ export default function InventoryPage() {
 
   const renderContent = () => (
     <ShadowSection>
-      {tabIndex === 0 ? (
+      {tabIndex === 'stock' ? (
         <Fade in={true} timeout={300}>
           <Box>
             <StockItems
@@ -509,16 +517,22 @@ export default function InventoryPage() {
             />
           </Box>
         </Fade>
-      ) : tabIndex === 1 ? (
+      ) : tabIndex === 'internal' ? (
         <Fade in={true} timeout={300}>
           <Box>
             <InternalItems />
           </Box>
         </Fade>
-      ) : (
+      ) : tabIndex === 'logs' ? (
         <Fade in={true} timeout={300}>
           <Box>
             <InventoryLogs />
+          </Box>
+        </Fade>
+      ) : (
+        <Fade in={true} timeout={300}>
+          <Box>
+            <InventoryReports showNotification={showNotification} />
           </Box>
         </Fade>
       )}

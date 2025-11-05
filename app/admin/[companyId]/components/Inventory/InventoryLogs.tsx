@@ -40,6 +40,7 @@ import { InventoryLogType } from '@prisma/client';
 import SelectDateRange from '../Select/SelectDateRange';
 import { generateMonthRange } from '@/app/utils/time';
 import useDebounce from '@/hooks/useDebounce';
+import ItemSelector from './ItemSelector';
 
 // Action type configurations
 const actionConfig = {
@@ -96,7 +97,7 @@ export default function InventoryLogs() {
 
   const [dateRange, setDateRange] = useState<any>(() => generateMonthRange());
   const [filteredLogs, setFilteredLogs] = useState<any[]>([]);
-  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [selectedItem, setSelectedItem] = useState<IInventoryItem | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [expandedDates, setExpandedDates] = useState<Set<string>>(new Set());
@@ -259,58 +260,64 @@ export default function InventoryLogs() {
             }}
           >
             {filteredItems.map((item: IInventoryItem) => (
-              <Box
+              // <Box
+              //   key={item.id}
+              //   sx={{
+              //     p: 1.5,
+              //     cursor: 'pointer',
+              //     border:
+              //       selectedItem?.id === item.id
+              //         ? '2px solid #3B82F6'
+              //         : '1px solid #E5E7EB',
+              //     borderRadius: 1.5,
+              //     transition: 'all 0.2s ease',
+              //     bgcolor:
+              //       selectedItem?.id === item.id
+              //         ? alpha('#3B82F6', 0.05)
+              //         : 'transparent',
+              //     '&:hover': {
+              //       borderColor: '#3B82F6',
+              //       bgcolor: alpha('#3B82F6', 0.05),
+              //     },
+              //   }}
+              //   onClick={() => setSelectedItem(item)}
+              // >
+              //   <Box display="flex" alignItems="center" gap={1.5}>
+              //     <Box
+              //       sx={{
+              //         width: 28,
+              //         height: 28,
+              //         borderRadius: 1,
+              //         bgcolor: alpha('#3B82F6', 0.1),
+              //         display: 'flex',
+              //         alignItems: 'center',
+              //         justifyContent: 'center',
+              //         flexShrink: 0,
+              //       }}
+              //     >
+              //       <Package size={14} color="#3B82F6" />
+              //     </Box>
+              //     <Box flex={1} minWidth={0}>
+              //       <Typography variant="caption" fontWeight={600} noWrap>
+              //         {item.name}
+              //       </Typography>
+              //       <Typography
+              //         variant="caption"
+              //         color="text.secondary"
+              //         display="block"
+              //         noWrap
+              //       >
+              //         {item.sku}
+              //       </Typography>
+              //     </Box>
+              //   </Box>
+              // </Box>
+              <ItemSelector 
                 key={item.id}
-                sx={{
-                  p: 1.5,
-                  cursor: 'pointer',
-                  border:
-                    selectedItem?.id === item.id
-                      ? '2px solid #3B82F6'
-                      : '1px solid #E5E7EB',
-                  borderRadius: 1.5,
-                  transition: 'all 0.2s ease',
-                  bgcolor:
-                    selectedItem?.id === item.id
-                      ? alpha('#3B82F6', 0.05)
-                      : 'transparent',
-                  '&:hover': {
-                    borderColor: '#3B82F6',
-                    bgcolor: alpha('#3B82F6', 0.05),
-                  },
-                }}
+                item={item}
+                isSelected={selectedItem?.id === item.id}
                 onClick={() => setSelectedItem(item)}
-              >
-                <Box display="flex" alignItems="center" gap={1.5}>
-                  <Box
-                    sx={{
-                      width: 28,
-                      height: 28,
-                      borderRadius: 1,
-                      bgcolor: alpha('#3B82F6', 0.1),
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0,
-                    }}
-                  >
-                    <Package size={14} color="#3B82F6" />
-                  </Box>
-                  <Box flex={1} minWidth={0}>
-                    <Typography variant="caption" fontWeight={600} noWrap>
-                      {item.name}
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      display="block"
-                      noWrap
-                    >
-                      {item.sku}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Box>
+              />
             ))}
           </Box>
         )}

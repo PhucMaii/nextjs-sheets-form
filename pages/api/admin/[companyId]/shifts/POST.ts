@@ -25,7 +25,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       return res.status(400).json({ error: 'Missing companyId' });
     }
 
-    const existingDriver = await prisma.employee.findUnique({
+     const existingDriver = await prisma.employee.findUnique({
       where: {
         id: driverId,
       },
