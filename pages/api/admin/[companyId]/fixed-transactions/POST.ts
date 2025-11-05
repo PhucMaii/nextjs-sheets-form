@@ -1,9 +1,9 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate, normalizeDate } from '@/pages/api/utils/date';
 import { RECURRENCE_TYPE, FIXED_TRANSACTION_STATUS } from '@/app/utils/enum';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
+import prisma from '@/client';
 interface IBody {
   title: string;
   defaultAmount?: number;
@@ -16,9 +16,8 @@ interface IBody {
   initialDueDate: string;
   note?: string;
   paymentMethodId: number;
+  typeId?: number;
 }
-
-const prisma = new PrismaClient();
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -34,6 +33,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       initialDueDate,
       note,
       paymentMethodId,
+      typeId,
     } = req.body as IBody;
 
     const { companyId } = req.query;
@@ -104,6 +104,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         createdBy: `Admin - ${admin?.clientName}`,
         paymentMethodId: paymentMethodId,
         companyId: Number(companyId),
+        typeId: typeId || -1,
       },
     });
 

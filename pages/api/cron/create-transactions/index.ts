@@ -46,6 +46,7 @@ export default async function handler(
           discount: 0,
           fixedTransactionId: transaction.id,
           companyId: 1,
+          typeId: transaction.typeId || -1,
         },
       });
 
