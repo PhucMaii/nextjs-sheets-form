@@ -260,58 +260,6 @@ export default function InventoryLogs() {
             }}
           >
             {filteredItems.map((item: IInventoryItem) => (
-              // <Box
-              //   key={item.id}
-              //   sx={{
-              //     p: 1.5,
-              //     cursor: 'pointer',
-              //     border:
-              //       selectedItem?.id === item.id
-              //         ? '2px solid #3B82F6'
-              //         : '1px solid #E5E7EB',
-              //     borderRadius: 1.5,
-              //     transition: 'all 0.2s ease',
-              //     bgcolor:
-              //       selectedItem?.id === item.id
-              //         ? alpha('#3B82F6', 0.05)
-              //         : 'transparent',
-              //     '&:hover': {
-              //       borderColor: '#3B82F6',
-              //       bgcolor: alpha('#3B82F6', 0.05),
-              //     },
-              //   }}
-              //   onClick={() => setSelectedItem(item)}
-              // >
-              //   <Box display="flex" alignItems="center" gap={1.5}>
-              //     <Box
-              //       sx={{
-              //         width: 28,
-              //         height: 28,
-              //         borderRadius: 1,
-              //         bgcolor: alpha('#3B82F6', 0.1),
-              //         display: 'flex',
-              //         alignItems: 'center',
-              //         justifyContent: 'center',
-              //         flexShrink: 0,
-              //       }}
-              //     >
-              //       <Package size={14} color="#3B82F6" />
-              //     </Box>
-              //     <Box flex={1} minWidth={0}>
-              //       <Typography variant="caption" fontWeight={600} noWrap>
-              //         {item.name}
-              //       </Typography>
-              //       <Typography
-              //         variant="caption"
-              //         color="text.secondary"
-              //         display="block"
-              //         noWrap
-              //       >
-              //         {item.sku}
-              //       </Typography>
-              //     </Box>
-              //   </Box>
-              // </Box>
               <ItemSelector 
                 key={item.id}
                 item={item}

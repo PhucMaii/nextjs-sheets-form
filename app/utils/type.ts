@@ -44,6 +44,8 @@ import {
   ZoneWater,
   CreditReport,
   CreditItem,
+  InventoryCount,
+  InventoryReport,
 } from '@prisma/client';
 import { Session } from 'next-auth';
 import { Order } from '../admin/[companyId]/orders/page';
@@ -450,4 +452,12 @@ export interface ICreditItem extends CreditItem {
   orderedItem: OrderedItems;
   categoryItem?: any;
   price?: number;
+}
+
+export interface IInventoryCount extends InventoryCount {
+  inventoryItem: IInventoryItem;
+  inventoryUnit: IInventoryUnit;
+}
+export interface IInventoryReport extends InventoryReport {
+  inventoryCount: IInventoryCount[];
 }

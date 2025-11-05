@@ -14,12 +14,12 @@ import {
   Paper,
   Stack,
   Avatar,
-  Grid,
   InputAdornment,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Collapse,
+  Badge,
 } from '@mui/material';
 import {
   MessageSquare,
@@ -31,6 +31,9 @@ import {
   Trash2,
   X,
   Package,
+  ChevronDown,
+  ChevronUp,
+  FileText,
 } from 'lucide-react';
 import { generateCurrentTime } from '@/app/utils/time';
 import { useQuery } from '@tanstack/react-query';
@@ -38,26 +41,9 @@ import axios from 'axios';
 import { getAdminApiUrl } from '@/app/utils/enum';
 import { useParams } from 'next/navigation';
 import ItemSelector from './ItemSelector';
-
-interface IReportItem {
-  inventoryItemId: string;
-  itemName: string;
-  count: number;
-}
-
-interface IReport {
-  id: string;
-  items: IReportItem[];
-  createdAt: string;
-  createdBy: string;
-  date: string;
-}
-
-interface IMockInventoryItem {
-  id: string;
-  name: string;
-  sku?: string;
-}
+import CountInputDialog from './CountInputDialog';
+import { IInventoryCount, IInventoryItem, IInventoryReport } from '@/app/utils/type';
+import { InventoryReportType } from '@prisma/client';
 
 interface IProps {
   showNotification: (
@@ -69,16 +55,27 @@ interface IProps {
 export default function InventoryReports({ showNotification }: IProps) {
   const { companyId }: any = useParams();
 
-  const [reports, setReports] = useState<IReport[]>([]);
+  const [reports, setReports] = useState<IInventoryReport[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [selectedItem, setSelectedItem] = useState<IMockInventoryItem | null>(
+  const [selectedItem, setSelectedItem] = useState<IInventoryItem | null>(
     null,
   );
-  const [countInput, setCountInput] = useState<string>('');
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
-  const [currentReportItems, setCurrentReportItems] = useState<IReportItem[]>(
+  const [currentReportItems, setCurrentReportItems] = useState<IInventoryCount[]>(
     [],
   );
+  const [isSearchExpanded, setIsSearchExpanded] = useState<boolean>(false);
+  const [isCurrentReportExpanded, setIsCurrentReportExpanded] = useState<boolean>(false);
+  const [expandedReports, setExpandedReports] = useState<Set<number>>(new Set());
+
+  // const { data: inventoryReports } = useQuery({
+  //   queryKey: ['inventory-reports'],
+  //   queryFn: async () => {
+  //     const response = await axios.get(getAdminApiUrl(companyId, '/inventory-report'));
+  //     return response.data.data;
+  //   },
+  //   enabled: !!companyId,
+  // });
 
   const { data: inventoryItems } = useQuery({
     queryKey: ['inventory-items'],
@@ -120,7 +117,7 @@ export default function InventoryReports({ showNotification }: IProps) {
 
   // Filter items based on search query
   const filteredItems = useMemo(() => {
-	if (!inventoryItems) return [];
+    if (!inventoryItems) return [];
     if (!searchQuery.trim()) {
       return inventoryItems || [];
     }
@@ -130,28 +127,25 @@ export default function InventoryReports({ showNotification }: IProps) {
         item.name.toLowerCase().includes(query) ||
         item.sku?.toLowerCase().includes(query),
     );
-  }, [searchQuery]);
+  }, [searchQuery, inventoryItems]);
 
   // Check if item is already in current report
-  const getItemCount = (itemId: string): number | null => {
+  const getItemCount = (itemId: number): number | null => {
     const reportItem = currentReportItems.find(
       (item) => item.inventoryItemId === itemId,
     );
-    return reportItem ? reportItem.count : null;
+    return reportItem ? reportItem.countedQty : null;
   };
 
-  const handleItemClick = (item: IMockInventoryItem) => {
-    const existingCount = getItemCount(item.id);
+  const handleItemClick = (item: IInventoryItem) => {
     setSelectedItem(item);
-    setCountInput(existingCount ? existingCount.toString() : '');
     setIsDialogOpen(true);
   };
 
-  const handleSaveCount = () => {
+  const handleSaveCount = (countInput: number, inventoryUnit: any) => {
     if (!selectedItem) return;
 
-    const count = parseInt(countInput);
-    if (isNaN(count) || count < 0) {
+    if (isNaN(countInput) || countInput < 0) {
       showNotification('warning', 'Please enter a valid number');
       return;
     }
@@ -161,13 +155,13 @@ export default function InventoryReports({ showNotification }: IProps) {
       (item) => item.inventoryItemId === selectedItem.id,
     );
 
-    let updatedItems: IReportItem[];
+    let updatedItems: IInventoryCount[];
     if (existingIndex >= 0) {
       // Update existing item
       updatedItems = [...currentReportItems];
       updatedItems[existingIndex] = {
         ...updatedItems[existingIndex],
-        count,
+        countedQty: countInput,
       };
     } else {
       // Add new item
@@ -175,8 +169,12 @@ export default function InventoryReports({ showNotification }: IProps) {
         ...currentReportItems,
         {
           inventoryItemId: selectedItem.id,
-          itemName: selectedItem.name,
-          count,
+          inventoryUnitId: inventoryUnit.id,
+          countedQty: countInput,
+          inventoryItem: selectedItem,
+          inventoryUnit: inventoryUnit,
+          id: Date.now(),
+          reportId: Date.now(),
         },
       ];
     }
@@ -184,11 +182,10 @@ export default function InventoryReports({ showNotification }: IProps) {
     setCurrentReportItems(updatedItems);
     setIsDialogOpen(false);
     setSelectedItem(null);
-    setCountInput('');
     showNotification('success', `Count for ${selectedItem.name} saved`);
   };
 
-  const handleRemoveItem = (itemId: string) => {
+  const handleRemoveItem = (itemId: number) => {
     setCurrentReportItems(
       currentReportItems.filter((item) => item.inventoryItemId !== itemId),
     );
@@ -204,15 +201,18 @@ export default function InventoryReports({ showNotification }: IProps) {
     const now = generateCurrentTime();
     const date = new Date().toISOString().split('T')[0];
 
-    const newReport: IReport = {
-      id: Date.now().toString(),
-      items: [...currentReportItems],
+    const newReport: IInventoryReport = {
+      id: Date.now(),
+      inventoryCount: [...currentReportItems],
       createdAt: now,
       createdBy: 'Current User', // This would come from auth context
-      date,
+      queryDate: date,
+      companyId: companyId,
+      note: 'Inventory count report',
+      type: InventoryReportType.COUNT,
     };
 
-    setReports([newReport, ...reports]);
+    setReports([...reports, newReport]);
     setCurrentReportItems([]);
     showNotification('success', 'Report submitted successfully');
 
@@ -226,7 +226,7 @@ export default function InventoryReports({ showNotification }: IProps) {
     showNotification('info', 'Report cleared');
   };
 
-  const handleDeleteReport = (reportId: string) => {
+  const handleDeleteReport = (reportId: number) => {
     setReports(reports.filter((report) => report.id !== reportId));
     showNotification('success', 'Report deleted successfully');
   };
@@ -260,157 +260,131 @@ export default function InventoryReports({ showNotification }: IProps) {
     }
   };
 
+  const toggleReportExpanded = (reportId: number) => {
+    const newExpanded = new Set(expandedReports);
+    if (newExpanded.has(reportId)) {
+      newExpanded.delete(reportId);
+    } else {
+      newExpanded.add(reportId);
+    }
+    setExpandedReports(newExpanded);
+  };
+
   return (
-    <Box display="flex" flexDirection="column" gap={3}>
-      {/* Search and Item Selection Section */}
-      <Card
+    <Box display="flex" flexDirection="column" gap={1.5}>
+      {/* Compact Search Section - Collapsible */}
+      <Accordion
+        expanded={isSearchExpanded}
+        onChange={() => setIsSearchExpanded(!isSearchExpanded)}
         sx={{
-          borderRadius: 3,
+          borderRadius: 2,
           border: '1px solid',
           borderColor: alpha('#000', 0.06),
-          boxShadow: '0 2px 12px rgba(0, 0, 0, 0.04)',
-          background: '#ffffff',
+          boxShadow: '0 1px 4px rgba(0, 0, 0, 0.04)',
+          '&:before': { display: 'none' },
+          '&.Mui-expanded': {
+            margin: 0,
+          },
         }}
       >
-        <CardContent sx={{ p: 3 }}>
-          <Box display="flex" alignItems="center" gap={2} mb={3}>
+        <AccordionSummary
+          expandIcon={<ChevronDown size={18} />}
+          sx={{
+            minHeight: 56,
+            px: 2,
+            '&.Mui-expanded': {
+              minHeight: 56,
+            },
+            '& .MuiAccordionSummary-content': {
+              my: 1.5,
+              '&.Mui-expanded': {
+                my: 1.5,
+              },
+            },
+          }}
+        >
+          <Box display="flex" alignItems="center" gap={1.5} width="100%">
             <Box
               sx={{
-                width: 40,
-                height: 40,
-                borderRadius: 2,
+                width: 32,
+                height: 32,
+                borderRadius: 1.5,
                 bgcolor: alpha('#3B82F6', 0.1),
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
             >
-              <Package size={20} color="#3B82F6" />
+              <Package size={16} color="#3B82F6" />
             </Box>
-            <Box>
-              <Typography variant="h6" fontWeight={600}>
-                Inventory Count Report
+            <Box flex={1}>
+              <Typography variant="subtitle1" fontWeight={600}>
+                Add Items to Report
               </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Search and click items to enter counts
+              <Typography variant="caption" color="text.secondary">
+                {filteredItems.length} items available
               </Typography>
             </Box>
           </Box>
-
-          {/* Search Input */}
+        </AccordionSummary>
+        <AccordionDetails sx={{ px: 2, pb: 2, pt: 0 }}>
           <TextField
             fullWidth
+            size="small"
             placeholder="Search items by name or SKU..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <Search size={20} color="#999" />
+                  <Search size={18} color="#999" />
                 </InputAdornment>
               ),
             }}
             sx={{
-              mb: 3,
+              mb: 2,
               '& .MuiOutlinedInput-root': {
-                borderRadius: 2,
+                borderRadius: 1.5,
               },
             }}
           />
 
-          {/* Items Grid */}
-          <Grid container spacing={2}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: {
+                xs: '1fr',
+                sm: 'repeat(2, 1fr)',
+                md: 'repeat(3, 1fr)',
+                lg: 'repeat(4, 1fr)',
+              },
+              gap: 1,
+              maxHeight: 300,
+              overflowY: 'auto',
+            }}
+          >
             {(filteredItems || []).map((item: any) => {
               const itemCount = getItemCount(item.id);
               const isSelected = itemCount !== null;
 
               return (
-                <Grid item xs={6} sm={4} md={3} key={item.id}>
-					<ItemSelector
-						key={item.id}
-						item={item}
-						isSelected={isSelected}
-						onClick={() => handleItemClick(item)}
-					/>
-                  {/* <Button
-                    fullWidth
-                    variant={isSelected ? 'contained' : 'outlined'}
-                    onClick={() => handleItemClick(item)}
-                    sx={{
-                      p: 2,
-                      borderRadius: 2,
-                      textTransform: 'none',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 0.5,
-                      minHeight: 80,
-                      bgcolor: isSelected
-                        ? alpha('#3B82F6', 0.1)
-                        : 'transparent',
-                      borderColor: isSelected ? '#3B82F6' : alpha('#000', 0.12),
-                      color: isSelected ? '#3B82F6' : 'text.primary',
-                      '&:hover': {
-                        bgcolor: isSelected
-                          ? alpha('#3B82F6', 0.15)
-                          : alpha('#3B82F6', 0.05),
-                        borderColor: '#3B82F6',
-                      },
-                    }}
-                  >
-                    <Badge
-                      badgeContent={itemCount}
-                      color="primary"
-                      invisible={!isSelected}
-                      sx={{
-                        '& .MuiBadge-badge': {
-                          right: -8,
-                          top: -8,
-                        },
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          width: 32,
-                          height: 32,
-                          borderRadius: 1,
-                          bgcolor: alpha('#3B82F6', 0.1),
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        <Package size={16} color="#3B82F6" />
-                      </Box>
-                    </Badge>
-                    <Typography
-                      variant="body2"
-                      fontWeight={600}
-                      sx={{ textAlign: 'center' }}
-                    >
-                      {item.name}
-                    </Typography>
-                    {item.sku && (
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        sx={{ fontSize: '0.7rem' }}
-                      >
-                        {item.sku}
-                      </Typography>
-                    )} */}
-					
-                  {/* </Button> */}
-                </Grid>
+                <ItemSelector
+                  key={item.id}
+                  item={item}
+                  isSelected={isSelected}
+                  onClick={() => handleItemClick(item)}
+                  itemCount={itemCount}
+                />
               );
             })}
-          </Grid>
+          </Box>
 
           {filteredItems.length === 0 && (
             <Paper
               sx={{
-                p: 3,
+                p: 2,
                 textAlign: 'center',
-                borderRadius: 2,
+                borderRadius: 1.5,
                 backgroundColor: alpha('#000', 0.02),
               }}
             >
@@ -419,258 +393,347 @@ export default function InventoryReports({ showNotification }: IProps) {
               </Typography>
             </Paper>
           )}
-        </CardContent>
-      </Card>
+        </AccordionDetails>
+      </Accordion>
 
-      {/* Current Report Items */}
+      {/* Compact Current Report Section - Sticky when has items */}
       {currentReportItems.length > 0 && (
         <Card
           sx={{
-            borderRadius: 3,
+            borderRadius: 2,
             border: '1px solid',
             borderColor: alpha('#10B981', 0.3),
-            boxShadow: '0 2px 12px rgba(0, 0, 0, 0.04)',
-            background: alpha('#10B981', 0.02),
+            boxShadow: '0 2px 8px rgba(16, 185, 129, 0.1)',
+            background: alpha('#10B981', 0.03),
+            position: 'sticky',
+            top: 16,
+            zIndex: 10,
           }}
         >
-          <CardContent sx={{ p: 3 }}>
+          <CardContent sx={{ p: 1.5 }}>
             <Box
               display="flex"
               justifyContent="space-between"
               alignItems="center"
-              mb={2}
+              onClick={() => setIsCurrentReportExpanded(!isCurrentReportExpanded)}
+              sx={{ cursor: 'pointer' }}
             >
-              <Typography variant="h6" fontWeight={600}>
-                Current Report ({currentReportItems.length} items)
-              </Typography>
-              <Box display="flex" gap={1}>
+              <Box display="flex" alignItems="center" gap={1.5}>
+                <Badge badgeContent={currentReportItems.length} color="primary">
+                  <FileText size={18} color="#10B981" />
+                </Badge>
+                <Typography variant="subtitle2" fontWeight={600}>
+                  Current Report ({currentReportItems.length} items)
+                </Typography>
+              </Box>
+              <Box display="flex" alignItems="center" gap={1}>
+                <IconButton
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsCurrentReportExpanded(!isCurrentReportExpanded);
+                  }}
+                  sx={{ color: 'text.secondary' }}
+                >
+                  {isCurrentReportExpanded ? (
+                    <ChevronUp size={18} />
+                  ) : (
+                    <ChevronDown size={18} />
+                  )}
+                </IconButton>
                 <Button
                   variant="outlined"
                   size="small"
-                  onClick={handleClearReport}
-                  sx={{ borderRadius: 2, textTransform: 'none' }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleClearReport();
+                  }}
+                  sx={{
+                    borderRadius: 1.5,
+                    textTransform: 'none',
+                    px: 1.5,
+                    minWidth: 'auto',
+                  }}
                 >
                   Clear
                 </Button>
                 <Button
                   variant="contained"
                   size="small"
-                  onClick={handleSubmitReport}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSubmitReport();
+                  }}
                   sx={{
-                    borderRadius: 2,
+                    borderRadius: 1.5,
                     textTransform: 'none',
                     bgcolor: '#10B981',
                     '&:hover': { bgcolor: '#059669' },
+                    px: 2,
+                    minWidth: 'auto',
                   }}
                 >
-                  Submit Report
+                  Submit
                 </Button>
               </Box>
             </Box>
 
-            <Divider sx={{ mb: 2 }} />
-
-            <Stack spacing={1}>
-              {(currentReportItems || []).map((reportItem) => (
-                <Paper
-                  key={reportItem.inventoryItemId}
-                  sx={{
-                    p: 2,
-                    borderRadius: 2,
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    backgroundColor: '#ffffff',
-                  }}
-                >
-                  <Box display="flex" alignItems="center" gap={2}>
-                    <Typography variant="body1" fontWeight={600}>
-                      {reportItem.itemName}
-                    </Typography>
-                    <Chip
-                      label={`Count: ${reportItem.count}`}
-                      size="small"
-                      color="primary"
-                    />
-                  </Box>
-                  <Box display="flex" gap={1}>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        const item = inventoryItems.find(
-                          (i: any) => i.id === reportItem.inventoryItemId,
-                        );
-                        if (item) handleItemClick(item);
-                      }}
-                      sx={{ color: '#3B82F6' }}
-                    >
-                      <Edit2 size={16} />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      onClick={() =>
-                        handleRemoveItem(reportItem.inventoryItemId)
-                      }
-                      sx={{ color: '#EF4444' }}
-                    >
-                      <X size={16} />
-                    </IconButton>
-                  </Box>
-                </Paper>
-              ))}
-            </Stack>
+            <Collapse in={isCurrentReportExpanded}>
+              <Divider sx={{ my: 1.5 }} />
+              <Stack spacing={0.75}>
+                {(currentReportItems || []).map((reportItem) => (
+                  <Paper
+                    key={reportItem.inventoryItemId}
+                    sx={{
+                      p: 1.5,
+                      borderRadius: 1.5,
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      backgroundColor: '#ffffff',
+                    }}
+                  >
+                    <Box display="flex" alignItems="center" gap={1.5} flex={1} minWidth={0}>
+                      <Typography
+                        variant="body2"
+                        fontWeight={600}
+                        noWrap
+                        sx={{ flex: 1 }}
+                      >
+                        {reportItem.inventoryItem.name}
+                      </Typography>
+                      <Chip
+                        label={reportItem.countedQty}
+                        size="small"
+                        color="primary"
+                        variant="outlined"
+                        sx={{ height: 24, fontSize: '0.75rem' }}
+                      />
+                    </Box>
+                    <Box display="flex" gap={0.5}>
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          const item = inventoryItems?.find(
+                            (i: any) => i.id === reportItem.inventoryItemId,
+                          );
+                          if (item) handleItemClick(item);
+                        }}
+                        sx={{
+                          color: '#3B82F6',
+                          p: 0.5,
+                          '&:hover': { bgcolor: alpha('#3B82F6', 0.1) },
+                        }}
+                      >
+                        <Edit2 size={14} />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() =>
+                          handleRemoveItem(reportItem.inventoryItemId)
+                        }
+                        sx={{
+                          color: '#EF4444',
+                          p: 0.5,
+                          '&:hover': { bgcolor: alpha('#EF4444', 0.1) },
+                        }}
+                      >
+                        <X size={14} />
+                      </IconButton>
+                    </Box>
+                  </Paper>
+                ))}
+              </Stack>
+            </Collapse>
           </CardContent>
         </Card>
       )}
 
-      {/* Reports List */}
+      {/* Compact Reports List */}
       <Box>
         <Box
           display="flex"
           alignItems="center"
           justifyContent="space-between"
-          mb={2}
+          mb={1.5}
         >
-          <Typography variant="h6" fontWeight={600}>
-            Previous Reports ({reports.length})
+          <Typography variant="subtitle1" fontWeight={600}>
+            Reports ({reports.length})
           </Typography>
         </Box>
 
         {reports.length === 0 ? (
           <Paper
             sx={{
-              p: 4,
+              p: 3,
               textAlign: 'center',
-              borderRadius: 3,
+              borderRadius: 2,
               backgroundColor: alpha('#000', 0.02),
             }}
           >
             <MessageSquare
-              size={48}
+              size={32}
               color="#ccc"
-              style={{ marginBottom: 16 }}
+              style={{ marginBottom: 12 }}
             />
-            <Typography variant="body1" color="text.secondary">
+            <Typography variant="body2" color="text.secondary">
               No reports yet. Create your first inventory count report above.
             </Typography>
           </Paper>
         ) : (
-          <Stack spacing={2}>
-            {(reports || []).map((report) => (
-              <Card
-                key={report.id}
-                sx={{
-                  borderRadius: 3,
-                  border: '1px solid',
-                  borderColor: alpha('#000', 0.06),
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
-                  background: '#ffffff',
-                  transition: 'all 0.2s ease',
-                  '&:hover': {
-                    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
-                    transform: 'translateY(-2px)',
-                  },
-                }}
-              >
-                <CardContent sx={{ p: 3 }}>
-                  {/* Report Header */}
-                  <Box
-                    display="flex"
-                    justifyContent="space-between"
-                    alignItems="flex-start"
-                    mb={2}
+          <Stack spacing={1}>
+            {(reports || []).map((report) => {
+              const isExpanded = expandedReports.has(report.id);
+              return (
+                <Accordion
+                  key={report.id}
+                  expanded={isExpanded}
+                  onChange={() => toggleReportExpanded(report.id)}
+                  sx={{
+                    borderRadius: 2,
+                    border: '1px solid',
+                    borderColor: alpha('#000', 0.06),
+                    boxShadow: '0 1px 4px rgba(0, 0, 0, 0.04)',
+                    '&:before': { display: 'none' },
+                    '&.Mui-expanded': {
+                      margin: 0,
+                    },
+                  }}
+                >
+                  <AccordionSummary
+                    expandIcon={<ChevronDown size={18} />}
+                    sx={{
+                      minHeight: 56,
+                      px: 2,
+                      '&.Mui-expanded': {
+                        minHeight: 56,
+                      },
+                      '& .MuiAccordionSummary-content': {
+                        my: 1,
+                        '&.Mui-expanded': {
+                          my: 1,
+                        },
+                      },
+                    }}
                   >
-                    <Box display="flex" alignItems="center" gap={2}>
-                      <Avatar
-                        sx={{
-                          width: 40,
-                          height: 40,
-                          bgcolor: alpha('#3B82F6', 0.1),
-                          color: '#3B82F6',
-                        }}
-                      >
-                        <User size={20} />
-                      </Avatar>
-                      <Box>
-                        <Typography variant="subtitle2" fontWeight={600}>
-                          {report.createdBy}
-                        </Typography>
-                        <Box
-                          display="flex"
-                          alignItems="center"
-                          gap={1}
-                          mt={0.5}
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="space-between"
+                      width="100%"
+                      pr={2}
+                    >
+                      <Box display="flex" alignItems="center" gap={1.5} flex={1}>
+                        <Avatar
+                          sx={{
+                            width: 32,
+                            height: 32,
+                            bgcolor: alpha('#3B82F6', 0.1),
+                            color: '#3B82F6',
+                          }}
                         >
-                          <Calendar size={14} color="#999" />
-                          <Typography variant="caption" color="text.secondary">
-                            {formatDate(report.date)}
+                          <User size={16} />
+                        </Avatar>
+                        <Box>
+                          <Typography variant="body2" fontWeight={600}>
+                            {report.createdBy}
                           </Typography>
                           <Box
-                            sx={{
-                              width: 4,
-                              height: 4,
-                              borderRadius: '50%',
-                              bgcolor: '#999',
-                              mx: 0.5,
-                            }}
-                          />
-                          <Clock size={14} color="#999" />
-                          <Typography variant="caption" color="text.secondary">
-                            {formatTime(report.createdAt)}
-                          </Typography>
+                            display="flex"
+                            alignItems="center"
+                            gap={0.75}
+                            mt={0.25}
+                          >
+                            <Calendar size={12} color="#999" />
+                            <Typography variant="caption" color="text.secondary">
+                              {formatDate(report.queryDate)}
+                            </Typography>
+                            <Box
+                              sx={{
+                                width: 3,
+                                height: 3,
+                                borderRadius: '50%',
+                                bgcolor: '#999',
+                                mx: 0.5,
+                              }}
+                            />
+                            <Clock size={12} color="#999" />
+                            <Typography variant="caption" color="text.secondary">
+                              {formatTime(report.createdAt)}
+                            </Typography>
+                          </Box>
                         </Box>
                       </Box>
-                    </Box>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleDeleteReport(report.id)}
-                      sx={{
-                        color: '#EF4444',
-                        '&:hover': {
-                          bgcolor: alpha('#EF4444', 0.1),
-                        },
-                      }}
-                    >
-                      <Trash2 size={16} />
-                    </IconButton>
-                  </Box>
-
-                  <Divider sx={{ my: 2 }} />
-
-                  {/* Report Items */}
-                  <Stack spacing={1}>
-                    {(report.items || []).map((item) => (
-                      <Paper
-                        key={item.inventoryItemId}
-                        sx={{
-                          p: 2,
-                          borderRadius: 2,
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          backgroundColor: alpha('#3B82F6', 0.05),
-                        }}
-                      >
-                        <Typography variant="body2" fontWeight={600}>
-                          {item.itemName}
-                        </Typography>
+                      <Box display="flex" alignItems="center" gap={1}>
                         <Chip
-                          label={`Count: ${item.count}`}
+                          label={`${report.inventoryCount?.length || 0} items`}
                           size="small"
-                          color="primary"
+                          variant="outlined"
+                          sx={{ height: 24, fontSize: '0.7rem' }}
                         />
-                      </Paper>
-                    ))}
-                  </Stack>
-                </CardContent>
-              </Card>
-            ))}
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteReport(report.id);
+                          }}
+                          sx={{
+                            color: '#EF4444',
+                            p: 0.5,
+                            '&:hover': {
+                              bgcolor: alpha('#EF4444', 0.1),
+                            },
+                          }}
+                        >
+                          <Trash2 size={14} />
+                        </IconButton>
+                      </Box>
+                    </Box>
+                  </AccordionSummary>
+                  <AccordionDetails sx={{ px: 2, pb: 2, pt: 0 }}>
+                    <Stack spacing={0.75}>
+                      {(report.inventoryCount || []).map((item) => (
+                        <Paper
+                          key={item.inventoryItemId}
+                          sx={{
+                            p: 1.5,
+                            borderRadius: 1.5,
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            backgroundColor: alpha('#3B82F6', 0.05),
+                          }}
+                        >
+                          <Typography
+                            variant="body2"
+                            fontWeight={600}
+                            sx={{ flex: 1 }}
+                            noWrap
+                          >
+                            {item.inventoryItem.name}
+                          </Typography>
+                          <Box display="flex" gap={0.75}>
+                            <Chip
+                              label={`${item.countedQty} ${item.inventoryUnit.unit}`}
+                              size="small"
+                              color="primary"
+                              variant="outlined"
+                              sx={{ height: 24, fontSize: '0.7rem' }}
+                            />
+                          </Box>
+                        </Paper>
+                      ))}
+                    </Stack>
+                  </AccordionDetails>
+                </Accordion>
+              );
+            })}
           </Stack>
         )}
       </Box>
 
       {/* Count Input Dialog */}
-      <Dialog
+      {/* <Dialog
         open={isDialogOpen}
         onClose={() => {
           setIsDialogOpen(false);
@@ -744,7 +807,15 @@ export default function InventoryReports({ showNotification }: IProps) {
             Save
           </Button>
         </DialogActions>
-      </Dialog>
+      </Dialog> */}
+      <CountInputDialog 
+        isDialogOpen={isDialogOpen}
+        setIsDialogOpen={setIsDialogOpen}
+        selectedItem={selectedItem}
+        setSelectedItem={setSelectedItem}
+        handleSaveCount={handleSaveCount}
+        currentReportItems={currentReportItems}
+      />
     </Box>
   );
 }
