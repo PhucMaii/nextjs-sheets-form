@@ -358,6 +358,7 @@ export interface IProductLoss extends LossReport {
 
 export interface IFixedTransaction extends FixedTransaction {
   paymentMethod: IPaymentMethod;
+  type: IExpenseType;
 }
 
 export interface IScheduledShift extends ScheduledShift {

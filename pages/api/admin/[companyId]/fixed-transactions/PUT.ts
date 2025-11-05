@@ -36,6 +36,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         defaultTransactionStatus: updatedTransaction.defaultTransactionStatus,
         defaultSpentBy: updatedTransaction.defaultSpentBy,
         recurrence: updatedTransaction.recurrence,
+        typeId: updatedTransaction.typeId,
       },
     });
 
