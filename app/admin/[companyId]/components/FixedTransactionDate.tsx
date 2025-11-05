@@ -1,4 +1,4 @@
-import { Box, Typography, useMediaQuery, Button } from '@mui/material';
+import { Box, Typography, useMediaQuery, Button, Chip } from '@mui/material';
 import { blue, grey } from '@mui/material/colors';
 import React from 'react';
 
@@ -51,9 +51,12 @@ function FixedTransactionEvent({
           </Typography>
         )}
       </Box>
-      <Typography color={isGrey ? grey[600] : 'black'} variant="body1">
-        ${transaction?.defaultAmount?.toFixed(2) || 0}
-      </Typography>
+      <Box display="flex" flexDirection="row" justifyContent="space-between" alignItems="center">
+        <Typography color={isGrey ? grey[600] : 'black'} variant="body1">
+          ${transaction?.defaultAmount?.toFixed(2) || 0}
+        </Typography>
+        {transaction?.type && <Chip label={transaction?.type?.name} size="small" color="primary" variant="outlined" />}
+      </Box>
     </Box>
   );
 }

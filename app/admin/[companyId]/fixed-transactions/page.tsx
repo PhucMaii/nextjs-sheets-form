@@ -166,17 +166,6 @@ export default function FixedTransactionsPage() {
 
             setDateRange([firstDayOfMonth, lastDayOfMonth]);
           }}
-          // events={[
-          //     { title: 'event 1', date: '2025-05-01' },
-          //     { title: 'event 2', date: '2025-05-02' }
-          //   ]}
-          // dateClick={(params) => {
-          //   console.log(params);
-          //   setAddFixedTransactionProps({
-          //     open: true,
-          //     defaultDate: params.date,
-          //   });
-          // }}
           dayCellContent={(params) => {
             const date = YYYYMMDDFormat(params.date);
             const dateFixedTransactions = fixedTransactions
