@@ -459,5 +459,5 @@ export interface IInventoryCount extends InventoryCount {
   inventoryUnit: IInventoryUnit;
 }
 export interface IInventoryReport extends InventoryReport {
-  inventoryCount: IInventoryCount[];
+  inventoryCounts: IInventoryCount[];
 }

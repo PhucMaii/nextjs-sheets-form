@@ -34,7 +34,7 @@ export default function CountInputDialog({
   const { companyId }: any = useParams();
   const [countInput, setCountInput] = useState<number>(0);
 
-  const { renderSearchUnits, selectedUnit } = useSelectUnit(
+  const { renderSearchUnits, selectedUnit, isLoading } = useSelectUnit(
     companyId,
     selectedItem?.id || 0,
   );
@@ -103,6 +103,7 @@ export default function CountInputDialog({
               autoFocus
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
+                  if (isLoading) return;
                   handleSaveCount(countInput, selectedUnit);
                 }
               }}
@@ -123,14 +124,12 @@ export default function CountInputDialog({
           Cancel
         </Button>
         <Button
-          onClick={() => handleSaveCount(countInput, selectedUnit)}
-          variant="contained"
-          sx={{
-            borderRadius: 2,
-            textTransform: 'none',
-            bgcolor: '#3B82F6',
-            '&:hover': { bgcolor: '#2563EB' },
+          onClick={() => {
+            if (isLoading) return;
+            handleSaveCount(countInput, selectedUnit);
           }}
+          variant="contained"
+          disabled={isLoading}
         >
           Save
         </Button>

@@ -62,6 +62,7 @@ const useSelectUnit = (
     renderSearchUnits,
     selectedUnit,
     setSelectedUnit,
+    isLoading,
   };
 };
 

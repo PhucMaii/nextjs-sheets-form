@@ -851,7 +851,7 @@ model InventoryReport {
   createdAt         String
   createdBy         String
 
-  inventoryCount    InventoryCount[]
+  inventoryCounts    InventoryCount[]
   company           Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   @@index([companyId, queryDate])
@@ -866,7 +866,7 @@ model InventoryCount {
 
   inventoryItem     InventoryItem      @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
   inventoryUnit     InventoryUnit      @relation(fields: [inventoryUnitId], references: [id], onDelete: Cascade)
-  inventoryReports  InventoryReport    @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  inventoryReport  InventoryReport    @relation(fields: [reportId], references: [id], onDelete: Cascade)
 
   @@index([reportId])
 }

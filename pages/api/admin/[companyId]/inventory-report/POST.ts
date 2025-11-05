@@ -25,7 +25,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     });
 
     await prisma.inventoryCount.createMany({
-      data: report.inventoryCount.map((item: any) => ({
+      data: report.inventoryCounts.map((item: any) => ({
         inventoryItemId: item.inventoryItemId,
         inventoryUnitId: item.inventoryUnitId,
         countedQty: item.countedQty,

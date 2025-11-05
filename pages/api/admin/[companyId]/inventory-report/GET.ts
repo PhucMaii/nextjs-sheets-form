@@ -31,7 +31,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             queryDate: { in: listOfDateString },
         },
         include: {  
-            inventoryCount: true,
+            inventoryCounts: {
+                include: {
+                    inventoryItem: true,
+                    inventoryUnit: true,
+                },
+            },
         },
         orderBy: {
             queryDate: 'desc',

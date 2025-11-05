@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import GET from './GET';
 import POST from './POST';
 import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
+import DELETE from './DELETE';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -11,6 +12,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
     if (req.method === 'POST') {
       const response = await POST(req, res);
+      return response;
+    }
+    if (req.method === 'DELETE') {
+      const response = await DELETE(req, res);
       return response;
     }
 
