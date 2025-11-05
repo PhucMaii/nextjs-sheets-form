@@ -1019,7 +1019,7 @@ const OrderView = ({
           display="flex"
           alignItems="center"
           width="100%"
-          sx={{ overflowY: 'auto' }}
+          sx={{ overflowX: 'auto' }}
           gap={0.5}
           whiteSpace="nowrap"
         >
@@ -1070,7 +1070,7 @@ const OrderView = ({
           mt={2}
           maxWidth="100%"
           maxHeight="100vh"
-          sx={{ overflowY: 'auto' }}
+          sx={{ overflowY: 'auto', overflowX: 'hidden' }}
         >
           {selectedItemType === 'All' &&
             !debouncedKeywords &&
