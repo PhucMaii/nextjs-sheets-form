@@ -1,9 +1,9 @@
 import { IItem } from '@/app/utils/type';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { checkAndUpdateUnits } from '../inventory/expenses/POST';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
+import prisma from '@/client';
 
 interface IBody {
   newItem: IItem;
@@ -13,8 +13,6 @@ interface IBody {
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { companyId } = req.query;
 
     if (!companyId) {
@@ -58,20 +56,20 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const user: any = session?.user;
     const createdBy = `Admin - ${user?.name}`;
 
-    for (const vItem of selectedInventoryItem.vendorItem) {
-      const clientVendorItemUnits = newItem.units.filter(
-        (unit: any) => unit.vendorItemId === vItem.id,
-      );
+    // for (const vItem of selectedInventoryItem.vendorItem) {
+    //   const clientVendorItemUnits = newItem.units.filter(
+    //     (unit: any) => unit.vendorItemId === vItem.id,
+    //   );
 
-      await checkAndUpdateUnits(
-        Number(companyId),
-        vItem.unit,
-        clientVendorItemUnits,
-        vItem.id,
-        createdAt,
-        createdBy,
-      );
-    }
+    //   await checkAndUpdateUnits(
+    //     Number(companyId),
+    //     vItem.unit,
+    //     clientVendorItemUnits,
+    //     vItem.id,
+    //     createdAt,
+    //     createdBy,
+    //   );
+    // }
 
     // Brand New Unit
     const brandNewUnit = newItem.units.filter(
