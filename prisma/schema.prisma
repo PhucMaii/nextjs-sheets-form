@@ -751,25 +751,26 @@ model Vendor {
 }
 
 model InventoryItem {
-  id              Int      @id @default(autoincrement())
-  name            String
-  sku             String?
-  supplierSku     String?
-  createdAt       String
-  createdBy       String
-  hasGST          Boolean?
-  hasPST          Boolean?
-  typeId          Int?
-  color           String?
-  indexPos        Int?
-  image           String?
-  isPromotion     Boolean?
-  promotionId     Int?
-  promoIndexPos   Int?
-  companyId       Int?
-  isShowQuantity  Boolean?
-  isShowInventory Boolean?
-  isInternal      Boolean?
+  id                  Int      @id @default(autoincrement())
+  name                String
+  sku                 String?
+  supplierSku         String?
+  createdAt           String
+  createdBy           String
+  hasGST              Boolean?
+  hasPST              Boolean?
+  typeId              Int?
+  color               String?
+  indexPos            Int?
+  image               String?
+  isPromotion         Boolean?
+  promotionId         Int?
+  promoIndexPos       Int?
+  companyId           Int?
+  isShowQuantity      Boolean?
+  isShowInventory     Boolean?
+  isInternal          Boolean?
+  isAllowedToCount    Boolean?
 
   item                   Item[]
   vendorItem             VendorItem[]

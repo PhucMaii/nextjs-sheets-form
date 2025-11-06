@@ -319,7 +319,7 @@ export default function UpcomingShifts() {
 
 				{shiftsInDate.length > 0 ? (
 					<Box display="flex" flexDirection="column" gap={1.5}>
-						{shiftsInDate.map((shift, index) => (
+						{shiftsInDate.map((shift) => (
 							<Paper
 								key={shift.id}
 								elevation={0}

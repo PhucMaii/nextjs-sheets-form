@@ -28,8 +28,12 @@ const useSelectUnit = (
   useEffect(() => {
     if (defaultUnit) {
       setSelectedUnit(defaultUnit);
+    } else {
+      if (units && units.length > 0) {
+        setSelectedUnit(units[0]);
+      }
     }
-  }, [defaultUnit]);
+  }, [defaultUnit, units]);
 
   useEffect(() => {
     if (units && units.length > 0) {

@@ -45,6 +45,8 @@ import BadgeIcon from '@mui/icons-material/Badge';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import YardIcon from '@mui/icons-material/Yard';
 import CardMembershipIcon from '@mui/icons-material/CardMembership';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import MenuIcon from '@mui/icons-material/Menu';
 
 export const mainPaymentMethodId = 4;
 export const otherPaymentMethodId = 9;
@@ -252,10 +254,10 @@ export const adminTabs = {
     },
     {
       id: 24,
-      name: "Farm",
+      name: 'Farm',
       icon: YardIcon,
       path: '/admin/[companyId]/farm',
-    }
+    },
   ],
   Others: [
     {
@@ -367,7 +369,8 @@ export const clientTabs = [
   },
 ];
 
-export const driverTabs = [
+// Tabs shown in bottom navigation on mobile
+export const driverPrimaryTabs = [
   {
     name: 'Overview',
     icon: DashboardIcon,
@@ -384,26 +387,33 @@ export const driverTabs = [
     path: '/driver/add',
   },
   {
+    name: 'Blocking',
+    icon: AppBlockingIcon,
+    path: '/driver/blocking',
+  },
+  {
+    name: 'More',
+    icon: MenuIcon,
+    path: '/driver/more',
+  },
+];
+
+// Secondary tabs shown inside More tab
+export const driverMoreTabs = [
+  {
     name: 'Shifts',
     icon: AccessTime,
     path: '/driver/shifts',
   },
   {
-    name: 'Blocking',
-    icon: AppBlockingIcon,
-    path: '/driver/blocking',
+    name: 'Submit Report',
+    icon: AssignmentIcon,
+    path: '/driver/submit-inventory-report',
   },
-  // {
-  //   name: 'Message',
-  //   icon: MessageIcon,
-  //   path: '/driver/message',
-  // },
-  // {
-  //   name: 'Account',
-  //   icon: AccountCircleIcon,
-  //   path: '/driver/account',
-  // },
 ];
+
+// All tabs (for desktop view and other uses)
+export const driverTabs = [...driverPrimaryTabs, ...driverMoreTabs];
 
 export const settingsTabs = ['General', 'Products', 'Announcement'];
 
@@ -479,7 +489,7 @@ export const rejectOrderReasons = [
   'Suspicious or duplicate order',
   'Customer requested cancellation',
   'Other (specify)',
-]
+];
 
 export const units = ['bags', 'g', 'kg', 'lbs', 'pcs', 'cases', 'cans'];
 
@@ -509,7 +519,7 @@ export const userCategorizedColor: any = {
 export const shiftColors = {
   Driver: {
     color: 'black',
-    backgroundColor: blue[50]
+    backgroundColor: blue[50],
   },
   'In Factory': {
     color: 'black',

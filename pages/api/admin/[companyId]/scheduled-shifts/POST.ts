@@ -1,7 +1,7 @@
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { getTodayDate } from '@/pages/api/utils/date';
-import { PrismaClient } from '@prisma/client';
+import { PayrollType, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 
@@ -20,7 +20,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const today = getTodayDate();
     const createdBy = await getCreatedBy(req, res, session?.user?.role);
 
-    const cost = scheduledShift.hours * scheduledShift.employee.payRate;
+    const cost = scheduledShift.employee.payrollType === PayrollType.hourly ? scheduledShift.hours * scheduledShift.employee.payRate : 0;
 
     const newShift = await prisma.scheduledShift.create({
       data: {

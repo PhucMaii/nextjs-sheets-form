@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -33,6 +33,19 @@ export default function CountInputDialog({
 }: IProps) {
   const { companyId }: any = useParams();
   const [countInput, setCountInput] = useState<number>(0);
+  const quantityInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isDialogOpen) {
+      // Delay to ensure dialog animation completes before focusing
+      const timer = setTimeout(() => {
+        quantityInputRef.current?.focus();
+        quantityInputRef.current?.select();
+      }, 100);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isDialogOpen]);
 
   const { renderSearchUnits, selectedUnit, isLoading } = useSelectUnit(
     companyId,
@@ -92,6 +105,8 @@ export default function CountInputDialog({
           <Box display="flex" gap={2}>
             <TextField
               fullWidth
+              inputRef={quantityInputRef}
+              autoFocus
               sx={{ flex: 2 }}
               label="Count"
               type="number"
@@ -100,7 +115,6 @@ export default function CountInputDialog({
               InputProps={{
                 inputProps: { min: 0 },
               }}
-              autoFocus
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   if (isLoading) return;

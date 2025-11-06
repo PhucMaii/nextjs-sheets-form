@@ -19,7 +19,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { blue, blueGrey } from '@mui/material/colors';
-import { driverTabs } from '@/app/lib/constant';
+import { driverTabs, driverPrimaryTabs } from '@/app/lib/constant';
 import { ListItemButtonStyled } from '@/app/admin/[companyId]/components/Sidebar/styled';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { primary } from '@/theme/color';
@@ -306,7 +306,7 @@ export default function Sidebar({ children }: IProps) {
               setCurrentTab(newValue);
             }}
           >
-            {driverTabs.map((tab, index) => {
+            {driverPrimaryTabs.map((tab, index) => {
               return (
                 <BottomNavigationAction
                   sx={{ minWidth: '30px' }}

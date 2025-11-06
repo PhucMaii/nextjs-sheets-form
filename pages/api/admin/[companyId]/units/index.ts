@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import POST from './POST';
-import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 import GET from './GET';
+import withEmployeeAuthGuard from '@/pages/api/utils/withEmployeeAuthGuard';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -26,4 +26,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-export default withAdminAuthGuard(handler);
+export default withEmployeeAuthGuard(handler);
