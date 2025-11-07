@@ -3,7 +3,6 @@ import prisma from '@/client';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { getTodayDate } from '@/pages/api/utils/date';
 import { getDriverInfo } from '@/pages/api/utils/auth';
-import { InventoryReportType } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
@@ -24,7 +23,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 		const newReport = await prisma.inventoryReport.create({
 			data: {
 				companyId: driver.companyId,
-				type: InventoryReportType.COUNT,
+				type: report.type,
 				note: report.note,
 				queryDate: today.date,
 				createdAt: today.dateAndTime,

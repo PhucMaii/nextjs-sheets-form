@@ -11,10 +11,12 @@ import {
   alpha,
   Paper,
   Stack,
+  Tooltip,
 } from '@mui/material';
 import { User, Calendar, Clock, Trash2, ChevronDown } from 'lucide-react';
 import { IInventoryReport } from '@/app/utils/type';
 import dayjs from 'dayjs';
+import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 
 interface IProps {
   report: IInventoryReport;
@@ -97,6 +99,13 @@ export default function ReportCard({ report, handleDeleteReport }: IProps) {
                 <Typography variant="caption" color="text.secondary">
                   {dayjs(report.createdAt).format('HH:mm')}
                 </Typography>
+                {report?.note && (
+                  <Tooltip title={report.note}>
+                    <IconButton size="small">
+                      <TextSnippetIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                )}
               </Box>
             </Box>
           </Box>

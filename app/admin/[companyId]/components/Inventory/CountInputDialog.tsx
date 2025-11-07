@@ -8,6 +8,7 @@ import {
   Typography,
   TextField,
   Button,
+  useMediaQuery,
 } from '@mui/material';
 import { Package } from 'lucide-react';
 import { IInventoryCount, IInventoryItem } from '@/app/utils/type';
@@ -34,6 +35,8 @@ export default function CountInputDialog({
   const { companyId }: any = useParams();
   const [countInput, setCountInput] = useState<number>(0);
   const quantityInputRef = useRef<HTMLInputElement>(null);
+
+  const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   useEffect(() => {
     if (isDialogOpen) {
@@ -102,7 +105,7 @@ export default function CountInputDialog({
               SKU: {selectedItem.sku}
             </Typography>
           )}
-          <Box display="flex" gap={2}>
+          <Box display="flex" flexDirection={smDown ? 'column' : 'row'} gap={2}>
             <TextField
               fullWidth
               inputRef={quantityInputRef}

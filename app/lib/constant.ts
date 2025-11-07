@@ -47,6 +47,7 @@ import YardIcon from '@mui/icons-material/Yard';
 import CardMembershipIcon from '@mui/icons-material/CardMembership';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import MenuIcon from '@mui/icons-material/Menu';
+import { InventoryReportType } from '@prisma/client';
 
 export const mainPaymentMethodId = 4;
 export const otherPaymentMethodId = 9;
@@ -408,7 +409,12 @@ export const driverMoreTabs = [
   {
     name: 'Submit Report',
     icon: AssignmentIcon,
-    path: '/driver/submit-inventory-report',
+    path: `/driver/submit-inventory-report?reportType=${InventoryReportType.COUNT}`,
+  },
+  {
+    name: 'Driver Return',
+    icon: LocalShippingIcon,
+    path: `/driver/submit-inventory-report?reportType=${InventoryReportType.DRIVER_RETURN}`,
   },
 ];
 
