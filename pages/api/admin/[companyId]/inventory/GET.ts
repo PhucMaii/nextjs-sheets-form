@@ -11,13 +11,14 @@ interface IQuery {
   companyId?: string;
   isInternal?: string;
   includedInternal?: string;
+  isAllowedToCount?: string;
 }
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const prisma = new PrismaClient();
 
-    const { vendorId, inventoryItemId, companyId, isInternal, includedInternal }: IQuery =
+    const { vendorId, inventoryItemId, companyId, isInternal, includedInternal, isAllowedToCount }: IQuery =
       req.query;
 
     if (vendorId) {
@@ -161,11 +162,13 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const internalQuery = isInternal ? { isInternal: true } : !includedInternal ? { OR: [{ isInternal: null }, { isInternal: false }] } : {};
+    const allowedToCountQuery = isAllowedToCount ? { isAllowedToCount: true } : {};
 
     const inventory: any = await prisma.inventoryItem.findMany({
       where: {
         companyId: Number(companyId),
         ...internalQuery,
+        ...allowedToCountQuery,
       },
       include: {
         subtractRules: {

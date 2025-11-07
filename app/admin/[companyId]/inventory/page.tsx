@@ -30,7 +30,7 @@ import {
   BarChart3,
   Warehouse,
   Logs,
-  MessageSquare,
+  Newspaper,
 } from 'lucide-react';
 import TrackInventoryRecord from '../components/Modals/TrackInventoryRecord';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
@@ -496,7 +496,7 @@ export default function InventoryPage() {
         <Tab
           label="Reports"
           value={'reports'}
-          icon={<MessageSquare size={18} />}
+          icon={<Newspaper size={18} />}
           iconPosition="start"
         />
       </Tabs>

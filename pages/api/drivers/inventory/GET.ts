@@ -16,6 +16,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       where: {
         companyId: driver.companyId,
         OR: [{ isInternal: null }, { isInternal: false }],
+        isAllowedToCount: true,
       },
       include: {
         subtractRules: {

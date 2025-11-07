@@ -795,6 +795,8 @@ model InventoryItem {
   @@index([indexPos])
   @@index([promoIndexPos])
   @@index([typeId, indexPos])
+  @@index([isAllowedToCount])
+  @@index([isInternal])
 }
 
 model AutomationRules {
