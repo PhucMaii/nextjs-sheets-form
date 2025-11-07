@@ -120,43 +120,29 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-  const listOfDates = generateListOfDateString(new Date('10/01/2025'), new Date('10/31/2025'));
-  console.log(listOfDates);
+  const listOfDates = generateListOfDateString(new Date('11/01/2025'), new Date('11/08/2025'));
   const targetOrders = await prisma.orders.findMany({
     where: {
         deliveryDate: {
           in: listOfDates,
-        }
+        },
     },
     include: {
-      items: true,
+      items: {
+        include: {
+          inventoryItem: true
+        }
+      },
       user: true,
     },
   });
-  
-  const ordersWithNegativeProfit = targetOrders.filter((order) => {
-    const profit = order.items.reduce((acc, item) => {
-      return acc + (item.profit || 0);
-    }, 0);
-    return profit < 0;
+
+
+  const ordersWithSilken = targetOrders.filter((order) => {
+    return order.items.some((item) => item.inventoryItemId === 10080);
   });
 
-  const returnOrders = ordersWithNegativeProfit.map((order) => {
-    const profit = order.items.reduce((acc, item) => {
-      return acc + (item.profit || 0);
-    }, 0);
-    return {
-      id: order.id,
-      deliveryDate: order.deliveryDate,
-      items: order.items,
-      profit: profit,
-      user: order.user?.clientName,
-    };
-  });
-
-  console.log(returnOrders);
-
- 
+  console.log(ordersWithSilken)
 }
 
 // async function main() {

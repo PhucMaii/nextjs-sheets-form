@@ -16,6 +16,9 @@ import {
   Checkbox,
   Button,
   CircularProgress,
+  IconButton,
+  Menu,
+  MenuItem,
 } from '@mui/material';
 import {
   MessageSquare,
@@ -23,11 +26,15 @@ import {
   Package,
   ChevronDown,
   Save,
+  Filter,
+  Calendar,
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { getAdminApiUrl } from '@/app/utils/enum';
 import { useParams } from 'next/navigation';
+import { InventoryReportType } from '@prisma/client';
+import dayjs from 'dayjs';
 import ItemSelector from './ItemSelector';
 import CountInputDialog from './CountInputDialog';
 import {
@@ -40,6 +47,7 @@ import SelectDateRange from '../Select/SelectDateRange';
 import ReportCard from './ReportCard';
 import SubmitReportSection from './SubmitReportSection';
 import ConfirmModal from '../Modals/ConfirmModal';
+import { blueGrey } from '@mui/material/colors';
 
 interface IProps {
   showNotification: (
@@ -68,6 +76,12 @@ export default function InventoryReports({ showNotification }: IProps) {
     Set<number>
   >(new Set());
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [reportTypeFilter, setReportTypeFilter] = useState<
+    InventoryReportType | 'ALL'
+  >('ALL');
+  const [reportTypeFilterMenuAnchor, setReportTypeFilterMenuAnchor] =
+    useState<null | HTMLElement>(null);
+  const openReportTypeFilterMenu = Boolean(reportTypeFilterMenuAnchor);
 
   const { data: reports, refetch: refetchReports } = useQuery({
     queryKey: ['inventory-reports', dateRange],
@@ -134,6 +148,49 @@ export default function InventoryReports({ showNotification }: IProps) {
         item.sku?.toLowerCase().includes(query),
     );
   }, [searchQuery, inventoryItems]);
+
+  // Filter reports based on type
+  const filteredReports = useMemo(() => {
+    if (!reports) return [];
+    if (reportTypeFilter === 'ALL') {
+      return reports;
+    }
+    return reports.filter(
+      (report: IInventoryReport) => report.type === reportTypeFilter,
+    );
+  }, [reports, reportTypeFilter]);
+
+  // Group reports by date
+  const reportsByDate = useMemo(() => {
+    if (!filteredReports || filteredReports.length === 0) return [];
+
+    const grouped: Record<string, IInventoryReport[]> = {};
+
+    filteredReports.forEach((report: IInventoryReport) => {
+      const dateKey = dayjs(report.queryDate).format('YYYY-MM-DD');
+      if (!grouped[dateKey]) {
+        grouped[dateKey] = [];
+      }
+      grouped[dateKey].push(report);
+    });
+
+    // Sort dates in descending order (newest first)
+    const sortedDates = Object.keys(grouped).sort((a, b) => {
+      return dayjs(b).valueOf() - dayjs(a).valueOf();
+    });
+
+    // Sort reports within each date by creation time (newest first)
+    sortedDates.forEach((dateKey) => {
+      grouped[dateKey].sort((a, b) => {
+        return dayjs(b.createdAt).valueOf() - dayjs(a.createdAt).valueOf();
+      });
+    });
+
+    return sortedDates.map((dateKey) => ({
+      date: dateKey,
+      reports: grouped[dateKey],
+    }));
+  }, [filteredReports]);
 
   // Check if item is already in current report
   const getItemCount = (itemId: number): number | null => {
@@ -325,6 +382,67 @@ export default function InventoryReports({ showNotification }: IProps) {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleSwitchReportType = (type: InventoryReportType | 'ALL') => {
+    setReportTypeFilter(type);
+    setReportTypeFilterMenuAnchor(null);
+  };
+
+  const renderReportTypeFilter = () => {
+    return (
+      <>
+        <IconButton
+          onClick={(e) => setReportTypeFilterMenuAnchor(e.currentTarget)}
+        >
+          <Filter size={16} color="#999" />
+        </IconButton>
+        <Menu
+          anchorEl={reportTypeFilterMenuAnchor}
+          open={openReportTypeFilterMenu}
+          onClose={() => setReportTypeFilterMenuAnchor(null)}
+        >
+          <MenuItem
+            value="ALL"
+            onClick={() => handleSwitchReportType('ALL')}
+            sx={{
+              bgcolor:
+                reportTypeFilter === 'ALL'
+                  ? alpha(blueGrey[500], 0.1)
+                  : 'transparent',
+            }}
+          >
+            All
+          </MenuItem>
+          <MenuItem
+            value={InventoryReportType.COUNT}
+            onClick={() => handleSwitchReportType(InventoryReportType.COUNT)}
+            sx={{
+              bgcolor:
+                reportTypeFilter === InventoryReportType.COUNT
+                  ? alpha(blueGrey[500], 0.1)
+                  : 'transparent',
+            }}
+          >
+            Stocktake
+          </MenuItem>
+          <MenuItem
+            value={InventoryReportType.DRIVER_RETURN}
+            onClick={() =>
+              handleSwitchReportType(InventoryReportType.DRIVER_RETURN)
+            }
+            sx={{
+              bgcolor:
+                reportTypeFilter === InventoryReportType.DRIVER_RETURN
+                  ? alpha(blueGrey[500], 0.1)
+                  : 'transparent',
+            }}
+          >
+            Driver Return
+          </MenuItem>
+        </Menu>
+      </>
+    );
   };
 
   return (
@@ -601,9 +719,15 @@ export default function InventoryReports({ showNotification }: IProps) {
           mb={1.5}
         >
           <Typography variant="subtitle1" fontWeight={600}>
-            Reports ({reports?.length || 0})
+            Reports ({filteredReports?.length || 0})
           </Typography>
-          <SelectDateRange dateRange={dateRange} setDateRange={setDateRange} />
+          <Box display="flex" alignItems="center" gap={1}>
+            {renderReportTypeFilter()}
+            <SelectDateRange
+              dateRange={dateRange}
+              setDateRange={setDateRange}
+            />
+          </Box>
         </Box>
 
         {!reports || reports.length === 0 ? (
@@ -621,17 +745,118 @@ export default function InventoryReports({ showNotification }: IProps) {
               No reports yet. Create your first inventory count report above.
             </Typography>
           </Paper>
+        ) : filteredReports.length === 0 ? (
+          <Paper
+            sx={{
+              p: 3,
+              textAlign: 'center',
+              borderRadius: 2,
+              backgroundColor: alpha('#000', 0.02),
+            }}
+            elevation={0}
+          >
+            <Filter size={32} style={{ marginBottom: 12, opacity: 0.5 }} />
+            <Typography variant="subtitle1" color="text.secondary">
+              No reports match the selected filter.
+            </Typography>
+          </Paper>
         ) : (
-          <Stack spacing={1}>
-            {(reports || []).map((report: IInventoryReport) => {
+          <Stack spacing={2.5}>
+            {reportsByDate.map((dateGroup) => {
+              const isToday = dayjs(dateGroup.date).isSame(dayjs(), 'day');
+              const isYesterday = dayjs(dateGroup.date).isSame(
+                dayjs().subtract(1, 'day'),
+                'day',
+              );
+              const dateLabel = isToday
+                ? 'Today'
+                : isYesterday
+                  ? 'Yesterday'
+                  : dayjs(dateGroup.date).format('MMMM D, YYYY');
+
               return (
-                <ReportCard
-                  key={report.id}
-                  report={report}
-                  handleDeleteReport={(reportId: number) =>
-                    setDeleteReportProps({ open: true, reportId: reportId })
-                  }
-                />
+                <Box key={dateGroup.date}>
+                  {/* Date Header */}
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1.5,
+                      mb: 1.5,
+                      position: 'sticky',
+                      top: 0,
+                      zIndex: 1,
+                      backgroundColor: 'background.paper',
+                      py: 0.5,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                        px: 1.5,
+                        py: 0.75,
+                        borderRadius: 1.5,
+                        // bgcolor: alpha('#3B82F6', 0.08),
+                        // border: '1px solid',
+                        border: '1px solid',
+                        borderColor: blueGrey[100],
+                      }}
+                    >
+                      <Calendar size={14} color={blueGrey[500]} />
+                      <Typography
+                        variant="body2"
+                        fontWeight={600}
+                        // sx={{ color: '#3B82F6' }}
+                      >
+                        {dateLabel}
+                      </Typography>
+                      <Box
+                        sx={{
+                          ml: 0.5,
+                          px: 0.75,
+                          py: 0.25,
+                          borderRadius: 1,
+                          bgcolor: alpha('#3B82F6', 0.15),
+                        }}
+                      >
+                        <Typography
+                          variant="caption"
+                          fontWeight={600}
+                          sx={{ color: '#3B82F6', fontSize: '0.65rem' }}
+                        >
+                          {dateGroup.reports.length}
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Box
+                      sx={{
+                        flex: 1,
+                        height: 1,
+                        bgcolor: alpha('#000', 0.08),
+                      }}
+                    />
+                  </Box>
+
+                  {/* Reports for this date */}
+                  <Stack spacing={1}>
+                    {dateGroup.reports.map((report: IInventoryReport) => {
+                      return (
+                        <ReportCard
+                          key={report.id}
+                          report={report}
+                          handleDeleteReport={(reportId: number) =>
+                            setDeleteReportProps({
+                              open: true,
+                              reportId: reportId,
+                            })
+                          }
+                        />
+                      );
+                    })}
+                  </Stack>
+                </Box>
               );
             })}
           </Stack>
