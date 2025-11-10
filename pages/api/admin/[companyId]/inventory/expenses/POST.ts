@@ -157,37 +157,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     const itemsAlreadyExist = items.filter((item: any) => item.id > 0);
     console.log('itemsAlreadyExist', itemsAlreadyExist);
-    // const itemsToCreate = items.filter((item: any) => item.id === 0);
-
-    // const newItems =
-    //   itemsToCreate.length > 0
-    //     ? itemsToCreate.reduce((acc: any, item: any) => {
-    //         if (!acc.brandNewItems) {
-    //           acc.brandNewItems = [];
-    //         }
-
-    //         if (!acc.itemsAlreadyHasInventoryItem) {
-    //           acc.itemsAlreadyHasInventoryItem = [];
-    //         }
-
-    //         const existedInventoryItem = inventoryItems.find(
-    //           (inventoryItem: any) => {
-    //             return inventoryItem.name === item.name;
-    //           },
-    //         );
-
-    //         if (existedInventoryItem) {
-    //           acc.itemsAlreadyHasInventoryItem.push({
-    //             ...item,
-    //             inventoryItemId: existedInventoryItem.id,
-    //           });
-    //         } else {
-    //           acc.brandNewItems.push(item);
-    //         }
-
-    //         return acc;
-    //       }, {})
-    //     : {};
 
     // CASE 1: ITEM ALREADY EXISTS
     if (itemsAlreadyExist.length > 0) {

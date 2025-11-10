@@ -11,13 +11,13 @@ interface IBody {
   startedAt: string;
   endedAt: string;
   routeId: number;
-  driverId: number;
+  employeeId: number;
   role: WORKING_ROLE;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { id, date, startedAt, endedAt, routeId, driverId, role }: IBody =
+    const { id, date, startedAt, endedAt, routeId, employeeId, role }: IBody =
       req.body;
 
     console.log(date, 'date');
@@ -57,8 +57,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       }
     }
 
-    if (driverId !== existingShift.driverId) {
-      updatedFields.driverId = driverId;
+    if (employeeId !== existingShift.employeeId) {
+      updatedFields.employeeId = employeeId;
     }
 
     if (date !== existingShift.date) {
@@ -76,7 +76,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     // Handle update cost if anything hours or driverId changed
     if (updatedFields.hours || updatedFields.driverId) {
       const driver = await prisma.employee.findUnique({
-        where: { id: updatedFields.driverId || existingShift.driverId },
+        where: { id: updatedFields.employeeId || existingShift.employeeId },
         include: {
           routes: true,
         },
