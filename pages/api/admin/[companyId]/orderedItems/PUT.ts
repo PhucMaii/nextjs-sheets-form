@@ -84,16 +84,38 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       where: {
         id: orderId,
       },
-      include: {
+      select: {
+        id: true,
+        companyId: true,
+        deliveryDate: true,
+        note: true,
+        status: true,
+        hasSubtractInventory: true,
         items: {
-          include: {
-            fifo: true,
+          select: {
+            id: true,
+            name: true,
+            price: true,
+            quantity: true,
+            option: true,
+            inventoryUnitId: true,
             inventoryUnit: true,
             inventoryItem: true,
+            fifo: true,
           },
         },
         user: true,
       },
+      // include: {
+      //   items: {
+      //     include: {
+      //       fifo: true,
+      //       inventoryUnit: true,
+      //       inventoryItem: true,
+      //     },
+      //   },
+      //   user: true,
+      // },
     });
 
     if (!existingOrder) {
@@ -101,17 +123,18 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     }
 
     // Track order items
-    const orderedItemList = await prisma.orderedItems.findMany({
-      where: {
-        orderId,
-      },
-      include: {
-        fifo: true,
-        inventoryUnit: true,
-        inventoryItem: true,
-        Orders: true,
-      },
-    });
+    // const orderedItemList = await prisma.orderedItems.findMany({
+    //   where: {
+    //     orderId,
+    //   },
+    //   include: {
+    //     fifo: true,
+    //     inventoryUnit: true,
+    //     inventoryItem: true,
+    //     Orders: true,
+    //   },
+    // });
+    const orderedItemList = existingOrder.items;
 
     // Categorize updated items into create, update, delete
     const newItems = categorizeUpdatedItems(
@@ -131,140 +154,149 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       existingOrder.deliveryDate,
     );
 
-    for (const item of newItems) {
-      // Check item categorize to create, update or delete
-
-      // CREATE
-      if (item.type === ITEM_CATEGORIZED.CREATE) {
-        await createOrderedItems(Number(companyId), existingOrder, [item]);
-        actionRecord.create.push(item);
-        continue;
-      } else if (item.type === ITEM_CATEGORIZED.REMAIN) {
-        // REMAIN
-        continue;
-      } else if (item.type === ITEM_CATEGORIZED.DELETE) {
-        // DELETE - force to delete first -> then restock
-        await prisma.orderedItems.delete({
-          where: {
-            id: item.id,
-          },
-        });
-
-        actionRecord.delete.push(item);
-
-        if (item?.fifo && item?.inventoryUnit && isValidToAffectInventory) {
-          await restockInventoryItem(
-            item.orderId,
-            item.fifo,
-            item.inventoryUnit,
-            item.quantity,
-          );
-
-          // Record inventory log
-          await recordOrderInventoryLog(
-            item.orderId,
-            item?.fifo?.inventoryItemId,
-            item.quantity,
-            InventoryLogType.RESTOCK,
-            InventoryLogFrom.EDIT_ORDER,
-            `Restock ${item.quantity} ${item?.inventoryItem?.name} to inventory due to order ${item.orderId} removed ${item.name}`,
-          );
-        }
-
-        continue;
-      } else {
-        // UPDATE
-        // const { cost } = await generateCostAndProfit(item.id);
-
-        // Calculate cost: prevCost / prevRatio to get cost for ratio of 1 -> then multiply to new ratio
-        const cost =
-          (item?.cost / (item?.inventoryUnit?.ratio || 1)) *
-          (item?.inventoryUnit?.ratio || 1);
-
-        actionRecord.update.push(item);
-
-        const profit = await calculateProfit(item, cost);
-
-        await prisma.orderedItems.update({
-          where: {
-            id: item.id,
-          },
-          data: {
-            price: item.price,
-            quantity: item.quantity,
-            cost,
-            profit,
-            inventoryUnitId: item.inventoryUnitId,
-            option: item.option,
-          },
-        });
-
-        // Inventory Update
-
-        if (
-          item?.fifo &&
-          item.inventoryUnit &&
-          item?.Orders?.status !== ORDER_STATUS.VOID &&
-          isValidToAffectInventory
-        ) {
-          // Identify the difference between the previous quantity and the new quantity
-          const difference = item.quantity - item.prevQuantity;
-
-          const isRestock = difference < 0;
-
-          await updateSingleInventoryItem(
-            item.orderId,
-            item.fifo,
-            item.inventoryUnit,
-            item.quantity,
-            item.prevQuantity,
-            item?.prevInventoryUnit,
-          );
-
-          // Record inventory log
-          await recordOrderInventoryLog(
-            item.orderId,
-            item?.fifo?.inventoryItemId,
-            Math.abs(difference),
-            isRestock ? InventoryLogType.RESTOCK : InventoryLogType.SUBTRACT,
-            InventoryLogFrom.EDIT_ORDER,
-            `${isRestock ? 'Restock' : 'Subtract'} ${Math.abs(difference)} ${item?.inventoryItem?.name} to inventory due to order ${item.orderId} updated ${item.name}`,
-          );
-        }
-      }
-    }
-
-    const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
-    let comment = '';
-
-    if (actionRecord.create.length > 0) {
-      comment += `### Create\n ${actionRecord.create.map((item: any) => `x${item.quantity} ${item.name} ($${item.price})`).join('\n')}\n`;
-    }
-    if (actionRecord.update.length > 0) {
-      comment += `### Update\n ${actionRecord.update.map((item: any) => `x${item.quantity} ${item.name} ($${item.price})`).join('\n')}\n`;
-    }
-    if (actionRecord.delete.length > 0) {
-      comment += `### Remove\n ${actionRecord.delete.map((item: any) => `x${item.quantity} ${item.name} ($${item.price})`).join('\n')}\n`;
-    }
-
-    await recordAction(
-      orderId,
-      createdBy,
-      `${createdBy} edited this order`,
-      comment,
+    const creates = newItems.filter(
+      (item: any) => item.type === ITEM_CATEGORIZED.CREATE,
+    );
+    const updates = newItems.filter(
+      (item: any) => item.type === ITEM_CATEGORIZED.UPDATE,
+    );
+    const deletes = newItems.filter(
+      (item: any) => item.type === ITEM_CATEGORIZED.DELETE,
     );
 
-    // Get admin update info
-    const updatedBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
+    // Create new log lines
+    const toLines = (item: any) =>
+      `x${item.quantity} ${item.name} ($${item.price})`;
+    const createLines = creates.map(toLines);
+    const updateLines = updates.map(toLines);
+    const deleteLines = deletes.map(toLines);
 
-    const orderedItems = await prisma.orderedItems.findMany({
-      where: {
+    // Delete items first
+    await prisma.$transaction(async (tx) => {
+      if (deletes.length > 0) {
+        await tx.orderedItems.deleteMany({
+          where: {
+            id: {
+              in: deletes.map((item: any) => item.id),
+            },
+          },
+        });
+
+        if (isValidToAffectInventory) {
+          for (const item of deletes) {
+            if (item?.fifo && item?.inventoryUnit) {
+              await restockInventoryItem(
+                item.orderId,
+                item.fifo,
+                item.inventoryUnit,
+                item.quantity,
+              );
+
+              await recordOrderInventoryLog(
+                item.orderId,
+                item?.fifo?.inventoryItemId,
+                item.quantity,
+                InventoryLogType.RESTOCK,
+                InventoryLogFrom.EDIT_ORDER,
+                `Restock ${item.quantity} ${item?.inventoryItem?.name} to inventory due to order ${item.orderId} removed ${item.name}`,
+              );
+            }
+          }
+        }
+      }
+      // Create new items
+      if (creates.length > 0) {
+        await Promise.allSettled(
+          creates.map(async (item: any) => {
+            await createOrderedItems(Number(companyId), existingOrder as any, [
+              item,
+            ]);
+          }),
+        );
+      }
+
+      // Update items
+      if (updates.length > 0) {
+        await Promise.allSettled(
+          updates.map(async (item: any) => {
+            const cost =
+              (item?.cost / (item?.inventoryUnit?.ratio || 1)) *
+              (item?.inventoryUnit?.ratio || 1);
+            const profit = await calculateProfit(item, cost);
+
+            await tx.orderedItems.update({
+              where: {
+                id: item.id,
+              },
+              data: {
+                price: item.price,
+                quantity: item.quantity,
+                cost,
+                profit,
+                inventoryUnitId: item.inventoryUnitId,
+                option: item.option,
+              },
+            });
+
+            if (item?.fifo && item?.inventoryUnit && isValidToAffectInventory) {
+              const difference = item.quantity - item.prevQuantity;
+              const isRestock = difference < 0;
+              await updateSingleInventoryItem(
+                item.orderId,
+                item.fifo,
+                item.inventoryUnit,
+                item.quantity,
+                item.prevQuantity,
+                item?.prevInventoryUnit,
+              );
+
+              await recordOrderInventoryLog(
+                orderId,
+                item?.fifo?.inventoryItemId,
+                Math.abs(difference),
+                isRestock
+                  ? InventoryLogType.RESTOCK
+                  : InventoryLogType.SUBTRACT,
+                InventoryLogFrom.EDIT_ORDER,
+                `${isRestock ? 'Restock' : 'Subtract'} ${Math.abs(difference)} ${item?.inventoryItem?.name} (item update)`,
+              );
+            }
+          }),
+        );
+      }
+    });
+
+    const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
+
+    // Single action record in one comment
+    let comment = '';
+    if (createLines.length)
+      comment += `### Create\n${createLines.join('\n')}\n`;
+    if (updateLines.length)
+      comment += `### Update\n${updateLines.join('\n')}\n`;
+    if (deleteLines.length)
+      comment += `### Remove\n${deleteLines.join('\n')}\n`;
+
+    if (comment) {
+      await recordAction(
         orderId,
-      },
-      include: {
-        fifo: true,
-        inventoryItem: true,
-        inventoryUnit: true,
+        createdBy,
+        `${createdBy} edited this order`,
+        comment,
+      );
+    }
+
+    // Recompute totals & perform one order update (not multiple)
+    //   Re-fetch items minimally (or reuse in-memory if your create/update code returns them)
+    const orderedItems = await prisma.orderedItems.findMany({
+      where: { orderId },
+      select: {
+        id: true,
+        price: true,
+        quantity: true,
+        prevPrice: true,
+        isShowDiscount: true,
+        inventoryItem: { select: { hasPST: true, hasGST: true, name: true } },
       },
     });
     const orderTotalPrice = generateOrderTotalPrice(orderedItems);
@@ -283,7 +315,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         PST: orderTotalPrice.PST,
         GST: orderTotalPrice.GST,
         discount: orderTotalPrice.discount,
-        updatedBy,
+        updatedBy: createdBy,
         updateTime,
       },
       include: {
@@ -304,6 +336,75 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
+    const deliveryDateChanged = deliveryDate !== existingOrder.deliveryDate;
+    const noteChanged = note !== existingOrder.note;
+
+    let hasSubtractInventory = existingOrder.hasSubtractInventory;
+
+    if (deliveryDateChanged) {
+      if (
+        new Date(deliveryDate) < new Date(existingOrder.deliveryDate) &&
+        !hasSubtractInventory
+      ) {
+        for (const item of orderUpdated.items) {
+          if (item?.fifo && item?.inventoryUnit) {
+            await subtractInventoryItem(
+              orderId,
+              item.fifo,
+              item.inventoryUnit,
+              item.quantity,
+            );
+
+            // Record inventory log
+            await recordOrderInventoryLog(
+              orderId,
+              item?.fifo?.inventoryItemId,
+              item.quantity,
+              InventoryLogType.SUBTRACT,
+              InventoryLogFrom.EDIT_ORDER,
+              `Subtract ${item.quantity} ${item?.inventoryItem?.name} from inventory due to order ${item.orderId} delivery date from ${existingOrder.deliveryDate} to ${deliveryDate} update`,
+            );
+          }
+        }
+      }
+
+      if (new Date(deliveryDate) > new Date(existingOrder.deliveryDate)) {
+        // move later -> restock now
+        for (const item of orderUpdated.items) {
+          if (item?.fifo && item?.inventoryUnit) {
+            await restockInventoryItem(
+              orderId,
+              item.fifo,
+              item.inventoryUnit,
+              item.quantity,
+            );
+            await recordOrderInventoryLog(
+              orderId,
+              item?.fifo?.inventoryItemId,
+              item.quantity,
+              InventoryLogType.RESTOCK,
+              InventoryLogFrom.EDIT_ORDER,
+              `Restock ${item.quantity} ${item?.inventoryItem?.name}: delivery moved ${existingOrder.deliveryDate} → ${deliveryDate}`,
+            );
+          }
+        }
+        hasSubtractInventory = false;
+
+        // clear reassignment for old date
+        await prisma.reassignment.deleteMany({
+          where: { orderId, date: existingOrder.deliveryDate },
+        });
+      }
+    }
+
+    // Secondary action log for delivery/note changes (only if changed)
+    if (deliveryDateChanged || noteChanged) {
+      let extra = '';
+      if (deliveryDateChanged) extra += `### Delivery date\n${existingOrder.deliveryDate} -> ${deliveryDate}\n`;
+      if (noteChanged) extra += `### Note\n${note}\n`;
+      await recordAction(orderId, createdBy, `${createdBy} edited this order`, extra);
+    }
+
     // Notify Email for client
     if (
       existingOrder?.user?.email &&
@@ -317,105 +418,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         true,
         note,
         'EDIT ORDER',
-      );
-    }
-
-    if (
-      deliveryDate !== existingOrder.deliveryDate ||
-      note !== existingOrder.note
-    ) {
-      let comment: string = '';
-
-      if (deliveryDate !== existingOrder.deliveryDate) {
-        comment += `### Delivery date\n${existingOrder.deliveryDate} -> ${deliveryDate}\n`;
-
-        // If delivery date is moved to the past and !hasSubtractInventory, subtract the inventory
-        if (
-          new Date(deliveryDate) < new Date(existingOrder.deliveryDate) &&
-          !orderUpdated.hasSubtractInventory
-        ) {
-          for (const item of orderUpdated.items) {
-            if (item?.fifo && item?.inventoryUnit) {
-              await subtractInventoryItem(
-                orderId,
-                item.fifo,
-                item.inventoryUnit,
-                item.quantity,
-              );
-
-              // Record inventory log
-              await recordOrderInventoryLog(
-                orderId,
-                item?.fifo?.inventoryItemId,
-                item.quantity,
-                InventoryLogType.SUBTRACT,
-                InventoryLogFrom.EDIT_ORDER,
-                `Subtract ${item.quantity} ${item?.inventoryItem?.name} from inventory due to order ${item.orderId} delivery date from ${existingOrder.deliveryDate} to ${deliveryDate} update`,
-              );
-            }
-          }
-
-          await prisma.orders.update({
-            where: {
-              id: orderId,
-            },
-            data: {
-              hasSubtractInventory: true,
-            },
-          });
-        }
-
-        // If delivery date is moved to the future, restock the inventory
-        if (new Date(deliveryDate) > new Date(existingOrder.deliveryDate)) {
-          for (const item of orderUpdated.items) {
-            if (item?.fifo && item?.inventoryUnit) {
-              await restockInventoryItem(
-                orderId,
-                item.fifo,
-                item.inventoryUnit,
-                item.quantity,
-              );
-
-              // Record inventory log
-              await recordOrderInventoryLog(
-                orderId,
-                item?.fifo?.inventoryItemId,
-                item.quantity,
-                InventoryLogType.RESTOCK,
-                InventoryLogFrom.EDIT_ORDER,
-                `Restock ${item.quantity} ${item?.inventoryItem?.name} to inventory due to order ${item.orderId} delivery date from ${existingOrder.deliveryDate} to ${deliveryDate} update`,
-              );
-            }
-          }
-
-          await prisma.orders.update({
-            where: {
-              id: orderId,
-            },
-            data: {
-              hasSubtractInventory: false,
-            },
-          });
-        }
-
-        // If delivery date is changed, remove the reassignment if any
-        await prisma.reassignment.deleteMany({
-          where: {
-            orderId,
-            date: existingOrder.deliveryDate,
-          },
-        });
-      }
-
-      if (note !== existingOrder.note) {
-        comment += `### Note\n${note}\n`;
-      }
-      // Create order action of update delivery date
-      await recordAction(
-        orderId,
-        createdBy,
-        `${createdBy} edited this order`,
-        comment,
       );
     }
 
@@ -445,30 +447,31 @@ export const categorizeUpdatedItems = (
   updatedItems: any,
   comparedField: string = 'id',
 ) => {
-  let trackBaseItems = [...baseItems];
+  const baseById = new Map<number, any>();
+  const seen = new Set<number>();
 
-  const newItems = updatedItems.map((updatedItem: any) => {
-    const baseItem = baseItems.find((item: any) => {
-      return item[comparedField] === updatedItem[comparedField];
-    });
+  const results: any[] = [];
 
-    if (updatedItem?.option?.name) {
-      console.log({ updatedItem }, 'updatedItem?.option?.name');
-    }
+  for (const baseItem of baseItems) {
+    baseById.set(baseItem[comparedField], baseItem);
+  }
+
+  for (const updatedItem of updatedItems) {
+    const baseItem = baseById.get(updatedItem[comparedField]);
 
     if (baseItem) {
-      console.log({ baseItem, updatedItem });
-      trackBaseItems = trackBaseItems.filter((item: any) => {
-        return item[comparedField] !== updatedItem[comparedField];
-      });
+      seen.add(updatedItem[comparedField]);
 
-      if (
-        baseItem.quantity !== updatedItem.quantity ||
-        updatedItem.price !== baseItem.price ||
-        updatedItem.inventoryUnitId !== baseItem.inventoryUnitId ||
-        updatedItem?.option?.name !== baseItem?.option?.name
-      ) {
-        return {
+      const priceChanged = updatedItem.price !== baseItem?.price;
+      const qtyChanged = updatedItem.quantity !== baseItem?.quantity;
+      const unitChanged =
+        updatedItem.inventoryUnitId !== baseItem?.inventoryUnitId;
+      const optNameChanged =
+        (updatedItem?.option?.name ?? null) !==
+        (baseItem?.option?.name ?? null);
+
+      if (priceChanged || qtyChanged || unitChanged || optNameChanged) {
+        results.push({
           ...baseItem,
           prevInventoryUnit: baseItem.inventoryUnit,
           inventoryUnitId: updatedItem.inventoryUnitId,
@@ -484,30 +487,33 @@ export const categorizeUpdatedItems = (
             prevPrice: updatedItem?.option?.prevPrice,
             isShowDiscount: updatedItem?.option?.isShowDiscount,
           },
-        };
+        });
       } else {
-        return {
+        results.push({
           ...baseItem,
           type: ITEM_CATEGORIZED.REMAIN,
-        };
+        });
       }
     } else {
-      return {
+      results.push({
         ...updatedItem,
         companyId,
         type: ITEM_CATEGORIZED.CREATE,
-      };
+      });
     }
-  });
+  }
 
-  const deletedItems = trackBaseItems.map((item: any) => {
-    return {
-      ...item,
-      type: ITEM_CATEGORIZED.DELETE,
-    };
-  });
+  // Delete items that are not in the updated items
+  for (const baseItem of baseItems) {
+    if (!seen.has(baseItem[comparedField])) {
+      results.push({
+        ...baseItem,
+        type: ITEM_CATEGORIZED.DELETE,
+      });
+    }
+  }
 
-  return [...newItems, ...deletedItems];
+  return results;
 };
 
 export const generateOrderTotalPrice = (
