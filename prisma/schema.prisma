@@ -917,6 +917,7 @@ model ItemType_Category {
   category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@id([itemTypeId, categoryId])
+  @@index([categoryId])
 }
 
 model VendorItem {
@@ -1111,6 +1112,9 @@ model Option {
   unit          InventoryUnit @relation(fields: [unitId], references: [id])
   item          Item          @relation(fields: [itemId], references: [id], onDelete: Cascade)
   inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+
+  @@index([itemId])
+  @@index([unitId])
 }
 
 model ScheduledShift {

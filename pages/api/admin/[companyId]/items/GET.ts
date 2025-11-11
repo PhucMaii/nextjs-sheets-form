@@ -131,11 +131,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
                 },
               },
               type: true,
-              // type: {
-              //   include: {
-              //     itemType_category: true,
-              //   },
-              // },
             },
           },
           category: {

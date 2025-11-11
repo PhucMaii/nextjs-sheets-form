@@ -1,3 +1,5 @@
+import { generateOrderTotalPrice } from '@/app/utils/orders';
+
 export const LouisFooter = `
     <p>
       <strong>Louis Le</strong><br />
@@ -27,12 +29,7 @@ export const generateOrderTemplate = (
   orderId: number,
   flag?: string,
 ) => {
-  const actualItemSubtotal = order?.items.reduce(
-    (acc: number, item: any) => acc + item.price * item.quantity,
-    0,
-  );
-  const isSubtotalUnmatch =
-    actualItemSubtotal.toFixed(2) !== order?.subTotal.toFixed(2);
+  const total = generateOrderTotalPrice(order.items, order?.shippingFee);
 
   let orderDetailsTemplate = '';
 
@@ -107,14 +104,14 @@ export const generateOrderTemplate = (
       <hr style="margin: 20px 0;" />
 
       ${
-        order?.discount
-          ? `<p style="text-align: right;">Discount: -$${order.discount.toFixed(2)}</p>`
+        total?.discount && total?.discount > 0
+          ? `<p style="text-align: right;">Discount: -$${total?.discount?.toFixed(2) || '0.00'}</p>`
           : ''
       }
-      <p style="text-align: right;">Subtotal: $${(order?.subTotal ?? order?.totalPrice ?? 0).toFixed(2)}</p>
-      <p style="text-align: right;">GST: $${order?.GST?.toFixed(2) || '0.00'}</p>
-      <p style="text-align: right;">PST: $${order?.PST?.toFixed(2) || '0.00'}</p>
-      <p style="text-align: right;"><strong>Total: $${order?.totalPrice?.toFixed(2)}</strong></p>
+      <p style="text-align: right;">Subtotal: $${total?.subTotal?.toFixed(2) || '0.00'}</p>
+      <p style="text-align: right;">GST: $${total?.GST?.toFixed(2) || '0.00'}</p>
+      <p style="text-align: right;">PST: $${total?.PST?.toFixed(2) || '0.00'}</p>
+      <p style="text-align: right;"><strong>Total: $${total?.totalPrice?.toFixed(2)}</strong></p>
 
       <p><strong>Delivery Address:</strong> ${deliveryAddress}</p>
       <p><strong>Contact:</strong> ${phoneNumber}</p>
@@ -123,18 +120,6 @@ export const generateOrderTemplate = (
 
       <p style="text-align: right;">Order by: ${order?.createdBy}</p>
       ${order?.updatedBy ? `<p style="text-align: right;">Updated by: ${order?.updatedBy}</p>` : ''}
-
-      ${
-        isSubtotalUnmatch
-          ? `
-        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
-          <p style="text-align: right; color: red;">Subtotal is not match with actual item subtotal. We'll fix it as soon as possible.</p>
-          <p style="text-align: right; color: red;">Actual item subtotal: $${actualItemSubtotal.toFixed(2)}</p>
-          <p style="text-align: right; color: red;">Order subtotal: $${order?.subTotal?.toFixed(2)}</p>
-        </div>
-        `
-          : ''
-      }
     </div>
   `;
 };

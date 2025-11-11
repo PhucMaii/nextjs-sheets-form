@@ -104,7 +104,9 @@ export default function DetailStep({
   defaultCodDate,
 }: PropTypes) {
   const { companyId }: any = useParams();
-  const [codDate, setCodDate] = useState<any>(dayjs(defaultCodDate || ''));
+  const [codDate, setCodDate] = useState<any>(
+    defaultCodDate ? dayjs(defaultCodDate) : null,
+  );
   const [isSelectRangeOpen, setIsSelectRangeOpen] = useState(false);
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
@@ -116,6 +118,12 @@ export default function DetailStep({
 
   const month = YYYYMMDDFormat(new Date()).split('/')[0];
   const year = YYYYMMDDFormat(new Date()).split('/')[2];
+
+  useEffect(() => {
+    if (codDate) {
+      setSelectedDate(codDate);
+    }
+  }, [codDate]);
 
   // Define sections based on transaction type
   const getSections = () => {
@@ -207,7 +215,7 @@ export default function DetailStep({
 
   // Data Fetching
   const { data: codList } = useQuery({
-    queryKey: ['codList', codDate.format('MM/DD/YYYY')],
+    queryKey: ['codList', codDate ? codDate.format('MM/DD/YYYY') : ''],
     queryFn: () =>
       axios
         .get(
@@ -217,6 +225,8 @@ export default function DetailStep({
           ),
         )
         .then((res) => res.data.data),
+
+    enabled: !!codDate,
   });
 
   const { data: expenseTypes } = useQuery({
@@ -1059,9 +1069,7 @@ export default function DetailStep({
                           backgroundColor: isCurrent
                             ? `${primaryColor}20`
                             : 'grey.300',
-                          color: isCurrent
-                            ? primaryColor
-                            : 'grey.600',
+                          color: isCurrent ? primaryColor : 'grey.600',
                           transition: 'all 0.2s ease',
                         }}
                       >
@@ -1157,36 +1165,34 @@ export default function DetailStep({
                 {formData.isCOD ? (
                   <Box>
                     {/* COD Date Selection */}
-                    {setCodDate && codDate && (
-                      <Box sx={{ mb: 3 }}>
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{ mb: 2 }}
-                        >
-                          Select a date to fetch available COD options
-                        </Typography>
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                          <DatePicker
-                            label="COD Date"
-                            value={codDate}
-                            onChange={(newValue) => {
-                              if (newValue && setCodDate) {
-                                setCodDate(newValue);
-                                setSelectedDate(newValue);
-                                setSelectedDate(newValue);
-                              }
-                            }}
-                            slotProps={{
-                              textField: {
-                                fullWidth: false,
-                                sx: { maxWidth: 300 },
-                              },
-                            }}
-                          />
-                        </LocalizationProvider>
-                      </Box>
-                    )}
+                    {/* {setCodDate && codDate && ( */}
+                    <Box sx={{ mb: 3 }}>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ mb: 2 }}
+                      >
+                        Select a date to fetch available COD options
+                      </Typography>
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DatePicker
+                          label="COD Date"
+                          value={codDate}
+                          onChange={(newValue) => {
+                            if (newValue && setCodDate) {
+                              setCodDate(newValue);
+                            }
+                          }}
+                          slotProps={{
+                            textField: {
+                              fullWidth: false,
+                              sx: { maxWidth: 300 },
+                            },
+                          }}
+                        />
+                      </LocalizationProvider>
+                    </Box>
+                    {/* )} */}
 
                     <FormControl fullWidth>
                       <InputLabel>COD</InputLabel>
