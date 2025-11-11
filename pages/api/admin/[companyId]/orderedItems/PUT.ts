@@ -1,10 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import {
-  InventoryLogFrom,
-  InventoryLogType,
-  Orders,
-  PrismaClient,
-} from '@prisma/client';
+import { InventoryLogFrom, InventoryLogType } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import {
   restockInventoryItem,
@@ -12,7 +7,7 @@ import {
   updateSingleInventoryItem,
 } from './single';
 import { gstRate, pstRate } from '@/app/lib/constant';
-import { ORDER_STATUS, USER_ROLE } from '@/app/utils/enum';
+import { USER_ROLE } from '@/app/utils/enum';
 import {
   calculateProfit,
   createOrderedItems,
@@ -22,12 +17,10 @@ import {
   checkOrderValidToAffectInventory,
   formatItemsWithTotalPrice,
 } from '@/pages/api/utils/order';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { recordAction } from '@/pages/api/utils/timeline';
 import { recordOrderInventoryLog } from '@/pages/api/utils/logs';
-import emailHandler, { sendEmail } from '@/pages/api/utils/email';
+import { sendEmail } from '@/pages/api/utils/email';
 import prisma from '@/client';
 
 export enum ITEM_CATEGORIZED {
@@ -88,6 +81,9 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         id: true,
         companyId: true,
         deliveryDate: true,
+        orderTime: true,
+        createdBy: true,
+        updatedBy: true,
         note: true,
         status: true,
         hasSubtractInventory: true,
@@ -106,16 +102,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         },
         user: true,
       },
-      // include: {
-      //   items: {
-      //     include: {
-      //       fifo: true,
-      //       inventoryUnit: true,
-      //       inventoryItem: true,
-      //     },
-      //   },
-      //   user: true,
-      // },
     });
 
     if (!existingOrder) {
@@ -142,12 +128,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       orderedItemList,
       updatedItems,
     );
-
-    const actionRecord: any = {
-      create: [],
-      update: [],
-      delete: [],
-    };
 
     const isValidToAffectInventory = await checkOrderValidToAffectInventory(
       existingOrder?.companyId || 1,
@@ -186,19 +166,19 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           for (const item of deletes) {
             if (item?.fifo && item?.inventoryUnit) {
               await restockInventoryItem(
-                item.orderId,
+                orderId,
                 item.fifo,
                 item.inventoryUnit,
                 item.quantity,
               );
 
               await recordOrderInventoryLog(
-                item.orderId,
+                orderId,
                 item?.fifo?.inventoryItemId,
                 item.quantity,
                 InventoryLogType.RESTOCK,
                 InventoryLogFrom.EDIT_ORDER,
-                `Restock ${item.quantity} ${item?.inventoryItem?.name} to inventory due to order ${item.orderId} removed ${item.name}`,
+                `Restock ${item.quantity} ${item?.inventoryItem?.name} to inventory due to order ${orderId} removed ${item.name}`,
               );
             }
           }
@@ -242,7 +222,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
               const difference = item.quantity - item.prevQuantity;
               const isRestock = difference < 0;
               await updateSingleInventoryItem(
-                item.orderId,
+                orderId,
                 item.fifo,
                 item.inventoryUnit,
                 item.quantity,
@@ -362,7 +342,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
               item.quantity,
               InventoryLogType.SUBTRACT,
               InventoryLogFrom.EDIT_ORDER,
-              `Subtract ${item.quantity} ${item?.inventoryItem?.name} from inventory due to order ${item.orderId} delivery date from ${existingOrder.deliveryDate} to ${deliveryDate} update`,
+              `Subtract ${item.quantity} ${item?.inventoryItem?.name} from inventory due to order ${orderId} delivery date from ${existingOrder.deliveryDate} to ${deliveryDate} update`,
             );
           }
         }
@@ -400,9 +380,15 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     // Secondary action log for delivery/note changes (only if changed)
     if (deliveryDateChanged || noteChanged) {
       let extra = '';
-      if (deliveryDateChanged) extra += `### Delivery date\n${existingOrder.deliveryDate} -> ${deliveryDate}\n`;
+      if (deliveryDateChanged)
+        extra += `### Delivery date\n${existingOrder.deliveryDate} -> ${deliveryDate}\n`;
       if (noteChanged) extra += `### Note\n${note}\n`;
-      await recordAction(orderId, createdBy, `${createdBy} edited this order`, extra);
+      await recordAction(
+        orderId,
+        createdBy,
+        `${createdBy} edited this order`,
+        extra,
+      );
     }
 
     // Notify Email for client
@@ -412,7 +398,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     ) {
       await sendEmail(
         existingOrder?.user,
-        existingOrder,
+        orderUpdated,
         orderId,
         deliveryDate,
         true,
