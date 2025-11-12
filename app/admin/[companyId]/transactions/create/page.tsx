@@ -325,6 +325,8 @@ export default function CreateTransaction() {
         return;
       }
 
+      console.log('expenseItems', expenseItems);
+
       const response = await axios.post(
         getAdminApiUrl(companyId, '/inventory/expenses'),
         {

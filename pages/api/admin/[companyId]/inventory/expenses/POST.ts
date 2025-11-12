@@ -22,6 +22,8 @@ export interface IExpenseItem {
   unit: IInventoryUnit | null;
   units: IInventoryUnit[];
   inventoryItemId: number;
+  sellingPrice: number;
+  isChangeSellingPrice: boolean;
 }
 
 interface IBody {
@@ -207,6 +209,18 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           InventoryLogFrom.CREATE_TRANSACTION,
           `Create ${item.quantity} ${existedItem.inventoryItem.name} to inventory due to expense ${newExpense.id} created`,
         );
+
+        // Update selling price if needed
+        if (item.isChangeSellingPrice) {
+          await prisma.item.updateMany({
+            where: {
+              inventoryItemId: item.inventoryItemId,
+            },
+            data: {
+              price: item.sellingPrice,
+            },
+          });
+        }
       }
 
       // STEP 4: Create OrderedItems
@@ -225,284 +239,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         });
       }
     }
-
-    // // CASE 2: BRAND NEW ITEMS
-    // if (
-    //   Object.keys(newItems).length > 0 &&
-    //   newItems?.brandNewItems?.length > 0
-    // ) {
-    //   const brandNewItems = newItems.brandNewItems;
-
-    //   // STEP 1: Create Inventory Items
-    //   const { nextPos, newRows } = await calculateNextIndexPosAndRows(
-    //     otherTypeId,
-    //     brandNewItems.length,
-    //   );
-
-    //   for (let i = 0; i < brandNewItems.length; i++) {
-    //     const newItem = brandNewItems[i];
-
-    //     await prisma.inventoryItem.create({
-    //       data: {
-    //         companyId: Number(companyId),
-    //         name: newItem.name,
-    //         createdAt,
-    //         createdBy,
-    //         color: infoBackground,
-    //         typeId: otherTypeId,
-    //         indexPos: nextPos[i],
-    //       },
-    //     });
-    //   }
-
-    //   // Update item type rows
-    //   await prisma.itemType.update({
-    //     where: {
-    //       id: otherTypeId,
-    //     },
-    //     data: {
-    //       rows: newRows,
-    //     },
-    //   });
-
-    //   // await prisma.inventoryItem.createMany({
-    //   //   data: brandNewItems.map((item: any) => {
-    //   //     return {
-    //   //       name: item.name,
-    //   //       createdAt,
-    //   //       createdBy,
-    //   //       color: infoBackground,
-    //   //       typeId: otherTypeId,
-    //   //       indexPos: 1,
-    //   //     };
-    //   //   }),
-    //   // });
-
-    //   // Get just created inventory items
-    //   const newInventoryItems = await prisma.inventoryItem.findMany({
-    //     where: {
-    //       companyId: Number(companyId),
-    //       createdAt,
-    //       createdBy,
-    //     },
-    //   });
-
-    //   // STEP 2: Create Vendor Items
-    //   const newVendorItems: any = brandNewItems.map((item: any) => {
-    //     const existedItem = newInventoryItems.find(
-    //       (inventoryItem) => inventoryItem.name === item.name,
-    //     );
-
-    //     if (!existedItem) {
-    //       return res.status(404).json({
-    //         error: 'Conflict Inventory Item Not Found',
-    //       });
-    //     }
-
-    //     return {
-    //       inventoryItemId: existedItem.id,
-    //       vendorId: item.vendorId,
-    //       quantity: item.quantity,
-    //       companyId: Number(companyId),
-    //       createdAt,
-    //       createdBy,
-    //     };
-    //   });
-
-    //   await prisma.vendorItem.createMany({
-    //     data: newVendorItems,
-    //   });
-
-    //   // Get just created vendor items
-    //   const newVendorItemsCreated = await prisma.vendorItem.findMany({
-    //     where: {
-    //       companyId: Number(companyId),
-    //       createdAt,
-    //       createdBy,
-    //     },
-    //     include: {
-    //       inventoryItem: true,
-    //     },
-    //   });
-
-    //   // STEP 3: Create Inventory Units
-    //   const newUnits = brandNewItems
-    //     .map((item: any) => {
-    //       const existedVendorItem = newVendorItemsCreated.find(
-    //         (vendorItem) => vendorItem.inventoryItem.name === item.name,
-    //       );
-
-    //       if (!existedVendorItem) {
-    //         return res.status(404).json({
-    //           error: 'Conflict Inventory Item Not Found',
-    //         });
-    //       }
-
-    //       return item.units.map((unit: IInventoryUnit) => {
-    //         return {
-    //           vendorItemId: existedVendorItem.id,
-    //           unit: unit.unit,
-    //           unitPrice: unit.unitPrice,
-    //           ratio: unit.ratio,
-    //           createdAt,
-    //           createdBy,
-    //           companyId: Number(companyId),
-    //         };
-    //       });
-    //     })
-    //     .flat();
-
-    //   await prisma.inventoryUnit.createMany({
-    //     data: newUnits,
-    //   });
-
-    //   // STEP 4: Create FIFO
-
-    //   const newItemsWithVendorItemId = brandNewItems.map((item: any) => {
-    //     const vendorItem = newVendorItemsCreated.find(
-    //       (vItem) => vItem.inventoryItem.name === item.name,
-    //     );
-
-    //     if (!vendorItem) {
-    //       return res.status(404).json({
-    //         error: 'Conflict Inventory Item Not Found',
-    //       });
-    //     }
-
-    //     return {
-    //       ...item,
-    //       id: vendorItem.id,
-    //       inventoryItemId: vendorItem.inventoryItemId,
-    //     };
-    //   });
-    //   await createFifo(
-    //     Number(companyId),
-    //     newItemsWithVendorItemId,
-    //     createdAt,
-    //     createdBy,
-    //   );
-
-    //   // STEP 5: Create OrderedItems
-    //   const response = await createOrderedItems(
-    //     Number(companyId),
-    //     newItemsWithVendorItemId,
-    //     newExpense,
-    //     createdAt,
-    //     createdBy,
-    //   );
-
-    //   if (!response.ok) {
-    //     return res.status(404).json({
-    //       error: response.error,
-    //     });
-    //   }
-    // }
-
-    // // CASE 3: UPDATE ITEMS ALREADY EXIST WITH INVENTORY ITEM
-    // if (
-    //   Object.keys(newItems).length > 0 &&
-    //   newItems?.itemsAlreadyHasInventoryItem?.length > 0
-    // ) {
-    //   const existedItems = newItems.itemsAlreadyHasInventoryItem;
-
-    //   // STEP 1: Create Vendor Items
-    //   await prisma.vendorItem.createMany({
-    //     data: existedItems.map((item: any) => {
-    //       return {
-    //         inventoryItemId: item?.inventoryItemId,
-    //         vendorId: item.vendorId,
-    //         quantity: item.quantity,
-    //         createdAt,
-    //         createdBy,
-    //         companyId: Number(companyId),
-    //       };
-    //     }),
-    //   });
-
-    //   // STEP 2: Create FIFO
-    //   // Get just created vendor items
-    //   const newVendorItemsCreated = await prisma.vendorItem.findMany({
-    //     where: {
-    //       createdAt,
-    //       createdBy,
-    //       companyId: Number(companyId),
-    //     },
-    //     include: {
-    //       inventoryItem: true,
-    //     },
-    //   });
-
-    //   const newItemsWithVendorItemId = existedItems.map((item: any) => {
-    //     const vendorItem = newVendorItemsCreated.find(
-    //       (vItem) => vItem.inventoryItem.name === item.name,
-    //     );
-
-    //     if (!vendorItem) {
-    //       return res.status(404).json({
-    //         error: 'Conflict Inventory Item Not Found',
-    //       });
-    //     }
-
-    //     return {
-    //       ...item,
-    //       id: vendorItem.id,
-    //       inventoryItemId: vendorItem.inventoryItemId,
-    //     };
-    //   });
-
-    //   await createFifo(
-    //     Number(companyId),
-    //     newItemsWithVendorItemId,
-    //     createdAt,
-    //     createdBy,
-    //   );
-
-    //   // STEP 3: Create Inventory Units
-    //   const newUnits = existedItems
-    //     .map((item: any) => {
-    //       const existedVendorItem = newVendorItemsCreated.find(
-    //         (vendorItem) => vendorItem.inventoryItem.name === item.name,
-    //       );
-
-    //       if (!existedVendorItem) {
-    //         return res.status(404).json({
-    //           error: 'Conflict Inventory Item Not Found',
-    //         });
-    //       }
-
-    //       return item.units.map((unit: IInventoryUnit) => {
-    //         return {
-    //           vendorItemId: existedVendorItem.id,
-    //           unit: unit.unit,
-    //           unitPrice: unit.unitPrice,
-    //           ratio: unit.ratio,
-    //           createdAt,
-    //           createdBy,
-    //           companyId: Number(companyId),
-    //         };
-    //       });
-    //     })
-    //     .flat();
-
-    //   await prisma.inventoryUnit.createMany({
-    //     data: newUnits,
-    //   });
-
-    //   // STEP 4: Create OrderedItems
-    //   const response = await createOrderedItems(
-    //     Number(companyId),
-    //     newItemsWithVendorItemId,
-    //     newExpense,
-    //     createdAt,
-    //     createdBy,
-    //   );
-
-    //   if (!response.ok) {
-    //     return res.status(500).json({
-    //       message: response.error,
-    //     });
-    //   }
-    // }
 
     return res.status(200).json({ message: 'Expense created successfully' });
   } catch (error: any) {

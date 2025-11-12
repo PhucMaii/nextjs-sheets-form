@@ -206,40 +206,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           error: response.error,
         });
       }
-      // await prisma.orderedItems.createMany({
-      //   data: items.map((item: any) => {
-      //     return {
-      //       name: item.name,
-      //       price: item.unitPrice,
-      //       quantity: item.quantity,
-      //       expenseId: newExpense.id,
-      //     };
-      //   }),
-      // });
-
-      // for (const item of items) {
-      //   // Only allow driver to select old items, not allow them to create new items -> only inventory items
-      //   const existedItem = vendorItems.find((vendorItem: any) => {
-      //     return vendorItem.id === item.id;
-      //   });
-
-      //   if (!existedItem) {
-      //     return res.status(404).json({
-      //       error:
-      //         'Driver Can Only Select Inventory Items, Not Allow To Create New Items',
-      //     });
-      //   }
-
-      //   // await prisma.inventoryItem.update({
-      //   //   where: {
-      //   //     id: existedItem.id,
-      //   //   },
-      //   //   data: {
-      //   //     quantity: existedItem.quantity + item.quantity,
-      //   //     unitPrice: item.unitPrice,
-      //   //   },
-      //   // });
-      // }
     }
 
     // Connect Vendors and Expense

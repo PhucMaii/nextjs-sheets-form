@@ -4,10 +4,6 @@ import { verifySignature } from '@upstash/qstash/nextjs';
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    if (req.method !== 'POST') {
-      return res.status(405).json({ error: 'Method not allowed' });
-    }
-
     const { user, order, orderId, deliveryDate, note, subjectTag } = req.body;
     if (!user || !order || !orderId || !deliveryDate || !note || !subjectTag) {
       return res.status(400).json({ error: 'Missing required fields' });
