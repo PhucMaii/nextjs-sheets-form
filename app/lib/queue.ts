@@ -24,9 +24,9 @@ export async function enqueueEmail(payload: EmailPayload) {
     await qstash.publishJSON({
         url: target,
         body: payload,
-        retries: 8,
+        retries: 3,
         backoff: 'exponential',
-        timeout: 30_000,
+        timeout: 900,
         dedupe: true
     })
 }
