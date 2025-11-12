@@ -9,6 +9,8 @@ import {
   InputAdornment,
   TextField,
   Typography,
+  Checkbox,
+  FormControlLabel,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import React from 'react';
@@ -22,6 +24,7 @@ export default function ItemRow({
   removeExpenseItem,
   isLastItem,
   expenseItems,
+  isAllowChangeSellingPrice,
 }: {
   item: any;
   index: number;
@@ -30,6 +33,7 @@ export default function ItemRow({
   removeExpenseItem: (id: number) => void;
   isLastItem: boolean;
   expenseItems: any[];
+  isAllowChangeSellingPrice: boolean;
 }) {
   console.log(item.id, 'item');
   //   useEffect(() => {
@@ -215,6 +219,72 @@ export default function ItemRow({
             }
           />
         </Grid>
+
+        {isAllowChangeSellingPrice && <Grid item xs={12}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              alignItems: { xs: 'flex-start', sm: 'center' },
+              gap: { xs: 2, sm: 2 },
+              p: 2,
+              borderRadius: 1,
+              backgroundColor: 'grey.50',
+              border: '1px solid',
+              borderColor: 'grey.200',
+            }}
+          >
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={item.isChangeSellingPrice || false}
+                  onChange={(e) =>
+                    handleItemChange(
+                      item.id,
+                      'isChangeSellingPrice',
+                      e.target.checked,
+                    )
+                  }
+                />
+              }
+              label="Change selling price"
+              sx={{
+                mb: { xs: 0, sm: 0 },
+                flexShrink: 0,
+              }}
+            />
+            {item.isChangeSellingPrice && (
+              <Box
+                sx={{
+                  width: { xs: '100%', sm: 'auto' },
+                  minWidth: { xs: '100%', sm: 200 },
+                  maxWidth: { xs: '100%', sm: 300 },
+                }}
+              >
+                <TextField
+                  fullWidth
+                  label="Selling Price"
+                  type="number"
+                  value={item.sellingPrice || ''}
+                  onChange={(e) =>
+                    handleItemChange(
+                      item.id,
+                      'sellingPrice',
+                      Number(e.target.value),
+                    )
+                  }
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">$</InputAdornment>
+                    ),
+                  }}
+                  inputProps={{ min: 0, step: 0.01 }}
+                  size="small"
+                />
+              </Box>
+            )}
+          </Box>
+        </Grid>}
       </Grid>
       {!isLastItem && <Divider sx={{ mt: 2 }} />}
     </Box>

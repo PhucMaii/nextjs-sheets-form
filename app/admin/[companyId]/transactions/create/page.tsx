@@ -602,6 +602,7 @@ export default function CreateTransaction() {
               smallExpenses={smallExpenses}
               setSmallExpenses={setSmallExpenses}
               defaultCodDate={defaultCodDate}
+              isAllowChangeSellingPrice={true}
             />
           )}
           {activeStep === 2 && (

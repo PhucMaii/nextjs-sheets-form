@@ -22,6 +22,7 @@ import { recordAction } from '@/pages/api/utils/timeline';
 import { recordOrderInventoryLog } from '@/pages/api/utils/logs';
 import { sendEmail } from '@/pages/api/utils/email';
 import prisma from '@/client';
+import { enqueueEmail } from '@/app/lib/queue';
 
 export enum ITEM_CATEGORIZED {
   REMAIN = 'remain',
@@ -244,6 +245,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           }),
         );
       }
+    }, {
+      timeout: 20000,
     });
 
     const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
@@ -396,14 +399,15 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       existingOrder?.user?.email &&
       !existingOrder?.user?.email.includes('INACTIVE')
     ) {
-      await sendEmail(
-        existingOrder?.user,
-        orderUpdated,
-        orderId,
-        deliveryDate,
-        true,
-        note,
-        'EDIT ORDER',
+      await enqueueEmail(
+        {
+          user: existingOrder?.user,
+          order: orderUpdated,
+          orderId,
+          deliveryDate,
+          note,
+          subjectTag: 'EDIT ORDER',
+        }
       );
     }
 

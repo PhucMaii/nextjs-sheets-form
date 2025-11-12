@@ -80,6 +80,7 @@ interface PropTypes {
   setSmallExpenses: (data: any) => void;
   isEditMode?: boolean;
   defaultCodDate?: any;
+  isAllowChangeSellingPrice?: boolean;
 }
 
 export default function DetailStep({
@@ -102,6 +103,7 @@ export default function DetailStep({
   setSmallExpenses,
   isEditMode = false,
   defaultCodDate,
+  isAllowChangeSellingPrice = false,
 }: PropTypes) {
   const { companyId }: any = useParams();
   const [codDate, setCodDate] = useState<any>(
@@ -400,6 +402,8 @@ export default function DetailStep({
       unitPrice: 0,
       total: 0,
       unit: [],
+      isChangeSellingPrice: false,
+      sellingPrice: null,
     };
     setExpenseItems((prev: any) => [...prev, newItem]);
   };
@@ -1337,6 +1341,7 @@ export default function DetailStep({
                         handleItemChange={handleItemChange}
                         removeExpenseItem={removeExpenseItem}
                         expenseItems={expenseItems}
+                        isAllowChangeSellingPrice={isAllowChangeSellingPrice}
                       />
                     ))}
 
