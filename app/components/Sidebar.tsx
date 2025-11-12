@@ -34,6 +34,7 @@ import Maintenance from './Maintenance';
 import { USER_CATEGORIZED } from '../utils/enum';
 import Image from 'next/image';
 // import HolidayText from './HolidayText';
+import LoadingComponent from './LoadingComponent/LoadingComponent';
 
 interface PropTypes {
   children: ReactNode;
@@ -41,20 +42,20 @@ interface PropTypes {
 
 const drawerWidth = 250;
 export default function Sidebar({ children }: PropTypes) {
+  // All hooks must be called before any conditional returns
   const [currentTab, setCurrentTab] = useState<string>('');
   const [isNavOpen, setIsNavOpen] = useState<boolean>(false);
-  const { user, isValidating } = useContext(UserContext);
+  const { user } = useContext(UserContext);
   const [isOpenSnackbar, setIsOpenSnackbar] = useState<boolean>(!user?.email);
 
   const router = useRouter();
   const pathname: any = usePathname();
   const { showNotification, NotificationComp } = useNotification();
 
-  const { isMaintenance } = useContext(MaintenanceContext);
+  const { isMaintenance, isValidating } = useContext(MaintenanceContext);
 
-  if (isMaintenance) {
-    return <Maintenance />;
-  }
+  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
+  const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   useEffect(() => {
     if (user?.type === USER_CATEGORIZED.INACTIVE) {
@@ -68,6 +69,15 @@ export default function Sidebar({ children }: PropTypes) {
     setCurrentTab(pathname);
   }, [pathname]);
 
+  // Conditional returns AFTER all hooks are called
+  if (isValidating) {
+    return <LoadingComponent />;
+  }
+
+  if (isMaintenance) {
+    return <Maintenance />;
+  }
+
   // useEffect(() => {
   //   if (!isValidating && !user?.email) {
   //     setIsOpenSnackbar(true);
@@ -79,9 +89,6 @@ export default function Sidebar({ children }: PropTypes) {
   const handleChangeTab = (path: string) => {
     router.push(path);
   };
-
-  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
-  const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   const content = (
     <>

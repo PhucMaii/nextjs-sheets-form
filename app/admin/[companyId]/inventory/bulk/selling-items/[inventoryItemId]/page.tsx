@@ -87,6 +87,12 @@ export default function BulkEditItems() {
 
   const columns: GridColDef[] = [
     {
+      field: 'availability',
+      headerName: 'Available',
+      renderCell: (params) => <span>{params.row.availability ? 'Yes' : 'No'}</span>,
+      width: 100,
+    },
+    {
       field: 'category.name',
       headerName: 'Category',
       renderCell: (params) => <span>{params.row.category?.name || '—'}</span>,
@@ -236,26 +242,6 @@ export default function BulkEditItems() {
   useEffect(() => {
     fetchItems();
   }, []);
-
-  // const onAddItem = (newItem: any, categories: any) => {
-  //   const newItemsWithCategory = categories.map((category: any) => {
-  //     const tempNewItem = {
-  //       ...newItem,
-  //       inventoryUnit: newItem.unit,
-  //       inventoryUnitId: Number(newItem.unit.id),
-  //       availability: true,
-  //       isShowDiscount: false,
-  //       prevPrice: 0,
-  //       category,
-  //     };
-
-  //     console.log(tempNewItem, 'TEMP NEW ITEM');
-
-  //     return tempNewItem;
-  //   });
-
-  //   setItems([...items, ...newItemsWithCategory]);
-  // };
 
   const fetchItems = async () => {
     try {

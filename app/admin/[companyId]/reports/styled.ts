@@ -2,8 +2,8 @@ import { Box } from '@mui/material';
 import { grey, blue } from '@mui/material/colors';
 import styled from 'styled-components';
 
-export const ShadowSection = styled(Box)`
-  background-color: white;
+export const ShadowSection = styled(Box)<{ $backgroundColor?: string }>`
+  background-color: ${(props: any) => props.$backgroundColor ? props.$backgroundColor : 'white'};
   // width: 100%;
   padding: 20px;
   border-radius: 10px;

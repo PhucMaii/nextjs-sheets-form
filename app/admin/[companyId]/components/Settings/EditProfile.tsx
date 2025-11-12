@@ -1,15 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import {
   Box,
+  FormControlLabel,
   IconButton,
   InputAdornment,
   OutlinedInput,
+  Switch,
   TextField,
   Typography,
   useMediaQuery,
+  Chip,
 } from '@mui/material';
-import { blueGrey } from '@mui/material/colors';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { blueGrey, orange, green } from '@mui/material/colors';
+import {
+  Visibility,
+  VisibilityOff,
+  PowerSettingsNew,
+  Warning,
+} from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 import axios from 'axios';
 import { getAdminApiUrl } from '@/app/utils/enum';
@@ -17,6 +25,8 @@ import useNotification from '@/hooks/useNotification';
 import { useParams } from 'next/navigation';
 import { fetchApi } from '@/app/utils/db';
 import { ShadowSection } from '../../reports/styled';
+import { useQuery } from '@tanstack/react-query';
+import LoadingModal from '../Modals/LoadingModal';
 
 export default function EditProfile() {
   const { companyId }: any = useParams();
@@ -35,6 +45,17 @@ export default function EditProfile() {
   const { showNotification, NotificationComp } = useNotification();
 
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
+
+  const { data: settings, refetch: refetchSettings } = useQuery({
+    queryKey: ['shut-down', companyId],
+    queryFn: async () => {
+      const response = await axios.get(
+        getAdminApiUrl(companyId, '/settings/get-shut-down'),
+      );
+      return response.data.data;
+    },
+    enabled: !!companyId,
+  });
 
   // Context
   // const { user } = useContext(UserContext);
@@ -136,11 +157,146 @@ export default function EditProfile() {
     }
   };
 
+  const handleUpdateShutDown = async (isShutDown: boolean) => {
+    try {
+      setIsSubmitting(true);
+      const response = await axios.put(
+        getAdminApiUrl(companyId, '/settings/update-shut-down'),
+        {
+          isShutDown: isShutDown,
+        },
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        setIsSubmitting(false);
+        return;
+      }
+
+      showNotification('success', response.data.message);
+      await refetchSettings();
+      setIsSubmitting(false);
+    } catch (error: any) {
+      console.log('Fail to update shut down: ', error);
+      showNotification('error', 'Fail to update shut down: ' + error);
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <>
+      <LoadingModal open={isSubmitting} />
       {NotificationComp}
-      {/* Geenral Information */}
-      <ShadowSection display="flex" flexDirection="column" gap={2}>
+      {/* Shut Down Section */}
+      <ShadowSection
+        $backgroundColor={settings?.isShutDown ? orange[50] : green[50]}
+        sx={{
+          border: `2px solid ${settings?.isShutDown ? orange[400] : green[300]}`,
+          transition: 'all 0.3s ease',
+        }}
+      >
+        <Box
+          display="flex"
+          flexDirection={{ xs: 'column', sm: 'row' }}
+          justifyContent="space-between"
+          alignItems={{ xs: 'flex-start', sm: 'center' }}
+          gap={{ xs: 2, sm: 3 }}
+        >
+          <Box
+            display="flex"
+            alignItems="center"
+            gap={2.5}
+            flex={1}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 64,
+                height: 64,
+                borderRadius: '50%',
+                backgroundColor: settings?.isShutDown
+                  ? orange[200]
+                  : green[200],
+                color: settings?.isShutDown ? orange[800] : green[800],
+                transition: 'all 0.3s ease',
+                boxShadow: `0 4px 12px ${settings?.isShutDown ? orange[300] : green[300]}40`,
+              }}
+            >
+              {settings?.isShutDown ? (
+                <Warning sx={{ fontSize: 32 }} />
+              ) : (
+                <PowerSettingsNew sx={{ fontSize: 32 }} />
+              )}
+            </Box>
+            <Box>
+              <Box
+                display="flex"
+                alignItems="center"
+                gap={1.5}
+                mb={0.5}
+                flexWrap="wrap"
+              >
+                <Typography
+                  variant="h6"
+                  color={blueGrey[900]}
+                  sx={{ fontWeight: 700 }}
+                >
+                  Client Side
+                </Typography>
+                <Chip
+                  label={settings?.isShutDown ? 'Shut Down' : 'Active'}
+                  color={settings?.isShutDown ? 'warning' : 'success'}
+                  size="small"
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: '0.7rem',
+                    height: 24,
+                    '& .MuiChip-label': {
+                      px: 1.5,
+                    },
+                  }}
+                />
+              </Box>
+            </Box>
+          </Box>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.5,
+            }}
+          >
+            <FormControlLabel
+              control={
+                <Switch
+                  color="warning"
+                  checked={settings?.isShutDown || false}
+                  onChange={(e: any) => {
+                    handleUpdateShutDown(e.target.checked);
+                  }}
+                  sx={{
+                    '& .MuiSwitch-switchBase.Mui-checked': {
+                      color: orange[700],
+                    },
+                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                      backgroundColor: orange[500],
+                    },
+                    '& .MuiSwitch-track': {
+                      backgroundColor: green[400],
+                    },
+                  }}
+                />
+              }
+              label=""
+              sx={{
+                margin: 0,
+              }}
+            />
+          </Box>
+        </Box>
+      </ShadowSection>
         <Typography variant="h6" color={blueGrey[800]} sx={{ mb: 2 }}>
           General Information
         </Typography>
@@ -182,7 +338,6 @@ export default function EditProfile() {
             Save
           </LoadingButton>
         </Box>
-      </ShadowSection>
 
       {/* Security Section */}
       <ShadowSection display="flex" flexDirection="column" gap={2}>

@@ -120,29 +120,62 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-  const listOfDates = generateListOfDateString(new Date('11/01/2025'), new Date('11/08/2025'));
-  const targetOrders = await prisma.orders.findMany({
-    where: {
-        deliveryDate: {
-          in: listOfDates,
-        },
-    },
-    include: {
-      items: {
-        include: {
-          inventoryItem: true
-        }
-      },
-      user: true,
-    },
-  });
+const items = await prisma.item.findMany({
+  where: {
+    inventoryItemId: 10022,
+  },
+  include: {
+    category: true,
+  },
+});
 
+console.log(items);
+  // const allItems = await prisma.item.findMany({
+  //   where: {
+  //     companyId: 1,
+  //     id: {
+  //       gt: 6800
+  //     }
+  //   },
+  // });
 
-  const ordersWithSilken = targetOrders.filter((order) => {
-    return order.items.some((item) => item.inventoryItemId === 10080);
-  });
+  // await Promise.all(
+  //   allItems.map(async (item) => {
+  //     const lastTimeOrder = await prisma.orderedItems.findFirst({
+  //       where: {
+  //         inventoryItemId: item.inventoryItemId,
+  //         Orders: {
+  //           user: {
+  //             categoryId: item.categoryId,
+  //           }
+  //         }
+  //       },
+  //       include: {
+  //         Orders: true,
+  //       },
+  //       orderBy: {
+  //         Orders: {
+  //           id: 'desc',
+  //         },
+  //       },
+  //     });
 
-  console.log(ordersWithSilken)
+  //     if (lastTimeOrder) {
+  //       await prisma.item.update({
+  //         where: {
+  //           id: item.id,
+  //         },
+  //         data: {
+  //           price: lastTimeOrder.price,
+  //         },
+  //       });
+  //     } else {
+  //       console.log(item.name, 'not found');
+  //     }
+
+  //     console.log(item.id);
+  //   }),
+  // );
 }
 
 // async function main() {

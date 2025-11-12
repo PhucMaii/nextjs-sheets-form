@@ -17,6 +17,8 @@ model Company {
   createdAt     String
   createdBy     String
 
+  setting       Settings? @relation("CompanySetting")
+
   actions           Action[]
   announcements     Announcement[]
   users             User[]
@@ -63,6 +65,14 @@ model Company {
   creditReports     CreditReport[]
   creditItems       CreditItem[]
   inventoryReports  InventoryReport[]
+}
+
+model Settings {
+  id                Int     @id @default(autoincrement())
+  companyId         Int     @unique
+  isShutDown         Boolean
+
+  company           Company?   @relation("CompanySetting", fields: [companyId], references: [id])
 }
 
 model PageView {

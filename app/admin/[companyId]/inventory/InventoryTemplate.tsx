@@ -24,6 +24,7 @@ import {
   FormControlLabel,
   InputAdornment,
   Checkbox,
+  Chip,
 } from '@mui/material';
 import { ShadowSection } from '../reports/styled';
 import { useQuery } from '@tanstack/react-query';
@@ -577,22 +578,29 @@ const InventoryTemplate = ({
               //   href={`/admin/${companyId}/items/${item.itemId}`}
               //   style={{ width: 'fit-content' }}
               // >
-              <Typography
-                sx={{
-                  color: 'black',
-                  width: 'fit-content',
-                  '&:hover': {
-                    textDecoration: 'underline',
-                    cursor: 'pointer',
-                  },
-                }}
-                fontWeight={600}
-                onClick={() => {
-                  router.push(`/admin/${companyId}/items/${item.itemId}`);
-                }}
-              >
-                {item.category.name}
-              </Typography>
+              <Box display="flex" alignItems="center" gap={1}>
+                <Chip 
+                  label={item.availability ? 'Available' : 'Not Available'}
+                  color={item.availability ? 'primary' : 'warning'}
+                  size="small"
+                />
+                <Typography
+                  sx={{
+                    color: 'black',
+                    width: 'fit-content',
+                    '&:hover': {
+                      textDecoration: 'underline',
+                      cursor: 'pointer',
+                    },
+                  }}
+                  fontWeight={600}
+                  onClick={() => {
+                    router.push(`/admin/${companyId}/items/${item.itemId}`);
+                  }}
+                >
+                  {item.category.name}
+                </Typography>
+              </Box>
             ) : (
               <Typography fontWeight={600}>{item.category.name}</Typography>
             )}
@@ -955,10 +963,17 @@ const InventoryTemplate = ({
             </Grid>
           )}
 
-          <Grid item xs={12} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Grid
+            item
+            xs={12}
+            sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
+          >
             <Typography fontWeight={600}>Image</Typography>
             {newInventoryItem.image && (
-              <DisplayFile fileKey={newInventoryItem.image} alt="product image" />
+              <DisplayFile
+                fileKey={newInventoryItem.image}
+                alt="product image"
+              />
             )}
             <PresignedFileUpload
               location={`products/${newInventoryItem?.name}`}
