@@ -53,6 +53,7 @@
     "@types/nodemailer": "^6.4.14",
     "@types/pako": "^2.0.3",
     "@types/react-csv": "^1.1.10",
+    "@upstash/qstash": "^2.8.4",
     "apexcharts": "^3.49.1",
     "autosuggest-highlight": "^3.3.4",
     "axios": "^1.6.5",
