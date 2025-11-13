@@ -1,7 +1,7 @@
 import { UPDATE_OPTION } from '@/app/admin/[companyId]/components/Modals/edit/EditItem';
 // import { websiteItemCategoryId } from '@/app/lib/constant';
 import { IItem, IOption } from '@/app/utils/type';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IBody {
@@ -13,8 +13,6 @@ interface IBody {
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const {
       updatedItem,
       updateOption = UPDATE_OPTION.CURRENT_CATEGORY,
@@ -160,103 +158,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    // if (options) {
-    //   if (options.length === 0) {
-    //     await prisma.option.deleteMany({
-    //       where: {
-    //         itemId: updatedItem.id,
-    //       },
-    //     });
-    //   } else {
-    //     // Get existing options
-    //     const existingOptions = await prisma.option.findMany({
-    //       where: {
-    //         itemId: updatedItem.id,
-    //       },
-    //       include: {
-    //         unit: true,
-    //         item: true,
-    //       },
-    //     });
-
-    //     const deletedOptions = existingOptions.filter(
-    //       (option) => !options.some((o) => o.id === option.id),
-    //     );
-
-    //     await prisma.option.deleteMany({
-    //       where: {
-    //         id: {
-    //           in: deletedOptions.map((option) => option.id),
-    //         },
-    //       },
-    //     });
-
-    //     if (updateOption !== UPDATE_OPTION.ALL_ITEMS_SAME_NAME) {
-    //       const today = getTodayDate();
-    //       const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
-
-    //       const updatedOptions = options.map(async (option) => {
-    //         const existingOption = existingOptions.find(
-    //           (o) => o.id === option.id,
-    //         );
-    //         if (existingOption) {
-    //           return prisma.option.update({
-    //             where: {
-    //               id: existingOption.id,
-    //             },
-    //             data: {
-    //               name: option.name,
-    //               price: option.price,
-    //               unitId: option.unitId,
-    //               prevPrice: option.prevPrice,
-    //               isShowDiscount: option.isShowDiscount,
-    //             },
-    //           });
-    //         } else {
-    //           return prisma.option.create({
-    //             data: {
-    //               name: option.name,
-    //               price: option.price,
-    //               prevPrice: option.prevPrice,
-    //               isShowDiscount: option.isShowDiscount,
-    //               availability: option.availability,
-    //               unitId: option.unitId,
-    //               inventoryItemId: updatedItem.inventoryItemId,
-    //               itemId: updatedItem.id,
-    //               createdBy,
-    //               createdAt: today.dateAndTime,
-    //             },
-    //           });
-    //         }
-    //       });
-
-    //       await Promise.all(updatedOptions);
-
-    //       const justUpdatedOptions = await prisma.option.findMany({
-    //         where: {
-    //           itemId: updatedItem.id,
-    //         },
-    //       });
-
-    //       const updatedScheduleOrderItemPromises = justUpdatedOptions.map(
-    //         (option) => {
-    //           const oldOption = existingOptions.find((o) => o.id === option.id);
-    //           if (oldOption) {
-    //             return updateAllScheduleOrderItemsForOption(
-    //               oldOption,
-    //               option,
-    //               updatedItem.categoryId,
-    //               true,
-    //             );
-    //           }
-    //         },
-    //       );
-
-    //       await Promise.all(updatedScheduleOrderItemPromises);
-    //     }
-    //   }
-    // }
-
     return res.status(200).json({
       data: newUpdatedItem,
       message: 'Item Updated Successfully',
@@ -276,59 +177,74 @@ export const updateAllScheduleOrderItems = async (
   updatedData: any,
 ) => {
   try {
-    const prisma = new PrismaClient();
-
     // CASE 1: UPDATE ALL ITEM WITH SAME INVENTORY ITEM ID - if update all ordered item in scheduled orders same inventory id
     if (
       updateOption === UPDATE_OPTION.ALL_ITEMS_SAME_NAME &&
-      inventoryItemId
+      inventoryItemId !== null
     ) {
-      await prisma.orderedItems.updateMany({
-        where: {
-          scheduledOrderId: {
-            not: null,
+      const shouldRecalculateTotalPrice = Object.prototype.hasOwnProperty.call(
+        updatedData,
+        'price',
+      );
+
+      await prisma.$transaction(async (tx) => {
+        await tx.orderedItems.updateMany({
+          where: {
+            scheduledOrderId: {
+              not: null,
+            },
+            orderId: null,
+            expenseId: null,
+            inventoryItemId,
           },
-          orderId: null,
-          expenseId: null,
-          inventoryItemId,
-        },
-        data: updatedData,
-      });
+          data: updatedData,
+        });
 
-      // Update all scheduled orders that has items with same inventory item id
-      const scheduleOrders = await prisma.scheduleOrders.findMany({
-        where: {
-          items: {
-            some: {
-              inventoryItemId,
-            },
-          },
-        },
-        include: {
-          items: true,
-        },
-      });
-
-      // Re calculate their new total price if the udpated data included price
-      if (updatedData?.price) {
-        for (const scheduleOrder of scheduleOrders) {
-          const totalPrice = scheduleOrder.items.reduce(
-            (acc: number, item: any) => {
-              return acc + item.quantity * item.price;
-            },
-            0,
-          );
-
-          await prisma.scheduleOrders.update({
-            where: {
-              id: scheduleOrder.id,
-            },
-            data: {
-              totalPrice: totalPrice,
-            },
-          });
+        if (!shouldRecalculateTotalPrice) {
+          return;
         }
-      }
+
+        // Update all scheduled orders that has items with same inventory item id
+        const scheduleOrders = await tx.scheduleOrders.findMany({
+          where: {
+            items: {
+              some: {
+                inventoryItemId,
+              },
+            },
+          },
+          select: {
+            id: true,
+            items: {
+              select: {
+                quantity: true,
+                price: true,
+              },
+            },
+          },
+        });
+
+        // Re calculate their new total price if the udpated data included price
+        if (updatedData?.price) {
+          for (const scheduleOrder of scheduleOrders) {
+            const totalPrice = scheduleOrder.items.reduce(
+              (acc: number, item: any) => {
+                return acc + item.quantity * item.price;
+              },
+              0,
+            );
+
+            await tx.scheduleOrders.update({
+              where: {
+                id: scheduleOrder.id,
+              },
+              data: {
+                totalPrice: totalPrice,
+              },
+            });
+          }
+        }
+      });
 
       return { ok: true };
     }
@@ -337,7 +253,7 @@ export const updateAllScheduleOrderItems = async (
     const scheduleOrders = await prisma.scheduleOrders.findMany({
       where: {
         user: {
-          categoryId
+          categoryId,
         },
       },
       include: {

@@ -120,21 +120,35 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-const items = await prisma.item.findMany({
-  where: {
-    inventoryItemId: 10022,
-  },
-  include: {
-    category: true,
-  },
-});
+  const items = await prisma.item.findMany({
+    where: {
+      companyId: 1,
+      price: 10
+    },
+    include: {
+      inventoryItem: true,
+    }
+  });
 
-console.log(items);
+  console.log(items);
+
+  const mapInventoryItem = items.reduce((acc: any, item: any) => {
+    if (!item.inventoryItem?.name) {
+      return acc;
+    }
+    if (!acc[item.inventoryItem?.name]) {
+      acc[item.inventoryItem?.name] = 0;
+    }
+    acc[item.inventoryItem?.name]++;
+    return acc;
+  }, {});
+  
+  console.log(mapInventoryItem);
   // const allItems = await prisma.item.findMany({
   //   where: {
-  //     companyId: 1,
+  //     companyId: 2,
   //     id: {
-  //       gt: 6800
+  //       gt: 6809
   //     }
   //   },
   // });
@@ -159,6 +173,10 @@ console.log(items);
   //         },
   //       },
   //     });
+
+  //     if (lastTimeOrder?.companyId !== 2) {
+  //       return;
+  //     }
 
   //     if (lastTimeOrder) {
   //       await prisma.item.update({
