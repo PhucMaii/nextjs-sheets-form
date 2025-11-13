@@ -229,8 +229,8 @@ export default function ItemRow({
             {item.isChangeSellingPrice && (
               <Alert severity="warning" sx={{ width: '100%' }}>
                 <Typography variant="subtitle2">
-                  It will update the selling price of all selling items with the
-                  same inventory items.
+                  It will update the price of all selling items with the
+                  same inventory items for all categories.
                 </Typography>
               </Alert>
             )}
