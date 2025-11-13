@@ -1,7 +1,7 @@
 import prisma from '@/client';
 import { WaterStatus } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getTodayDate } from '../../utils/date';
+import { getTodayDate } from '@/pages/api/utils/date';
 import { runZonesSequentially } from '../../admin/[companyId]/water-program/activate';
 
 export default async function handler(
@@ -16,10 +16,13 @@ export default async function handler(
     }
 
     const today = getTodayDate();
+    console.log({ today }, 'today');
 
     const isPM = today.time.split(' ')[1] === 'PM';
     const time = today.time.split(' ')[0];
     let hour: string = time.split(':')[0];
+
+    console.log({ isPM, hour, time, today: today.dateAndTime }, 'isPM, hour, time' );
 
     if (isPM && Number(hour) !== 12) {
       // if hour is evening and not 12, add 12 to the hour
