@@ -165,6 +165,7 @@ export enum PO_STATUS {
   ORDERED = 'Ordered',
   RECEIVED = 'Received',
   CANCELLED = 'Cancelled',
+  PRE_APPROVED = 'Pre Approved',
 }
 
 export enum LOSS_REPORT_TYPE {

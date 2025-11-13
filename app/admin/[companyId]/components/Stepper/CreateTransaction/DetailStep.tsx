@@ -403,7 +403,7 @@ export default function DetailStep({
       total: 0,
       unit: [],
       isChangeSellingPrice: false,
-      sellingPrice: null,
+      sellingPrice: 0,
     };
     setExpenseItems((prev: any) => [...prev, newItem]);
   };

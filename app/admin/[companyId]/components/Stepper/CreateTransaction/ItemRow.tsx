@@ -11,6 +11,7 @@ import {
   Typography,
   Checkbox,
   FormControlLabel,
+  Alert,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import React from 'react';
@@ -35,15 +36,6 @@ export default function ItemRow({
   expenseItems: any[];
   isAllowChangeSellingPrice: boolean;
 }) {
-  console.log(item.id, 'item');
-  //   useEffect(() => {
-  //     if (item.id !== -1) {
-  //       const targetItem = vendorItems.find(
-  //         (item: any) => item.id === Number(item.id),
-  //       );
-  //       handleItemChange(item.id, 'unit', targetItem?.unit || []);
-  //     }
-  //   }, [item.id]);
 
   return (
     <Box key={item.id} mb={2}>
@@ -59,9 +51,10 @@ export default function ItemRow({
                 name: item?.inventoryItem?.name,
                 id: item.id,
                 sku: item?.inventoryItem?.sku || 'N/A',
-                isSelected: expenseItems.some(
-                  (expenseItem: any) => expenseItem.id === item.id,
-                ) || false,
+                isSelected:
+                  expenseItems.some(
+                    (expenseItem: any) => expenseItem.id === item.id,
+                  ) || false,
                 vendorItemId: item?.vendorItemId || item?.id,
               }}
               onChange={(e, value) => {
@@ -98,12 +91,13 @@ export default function ItemRow({
               }))}
               renderOption={(props, option) => {
                 return (
-                <li {...props}>
-                  <Typography variant="body2">
-                    {option?.sku || 'N/A'} - {option.name}
-                  </Typography>
-                </li>
-              )}}
+                  <li {...props}>
+                    <Typography variant="body2">
+                      {option?.sku || 'N/A'} - {option.name}
+                    </Typography>
+                  </li>
+                );
+              }}
               getOptionLabel={(option) => {
                 return `${option?.sku || 'N/A'} - ${option.name}`;
               }}
@@ -219,72 +213,87 @@ export default function ItemRow({
             }
           />
         </Grid>
-
-        {isAllowChangeSellingPrice && <Grid item xs={12}>
-          <Box
+        {isAllowChangeSellingPrice && (
+          <Grid
+            item
+            xs={12}
             sx={{
-              display: 'flex',
-              flexDirection: { xs: 'column', sm: 'row' },
-              alignItems: { xs: 'flex-start', sm: 'center' },
-              gap: { xs: 2, sm: 2 },
-              p: 2,
-              borderRadius: 1,
-              backgroundColor: 'grey.50',
               border: '1px solid',
               borderColor: 'grey.200',
+              borderRadius: 1,
+              p: 2,
+              m: 2,
+              backgroundColor: 'grey.50',
             }}
           >
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={item.isChangeSellingPrice || false}
-                  onChange={(e) =>
-                    handleItemChange(
-                      item.id,
-                      'isChangeSellingPrice',
-                      e.target.checked,
-                    )
-                  }
-                />
-              }
-              label="Change selling price"
-              sx={{
-                mb: { xs: 0, sm: 0 },
-                flexShrink: 0,
-              }}
-            />
             {item.isChangeSellingPrice && (
-              <Box
-                sx={{
-                  width: { xs: '100%', sm: 'auto' },
-                  minWidth: { xs: '100%', sm: 200 },
-                  maxWidth: { xs: '100%', sm: 300 },
-                }}
-              >
-                <TextField
-                  fullWidth
-                  label="Selling Price"
-                  type="number"
-                  value={item.sellingPrice || ''}
-                  onChange={(e) =>
-                    handleItemChange(
-                      item.id,
-                      'sellingPrice',
-                      Number(e.target.value),
-                    )
-                  }
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">$</InputAdornment>
-                    ),
-                  }}
-                  inputProps={{ min: 0, step: 0.01 }}
-                  size="small"
-                />
-              </Box>
+              <Alert severity="warning" sx={{ width: '100%' }}>
+                <Typography variant="subtitle2">
+                  It will update the selling price of all selling items with the
+                  same inventory items.
+                </Typography>
+              </Alert>
             )}
-          </Box>
-        </Grid>}
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: { xs: 'column', sm: 'row' },
+                alignItems: { xs: 'flex-start', sm: 'center' },
+                gap: { xs: 2, sm: 2 },
+              }}
+            >
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={item.isChangeSellingPrice || false}
+                    onChange={(e) =>
+                      handleItemChange(
+                        item.id,
+                        'isChangeSellingPrice',
+                        e.target.checked,
+                      )
+                    }
+                  />
+                }
+                label="Change selling price"
+                sx={{
+                  mb: { xs: 0, sm: 0 },
+                  flexShrink: 0,
+                }}
+              />
+              {item.isChangeSellingPrice && (
+                <Box
+                  sx={{
+                    width: { xs: '100%', sm: 'auto' },
+                    minWidth: { xs: '100%', sm: 200 },
+                    maxWidth: { xs: '100%', sm: 300 },
+                  }}
+                >
+                  <TextField
+                    fullWidth
+                    label="Selling Price"
+                    type="number"
+                    value={item.sellingPrice || ''}
+                    onChange={(e) =>
+                      handleItemChange(
+                        item.id,
+                        'sellingPrice',
+                        Number(e.target.value),
+                      )
+                    }
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">$</InputAdornment>
+                      ),
+                    }}
+                    inputProps={{ min: 0, step: 0.01 }}
+                    size="small"
+                  />
+                </Box>
+              )}
+            </Box>
+          </Grid>
+        )}
       </Grid>
       {!isLastItem && <Divider sx={{ mt: 2 }} />}
     </Box>

@@ -13,6 +13,8 @@ import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { USER_ROLE } from '@/app/utils/enum';
 import { recordTransactionInventoryLog } from '@/pages/api/utils/logs';
 import prisma from '@/client';
+import { updateAllScheduleOrderItems } from '../../items/PUT';
+import { UPDATE_OPTION } from '@/app/admin/[companyId]/components/Modals/edit/EditItem';
 
 export interface IExpenseItem {
   id: number;
@@ -211,16 +213,25 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         );
 
         // Update selling price if needed
-        // if (item.isChangeSellingPrice) {
-        //   await prisma.item.updateMany({
-        //     where: {
-        //       inventoryItemId: item.inventoryItemId,
-        //     },
-        //     data: {
-        //       price: item.sellingPrice,
-        //     },
-        //   });
-        // }
+        if (item.isChangeSellingPrice && existedItem.inventoryItemId) {
+          await prisma.item.updateMany({
+            where: {
+              inventoryItemId: existedItem.inventoryItemId,
+            },
+            data: {
+              price: item.sellingPrice,
+            },
+          });
+
+          await updateAllScheduleOrderItems(
+            existedItem.categoryId || -1,
+            existedItem.inventoryItemId,
+            UPDATE_OPTION.ALL_ITEMS_SAME_NAME,
+            {
+              price: item.sellingPrice,
+            },
+          )
+        }
       }
 
       // STEP 4: Create OrderedItems

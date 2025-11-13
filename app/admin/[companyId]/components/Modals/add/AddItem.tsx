@@ -71,7 +71,7 @@ export default function AddItem({
           (item: any) => item.id === defaultItem.inventoryItemId,
         );
 
-        let newUnits = newValue.vendorItem.flatMap((item: any) => item.unit);
+        let newUnits = newValue?.vendorItem?.flatMap((item: any) => item.unit);
 
         newUnits = Array.from(
           new Map(newUnits.map((unit: any) => [unit.ratio, unit])).values(),
