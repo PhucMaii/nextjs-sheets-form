@@ -318,6 +318,25 @@ export default function CreateTransaction() {
   //   }
   // };
 
+  const validateExpenseItems = () => {
+    for (const item of expenseItems) {
+      if (item.isChangeSellingPrice) {
+        const price = Number(item.sellingPrice);
+
+        if (isNaN(price)) {
+          showNotification('error', 'Please enter a valid selling price');
+          return false;
+        }
+
+        if (price <= 0) {
+          showNotification('error', 'Selling price must be greater than 0');
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+
   const handleSubmitStock = async () => {
     try {
       if (expenseItems.length === 0) {
@@ -325,7 +344,9 @@ export default function CreateTransaction() {
         return;
       }
 
-      console.log('expenseItems', expenseItems);
+      if (!validateExpenseItems()) {
+        return;
+      }
 
       const response = await axios.post(
         getAdminApiUrl(companyId, '/inventory/expenses'),
@@ -410,9 +431,7 @@ export default function CreateTransaction() {
           batchTransaction: {
             ...formData,
             date: dayjs(selectedDate.toDate()).format('MM/DD/YYYY'),
-            startDate: dayjs(formData.dateRange[0]).format(
-              'MM/DD/YYYY',
-            ),
+            startDate: dayjs(formData.dateRange[0]).format('MM/DD/YYYY'),
             endDate: dayjs(formData.dateRange[1]).format('MM/DD/YYYY'),
           },
           smallExpenses: smallExpenses.map((expense: any) => ({

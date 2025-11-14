@@ -36,15 +36,6 @@ export default function ItemRow({
   expenseItems: any[];
   isAllowChangeSellingPrice: boolean;
 }) {
-  console.log(item.id, 'item');
-  //   useEffect(() => {
-  //     if (item.id !== -1) {
-  //       const targetItem = vendorItems.find(
-  //         (item: any) => item.id === Number(item.id),
-  //       );
-  //       handleItemChange(item.id, 'unit', targetItem?.unit || []);
-  //     }
-  //   }, [item.id]);
 
   return (
     <Box key={item.id} mb={2}>
@@ -238,8 +229,8 @@ export default function ItemRow({
             {item.isChangeSellingPrice && (
               <Alert severity="warning" sx={{ width: '100%' }}>
                 <Typography variant="subtitle2">
-                  It will update the selling price of all selling items with the
-                  same inventory items.
+                  It will update the price of all selling items with the
+                  same inventory items for all categories.
                 </Typography>
               </Alert>
             )}
