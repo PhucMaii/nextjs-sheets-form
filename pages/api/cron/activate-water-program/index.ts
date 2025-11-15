@@ -18,26 +18,21 @@ export default async function handler(
     const today = getTodayDate();
     console.log({ today }, 'today');
 
-    const isPM = today.time.split(' ')[1] === 'PM';
-    const time = today.time.split(' ')[0];
-    let hour: string = time.split(':')[0];
+    const [rawTime, meridiem] = today.time.trim().split(' ');
 
-    console.log({ isPM, hour, time, today: today.dateAndTime }, 'isPM, hour, time' );
+    const [rawHour, rawMinute] = rawTime.split(':');
 
-    if (isPM && Number(hour) !== 12) {
-      // if hour is evening and not 12, add 12 to the hour
-      hour = (Number(hour) + 12).toString();
-    } else if (!isPM && Number(hour) === 12) {
-      // if hour is morning and 12, set to 00
-      hour = '00';
-    } else if (Number(hour) < 10) {
-      // if hour is less than 10, add a 0 to the front
-      hour = `0${hour}`;
+    let hour = Number(rawHour);
+    const minute = rawMinute;
+
+    // Convert to 24h
+    if (meridiem === 'PM' && hour !== 12) {
+      hour += 12;
+    } else if (meridiem === 'AM' && hour === 12) {
+      hour = 0;
     }
 
-    const minute = time.split(':')[1];
-
-    const queryTime = `${hour}:${minute}`;
+    const queryTime = `${hour.toString().padStart(2, '0')}:${minute}`;
     console.log({ queryTime }, 'queryTime');
 
     const schedulePrograms = await prisma.programSchedule.findMany({
@@ -82,8 +77,10 @@ export default async function handler(
       },
       data: { status: WaterStatus.FINISHED },
     });
-    
-    return res.status(200).json({ message: 'Water program activated successfully' });
+
+    return res
+      .status(200)
+      .json({ message: 'Water program activated successfully' });
   } catch (error) {
     console.error('Error activating water program:', error);
     return res.status(500).json({ error: 'Internal server error' });

@@ -556,8 +556,17 @@ export const testItemId = 10107;
 
 export const minThreshold = 10; // min threshold for inventory item
 
-export const times = Array.from({ length: 96 }, (_, i) => {
-  const time = `${Math.floor(i / 4) < 10 ? '0' + Math.floor(i / 4) : Math.floor(i / 4)}:${(i % 4) * 15 === 0 ? '00' : (i % 4) * 15}`;
+export const times = Array.from({ length: 288 }, (_, i) => {
+  const totalMinutes = i * 5; // 0, 5, 10, 15, ...
+  const hour = Math.floor(totalMinutes / 60)
+    .toString()
+    .padStart(2, '0');
+  const minute = (totalMinutes % 60)
+    .toString()
+    .padStart(2, '0');
+
+  const time = `${hour}:${minute}`;
+
   return {
     id: time,
     time: time,
