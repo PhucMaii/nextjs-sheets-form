@@ -86,7 +86,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 
     // Record inventory log
     await recordInventoryItemLog(
-      newProductLoss.id,
+      newProductLoss.companyId || 1,
       productLoss.inventoryItemId,
       productLoss.quantityLost,
       InventoryLogType.LOST,

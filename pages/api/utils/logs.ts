@@ -3,21 +3,17 @@ import prisma from '@/client';
 import { getTodayDate } from './date';
 
 export const recordInventoryItemLog = async (
-  lossReportId: number,
+  companyId: number,
   inventoryItemId: number,
   quantity: number,
   type: InventoryLogType,
   createdFrom: InventoryLogFrom,
   log: string,
+  tx?: any // prisma transaction client -> for synchronous database operations
 ) => {
   try {
-    const existingLossReport = await prisma.lossReport.findUnique({
-      where: {
-        id: lossReportId,
-      },
-    });
-
-    const existingInventoryItem = await prisma.inventoryItem.findUnique({
+    const db = tx || prisma;
+    const existingInventoryItem = await db.inventoryItem.findUnique({
       where: {
         id: inventoryItemId,
       },
@@ -28,10 +24,6 @@ export const recordInventoryItemLog = async (
 
     if (!existingInventoryItem) {
       throw new Error('Inventory item not found');
-    }
-
-    if (!existingLossReport) {
-      throw new Error('Loss report not found');
     }
 
     const afterQty = existingInventoryItem.fifo.reduce(
@@ -45,9 +37,9 @@ export const recordInventoryItemLog = async (
         : afterQty - quantity;
 
     const today = getTodayDate();
-    await prisma.inventoryLog.create({
+    await db.inventoryLog.create({
       data: {
-        companyId: existingLossReport?.companyId || 1,
+        companyId,
         inventoryItemId,
         type,
         quantity,

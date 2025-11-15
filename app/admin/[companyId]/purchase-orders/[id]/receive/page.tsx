@@ -16,6 +16,7 @@ import { IPurchaseOrder } from '@/app/utils/type';
 import ConvertToTransaction from '@/app/admin/[companyId]/components/Modals/add/ConvertToTransaction';
 import { LoadingButton } from '@mui/lab';
 import ReceivedProgress from '@/app/admin/[companyId]/components/ReceivedProgress';
+import ConfirmStockInModal from '@/app/admin/[companyId]/components/Modals/ConfirmStockInModal';
 
 export default function ReceiveInventory() {
   const { id, companyId }: any = useParams();
@@ -27,6 +28,7 @@ export default function ReceiveInventory() {
   const [poItems, setPoItems] = useState<any[]>([]);
   const [openConvertToTransactionModal, setOpenConvertToTransactionModal] =
     useState(false);
+  const [openConfirmStockInModal, setOpenConfirmStockInModal] = useState(false);
   const { showNotification, NotificationComp } = useNotification();
 
   const receivedSummary: any = useMemo(() => {
@@ -58,7 +60,6 @@ export default function ReceiveInventory() {
   useEffect(() => {
     fetchPoItems();
   }, []);
-  
 
   console.log(poItems, 'PO ITEMS');
 
@@ -126,6 +127,36 @@ export default function ReceiveInventory() {
     }
   };
 
+  const handleConfirmPreApprove = async () => {
+    setIsSaving(true)
+    try {
+      const response = await axios.put(
+        getAdminApiUrl(companyId, '/purchase-orders/pre-approve'),
+        {
+          id: po.id,
+          poItems: poItems,
+        },
+      )
+
+      if (response.data.error) {
+        showNotification('error', response.data.error)
+        setIsSaving(false)
+        return
+      }
+
+      showNotification('success', response.data.message || 'Purchase order pre approved')
+      setOpenConfirmStockInModal(false)
+      router.push(`/admin/${companyId}/purchase-orders/${id}`)
+    } catch (error: any) {
+      console.error('Error pre approving: ', error)
+      showNotification(
+        'error',
+        error?.response?.data?.error || 'Error pre approving',
+      )
+      setIsSaving(false)
+    }
+  }
+
   return (
     <Sidebar>
       {po && (
@@ -136,6 +167,14 @@ export default function ReceiveInventory() {
           po={{ ...po, poItems }}
         />
       )}
+      <ConfirmStockInModal
+        open={openConfirmStockInModal}
+        onClose={() => setOpenConfirmStockInModal(false)}
+        poItems={poItems}
+        onConfirm={handleConfirmPreApprove}
+        showNotification={showNotification}
+        isLoading={isSaving}
+      />
       {NotificationComp}
       <Box
         sx={{
@@ -157,6 +196,17 @@ export default function ReceiveInventory() {
           </Box>
 
           <Box display="flex" alignItems="center" gap={1} my={2}>
+            {po?.status !== PO_STATUS.RECEIVED &&
+              po?.status !== PO_STATUS.PRE_APPROVED && (
+                <LoadingButton
+                  loading={isSaving}
+                  variant="outlined"
+                  color="primary"
+                  onClick={() => setOpenConfirmStockInModal(true)}
+                >
+                  Pre Approve
+                </LoadingButton>
+              )}
             <LoadingButton
               loading={isSaving}
               variant="contained"

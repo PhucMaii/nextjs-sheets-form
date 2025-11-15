@@ -46,7 +46,7 @@ export default async function DELETE(
 
     // Record inventory log
     await recordInventoryItemLog(
-      existingProductLoss.id,
+      existingProductLoss.companyId || 1,
       existingProductLoss.inventoryItemId,
       existingProductLoss.quantityLost,
       InventoryLogType.RESTOCK,

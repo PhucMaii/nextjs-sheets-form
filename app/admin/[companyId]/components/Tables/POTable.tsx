@@ -137,7 +137,7 @@ export default function POTable({
                   <StatusText
                     text={po.status}
                     type={
-                      po.status === PO_STATUS.DRAFT
+                      (po.status === PO_STATUS.DRAFT || po.status === PO_STATUS.PRE_APPROVED)
                         ? 'warning'
                         : po.status === PO_STATUS.ORDERED
                           ? 'info'
