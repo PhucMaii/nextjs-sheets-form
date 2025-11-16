@@ -17,6 +17,8 @@ interface IProps {
   refetchSchedules: () => void;
   handleSave: () => Promise<void>;
   setSchedules: any;
+  selectedPrograms: Program[];
+  handleSelectProgram: (program: Program) => void;
 }
 
 const ProgramDayView = ({
@@ -28,6 +30,8 @@ const ProgramDayView = ({
   removeSchedule,
   handleSave,
   setSchedules,
+  selectedPrograms,
+  handleSelectProgram,
 }: IProps) => {
   const timeSlots = Array.from(
     { length: 24 },
@@ -35,7 +39,7 @@ const ProgramDayView = ({
   );
 
   const theme = useTheme();
-  
+
   return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -118,6 +122,10 @@ const ProgramDayView = ({
                                   removeSchedule={removeSchedule}
                                   handleSave={handleSave}
                                   setSchedules={setSchedules}
+                                  handleSelectProgram={handleSelectProgram}
+                                  isSelected={selectedPrograms.some(
+                                    (p) => p.id === program.id,
+                                  )}
                                 />
                               )}
                             </Draggable>

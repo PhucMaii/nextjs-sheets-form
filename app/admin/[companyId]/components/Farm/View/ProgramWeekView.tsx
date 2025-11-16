@@ -17,6 +17,8 @@ interface IProps {
   removeSchedule: (id: string) => void;
   handleSave: () => Promise<void>;
   setSchedules: any;
+  selectedPrograms: Program[];
+  handleSelectProgram: (program: Program) => void;
 }
 
 const ProgramWeekView = ({
@@ -27,8 +29,9 @@ const ProgramWeekView = ({
   removeSchedule,
   handleSave,
   setSchedules,
+  selectedPrograms,
+  handleSelectProgram,
 }: IProps) => {
-
   const weekStart = startOfWeek(currentDate);
   const theme = useTheme();
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
@@ -196,6 +199,10 @@ const ProgramWeekView = ({
                               removeSchedule={removeSchedule}
                               handleSave={handleSave}
                               setSchedules={setSchedules}
+                              handleSelectProgram={handleSelectProgram}
+                              isSelected={selectedPrograms.some(
+                                (p) => p.id === program.id,
+                              )}
                             />
                           )}
                         </Draggable>

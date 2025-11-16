@@ -66,7 +66,6 @@ const ProgramDetailsPage = () => {
         {
           id: id,
           name: formData.name,
-          days: formData.days,
           zonePrograms: formData.zonePrograms,
         },
       );

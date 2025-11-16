@@ -7,7 +7,6 @@ import {
   CardActions,
   CardContent,
   Chip,
-  IconButton,
   Stack,
   Typography,
 } from '@mui/material';
@@ -15,9 +14,6 @@ import { blue, grey } from '@mui/material/colors';
 import React, { useMemo } from 'react';
 import {
   FolderCopy as FolderCopyIcon,
-  ViewList as ViewListIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
 } from '@mui/icons-material';
 import { IBundleProgram, IZoneWater } from '@/app/utils/type';
 import { IZone } from '@/hooks/useHydrawiseAPI';
@@ -200,41 +196,6 @@ function BundleProgramCard({ bundleProgram, zones }: IProps) {
         >
           Created {new Date(bundleProgram.createdAt).toLocaleDateString()}
         </Typography>
-        <Stack direction="row" spacing={1}>
-          <IconButton
-            size="small"
-            sx={{
-              color: theme.palette.primary.main,
-              '&:hover': {
-                backgroundColor: alpha(theme.palette.primary.main, 0.1),
-              },
-            }}
-          >
-            <ViewListIcon fontSize="small" />
-          </IconButton>
-          <IconButton
-            size="small"
-            sx={{
-              color: theme.palette.warning.main,
-              '&:hover': {
-                backgroundColor: alpha(theme.palette.warning.main, 0.1),
-              },
-            }}
-          >
-            <EditIcon fontSize="small" />
-          </IconButton>
-          <IconButton
-            size="small"
-            sx={{
-              color: theme.palette.error.main,
-              '&:hover': {
-                backgroundColor: alpha(theme.palette.error.main, 0.1),
-              },
-            }}
-          >
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Stack>
       </CardActions>
     </Card>
   );

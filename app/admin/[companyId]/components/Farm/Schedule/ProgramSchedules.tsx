@@ -22,6 +22,7 @@ import {
   ExpandMore as ExpandMoreIcon,
   CopyAll as CopyAllIcon,
   Save as SaveIcon,
+  Delete as DeleteIcon,
 } from '@mui/icons-material';
 import {
   DragDropContext,
@@ -61,6 +62,7 @@ import { times } from '@/app/lib/constant';
 import SmallProgramCard from '../SmallProgramCard';
 import SmallBundleProgramCard from '../SmallBundleProgramCard';
 import { getProgramById } from '@/app/utils/programs';
+import ConfirmModal from '../../Modals/ConfirmModal';
 
 type ViewType = 'month' | 'week' | 'day';
 interface ScheduleItem {
@@ -119,6 +121,8 @@ export default function ProgramSchedules({ showNotification }: IProps) {
   const [displayedPrograms, setDisplayedPrograms] = useState<Program[]>(
     programs || [],
   );
+  const [selectedPrograms, setSelectedPrograms] = useState<Program[]>([]);
+  const [isConfirmDelete, setIsConfirmDelete] = useState<boolean>(false);
   const [viewType, setViewType] = useState<ViewType>('month');
   const [schedules, setSchedules] = useState<ScheduleItem[]>([]);
   const [draggedProgram, setDraggedProgram] = useState<string | null>(null);
@@ -141,6 +145,14 @@ export default function ProgramSchedules({ showNotification }: IProps) {
     defaultValue: null,
   });
 
+  const handleSelectProgram = (program: Program) => {
+    const isSelected = selectedPrograms.some((p) => p.id === program.id);
+    if (isSelected) {
+      setSelectedPrograms((prev) => prev.filter((p) => p.id !== program.id));
+    } else {
+      setSelectedPrograms((prev) => [...prev, program]);
+    }
+  };
   const getStartAndEndDate = () => {
     if (viewType === 'month') {
       const startDate = startOfMonth(currentDate);
@@ -435,6 +447,31 @@ export default function ProgramSchedules({ showNotification }: IProps) {
       setIsCopyingPrevPeriod(false);
     }
   };
+
+  const handleDeleteSelectedPrograms = async () => {
+    try {
+      const programIds = selectedPrograms.map((program) => program.id);
+      const response = await axios.delete(
+        getAdminApiUrl(
+          companyId,
+          `/water-program/schedule/delete-multiple-programs?programIds=${programIds.join(',')}`,
+        ),
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      await refetchSchedules();
+      setSelectedPrograms([]);
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('Internal Server Error: ', error);
+      showNotification('error', 'Something went wrong: ' + error);
+    }
+  };
+
   return (
     <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <TimeInputModal
@@ -453,6 +490,16 @@ export default function ProgramSchedules({ showNotification }: IProps) {
         renderField={'time'}
         defaultValue={isTimeInputModalOpen.defaultValue || defaultScheduleTime}
         handleUpdate={handleUpdateTime as any}
+      />
+
+      <ConfirmModal
+        open={isConfirmDelete}
+        onClose={() => setIsConfirmDelete(false)}
+        handleSubmit={handleDeleteSelectedPrograms}
+        title={`Are you sure to delete ${selectedPrograms.length} schedules?`}
+        buttonLabel="Delete"
+        showNotification={showNotification}
+        color="error"
       />
       <Box sx={{ p: 3 }}>
         {/* Header */}
@@ -772,30 +819,44 @@ export default function ProgramSchedules({ showNotification }: IProps) {
             position: 'relative',
           }}
         >
-          <Box display="flex" justifyContent="flex-end" mb={2} gap={2}>
-            {(viewType === 'month' || viewType === 'week') && (
+          <Box display="flex" justifyContent="space-between" mb={2} gap={2}>
+            <Box>
+              {selectedPrograms.length > 0 && (
+                <Button
+                  variant="outlined"
+                  color="error"
+                  startIcon={<DeleteIcon />}
+                  onClick={() => setIsConfirmDelete(true)}
+                >
+                  Delete {selectedPrograms.length} schedules
+                </Button>
+              )}
+            </Box>
+            <Box display="flex" alignItems="center" gap={2}>
+              {(viewType === 'month' || viewType === 'week') && (
+                <LoadingButton
+                  onClick={handleCopyPrevPeriod}
+                  loading={isCopyingPrevPeriod}
+                  variant="outlined"
+                  startIcon={<CopyAllIcon />}
+                >
+                  Copy Last{' '}
+                  {viewType === 'month'
+                    ? 'Month'
+                    : viewType === 'week'
+                      ? 'Week'
+                      : ''}
+                </LoadingButton>
+              )}
               <LoadingButton
-                onClick={handleCopyPrevPeriod}
-                loading={isCopyingPrevPeriod}
-                variant="outlined"
-                startIcon={<CopyAllIcon />}
+                variant="contained"
+                onClick={handleSave}
+                loading={isSaving}
+                startIcon={<SaveIcon />}
               >
-                Copy Last{' '}
-                {viewType === 'month'
-                  ? 'Month'
-                  : viewType === 'week'
-                    ? 'Week'
-                    : ''}
+                Save
               </LoadingButton>
-            )}
-            <LoadingButton
-              variant="contained"
-              onClick={handleSave}
-              loading={isSaving}
-              startIcon={<SaveIcon />}
-            >
-              Save
-            </LoadingButton>
+            </Box>
           </Box>
 
           {viewType === 'month' && (
@@ -813,6 +874,8 @@ export default function ProgramSchedules({ showNotification }: IProps) {
               hoveredDate={hoveredDate}
               setHoveredDate={setHoveredDate}
               isDateOccupiedByBundle={isDateOccupiedByBundle}
+              selectedPrograms={selectedPrograms}
+              handleSelectProgram={handleSelectProgram}
             />
           )}
           {viewType === 'week' && (
@@ -824,6 +887,8 @@ export default function ProgramSchedules({ showNotification }: IProps) {
               removeSchedule={deleteSchedule}
               handleSave={handleSave}
               setSchedules={setSchedules}
+              selectedPrograms={selectedPrograms}
+              handleSelectProgram={handleSelectProgram}
             />
           )}
           {viewType === 'day' && (
@@ -836,6 +901,8 @@ export default function ProgramSchedules({ showNotification }: IProps) {
               programs={displayedPrograms}
               handleSave={handleSave}
               setSchedules={setSchedules}
+              selectedPrograms={selectedPrograms}
+              handleSelectProgram={handleSelectProgram}
             />
           )}
 

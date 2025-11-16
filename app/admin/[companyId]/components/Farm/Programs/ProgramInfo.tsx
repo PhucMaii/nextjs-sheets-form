@@ -1,8 +1,9 @@
 import React, { Dispatch, SetStateAction, useMemo } from 'react';
 import { Paper, Typography, Divider, Box, TextField } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { CreateProgramForm } from '../../farm/program/create/page';
 import { formatDuration } from '@/app/utils/time';
+import { CreateProgramForm } from '../../../farm/program/create/page';
+// import { ColorPicker, useColor } from 'react-color-palette';
 
 interface ProgramInfoProps {
   formData: CreateProgramForm;
@@ -11,11 +12,16 @@ interface ProgramInfoProps {
 
 const ProgramInfo = ({ formData, setFormData }: ProgramInfoProps) => {
   const theme = useTheme();
+  // const [color] = useColor(formData.hexColor || '#2196F3');
 
-  const totalDuration = useMemo(() => formData.zonePrograms.reduce(
-    (total, zoneProgram) => total + zoneProgram.duration,
-    0,
-  ), [formData.zonePrograms]);
+  const totalDuration = useMemo(
+    () =>
+      formData.zonePrograms.reduce(
+        (total: number, zoneProgram: any) => total + zoneProgram.duration,
+        0,
+      ),
+    [formData.zonePrograms],
+  );
 
   return (
     <Paper
@@ -50,28 +56,25 @@ const ProgramInfo = ({ formData, setFormData }: ProgramInfoProps) => {
           }}
         />
 
-        <TextField
-          fullWidth
-          label="Duration (days)"
-          type="number"
-          value={formData.days}
-          onChange={(e) =>
+        <Typography variant="subtitle2" fontWeight={600}>
+          Program Color
+        </Typography>
+          {/* Show color preview */}
+          {/* <Box display="flex" flexDirection="row" gap={2}>
+            <Box width={20} height={20} bgcolor={color.hex} borderRadius={1} />
+          </Box> */}
+        {/* <ColorPicker
+          height={100}
+          color={color}
+          onChange={(color: any) =>
             setFormData((prev: CreateProgramForm) => ({
               ...prev,
-              days: Math.max(1, parseInt(e.target.value) || 1),
+              hexColor: color.hex,
             }))
           }
-          error={formData.days < 1}
-          helperText={
-            formData.days < 1 ? 'Duration must be at least 1 day' : null
-          }
-          inputProps={{ min: 1 }}
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              borderRadius: 2,
-            },
-          }}
-        />
+          // hideAlpha
+          hideInput={['hsv', 'rgb']}
+        /> */}
 
         {/* Summary */}
         <Box

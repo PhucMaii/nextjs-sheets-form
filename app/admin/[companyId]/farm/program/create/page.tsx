@@ -24,6 +24,7 @@ export interface CreateProgramForm {
   name: string;
   days: number;
   zonePrograms: ZoneProgram[];
+  hexColor: string;
 }
 
 export default function CreateWaterProgram() {
@@ -34,6 +35,7 @@ export default function CreateWaterProgram() {
     name: '',
     days: 1,
     zonePrograms: [],
+    hexColor: '#2196F3',
   });
   const [isLoading, setIsLoading] = useState(false);
 
