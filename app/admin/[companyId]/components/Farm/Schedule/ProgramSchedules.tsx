@@ -56,7 +56,7 @@ import TimeInputModal from '../../Modals/edit/SingleFieldUpdate';
 import axios from 'axios';
 import { getAdminApiUrl } from '@/app/utils/enum';
 import { ShowNotificationType } from '@/hooks/useNotification';
-import { WaterStatus } from '@prisma/client';
+import { ProgramSchedule, WaterStatus } from '@prisma/client';
 import { LoadingButton } from '@mui/lab';
 import { times } from '@/app/lib/constant';
 import SmallProgramCard from '../SmallProgramCard';
@@ -146,12 +146,12 @@ export default function ProgramSchedules({ showNotification }: IProps) {
     defaultValue: null,
   });
 
-  const handleSelectProgram = (program: Program) => {
-    const isSelected = selectedPrograms.some((p) => p.id === program.id);
+  const handleSelectProgram = (schedule: ProgramSchedule | any) => {
+    const isSelected = selectedPrograms.some((p) => p.id === schedule.id);
     if (isSelected) {
-      setSelectedPrograms((prev) => prev.filter((p) => p.id !== program.id));
+      setSelectedPrograms((prev) => prev.filter((p) => p.id !== schedule.id));
     } else {
-      setSelectedPrograms((prev) => [...prev, program]);
+      setSelectedPrograms((prev) => [...prev, schedule]);
     }
   };
   const getStartAndEndDate = () => {

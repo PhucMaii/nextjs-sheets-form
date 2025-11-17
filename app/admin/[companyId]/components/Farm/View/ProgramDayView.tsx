@@ -6,6 +6,7 @@ import { Droppable, Draggable } from '@hello-pangea/dnd';
 import { Program } from '../types';
 import ScheduleCard from '../Schedule/ScheduleCard';
 import { ShowNotificationType } from '@/hooks/useNotification';
+import { ProgramSchedule } from '@prisma/client';
 
 interface IProps {
   currentDate: Date;
@@ -16,7 +17,7 @@ interface IProps {
   handleSave: () => Promise<void>;
   setSchedules: any;
   selectedPrograms: Program[];
-  handleSelectProgram: (program: Program) => void;
+  handleSelectProgram: (schedule: ProgramSchedule) => void;
 }
 
 const ProgramDayView = ({
@@ -118,7 +119,7 @@ const ProgramDayView = ({
                                   setSchedules={setSchedules}
                                   handleSelectProgram={handleSelectProgram}
                                   isSelected={selectedPrograms.some(
-                                    (p) => p.id === program.id,
+                                    (p) => p.id === schedule.id,
                                   )}
                                 />
                               )}

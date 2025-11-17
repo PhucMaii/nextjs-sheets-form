@@ -60,8 +60,6 @@ const ProgramDetailsPage = () => {
     }
   }, [program]);
 
-  console.log(formData.hexColor, 'formData.hexColor');
-
   const handleSubmit = async () => {
     try {
       setIsLoading(true);

@@ -7,7 +7,7 @@ import { startOfWeek, addDays } from 'date-fns';
 import { Program } from '../types';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import ScheduleCard from '../Schedule/ScheduleCard';
-
+import { ProgramSchedule } from '@prisma/client';
 interface IProps {
   currentDate: Date;
   getSchedulesForTimeSlot: (date: Date, time: string) => any[];
@@ -17,7 +17,7 @@ interface IProps {
   handleSave: () => Promise<void>;
   setSchedules: any;
   selectedPrograms: Program[];
-  handleSelectProgram: (program: Program) => void;
+  handleSelectProgram: (schedule: ProgramSchedule) => void;
 }
 
 const ProgramWeekView = ({
@@ -202,7 +202,7 @@ const ProgramWeekView = ({
                               setSchedules={setSchedules}
                               handleSelectProgram={handleSelectProgram}
                               isSelected={selectedPrograms.some(
-                                (p) => p.id === program.id,
+                                (p) => p.id === schedule.id,
                               )}
                             />
                           )}

@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useMemo, useEffect } from 'react';
+import React, { Dispatch, SetStateAction, useMemo } from 'react';
 import { Paper, Typography, Divider, Box, TextField } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { formatDuration } from '@/app/utils/time';
@@ -16,30 +16,16 @@ const ProgramInfo = ({ formData, setFormData }: ProgramInfoProps) => {
   const theme = useTheme();
   const [color, setColor] = useColor(formData.hexColor || '#2196F3');
 
-  useEffect(() => {
-    if (formData.hexColor && color.hex !== formData.hexColor) {
-      const hex = formData.hexColor;
-      const r = parseInt(hex.slice(1, 3), 16);
-      const g = parseInt(hex.slice(3, 5), 16);
-      const b = parseInt(hex.slice(5, 7), 16);
+  // useEffect(() => {
+  //   if (formData.hexColor && color.hex !== formData.hexColor) {
+  //     const hex = formData.hexColor;
+  //     const r = parseInt(hex.slice(1, 3), 16);
+  //     const g = parseInt(hex.slice(3, 5), 16);
+  //     const b = parseInt(hex.slice(5, 7), 16);
       
-      setColor({
-        hex: formData.hexColor,
-        rgb: {
-          r,
-          g,
-          b,
-          a: 1,
-        },
-        hsv: {
-          h: 0,
-          s: 0,
-          v: 0,
-          a: 1,
-        },
-      });
-    }
-  }, [formData.hexColor, color.hex, setColor]);
+  //     setColor(formData.hexColor);
+  //   }
+  // }, [formData.hexColor]);
 
   const totalDuration = useMemo(
     () =>

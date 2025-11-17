@@ -31,7 +31,7 @@ interface IProps {
   removeSchedule: (id: string) => void;
   handleSave: () => Promise<void>;
   setSchedules: any;
-  handleSelectProgram: (program: Program) => void;
+  handleSelectProgram: (schedule: ProgramSchedule) => void;
   isSelected: boolean;
 }
 
@@ -188,7 +188,7 @@ function ScheduleCard({
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
-              handleSelectProgram(program);
+              handleSelectProgram(schedule);
             }}
           />
           <Box

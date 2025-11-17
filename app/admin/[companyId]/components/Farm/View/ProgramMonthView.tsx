@@ -15,6 +15,7 @@ import ScheduleCard from '../Schedule/ScheduleCard';
 import { Program } from '../types';
 import { grey } from '@mui/material/colors';
 import { useState } from 'react';
+import { ProgramSchedule } from '@prisma/client';
 
 interface IProps {
   currentDate: Date;
@@ -34,7 +35,7 @@ interface IProps {
     startDate: Date,
   ) => boolean;
   selectedPrograms: Program[];
-  handleSelectProgram: (program: Program) => void;
+  handleSelectProgram: (schedule: ProgramSchedule) => void;
 }
 
 const ProgramMonthView = ({
@@ -252,7 +253,7 @@ const ProgramMonthView = ({
                                     setSchedules={setSchedules}
                                     handleSelectProgram={handleSelectProgram}
                                     isSelected={selectedPrograms.some(
-                                      (p) => p.id === program.id,
+                                      (p) => p.id === schedule.id,
                                     )}
                                   />
                                 )}
