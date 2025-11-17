@@ -11,6 +11,7 @@ export interface Program {
   createdAt: Date;
   updatedAt: Date;
   time?: string;
+  hexColor?: string;
 }
 
 export interface ZoneWater {

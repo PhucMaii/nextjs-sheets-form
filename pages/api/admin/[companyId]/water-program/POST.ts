@@ -9,6 +9,7 @@ import { USER_ROLE } from '@/app/utils/enum';
 interface IBody {
   name: string;
   days: number;
+  hexColor: string;
   zonePrograms: ZoneProgram[];
 }
 
@@ -20,7 +21,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       return res.status(400).json({ error: 'Company ID is required' });
     }
 
-    const { name, days, zonePrograms } = req.body as IBody;
+    const { name, days, zonePrograms, hexColor } = req.body as IBody;
 
     const createdAt = getTodayDate().dateAndTime;
     const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
@@ -33,6 +34,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         createdAt,
         createdBy,
         companyId: Number(companyId),
+        hexColor,
       },
     });
 

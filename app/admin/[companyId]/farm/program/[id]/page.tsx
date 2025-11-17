@@ -39,6 +39,7 @@ const ProgramDetailsPage = () => {
     name: program?.name || '',
     days: 1,
     zonePrograms: program?.zoneWaterPrograms || [],
+    hexColor: program?.hexColor || '#2196F3',
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isOpenConfirmModal, setIsOpenConfirmModal] = useState<boolean>(false);
@@ -54,19 +55,26 @@ const ProgramDetailsPage = () => {
             index: zoneProgram.zoneProgram.index,
             id: zoneProgram.zoneProgram.id,
           })) || [],
+        hexColor: program?.hexColor || '#2196F3',
       });
     }
   }, [program]);
 
+  console.log(formData.hexColor, 'formData.hexColor');
+
   const handleSubmit = async () => {
     try {
       setIsLoading(true);
+      
+      const hexColor = formData.hexColor || '#2196F3';
+      
       const response = await axios.put(
         getAdminApiUrl(companyId, `/water-program`),
         {
           id: id,
           name: formData.name,
           zonePrograms: formData.zonePrograms,
+          hexColor: hexColor,
         },
       );
 

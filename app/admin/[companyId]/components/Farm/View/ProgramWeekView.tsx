@@ -7,7 +7,6 @@ import { startOfWeek, addDays } from 'date-fns';
 import { Program } from '../types';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import ScheduleCard from '../Schedule/ScheduleCard';
-import { getProgramById } from '@/app/utils/programs';
 
 interface IProps {
   currentDate: Date;
@@ -176,10 +175,12 @@ const ProgramWeekView = ({
                 >
                   <Stack spacing={0.5}>
                     {daySchedules.map((schedule) => {
-                      const program: Program | any = getProgramById(
-                        schedule.id,
-                        daySchedules,
-                      );
+                      // const program: Program | any = getProgramById(
+                      //   schedule.id,
+                      //   daySchedules,
+                      // );
+
+                      const program = schedule.waterProgram;
                       if (!program) return null;
 
                       return (

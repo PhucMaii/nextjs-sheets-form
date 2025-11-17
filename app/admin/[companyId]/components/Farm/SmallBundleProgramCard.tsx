@@ -1,6 +1,6 @@
 import { alpha } from '@mui/material/styles';
 import { Avatar, Box, Paper, Stack, Typography, Chip } from '@mui/material';
-import React, { useState } from 'react';
+import React from 'react';
 import {
   FolderCopy as FolderCopyIcon,
   CalendarToday as CalendarTodayIcon,

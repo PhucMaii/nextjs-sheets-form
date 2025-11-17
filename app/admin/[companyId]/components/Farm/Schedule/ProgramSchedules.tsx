@@ -73,6 +73,7 @@ interface ScheduleItem {
   time: string;
   status: WaterStatus;
   zoneWaterPrograms?: ZoneWater[];
+  waterProgram?: Program;
 }
 
 export const defaultScheduleTime = '09:00';
@@ -293,6 +294,7 @@ export default function ProgramSchedules({ showNotification }: IProps) {
         time: time || defaultScheduleTime,
         status: WaterStatus.SCHEDULED,
         zoneWaterPrograms: program?.zoneWaterPrograms || [],
+        waterProgram: program,
       };
 
       setSchedules((prev) => {
@@ -326,6 +328,7 @@ export default function ProgramSchedules({ showNotification }: IProps) {
               time: dayProgram.time,
               status: WaterStatus.SCHEDULED,
               zoneWaterPrograms: dayProgram.program.zoneWaterPrograms || [],
+              waterProgram: dayProgram.program,
             };
           },
         );
@@ -346,6 +349,7 @@ export default function ProgramSchedules({ showNotification }: IProps) {
                 ...schedule,
                 date: format(targetDate, 'MM/dd/yyyy'),
                 time: time || schedule.time,
+                waterProgram: schedule.waterProgram,
               }
             : schedule,
         );
@@ -866,7 +870,7 @@ export default function ProgramSchedules({ showNotification }: IProps) {
               getSchedulesForDate={getSchedulesForDate}
               showNotification={showNotification}
               refetchSchedules={refetchSchedules}
-              programs={displayedPrograms}
+              // programs={displayedPrograms}
               removeSchedule={deleteSchedule}
               handleSave={handleSave}
               setSchedules={setSchedules}
@@ -898,7 +902,7 @@ export default function ProgramSchedules({ showNotification }: IProps) {
               removeSchedule={deleteSchedule}
               showNotification={showNotification}
               refetchSchedules={refetchSchedules}
-              programs={displayedPrograms}
+              // programs={displayedPrograms}
               handleSave={handleSave}
               setSchedules={setSchedules}
               selectedPrograms={selectedPrograms}

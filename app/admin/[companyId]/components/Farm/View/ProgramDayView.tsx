@@ -6,12 +6,10 @@ import { Droppable, Draggable } from '@hello-pangea/dnd';
 import { Program } from '../types';
 import ScheduleCard from '../Schedule/ScheduleCard';
 import { ShowNotificationType } from '@/hooks/useNotification';
-import { getProgramById } from '@/app/utils/programs';
 
 interface IProps {
   currentDate: Date;
   getSchedulesForTimeSlot: (date: Date, time: string) => any[];
-  programs: Program[];
   removeSchedule: (id: string) => void;
   showNotification: ShowNotificationType;
   refetchSchedules: () => void;
@@ -24,7 +22,6 @@ interface IProps {
 const ProgramDayView = ({
   currentDate,
   getSchedulesForTimeSlot,
-  programs,
   showNotification,
   refetchSchedules,
   removeSchedule,
@@ -98,10 +95,7 @@ const ProgramDayView = ({
                         }}
                       >
                         {timeSchedules.map((schedule) => {
-                          const program: Program | any = getProgramById(
-                            schedule.programId,
-                            programs,
-                          );
+                          const program = schedule.waterProgram;
                           if (!program) return null;
 
                           return (

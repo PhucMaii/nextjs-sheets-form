@@ -96,6 +96,7 @@ export default function CreateWaterProgram() {
         {
           name: formData.name,
           days: formData.days,
+          hexColor: formData.hexColor,
           zonePrograms: updatedZonePrograms,
         },
       );

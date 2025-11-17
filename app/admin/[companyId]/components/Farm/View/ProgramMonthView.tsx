@@ -12,7 +12,6 @@ import {
 import { Droppable, Draggable } from '@hello-pangea/dnd';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import ScheduleCard from '../Schedule/ScheduleCard';
-import { getProgramById } from '@/app/utils/programs';
 import { Program } from '../types';
 import { grey } from '@mui/material/colors';
 import { useState } from 'react';
@@ -23,7 +22,6 @@ interface IProps {
   getSchedulesForDate: (date: Date) => any[];
   showNotification: ShowNotificationType;
   refetchSchedules: () => void;
-  programs: Program[];
   removeSchedule: (id: string) => void;
   handleSave: () => Promise<void>;
   setSchedules: any;
@@ -226,10 +224,13 @@ const ProgramMonthView = ({
                             ? daySchedules
                             : daySchedules.slice(0, 3)
                           ).map((schedule, scheduleIndex) => {
-                            const program: any = getProgramById(
-                              schedule.id,
-                              daySchedules,
-                            );
+                            // const program: any = getProgramById(
+                            //   schedule.id,
+                            //   daySchedules,
+                            // );
+
+                            // console.log({program, schedule})
+                            const program = schedule.waterProgram;
                             if (!program) return null;
 
                             return (
