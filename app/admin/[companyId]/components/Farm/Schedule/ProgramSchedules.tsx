@@ -63,6 +63,8 @@ import SmallProgramCard from '../SmallProgramCard';
 import SmallBundleProgramCard from '../SmallBundleProgramCard';
 import { getProgramById } from '@/app/utils/programs';
 import ConfirmModal from '../../Modals/ConfirmModal';
+import { useHydrawiseAPI } from '@/hooks/useHydrawiseAPI';
+import ZoneFilter from '../ZoneFilter';
 
 type ViewType = 'month' | 'week' | 'day';
 interface ScheduleItem {
@@ -86,7 +88,7 @@ export default function ProgramSchedules({ showNotification }: IProps) {
   const theme = useTheme();
   const { companyId }: any = useParams();
   const [currentDate, setCurrentDate] = useState(new Date());
-  // const { zones } = useHydrawiseAPI(companyId);
+  const { zones } = useHydrawiseAPI(companyId);
   const { getPrograms } = usePrograms(companyId, []);
 
   const { data: bundlePrograms } = useQuery({
@@ -123,6 +125,7 @@ export default function ProgramSchedules({ showNotification }: IProps) {
     programs || [],
   );
   const [selectedPrograms, setSelectedPrograms] = useState<Program[]>([]);
+  const [selectedZones, setSelectedZones] = useState<number[]>([]);
   const [isConfirmDelete, setIsConfirmDelete] = useState<boolean>(false);
   const [viewType, setViewType] = useState<ViewType>('month');
   const [schedules, setSchedules] = useState<ScheduleItem[]>([]);
@@ -186,11 +189,47 @@ export default function ProgramSchedules({ showNotification }: IProps) {
     },
   });
 
-  useEffect(() => {
-    if (programs) {
-      setDisplayedPrograms(programs || []);
-    }
+  // Extract unique zones from all programs
+  const availableZones = useMemo(() => {
+    if (!programs) return [];
+    const zoneMap = new Map<number, { zoneId: number; name: string }>();
+
+    programs.forEach((program: Program) => {
+      program.zoneWaterPrograms?.forEach((zoneWater: ZoneWater) => {
+        const zoneId = Number(zoneWater.zoneProgram?.zoneId);
+        if (zoneId && !zoneMap.has(zoneId)) {
+          zoneMap.set(zoneId, {
+            zoneId,
+            name: `Zone ${zoneId}`,
+          });
+        }
+      });
+    });
+
+    return Array.from(zoneMap.values()).sort((a, b) => a.zoneId - b.zoneId);
   }, [programs]);
+
+  // Filter programs based on selected zones
+  useEffect(() => {
+    if (!programs) return;
+
+    if (selectedZones.length === 0) {
+      setDisplayedPrograms(programs);
+      return;
+    }
+
+    const filtered = programs.filter((program: Program) => {
+      const programZoneIds =
+        program.zoneWaterPrograms?.map((zoneWater: ZoneWater) =>
+          Number(zoneWater.zoneProgram?.zoneId),
+        ) || [];
+
+      // Check if program has at least one zone that matches selected zones
+      return programZoneIds.some((zoneId) => selectedZones.includes(zoneId));
+    });
+
+    setDisplayedPrograms(filtered);
+  }, [programs, selectedZones]);
 
   useEffect(() => {
     if (dbSchedules) {
@@ -732,49 +771,60 @@ export default function ProgramSchedules({ showNotification }: IProps) {
             mb: 3,
             borderRadius: 3,
             backgroundColor: 'white',
-            border: `1px solid ${alpha(theme.palette.grey[200], 0.5)}`,
+            border: `1px solid ${alpha(theme.palette.grey[300], 0.5)}`,
             background: `linear-gradient(135deg, ${alpha(theme.palette.grey[50], 0.5)}, ${alpha(theme.palette.grey[100], 0.2)})`,
           }}
         >
-          <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent="space-between"
-            mb={showAvailablePrograms ? 2 : 0}
-            sx={{ cursor: 'pointer' }}
-            onClick={() => setShowAvailablePrograms(!showAvailablePrograms)}
-          >
-            <Stack direction="row" alignItems="center" spacing={2}>
-              <WaterIcon sx={{ color: theme.palette.primary.main }} />
-              <Typography variant="h6" fontWeight={600}>
-                Available Programs
-              </Typography>
-              <Chip
-                label="Drag to schedule"
+          <Stack spacing={2}>
+            <Stack
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+              sx={{ cursor: 'pointer' }}
+              onClick={() => setShowAvailablePrograms(!showAvailablePrograms)}
+            >
+              <Stack direction="row" alignItems="center" spacing={2}>
+                <WaterIcon sx={{ color: theme.palette.primary.main }} />
+                <Typography variant="h6" fontWeight={600}>
+                  Available Programs
+                </Typography>
+                <Chip
+                  label="Drag to schedule"
+                  size="small"
+                  sx={{
+                    backgroundColor: alpha(theme.palette.info.main, 0.1),
+                    color: theme.palette.info.main,
+                    fontWeight: 500,
+                  }}
+                />
+              </Stack>
+              <IconButton
                 size="small"
                 sx={{
-                  backgroundColor: alpha(theme.palette.info.main, 0.1),
-                  color: theme.palette.info.main,
-                  fontWeight: 500,
+                  color: theme.palette.primary.main,
+                  transition: 'transform 0.2s ease',
+                  transform: showAvailablePrograms
+                    ? 'rotate(180deg)'
+                    : 'rotate(0deg)',
                 }}
-              />
+              >
+                <ExpandMoreIcon />
+              </IconButton>
             </Stack>
-            <IconButton
-              size="small"
-              sx={{
-                color: theme.palette.primary.main,
-                transition: 'transform 0.2s ease',
-                transform: showAvailablePrograms
-                  ? 'rotate(180deg)'
-                  : 'rotate(0deg)',
-              }}
-            >
-              <ExpandMoreIcon />
-            </IconButton>
+
+            {/* Zone Filter Section */}
+            {showAvailablePrograms && (
+              <ZoneFilter
+                availableZones={availableZones}
+                selectedZones={selectedZones}
+                onZoneChange={setSelectedZones}
+                zones={zones}
+              />
+            )}
           </Stack>
 
           {showAvailablePrograms && (
-            <Stack direction="row" spacing={2} flexWrap="wrap">
+            <Stack direction="row" spacing={2} flexWrap="wrap" sx={{ mt: 2 }}>
               <Droppable droppableId="program-list">
                 {(provided) => (
                   <Box

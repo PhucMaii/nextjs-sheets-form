@@ -1320,7 +1320,6 @@ model WaterProgram {
   createdAt           String
   createdBy           String
   companyId           Int
-  hexColor            String?
 
   zoneWaterPrograms   ZoneWater[]
   programSchedules    ProgramSchedule[]

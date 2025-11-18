@@ -18,6 +18,7 @@ import TimeInputModal from '../../Modals/edit/SingleFieldUpdate';
 import ConfirmModal from '../../Modals/ConfirmModal';
 import { times } from '@/app/lib/constant';
 import { ShowNotificationType } from '@/hooks/useNotification';
+import { programColors } from '@/app/lib/constant';
 // import { getScheduleProgramColor } from '@/app/utils/programs';
 
 interface IProps {
@@ -50,6 +51,7 @@ function ScheduleCard({
   isSelected,
 }: IProps) {
   const { companyId }: any = useParams();
+  const color = programColors[program.zoneWaterPrograms[0].zoneProgram.zoneId as keyof typeof programColors];
   const [isOpenConfirmModal, setIsOpenConfirmModal] = useState<{
     open: boolean;
     targetId: string | null;
@@ -163,9 +165,9 @@ function ScheduleCard({
         sx={{
           p: 0.5,
           borderRadius: 0.5,
-          backgroundColor: alpha(program.hexColor || '#2196F3', 0.2),
-          border: `1px solid ${alpha(program.hexColor || '#2196F3', 0.4)}`,
-          borderLeft: `3px solid ${program.hexColor || '#2196F3'}`,
+          backgroundColor: alpha(color || '#2196F3', 0.2),
+          border: `1px solid ${alpha(color || '#2196F3', 0.4)}`,
+          borderLeft: `3px solid ${color || '#2196F3'}`,
           opacity: snapshot.isDragging ? 0.5 : 1,
           cursor: 'grab',
           '&:active': {
@@ -173,7 +175,7 @@ function ScheduleCard({
           },
           transition: 'all 0.2s ease',
           '&:hover': {
-            backgroundColor: alpha(program.hexColor || '#2196F3', 0.3),
+            backgroundColor: alpha(color || '#2196F3', 0.3),
           },
           display: 'flex',
           alignItems: 'center',
@@ -204,7 +206,7 @@ function ScheduleCard({
                   fontWeight: 600,
                   color: isDetailed
                     ? theme.palette.text.primary
-                    : program.hexColor || '#2196F3',
+                    : color || '#2196F3',
                   display: 'block',
                   lineHeight: 1.2,
                 }}
@@ -236,7 +238,7 @@ function ScheduleCard({
               variant={isDetailed ? 'subtitle1' : 'caption'}
               sx={{
                 fontSize: isDetailed ? '0.9rem' : '0.7rem',
-                color: program.hexColor || '#2196F3',
+                color: color || '#2196F3',
                 display: 'block',
                 lineHeight: 1.2,
                 overflow: 'hidden',

@@ -3,9 +3,6 @@ import { Paper, Typography, Divider, Box, TextField } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { formatDuration } from '@/app/utils/time';
 import { CreateProgramForm } from '../../../farm/program/create/page';
-import { ColorPicker, useColor } from 'react-color-palette';
-import ScheduleCard from '../Schedule/ScheduleCard';
-import { WaterStatus } from '@prisma/client';
 
 interface ProgramInfoProps {
   formData: CreateProgramForm;
@@ -14,7 +11,6 @@ interface ProgramInfoProps {
 
 const ProgramInfo = ({ formData, setFormData }: ProgramInfoProps) => {
   const theme = useTheme();
-  const [color, setColor] = useColor(formData.hexColor || '#2196F3');
 
   // useEffect(() => {
   //   if (formData.hexColor && color.hex !== formData.hexColor) {
@@ -69,11 +65,11 @@ const ProgramInfo = ({ formData, setFormData }: ProgramInfoProps) => {
           }}
         />
 
-        <Typography variant="subtitle2" fontWeight={600}>
+        {/* <Typography variant="subtitle2" fontWeight={600}>
           Program Color
-        </Typography>
+        </Typography> */}
         {/* Show color preview */}
-        <Box display="flex" flexDirection="row" gap={2}>
+        {/* <Box display="flex" flexDirection="row" gap={2}>
           <ScheduleCard
             provided={{}}
             snapshot={{}}
@@ -102,8 +98,8 @@ const ProgramInfo = ({ formData, setFormData }: ProgramInfoProps) => {
             setSchedules={() => {}}
             handleSelectProgram={() => {}}
           />
-        </Box>
-        <ColorPicker
+        </Box> */}
+        {/* <ColorPicker
           height={100}
           color={color}
           onChange={(newColor: any) => {
@@ -114,7 +110,7 @@ const ProgramInfo = ({ formData, setFormData }: ProgramInfoProps) => {
             }));
           }}
           hideInput={['hsv', 'rgb']}
-        />
+        /> */}
 
         {/* Summary */}
         <Box

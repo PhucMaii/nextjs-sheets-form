@@ -13,6 +13,7 @@ import { Water as WaterIcon } from '@mui/icons-material';
 import { CopyIcon, Trash2Icon } from 'lucide-react';
 import ConfirmModal from '../Modals/ConfirmModal';
 import { ShowNotificationType } from '@/hooks/useNotification';
+import { programColors } from '@/app/lib/constant';
 
 interface IProps {
   provided: any;
@@ -33,6 +34,8 @@ export default function SmallProgramCard({
   onClick,
   showNotification,
 }: IProps) {
+  console.log(program, 'program')
+  const color = programColors[program.zoneWaterPrograms[0].zoneProgram.zoneId as keyof typeof programColors];
   const [isOpenConfirmModal, setIsOpenConfirmModal] = useState<boolean>(false);
   return (
     <>
@@ -55,16 +58,16 @@ export default function SmallProgramCard({
         sx={{
           p: 2,
           borderRadius: 2,
-          border: `2px solid ${alpha(program?.hexColor || '#2196F3', 0.3)}`,
-          backgroundColor: alpha(program?.hexColor || '#2196F3', 0.1),
+          border: `2px solid ${alpha(color || '#2196F3', 0.3)}`,
+          backgroundColor: alpha(color || '#2196F3', 0.1),
           minWidth: isSmall ? 150 : 220,
           cursor: 'grab',
           transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           '&:hover': {
             transform: 'translateY(-2px)',
-            boxShadow: `0 4px 12px ${alpha(program?.hexColor || '#2196F3', 0.3)}`,
-            borderColor: program?.hexColor || '#2196F3',
-            backgroundColor: alpha(program?.hexColor || '#2196F3', 0.15),
+            boxShadow: `0 4px 12px ${alpha(color || '#2196F3', 0.3)}`,
+            borderColor: color || '#2196F3',
+            backgroundColor: alpha(color || '#2196F3', 0.15),
           },
           '&:active': {
             cursor: 'grabbing',
@@ -75,9 +78,9 @@ export default function SmallProgramCard({
         <Stack direction="row" alignItems="center" spacing={2}>
           <Avatar
             sx={{
-              backgroundColor: alpha(program?.hexColor || '#2196F3', 0.2),
-              color: program?.hexColor || '#2196F3',
-              border: `2px solid ${alpha(program?.hexColor || '#2196F3', 0.3)}`,
+              backgroundColor: alpha(color || '#2196F3', 0.2),
+              color: color || '#2196F3',
+              border: `2px solid ${alpha(color || '#2196F3', 0.3)}`,
             }}
           >
             <WaterIcon />
@@ -86,7 +89,7 @@ export default function SmallProgramCard({
             <Typography
               variant="body1"
               fontWeight={600}
-              color={program?.hexColor || '#2196F3'}
+              color={color || '#2196F3'}
             >
               {program.name}
             </Typography>

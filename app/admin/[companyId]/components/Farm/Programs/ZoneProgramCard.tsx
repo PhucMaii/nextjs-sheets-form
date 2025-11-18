@@ -14,7 +14,7 @@ import {
   IconButton,
 } from '@mui/material';
 import { DragIndicator as DragIcon } from '@mui/icons-material';
-import { ZoneProgram } from './types';
+import { ZoneProgram } from '../types';
 import { Delete as DeleteIcon } from '@mui/icons-material';
 import { formatDuration } from '@/app/utils/time';
 
