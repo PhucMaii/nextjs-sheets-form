@@ -1314,7 +1314,7 @@ model BundleProgram {
 model WaterProgram {
   id                  Int   @id  @default(autoincrement())
   name                String
-  days                Int
+  days                Int?
   remainingDays       Int?
   isActive            Boolean     @default(false)
   createdAt           String

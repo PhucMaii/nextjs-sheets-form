@@ -1,8 +1,8 @@
 import React, { Dispatch, SetStateAction, useMemo } from 'react';
 import { Paper, Typography, Divider, Box, TextField } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { CreateProgramForm } from '../../farm/program/create/page';
 import { formatDuration } from '@/app/utils/time';
+import { CreateProgramForm } from '../../../farm/program/create/page';
 
 interface ProgramInfoProps {
   formData: CreateProgramForm;
@@ -12,10 +12,25 @@ interface ProgramInfoProps {
 const ProgramInfo = ({ formData, setFormData }: ProgramInfoProps) => {
   const theme = useTheme();
 
-  const totalDuration = useMemo(() => formData.zonePrograms.reduce(
-    (total, zoneProgram) => total + zoneProgram.duration,
-    0,
-  ), [formData.zonePrograms]);
+  // useEffect(() => {
+  //   if (formData.hexColor && color.hex !== formData.hexColor) {
+  //     const hex = formData.hexColor;
+  //     const r = parseInt(hex.slice(1, 3), 16);
+  //     const g = parseInt(hex.slice(3, 5), 16);
+  //     const b = parseInt(hex.slice(5, 7), 16);
+      
+  //     setColor(formData.hexColor);
+  //   }
+  // }, [formData.hexColor]);
+
+  const totalDuration = useMemo(
+    () =>
+      formData.zonePrograms.reduce(
+        (total: number, zoneProgram: any) => total + zoneProgram.duration,
+        0,
+      ),
+    [formData.zonePrograms],
+  );
 
   return (
     <Paper
@@ -50,28 +65,52 @@ const ProgramInfo = ({ formData, setFormData }: ProgramInfoProps) => {
           }}
         />
 
-        <TextField
-          fullWidth
-          label="Duration (days)"
-          type="number"
-          value={formData.days}
-          onChange={(e) =>
+        {/* <Typography variant="subtitle2" fontWeight={600}>
+          Program Color
+        </Typography> */}
+        {/* Show color preview */}
+        {/* <Box display="flex" flexDirection="row" gap={2}>
+          <ScheduleCard
+            provided={{}}
+            snapshot={{}}
+            schedule={{
+              id: 0,
+              programId: 0,
+              status: WaterStatus.SCHEDULED,
+              date: new Date().toISOString(),
+              time: '00:00',
+              createdAt: new Date().toISOString(),
+              createdBy: 'system',
+              companyId: 1,
+            }}
+            isSelected={false}
+            program={{
+              id: 'preview-color',
+              name: 'Preview Color',
+              duration: 300,
+              zoneWaterPrograms: [],
+              hexColor: formData.hexColor || '#2196F3',
+            }}
+            showNotification={() => {}}
+            refetchSchedules={() => {}}
+            removeSchedule={() => {}}
+            handleSave={async () => {}}
+            setSchedules={() => {}}
+            handleSelectProgram={() => {}}
+          />
+        </Box> */}
+        {/* <ColorPicker
+          height={100}
+          color={color}
+          onChange={(newColor: any) => {
+            setColor(newColor);
             setFormData((prev: CreateProgramForm) => ({
               ...prev,
-              days: Math.max(1, parseInt(e.target.value) || 1),
-            }))
-          }
-          error={formData.days < 1}
-          helperText={
-            formData.days < 1 ? 'Duration must be at least 1 day' : null
-          }
-          inputProps={{ min: 1 }}
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              borderRadius: 2,
-            },
+              hexColor: newColor.hex,
+            }));
           }}
-        />
+          hideInput={['hsv', 'rgb']}
+        /> */}
 
         {/* Summary */}
         <Box

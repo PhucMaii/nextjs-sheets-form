@@ -6,28 +6,30 @@ import { Droppable, Draggable } from '@hello-pangea/dnd';
 import { Program } from '../types';
 import ScheduleCard from '../Schedule/ScheduleCard';
 import { ShowNotificationType } from '@/hooks/useNotification';
-import { getProgramById } from '@/app/utils/programs';
+import { ProgramSchedule } from '@prisma/client';
 
 interface IProps {
   currentDate: Date;
   getSchedulesForTimeSlot: (date: Date, time: string) => any[];
-  programs: Program[];
   removeSchedule: (id: string) => void;
   showNotification: ShowNotificationType;
   refetchSchedules: () => void;
   handleSave: () => Promise<void>;
   setSchedules: any;
+  selectedPrograms: Program[];
+  handleSelectProgram: (schedule: ProgramSchedule) => void;
 }
 
 const ProgramDayView = ({
   currentDate,
   getSchedulesForTimeSlot,
-  programs,
   showNotification,
   refetchSchedules,
   removeSchedule,
   handleSave,
   setSchedules,
+  selectedPrograms,
+  handleSelectProgram,
 }: IProps) => {
   const timeSlots = Array.from(
     { length: 24 },
@@ -35,7 +37,7 @@ const ProgramDayView = ({
   );
 
   const theme = useTheme();
-  
+
   return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -94,10 +96,7 @@ const ProgramDayView = ({
                         }}
                       >
                         {timeSchedules.map((schedule) => {
-                          const program: Program | any = getProgramById(
-                            schedule.programId,
-                            programs,
-                          );
+                          const program = schedule.waterProgram;
                           if (!program) return null;
 
                           return (
@@ -118,6 +117,10 @@ const ProgramDayView = ({
                                   removeSchedule={removeSchedule}
                                   handleSave={handleSave}
                                   setSchedules={setSchedules}
+                                  handleSelectProgram={handleSelectProgram}
+                                  isSelected={selectedPrograms.some(
+                                    (p) => p.id === schedule.id,
+                                  )}
                                 />
                               )}
                             </Draggable>

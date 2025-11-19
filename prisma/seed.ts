@@ -120,99 +120,13 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-  const items = await prisma.item.findMany({
-    where: {
-      companyId: 1,
-      price: 10
+  await prisma.waterProgram.updateMany({
+    data: {
+      hexColor: null,
     },
-    include: {
-      inventoryItem: true,
-    }
   });
-
-  console.log(items);
-
-  const mapInventoryItem = items.reduce((acc: any, item: any) => {
-    if (!item.inventoryItem?.name) {
-      return acc;
-    }
-    if (!acc[item.inventoryItem?.name]) {
-      acc[item.inventoryItem?.name] = 0;
-    }
-    acc[item.inventoryItem?.name]++;
-    return acc;
-  }, {});
-  
-  console.log(mapInventoryItem);
-  // const allItems = await prisma.item.findMany({
-  //   where: {
-  //     companyId: 2,
-  //     id: {
-  //       gt: 6809
-  //     }
-  //   },
-  // });
-
-  // await Promise.all(
-  //   allItems.map(async (item) => {
-  //     const lastTimeOrder = await prisma.orderedItems.findFirst({
-  //       where: {
-  //         inventoryItemId: item.inventoryItemId,
-  //         Orders: {
-  //           user: {
-  //             categoryId: item.categoryId,
-  //           }
-  //         }
-  //       },
-  //       include: {
-  //         Orders: true,
-  //       },
-  //       orderBy: {
-  //         Orders: {
-  //           id: 'desc',
-  //         },
-  //       },
-  //     });
-
-  //     if (lastTimeOrder?.companyId !== 2) {
-  //       return;
-  //     }
-
-  //     if (lastTimeOrder) {
-  //       await prisma.item.update({
-  //         where: {
-  //           id: item.id,
-  //         },
-  //         data: {
-  //           price: lastTimeOrder.price,
-  //         },
-  //       });
-  //     } else {
-  //       console.log(item.name, 'not found');
-  //     }
-
-  //     console.log(item.id);
-  //   }),
-  // );
 }
 
-// async function main() {
-//   const routes = await prisma.route.findMany({
-//     where: {
-//       companyId: 1,
-//     },
-//   });
-
-//   for (const route of routes) {
-//     await prisma.route.update({
-//       where: {
-//         id: route.id,
-//       },
-//       data: { employeeId: route.driverId },
-//     });
-//   }
-
-// }
 
 main()
   .then(() => prisma.$disconnect())

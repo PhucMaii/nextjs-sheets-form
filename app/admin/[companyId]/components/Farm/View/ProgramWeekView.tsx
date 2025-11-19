@@ -7,8 +7,7 @@ import { startOfWeek, addDays } from 'date-fns';
 import { Program } from '../types';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import ScheduleCard from '../Schedule/ScheduleCard';
-import { getProgramById } from '@/app/utils/programs';
-
+import { ProgramSchedule } from '@prisma/client';
 interface IProps {
   currentDate: Date;
   getSchedulesForTimeSlot: (date: Date, time: string) => any[];
@@ -17,6 +16,8 @@ interface IProps {
   removeSchedule: (id: string) => void;
   handleSave: () => Promise<void>;
   setSchedules: any;
+  selectedPrograms: Program[];
+  handleSelectProgram: (schedule: ProgramSchedule) => void;
 }
 
 const ProgramWeekView = ({
@@ -27,8 +28,9 @@ const ProgramWeekView = ({
   removeSchedule,
   handleSave,
   setSchedules,
+  selectedPrograms,
+  handleSelectProgram,
 }: IProps) => {
-
   const weekStart = startOfWeek(currentDate);
   const theme = useTheme();
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
@@ -173,10 +175,12 @@ const ProgramWeekView = ({
                 >
                   <Stack spacing={0.5}>
                     {daySchedules.map((schedule) => {
-                      const program: Program | any = getProgramById(
-                        schedule.id,
-                        daySchedules,
-                      );
+                      // const program: Program | any = getProgramById(
+                      //   schedule.id,
+                      //   daySchedules,
+                      // );
+
+                      const program = schedule.waterProgram;
                       if (!program) return null;
 
                       return (
@@ -196,6 +200,10 @@ const ProgramWeekView = ({
                               removeSchedule={removeSchedule}
                               handleSave={handleSave}
                               setSchedules={setSchedules}
+                              handleSelectProgram={handleSelectProgram}
+                              isSelected={selectedPrograms.some(
+                                (p) => p.id === schedule.id,
+                              )}
                             />
                           )}
                         </Draggable>

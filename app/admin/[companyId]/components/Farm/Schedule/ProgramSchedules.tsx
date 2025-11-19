@@ -22,6 +22,7 @@ import {
   ExpandMore as ExpandMoreIcon,
   CopyAll as CopyAllIcon,
   Save as SaveIcon,
+  Delete as DeleteIcon,
 } from '@mui/icons-material';
 import {
   DragDropContext,
@@ -55,12 +56,15 @@ import TimeInputModal from '../../Modals/edit/SingleFieldUpdate';
 import axios from 'axios';
 import { getAdminApiUrl } from '@/app/utils/enum';
 import { ShowNotificationType } from '@/hooks/useNotification';
-import { WaterStatus } from '@prisma/client';
+import { ProgramSchedule, WaterStatus } from '@prisma/client';
 import { LoadingButton } from '@mui/lab';
 import { times } from '@/app/lib/constant';
 import SmallProgramCard from '../SmallProgramCard';
 import SmallBundleProgramCard from '../SmallBundleProgramCard';
 import { getProgramById } from '@/app/utils/programs';
+import ConfirmModal from '../../Modals/ConfirmModal';
+import { useHydrawiseAPI } from '@/hooks/useHydrawiseAPI';
+import ZoneFilter from '../ZoneFilter';
 
 type ViewType = 'month' | 'week' | 'day';
 interface ScheduleItem {
@@ -71,6 +75,7 @@ interface ScheduleItem {
   time: string;
   status: WaterStatus;
   zoneWaterPrograms?: ZoneWater[];
+  waterProgram?: Program;
 }
 
 export const defaultScheduleTime = '09:00';
@@ -83,7 +88,7 @@ export default function ProgramSchedules({ showNotification }: IProps) {
   const theme = useTheme();
   const { companyId }: any = useParams();
   const [currentDate, setCurrentDate] = useState(new Date());
-  // const { zones } = useHydrawiseAPI(companyId);
+  const { zones } = useHydrawiseAPI(companyId);
   const { getPrograms } = usePrograms(companyId, []);
 
   const { data: bundlePrograms } = useQuery({
@@ -119,6 +124,9 @@ export default function ProgramSchedules({ showNotification }: IProps) {
   const [displayedPrograms, setDisplayedPrograms] = useState<Program[]>(
     programs || [],
   );
+  const [selectedPrograms, setSelectedPrograms] = useState<Program[]>([]);
+  const [selectedZones, setSelectedZones] = useState<number[]>([]);
+  const [isConfirmDelete, setIsConfirmDelete] = useState<boolean>(false);
   const [viewType, setViewType] = useState<ViewType>('month');
   const [schedules, setSchedules] = useState<ScheduleItem[]>([]);
   const [draggedProgram, setDraggedProgram] = useState<string | null>(null);
@@ -141,6 +149,14 @@ export default function ProgramSchedules({ showNotification }: IProps) {
     defaultValue: null,
   });
 
+  const handleSelectProgram = (schedule: ProgramSchedule | any) => {
+    const isSelected = selectedPrograms.some((p) => p.id === schedule.id);
+    if (isSelected) {
+      setSelectedPrograms((prev) => prev.filter((p) => p.id !== schedule.id));
+    } else {
+      setSelectedPrograms((prev) => [...prev, schedule]);
+    }
+  };
   const getStartAndEndDate = () => {
     if (viewType === 'month') {
       const startDate = startOfMonth(currentDate);
@@ -173,11 +189,47 @@ export default function ProgramSchedules({ showNotification }: IProps) {
     },
   });
 
-  useEffect(() => {
-    if (programs) {
-      setDisplayedPrograms(programs || []);
-    }
+  // Extract unique zones from all programs
+  const availableZones = useMemo(() => {
+    if (!programs) return [];
+    const zoneMap = new Map<number, { zoneId: number; name: string }>();
+
+    programs.forEach((program: Program) => {
+      program.zoneWaterPrograms?.forEach((zoneWater: ZoneWater) => {
+        const zoneId = Number(zoneWater.zoneProgram?.zoneId);
+        if (zoneId && !zoneMap.has(zoneId)) {
+          zoneMap.set(zoneId, {
+            zoneId,
+            name: `Zone ${zoneId}`,
+          });
+        }
+      });
+    });
+
+    return Array.from(zoneMap.values()).sort((a, b) => a.zoneId - b.zoneId);
   }, [programs]);
+
+  // Filter programs based on selected zones
+  useEffect(() => {
+    if (!programs) return;
+
+    if (selectedZones.length === 0) {
+      setDisplayedPrograms(programs);
+      return;
+    }
+
+    const filtered = programs.filter((program: Program) => {
+      const programZoneIds =
+        program.zoneWaterPrograms?.map((zoneWater: ZoneWater) =>
+          Number(zoneWater.zoneProgram?.zoneId),
+        ) || [];
+
+      // Check if program has at least one zone that matches selected zones
+      return programZoneIds.some((zoneId) => selectedZones.includes(zoneId));
+    });
+
+    setDisplayedPrograms(filtered);
+  }, [programs, selectedZones]);
 
   useEffect(() => {
     if (dbSchedules) {
@@ -281,6 +333,7 @@ export default function ProgramSchedules({ showNotification }: IProps) {
         time: time || defaultScheduleTime,
         status: WaterStatus.SCHEDULED,
         zoneWaterPrograms: program?.zoneWaterPrograms || [],
+        waterProgram: program,
       };
 
       setSchedules((prev) => {
@@ -314,6 +367,7 @@ export default function ProgramSchedules({ showNotification }: IProps) {
               time: dayProgram.time,
               status: WaterStatus.SCHEDULED,
               zoneWaterPrograms: dayProgram.program.zoneWaterPrograms || [],
+              waterProgram: dayProgram.program,
             };
           },
         );
@@ -334,6 +388,7 @@ export default function ProgramSchedules({ showNotification }: IProps) {
                 ...schedule,
                 date: format(targetDate, 'MM/dd/yyyy'),
                 time: time || schedule.time,
+                waterProgram: schedule.waterProgram,
               }
             : schedule,
         );
@@ -435,6 +490,31 @@ export default function ProgramSchedules({ showNotification }: IProps) {
       setIsCopyingPrevPeriod(false);
     }
   };
+
+  const handleDeleteSelectedPrograms = async () => {
+    try {
+      const programIds = selectedPrograms.map((program) => program.id);
+      const response = await axios.delete(
+        getAdminApiUrl(
+          companyId,
+          `/water-program/schedule/delete-multiple-programs?programIds=${programIds.join(',')}`,
+        ),
+      );
+
+      if (response.data.error) {
+        showNotification('error', response.data.error);
+        return;
+      }
+
+      await refetchSchedules();
+      setSelectedPrograms([]);
+      showNotification('success', response.data.message);
+    } catch (error: any) {
+      console.log('Internal Server Error: ', error);
+      showNotification('error', 'Something went wrong: ' + error);
+    }
+  };
+
   return (
     <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <TimeInputModal
@@ -453,6 +533,16 @@ export default function ProgramSchedules({ showNotification }: IProps) {
         renderField={'time'}
         defaultValue={isTimeInputModalOpen.defaultValue || defaultScheduleTime}
         handleUpdate={handleUpdateTime as any}
+      />
+
+      <ConfirmModal
+        open={isConfirmDelete}
+        onClose={() => setIsConfirmDelete(false)}
+        handleSubmit={handleDeleteSelectedPrograms}
+        title={`Are you sure to delete ${selectedPrograms.length} schedules?`}
+        buttonLabel="Delete"
+        showNotification={showNotification}
+        color="error"
       />
       <Box sx={{ p: 3 }}>
         {/* Header */}
@@ -681,49 +771,60 @@ export default function ProgramSchedules({ showNotification }: IProps) {
             mb: 3,
             borderRadius: 3,
             backgroundColor: 'white',
-            border: `1px solid ${alpha(theme.palette.grey[200], 0.5)}`,
+            border: `1px solid ${alpha(theme.palette.grey[300], 0.5)}`,
             background: `linear-gradient(135deg, ${alpha(theme.palette.grey[50], 0.5)}, ${alpha(theme.palette.grey[100], 0.2)})`,
           }}
         >
-          <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent="space-between"
-            mb={showAvailablePrograms ? 2 : 0}
-            sx={{ cursor: 'pointer' }}
-            onClick={() => setShowAvailablePrograms(!showAvailablePrograms)}
-          >
-            <Stack direction="row" alignItems="center" spacing={2}>
-              <WaterIcon sx={{ color: theme.palette.primary.main }} />
-              <Typography variant="h6" fontWeight={600}>
-                Available Programs
-              </Typography>
-              <Chip
-                label="Drag to schedule"
+          <Stack spacing={2}>
+            <Stack
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+              sx={{ cursor: 'pointer' }}
+              onClick={() => setShowAvailablePrograms(!showAvailablePrograms)}
+            >
+              <Stack direction="row" alignItems="center" spacing={2}>
+                <WaterIcon sx={{ color: theme.palette.primary.main }} />
+                <Typography variant="h6" fontWeight={600}>
+                  Available Programs
+                </Typography>
+                <Chip
+                  label="Drag to schedule"
+                  size="small"
+                  sx={{
+                    backgroundColor: alpha(theme.palette.info.main, 0.1),
+                    color: theme.palette.info.main,
+                    fontWeight: 500,
+                  }}
+                />
+              </Stack>
+              <IconButton
                 size="small"
                 sx={{
-                  backgroundColor: alpha(theme.palette.info.main, 0.1),
-                  color: theme.palette.info.main,
-                  fontWeight: 500,
+                  color: theme.palette.primary.main,
+                  transition: 'transform 0.2s ease',
+                  transform: showAvailablePrograms
+                    ? 'rotate(180deg)'
+                    : 'rotate(0deg)',
                 }}
-              />
+              >
+                <ExpandMoreIcon />
+              </IconButton>
             </Stack>
-            <IconButton
-              size="small"
-              sx={{
-                color: theme.palette.primary.main,
-                transition: 'transform 0.2s ease',
-                transform: showAvailablePrograms
-                  ? 'rotate(180deg)'
-                  : 'rotate(0deg)',
-              }}
-            >
-              <ExpandMoreIcon />
-            </IconButton>
+
+            {/* Zone Filter Section */}
+            {showAvailablePrograms && (
+              <ZoneFilter
+                availableZones={availableZones}
+                selectedZones={selectedZones}
+                onZoneChange={setSelectedZones}
+                zones={zones}
+              />
+            )}
           </Stack>
 
           {showAvailablePrograms && (
-            <Stack direction="row" spacing={2} flexWrap="wrap">
+            <Stack direction="row" spacing={2} flexWrap="wrap" sx={{ mt: 2 }}>
               <Droppable droppableId="program-list">
                 {(provided) => (
                   <Box
@@ -772,30 +873,44 @@ export default function ProgramSchedules({ showNotification }: IProps) {
             position: 'relative',
           }}
         >
-          <Box display="flex" justifyContent="flex-end" mb={2} gap={2}>
-            {(viewType === 'month' || viewType === 'week') && (
+          <Box display="flex" justifyContent="space-between" mb={2} gap={2}>
+            <Box>
+              {selectedPrograms.length > 0 && (
+                <Button
+                  variant="outlined"
+                  color="error"
+                  startIcon={<DeleteIcon />}
+                  onClick={() => setIsConfirmDelete(true)}
+                >
+                  Delete {selectedPrograms.length} schedules
+                </Button>
+              )}
+            </Box>
+            <Box display="flex" alignItems="center" gap={2}>
+              {(viewType === 'month' || viewType === 'week') && (
+                <LoadingButton
+                  onClick={handleCopyPrevPeriod}
+                  loading={isCopyingPrevPeriod}
+                  variant="outlined"
+                  startIcon={<CopyAllIcon />}
+                >
+                  Copy Last{' '}
+                  {viewType === 'month'
+                    ? 'Month'
+                    : viewType === 'week'
+                      ? 'Week'
+                      : ''}
+                </LoadingButton>
+              )}
               <LoadingButton
-                onClick={handleCopyPrevPeriod}
-                loading={isCopyingPrevPeriod}
-                variant="outlined"
-                startIcon={<CopyAllIcon />}
+                variant="contained"
+                onClick={handleSave}
+                loading={isSaving}
+                startIcon={<SaveIcon />}
               >
-                Copy Last{' '}
-                {viewType === 'month'
-                  ? 'Month'
-                  : viewType === 'week'
-                    ? 'Week'
-                    : ''}
+                Save
               </LoadingButton>
-            )}
-            <LoadingButton
-              variant="contained"
-              onClick={handleSave}
-              loading={isSaving}
-              startIcon={<SaveIcon />}
-            >
-              Save
-            </LoadingButton>
+            </Box>
           </Box>
 
           {viewType === 'month' && (
@@ -805,7 +920,7 @@ export default function ProgramSchedules({ showNotification }: IProps) {
               getSchedulesForDate={getSchedulesForDate}
               showNotification={showNotification}
               refetchSchedules={refetchSchedules}
-              programs={displayedPrograms}
+              // programs={displayedPrograms}
               removeSchedule={deleteSchedule}
               handleSave={handleSave}
               setSchedules={setSchedules}
@@ -813,6 +928,8 @@ export default function ProgramSchedules({ showNotification }: IProps) {
               hoveredDate={hoveredDate}
               setHoveredDate={setHoveredDate}
               isDateOccupiedByBundle={isDateOccupiedByBundle}
+              selectedPrograms={selectedPrograms}
+              handleSelectProgram={handleSelectProgram}
             />
           )}
           {viewType === 'week' && (
@@ -824,6 +941,8 @@ export default function ProgramSchedules({ showNotification }: IProps) {
               removeSchedule={deleteSchedule}
               handleSave={handleSave}
               setSchedules={setSchedules}
+              selectedPrograms={selectedPrograms}
+              handleSelectProgram={handleSelectProgram}
             />
           )}
           {viewType === 'day' && (
@@ -833,9 +952,11 @@ export default function ProgramSchedules({ showNotification }: IProps) {
               removeSchedule={deleteSchedule}
               showNotification={showNotification}
               refetchSchedules={refetchSchedules}
-              programs={displayedPrograms}
+              // programs={displayedPrograms}
               handleSave={handleSave}
               setSchedules={setSchedules}
+              selectedPrograms={selectedPrograms}
+              handleSelectProgram={handleSelectProgram}
             />
           )}
 

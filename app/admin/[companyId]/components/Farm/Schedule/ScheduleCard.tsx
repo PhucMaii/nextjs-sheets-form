@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { Box, Typography, IconButton, useTheme, Stack } from '@mui/material';
+import {
+  Box,
+  Typography,
+  IconButton,
+  useTheme,
+  Stack,
+  Checkbox,
+} from '@mui/material';
 import { alpha } from '@mui/material';
 import { DragIndicator as DragHandleIcon } from '@mui/icons-material';
 import { Trash2Icon } from 'lucide-react';
@@ -11,7 +18,8 @@ import TimeInputModal from '../../Modals/edit/SingleFieldUpdate';
 import ConfirmModal from '../../Modals/ConfirmModal';
 import { times } from '@/app/lib/constant';
 import { ShowNotificationType } from '@/hooks/useNotification';
-import { getScheduleProgramColor } from '@/app/utils/programs';
+import { programColors } from '@/app/lib/constant';
+// import { getScheduleProgramColor } from '@/app/utils/programs';
 
 interface IProps {
   provided: any;
@@ -23,7 +31,9 @@ interface IProps {
   isDetailed?: boolean;
   removeSchedule: (id: string) => void;
   handleSave: () => Promise<void>;
-  setSchedules: any
+  setSchedules: any;
+  handleSelectProgram: (schedule: ProgramSchedule) => void;
+  isSelected: boolean;
 }
 
 function ScheduleCard({
@@ -37,8 +47,11 @@ function ScheduleCard({
   removeSchedule,
   handleSave,
   setSchedules,
+  handleSelectProgram,
+  isSelected,
 }: IProps) {
   const { companyId }: any = useParams();
+  const color = programColors[program.zoneWaterPrograms[0].zoneProgram.zoneId as keyof typeof programColors];
   const [isOpenConfirmModal, setIsOpenConfirmModal] = useState<{
     open: boolean;
     targetId: string | null;
@@ -67,7 +80,7 @@ function ScheduleCard({
         removeSchedule(id);
         return;
       }
-      
+
       await handleSave();
       const response = await deleteProgramSchedule(id);
 
@@ -152,9 +165,9 @@ function ScheduleCard({
         sx={{
           p: 0.5,
           borderRadius: 0.5,
-          backgroundColor: alpha(getScheduleProgramColor(schedule), 0.2),
-          border: `1px solid ${alpha(getScheduleProgramColor(schedule), 0.4)}`,
-          borderLeft: `3px solid ${getScheduleProgramColor(schedule)}`,
+          backgroundColor: alpha(color || '#2196F3', 0.2),
+          border: `1px solid ${alpha(color || '#2196F3', 0.4)}`,
+          borderLeft: `3px solid ${color || '#2196F3'}`,
           opacity: snapshot.isDragging ? 0.5 : 1,
           cursor: 'grab',
           '&:active': {
@@ -162,7 +175,7 @@ function ScheduleCard({
           },
           transition: 'all 0.2s ease',
           '&:hover': {
-            backgroundColor: alpha(getScheduleProgramColor(schedule), 0.3),
+            backgroundColor: alpha(color || '#2196F3', 0.3),
           },
           display: 'flex',
           alignItems: 'center',
@@ -170,59 +183,72 @@ function ScheduleCard({
           minWidth: isDetailed ? 300 : 'auto',
         }}
       >
-        <Box
-          display="flex"
-          flexDirection={isDetailed ? 'column-reverse' : 'column'}
-          gap={isDetailed ? 1 : 0.5}
-        >
-          <Box display="flex" alignItems="center" gap={0.5}>
+        <Box display="flex" alignItems="center" gap={0.5}>
+          <Checkbox
+            checked={isSelected}
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              handleSelectProgram(schedule);
+            }}
+          />
+          <Box
+            display="flex"
+            flexDirection={isDetailed ? 'column-reverse' : 'column'}
+            gap={isDetailed ? 1 : 0.5}
+          >
+            <Box display="flex" alignItems="center" gap={0.5}>
+              <Typography
+                variant={isDetailed ? 'subtitle1' : 'caption'}
+                sx={{
+                  fontSize: isDetailed ? '0.8rem' : '0.7rem',
+                  fontWeight: 600,
+                  color: isDetailed
+                    ? theme.palette.text.primary
+                    : color || '#2196F3',
+                  display: 'block',
+                  lineHeight: 1.2,
+                }}
+              >
+                {schedule.time}
+              </Typography>
+              {isDetailed && (
+                <Stack direction="row" alignItems="center" gap={0.5}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      fontSize: '0.8rem',
+                    }}
+                  >
+                    • {program.duration} sec
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      fontSize: '0.8rem',
+                    }}
+                  >
+                    ({program.zoneWaterPrograms.length} zones)
+                  </Typography>
+                </Stack>
+              )}
+            </Box>
             <Typography
               variant={isDetailed ? 'subtitle1' : 'caption'}
               sx={{
-                fontSize: isDetailed ? '0.8rem' : '0.7rem',
-                fontWeight: 600,
-                color: isDetailed ? theme.palette.text.primary : getScheduleProgramColor(schedule),
+                fontSize: isDetailed ? '0.9rem' : '0.7rem',
+                color: color || '#2196F3',
                 display: 'block',
                 lineHeight: 1.2,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
               }}
             >
-              {schedule.time}
+              {program?.name || program?.waterProgram?.name}
             </Typography>
-            {isDetailed && (
-              <Stack direction="row" alignItems="center" gap={0.5}>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    fontSize: '0.8rem',
-                  }}
-                >
-                  • {program.duration} sec
-                </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    fontSize: '0.8rem',
-                  }}
-                >
-                  ({program.zoneWaterPrograms.length} zones)
-                </Typography>
-              </Stack>
-            )}
           </Box>
-          <Typography
-            variant={isDetailed ? 'subtitle1' : 'caption'}
-            sx={{
-              fontSize: isDetailed ? '0.9rem' : '0.7rem',
-              color: getScheduleProgramColor(schedule),
-              display: 'block',
-              lineHeight: 1.2,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {program?.name || program?.waterProgram?.name}
-          </Typography>
         </Box>
         <Box display="flex" alignItems="center" gap={1}>
           <Box

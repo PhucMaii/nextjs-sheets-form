@@ -8,13 +8,12 @@ import { NextApiRequest, NextApiResponse } from 'next';
 interface IBody {
   id: number;
   name: string;
-  days: number;
   zonePrograms: ZoneProgram[];
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { id, name, days, zonePrograms } = req.body as IBody;
+    const { id, name, zonePrograms } = req.body as IBody;
     const { companyId } = req.query;
 
     const existingWaterProgram = await prisma.waterProgram.findUnique({
@@ -32,16 +31,11 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       return res.status(404).json({ error: 'Water program not found' });
     }
 
-    if (
-      name !== existingWaterProgram.name ||
-      days !== existingWaterProgram.days
-    ) {
+    if (name !== existingWaterProgram.name) {
       await prisma.waterProgram.update({
         where: { id: Number(id) },
         data: {
           name,
-          days,
-          remainingDays: days,
         },
       });
     }
@@ -66,7 +60,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             companyId: Number(companyId),
           },
         });
-        
+
         return prisma.zoneWater.create({
           data: {
             zoneProgramId: newZoneProgram.id,
@@ -74,8 +68,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           },
         });
       }
-
-      console.log({ existingZone: existingZoneProgram.zoneProgram, zoneProgram, idx });
 
       if (
         existingZoneProgram.zoneProgram.duration !== zoneProgram.duration ||

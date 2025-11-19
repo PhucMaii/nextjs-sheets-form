@@ -61,12 +61,12 @@ const ProgramDetailsPage = () => {
   const handleSubmit = async () => {
     try {
       setIsLoading(true);
+      
       const response = await axios.put(
         getAdminApiUrl(companyId, `/water-program`),
         {
           id: id,
           name: formData.name,
-          days: formData.days,
           zonePrograms: formData.zonePrograms,
         },
       );

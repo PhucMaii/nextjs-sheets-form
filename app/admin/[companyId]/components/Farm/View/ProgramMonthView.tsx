@@ -12,9 +12,10 @@ import {
 import { Droppable, Draggable } from '@hello-pangea/dnd';
 import { ShowNotificationType } from '@/hooks/useNotification';
 import ScheduleCard from '../Schedule/ScheduleCard';
-import { getProgramById } from '@/app/utils/programs';
 import { Program } from '../types';
 import { grey } from '@mui/material/colors';
+import { useState } from 'react';
+import { ProgramSchedule } from '@prisma/client';
 
 interface IProps {
   currentDate: Date;
@@ -22,7 +23,6 @@ interface IProps {
   getSchedulesForDate: (date: Date) => any[];
   showNotification: ShowNotificationType;
   refetchSchedules: () => void;
-  programs: Program[];
   removeSchedule: (id: string) => void;
   handleSave: () => Promise<void>;
   setSchedules: any;
@@ -34,6 +34,8 @@ interface IProps {
     bundleProgram: any,
     startDate: Date,
   ) => boolean;
+  selectedPrograms: Program[];
+  handleSelectProgram: (schedule: ProgramSchedule) => void;
 }
 
 const ProgramMonthView = ({
@@ -49,12 +51,31 @@ const ProgramMonthView = ({
   hoveredDate,
   setHoveredDate,
   isDateOccupiedByBundle,
+  selectedPrograms,
+  handleSelectProgram,
 }: IProps) => {
+  const [expandedDay, setExpandedDay] = useState<Date | null>(null);
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
   const startDate = startOfWeek(monthStart);
   const endDate = endOfWeek(monthEnd);
   const days = eachDayOfInterval({ start: startDate, end: endDate });
+
+  const handleDayMouseEnter = (day: Date, daySchedules: any[]) => {
+    if (draggedBundleProgram && setHoveredDate) {
+      setHoveredDate(day);
+    }
+    if (daySchedules.length > 3) {
+      setExpandedDay(day);
+    }
+  };
+
+  const handleDayMouseLeave = () => {
+    if (draggedBundleProgram && setHoveredDate) {
+      setHoveredDate(null);
+    }
+    setExpandedDay(null);
+  };
 
   return (
     <Box
@@ -117,19 +138,17 @@ const ProgramMonthView = ({
                       <Box
                         ref={provided.innerRef}
                         {...provided.droppableProps}
-                        onMouseEnter={() => {
-                          if (draggedBundleProgram && setHoveredDate) {
-                            setHoveredDate(day);
-                          }
-                        }}
-                        onMouseLeave={() => {
-                          if (draggedBundleProgram && setHoveredDate) {
-                            setHoveredDate(null);
-                          }
-                        }}
+                        onMouseEnter={() =>
+                          handleDayMouseEnter(day, daySchedules)
+                        }
+                        onMouseLeave={handleDayMouseLeave}
                         sx={{
                           flex: 1,
-                          minHeight: 120,
+                          minHeight:
+                            expandedDay &&
+                            expandedDay.getTime() === day.getTime()
+                              ? 'auto'
+                              : 120,
                           p: 1,
                           borderRight:
                             dayIndex < 6
@@ -149,6 +168,11 @@ const ProgramMonthView = ({
                           opacity: isCurrentMonth ? 1 : 0.4,
                           transition: 'all 0.2s ease',
                           position: 'relative',
+                          zIndex:
+                            expandedDay &&
+                            expandedDay.getTime() === day.getTime()
+                              ? 10
+                              : 1,
                           '&:hover': {
                             backgroundColor: !isCurrentMonth
                               ? grey[100]
@@ -169,6 +193,11 @@ const ProgramMonthView = ({
                             border: `2px solid ${theme.palette.primary.dark}`,
                             boxShadow: `0 0 8px ${alpha(theme.palette.primary.dark, 0.3)}`,
                           }),
+                          ...(expandedDay &&
+                            expandedDay.getTime() === day.getTime() && {
+                              boxShadow: theme.shadows[8],
+                              border: `2px solid ${theme.palette.primary.main}`,
+                            }),
                         }}
                       >
                         {/* Date Number */}
@@ -191,55 +220,66 @@ const ProgramMonthView = ({
 
                         {/* Events/Programs */}
                         <Stack spacing={0.5}>
-                          {daySchedules
-                            .slice(0, 3)
-                            .map((schedule, scheduleIndex) => {
-                              const program: any = getProgramById(
-                                schedule.id,
-                                daySchedules,
-                              );
-                              if (!program) return null;
+                          {(expandedDay &&
+                          expandedDay.getTime() === day.getTime()
+                            ? daySchedules
+                            : daySchedules.slice(0, 3)
+                          ).map((schedule, scheduleIndex) => {
+                            // const program: any = getProgramById(
+                            //   schedule.id,
+                            //   daySchedules,
+                            // );
 
-                              return (
-                                <Draggable
-                                  key={schedule.id}
-                                  draggableId={schedule.id}
-                                  index={scheduleIndex}
-                                >
-                                  {(provided, snapshot) => (
-                                    <ScheduleCard
-                                      provided={provided}
-                                      snapshot={snapshot}
-                                      schedule={schedule}
-                                      program={program}
-                                      showNotification={showNotification}
-                                      refetchSchedules={refetchSchedules}
-                                      removeSchedule={removeSchedule}
-                                      handleSave={handleSave}
-                                      setSchedules={setSchedules}
-                                    />
-                                  )}
-                                </Draggable>
-                              );
-                            })}
-                          {daySchedules.length > 3 && (
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                              sx={{
-                                fontSize: '0.6rem',
-                                textAlign: 'center',
-                                py: 0.5,
-                                backgroundColor: alpha(
-                                  theme.palette.grey[300],
-                                  0.3,
-                                ),
-                                borderRadius: 0.5,
-                              }}
-                            >
-                              +{daySchedules.length - 3} more
-                            </Typography>
-                          )}
+                            // console.log({program, schedule})
+                            const program = schedule.waterProgram;
+                            if (!program) return null;
+
+                            return (
+                              <Draggable
+                                key={schedule.id}
+                                draggableId={schedule.id}
+                                index={scheduleIndex}
+                              >
+                                {(provided, snapshot) => (
+                                  <ScheduleCard
+                                    provided={provided}
+                                    snapshot={snapshot}
+                                    schedule={schedule}
+                                    program={program}
+                                    showNotification={showNotification}
+                                    refetchSchedules={refetchSchedules}
+                                    removeSchedule={removeSchedule}
+                                    handleSave={handleSave}
+                                    setSchedules={setSchedules}
+                                    handleSelectProgram={handleSelectProgram}
+                                    isSelected={selectedPrograms.some(
+                                      (p) => p.id === schedule.id,
+                                    )}
+                                  />
+                                )}
+                              </Draggable>
+                            );
+                          })}
+                          {daySchedules.length > 3 &&
+                            (!expandedDay ||
+                              expandedDay.getTime() !== day.getTime()) && (
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                sx={{
+                                  fontSize: '0.6rem',
+                                  textAlign: 'center',
+                                  py: 0.5,
+                                  backgroundColor: alpha(
+                                    theme.palette.grey[300],
+                                    0.3,
+                                  ),
+                                  borderRadius: 0.5,
+                                }}
+                              >
+                                +{daySchedules.length - 3} more
+                              </Typography>
+                            )}
                         </Stack>
 
                         {provided.placeholder}

@@ -25,7 +25,10 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import TimeInputModal from '../../Modals/edit/SingleFieldUpdate';
 import { times } from '@/app/lib/constant';
-import { getProgramById } from '@/app/utils/programs';
+import {
+  getProgramById,
+  getProgramByIdAndSchedules,
+} from '@/app/utils/programs';
 import ProgramsSection from './ProgramsSection';
 import { ShowNotificationType } from '@/hooks/useNotification';
 
@@ -48,10 +51,12 @@ export default function SchedulePrograms({
     open: boolean;
     targetId: string | null;
     day: number | null;
+    defaultValue: string | null;
   }>({
     open: false,
     targetId: null,
     day: null,
+    defaultValue: null,
   });
 
   const handleAddDay = () => {
@@ -122,6 +127,7 @@ export default function SchedulePrograms({
         open: true,
         targetId: scheduleId,
         day: Number(destDay),
+        defaultValue: '09:00',
       });
     } else if (result.source.droppableId.startsWith('day-')) {
       // Switch program between days
@@ -169,6 +175,34 @@ export default function SchedulePrograms({
       })),
     );
   };
+
+  console.log({ daySchedules });
+
+  const handleCopyProgram = (id: string) => {
+    const program = getProgramByIdAndSchedules(id, daySchedules);
+    if (!program?.program) return;
+
+    setDaySchedules((prev: any) => {
+      return prev.map((daySchedule: any) => {
+        if (daySchedule.day === program?.daySchedule?.day) {
+          return {
+            ...daySchedule,
+            programs: [
+              ...daySchedule.programs,
+              {
+                ...program.program,
+                time: program.program.time,
+                id: `s${Date.now()}`,
+                programId: program?.program?.programId,
+              },
+            ],
+          };
+        }
+        return daySchedule;
+      });
+    });
+  };
+
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <TimeInputModal
@@ -178,18 +212,22 @@ export default function SchedulePrograms({
             open: false,
             targetId: null,
             day: null,
+            defaultValue: null,
           })
         }
         title="Select Time"
         label="Time"
         menuList={times}
-        defaultValue={'09:00'}
+        defaultValue={isTimeInputModalOpen.defaultValue || '09:00'}
         renderField={'time'}
         updatedField={isTimeInputModalOpen.targetId?.toString() || ''}
         handleUpdate={handleUpdateTime}
       />
       {/* Available Programs */}
-      <ProgramsSection programs={programs} showNotification={showNotification} />
+      <ProgramsSection
+        programs={programs}
+        showNotification={showNotification}
+      />
       <Paper
         elevation={0}
         sx={{
@@ -281,8 +319,8 @@ export default function SchedulePrograms({
                       {...provided.droppableProps}
                       elevation={0}
                       sx={{
-                        minWidth: 280,
-                        maxWidth: 280,
+                        minWidth: 320,
+                        maxWidth: 320,
                         borderRadius: 3,
                         border: `2px solid ${
                           snapshot.isDraggingOver
@@ -374,11 +412,17 @@ export default function SchedulePrograms({
                                       key={program.id}
                                       program={program}
                                       isSmall
-                                      onClick={() => setIsTimeInputModalOpen({
-                                        open: true,
-                                        targetId: program.id.toString(),
-                                        day: daySchedule.day,
-                                      })}
+                                      onClick={() =>
+                                        setIsTimeInputModalOpen({
+                                          open: true,
+                                          targetId: program.id.toString(),
+                                          day: daySchedule.day,
+                                          defaultValue: program.time,
+                                        })
+                                      }
+                                      handleCopy={() =>
+                                        handleCopyProgram(program.id)
+                                      }
                                     />
                                   );
                                 }}
