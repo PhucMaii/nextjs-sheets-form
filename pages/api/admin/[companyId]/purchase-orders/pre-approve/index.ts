@@ -3,8 +3,9 @@ import prisma from '@/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { IPOItem } from '@/app/utils/type';
 import { getTodayDate } from '@/pages/api/utils/date';
-import { InventoryLogFrom, InventoryLogType } from '@prisma/client';
+import { InventoryLogFrom, InventoryLogType, PO } from '@prisma/client';
 import { recordInventoryItemLog } from '@/pages/api/utils/logs';
+import withAdminAuthGuard from '@/pages/api/utils/withAdminAuthGuard';
 
 interface IBody {
   id: number;
@@ -34,82 +35,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(404).json({ error: 'Purchase order not found' });
     }
 
-    const vendorItems = await prisma.vendorItem.findMany({
-      where: {
-        inventoryItemId: {
-          in: po.poItems.map((poItem: any) => poItem.inventoryItemId),
-        },
-        vendorId: po.vendorId,
-      },
-    });
-
-    const vendorItemMap = new Map<number, number>();
-    for (const vendorItem of vendorItems) {
-      vendorItemMap.set(vendorItem.inventoryItemId, vendorItem.id);
-    }
-
-    const today = getTodayDate();
-    await prisma.$transaction(async (tx) => {
-      // Update po items
-      const poItemPromises = poItems.map(async (poItem: any) => {
-        // Create new fifo
-        const vendorItemId = vendorItemMap.get(poItem.inventoryItemId);
-        const inventoryItemId = poItem.inventoryItemId;
-        if (!vendorItemId || !inventoryItemId || !poItem.inventoryUnit) {
-          return;
-        }
-        await tx.fifo.create({
-          data: {
-            inventoryItemId: poItem.inventoryItemId,
-            quantity: poItem.receivedQty * poItem.inventoryUnit.ratio,
-            vendorItemId: vendorItemId,
-            companyId: po.companyId,
-            createdAt: today.dateAndTime,
-            createdBy: 'System - Pre Approve Purchase Order',
-          },
-        });
-
-        // If cost per item is not equal to unit price, update unit price
-        if (poItem.costPerItem !== poItem.inventoryUnit.unitPrice) {
-          await tx.inventoryUnit.update({
-            where: { id: poItem.inventoryUnitId },
-            data: { unitPrice: poItem.costPerItem },
-          });
-        }
-
-        // record inventory log
-        await recordInventoryItemLog(
-          po.companyId || 1,
-          poItem.inventoryItemId,
-          poItem.receivedQty,
-          InventoryLogType.STOCK_IN,
-          InventoryLogFrom.PRE_APPROVE_PO,
-          `Create ${poItem.receivedQty} ${poItem.inventoryItem.name} to inventory due to purchase order ${po.id} pre approved`,
-          tx,
-        );
-
-        return tx.pOItem.update({
-          where: { id: poItem.id },
-          data: {
-            receivedQty: poItem.receivedQty,
-            rejectedQty: poItem.rejectedQty,
-            costPerItem: poItem.costPerItem,
-          },
-        });
-      });
-      await Promise.all(poItemPromises);
-
-      // Update po
-      await tx.pO.update({
-        where: { id: id },
-        data: { status: PO_STATUS.PRE_APPROVED },
-      });
-    });
-
-    await prisma.pO.update({
-      where: { id: id },
-      data: { status: PO_STATUS.PRE_APPROVED },
-    });
+    await createFifoForPOItems(po, poItems);
 
     return res.status(200).json({ message: 'Purchase order pre approved' });
   } catch (error) {
@@ -118,4 +44,78 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-export default handler;
+export default withAdminAuthGuard(handler);
+
+export const createFifoForPOItems = async (po: PO, poItems: IPOItem[]) => {
+  const vendorItems = await prisma.vendorItem.findMany({
+    where: {
+      inventoryItemId: {
+        in: poItems.map((poItem: any) => poItem.inventoryItemId),
+      },
+      vendorId: po.vendorId,
+    },
+  });
+
+  const vendorItemMap = new Map<number, number>();
+  for (const vendorItem of vendorItems) {
+    vendorItemMap.set(vendorItem.inventoryItemId, vendorItem.id);
+  }
+
+  const today = getTodayDate();
+  await prisma.$transaction(async (tx) => {
+    // Update po items
+    const poItemPromises = poItems.map(async (poItem: any) => {
+      // Create new fifo
+      const vendorItemId = vendorItemMap.get(poItem.inventoryItemId);
+      const inventoryItemId = poItem.inventoryItemId;
+      if (!vendorItemId || !inventoryItemId || !poItem.inventoryUnit) {
+        return;
+      }
+      await tx.fifo.create({
+        data: {
+          inventoryItemId: poItem.inventoryItemId,
+          quantity: poItem.receivedQty * poItem.inventoryUnit.ratio,
+          vendorItemId: vendorItemId,
+          companyId: po.companyId,
+          createdAt: today.dateAndTime,
+          createdBy: 'System - Pre Approve Purchase Order',
+        },
+      });
+
+      // If cost per item is not equal to unit price, update unit price
+      if (poItem.costPerItem !== poItem.inventoryUnit.unitPrice) {
+        await tx.inventoryUnit.update({
+          where: { id: poItem.inventoryUnitId },
+          data: { unitPrice: poItem.costPerItem },
+        });
+      }
+
+      // record inventory log
+      await recordInventoryItemLog(
+        po.companyId || 1,
+        poItem.inventoryItemId,
+        poItem.receivedQty,
+        InventoryLogType.STOCK_IN,
+        InventoryLogFrom.PRE_APPROVE_PO,
+        `Create ${poItem.receivedQty} ${poItem.inventoryItem.name} to inventory due to purchase order ${po.id} pre approved`,
+        tx,
+      );
+
+      return tx.pOItem.update({
+        where: { id: poItem.id },
+        data: {
+          receivedQty: poItem.receivedQty,
+          rejectedQty: poItem.rejectedQty,
+          costPerItem: poItem.costPerItem,
+        },
+      });
+    });
+    await Promise.all(poItemPromises);
+
+    // Update po
+    await tx.pO.update({
+      where: { id: po.id },
+      data: { status: PO_STATUS.PRE_APPROVED },
+    });
+  });
+};
