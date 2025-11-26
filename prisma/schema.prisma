@@ -1215,6 +1215,7 @@ model POItem {
   costPerItem     Float
   note            String?
   inventoryUnitId Int
+  qtyDelta        Float?     // this will be converted to ratio of 1
 
   inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
   inventoryUnit InventoryUnit @relation(fields: [inventoryUnitId], references: [id])

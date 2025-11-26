@@ -115,6 +115,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
 
     if (existingPo.status !== PO_STATUS.PRE_APPROVED) {
+      // If not pre approved, then create fifo and ordered items for new transaction 
       await createFifoAndOrderedItemsForPOItems(
         existingPo,
         poItems,
@@ -122,6 +123,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         createdBy,
       );
     } else {
+      // Find all vendor items
       const vendorItems = await prisma.vendorItem.findMany({
         where: {
           inventoryItemId: {
@@ -135,25 +137,30 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         },
       });
 
-      const fifoMap = new Map<number, number>();
+      // Map: inventoryItemId -> fifo (latest fifo)
+      const fifoMap = new Map<number, any>();
       for (const vendorItem of vendorItems) {
         const latestFifo = vendorItem.fifo.sort(
           (a, b) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
         );
-        fifoMap.set(vendorItem.inventoryItemId, latestFifo[0].id);
+        fifoMap.set(vendorItem.inventoryItemId, latestFifo[0]);
       }
 
+      // Map: poItemId -> poItem
       const poItemMap = new Map<number, any>();
       for (const item of existingPo.poItems) {
         poItemMap.set(item.id, item);
       }
 
       const toUpdateUnit = new Map<number, number>();
+      const toUpdateFifo = new Map<number, any>();
 
+      // Loop through po item from params
       const orderedItems: any = poItems.map((item: any) => {
-        const fifoId = fifoMap.get(item.inventoryItemId);
+        const fifo = fifoMap.get(item.inventoryItemId);
 
+        // Get po item from existing po items
         const poItem = poItemMap.get(item.id);
 
         if (!poItem) {
@@ -166,8 +173,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           toUpdateUnit.set(selectedUnit.id, item.costPerItem);
         }
 
+        if (item.orderedQty !== item.receivedQty) {
+          toUpdateFifo.set(fifo.id, {
+            quantity: (item.orderedQty - item.receivedQty) * selectedUnit.ratio,
+            price: Math.round((item.costPerItem / selectedUnit.ratio) * 100) / 100,
+          });
+        }
+
         return {
-          fifoId: fifoId,
+          fifoId: fifo.id,
           quantity: item.receivedQty,
           expenseId: newTransaction.id,
           price: item.costPerItem,
@@ -182,6 +196,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         data: orderedItems,
       });
 
+      // Update unit price if needed
       if (toUpdateUnit.size > 0) {
         for (const [unitId, unitPrice] of Array.from(toUpdateUnit.entries())) {
           await prisma.inventoryUnit.update({
@@ -190,83 +205,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           });
         }
       }
+
+      // Update fifo quantity and fifo price if needed
+      if (toUpdateFifo.size > 0) {
+        for (const [fifoId, fifoData] of Array.from(toUpdateFifo.entries())) {
+          await prisma.fifo.update({
+            where: { id: fifoId },
+            data: fifoData,
+          });
+        }
+      }
     }
-
-    // Create map vendor item id to po item id
-    // const vendorItems = await prisma.vendorItem.findMany({
-    //   where: {
-    //     inventoryItemId: {
-    //       in: poItems.map((poItem: any) => poItem.inventoryItemId),
-    //     },
-    //     vendorId: existingPo.vendorId,
-    //   },
-    // });
-
-    // const vendorItemMap = new Map<number, number>();
-    // for (const vendorItem of vendorItems) {
-    //   vendorItemMap.set(vendorItem.inventoryItemId, vendorItem.id);
-    // }
-
-    // const itemParamsFifo: any[] = [];
-    // for (const poItem of poItems) {
-    //   const vendorItemId = vendorItemMap.get(poItem.inventoryItemId);
-
-    //   const isExistingInItemParamsFifo = itemParamsFifo.find(
-    //     (item) => item.inventoryItemId === poItem.inventoryItemId,
-    //   );
-
-    //   if (!vendorItemId) {
-    //     console.error('Vendor Item Not Found in receive purchase order');
-    //     continue;
-    //   }
-
-    //   // If item already exists in itemParamsFifo, update the quantity
-    //   if (isExistingInItemParamsFifo) {
-    //     isExistingInItemParamsFifo.quantity += poItem.receivedQty;
-    //     continue;
-    //   }
-
-    //   if (vendorItemId) {
-    //     itemParamsFifo.push({
-    //       id: vendorItemId,
-    //       quantity: poItem.receivedQty,
-    //       price: poItem.costPerItem,
-    //       vendorId: existingPo.vendorId,
-    //       unit: {
-    //         ...poItem.inventoryUnit,
-    //         unitPrice: poItem.costPerItem,
-    //       },
-    //       inventoryItemId: poItem.inventoryItemId,
-    //       inventoryItem: poItem.inventoryItem,
-    //       companyId: Number(companyId),
-    //     });
-    //   }
-    // }
-
-    // // Create items for the transaction
-    // if (itemParamsFifo.length > 0) {
-    //   await createFifo(
-    //     Number(companyId),
-    //     itemParamsFifo,
-    //     today.dateAndTime,
-    //     createdBy,
-    //     newTransaction.id,
-    //   );
-
-    //   const response = await createOrderedItems(
-    //     Number(companyId),
-    //     itemParamsFifo,
-    //     newTransaction,
-    //     today.dateAndTime,
-    //     createdBy,
-    //   );
-
-    //   if (!response.ok) {
-    //     return res.status(404).json({
-    //       error: response.error,
-    //     });
-    //   }
-    // }
 
     return res.status(200).json({ message: 'Received Items Successfully' });
   } catch (error: any) {
