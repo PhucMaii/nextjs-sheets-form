@@ -60,7 +60,6 @@ export default function EditEmail({
       await sendInvoice(updatedEmail);
       setIsLoading(false);
     } catch (error: any) {
-      console.log('Internal Server Error: ', error);
       showNotification(
         'error',
         'Fail to send statement: ' + error?.response?.data?.error,

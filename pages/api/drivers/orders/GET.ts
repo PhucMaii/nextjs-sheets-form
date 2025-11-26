@@ -234,11 +234,13 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     // Format the return orders
     const sortedDeliveryOrders = [];
     for (const order of arrangedOrders) {
+      console.log('order', order);
+      console.log('reassignmentOrdersAwayFromCurrentRoute', reassignmentOrdersAwayFromCurrentRoute);
       // If the order is a reassignment order go away from current route, skip it -> remove it from the arrangedOrders
       if (
         reassignmentOrdersAwayFromCurrentRoute.some(
           (reassignmentOrder: IReassignment) =>
-            reassignmentOrder.order.userId === order.order.userId,
+            reassignmentOrder.order.userId === order.userId,
         )
       ) {
         continue;
