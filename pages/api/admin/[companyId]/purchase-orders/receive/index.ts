@@ -6,7 +6,13 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { createFifo, createOrderedItems } from '../../inventory/expenses/POST';
 import prisma from '@/client';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
-import { Expense, PO } from '@prisma/client';
+import {
+  Expense,
+  InventoryLogType,
+  InventoryLogFrom,
+  PO,
+} from '@prisma/client';
+import { recordInventoryItemLog } from '@/pages/api/utils/logs';
 
 interface IBody {
   poId: number;
@@ -115,7 +121,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
 
     if (existingPo.status !== PO_STATUS.PRE_APPROVED) {
-      // If not pre approved, then create fifo and ordered items for new transaction 
+      // If not pre approved, then create fifo and ordered items for new transaction
       await createFifoAndOrderedItemsForPOItems(
         existingPo,
         poItems,
@@ -144,6 +150,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           (a, b) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
         );
+        console.log(latestFifo[0], 'latestFifo');
         fifoMap.set(vendorItem.inventoryItemId, latestFifo[0]);
       }
 
@@ -173,10 +180,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           toUpdateUnit.set(selectedUnit.id, item.costPerItem);
         }
 
-        if (item.orderedQty !== item.receivedQty) {
+        if (item.qtyDelta > 0) {
           toUpdateFifo.set(fifo.id, {
-            quantity: (item.orderedQty - item.receivedQty) * selectedUnit.ratio,
-            price: Math.round((item.costPerItem / selectedUnit.ratio) * 100) / 100,
+            quantity: fifo.quantity + item.qtyDelta * selectedUnit.ratio,
+            price:
+              Math.round((item.costPerItem / selectedUnit.ratio) * 100) / 100,
+            qtyDelta: item.qtyDelta,
+            inventoryItemId: poItem.inventoryItemId,
+            name: poItem.inventoryItem.name,
           });
         }
 
@@ -208,11 +219,26 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       // Update fifo quantity and fifo price if needed
       if (toUpdateFifo.size > 0) {
-        for (const [fifoId, fifoData] of Array.from(toUpdateFifo.entries())) {
+        for (const [
+          fifoId,
+          { quantity, price, qtyDelta, inventoryItemId, name },
+        ] of Array.from(toUpdateFifo.entries())) {
           await prisma.fifo.update({
             where: { id: fifoId },
-            data: fifoData,
+            data: { quantity, price },
           });
+
+          // Record inventory log
+          await recordInventoryItemLog(
+            Number(companyId),
+            inventoryItemId,
+            qtyDelta,
+            qtyDelta > 0
+              ? InventoryLogType.STOCK_IN
+              : InventoryLogType.SUBTRACT,
+            InventoryLogFrom.CREATE_TRANSACTION,
+            `${qtyDelta > 0 ? 'Receive' : 'Subtract'} ${qtyDelta} ${name} to inventory due to purchase order ${poId} received with edited purchase order items`,
+          );
         }
       }
     }

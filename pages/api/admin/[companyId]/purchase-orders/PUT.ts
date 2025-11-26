@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
+import { PO_STATUS } from '@/app/utils/enum';
 
 const prisma = new PrismaClient();
 
@@ -50,6 +51,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
+    const isPreApproved = existingPo.status === PO_STATUS.PRE_APPROVED;
+
     // Handle items
     // Field to update: orderedQty, costPerItem, inventoryUnitId, tax
     const toCreateItems: any[] = [];
@@ -69,6 +72,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             inventoryUnitId: updatedItem.inventoryUnit.id,
             tax: updatedItem.tax,
             note: updatedItem.note,
+            qtyDelta: isPreApproved ? updatedItem.orderedQty - existingItem.orderedQty : 0,
           },
         });
       } else {
@@ -81,6 +85,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           inventoryUnitId: updatedItem.inventoryUnit.id,
           tax: updatedItem.tax,
           note: updatedItem.note,
+          qtyDelta: isPreApproved ? updatedItem.orderedQty : 0,
         });
       }
     });

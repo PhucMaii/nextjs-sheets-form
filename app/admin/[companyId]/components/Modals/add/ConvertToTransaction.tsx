@@ -256,6 +256,7 @@ export default function ConvertToTransaction({
     });
   };
 
+  console.log(updatedPOItems, 'updatedPOItems');
   const handleReceive = async () => {
     setLoading(true);
     try {
