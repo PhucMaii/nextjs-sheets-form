@@ -318,6 +318,20 @@ export default function CreateTransaction() {
   //   }
   // };
 
+  const validateForm = () => {
+    if (formData.spentBy === '-- Choose who spent --') {
+      showNotification('error', 'Please select who spent');
+      return false;
+    }
+
+    if (formData.paymentMethodId === -1) {
+      showNotification('error', 'Please add payment method');
+      return false;
+    }
+
+    return true;
+  };
+
   const validateExpenseItems = () => {
     for (const item of expenseItems) {
       if (item.isChangeSellingPrice) {
@@ -339,6 +353,10 @@ export default function CreateTransaction() {
 
   const handleSubmitStock = async () => {
     try {
+      if (!validateForm()) {
+        return;
+      }
+
       if (expenseItems.length === 0) {
         showNotification('error', 'Please add items to the stock purchase');
         return;
@@ -462,6 +480,10 @@ export default function CreateTransaction() {
   // Handle form submission
   const handleSubmit = async () => {
     try {
+      if (!validateForm()) {
+        return;
+      }
+
       setIsSubmitting(true);
       if (transactionType === 'stock') {
         await handleSubmitStock();
