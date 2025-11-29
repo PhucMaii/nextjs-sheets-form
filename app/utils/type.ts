@@ -46,6 +46,8 @@ import {
   CreditItem,
   InventoryCount,
   InventoryReport,
+  Media,
+  Delivery,
 } from '@prisma/client';
 import { Session } from 'next-auth';
 import { Order } from '../admin/[companyId]/orders/page';
@@ -460,4 +462,17 @@ export interface IInventoryCount extends InventoryCount {
 }
 export interface IInventoryReport extends InventoryReport {
   inventoryCounts: IInventoryCount[];
+}
+
+export interface IDelivery extends Delivery {
+  order?: Order;
+  employee?: Employee;
+  company?: Company;
+  medias: Media[];
+}
+
+export interface IFile extends Media {
+  expense?: IExpense;
+  delivery?: IDelivery;
+  batchTransaction?: IBatchTransaction;
 }
