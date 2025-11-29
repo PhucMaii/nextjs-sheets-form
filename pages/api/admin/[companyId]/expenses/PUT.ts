@@ -138,6 +138,7 @@ export const updateCheque = async (
           type: frontFileType,
           fileKey: frontFileKey,
           ...queryExpense,
+          companyId: expense.companyId,
           createdBy: createdBy,
           createdAt: today.dateAndTime,
           note: 'front',
@@ -177,6 +178,7 @@ export const updateCheque = async (
           createdBy: createdBy,
           createdAt: today.dateAndTime,
           note: 'back',
+          companyId: expense.companyId,
         },
       });
     }

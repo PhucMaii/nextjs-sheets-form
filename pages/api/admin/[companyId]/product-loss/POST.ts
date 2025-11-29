@@ -73,6 +73,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
           lossReportId: newProductLoss.id,
           fileKey,
           createdAt: today.dateAndTime,
+          companyId: Number(companyId),
           createdBy: `${admin?.role || 'Admin'} - ${admin?.name}`,
         })),
       });

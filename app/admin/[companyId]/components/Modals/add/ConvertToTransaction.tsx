@@ -256,8 +256,25 @@ export default function ConvertToTransaction({
     });
   };
 
-  console.log(updatedPOItems, 'updatedPOItems');
+  const validateForm = () => {
+    if (expenseData.paymentMethodId === -1) {
+      showNotification('error', 'Please add payment method');
+      return false;
+    }
+
+    if (expenseData.spentBy === '-- Choose who spent --') {
+      showNotification('error', 'Please select who spent');
+      return false;
+    }
+    
+    return true;
+  };
+
   const handleReceive = async () => {
+    if (!validateForm()) {
+      return;
+    }
+    
     setLoading(true);
     try {
       const res = await axios.put(

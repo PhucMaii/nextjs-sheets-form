@@ -128,6 +128,15 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             companyId: existingOrder.companyId,
           },
         });
+      } else {
+        await prisma.delivery.update({
+          where: {
+            id: delivery.id,
+          },
+          data: {
+            deliveredAt: dateAndTime,
+          },
+        });
       }
   
       // If fileKey is provided, and updated status is fulfilled but have no delivery proof,
