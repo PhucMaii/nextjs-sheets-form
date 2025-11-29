@@ -8,7 +8,7 @@ import { getTodayDate } from '@/pages/api/utils/date';
 import { recordOrderInventoryLog } from '@/pages/api/utils/logs';
 import { checkOrderValidToAffectInventory } from '@/pages/api/utils/order';
 import { recordAction } from '@/pages/api/utils/timeline';
-import { InventoryLogType, InventoryLogFrom, OrderedItems, PaymentStatus, PrismaClient } from '@prisma/client';
+import { EvidenceType, InventoryLogType, InventoryLogFrom, OrderedItems, PaymentStatus, PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IBody {
@@ -22,8 +22,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     const prisma = new PrismaClient();
 
     const { orderId, updatedStatus, fileKey }: IBody = req.body;
-    console.log(req.body, 'req.body in put');
-    console.log(fileKey, 'fileKey in put');
     // return;
 
     const existingOrder = await prisma.orders.findUnique({
@@ -142,6 +140,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             createdAt: dateAndTime,
             deliveryId: delivery?.id,
             companyId: existingOrder.companyId,
+            evidenceType: EvidenceType.DELIVERY_PROOF,
           },
         });
   

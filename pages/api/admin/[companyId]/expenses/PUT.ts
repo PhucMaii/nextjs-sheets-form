@@ -2,6 +2,7 @@ import { USER_ROLE } from '@/app/utils/enum';
 import prisma from '@/client';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { getTodayDate } from '@/pages/api/utils/date';
+import { EvidenceType } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IBody {
@@ -141,6 +142,7 @@ export const updateCheque = async (
           createdBy: createdBy,
           createdAt: today.dateAndTime,
           note: 'front',
+          evidenceType: EvidenceType.CHEQUE,
         },
       });
     }
@@ -177,6 +179,7 @@ export const updateCheque = async (
           createdBy: createdBy,
           createdAt: today.dateAndTime,
           note: 'back',
+          evidenceType: EvidenceType.CHEQUE,
         },
       });
     }

@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { EvidenceType, PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 // const checkIsKorean = (text: string) => {
 //   // const koreanRange = /^[\uAC00-\uD7AF]+$/;
@@ -120,11 +120,16 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-  await prisma.waterProgram.updateMany({
-    data: {
-      hexColor: null,
+  await prisma.media.updateMany({
+    where: {
+      deliveryId: {
+        not: null
+      }
     },
-  });
+    data: {
+      evidenceType: EvidenceType.DELIVERY_PROOF,
+    },
+  })
 }
 
 
