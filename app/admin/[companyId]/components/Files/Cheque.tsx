@@ -11,34 +11,33 @@ import {
   IconButton,
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
-import { info, success, neutral, primary } from '@/theme/color';
+import { info, neutral, primary } from '@/theme/color';
 import DisplayFile from '../Modals/DisplayFile';
 import React from 'react';
 import {
   Download as DownloadIcon,
   Visibility as VisibilityIcon,
   Receipt as ReceiptIcon,
-  LocalShipping as LocalShippingIcon,
 } from '@mui/icons-material';
 import { formatCurrency } from '@/app/utils/number';
 import dayjs from 'dayjs';
-import { IFile } from '@/app/utils/type';
+import { ICheque, IFile } from '@/app/utils/type';
 
 interface IProps {
-  file: IFile;
-  isCheque: boolean;
+  file: ICheque;
   handleViewFile: (file: IFile) => void;
   handleDownloadFile: (file: IFile) => void;
 }
 
-export default function FileCard({
+export default function Cheque({
   file,
-  isCheque,
   handleViewFile,
   handleDownloadFile,
 }: IProps) {
-  const accentColor = isCheque ? info.main : success.main;
-  const bgColor = isCheque ? info.lightest : success.lightest;
+  const accentColor = info.main;
+  const bgColor = info.lightest;
+
+  console.log(file, 'file.fileKeyFront');
 
   return (
     <Grid item xs={12} sm={6} md={4} lg={3} key={file.id}>
@@ -73,11 +72,11 @@ export default function FileCard({
           }}
         >
           <DisplayFile
-            fileKey={file.fileKey}
-            alt={isCheque ? 'Cheque' : 'Delivery Proof'}
+            fileKey={file.fileKeyFront}
+            alt="Cheque"
             width="100%"
             height="100%"
-            isCheque={isCheque}
+            isCheque={true}
             style={{
               objectFit: 'cover',
             }}
@@ -85,7 +84,7 @@ export default function FileCard({
 
           {/* Type Badge */}
           <Chip
-            label={isCheque ? 'Cheque' : 'Delivery Proof'}
+            label="Cheque"
             size="small"
             sx={{
               position: 'absolute',
@@ -98,19 +97,13 @@ export default function FileCard({
               height: 24,
               boxShadow: `0 2px 8px ${alpha(accentColor, 0.3)}`,
             }}
-            icon={
-              isCheque ? (
-                <ReceiptIcon sx={{ fontSize: 14, color: 'white' }} />
-              ) : (
-                <LocalShippingIcon sx={{ fontSize: 14, color: 'white' }} />
-              )
-            }
+            icon={<ReceiptIcon sx={{ fontSize: 14, color: 'white' }} />}
           />
 
           {/* Front/Back Badge for Cheques */}
-          {file.note && (
+          {file.fileKeyBack && (
             <Chip
-              label={file.note === 'front' ? 'Front' : 'Back'}
+              label={file.fileKeyBack ? 'Back' : 'Front'}
               size="small"
               sx={{
                 position: 'absolute',
@@ -128,7 +121,7 @@ export default function FileCard({
 
         {/* Content Section */}
         <CardContent sx={{ flexGrow: 1, p: 2.5, pb: 1 }}>
-          {isCheque && file.expense ? (
+          {file.expense ? (
             <>
               <Typography
                 variant="subtitle1"
@@ -178,7 +171,24 @@ export default function FileCard({
                     Date
                   </Typography>
                   <Typography variant="body2" sx={{ color: neutral[700] }}>
-                    {dayjs(file.expense.date).format('MMM DD, YYYY')}
+                    {file.expense.date
+                      ? dayjs(file.expense.date).format('MMM DD, YYYY')
+                      : 'No date'}
+                  </Typography>
+                </Box>
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  <Typography
+                    variant="caption"
+                    sx={{ color: neutral[600], fontWeight: 500 }}
+                  >
+                    Payment Method
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: neutral[700] }}>
+                    {file.expense.paymentMethod?.name || 'N/A'}
                   </Typography>
                 </Box>
                 <Box
@@ -198,7 +208,7 @@ export default function FileCard({
                 </Box>
               </Stack>
             </>
-          ) : file.delivery ? (
+          ) : (
             <>
               <Typography
                 variant="subtitle1"
@@ -208,7 +218,7 @@ export default function FileCard({
                   mb: 1.5,
                 }}
               >
-                Order #{file.delivery.orderId}
+                Cheque File
               </Typography>
               <Divider sx={{ my: 1.5 }} />
               <Stack spacing={1}>
@@ -221,50 +231,32 @@ export default function FileCard({
                     variant="caption"
                     sx={{ color: neutral[600], fontWeight: 500 }}
                   >
-                    Customer
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{ color: neutral[900], fontWeight: 600 }}
-                  >
-                    {file.delivery.order?.user
-                      ? `${file.delivery.order?.user?.clientName} - ${file.delivery.order?.user?.clientId}`
-                      : 'N/A'}
-                  </Typography>
-                </Box>
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-                  <Typography
-                    variant="caption"
-                    sx={{ color: neutral[600], fontWeight: 500 }}
-                  >
-                    Delivered
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: neutral[700] }}>
-                    {file.delivery.deliveredAt ? dayjs(file.delivery.deliveredAt).format('MMM DD, YYYY HH:mm') : 'No record'}
-                  </Typography>
-                </Box>
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-                  <Typography
-                    variant="caption"
-                    sx={{ color: neutral[600], fontWeight: 500 }}
-                  >
-                    Driver
+                    Created by
                   </Typography>
                   <Typography variant="body2" sx={{ color: neutral[700] }}>
                     {file.createdBy}
                   </Typography>
                 </Box>
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  <Typography
+                    variant="caption"
+                    sx={{ color: neutral[600], fontWeight: 500 }}
+                  >
+                    Created at
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: neutral[700] }}>
+                    {file.createdAt
+                      ? dayjs(file.createdAt).format('MMM DD, YYYY')
+                      : 'No date'}
+                  </Typography>
+                </Box>
               </Stack>
             </>
-          ) : null}
+          )}
         </CardContent>
 
         {/* Actions Section */}

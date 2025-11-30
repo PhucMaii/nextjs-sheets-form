@@ -15,6 +15,8 @@ import {
   Button,
   Menu,
   MenuItem,
+  Chip,
+  Divider,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -23,17 +25,20 @@ import {
   FilterList as FilterListIcon,
   Sort as SortIcon,
   ArrowDownward as ArrowDownwardIcon,
+  Group as GroupIcon,
 } from '@mui/icons-material';
 import ViewImg from '../components/ViewImg';
 import OverviewCard from '../components/OverviewCard/OverviewCard';
 import { primary, neutral, success, info } from '@/theme/color';
-import FileCard from '../components/Files/FileCard';
+import DeliveryProof from '../components/Files/DeliveryProof';
 import { IFile } from '@/app/utils/type';
 import { EvidenceType } from '@prisma/client';
 import EmptyFiles from '../components/Files/EmptyFiles';
 import { useQuery } from '@tanstack/react-query';
 import useFiles from '@/hooks/db-tables/useFiles';
 import { useParams } from 'next/navigation';
+import Cheque from '../components/Files/Cheque';
+import dayjs from 'dayjs';
 
 const tabs = [
   {
@@ -66,52 +71,80 @@ export default function FilesPage() {
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [sortAnchorEl, setSortAnchorEl] = useState<null | HTMLElement>(null);
   const isSortMenuOpen = Boolean(sortAnchorEl);
+  const [groupBy, setGroupBy] = useState<'none' | 'date' | 'customer' | 'vendor'>('none');
+  const [groupAnchorEl, setGroupAnchorEl] = useState<null | HTMLElement>(null);
+  const isGroupMenuOpen = Boolean(groupAnchorEl);
 
-  const { data: allFiles, isLoading } = useQuery({
+  const { data: allFiles } = useQuery({
     queryKey: ['files', companyId],
     queryFn: () => getAllFiles(companyId),
-    initialData: [],
+    initialData: {
+      deliveryProofFiles: [],
+      chequeFiles: [],
+    },
   });
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
-
   const filteredFiles = useMemo(() => {
-    let files: IFile[] = allFiles;
+    if (!allFiles) {
+      return [];
+    }
 
+    let chequesAndProofs = [
+      ...allFiles.deliveryProofFiles,
+      ...allFiles.chequeFiles,
+    ];
+
+    if (chequesAndProofs.length === 0) {
+      return [];
+    }
+
+    // Filter by tab
     if (activeTab === 'cheque') {
-      files = files.filter((file) => file.evidenceType === EvidenceType.CHEQUE);
+      chequesAndProofs = chequesAndProofs.filter(
+        (file: any) => !file.deliveryId || file.deliveryId === 0,
+      );
     } else if (activeTab === 'delivery-proof') {
-      files = files.filter(
-        (file) => file.evidenceType === EvidenceType.DELIVERY_PROOF,
+      chequesAndProofs = chequesAndProofs.filter(
+        (file: any) => file.deliveryId && file.deliveryId > 0,
       );
     }
 
+    // Filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      files = files.filter((file) => {
-        if (file.evidenceType === EvidenceType.CHEQUE && file.expense) {
+      chequesAndProofs = chequesAndProofs.filter((file: any) => {
+        if (file.deliveryId && file.deliveryId > 0 && file.delivery) {
           return (
-            file.expense.description.toLowerCase().includes(query) ||
-            file.expense.amount.toString().includes(query) ||
-            file.createdBy.toLowerCase().includes(query)
+            file.delivery.order?.user?.clientName?.toLowerCase().includes(query) ||
+            file.delivery.orderId?.toString().includes(query) ||
+            file.createdBy?.toLowerCase().includes(query)
           );
-        } else if (
-          file.evidenceType === EvidenceType.DELIVERY_PROOF &&
-          file.delivery
-        ) {
+        } else if (file.expense) {
           return (
-            file.delivery.order?.user?.name.toLowerCase().includes(query) ||
-            file.delivery.orderId.toString().includes(query) ||
-            file.createdBy.toLowerCase().includes(query)
+            file.expense.description?.toLowerCase().includes(query) ||
+            file.expense.amount?.toString().includes(query) ||
+            file.expense.vendor?.name?.toLowerCase().includes(query) ||
+            file.createdBy?.toLowerCase().includes(query)
           );
         }
         return false;
       });
     }
 
+    // Map files with evidenceType
+    let files = chequesAndProofs.map((file: any) => {
+      return {
+        ...file,
+        evidenceType: file.deliveryId > 0
+          ? EvidenceType.DELIVERY_PROOF
+          : EvidenceType.CHEQUE,
+      };
+    });
+
     // Sort files by createdAt
-    files = [...files].sort((a, b) => {
+    files = files.sort((a, b) => {
       const dateA = new Date(a.createdAt).getTime();
       const dateB = new Date(b.createdAt).getTime();
       return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
@@ -119,6 +152,59 @@ export default function FilesPage() {
 
     return files;
   }, [allFiles, activeTab, searchQuery, sortOrder]);
+
+  const groupedFiles = useMemo(() => {
+    if (groupBy === 'none') {
+      return { ungrouped: filteredFiles };
+    }
+
+    const groups: Record<string, any[]> = {};
+
+    filteredFiles.forEach((file: any) => {
+      let groupKey = 'Unknown';
+
+      if (groupBy === 'date') {
+        const date = file.expense?.date || file.delivery?.deliveredAt || file.createdAt;
+        if (date) {
+          groupKey = dayjs(date).format('MMM DD, YYYY');
+        } else {
+          groupKey = 'No Date';
+        }
+      } else if (groupBy === 'customer') {
+        if (file.delivery?.order?.user?.clientName) {
+          groupKey = file.delivery.order.user.clientName;
+        } else {
+          groupKey = 'No Customer';
+        }
+      } else if (groupBy === 'vendor') {
+        if (file.expense?.vendor?.name) {
+          groupKey = file.expense.vendor.name;
+        } else {
+          groupKey = 'No Vendor';
+        }
+      }
+
+      if (!groups[groupKey]) {
+        groups[groupKey] = [];
+      }
+      groups[groupKey].push(file);
+    });
+
+    // Sort group keys
+    const sortedKeys = Object.keys(groups).sort((a, b) => {
+      if (groupBy === 'date') {
+        return dayjs(b).valueOf() - dayjs(a).valueOf();
+      }
+      return a.localeCompare(b);
+    });
+
+    const sortedGroups: Record<string, any[]> = {};
+    sortedKeys.forEach((key) => {
+      sortedGroups[key] = groups[key];
+    });
+
+    return sortedGroups;
+  }, [filteredFiles, groupBy]);
 
   const handleViewFile = (file: IFile) => {
     setSelectedFile(file);
@@ -142,6 +228,19 @@ export default function FilesPage() {
     handleSortMenuClose();
   };
 
+  const handleGroupMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setGroupAnchorEl(event.currentTarget);
+  };
+
+  const handleGroupMenuClose = () => {
+    setGroupAnchorEl(null);
+  };
+
+  const handleGroupSelect = (group: 'none' | 'date' | 'customer' | 'vendor') => {
+    setGroupBy(group);
+    handleGroupMenuClose();
+  };
+
   return (
     <Sidebar>
       {/* View Modal */}
@@ -151,7 +250,7 @@ export default function FilesPage() {
           fileKeyBack={
             selectedFile.evidenceType === EvidenceType.CHEQUE &&
             selectedFile.note === 'front'
-              ? allFiles.find(
+              ? filteredFiles.find(
                   (f: IFile) =>
                     f.expense?.id === selectedFile.expense?.id &&
                     f.note === 'back',
@@ -196,7 +295,7 @@ export default function FilesPage() {
           <Grid item xs={12} md={6} lg={4}>
             <OverviewCard
               text="Total Files"
-              value={allFiles.length}
+              value={filteredFiles.length}
               icon={
                 <FilterListIcon sx={{ color: primary.main, fontSize: 50 }} />
               }
@@ -208,7 +307,7 @@ export default function FilesPage() {
             <OverviewCard
               text="Cheque Files"
               value={
-                allFiles.filter(
+                filteredFiles.filter(
                   (file: IFile) => file.evidenceType === EvidenceType.CHEQUE,
                 ).length
               }
@@ -221,8 +320,9 @@ export default function FilesPage() {
             <OverviewCard
               text="Delivery Proof Files"
               value={
-                allFiles.filter(
-                  (file: IFile) => file.evidenceType === EvidenceType.DELIVERY_PROOF,
+                filteredFiles.filter(
+                  (file: IFile) =>
+                    file.evidenceType === EvidenceType.DELIVERY_PROOF,
                 ).length
               }
               icon={
@@ -234,7 +334,7 @@ export default function FilesPage() {
           </Grid>
         </Grid>
 
-        {/* Search and Sort Section */}
+        {/* Search, Sort and Group Section */}
         <Paper
           elevation={0}
           sx={{
@@ -246,7 +346,7 @@ export default function FilesPage() {
           }}
         >
           <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={8}>
+            <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
                 placeholder="Search files..."
@@ -274,7 +374,7 @@ export default function FilesPage() {
                 }}
               />
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={3}>
               <Button
                 variant="outlined"
                 startIcon={<SortIcon />}
@@ -293,7 +393,10 @@ export default function FilesPage() {
                   },
                 }}
               >
-                Sort: {sortOrder === 'newest' ? 'Newest to Oldest' : 'Oldest to Newest'}
+                Sort:{' '}
+                {sortOrder === 'newest'
+                  ? 'Newest to Oldest'
+                  : 'Oldest to Newest'}
               </Button>
               <Menu
                 anchorEl={sortAnchorEl}
@@ -314,6 +417,68 @@ export default function FilesPage() {
                   selected={sortOrder === 'oldest'}
                 >
                   Oldest to Newest
+                </MenuItem>
+              </Menu>
+            </Grid>
+            <Grid item xs={12} md={3}>
+              <Button
+                variant="outlined"
+                startIcon={<GroupIcon />}
+                endIcon={<ArrowDownwardIcon />}
+                onClick={handleGroupMenuOpen}
+                fullWidth
+                sx={{
+                  textTransform: 'none',
+                  borderColor: neutral[300],
+                  color: neutral[700],
+                  fontWeight: 500,
+                  '&:hover': {
+                    borderColor: primary.main,
+                    backgroundColor: primary.lightest,
+                    color: primary.main,
+                  },
+                }}
+              >
+                Group:{' '}
+                {groupBy === 'none'
+                  ? 'None'
+                  : groupBy === 'date'
+                    ? 'Date'
+                    : groupBy === 'customer'
+                      ? 'Customer'
+                      : 'Vendor'}
+              </Button>
+              <Menu
+                anchorEl={groupAnchorEl}
+                open={isGroupMenuOpen}
+                onClose={handleGroupMenuClose}
+                MenuListProps={{
+                  'aria-labelledby': 'group-button',
+                }}
+              >
+                <MenuItem
+                  onClick={() => handleGroupSelect('none')}
+                  selected={groupBy === 'none'}
+                >
+                  None
+                </MenuItem>
+                <MenuItem
+                  onClick={() => handleGroupSelect('date')}
+                  selected={groupBy === 'date'}
+                >
+                  By Date
+                </MenuItem>
+                <MenuItem
+                  onClick={() => handleGroupSelect('customer')}
+                  selected={groupBy === 'customer'}
+                >
+                  By Customer Name
+                </MenuItem>
+                <MenuItem
+                  onClick={() => handleGroupSelect('vendor')}
+                  selected={groupBy === 'vendor'}
+                >
+                  By Vendor Name
                 </MenuItem>
               </Menu>
             </Grid>
@@ -368,17 +533,89 @@ export default function FilesPage() {
 
         {/* Files Grid */}
         {filteredFiles.length > 0 ? (
-          <Grid container spacing={3}>
-            {filteredFiles.map((file) => (
-              <FileCard
-                key={file.id}
-                file={file}
-                isCheque={file.evidenceType === EvidenceType.CHEQUE}
-                handleViewFile={handleViewFile}
-                handleDownloadFile={handleDownloadFile}
-              />
-            ))}
-          </Grid>
+          groupBy === 'none' ? (
+            <Grid container spacing={3}>
+              {filteredFiles.map((file: any) => {
+                if (file.evidenceType === EvidenceType.DELIVERY_PROOF) {
+                  return (
+                    <DeliveryProof
+                      key={file.id}
+                      file={file}
+                      handleViewFile={handleViewFile}
+                      handleDownloadFile={handleDownloadFile}
+                    />
+                  );
+                } else {
+                  return (
+                    <Cheque
+                      key={file.id}
+                      file={file}
+                      handleViewFile={handleViewFile}
+                      handleDownloadFile={handleDownloadFile}
+                    />
+                  );
+                }
+              })}
+            </Grid>
+          ) : (
+            <Box>
+              {Object.entries(groupedFiles).map(([groupKey, files]) => (
+                <Box key={groupKey} sx={{ mb: 4 }}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      mb: 2,
+                      gap: 1,
+                    }}
+                  >
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 600,
+                        color: neutral[900],
+                      }}
+                    >
+                      {groupKey}
+                    </Typography>
+                    <Chip
+                      label={files.length}
+                      size="small"
+                      sx={{
+                        backgroundColor: primary.lightest,
+                        color: primary.main,
+                        fontWeight: 600,
+                      }}
+                    />
+                  </Box>
+                  <Divider sx={{ mb: 2 }} />
+                  <Grid container spacing={3}>
+                    {files.map((file: any) => {
+                      if (file.evidenceType === EvidenceType.DELIVERY_PROOF) {
+                        return (
+                          <DeliveryProof
+                            key={file.id}
+                            file={file}
+                            handleViewFile={handleViewFile}
+                            handleDownloadFile={handleDownloadFile}
+                          />
+                        );
+                      } else {
+                        return (
+                          <Cheque
+                            key={file.id}
+                            file={file}
+                            handleViewFile={handleViewFile}
+                            handleDownloadFile={handleDownloadFile}
+                          />
+                        );
+                      }
+                    })}
+                  </Grid>
+                </Box>
+              ))}
+            </Box>
+          )
         ) : (
           <EmptyFiles />
         )}

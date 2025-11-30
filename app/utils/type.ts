@@ -48,6 +48,7 @@ import {
   InventoryReport,
   Media,
   Delivery,
+  Cheque,
 } from '@prisma/client';
 import { Session } from 'next-auth';
 import { Order } from '../admin/[companyId]/orders/page';
@@ -474,5 +475,10 @@ export interface IDelivery extends Delivery {
 export interface IFile extends Media {
   expense?: IExpense;
   delivery?: IDelivery;
+  batchTransaction?: IBatchTransaction;
+}
+
+export interface ICheque extends Cheque {
+  expense?: IExpense;
   batchTransaction?: IBatchTransaction;
 }

@@ -4,6 +4,7 @@ import axios from "axios";
 const useFiles = () => {
     const getAllFiles = async (companyId: string) => {
         const response = await axios.get(getAdminApiUrl(companyId, '/files'));
+        console.log(response.data, 'response.data');
         return response.data.data;
     }
 

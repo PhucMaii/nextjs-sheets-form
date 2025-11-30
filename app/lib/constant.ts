@@ -48,7 +48,7 @@ import CardMembershipIcon from '@mui/icons-material/CardMembership';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import MenuIcon from '@mui/icons-material/Menu';
 import { InventoryReportType } from '@prisma/client';
-import { FileIcon } from 'lucide-react';
+import FolderIcon from '@mui/icons-material/Folder';
 
 export const mainPaymentMethodId = 4;
 export const otherPaymentMethodId = 9;
@@ -227,7 +227,7 @@ export const adminTabs = {
     {
       id: 26,
       name: 'Files',
-      icon: FileIcon,
+      icon: FolderIcon,
       path: '/admin/[companyId]/files',
     },
     {

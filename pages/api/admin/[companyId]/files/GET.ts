@@ -12,12 +12,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    const files = await prisma.media.findMany({
+    const deliveryProofFiles = await prisma.media.findMany({
       where: {
         companyId: Number(companyId),
       },
       include: {
-        expense: true,
         delivery: {
           include: {
             order: {
@@ -27,13 +26,32 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             },
           },
         },
-        batchTransaction: true,
       },
     });
 
+    const chequeFiles = await prisma.cheque.findMany({
+      where: {
+        companyId: Number(companyId),
+      },
+      include: {
+        user: true,
+        transactions: true,
+        vendor: true,
+      },
+    });
+
+    console.log(deliveryProofFiles, 'deliveryProofFiles');
+    console.log(chequeFiles, 'chequeFiles');
+
     return res
       .status(200)
-      .json({ data: files, message: 'Files fetched successfully' });
+      .json({
+        data: {
+          deliveryProofFiles,
+          chequeFiles,
+        },
+        message: 'Files fetched successfully',
+      });
   } catch (error: any) {
     console.log('Internal Server Error', error);
     return errorResponse(res, error);
