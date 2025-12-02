@@ -17,7 +17,6 @@ import {
   IconButton,
   Checkbox,
   FormControlLabel,
-  useMediaQuery,
   Paper,
   Fade,
 } from '@mui/material';
@@ -34,11 +33,7 @@ import {
 } from '@mui/icons-material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
-import {
-  getAdminApiUrl,
-  PAYMENT_METHOD_TYPE,
-  TRANSACTION_STATUS,
-} from '@/app/utils/enum';
+import { getAdminApiUrl } from '@/app/utils/enum';
 import { BorderSection } from '../../../reports/styled';
 import CreditCardIcon from '@mui/icons-material/CreditCard';
 import ItemRow from './ItemRow';
@@ -53,12 +48,13 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { useParams } from 'next/navigation';
 import { calculateTaxWithDiscount } from '@/app/utils/item';
-import { YYYYMMDDFormat } from '@/app/utils/time';
-import { PresignedFileUpload } from '@/app/components/PresignedFileUpload';
-import DisplayFile from '../../Modals/DisplayFile';
 import HelpIcon from '@mui/icons-material/Help';
 import HideSourceIcon from '@mui/icons-material/HideSource';
-import { IExpenseType } from '@/app/utils/type';
+import BasicInformation from './BasicInformation';
+import DocumentScannerIcon from '@mui/icons-material/DocumentScanner';
+import { PresignedFileUpload } from '@/app/components/PresignedFileUpload';
+import { YYYYMMDDFormat } from '@/app/utils/time';
+import DisplayFile from '../../Modals/DisplayFile';
 
 interface PropTypes {
   transactionType: TransactionType;
@@ -110,7 +106,6 @@ export default function DetailStep({
     defaultCodDate ? dayjs(defaultCodDate) : null,
   );
   const [isSelectRangeOpen, setIsSelectRangeOpen] = useState(false);
-  const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   // Highlight system state
   const [currentHighlightedSection, setCurrentHighlightedSection] =
@@ -129,7 +124,13 @@ export default function DetailStep({
 
   // Define sections based on transaction type
   const getSections = () => {
-    const sections = [];
+    const sections = [
+      {
+        id: 'Bill',
+        title: 'Bill',
+        icon: <DocumentScannerIcon />,
+      },
+    ];
 
     if (transactionType !== 'batch') {
       sections.push({
@@ -577,380 +578,20 @@ export default function DetailStep({
 
   const renderBasicInformation = () => {
     return (
-      <Grid item xs={12}>
-        <BorderSection
-          sx={{ p: 3, mb: 3 }}
-          $isHighlighted={
-            currentHighlightedSection === 'basic-info' && isHelpMode
-          }
-          ref={(el) => {
-            sectionRefs.current['basic-info'] = el as HTMLElement;
-          }}
-        >
-          <Typography
-            variant="subtitle1"
-            gutterBottom
-            sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-          >
-            <CreditCardIcon color="primary" />
-            Basic Information
-          </Typography>
-          <Divider sx={{ mb: 3 }} />
-
-          <Grid container spacing={3}>
-            {transactionType === 'stock' && (
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  id="invoice-number"
-                  label="Invoice Number"
-                  value={formData.invoice}
-                  onChange={(e) =>
-                    setFormData((prev: any) => ({
-                      ...prev,
-                      invoice: e.target.value,
-                    }))
-                  }
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <Receipt />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-            )}
-            <Grid item xs={12} md={6}>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  label="Transaction Date"
-                  value={selectedDate}
-                  onChange={(newValue) => setSelectedDate(newValue || dayjs())}
-                  slots={{
-                    textField: TextField,
-                  }}
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      InputProps: {
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <CalendarToday />
-                          </InputAdornment>
-                        ),
-                      },
-                    },
-                  }}
-                />
-              </LocalizationProvider>
-            </Grid>
-
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>Spent By</InputLabel>
-                <Select
-                  value={formData.spentBy}
-                  label="Spent By"
-                  onChange={(e) =>
-                    setFormData((prev: any) => ({
-                      ...prev,
-                      spentBy: e.target.value,
-                    }))
-                  }
-                  startAdornment={
-                    <InputAdornment position="start">
-                      <Person />
-                    </InputAdornment>
-                  }
-                >
-                  <MenuItem value="">
-                    <em>Select who spent</em>
-                  </MenuItem>
-                  {adminsAndDrivers?.map((person: string) => (
-                    <MenuItem key={person} value={person}>
-                      {person}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>Payment Method</InputLabel>
-                <Select
-                  value={formData.paymentMethodId}
-                  label="Payment Method"
-                  onChange={(e) =>
-                    setFormData((prev: any) => ({
-                      ...prev,
-                      paymentMethodId: Number(e.target.value),
-                      paymentMethod: paymentMethods?.find(
-                        (m: any) => m.id === Number(e.target.value),
-                      ),
-                    }))
-                  }
-                  startAdornment={
-                    <InputAdornment position="start">
-                      <Payment />
-                    </InputAdornment>
-                  }
-                >
-                  <MenuItem value={-1}>
-                    <em>Select payment method</em>
-                  </MenuItem>
-                  {paymentMethods?.map((method: any) => (
-                    <MenuItem key={method.id} value={method.id}>
-                      {method.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>Status</InputLabel>
-                <Select
-                  value={formData.status}
-                  label="Status"
-                  onChange={(e) => {
-                    const value = e.target.value as TRANSACTION_STATUS;
-                    setFormData((prev: any) => ({
-                      ...prev,
-                      status: value,
-                    }));
-                  }}
-                >
-                  <MenuItem value={TRANSACTION_STATUS.PAID}>Paid</MenuItem>
-                  <MenuItem value={TRANSACTION_STATUS.UNPAID}>Unpaid</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-
-            {transactionType !== 'stock' && (
-              <Grid item xs={12}>
-                <FormControl fullWidth>
-                  <InputLabel htmlFor="assign-type" id="assign-type-label">
-                    Assign Type
-                  </InputLabel>
-                  <Select
-                    labelId="assign-type-label"
-                    id="assign-type"
-                    aria-labelledby="assign-type-label"
-                    value={formData.typeId}
-                    label="Assign Type"
-                    fullWidth
-                    onChange={(e) => {
-                      setFormData((prev: any) => ({
-                        ...prev,
-                        typeId: Number(e.target.value),
-                        type: expenseTypes?.find(
-                          (type: IExpenseType) =>
-                            type.id === Number(e.target.value),
-                        ),
-                      }));
-                    }}
-                  >
-                    <MenuItem value={-1}>N/A</MenuItem>
-                    {expenseTypes?.map((type: IExpenseType) => (
-                      <MenuItem key={type.id} value={type.id}>
-                        {type.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-            )}
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Description"
-                multiline
-                rows={3}
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData((prev: any) => ({
-                    ...prev,
-                    description: e.target.value,
-                  }))
-                }
-                placeholder="Enter transaction description..."
-              />
-            </Grid>
-
-            {formData?.paymentMethod?.type === PAYMENT_METHOD_TYPE.CHEQUE && (
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  // gap: 2,
-                  mt: 2,
-                  p: 2,
-                  width: '100%',
-                }}
-              >
-                <Divider sx={{ width: '100%', my: 2 }}>Cheque Proof</Divider>
-
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  gap={1}
-                  width="100%"
-                  justifyContent="flex-end"
-                >
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={formData.isFrontCheque}
-                        onChange={(e) => {
-                          setFormData((prev: any) => ({
-                            ...prev,
-                            isFrontCheque: e.target.checked,
-                          }));
-                        }}
-                      />
-                    }
-                    label="Front"
-                  />
-
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={formData.isBackCheque}
-                        onChange={(e) => {
-                          setFormData((prev: any) => ({
-                            ...prev,
-                            isBackCheque: e.target.checked,
-                          }));
-                        }}
-                      />
-                    }
-                    label="Back"
-                  />
-                </Box>
-
-                <Box
-                  display="flex"
-                  flexDirection={mdDown ? 'column' : 'row'}
-                  alignItems="flex-start"
-                  gap={1}
-                  width="100%"
-                  mt={2}
-                >
-                  {!formData?.isFrontCheque && !formData?.isBackCheque && (
-                    <ErrorComponent errorText="Please select either front or back of the cheque to upload" />
-                  )}
-                  {formData?.isFrontCheque && formData?.frontFileKey ? (
-                    <Box
-                      width="100%"
-                      display="flex"
-                      flexDirection="column"
-                      alignItems="center"
-                      gap={2}
-                    >
-                      <Typography>Front</Typography>
-                      <DisplayFile
-                        fileKey={formData?.frontFileKey}
-                        isCheque={true}
-                        width="200px"
-                        height="200px"
-                      />
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        onClick={() => {
-                          setFormData((prev: any) => ({
-                            ...prev,
-                            frontFileKey: null,
-                            frontFileType: null,
-                          }));
-                        }}
-                      >
-                        Upload Other Proof
-                      </Button>
-                    </Box>
-                  ) : formData?.isFrontCheque && !formData?.frontFileKey ? (
-                    <Box width="100%">
-                      <Typography>Front</Typography>
-                      <PresignedFileUpload
-                        location={`transactions/${year}/${month}`}
-                        isCheque={true}
-                        maxFiles={1}
-                        maxSize={10 * 1024 * 1024} // 10MB
-                        acceptedFileTypes={['image/*', 'application/pdf']}
-                        onUploadComplete={(files) => {
-                          setFormData((prev: any) => ({
-                            ...prev,
-                            frontFileKey: files[0].fileKey,
-                            frontFileType: files[0].fileType,
-                          }));
-                        }}
-                        isUploaded={!!formData.frontFileKey}
-                      />
-                    </Box>
-                  ) : null}
-
-                  {formData?.isBackCheque && formData?.backFileKey ? (
-                    <Box
-                      width="100%"
-                      display="flex"
-                      flexDirection="column"
-                      alignItems="center"
-                      gap={2}
-                    >
-                      <Typography>Back</Typography>
-                      <DisplayFile
-                        fileKey={formData?.backFileKey}
-                        isCheque={true}
-                        width="200px"
-                        height="200px"
-                      />
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        onClick={() => {
-                          setFormData((prev: any) => ({
-                            ...prev,
-                            backFileKey: null,
-                            backFileType: null,
-                          }));
-                        }}
-                      >
-                        Upload Other Proof
-                      </Button>
-                    </Box>
-                  ) : formData?.isBackCheque && !formData?.backFileKey ? (
-                    <Box width="100%">
-                      <Typography>Back</Typography>
-                      <PresignedFileUpload
-                        location={`transactions/${year}/${month}`}
-                        isCheque={true}
-                        maxFiles={1}
-                        maxSize={10 * 1024 * 1024} // 10MB
-                        acceptedFileTypes={['image/*', 'application/pdf']}
-                        onUploadComplete={(files) => {
-                          setFormData((prev: any) => ({
-                            ...prev,
-                            backFileKey: files[0].fileKey,
-                            backFileType: files[0].fileType,
-                          }));
-                        }}
-                        isUploaded={!!formData.backFileKey}
-                      />
-                    </Box>
-                  ) : null}
-                </Box>
-              </Box>
-            )}
-          </Grid>
-          {currentHighlightedSection === 'basic-info' && nextButton()}
-        </BorderSection>
-      </Grid>
+      <BasicInformation
+        transactionType={transactionType}
+        selectedDate={selectedDate}
+        setSelectedDate={setSelectedDate}
+        formData={formData}
+        setFormData={setFormData}
+        adminsAndDrivers={adminsAndDrivers}
+        paymentMethods={paymentMethods}
+        expenseTypes={expenseTypes}
+        currentHighlightedSection={currentHighlightedSection}
+        isHelpMode={isHelpMode}
+        sectionRefs={sectionRefs}
+        nextButton={nextButton}
+      />
     );
   };
 
@@ -1131,6 +772,41 @@ export default function DetailStep({
         )}
 
         <Grid container spacing={3}>
+          {/* Bill */}
+          <Grid item xs={12}>
+            <BorderSection
+              ref={(el) => {
+                sectionRefs.current['Bill'] = el as HTMLElement;
+              }}
+              $isHighlighted={
+                currentHighlightedSection === 'Bill' && isHelpMode
+              }
+            >
+              <Typography variant="subtitle1" gutterBottom>
+                Bill
+              </Typography>
+              {formData?.billFileKey && <DisplayFile
+                fileKey={formData.billFileKey}
+                width="200px"
+                height="200px"
+              />}
+              <PresignedFileUpload
+                location={`bills/${year}/${month}`}
+                maxFiles={1}
+                maxSize={10 * 1024 * 1024} // 10MB
+                acceptedFileTypes={['image/*', 'application/pdf']}
+                onUploadComplete={(files) => {
+                  setFormData((prev: any) => ({
+                    ...prev,
+                    billFileKey: files[0].fileKey,
+                    billFileType: files[0].fileType,
+                  }));
+                }}
+                isUploaded={!!formData.billFileKey}
+              />
+            </BorderSection>
+          </Grid>
+
           {/* Assign COD */}
           {transactionType !== 'batch' && (
             <Grid item xs={12}>
@@ -1241,11 +917,6 @@ export default function DetailStep({
           {transactionType === 'stock' ? (
             <>
               <Grid item xs={12}>
-                {/* <HighlightedSection
-                  sectionId="vendor-selection"
-                  title="Vendor Selection"
-                  icon={<Person />}
-                > */}
                 <BorderSection
                   sx={{ p: 3 }}
                   $isHighlighted={
@@ -1283,15 +954,9 @@ export default function DetailStep({
                   {currentHighlightedSection === 'vendor-selection' &&
                     nextButton()}
                 </BorderSection>
-                {/* </HighlightedSection> */}
               </Grid>
 
               <Grid item xs={12}>
-                {/* <HighlightedSection
-                  sectionId="items"
-                  title="Items"
-                  icon={<Receipt />}
-                > */}
                 <BorderSection
                   sx={{ p: 3 }}
                   $isHighlighted={
@@ -1347,25 +1012,13 @@ export default function DetailStep({
 
                   {currentHighlightedSection === 'items' && nextButton()}
                 </BorderSection>
-                {/* </HighlightedSection> */}
               </Grid>
 
               <Grid item xs={12}>
-                {/* <HighlightedSection
-                  sectionId="basic-info"
-                  title="Basic Information"
-                  icon={<CreditCardIcon />}
-                > */}
                 {renderBasicInformation()}
-                {/* </HighlightedSection> */}
               </Grid>
 
               <Grid item xs={12}>
-                {/* <HighlightedSection
-                  sectionId="totals"
-                  title="Tax Calculation & Totals"
-                  icon={<AttachMoney />}
-                > */}
                 <BorderSection
                   sx={{ p: 3 }}
                   $isHighlighted={

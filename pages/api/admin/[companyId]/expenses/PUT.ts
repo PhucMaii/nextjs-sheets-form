@@ -21,6 +21,8 @@ interface IBody {
   backFileKey?: string;
   backFileType?: string;
   typeId?: number;
+  billFileKey?: string;
+  billFileType?: string;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
@@ -42,6 +44,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       backFileKey,
       backFileType,
       typeId,
+      billFileKey,
+      billFileType,
     }: IBody = req.body;
 
     const existingExpense = await prisma.expense.findUnique({
@@ -74,7 +78,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         typeId,
       },
       include: {
-        cheques: true,
+        medias: true,
       },
     });
 
@@ -96,6 +100,17 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     return res.status(500).json({ error: 'Internal Server Error: ' + error });
   }
 }
+
+export const updateBill = async (
+  expense: any,
+  billFileKey: string | null | undefined,
+  billFileType: string | null | undefined,
+) => {
+  const today = getTodayDate();
+
+  // Check if expense has bill file key yet
+
+};
 
 export const updateCheque = async (
   expense: any,

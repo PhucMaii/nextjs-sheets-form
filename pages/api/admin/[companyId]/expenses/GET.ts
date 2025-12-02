@@ -289,7 +289,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           include: {
             transactions: true,
             paymentMethod: true,
-            cheques: true,
+            medias: true,
           },
         });
 
@@ -332,7 +332,7 @@ const getTransactions = async (
           },
         },
         type: true,
-        cheques: true,
+        medias: true,
         codBoard: true,
         orderedItems: {
           include: {
@@ -367,7 +367,7 @@ const getTransactions = async (
         },
       },
       type: true,
-      cheques: true,
+      medias: true,
       codBoard: true,
       orderedItems: {
         include: {
@@ -397,7 +397,7 @@ const getTransactions = async (
       include: {
         transactions: true,
         paymentMethod: true,
-        cheques: true,
+        medias: true,
         type: true,
       },
     });
