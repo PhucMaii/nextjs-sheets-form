@@ -718,7 +718,7 @@ model BatchTransaction {
   typeId          Int?
 
   transactions Expense[]
-  cheques      Media[]
+  medias      Media[]
 
   company       Company?      @relation(fields: [companyId], references: [id])
   paymentMethod PaymentMethod @relation(fields: [paymentMethodId], references: [id])
