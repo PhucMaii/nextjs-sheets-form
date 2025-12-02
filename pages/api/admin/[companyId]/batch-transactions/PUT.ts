@@ -82,7 +82,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
       include: {
         transactions: true,
-        cheques: true,
+        medias: true,
       },
     });
 

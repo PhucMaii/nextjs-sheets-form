@@ -45,7 +45,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             vendor: true,
           },
         },
-        cheques: true,
+        medias: true,
         orderedItems: {
           include: {
             inventoryUnit: true,

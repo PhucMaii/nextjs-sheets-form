@@ -676,7 +676,7 @@ model Expense {
   shifts           ShiftSession[]
   purchaseOrders   PO[]
   payrolls         Payroll[]
-  cheques          Media[]
+  medias          Media[]
   logs             InventoryLog[]
   fixedTransaction FixedTransaction? @relation(fields: [fixedTransactionId], references: [id])
 
@@ -718,7 +718,7 @@ model BatchTransaction {
   typeId          Int?
 
   transactions Expense[]
-  cheques      Media[]
+  medias      Media[]
 
   company       Company?      @relation(fields: [companyId], references: [id])
   paymentMethod PaymentMethod @relation(fields: [paymentMethodId], references: [id])
@@ -1248,12 +1248,13 @@ model LossReport {
 }
 
 model Media {
-  id        Int     @id @default(autoincrement())
-  type      String
-  fileKey   String
-  createdAt String
-  createdBy String
-  note      String?
+  id              Int     @id @default(autoincrement())
+  type            String
+  fileKey          String
+  createdAt       String
+  createdBy       String
+  note            String?
+  evidenceType    EvidenceType?
 
   companyId          Int?
   lossReportId       Int?
@@ -1433,5 +1434,10 @@ enum CreditType {
 enum InventoryReportType {
   COUNT
   DRIVER_RETURN
+}
 
+enum EvidenceType {
+  DELIVERY_PROOF
+  CHEQUE
+  BILL
 }

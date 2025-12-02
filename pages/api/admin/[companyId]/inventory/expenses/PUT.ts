@@ -103,7 +103,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             inventoryUnit: true,
           },
         },
-        cheques: true,
+        medias: true,
       },
     });
 
@@ -160,7 +160,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
             },
           },
         },
-        cheques: true,
+        medias: true,
       },
     });
 
