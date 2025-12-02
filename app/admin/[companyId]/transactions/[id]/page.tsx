@@ -122,11 +122,11 @@ export default function EditTransaction() {
         let backFileKey = null;
         let backFileType = null;
 
-        if (transaction?.cheques?.length > 0) {
-          const frontFile = transaction?.cheques?.find(
+        if (transaction?.medias?.length > 0) {
+          const frontFile = transaction?.medias?.find(
             (cheque: any) => cheque.note === 'front',
           );
-          const backFile = transaction?.cheques?.find(
+          const backFile = transaction?.medias?.find(
             (cheque: any) => cheque.note === 'back',
           );
 

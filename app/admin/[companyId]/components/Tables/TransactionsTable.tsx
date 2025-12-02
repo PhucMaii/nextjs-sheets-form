@@ -275,15 +275,15 @@ const TransactionsTable = ({
                       </TableCell>
                     )}
                     <TableCell>
-                      {transaction?.cheques?.length > 0 && (
+                      {transaction?.medias?.length > 0 && (
                         <IconButton
                           onClick={(e: any) => {
                             e.stopPropagation();
                             e.preventDefault();
-                            const frontFileKey = transaction?.cheques?.find(
+                            const frontFileKey = transaction?.medias?.find(
                               (cheque: any) => cheque.note === 'front',
                             )?.fileKey;
-                            const backFileKey = transaction?.cheques?.find(
+                            const backFileKey = transaction?.medias?.find(
                               (cheque: any) => cheque.note === 'back',
                             )?.fileKey;
                             setViewImgProps({

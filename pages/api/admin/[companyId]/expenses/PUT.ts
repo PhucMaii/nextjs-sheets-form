@@ -120,7 +120,7 @@ export const updateCheque = async (
   // Check if front file key is provided for this expense
   if (frontFileKey && frontFileType) {
     // Check if front file key already exists for this expense
-    const isFrontFileExists = expense?.cheques?.find(
+    const isFrontFileExists = expense?.medias?.find(
       (cheque: any) => cheque?.note === 'front',
     );
 
@@ -157,7 +157,7 @@ export const updateCheque = async (
   // Check if back file key is provided for this expense
   if (backFileKey && backFileType) {
     // Check if back file key already exists for this expense
-    const isBackFileExists = expense?.cheques?.find(
+    const isBackFileExists = expense?.medias?.find(
       (cheque: any) => cheque?.note === 'back',
     );
 
