@@ -24,6 +24,7 @@ import { IExpense } from '@/app/utils/type';
 import { gstRate, pstRate } from '@/app/lib/constant';
 import useNotification from '@/hooks/useNotification';
 import BackButton from '../../components/BackButton';
+import { EvidenceType } from '@prisma/client';
 
 export default function EditTransaction() {
   const { companyId, id }: any = useParams();
@@ -121,6 +122,8 @@ export default function EditTransaction() {
         let frontFileType = null;
         let backFileKey = null;
         let backFileType = null;
+        let billFileKey = null;
+        let billFileType = null;
 
         if (transaction?.medias?.length > 0) {
           const frontFile = transaction?.medias?.find(
@@ -128,6 +131,9 @@ export default function EditTransaction() {
           );
           const backFile = transaction?.medias?.find(
             (cheque: any) => cheque.note === 'back',
+          );
+          const billFile = transaction?.medias?.find(
+            (bill: any) => bill.evidenceType === EvidenceType.BILL,
           );
 
           if (frontFile) {
@@ -137,6 +143,10 @@ export default function EditTransaction() {
           if (backFile) {
             backFileKey = backFile.fileKey;
             backFileType = backFile.type;
+          }
+          if (billFile) {
+            billFileKey = billFile.fileKey;
+            billFileType = billFile.type;
           }
         }
 
@@ -152,6 +162,8 @@ export default function EditTransaction() {
           frontFileType: frontFileType,
           backFileKey: backFileKey,
           backFileType: backFileType,
+          billFileKey: billFileKey,
+          billFileType: billFileType,
           dateRange:
             type === 'batch'
               ? [
@@ -330,6 +342,12 @@ export default function EditTransaction() {
           discount: transactionData?.discount || 0,
           oldItems: transactionData?.orderedItems || [],
           updatedItems: updatedItems,
+          billFileKey: transactionData?.billFileKey
+            ? transactionData.billFileKey
+            : null,
+          billFileType: transactionData?.billFileKey
+            ? transactionData.billFileType
+            : null,
           isAffectQuantity: true,
           frontFileKey: transactionData?.isFrontCheque
             ? transactionData.frontFileKey
@@ -376,6 +394,12 @@ export default function EditTransaction() {
         paymentMethodId: transactionData.paymentMethodId,
         spentBy: transactionData.spentBy,
         status: transactionData.status,
+        billFileKey: transactionData?.billFileKey
+          ? transactionData.billFileKey
+          : null,
+        billFileType: transactionData?.billFileKey
+          ? transactionData.billFileType
+          : null,
         frontFileKey: transactionData?.isFrontCheque
           ? transactionData.frontFileKey
           : null,

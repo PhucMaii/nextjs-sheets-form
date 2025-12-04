@@ -4,7 +4,7 @@ import { TRANSACTION_STATUS, USER_ROLE } from '@/app/utils/enum';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { getTodayDate } from '@/pages/api/utils/date';
-import { updateCheque } from './PUT';
+import { updateBill, updateCheque } from './PUT';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 
 interface IBody {
@@ -24,6 +24,8 @@ interface IBody {
   frontFileType?: string;
   backFileKey?: string;
   backFileType?: string;
+  billFileKey?: string;
+  billFileType?: string;
 }
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
@@ -47,6 +49,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       frontFileType,
       backFileKey,
       backFileType,
+      billFileKey,
+      billFileType,
     }: IBody = req.body;
 
     const { companyId } = req.query;
@@ -98,6 +102,10 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         typeId,
       },
     });
+
+    if (billFileKey && billFileType) {
+      await updateBill(newExpense, billFileKey, billFileType, createdBy);
+    }
 
     await updateCheque(
       newExpense,

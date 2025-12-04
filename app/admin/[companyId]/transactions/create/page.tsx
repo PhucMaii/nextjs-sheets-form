@@ -388,6 +388,8 @@ export default function CreateTransaction() {
             : null,
           backFileKey: formData?.isBackCheque ? formData?.backFileKey : null,
           backFileType: formData?.isBackCheque ? formData?.backFileType : null,
+          billFileKey: formData?.billFileKey ? formData?.billFileKey : null,
+          billFileType: formData?.billFileKey ? formData?.billFileType : null,
         },
       );
 
@@ -426,6 +428,8 @@ export default function CreateTransaction() {
           backFileKey: formData?.isBackCheque ? formData?.backFileKey : null,
           backFileType: formData?.isBackCheque ? formData?.backFileType : null,
           codBoardId: formData?.isCOD ? Number(formData?.codBoardId) : null,
+          billFileKey: formData?.billFileKey ? formData?.billFileKey : null,
+          billFileType: formData?.billFileKey ? formData?.billFileType : null,
         },
       );
 

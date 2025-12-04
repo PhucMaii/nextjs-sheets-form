@@ -124,20 +124,22 @@ export default function DetailStep({
 
   // Define sections based on transaction type
   const getSections = () => {
-    const sections = [
-      {
-        id: 'Bill',
-        title: 'Bill',
-        icon: <DocumentScannerIcon />,
-      },
-    ];
+    const sections = [];
 
     if (transactionType !== 'batch') {
-      sections.push({
-        id: 'cod-assignment',
-        title: 'COD Assignment',
-        icon: <Payment />,
-      });
+      const initialSections = [
+        {
+          id: 'Bill',
+          title: 'Bill Upload',
+          icon: <DocumentScannerIcon />,
+        },
+        {
+          id: 'cod-assignment',
+          title: 'COD Assignment',
+          icon: <Payment />,
+        }
+      ];
+      sections.push(...initialSections);
     }
 
     if (transactionType === 'stock') {
@@ -785,11 +787,13 @@ export default function DetailStep({
               <Typography variant="subtitle1" gutterBottom>
                 Bill
               </Typography>
-              {formData?.billFileKey && <DisplayFile
-                fileKey={formData.billFileKey}
-                width="200px"
-                height="200px"
-              />}
+              {formData?.billFileKey && (
+                <DisplayFile
+                  fileKey={formData.billFileKey}
+                  width="200px"
+                  height="200px"
+                />
+              )}
               <PresignedFileUpload
                 location={`bills/${year}/${month}`}
                 maxFiles={1}

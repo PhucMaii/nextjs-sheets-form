@@ -14,7 +14,7 @@ import {
   Tooltip,
   // Toolbar,
 } from '@mui/material';
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 import EditExpense from '../Modals/edit/EditExpense';
 import axios from 'axios';
 import { getAdminApiUrl } from '@/app/utils/enum';
@@ -65,6 +65,16 @@ const TransactionsTable = ({
     fileKeyBack: null,
   });
   const { companyId }: any = useParams();
+
+  const chequeFiles = useMemo(() => {
+    if (!transactions || transactions.length === 0) {
+      return [];
+    }
+    
+    return transactions.flatMap((transaction: any) => {
+      return transaction?.medias?.filter((media: any) => media.note === 'front' || media.note === 'back');
+    });
+  }, [transactions]);
 
   useEffect(() => {
     if (transactions.length > 0) {
@@ -173,21 +183,6 @@ const TransactionsTable = ({
         }
         isCheque={true}
       />
-      {/* {editProps.type === ExpenseType.stockPurchased && showNotification && (
-        <EditStockPurchased
-          open={editProps.open}
-          onClose={() =>
-            setEditProps((prevState: any) => ({
-              ...prevState,
-              open: false,
-              type: null,
-            }))
-          }
-          stockPurchased={editProps.transaction}
-          showNotification={showNotification}
-        />
-      )} */}
-
       {editProps.type === ExpenseType.other && showNotification && (
         <EditExpense
           open={editProps.open}
@@ -248,22 +243,11 @@ const TransactionsTable = ({
                     key={index}
                     sx={{
                       '&:hover': { backgroundColor: grey[50] },
-                      // backgroundColor: typeStyles.backgroundColor,
-                      // borderLeft: typeStyles.borderLeft,
                     }}
-                    onClick={
-                      () =>
-                        router.push(
-                          `/admin/${companyId}/transactions/${transaction.id}?type=${type}`,
-                        )
-                      // setEditProps({
-                      //   open: true,
-                      //   transaction,
-                      //   type:
-                      //     transaction?.orderedItems?.length > 0
-                      //       ? ExpenseType.stockPurchased
-                      //       : ExpenseType.other,
-                      // })
+                    onClick={() =>
+                      router.push(
+                        `/admin/${companyId}/transactions/${transaction.id}?type=${type}`,
+                      )
                     }
                   >
                     {selectedExpense && (
@@ -275,17 +259,13 @@ const TransactionsTable = ({
                       </TableCell>
                     )}
                     <TableCell>
-                      {transaction?.medias?.length > 0 && (
+                      {chequeFiles.length > 0 && (
                         <IconButton
                           onClick={(e: any) => {
                             e.stopPropagation();
                             e.preventDefault();
-                            const frontFileKey = transaction?.medias?.find(
-                              (cheque: any) => cheque.note === 'front',
-                            )?.fileKey;
-                            const backFileKey = transaction?.medias?.find(
-                              (cheque: any) => cheque.note === 'back',
-                            )?.fileKey;
+                            const frontFileKey = chequeFiles[0]?.fileKey;
+                            const backFileKey = chequeFiles[1]?.fileKey;
                             setViewImgProps({
                               open: true,
                               fileKeyFront: frontFileKey,

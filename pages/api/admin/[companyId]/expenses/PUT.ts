@@ -2,6 +2,7 @@ import { USER_ROLE } from '@/app/utils/enum';
 import prisma from '@/client';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { getTodayDate } from '@/pages/api/utils/date';
+import { EvidenceType } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IBody {
@@ -82,6 +83,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
+    if (billFileKey && billFileType) {
+      await updateBill(updatedExpense, billFileKey, billFileType, createdBy);
+    }
+
     await updateCheque(
       updatedExpense,
       frontFileKey,
@@ -103,13 +108,47 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
 export const updateBill = async (
   expense: any,
-  billFileKey: string | null | undefined,
-  billFileType: string | null | undefined,
+  billFileKey: string,
+  billFileType: string,
+  createdBy: string,
 ) => {
   const today = getTodayDate();
 
-  // Check if expense has bill file key yet
+  await prisma.$transaction(async (tx) => {
+    // Check if expense has bill file key yet
+    if (expense?.medias && expense?.medias?.length > 0) {
+      const isBillFileExists = expense.medias?.find(
+        (media: any) => media.evidenceType === EvidenceType.BILL,
+      );
 
+      if (isBillFileExists) {
+        // Delete the old bill file
+        await tx.media.deleteMany({
+          where: {
+            expenseId: expense.id,
+            evidenceType: EvidenceType.BILL,
+          },
+        });
+      }
+    }
+
+    // Create new bill file
+    await tx.media.create({
+      data: {
+        type: billFileType || '',
+        fileKey: billFileKey || '',
+        expenseId: expense.id,
+        evidenceType: EvidenceType.BILL,
+        createdAt: today.dateAndTime,
+        createdBy: createdBy,
+      },
+    });
+  });
+
+  return {
+    ok: true,
+    message: 'Update Bill Successfully',
+  };
 };
 
 export const updateCheque = async (
