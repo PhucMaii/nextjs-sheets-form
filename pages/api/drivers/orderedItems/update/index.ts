@@ -165,7 +165,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
               const cost =
                 (item?.cost / (item?.inventoryUnit?.ratio || 1)) *
                 (item?.inventoryUnit?.ratio || 1);
-              const profit = await calculateProfit(item, cost);
+              const profit = calculateProfit(item, cost);
 
               await tx.orderedItems.update({
                 where: {

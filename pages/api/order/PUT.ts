@@ -143,7 +143,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           (item?.cost / item?.inventoryUnit?.ratio) * item.inventoryUnit.ratio;
 
         actionRecord.update.push(item);
-        const profit = await calculateProfit(item, cost);
+        const profit = calculateProfit(item, cost);
 
         await prisma.orderedItems.update({
           where: {
