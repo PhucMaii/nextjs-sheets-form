@@ -479,6 +479,8 @@ export interface IFile extends Media {
 }
 
 export interface ICheque extends Cheque {
-  expense?: IExpense;
+  transactions?: IExpense[];
   batchTransaction?: IBatchTransaction;
+  user?: UserType;
+  vendor?: IVendor;
 }

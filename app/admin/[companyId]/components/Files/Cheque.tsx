@@ -6,7 +6,6 @@ import {
   CardContent,
   Divider,
   Chip,
-  Grid,
   Typography,
   IconButton,
 } from '@mui/material';
@@ -19,14 +18,13 @@ import {
   Visibility as VisibilityIcon,
   Receipt as ReceiptIcon,
 } from '@mui/icons-material';
-import { formatCurrency } from '@/app/utils/number';
 import dayjs from 'dayjs';
-import { ICheque, IFile } from '@/app/utils/type';
+import { ICheque } from '@/app/utils/type';
 
 interface IProps {
   file: ICheque;
-  handleViewFile: (file: IFile) => void;
-  handleDownloadFile: (file: IFile) => void;
+  handleViewFile: (file: any) => void;
+  handleDownloadFile: (file: any) => void;
 }
 
 export default function Cheque({
@@ -37,267 +35,218 @@ export default function Cheque({
   const accentColor = info.main;
   const bgColor = info.lightest;
 
-  console.log(file, 'file.fileKeyFront');
+  // if (!file.user) {
+  //   console.log(file, 'file');
+  // }
+
+  const userFields = [
+    {
+      label: 'Cheque Number',
+      value: file.chequeNumber,
+    },
+    {
+      label: 'Amount',
+      value: file.amount,
+    },
+    {
+      label: 'Date',
+      value: file.createdAt ? dayjs(file.createdAt).format('MMM DD, YYYY') : 'No date',
+    },
+  ];
+  
+  const vendorFields = [
+    {
+      label: 'Transactions',
+      value: file.transactions?.length || 0,
+    },
+    {
+      label: 'Amount',
+      value: file.amount,
+    },
+  ];
+
+  const renderFieldRow = (label: string, value: string | number) => {
+    return (
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+      >
+        <Typography variant="caption" sx={{ color: neutral[600], fontWeight: 500 }}>
+          {label}
+        </Typography>
+        <Typography variant="body2" sx={{ color: label === 'Amount' ? primary.main : neutral[700], fontWeight: label === 'Amount' ? 600 : 500 }}>
+          {label === 'Amount' ? `$${value}` : value}
+        </Typography>
+      </Box>
+    );
+  };
 
   return (
-    <Grid item xs={12} sm={6} md={4} lg={3} key={file.id}>
-      <Card
-        elevation={0}
+    <Card
+      elevation={0}
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        borderRadius: 2,
+        border: `1px solid ${alpha(neutral[300], 0.5)}`,
+        transition: 'all 0.2s ease-in-out',
+        overflow: 'hidden',
+        '&:hover': {
+          borderColor: accentColor,
+          boxShadow: `0 4px 20px ${alpha(accentColor, 0.15)}`,
+          transform: 'translateY(-2px)',
+        },
+      }}
+    >
+      {/* File Preview Section */}
+      <Box
         sx={{
-          height: '100%',
+          position: 'relative',
+          width: '100%',
+          height: 220,
+          backgroundColor: bgColor,
           display: 'flex',
-          flexDirection: 'column',
-          borderRadius: 2,
-          border: `1px solid ${alpha(neutral[300], 0.5)}`,
-          transition: 'all 0.2s ease-in-out',
+          alignItems: 'center',
+          justifyContent: 'center',
           overflow: 'hidden',
-          '&:hover': {
-            borderColor: accentColor,
-            boxShadow: `0 4px 20px ${alpha(accentColor, 0.15)}`,
-            transform: 'translateY(-2px)',
-          },
         }}
       >
-        {/* File Preview Section */}
-        <Box
-          sx={{
-            position: 'relative',
-            width: '100%',
-            height: 220,
-            backgroundColor: bgColor,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'hidden',
+        <DisplayFile
+          fileKey={file.fileKeyFront}
+          alt="Cheque"
+          width="100%"
+          height="100%"
+          isCheque={true}
+          style={{
+            objectFit: 'cover',
           }}
-        >
-          <DisplayFile
-            fileKey={file.fileKeyFront}
-            alt="Cheque"
-            width="100%"
-            height="100%"
-            isCheque={true}
-            style={{
-              objectFit: 'cover',
-            }}
-          />
+        />
 
-          {/* Type Badge */}
+        {/* Type Badge */}
+        <Chip
+          label="Cheque"
+          size="small"
+          sx={{
+            position: 'absolute',
+            top: 12,
+            right: 12,
+            backgroundColor: accentColor,
+            color: 'white',
+            fontWeight: 600,
+            fontSize: '0.7rem',
+            height: 24,
+            boxShadow: `0 2px 8px ${alpha(accentColor, 0.3)}`,
+          }}
+          icon={<ReceiptIcon sx={{ fontSize: 14, color: 'white' }} />}
+        />
+
+        {/* Front/Back Badge for Cheques */}
+        {file.fileKeyBack && (
           <Chip
-            label="Cheque"
+            label={file.fileKeyBack ? 'Back' : 'Front'}
             size="small"
             sx={{
               position: 'absolute',
               top: 12,
-              right: 12,
-              backgroundColor: accentColor,
+              left: 12,
+              backgroundColor: neutral[700],
               color: 'white',
               fontWeight: 600,
-              fontSize: '0.7rem',
-              height: 24,
-              boxShadow: `0 2px 8px ${alpha(accentColor, 0.3)}`,
+              fontSize: '0.65rem',
+              height: 22,
             }}
-            icon={<ReceiptIcon sx={{ fontSize: 14, color: 'white' }} />}
           />
+        )}
+      </Box>
 
-          {/* Front/Back Badge for Cheques */}
-          {file.fileKeyBack && (
-            <Chip
-              label={file.fileKeyBack ? 'Back' : 'Front'}
-              size="small"
+      {/* Content Section */}
+      <CardContent sx={{ flexGrow: 1, p: 2.5, pb: 1 }}>
+        {file.user ? (
+          <>
+            <Typography
+              variant="subtitle1"
               sx={{
-                position: 'absolute',
-                top: 12,
-                left: 12,
-                backgroundColor: neutral[700],
-                color: 'white',
                 fontWeight: 600,
-                fontSize: '0.65rem',
-                height: 22,
+                color: neutral[900],
+                mb: 1.5,
               }}
-            />
-          )}
-        </Box>
+            >
+              {file.user?.clientName}
+            </Typography>
+            <Divider sx={{ my: 1.5 }} />
+            <Stack spacing={1}> 
+              {userFields.map((field) => (
+                <Box key={field.label}>
+                  {renderFieldRow(field.label, field.value as string)}
+                </Box>
+              ))}
 
-        {/* Content Section */}
-        <CardContent sx={{ flexGrow: 1, p: 2.5, pb: 1 }}>
-          {file.expense ? (
-            <>
-              <Typography
-                variant="subtitle1"
-                sx={{
-                  fontWeight: 600,
-                  color: neutral[900],
-                  mb: 1.5,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                  lineHeight: 1.4,
-                }}
-              >
-                {file.expense.description}
-              </Typography>
-              <Divider sx={{ my: 1.5 }} />
-              <Stack spacing={1}>
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-                  <Typography
-                    variant="caption"
-                    sx={{ color: neutral[600], fontWeight: 500 }}
-                  >
-                    Amount
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{ color: neutral[900], fontWeight: 600 }}
-                  >
-                    {formatCurrency(file.expense.amount)}
-                  </Typography>
+            </Stack>
+          </>
+        ) : (
+          <>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: 600,
+                color: neutral[900],
+                mb: 1.5,
+              }}
+            >
+              {file.vendor?.name}
+            </Typography>
+            <Divider sx={{ my: 1.5 }} />
+            <Stack spacing={1}> 
+              {vendorFields.map((field) => (
+                <Box key={field.label}>
+                  {renderFieldRow(field.label, field.value)}
                 </Box>
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-                  <Typography
-                    variant="caption"
-                    sx={{ color: neutral[600], fontWeight: 500 }}
-                  >
-                    Date
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: neutral[700] }}>
-                    {file.expense.date
-                      ? dayjs(file.expense.date).format('MMM DD, YYYY')
-                      : 'No date'}
-                  </Typography>
-                </Box>
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-                  <Typography
-                    variant="caption"
-                    sx={{ color: neutral[600], fontWeight: 500 }}
-                  >
-                    Payment Method
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: neutral[700] }}>
-                    {file.expense.paymentMethod?.name || 'N/A'}
-                  </Typography>
-                </Box>
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-                  <Typography
-                    variant="caption"
-                    sx={{ color: neutral[600], fontWeight: 500 }}
-                  >
-                    Created by
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: neutral[700] }}>
-                    {file.createdBy}
-                  </Typography>
-                </Box>
-              </Stack>
-            </>
-          ) : (
-            <>
-              <Typography
-                variant="subtitle1"
-                sx={{
-                  fontWeight: 600,
-                  color: neutral[900],
-                  mb: 1.5,
-                }}
-              >
-                Cheque File
-              </Typography>
-              <Divider sx={{ my: 1.5 }} />
-              <Stack spacing={1}>
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-                  <Typography
-                    variant="caption"
-                    sx={{ color: neutral[600], fontWeight: 500 }}
-                  >
-                    Created by
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: neutral[700] }}>
-                    {file.createdBy}
-                  </Typography>
-                </Box>
-                <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-                  <Typography
-                    variant="caption"
-                    sx={{ color: neutral[600], fontWeight: 500 }}
-                  >
-                    Created at
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: neutral[700] }}>
-                    {file.createdAt
-                      ? dayjs(file.createdAt).format('MMM DD, YYYY')
-                      : 'No date'}
-                  </Typography>
-                </Box>
-              </Stack>
-            </>
-          )}
-        </CardContent>
+              ))}
+            </Stack>
+          </>
+        )}
+      </CardContent>
 
-        {/* Actions Section */}
-        <Box sx={{ p: 2, pt: 0, display: 'flex', gap: 1 }}>
-          <Button
-            size="small"
-            variant="outlined"
-            fullWidth
-            startIcon={<VisibilityIcon />}
-            onClick={() => handleViewFile(file)}
-            sx={{
-              textTransform: 'none',
-              borderColor: neutral[300],
-              color: neutral[700],
-              fontWeight: 500,
-              '&:hover': {
-                borderColor: primary.main,
-                backgroundColor: primary.lightest,
-                color: primary.main,
-              },
-            }}
-          >
-            View
-          </Button>
-          <IconButton
-            size="small"
-            onClick={() => handleDownloadFile(file)}
-            sx={{
-              border: `1px solid ${neutral[300]}`,
-              color: neutral[700],
-              '&:hover': {
-                borderColor: primary.main,
-                backgroundColor: primary.lightest,
-                color: primary.main,
-              },
-            }}
-          >
-            <DownloadIcon fontSize="small" />
-          </IconButton>
-        </Box>
-      </Card>
-    </Grid>
+      {/* Actions Section */}
+      <Box sx={{ p: 2, pt: 0, display: 'flex', gap: 1 }}>
+        <Button
+          size="small"
+          variant="outlined"
+          fullWidth
+          startIcon={<VisibilityIcon />}
+          onClick={() => handleViewFile(file)}
+          sx={{
+            textTransform: 'none',
+            borderColor: neutral[300],
+            color: neutral[700],
+            fontWeight: 500,
+            '&:hover': {
+              borderColor: primary.main,
+              backgroundColor: primary.lightest,
+              color: primary.main,
+            },
+          }}
+        >
+          View
+        </Button>
+        <IconButton
+          size="small"
+          onClick={() => handleDownloadFile(file)}
+          sx={{
+            border: `1px solid ${neutral[300]}`,
+            color: neutral[700],
+            '&:hover': {
+              borderColor: primary.main,
+              backgroundColor: primary.lightest,
+              color: primary.main,
+            },
+          }}
+        >
+          <DownloadIcon fontSize="small" />
+        </IconButton>
+      </Box>
+    </Card>
   );
 }

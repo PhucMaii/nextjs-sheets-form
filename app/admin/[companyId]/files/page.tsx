@@ -1,6 +1,8 @@
 'use client';
 import React, { useState, useMemo } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
+import { Virtuoso } from 'react-virtuoso';
+import useDebounce from '@/hooks/useDebounce';
 import {
   Box,
   Typography,
@@ -66,12 +68,15 @@ export default function FilesPage() {
     'all' | 'cheque' | 'delivery-proof'
   >('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [selectedFile, setSelectedFile] = useState<IFile | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
   const [sortAnchorEl, setSortAnchorEl] = useState<null | HTMLElement>(null);
   const isSortMenuOpen = Boolean(sortAnchorEl);
-  const [groupBy, setGroupBy] = useState<'none' | 'date' | 'customer' | 'vendor'>('none');
+  const [groupBy, setGroupBy] = useState<
+    'none' | 'date' | 'customer' | 'vendor'
+  >('none');
   const [groupAnchorEl, setGroupAnchorEl] = useState<null | HTMLElement>(null);
   const isGroupMenuOpen = Boolean(groupAnchorEl);
 
@@ -112,20 +117,27 @@ export default function FilesPage() {
     }
 
     // Filter by search query
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
+    if (debouncedSearchQuery && debouncedSearchQuery.trim()) {
+      const query = debouncedSearchQuery.toLowerCase();
       chequesAndProofs = chequesAndProofs.filter((file: any) => {
         if (file.deliveryId && file.deliveryId > 0 && file.delivery) {
           return (
-            file.delivery.order?.user?.clientName?.toLowerCase().includes(query) ||
+            file.delivery.order?.user?.clientName
+              ?.toLowerCase()
+              .includes(query) ||
             file.delivery.orderId?.toString().includes(query) ||
             file.createdBy?.toLowerCase().includes(query)
           );
-        } else if (file.expense) {
+        } else if (file.user) {
           return (
-            file.expense.description?.toLowerCase().includes(query) ||
-            file.expense.amount?.toString().includes(query) ||
-            file.expense.vendor?.name?.toLowerCase().includes(query) ||
+            file.user.clientName?.toLowerCase().includes(query) ||
+            file.user.clientId?.toString().includes(query) ||
+            file.createdBy?.toLowerCase().includes(query)
+          );
+        } else if (file.vendor) {
+          return (
+            file.vendor.name?.toLowerCase().includes(query) ||
+            file.vendor.id?.toString().includes(query) ||
             file.createdBy?.toLowerCase().includes(query)
           );
         }
@@ -137,9 +149,10 @@ export default function FilesPage() {
     let files = chequesAndProofs.map((file: any) => {
       return {
         ...file,
-        evidenceType: file.deliveryId > 0
-          ? EvidenceType.DELIVERY_PROOF
-          : EvidenceType.CHEQUE,
+        evidenceType:
+          file.deliveryId > 0
+            ? EvidenceType.DELIVERY_PROOF
+            : EvidenceType.CHEQUE,
       };
     });
 
@@ -151,7 +164,7 @@ export default function FilesPage() {
     });
 
     return files;
-  }, [allFiles, activeTab, searchQuery, sortOrder]);
+  }, [allFiles, activeTab, debouncedSearchQuery, sortOrder]);
 
   const groupedFiles = useMemo(() => {
     if (groupBy === 'none') {
@@ -164,7 +177,8 @@ export default function FilesPage() {
       let groupKey = 'Unknown';
 
       if (groupBy === 'date') {
-        const date = file.expense?.date || file.delivery?.deliveredAt || file.createdAt;
+        const date =
+          file.expense?.date || file.delivery?.deliveredAt || file.createdAt;
         if (date) {
           groupKey = dayjs(date).format('MMM DD, YYYY');
         } else {
@@ -236,10 +250,126 @@ export default function FilesPage() {
     setGroupAnchorEl(null);
   };
 
-  const handleGroupSelect = (group: 'none' | 'date' | 'customer' | 'vendor') => {
+  const handleGroupSelect = (
+    group: 'none' | 'date' | 'customer' | 'vendor',
+  ) => {
     setGroupBy(group);
     handleGroupMenuClose();
   };
+
+  // Flatten grouped files for virtualization
+  const flattenedFiles = useMemo(() => {
+    if (groupBy === 'none') {
+      return filteredFiles.map((file: any, index: number) => ({
+        file,
+        index,
+        isGroupHeader: false,
+        groupKey: null,
+      }));
+    }
+
+    const flattened: Array<{
+      file: any;
+      index: number;
+      isGroupHeader: boolean;
+      groupKey: string | null;
+      fileCount?: number;
+    }> = [];
+    let globalIndex = 0;
+
+    Object.entries(groupedFiles).forEach(([groupKey, files]) => {
+      flattened.push({
+        file: null,
+        index: globalIndex++,
+        isGroupHeader: true,
+        groupKey,
+        fileCount: files.length,
+      });
+
+      files.forEach((file: any) => {
+        flattened.push({
+          file,
+          index: globalIndex++,
+          isGroupHeader: false,
+          groupKey,
+        });
+      });
+    });
+
+    return flattened;
+  }, [filteredFiles, groupedFiles, groupBy]);
+
+  // Calculate items per row based on screen size
+  const itemsPerRow = mdDown ? 1 : 4;
+
+  // Create rows for virtualization
+  const rows = useMemo(() => {
+    const rowsArray: Array<{
+      items: Array<{
+        file: any;
+        index: number;
+        isGroupHeader: boolean;
+        groupKey: string | null;
+        fileCount?: number;
+      }>;
+      rowIndex: number;
+    }> = [];
+
+    if (groupBy === 'none') {
+      // Simple grid layout for ungrouped
+      for (let i = 0; i < flattenedFiles.length; i += itemsPerRow) {
+        rowsArray.push({
+          items: flattenedFiles.slice(i, i + itemsPerRow),
+          rowIndex: Math.floor(i / itemsPerRow),
+        });
+      }
+    } else {
+      // Grouped layout - keep headers separate
+      let currentRow: Array<{
+        file: any;
+        index: number;
+        isGroupHeader: boolean;
+        groupKey: string | null;
+        fileCount?: number;
+      }> = [];
+
+      flattenedFiles.forEach((item) => {
+        if (item.isGroupHeader) {
+          // Start new row for group header
+          if (currentRow.length > 0) {
+            rowsArray.push({
+              items: currentRow,
+              rowIndex: rowsArray.length,
+            });
+            currentRow = [];
+          }
+          // Group header takes full row
+          rowsArray.push({
+            items: [item],
+            rowIndex: rowsArray.length,
+          });
+        } else {
+          currentRow.push(item);
+          if (currentRow.length === itemsPerRow) {
+            rowsArray.push({
+              items: currentRow,
+              rowIndex: rowsArray.length,
+            });
+            currentRow = [];
+          }
+        }
+      });
+
+      if (currentRow.length > 0) {
+        rowsArray.push({
+          items: currentRow,
+          rowIndex: rowsArray.length,
+        });
+      }
+    }
+
+    return rowsArray;
+  }, [flattenedFiles, itemsPerRow, groupBy, mdDown]);
 
   return (
     <Sidebar>
@@ -531,91 +661,100 @@ export default function FilesPage() {
           </Tabs>
         </Paper>
 
-        {/* Files Grid */}
+        {/* Files Grid - Virtualized */}
         {filteredFiles.length > 0 ? (
-          groupBy === 'none' ? (
-            <Grid container spacing={3}>
-              {filteredFiles.map((file: any) => {
-                if (file.evidenceType === EvidenceType.DELIVERY_PROOF) {
+          <Box
+            sx={{
+              height: 'calc(100vh - 500px)',
+              minHeight: 600,
+            }}
+          >
+            <Virtuoso
+              totalCount={rows.length}
+              data={rows}
+              itemContent={(index, row) => {
+                const firstItem = row.items[0];
+
+                // Render group header
+                if (firstItem.isGroupHeader) {
                   return (
-                    <DeliveryProof
-                      key={file.id}
-                      file={file}
-                      handleViewFile={handleViewFile}
-                      handleDownloadFile={handleDownloadFile}
-                    />
-                  );
-                } else {
-                  return (
-                    <Cheque
-                      key={file.id}
-                      file={file}
-                      handleViewFile={handleViewFile}
-                      handleDownloadFile={handleDownloadFile}
-                    />
+                    <Box
+                      key={`header-${firstItem.groupKey}`}
+                      sx={{ mb: 2, mt: index > 0 ? 4 : 0 }}
+                    >
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          mb: 2,
+                          gap: 1,
+                        }}
+                      >
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            fontWeight: 600,
+                            color: neutral[900],
+                          }}
+                        >
+                          {firstItem.groupKey}
+                        </Typography>
+                        <Chip
+                          label={firstItem.fileCount}
+                          size="small"
+                          sx={{
+                            backgroundColor: primary.lightest,
+                            color: primary.main,
+                            fontWeight: 600,
+                          }}
+                        />
+                      </Box>
+                      <Divider />
+                    </Box>
                   );
                 }
-              })}
-            </Grid>
-          ) : (
-            <Box>
-              {Object.entries(groupedFiles).map(([groupKey, files]) => (
-                <Box key={groupKey} sx={{ mb: 4 }}>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      mb: 2,
-                      gap: 1,
-                    }}
+
+                // Render file cards row
+                return (
+                  <Grid
+                    container
+                    spacing={3}
+                    key={`row-${row.rowIndex}`}
+                    sx={{ mb: 3 }}
                   >
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        fontWeight: 600,
-                        color: neutral[900],
-                      }}
-                    >
-                      {groupKey}
-                    </Typography>
-                    <Chip
-                      label={files.length}
-                      size="small"
-                      sx={{
-                        backgroundColor: primary.lightest,
-                        color: primary.main,
-                        fontWeight: 600,
-                      }}
-                    />
-                  </Box>
-                  <Divider sx={{ mb: 2 }} />
-                  <Grid container spacing={3}>
-                    {files.map((file: any) => {
-                      if (file.evidenceType === EvidenceType.DELIVERY_PROOF) {
-                        return (
-                          <DeliveryProof
-                            key={file.id}
-                            file={file}
-                            handleViewFile={handleViewFile}
-                            handleDownloadFile={handleDownloadFile}
-                          />
-                        );
-                      } else {
-                        return (
-                          <Cheque
-                            key={file.id}
-                            file={file}
-                            handleViewFile={handleViewFile}
-                            handleDownloadFile={handleDownloadFile}
-                          />
-                        );
-                      }
+                    {row.items.map((item) => {
+                      if (item.isGroupHeader) return null;
+                      return (
+                        <Grid
+                          item
+                          xs={12}
+                          sm={6}
+                          md={4}
+                          lg={3}
+                          key={item.file.id}
+                        >
+                          {item.file.evidenceType ===
+                          EvidenceType.DELIVERY_PROOF ? (
+                            <DeliveryProof
+                              file={item.file}
+                              handleViewFile={handleViewFile}
+                              handleDownloadFile={handleDownloadFile}
+                            />
+                          ) : (
+                            <Cheque
+                              file={item.file}
+                              handleViewFile={handleViewFile}
+                              handleDownloadFile={handleDownloadFile}
+                            />
+                          )}
+                        </Grid>
+                      );
                     })}
                   </Grid>
-                </Box>
-              ))}
-            </Box>
-          )
+                );
+              }}
+            />
+          </Box>
         ) : (
           <EmptyFiles />
         )}

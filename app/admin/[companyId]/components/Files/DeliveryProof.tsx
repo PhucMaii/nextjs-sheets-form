@@ -6,7 +6,6 @@ import {
   CardContent,
   Divider,
   Chip,
-  Grid,
   Typography,
   IconButton,
 } from '@mui/material';
@@ -38,7 +37,6 @@ export default function FileCard({
   const bgColor = success.lightest;
 
   return (
-    <Grid item xs={12} sm={6} md={4} lg={3} key={file.id}>
       <Card
         elevation={0}
         sx={{
@@ -298,6 +296,5 @@ export default function FileCard({
           </IconButton>
         </Box>
       </Card>
-    </Grid>
   );
 }
