@@ -37,6 +37,7 @@ interface BodyProps {
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
     const body = req.body as BodyProps;
+    console.log(body, 'body in order PUT');
 
     const session: any = await getServerSession(req, res, authOptions);
     const existingUser: any = await prisma.user.findUnique({

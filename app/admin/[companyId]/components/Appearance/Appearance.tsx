@@ -560,8 +560,6 @@ export default function Appearance({ types, showNotification }: IProps) {
         id: 'promotion_' + item.id,
       };
 
-      console.log({ newItem, emptyItemContainer });
-
       // Check if the item already exists in that every promotion containers
       const promotionsContainer = itemTypes.filter((type) =>
         type.id.includes('promotion'),
@@ -576,8 +574,6 @@ export default function Appearance({ types, showNotification }: IProps) {
       // const existingItemIndex = newTypes[
       //   emptyContainerIndex
       // ].inventoryItems.findIndex((i: any) => i.name === newItem.name);
-
-      console.log({ existingItemIndex });
 
       if (existingItemIndex === -1) {
         newTypes[emptyContainerIndex].inventoryItems.splice(

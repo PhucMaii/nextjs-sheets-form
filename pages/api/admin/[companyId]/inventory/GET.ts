@@ -204,6 +204,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
+
     const formattedInventory =
       formatInventoryWithTotalValueAndStatus(inventory);
 

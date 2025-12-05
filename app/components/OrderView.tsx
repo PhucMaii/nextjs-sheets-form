@@ -262,36 +262,15 @@ export const ItemButton = ({
         sx={{
           position: 'relative',
           p: 1,
-          // backgroundColor: blue[50],
           color: blackColor,
           borderRadius: 1,
           width: '100%',
           height: '100%',
           border: `1px solid ${grey[200]}`,
-          // color:
-          //   disabled || item?.availability === false
-          //     ? grey[400]
-          //     : blueGrey[800],
           ...(!(item?.image || item?.inventoryItem?.image) && containerStyle),
         }}
       >
         {(item?.image || item?.inventoryItem?.image) && (
-          // <img
-          //   src={generateImgUrl(item?.image || item?.inventoryItem?.image)}
-          //   alt="img"
-          //   style={{
-          //     position: 'absolute',
-          //     objectFit: 'cover',
-          //     width: '100%',
-          //     height: '100%',
-          //     borderRadius: 'inherit',
-          //     inset: 0, // Make the image stretch to fill the container
-          //     zIndex: 0,
-          //     opacity: disabled ? 0.2 : 0.5,
-          //     // brightness
-          //     filter: 'brightness(93%)',
-          //   }}
-          // />
           <DisplayFile
             fileKey={item?.image || item?.inventoryItem?.image}
             width="100%"
@@ -320,54 +299,14 @@ export const ItemButton = ({
           <Typography fontWeight="bold" textAlign="left" sx={{ zIndex: 1 }}>
             {item.name}
           </Typography>
-          {/* {onRemove && (
-              <IconButton
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onRemove(item);
-                }}
-                color="error"
-              >
-                <RemoveCircleIcon />
-              </IconButton>
-            )} */}
           <Box
             display="flex"
-            // alignItems="flex-start"
             flexDirection={'column'}
-            // justifyContent={flexColOnDiscount ? '' : 'space-between'}
             gap={1}
             width="100%"
           >
-            {/* {item.inventoryItem?.isShowInventory &&
-          item?.qtyLeft &&
-          item?.qtyLeft > 0 &&
-          item?.qtyLeft <= 3 ? (
-            // <Box display="flex" justifyContent="flex-end">
-              <Box
-                sx={{
-                  // backgroundColor: 'white',
-                  // color: 'black',
-                  // width: 25,
-                  // height: 25,
-                  // p: 0.5,
-                  // borderRadius: 1,
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  opacity: 1,
-                  filter: 'brightness(100%)',
-                  textTransform: 'none',
-                  color: grey[700],
-                }}
-              >
-                <Typography variant="caption">{item.qtyLeft} available</Typography>
-              </Box>
-            // </Box>
-          ) : null} */}
           </Box>
-          {((item?.isShowDiscount && item?.prevPrice && item.prevPrice > 0) ||
+          {!isDisabled && ((item?.isShowDiscount && item?.prevPrice && item.prevPrice > 0) ||
             options?.highestDiscount) && (
             // If options, then not display the prev price
             <OnSaleBadge
