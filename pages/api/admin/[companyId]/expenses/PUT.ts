@@ -196,6 +196,7 @@ export const updateCheque = async (
           createdBy: createdBy,
           createdAt: today.dateAndTime,
           note: 'front',
+          evidenceType: EvidenceType.CHEQUE,
         },
       });
     }
@@ -233,6 +234,7 @@ export const updateCheque = async (
           createdAt: today.dateAndTime,
           note: 'back',
           companyId: expense.companyId,
+          evidenceType: EvidenceType.CHEQUE,
         },
       });
     }

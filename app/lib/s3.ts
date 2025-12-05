@@ -7,7 +7,7 @@ import {
 
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
-const s3 = new S3Client({
+export const s3 = new S3Client({
   region: 'us-west-2',
   credentials: {
     accessKeyId: process.env.NEXT_PUBLIC_S3_ACCESS_KEY_ID || '',
