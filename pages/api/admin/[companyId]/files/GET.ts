@@ -1,10 +1,12 @@
+import { generateListOfDateString } from '@/app/utils/time';
 import prisma from '@/client';
+import { normalizeDate } from '@/pages/api/utils/date';
 import { errorResponse } from '@/pages/api/utils/response';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { companyId } = req.query;
+    const { companyId, startDate, endDate } = req.query;
 
     if (!companyId) {
       return res.status(404).json({
@@ -12,9 +14,30 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
+    const query: any = {
+      companyId: Number(companyId),
+    };
+    if (startDate && endDate) {
+      const normalizedStartDate = normalizeDate(new Date(startDate as string));
+      const normalizedEndDate = normalizeDate(new Date(endDate as string));
+
+      const listOfDateString = generateListOfDateString(
+        normalizedStartDate,
+        normalizedEndDate,
+      );
+
+      query.delivery = {
+        order: {
+          deliveryDate: {
+            in: listOfDateString,
+          },
+        },
+      };
+    }
+
     const deliveryProofFiles = await prisma.media.findMany({
       where: {
-        companyId: Number(companyId),
+        ...query,
       },
       include: {
         delivery: {
@@ -40,18 +63,13 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    console.log(deliveryProofFiles, 'deliveryProofFiles');
-    console.log(chequeFiles, 'chequeFiles');
-
-    return res
-      .status(200)
-      .json({
-        data: {
-          deliveryProofFiles,
-          chequeFiles,
-        },
-        message: 'Files fetched successfully',
-      });
+    return res.status(200).json({
+      data: {
+        deliveryProofFiles,
+        chequeFiles,
+      },
+      message: 'Files fetched successfully',
+    });
   } catch (error: any) {
     console.log('Internal Server Error', error);
     return errorResponse(res, error);

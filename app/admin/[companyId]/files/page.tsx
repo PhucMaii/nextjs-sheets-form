@@ -19,6 +19,8 @@ import {
   MenuItem,
   Chip,
   Divider,
+  Checkbox,
+  Slide,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -28,6 +30,8 @@ import {
   Sort as SortIcon,
   ArrowDownward as ArrowDownwardIcon,
   Group as GroupIcon,
+  Download as DownloadIcon,
+  CheckBox as CheckBoxIcon,
 } from '@mui/icons-material';
 import ViewImg from '../components/ViewImg';
 import OverviewCard from '../components/OverviewCard/OverviewCard';
@@ -79,6 +83,8 @@ export default function FilesPage() {
   >('none');
   const [groupAnchorEl, setGroupAnchorEl] = useState<null | HTMLElement>(null);
   const isGroupMenuOpen = Boolean(groupAnchorEl);
+  const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
+  const [isDownloadingBatch, setIsDownloadingBatch] = useState(false);
 
   const { data: allFiles } = useQuery({
     queryKey: ['files', companyId],
@@ -225,8 +231,93 @@ export default function FilesPage() {
     setIsViewModalOpen(true);
   };
 
-  const handleDownloadFile = (file: IFile) => {
-    console.log('Downloading file:', file.fileKey);
+  const handleDownloadFile = async (file: IFile, isCheque: boolean) => {
+    const fileKey = isCheque ? file.fileKeyFront : file.fileKey;
+    const url = await fetch(
+      `/api/admin/${companyId}/files/download?rawKey=${encodeURIComponent(fileKey || '')}&isCheque=${isCheque}&fileId=${file.id}`,
+    );
+    const data = await url.json();
+    window.open(data.url, '_blank');
+  };
+
+  const handleToggleFileSelection = (fileId: number, isCheque: boolean) => {
+    setSelectedFiles((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(`${fileId}-${isCheque ? 'cheque' : 'delivery'}`)) {
+        newSet.delete(`${fileId}-${isCheque ? 'cheque' : 'delivery'}`);
+      } else {
+        newSet.add(`${fileId}-${isCheque ? 'cheque' : 'delivery'}`);
+      }
+      return newSet;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedFiles.size === filteredFiles.length) {
+      setSelectedFiles(new Set());
+    } else {
+      setSelectedFiles(new Set(filteredFiles.map((f: any) => f.id)));
+    }
+  };
+
+  const handleClearSelection = () => {
+    setSelectedFiles(new Set());
+  };
+
+  const handleDownloadBatchFiles = async () => {
+    if (selectedFiles.size === 0) return;
+
+    setIsDownloadingBatch(true);
+    try {
+      const filesToDownload = filteredFiles
+        .filter((file: any) =>
+          selectedFiles.has(
+            `${file.id}-${file.evidenceType === EvidenceType.CHEQUE ? 'cheque' : 'delivery'}`,
+          ),
+        )
+        .map((file: any) => {
+          const isCheque = file.evidenceType === EvidenceType.CHEQUE;
+          return {
+            id: file.id,
+            fileKey: isCheque ? file.fileKeyFront : file.fileKey,
+            isCheque,
+            chequeNumber: file.chequeNumber,
+            user: file.user,
+            order: file.delivery?.order,
+          };
+        });
+
+      const response = await fetch(
+        `/api/admin/${companyId}/files/download/batch`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ files: filesToDownload }),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to download files');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `files-${new Date().getTime()}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
+      setSelectedFiles(new Set());
+    } catch (error) {
+      console.error('Error downloading batch files:', error);
+    } finally {
+      setIsDownloadingBatch(false);
+    }
   };
 
   const handleSortMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -615,7 +706,7 @@ export default function FilesPage() {
           </Grid>
         </Paper>
 
-        {/* Tabs Section */}
+        {/* Tabs and Select All Section */}
         <Paper
           elevation={0}
           sx={{
@@ -624,6 +715,11 @@ export default function FilesPage() {
             borderRadius: 2,
             border: `1px solid ${alpha(neutral[300], 0.5)}`,
             backgroundColor: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 2,
           }}
         >
           <Tabs
@@ -632,6 +728,7 @@ export default function FilesPage() {
             variant={mdDown ? 'scrollable' : 'standard'}
             scrollButtons="auto"
             sx={{
+              flex: 1,
               '& .MuiTab-root': {
                 textTransform: 'none',
                 fontWeight: 600,
@@ -659,6 +756,45 @@ export default function FilesPage() {
               />
             ))}
           </Tabs>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              px: { xs: 1, md: 2 },
+            }}
+          >
+            <Checkbox
+              checked={
+                filteredFiles.length > 0 &&
+                selectedFiles.size === filteredFiles.length
+              }
+              indeterminate={
+                selectedFiles.size > 0 &&
+                selectedFiles.size < filteredFiles.length
+              }
+              onChange={handleSelectAll}
+              sx={{
+                color: primary.main,
+                '&.Mui-checked': {
+                  color: primary.main,
+                },
+              }}
+            />
+            <Typography
+              variant="body2"
+              sx={{
+                color: neutral[600],
+                fontWeight: 500,
+                minWidth: { xs: 80, sm: 120 },
+                fontSize: { xs: '0.75rem', sm: '0.875rem' },
+              }}
+            >
+              {selectedFiles.size > 0
+                ? `${selectedFiles.size} selected`
+                : 'Select all'}
+            </Typography>
+          </Box>
         </Paper>
 
         {/* Files Grid - Virtualized */}
@@ -738,13 +874,29 @@ export default function FilesPage() {
                             <DeliveryProof
                               file={item.file}
                               handleViewFile={handleViewFile}
-                              handleDownloadFile={handleDownloadFile}
+                              handleDownloadFile={(file: IFile) =>
+                                handleDownloadFile(file, false)
+                              }
+                              isSelected={selectedFiles.has(
+                                `${item.file.id}-delivery`,
+                              )}
+                              onSelect={() =>
+                                handleToggleFileSelection(item.file.id, false)
+                              }
                             />
                           ) : (
                             <Cheque
                               file={item.file}
                               handleViewFile={handleViewFile}
-                              handleDownloadFile={handleDownloadFile}
+                              handleDownloadFile={(file: IFile) =>
+                                handleDownloadFile(file, true)
+                              }
+                              isSelected={selectedFiles.has(
+                                `${item.file.id}-cheque`,
+                              )}
+                              onSelect={() =>
+                                handleToggleFileSelection(item.file.id, true)
+                              }
                             />
                           )}
                         </Grid>
@@ -758,6 +910,103 @@ export default function FilesPage() {
         ) : (
           <EmptyFiles />
         )}
+
+        {/* Batch Actions Floating Bar */}
+        <Slide
+          direction="up"
+          in={selectedFiles.size > 0}
+          mountOnEnter
+          unmountOnExit
+        >
+          <Paper
+            elevation={8}
+            sx={{
+              position: 'fixed',
+              bottom: 24,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 1300,
+              p: 2,
+              borderRadius: 3,
+              backgroundColor: 'white',
+              border: `2px solid ${primary.main}`,
+              boxShadow: `0 8px 32px ${alpha(primary.main, 0.3)}`,
+              minWidth: { xs: '90%', sm: 400 },
+              maxWidth: 600,
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 2,
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Box
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: '50%',
+                    backgroundColor: primary.lightest,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <CheckBoxIcon sx={{ color: primary.main, fontSize: 24 }} />
+                </Box>
+                <Box>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 600, color: neutral[900] }}
+                  >
+                    {selectedFiles.size} file
+                    {selectedFiles.size !== 1 ? 's' : ''} selected
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: neutral[600] }}>
+                    Ready to download
+                  </Typography>
+                </Box>
+              </Box>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={handleClearSelection}
+                  sx={{
+                    textTransform: 'none',
+                    borderColor: neutral[300],
+                    color: neutral[700],
+                    '&:hover': {
+                      borderColor: neutral[400],
+                      backgroundColor: neutral[50],
+                    },
+                  }}
+                >
+                  Clear
+                </Button>
+                <Button
+                  variant="contained"
+                  size="small"
+                  startIcon={<DownloadIcon />}
+                  onClick={handleDownloadBatchFiles}
+                  disabled={isDownloadingBatch}
+                  sx={{
+                    textTransform: 'none',
+                    backgroundColor: primary.main,
+                    '&:hover': {
+                      backgroundColor: primary.dark,
+                    },
+                  }}
+                >
+                  {isDownloadingBatch ? 'Downloading...' : 'Download'}
+                </Button>
+              </Box>
+            </Box>
+          </Paper>
+        </Slide>
       </Box>
     </Sidebar>
   );

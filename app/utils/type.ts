@@ -476,6 +476,8 @@ export interface IFile extends Media {
   expense?: IExpense;
   delivery?: IDelivery;
   batchTransaction?: IBatchTransaction;
+  fileKeyFront?: string;
+  fileKeyBack?: string;
 }
 
 export interface ICheque extends Cheque {

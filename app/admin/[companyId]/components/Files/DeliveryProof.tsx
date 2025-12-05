@@ -8,6 +8,7 @@ import {
   Chip,
   Typography,
   IconButton,
+  Checkbox,
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import { success, neutral, primary } from '@/theme/color';
@@ -26,12 +27,16 @@ interface IProps {
   file: IFile;
   handleViewFile: (file: IFile) => void;
   handleDownloadFile: (file: IFile) => void;
+  isSelected?: boolean;
+  onSelect?: () => void;
 }
 
-export default function FileCard({
+export default function DeliveryProof({
   file,
   handleViewFile,
   handleDownloadFile,
+  isSelected = false,
+  onSelect,
 }: IProps) {
   const accentColor = success.main;
   const bgColor = success.lightest;
@@ -44,9 +49,11 @@ export default function FileCard({
           display: 'flex',
           flexDirection: 'column',
           borderRadius: 2,
-          border: `1px solid ${alpha(neutral[300], 0.5)}`,
+          border: `2px solid ${isSelected ? accentColor : alpha(neutral[300], 0.5)}`,
           transition: 'all 0.2s ease-in-out',
           overflow: 'hidden',
+          position: 'relative',
+          backgroundColor: isSelected ? alpha(accentColor, 0.02) : 'white',
           '&:hover': {
             borderColor: accentColor,
             boxShadow: `0 4px 20px ${alpha(accentColor, 0.15)}`,
@@ -113,6 +120,72 @@ export default function FileCard({
                 height: 22,
               }}
             />
+          )}
+
+          {/* Selection Checkbox Overlay */}
+          {onSelect && (
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 8,
+                left: 8,
+                zIndex: 10,
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelect();
+              }}
+            >
+              <Checkbox
+                checked={isSelected}
+                sx={{
+                  color: 'white',
+                  backgroundColor: alpha(neutral[900], 0.6),
+                  borderRadius: '50%',
+                  p: 0.5,
+                  '&.Mui-checked': {
+                    color: 'white',
+                    backgroundColor: accentColor,
+                  },
+                  '&:hover': {
+                    backgroundColor: alpha(accentColor, 0.8),
+                  },
+                }}
+                icon={
+                  <Box
+                    sx={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: '50%',
+                      border: '2px solid white',
+                    }}
+                  />
+                }
+                checkedIcon={
+                  <Box
+                    sx={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: '50%',
+                      backgroundColor: accentColor,
+                      border: '2px solid white',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        backgroundColor: 'white',
+                      }}
+                    />
+                  </Box>
+                }
+              />
+            </Box>
           )}
         </Box>
 
