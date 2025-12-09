@@ -11,7 +11,10 @@ import { getTodayDate } from '@/pages/api/utils/date';
 import { updateCheque } from '../../expenses/PUT';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { USER_ROLE } from '@/app/utils/enum';
-import { recordTransactionInventoryLog } from '@/pages/api/utils/logs';
+import {
+  recordInventoryItemLog,
+  recordTransactionInventoryLog,
+} from '@/pages/api/utils/logs';
 import prisma from '@/client';
 import { updateAllScheduleOrderItems } from '../../items/PUT';
 import { UPDATE_OPTION } from '@/app/admin/[companyId]/components/Modals/edit/EditItem';
@@ -230,7 +233,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
             {
               price: item.sellingPrice,
             },
-          )
+          );
         }
       }
 
@@ -507,6 +510,17 @@ export const createFifo = async (
           InventoryLogFrom.CREATE_TRANSACTION,
           `Create ${item.quantity} ${item.name} to inventory due to expense ${newExpenseId} created`,
         );
+      } else {
+        if (createdBy === `Cron - Pre-approve Purchase Order`) {
+          await recordInventoryItemLog(
+            companyId,
+            item?.inventoryItemId || item?.inventoryItem?.id,
+            itemQuantity,
+            InventoryLogType.STOCK_IN,
+            InventoryLogFrom.CREATE_TRANSACTION,
+            `Create ${itemQuantity} ${item.name} to inventory due to cron pre-approve purchase order`,
+          );
+        }
       }
 
       itemHasAlreadyUpdateIds.push(item.id);

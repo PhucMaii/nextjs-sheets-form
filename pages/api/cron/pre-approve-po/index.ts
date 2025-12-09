@@ -32,30 +32,18 @@ export default async function handler(
               inventoryItem: true,
               inventoryUnit: true,
             },
-          }, 
+          },
         },
       });
 
       if (poList.length === 0) {
+        console.log('No POs to pre-approve');
         return res.status(200).json({ message: 'No POs to pre-approve' });
       }
 
       const itemParamsFifo: any[] = [];
 
       await prisma.$transaction(async (tx) => {
-        // Loop through each PO
-        // Set status to pre-approved
-        await tx.pO.updateMany({
-          where: {
-            id: {
-              in: poList.map((po) => po.id),
-            },
-          },
-          data: {
-            status: PO_STATUS.PRE_APPROVED,
-          },
-        });
-
         // Stock in inventory items
         for (const po of poList) {
           if (!po.poItems || po.poItems.length === 0) {
@@ -92,13 +80,13 @@ export default async function handler(
             }
 
             if (existingItemParamsFifo) {
-              existingItemParamsFifo.quantity += poItem.receivedQty;
+              existingItemParamsFifo.quantity += poItem.orderedQty;
               continue;
             }
 
             itemParamsFifo.push({
               id: vendorItem.id,
-              quantity: poItem.receivedQty,
+              quantity: poItem.orderedQty,
               price: poItem.costPerItem,
               vendorId: po.vendorId,
               unit: {
@@ -109,9 +97,16 @@ export default async function handler(
               inventoryItem: poItem.inventoryItem,
               companyId: Number(po.companyId),
             });
+
+            await tx.pO.update({
+              where: { id: po.id },
+              data: { status: PO_STATUS.PRE_APPROVED },
+            });
           }
         }
       });
+
+      console.log('itemParamsFifo', itemParamsFifo);
 
       await createFifo(
         Number(company.id),
