@@ -180,27 +180,25 @@ export default function FilesPage() {
     const groups: Record<string, any[]> = {};
 
     filteredFiles.forEach((file: any) => {
-      let groupKey = 'Unknown';
+      let groupKey = 'N/A';
 
       if (groupBy === 'date') {
         const date =
           file.expense?.date || file.delivery?.deliveredAt || file.createdAt;
         if (date) {
           groupKey = dayjs(date).format('MMM DD, YYYY');
-        } else {
-          groupKey = 'No Date';
         }
       } else if (groupBy === 'customer') {
         if (file.delivery?.order?.user?.clientName) {
           groupKey = file.delivery.order.user.clientName;
-        } else {
-          groupKey = 'No Customer';
+        }
+
+        if (file.user?.clientName) {
+          groupKey = file.user.clientName;
         }
       } else if (groupBy === 'vendor') {
-        if (file.expense?.vendor?.name) {
-          groupKey = file.expense.vendor.name;
-        } else {
-          groupKey = 'No Vendor';
+        if (file?.vendor?.name) {
+          groupKey = file?.vendor?.name;
         }
       }
 
@@ -210,8 +208,10 @@ export default function FilesPage() {
       groups[groupKey].push(file);
     });
 
+    const nonNAGroupKeys = Object.keys(groups).filter((key) => key !== 'N/A');
+
     // Sort group keys
-    const sortedKeys = Object.keys(groups).sort((a, b) => {
+    const sortedKeys = nonNAGroupKeys.sort((a, b) => {
       if (groupBy === 'date') {
         return dayjs(b).valueOf() - dayjs(a).valueOf();
       }

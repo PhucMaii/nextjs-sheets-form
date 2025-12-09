@@ -22,6 +22,8 @@ import axios from 'axios';
 import { useParams, useRouter } from 'next/navigation';
 import StatusText from '../../StatusText';
 import { calculateTaxWithDiscount } from '@/app/utils/item';
+import DisplayFile from '../DisplayFile';
+import { PresignedFileUpload } from '@/app/components/PresignedFileUpload';
 
 interface IProps extends ModalProps {
   showNotification: ShowNotificationType;
@@ -54,6 +56,8 @@ export default function ConvertToTransaction({
   const [paymentMethods, setPaymentMethods] = useState<IPaymentMethod[]>([]);
 
   const { date, SelectDate } = useSelectDate(po.estArrival);
+  const year = date.split('-')[0];
+  const month = date.split('-')[1];
 
   const router = useRouter();
 
@@ -82,18 +86,6 @@ export default function ConvertToTransaction({
     fetchPaymentMethod();
   }, []);
 
-  // useEffect(() => {
-  //   if (expenseData) {
-  //     setExpenseData((prevState: any) => ({
-  //       ...prevState,
-  //       amount: prevState.subTotal + prevState.tax - prevState.discount,
-  //       tax: prevState.tax,
-  //       discount: prevState.discount,
-  //       subTotal: prevState.subTotal,
-  //     }));
-  //   }
-  // }, [expenseData?.discount, expenseData?.subTotal, expenseData?.tax]);
-
   const formatPOItems = (items: IPOItem[]) => {
     return items.map((item: IPOItem) => ({
       ...item,
@@ -105,11 +97,14 @@ export default function ConvertToTransaction({
   const onChangeExpense = (field: string, value: number | string) => {
     if (field === 'discount') {
       const discountPercent =
-        Math.round((Number(value) / (expenseData?.subTotal + Number(value))) * 100 * 100) / 100;
+        Math.round(
+          (Number(value) / (expenseData?.subTotal + Number(value))) * 100 * 100,
+        ) / 100;
 
-      const newSubtotal = updatedPOItems.reduce((acc: number, item: IPOItem) => {
-        return acc + item.costPerItem * (item.receivedQty || 0);
-      }, 0) - Number(value);
+      const newSubtotal =
+        updatedPOItems.reduce((acc: number, item: IPOItem) => {
+          return acc + item.costPerItem * (item.receivedQty || 0);
+        }, 0) - Number(value);
 
       const { pstTotal, gstTotal } = calculateTaxWithDiscount(
         formatPOItems(updatedPOItems),
@@ -125,13 +120,17 @@ export default function ConvertToTransaction({
         amount: newSubtotal + gstTotal + pstTotal,
       }));
     } else if (field === 'discountPercent') {
-      const newSubtotalWithoutDiscount = updatedPOItems.reduce((acc: number, item: IPOItem) => {
-        return acc + item.costPerItem * (item.receivedQty || 0);
-      }, 0)
+      const newSubtotalWithoutDiscount = updatedPOItems.reduce(
+        (acc: number, item: IPOItem) => {
+          return acc + item.costPerItem * (item.receivedQty || 0);
+        },
+        0,
+      );
 
       const discount =
-        Math.round((Number(value) / 100) * newSubtotalWithoutDiscount * 100) / 100;
-      
+        Math.round((Number(value) / 100) * newSubtotalWithoutDiscount * 100) /
+        100;
+
       const { pstTotal, gstTotal } = calculateTaxWithDiscount(
         formatPOItems(updatedPOItems),
         Number(value),
@@ -242,8 +241,6 @@ export default function ConvertToTransaction({
       discountPercent,
     );
 
-    console.log(discountPercent, 'discountPercent');
-
     const newAmount = newSubtotal + gstTotal + pstTotal;
 
     setUpdatedPOItems(newPOItems);
@@ -266,7 +263,7 @@ export default function ConvertToTransaction({
       showNotification('error', 'Please select who spent');
       return false;
     }
-    
+
     return true;
   };
 
@@ -274,7 +271,7 @@ export default function ConvertToTransaction({
     if (!validateForm()) {
       return;
     }
-    
+
     setLoading(true);
     try {
       const res = await axios.put(
@@ -320,6 +317,33 @@ export default function ConvertToTransaction({
         <Box display="flex" flexDirection="column" gap={1}>
           <Typography>Vendor</Typography>
           <Typography variant="h5">{po?.vendor?.name}</Typography>
+        </Box>
+
+        <Box>
+          <Typography variant="subtitle1" gutterBottom>
+            Bill
+          </Typography>
+          {expenseData?.billFileKey && (
+            <DisplayFile
+              fileKey={expenseData.billFileKey}
+              width="200px"
+              height="200px"
+            />
+          )}
+          <PresignedFileUpload
+            location={`bills/${year}/${month}`}
+            maxFiles={1}
+            maxSize={10 * 1024 * 1024} // 10MB
+            acceptedFileTypes={['image/*', 'application/pdf']}
+            onUploadComplete={(files) => {
+              setExpenseData((prev: any) => ({
+                ...prev,
+                billFileKey: files[0].fileKey,
+                billFileType: files[0].fileType,
+              }));
+            }}
+            isUploaded={!!expenseData.billFileKey}
+          />
         </Box>
 
         <Divider sx={{ my: 2 }}>Items</Divider>

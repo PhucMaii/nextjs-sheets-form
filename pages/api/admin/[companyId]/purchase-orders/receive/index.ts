@@ -13,6 +13,7 @@ import {
   PO,
 } from '@prisma/client';
 import { recordInventoryItemLog } from '@/pages/api/utils/logs';
+import { updateBill } from '../../expenses/PUT';
 
 interface IBody {
   poId: number;
@@ -28,6 +29,8 @@ interface IBody {
     status: TRANSACTION_STATUS;
     date: string;
     discount?: number;
+    billFileKey?: string;
+    billFileType?: string;
   };
 }
 
@@ -241,6 +244,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           );
         }
       }
+    }
+
+    if (expenseData.billFileKey) {
+      await updateBill(
+        newTransaction,
+        expenseData.billFileKey || '',
+        expenseData.billFileType || '',
+        createdBy,
+      );
     }
 
     return res.status(200).json({ message: 'Received Items Successfully' });
