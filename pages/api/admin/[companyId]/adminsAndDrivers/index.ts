@@ -1,8 +1,8 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import withAdminAuthGuard from '../../../utils/withAdminAuthGuard';
 // import { USER_ROLE } from '@/app/utils/enum';
 import { getRole } from '@/pages/api/utils/employee';
+import prisma from '@/client';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -15,23 +15,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (!companyId) {
       return res.status(404).json({ error: 'Company Id Not Found' });
     }
-
-    const prisma = new PrismaClient();
-
-    // const admins = await prisma.user.findMany({
-    //   where: {
-    //     role: {
-    //       in: [USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN],
-    //     },
-    //   },
-    // });
-
-    // const drivers = await prisma.driver.findMany({});
-
-    // const adminsAndDrivers = [
-    //   ...admins.map((admin: any) => `Admin - ${admin.clientName}`),
-    //   ...drivers.map((driver: any) => `Driver - ${driver.name}`),
-    // ];
 
     const employees = await prisma.employee.findMany({
       where: {

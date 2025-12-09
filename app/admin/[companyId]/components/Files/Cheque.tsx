@@ -54,8 +54,8 @@ export default function Cheque({
       value: file.amount,
     },
     {
-      label: 'Date',
-      value: file.createdAt ? dayjs(file.createdAt).format('MMM DD, YYYY') : 'No date',
+      label: 'Uploaded At',
+      value: file.createdAt ? dayjs(file.createdAt).format('MMM DD, YYYY h:mm A') : 'No date',
     },
   ];
   
@@ -67,6 +67,10 @@ export default function Cheque({
     {
       label: 'Amount',
       value: file.amount,
+    },
+    {
+      label: 'Uploaded At',
+      value: file.createdAt ? dayjs(file.createdAt).format('MMM DD, YYYY h:mm A') : 'No date',
     },
   ];
 

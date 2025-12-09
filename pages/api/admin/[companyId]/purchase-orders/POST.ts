@@ -1,12 +1,10 @@
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate } from '@/pages/api/utils/date';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/pages/api/auth/[...nextauth]';
-import { PO_STATUS } from '@/app/utils/enum';
+import { PO_STATUS, USER_ROLE } from '@/app/utils/enum';
 import { generatePurchaseOrderTemplate } from '@/config/email';
 import emailHandler from '@/pages/api/utils/email';
-const prisma = new PrismaClient();
+import { getCreatedBy } from '@/pages/api/import-sheets/utils';
+import prisma from '@/client';
 
 interface IBody {
   purchaseOrder: any;
@@ -41,8 +39,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const totalCost = subtotal + tax - (purchaseOrder?.discount || 0);
 
     const today = getTodayDate();
-    const session: any = await getServerSession(req, res, authOptions);
-    const admin: any = session?.user;
+    const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
 
     // Set up the purchase order
     const newPurchaseOrder: any = await prisma.pO.create({
@@ -58,7 +55,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         note: purchaseOrder.note,
         discount: purchaseOrder.discount,
         createdAt: today.dateAndTime,
-        createdBy: `Admin - ${admin.name}`,
+        createdBy,
         subtotal,
         tax,
         vendor: {

@@ -51,41 +51,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         true,
       );
 
-      // const batchTransactions: any = await prisma.batchTransaction.findMany({
-      //   where: {
-      //     date: {
-      //       in: listOfDateString,
-      //     },
-      //     companyId: Number(companyId),
-      //   },
-      //   include: {
-      //     transactions: true,
-      //     paymentMethod: true,
-      //     cheques: true,
-      //   },
-      // });
-
-      // const sortedExpensesByDate = sortExpenseByDate([
-      //   ...expenses,
-      //   ...batchTransactions,
-      // ]);
-
-      // const transactionBasedOnDate = expenses.reduce(
-      //   (acc: any, expense: any) => {
-      //     if (!acc[expense.date]) {
-      //       acc[expense.date] = 0;
-      //     }
-
-      //     acc[expense.date] += expense?.amount || expense?.total;
-      //     return acc;
-      //   },
-      //   {},
-      // );
-      // const chartData = generateChartDataForm(
-      //   transactionBasedOnDate,
-      //   listOfDateString,
-      // );
-
       return res.status(200).json({
         data: expenses.expenses,
         chartData: expenses.chartData,
@@ -93,10 +58,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       });
     }
 
-    console.log(type, 'type');
-
     if (type && type === VIEW_TYPE.VENDOR) {
-      console.log(id, 'acccess to vendor');
       const expenses = await getExpenseWithVendorId(
         Number(id),
         {
@@ -106,8 +68,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
         true,
       );
-
-      console.log(expenses, 'expenses');
 
       const sortedExpensesByDate = expenses.expenses;
 
@@ -357,7 +317,7 @@ const getTransactions = async (
       chartData: [],
     };
   }
-  const singleExpenses = await prisma.expense.findMany({
+  const expenses = await prisma.expense.findMany({
     where: { ...condition, batchTransactionId: null },
     include: {
       paymentMethod: true,
@@ -404,7 +364,7 @@ const getTransactions = async (
   }
 
   const sortedExpensesByDate = sortExpenseByDate([
-    ...singleExpenses,
+    ...expenses,
     ...(batchTransactions ? batchTransactions : []),
   ]);
 
@@ -508,6 +468,8 @@ const getExpenseWithVendorId = async (
     acc[expense.date] += expense?.amount || expense?.total;
     return acc;
   }, {});
+  
+  const sortedExpensesByDate = sortExpenseByDate(expenses);
 
   if (isChartInclude) {
     const chartData = generateChartDataForm(
@@ -516,13 +478,13 @@ const getExpenseWithVendorId = async (
     );
 
     return {
-      expenses,
+      expenses: sortedExpensesByDate,
       chartData,
     };
   }
 
   return {
-    expenses,
+    expenses: sortedExpensesByDate,
   };
 };
 
