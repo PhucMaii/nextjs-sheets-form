@@ -54,11 +54,20 @@ export default function Cheque({
       value: file.amount,
     },
     {
+      label: 'From - To',
+      value:
+        file.startDate && file.endDate
+          ? `${file.startDate} - ${file.endDate}`
+          : 'No date',
+    },
+    {
       label: 'Uploaded At',
-      value: file.createdAt ? dayjs(file.createdAt).format('MMM DD, YYYY h:mm A') : 'No date',
+      value: file.createdAt
+        ? dayjs(file.createdAt).format('MMM DD, YYYY h:mm A')
+        : 'No date',
     },
   ];
-  
+
   const vendorFields = [
     {
       label: 'Transactions',
@@ -69,22 +78,33 @@ export default function Cheque({
       value: file.amount,
     },
     {
+      label: 'From - To',
+      value: file.startDate && file.endDate ? `${file.startDate} - ${file.endDate}` : 'No date',
+    },
+    {
       label: 'Uploaded At',
-      value: file.createdAt ? dayjs(file.createdAt).format('MMM DD, YYYY h:mm A') : 'No date',
+      value: file.createdAt
+        ? dayjs(file.createdAt).format('MMM DD, YYYY h:mm A')
+        : 'No date',
     },
   ];
 
   const renderFieldRow = (label: string, value: string | number) => {
     return (
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-      >
-        <Typography variant="caption" sx={{ color: neutral[600], fontWeight: 500 }}>
+      <Box display="flex" justifyContent="space-between" alignItems="center">
+        <Typography
+          variant="caption"
+          sx={{ color: neutral[600], fontWeight: 500 }}
+        >
           {label}
         </Typography>
-        <Typography variant="body2" sx={{ color: label === 'Amount' ? primary.main : neutral[700], fontWeight: label === 'Amount' ? 600 : 500 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: label === 'Amount' ? primary.main : neutral[700],
+            fontWeight: label === 'Amount' ? 600 : 500,
+          }}
+        >
           {label === 'Amount' ? `$${value}` : value}
         </Typography>
       </Box>
@@ -253,13 +273,12 @@ export default function Cheque({
               {file.user?.clientName}
             </Typography>
             <Divider sx={{ my: 1.5 }} />
-            <Stack spacing={1}> 
+            <Stack spacing={1}>
               {userFields.map((field) => (
                 <Box key={field.label}>
                   {renderFieldRow(field.label, field.value as string)}
                 </Box>
               ))}
-
             </Stack>
           </>
         ) : (
@@ -275,7 +294,7 @@ export default function Cheque({
               {file.vendor?.name}
             </Typography>
             <Divider sx={{ my: 1.5 }} />
-            <Stack spacing={1}> 
+            <Stack spacing={1}>
               {vendorFields.map((field) => (
                 <Box key={field.label}>
                   {renderFieldRow(field.label, field.value)}

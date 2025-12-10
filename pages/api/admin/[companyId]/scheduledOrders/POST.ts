@@ -343,15 +343,13 @@ export const getRouteScheduledOrders = async (routeId: number) => {
 };
 export const refactorRouteArrangement = async (routeId: number) => {
   try {
-    const prisma = new PrismaClient();
-
+    // Get all position index of fetched scheduled orders and sort it
     const routeScheduledOrders = await getRouteScheduledOrders(routeId);
 
     if (routeScheduledOrders.length === 0) {
       return null;
     }
 
-    // Get all position index of fetched scheduled orders and sort it
     const sortedPosIndexList = routeScheduledOrders
       .filter(
         (scheduledOrder) =>

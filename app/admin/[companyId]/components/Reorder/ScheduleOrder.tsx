@@ -104,7 +104,6 @@ export default function ScheduleOrder({
         order={scheduleOrder}
         showNotification={showNotification}
         mutateOrders={mutateOrders}
-        handleDeleteOrderUI={handleDeleteOrderUI}
       />
     </Box>
   );

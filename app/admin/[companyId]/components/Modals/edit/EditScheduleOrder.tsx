@@ -23,7 +23,6 @@ import { useParams } from 'next/navigation';
 interface IProps {
   order: ScheduledOrder;
   showNotification: (type: AlertColor, message: string) => void;
-  handleDeleteOrderUI: (targetOrder: ScheduledOrder) => void;
   routes: IRoutes[];
   routeId: number;
   mutateOrders: any;
@@ -32,7 +31,6 @@ interface IProps {
 export default function EditScheduleOrder({
   order,
   showNotification,
-  handleDeleteOrderUI,
   routes,
   routeId,
   mutateOrders,
@@ -46,48 +44,6 @@ export default function EditScheduleOrder({
   const [sellingItems] = SWRFetchData(
     getAdminApiUrl(companyId, `/items?userId=${order.userId}`),
   );
-
-  // const onChangeNewItemQuantity = (e: any, item: any) => {
-  //   const newQuantity = +e.target.value;
-
-  //   if (newQuantity < 1) {
-  //     const newItemList = itemList.filter(
-  //       (orderItem: OrderedItems) => orderItem.name !== item.name,
-  //     );
-
-  //     setItemList(newItemList);
-  //     return;
-  //   }
-
-  //   const isExistedInItemList = itemList.find(
-  //     (orderItem: OrderedItems) => orderItem.name === item.name,
-  //   );
-
-  //   if (isExistedInItemList) {
-  //     const newItemList = itemList.map((orderItem: OrderedItems) => {
-  //       if (orderItem.name === item.name) {
-  //         return { ...orderItem, quantity: newQuantity };
-  //       }
-  //       return orderItem;
-  //     });
-  //     setItemList(newItemList);
-  //   } else {
-  //     setItemList([...itemList, { ...item, id: -1, quantity: newQuantity }]);
-  //   }
-  // }
-
-  // const onChangeNewItemPrice = (e: any, item: any) => {
-  //   const newPrice = +e.target.value;
-
-  //   const newBaseItems = baseItems.map((baseItem: any) => {
-  //     if (baseItem.id === item.id) {
-  //       return { ...baseItem, price: newPrice };
-  //     }
-  //     return baseItem;
-  //   });
-
-  //   setBaseItems(newBaseItems);
-  // }
 
   const switchRoute = async () => {
     if (newRouteId === routeId) {
@@ -111,8 +67,6 @@ export default function EditScheduleOrder({
         showNotification('error', response.data.error);
         return;
       }
-
-      handleDeleteOrderUI(order);
 
       showNotification('success', response.data.message);
       setIsSubmitting(false);

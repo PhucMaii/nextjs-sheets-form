@@ -173,8 +173,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           }
 
           return (
-            scheduleOrderA.positionIndex.index -
-            scheduleOrderB.positionIndex.index
+            (scheduleOrderA?.positionIndex?.index ?? 0) -
+            (scheduleOrderB?.positionIndex?.index ?? 0)
           );
         }),
       };

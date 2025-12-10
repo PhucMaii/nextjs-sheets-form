@@ -21,6 +21,7 @@ import {
   Divider,
   Checkbox,
   Slide,
+  Skeleton,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -45,16 +46,18 @@ import useFiles from '@/hooks/db-tables/useFiles';
 import { useParams } from 'next/navigation';
 import Cheque from '../components/Files/Cheque';
 import dayjs from 'dayjs';
+import { generateMonthRange } from '@/app/utils/time';
+import SelectDateRange from '../components/Select/SelectDateRange';
 
 const tabs = [
   {
-    label: 'All',
-    value: 'all',
-    icon: <FilterListIcon sx={{ fontSize: 18 }} />,
+    label: 'Client Cheque',
+    value: 'client-cheque',
+    icon: <ReceiptIcon sx={{ fontSize: 18 }} />,
   },
   {
-    label: 'Cheque',
-    value: 'cheque',
+    label: 'Vendor Cheque',
+    value: 'vendor-cheque',
     icon: <ReceiptIcon sx={{ fontSize: 18 }} />,
   },
   {
@@ -66,11 +69,17 @@ const tabs = [
 
 export default function FilesPage() {
   const { companyId }: any = useParams();
-  const { getAllFiles } = useFiles();
+  const { getClientChequeFiles, getVendorChequeFiles, getDeliveryProofFiles } =
+    useFiles();
 
   const [activeTab, setActiveTab] = useState<
-    'all' | 'cheque' | 'delivery-proof'
-  >('all');
+    'client-cheque' | 'vendor-cheque' | 'delivery-proof'
+  >('client-cheque');
+  const firstDayOfLastMonth = new Date();
+  firstDayOfLastMonth.setMonth(firstDayOfLastMonth.getMonth() - 1);
+  firstDayOfLastMonth.setDate(1);
+  firstDayOfLastMonth.setHours(0, 0, 0, 0);
+const [dateRange, setDateRange] = useState<any>(generateMonthRange(firstDayOfLastMonth, -1));
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [selectedFile, setSelectedFile] = useState<IFile | null>(null);
@@ -86,46 +95,54 @@ export default function FilesPage() {
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
   const [isDownloadingBatch, setIsDownloadingBatch] = useState(false);
 
-  const { data: allFiles } = useQuery({
-    queryKey: ['files', companyId],
-    queryFn: () => getAllFiles(companyId),
-    initialData: {
-      deliveryProofFiles: [],
-      chequeFiles: [],
+  const { data: files, isLoading: isLoadingFiles } = useQuery({
+    queryKey: ['files', companyId, dateRange, activeTab],
+    queryFn: async () => {
+      if (activeTab === 'client-cheque') {
+        const data = await getClientChequeFiles(
+          companyId,
+          dateRange[0],
+          dateRange[1],
+        );
+
+        return data;
+      } else if (activeTab === 'vendor-cheque') {
+        const data = await getVendorChequeFiles(
+          companyId,
+          dateRange[0],
+          dateRange[1],
+        );
+        return data;
+      } else if (activeTab === 'delivery-proof') {
+        const data = await getDeliveryProofFiles(
+          companyId,
+          dateRange[0],
+          dateRange[1],
+        );
+        return data;
+      }
+      return [];
     },
+    initialData: [],
+    enabled: !!companyId && !!dateRange[0] && !!dateRange[1],
   });
 
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   const filteredFiles = useMemo(() => {
-    if (!allFiles) {
+    if (!files) {
       return [];
     }
 
-    let chequesAndProofs = [
-      ...allFiles.deliveryProofFiles,
-      ...allFiles.chequeFiles,
-    ];
-
-    if (chequesAndProofs.length === 0) {
+    if (files.length === 0) {
       return [];
-    }
-
-    // Filter by tab
-    if (activeTab === 'cheque') {
-      chequesAndProofs = chequesAndProofs.filter(
-        (file: any) => !file.deliveryId || file.deliveryId === 0,
-      );
-    } else if (activeTab === 'delivery-proof') {
-      chequesAndProofs = chequesAndProofs.filter(
-        (file: any) => file.deliveryId && file.deliveryId > 0,
-      );
     }
 
     // Filter by search query
+    let queryFiles = files;
     if (debouncedSearchQuery && debouncedSearchQuery.trim()) {
       const query = debouncedSearchQuery.toLowerCase();
-      chequesAndProofs = chequesAndProofs.filter((file: any) => {
+      queryFiles = files.filter((file: any) => {
         if (file.deliveryId && file.deliveryId > 0 && file.delivery) {
           return (
             file.delivery.order?.user?.clientName
@@ -151,26 +168,15 @@ export default function FilesPage() {
       });
     }
 
-    // Map files with evidenceType
-    let files = chequesAndProofs.map((file: any) => {
-      return {
-        ...file,
-        evidenceType:
-          file.deliveryId > 0
-            ? EvidenceType.DELIVERY_PROOF
-            : EvidenceType.CHEQUE,
-      };
-    });
-
     // Sort files by createdAt
-    files = files.sort((a, b) => {
+    const sortedFiles = queryFiles.sort((a: any, b: any) => {
       const dateA = new Date(a.createdAt).getTime();
       const dateB = new Date(b.createdAt).getTime();
       return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
     });
 
-    return files;
-  }, [allFiles, activeTab, debouncedSearchQuery, sortOrder]);
+    return sortedFiles;
+  }, [files, activeTab, debouncedSearchQuery, sortOrder]);
 
   const groupedFiles = useMemo(() => {
     if (groupBy === 'none') {
@@ -424,7 +430,7 @@ export default function FilesPage() {
         fileCount?: number;
       }> = [];
 
-      flattenedFiles.forEach((item) => {
+      flattenedFiles.forEach((item: any) => {
         if (item.isGroupHeader) {
           // Start new row for group header
           if (currentRow.length > 0) {
@@ -683,12 +689,14 @@ export default function FilesPage() {
                 >
                   None
                 </MenuItem>
-                <MenuItem
-                  onClick={() => handleGroupSelect('date')}
-                  selected={groupBy === 'date'}
-                >
-                  By Date
-                </MenuItem>
+                {activeTab === 'delivery-proof' && (
+                  <MenuItem
+                    onClick={() => handleGroupSelect('date')}
+                    selected={groupBy === 'date'}
+                  >
+                    By Date
+                  </MenuItem>
+                )}
                 <MenuItem
                   onClick={() => handleGroupSelect('customer')}
                   selected={groupBy === 'customer'}
@@ -764,6 +772,10 @@ export default function FilesPage() {
               px: { xs: 1, md: 2 },
             }}
           >
+            <SelectDateRange
+              dateRange={dateRange}
+              setDateRange={setDateRange}
+            />
             <Checkbox
               checked={
                 filteredFiles.length > 0 &&
@@ -798,7 +810,9 @@ export default function FilesPage() {
         </Paper>
 
         {/* Files Grid - Virtualized */}
-        {filteredFiles.length > 0 ? (
+        {isLoadingFiles ? (
+          <Skeleton variant="rectangular" height={600} />
+        ) : filteredFiles.length > 0 ? (
           <Box
             sx={{
               height: 'calc(100vh - 500px)',
