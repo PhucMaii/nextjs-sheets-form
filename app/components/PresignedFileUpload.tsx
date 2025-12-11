@@ -13,7 +13,11 @@ interface PresignedFileUploadProps {
   acceptedFileTypes?: string[];
   handleFlagUpload?: Dispatch<SetStateAction<boolean>>;
   onUploadComplete?: (
-    uploadedFiles: Array<{ fileKey: string; fileName: string; fileType: string }>,
+    uploadedFiles: Array<{
+      fileKey: string;
+      fileName: string;
+      fileType: string;
+    }>,
     imgUrl: string,
   ) => void;
   onUploadError?: (error: string) => void;
@@ -250,18 +254,19 @@ export const PresignedFileUpload: React.FC<PresignedFileUploadProps> = ({
             Uploaded Files:
           </h3>
           <div className="space-y-2">
-            {uploadedFiles.map((file, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg"
-              >
+            {/* {uploadedFiles.map((file, index) => ( */}
+            {uploadedFiles && uploadedFiles.length > 0 && (
+              <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
                 <div className="flex items-center">
                   <span className="text-green-600 mr-2">✓</span>
-                  <span className="text-sm text-gray-700">{file.fileName}</span>
+                  <span className="text-sm text-gray-700">
+                    {uploadedFiles[uploadedFiles.length - 1].fileName}
+                  </span>
                 </div>
                 <span className="text-xs text-green-600">Uploaded</span>
               </div>
-            ))}
+            )}
+            {/* ))} */}
           </div>
         </div>
       )}

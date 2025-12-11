@@ -806,7 +806,6 @@ export default function DetailStep({
                     billFileType: files[0].fileType,
                   }));
                 }}
-                isUploaded={!!formData.billFileKey}
               />
             </BorderSection>
           </Grid>
