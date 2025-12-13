@@ -485,6 +485,7 @@ export default function EditInventory({
                 onChange={(e: any, newValue: any) =>
                   handleOnChangeVendorSearch(newValue)
                 }
+                multiple={true}
               />
             </Box>
 

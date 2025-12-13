@@ -9,6 +9,7 @@ interface IProps {
   value: any;
   onChange: any;
   variant?: 'outlined' | 'filled' | 'standard';
+  multiple?: boolean;
 }
 
 export const checkBoxOutlinedIcon = (
@@ -21,14 +22,15 @@ export default function VendorSearch({
   variant,
   value,
   onChange,
+  multiple = false,
 }: IProps) {
   return (
     <Autocomplete
-      multiple
+      multiple={multiple}
       value={value}
       onChange={onChange}
       id="tags-standard"
-      disableCloseOnSelect
+      disableCloseOnSelect={multiple}
       options={vendors}
       getOptionLabel={(option) => option.name}
       renderInput={(params) => (
@@ -44,12 +46,14 @@ export default function VendorSearch({
         const { key, ...optionProps } = props;
         return (
           <li key={key} {...optionProps}>
-            <Checkbox
-              icon={checkBoxOutlinedIcon}
-              checkedIcon={checkedBoxOutlinedIcon}
-              style={{ marginRight: 8 }}
-              checked={selected}
-            />
+            {multiple && (
+              <Checkbox
+                icon={checkBoxOutlinedIcon}
+                checkedIcon={checkedBoxOutlinedIcon}
+                style={{ marginRight: 8 }}
+                checked={selected}
+              />
+            )}
             {option.name}
           </li>
         );

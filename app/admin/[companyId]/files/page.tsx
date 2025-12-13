@@ -15,8 +15,6 @@ import {
   alpha,
   Paper,
   Button,
-  Menu,
-  MenuItem,
   Chip,
   Divider,
   Checkbox,
@@ -28,9 +26,6 @@ import {
   Receipt as ReceiptIcon,
   LocalShipping as LocalShippingIcon,
   FilterList as FilterListIcon,
-  Sort as SortIcon,
-  ArrowDownward as ArrowDownwardIcon,
-  Group as GroupIcon,
   Download as DownloadIcon,
   CheckBox as CheckBoxIcon,
 } from '@mui/icons-material';
@@ -38,7 +33,7 @@ import ViewImg from '../components/ViewImg';
 import OverviewCard from '../components/OverviewCard/OverviewCard';
 import { primary, neutral, success, info } from '@/theme/color';
 import DeliveryProof from '../components/Files/DeliveryProof';
-import { IFile } from '@/app/utils/type';
+import { IFile, IVendor, UserType } from '@/app/utils/type';
 import { EvidenceType } from '@prisma/client';
 import EmptyFiles from '../components/Files/EmptyFiles';
 import { useQuery } from '@tanstack/react-query';
@@ -48,22 +43,39 @@ import Cheque from '../components/Files/Cheque';
 import dayjs from 'dayjs';
 import { generateMonthRange } from '@/app/utils/time';
 import SelectDateRange from '../components/Select/SelectDateRange';
+import { getAdminApiUrl } from '@/app/utils/enum';
+import axios from 'axios';
+import { ShadowSection } from '../reports/styled';
+import ClientSearch from '../components/Autocomplete/ClientSearch';
+import { blueGrey } from '@mui/material/colors';
+import PeopleIcon from '@mui/icons-material/People';
+import StoreIcon from '@mui/icons-material/Store';
+import VendorSearch from '../components/Autocomplete/VendorSearch';
+import DescriptionIcon from '@mui/icons-material/Description';
 
-const tabs = [
+const clientTabs = [
   {
     label: 'Client Cheque',
     value: 'client-cheque',
     icon: <ReceiptIcon sx={{ fontSize: 18 }} />,
   },
   {
-    label: 'Vendor Cheque',
+    label: 'Delivery Proof',
+    value: 'delivery-proof',
+    icon: <LocalShippingIcon sx={{ fontSize: 18 }} />,
+  },
+];
+
+const vendorTabs = [
+  {
+    label: 'Cheque',
     value: 'vendor-cheque',
     icon: <ReceiptIcon sx={{ fontSize: 18 }} />,
   },
   {
-    label: 'Delivery Proof',
-    value: 'delivery-proof',
-    icon: <LocalShippingIcon sx={{ fontSize: 18 }} />,
+    label: 'Invoices',
+    value: 'invoices',
+    icon: <DescriptionIcon sx={{ fontSize: 18 }} />,
   },
 ];
 
@@ -79,7 +91,9 @@ export default function FilesPage() {
   firstDayOfLastMonth.setMonth(firstDayOfLastMonth.getMonth() - 1);
   firstDayOfLastMonth.setDate(1);
   firstDayOfLastMonth.setHours(0, 0, 0, 0);
-const [dateRange, setDateRange] = useState<any>(generateMonthRange(firstDayOfLastMonth, -1));
+  const [dateRange, setDateRange] = useState<any>(
+    generateMonthRange(firstDayOfLastMonth, -1),
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [selectedFile, setSelectedFile] = useState<IFile | null>(null);
@@ -94,6 +108,31 @@ const [dateRange, setDateRange] = useState<any>(generateMonthRange(firstDayOfLas
   const isGroupMenuOpen = Boolean(groupAnchorEl);
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
   const [isDownloadingBatch, setIsDownloadingBatch] = useState(false);
+  const [queryType, setQueryType] = useState<'clients' | 'vendors'>('clients');
+  const [selectedClient, setSelectedClient] = useState<UserType | null>(null);
+  const [selectedVendor, setSelectedVendor] = useState<IVendor | null>(null);
+
+  // Fetch all clients
+  const { data: clients } = useQuery({
+    queryKey: ['clients', companyId],
+    queryFn: async () => {
+      const response = await axios.get(getAdminApiUrl(companyId, '/clients'));
+      return response.data.data;
+    },
+    initialData: [],
+    enabled: !!companyId,
+  });
+
+  // Fetch all vendors
+  const { data: vendors } = useQuery({
+    queryKey: ['vendors', companyId],
+    queryFn: async () => {
+      const response = await axios.get(getAdminApiUrl(companyId, '/vendors'));
+      return response.data.data;
+    },
+    initialData: [],
+    enabled: !!companyId,
+  });
 
   const { data: files, isLoading: isLoadingFiles } = useQuery({
     queryKey: ['files', companyId, dateRange, activeTab],
@@ -495,27 +534,69 @@ const [dateRange, setDateRange] = useState<any>(generateMonthRange(firstDayOfLas
 
       <Box sx={{ p: { xs: 2, md: 3 } }}>
         {/* Header Section */}
-        <Box sx={{ mb: 4 }}>
-          <Typography
-            variant="h4"
-            sx={{
-              fontWeight: 700,
-              color: neutral[900],
-              mb: 1,
-            }}
-          >
-            Company Files
-          </Typography>
-          <Typography
-            variant="body1"
-            sx={{
-              color: neutral[600],
-              fontSize: '0.95rem',
-            }}
-          >
-            Manage and view all cheque and delivery proof files
-          </Typography>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Box sx={{ mb: 4 }}>
+            <Typography
+              variant="h4"
+              sx={{
+                fontWeight: 700,
+                color: neutral[900],
+                mb: 1,
+              }}
+            >
+              Company Files
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{
+                color: neutral[600],
+                fontSize: '0.95rem',
+              }}
+            >
+              Manage and view all cheque and delivery proof files
+            </Typography>
+          </Box>
+
+          <SelectDateRange dateRange={dateRange} setDateRange={setDateRange} />
         </Box>
+
+        {/* Select Client/Vendor Section */}
+        <ShadowSection display="flex" flexDirection="column" gap={2} mb={2}>
+          <Typography variant="h6" color={blueGrey[800]} sx={{ mb: 1 }}>
+            Select {queryType === 'clients' ? 'Client' : 'Vendor'}
+          </Typography>
+          <Box display="flex" gap={1} alignItems="center">
+            <Button
+              variant={queryType === 'clients' ? 'contained' : 'outlined'}
+              startIcon={<PeopleIcon />}
+              onClick={() => setQueryType('clients')}
+            >
+              Clients
+            </Button>
+            <Button
+              variant={queryType === 'vendors' ? 'contained' : 'outlined'}
+              startIcon={<StoreIcon />}
+              onClick={() => setQueryType('vendors')}
+            >
+              Vendors
+            </Button>
+          </Box>
+          {queryType === 'clients' ? (
+            <ClientSearch
+              clients={clients}
+              value={selectedClient}
+              onChange={(e, value) => setSelectedClient(value)}
+            />
+          ) : (
+            <VendorSearch
+              vendors={vendors || []}
+              value={selectedVendor}
+              onChange={(e: any, value: IVendor | null) =>
+                setSelectedVendor(value)
+              }
+            />
+          )}
+        </ShadowSection>
 
         {/* Stats Cards */}
         <Grid container spacing={2} sx={{ mb: 4 }}>
@@ -561,159 +642,6 @@ const [dateRange, setDateRange] = useState<any>(generateMonthRange(firstDayOfLas
           </Grid>
         </Grid>
 
-        {/* Search, Sort and Group Section */}
-        <Paper
-          elevation={0}
-          sx={{
-            p: 2.5,
-            mb: 2,
-            borderRadius: 2,
-            border: `1px solid ${alpha(neutral[300], 0.5)}`,
-            backgroundColor: 'white',
-          }}
-        >
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                placeholder="Search files..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                size="small"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon sx={{ color: neutral[500] }} />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 1.5,
-                    backgroundColor: neutral[50],
-                    '&:hover': {
-                      backgroundColor: 'white',
-                    },
-                    '&.Mui-focused': {
-                      backgroundColor: 'white',
-                    },
-                  },
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} md={3}>
-              <Button
-                variant="outlined"
-                startIcon={<SortIcon />}
-                endIcon={<ArrowDownwardIcon />}
-                onClick={handleSortMenuOpen}
-                fullWidth
-                sx={{
-                  textTransform: 'none',
-                  borderColor: neutral[300],
-                  color: neutral[700],
-                  fontWeight: 500,
-                  '&:hover': {
-                    borderColor: primary.main,
-                    backgroundColor: primary.lightest,
-                    color: primary.main,
-                  },
-                }}
-              >
-                Sort:{' '}
-                {sortOrder === 'newest'
-                  ? 'Newest to Oldest'
-                  : 'Oldest to Newest'}
-              </Button>
-              <Menu
-                anchorEl={sortAnchorEl}
-                open={isSortMenuOpen}
-                onClose={handleSortMenuClose}
-                MenuListProps={{
-                  'aria-labelledby': 'sort-button',
-                }}
-              >
-                <MenuItem
-                  onClick={() => handleSortSelect('newest')}
-                  selected={sortOrder === 'newest'}
-                >
-                  Newest to Oldest
-                </MenuItem>
-                <MenuItem
-                  onClick={() => handleSortSelect('oldest')}
-                  selected={sortOrder === 'oldest'}
-                >
-                  Oldest to Newest
-                </MenuItem>
-              </Menu>
-            </Grid>
-            <Grid item xs={12} md={3}>
-              <Button
-                variant="outlined"
-                startIcon={<GroupIcon />}
-                endIcon={<ArrowDownwardIcon />}
-                onClick={handleGroupMenuOpen}
-                fullWidth
-                sx={{
-                  textTransform: 'none',
-                  borderColor: neutral[300],
-                  color: neutral[700],
-                  fontWeight: 500,
-                  '&:hover': {
-                    borderColor: primary.main,
-                    backgroundColor: primary.lightest,
-                    color: primary.main,
-                  },
-                }}
-              >
-                Group:{' '}
-                {groupBy === 'none'
-                  ? 'None'
-                  : groupBy === 'date'
-                    ? 'Date'
-                    : groupBy === 'customer'
-                      ? 'Customer'
-                      : 'Vendor'}
-              </Button>
-              <Menu
-                anchorEl={groupAnchorEl}
-                open={isGroupMenuOpen}
-                onClose={handleGroupMenuClose}
-                MenuListProps={{
-                  'aria-labelledby': 'group-button',
-                }}
-              >
-                <MenuItem
-                  onClick={() => handleGroupSelect('none')}
-                  selected={groupBy === 'none'}
-                >
-                  None
-                </MenuItem>
-                {activeTab === 'delivery-proof' && (
-                  <MenuItem
-                    onClick={() => handleGroupSelect('date')}
-                    selected={groupBy === 'date'}
-                  >
-                    By Date
-                  </MenuItem>
-                )}
-                <MenuItem
-                  onClick={() => handleGroupSelect('customer')}
-                  selected={groupBy === 'customer'}
-                >
-                  By Customer Name
-                </MenuItem>
-                <MenuItem
-                  onClick={() => handleGroupSelect('vendor')}
-                  selected={groupBy === 'vendor'}
-                >
-                  By Vendor Name
-                </MenuItem>
-              </Menu>
-            </Grid>
-          </Grid>
-        </Paper>
-
         {/* Tabs and Select All Section */}
         <Paper
           elevation={0}
@@ -730,6 +658,33 @@ const [dateRange, setDateRange] = useState<any>(generateMonthRange(firstDayOfLas
             gap: 2,
           }}
         >
+          <TextField
+            fullWidth
+            placeholder="Search files..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            size="small"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ color: neutral[500] }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 1.5,
+                backgroundColor: neutral[50],
+                '&:hover': {
+                  backgroundColor: 'white',
+                },
+                '&.Mui-focused': {
+                  backgroundColor: 'white',
+                },
+              },
+            }}
+          />
+
           <Tabs
             value={activeTab}
             onChange={(e, newValue) => setActiveTab(newValue)}
@@ -772,10 +727,6 @@ const [dateRange, setDateRange] = useState<any>(generateMonthRange(firstDayOfLas
               px: { xs: 1, md: 2 },
             }}
           >
-            <SelectDateRange
-              dateRange={dateRange}
-              setDateRange={setDateRange}
-            />
             <Checkbox
               checked={
                 filteredFiles.length > 0 &&

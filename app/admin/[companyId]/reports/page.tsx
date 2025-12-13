@@ -2,13 +2,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import {
-  Autocomplete,
   Box,
   Grid,
   Paper,
   Tab,
   Tabs,
-  TextField,
   Typography,
   useMediaQuery,
 } from '@mui/material';
@@ -17,7 +15,6 @@ import { UserType } from '@/app/utils/type';
 import {
   ORDER_STATUS,
   PAYMENT_TYPE,
-  USER_CATEGORIZED,
   getAdminApiUrl,
 } from '@/app/utils/enum';
 import { Order } from '../orders/page';
@@ -34,13 +31,13 @@ import { filterDateRangeOrders } from '@/pages/api/utils/date';
 import { SWRFetchData } from '@/app/utils/db';
 import useSelectDate from '@/hooks/useSelectDate';
 import useNotification from '@/hooks/useNotification';
-import { renderType } from '@/app/lib/render';
 import { PriceChange } from '@mui/icons-material';
 import OrderInReportPage from './OrderInReportPage';
 import ChequeTab from './ChequeTab';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import useDebounce from '@/hooks/useDebounce';
 import { PaymentStatus } from '@prisma/client';
+import ClientSearch from '../components/Autocomplete/ClientSearch';
 
 // Types
 interface ReportStats {
@@ -432,28 +429,6 @@ export default function ReportPage() {
     reportState.setTabIndex(value);
   }, []);
 
-  const getOptionLabel = useCallback((option: UserType) => {
-    if (option.clientName === 'All Clients') {
-      return option.clientName;
-    }
-    return `${option.clientName} - ${option.clientId}`;
-  }, []);
-
-  const renderOption = useCallback((props: any, option: UserType) => {
-    return (
-      <li {...props}>
-        <Box display="flex" gap={2} alignItems="center">
-          <Typography>
-            {option.clientName} - {option.clientId}
-          </Typography>
-          {option?.type &&
-            option.type !== USER_CATEGORIZED.NONE &&
-            renderType(option.type)}
-        </Box>
-      </li>
-    );
-  }, []);
-
   // Render functions
   const renderHeader = () => (
     <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -476,7 +451,7 @@ export default function ReportPage() {
       <Typography variant="h6" color={blueGrey[800]} sx={{ mb: 1 }}>
         Clients
       </Typography>
-      <Autocomplete
+      {/* <Autocomplete
         options={clientOptions}
         getOptionLabel={getOptionLabel}
         renderInput={(params) => <TextField {...params} label="Client" />}
@@ -484,6 +459,11 @@ export default function ReportPage() {
         value={reportState.clientValue}
         onChange={handleClientChange}
         sx={{ width: 'auto' }}
+      /> */}
+      <ClientSearch
+        clients={clientOptions}
+        value={reportState.clientValue}
+        onChange={handleClientChange}
       />
     </ShadowSection>
   );

@@ -30,6 +30,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
+    console.log(vendors, 'vendors', companyIdNumber);
+
     return res.status(200).json({
       data: vendors,
       message: 'Fetch All Vendors Successfully',
