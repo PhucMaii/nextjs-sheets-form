@@ -15,23 +15,19 @@ import {
   alpha,
   Paper,
   Button,
-  Chip,
-  Divider,
   Checkbox,
   Slide,
-  Skeleton,
+  Chip,
 } from '@mui/material';
 import {
   Search as SearchIcon,
   Receipt as ReceiptIcon,
   LocalShipping as LocalShippingIcon,
-  FilterList as FilterListIcon,
   Download as DownloadIcon,
   CheckBox as CheckBoxIcon,
 } from '@mui/icons-material';
 import ViewImg from '../components/ViewImg';
-import OverviewCard from '../components/OverviewCard/OverviewCard';
-import { primary, neutral, success, info } from '@/theme/color';
+import { primary, neutral } from '@/theme/color';
 import DeliveryProof from '../components/Files/DeliveryProof';
 import { IFile, IVendor, UserType } from '@/app/utils/type';
 import { EvidenceType } from '@prisma/client';
@@ -40,7 +36,6 @@ import { useQuery } from '@tanstack/react-query';
 import useFiles from '@/hooks/db-tables/useFiles';
 import { useParams } from 'next/navigation';
 import Cheque from '../components/Files/Cheque';
-import dayjs from 'dayjs';
 import { generateMonthRange } from '@/app/utils/time';
 import SelectDateRange from '../components/Select/SelectDateRange';
 import { getAdminApiUrl } from '@/app/utils/enum';
@@ -52,6 +47,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import StoreIcon from '@mui/icons-material/Store';
 import VendorSearch from '../components/Autocomplete/VendorSearch';
 import DescriptionIcon from '@mui/icons-material/Description';
+import FileCardSkeleton from '../components/Skeleton/FileCardSkeleton';
 
 const clientTabs = [
   {
@@ -85,7 +81,7 @@ export default function FilesPage() {
     useFiles();
 
   const [activeTab, setActiveTab] = useState<
-    'client-cheque' | 'vendor-cheque' | 'delivery-proof'
+    'client-cheque' | 'vendor-cheque' | 'delivery-proof' | 'invoices'
   >('client-cheque');
   const firstDayOfLastMonth = new Date();
   firstDayOfLastMonth.setMonth(firstDayOfLastMonth.getMonth() - 1);
@@ -98,14 +94,6 @@ export default function FilesPage() {
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [selectedFile, setSelectedFile] = useState<IFile | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
-  const [sortAnchorEl, setSortAnchorEl] = useState<null | HTMLElement>(null);
-  const isSortMenuOpen = Boolean(sortAnchorEl);
-  const [groupBy, setGroupBy] = useState<
-    'none' | 'date' | 'customer' | 'vendor'
-  >('none');
-  const [groupAnchorEl, setGroupAnchorEl] = useState<null | HTMLElement>(null);
-  const isGroupMenuOpen = Boolean(groupAnchorEl);
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
   const [isDownloadingBatch, setIsDownloadingBatch] = useState(false);
   const [queryType, setQueryType] = useState<'clients' | 'vendors'>('clients');
@@ -166,6 +154,18 @@ export default function FilesPage() {
     enabled: !!companyId && !!dateRange[0] && !!dateRange[1],
   });
 
+  const tabs = useMemo(() => {
+    if (queryType === 'clients') {
+      setActiveTab('client-cheque');
+      return clientTabs;
+    } else if (queryType === 'vendors') {
+      setActiveTab('vendor-cheque');
+      return vendorTabs;
+    }
+
+    return [];
+  }, [queryType]);
+
   const mdDown = useMediaQuery((theme: any) => theme.breakpoints.down('md'));
 
   const filteredFiles = useMemo(() => {
@@ -177,11 +177,32 @@ export default function FilesPage() {
       return [];
     }
 
-    // Filter by search query
+    // Query by client or vendor
     let queryFiles = files;
+    if (queryType === 'clients') {
+      if (activeTab === 'delivery-proof') {
+        queryFiles = files.filter(
+          (file: any) => file.delivery?.order?.userId === selectedClient?.id,
+        );
+      } else {
+        queryFiles = files.filter(
+          (file: any) => file.userId === selectedClient?.id,
+        );
+      }
+    } else if (queryType === 'vendors') {
+      queryFiles = files.filter(
+        (file: any) => file.vendorId === selectedVendor?.id,
+      );
+    }
+
+    if (!debouncedSearchQuery || debouncedSearchQuery.trim() === '') {
+      return queryFiles;
+    }
+
+    // Filter by search query
     if (debouncedSearchQuery && debouncedSearchQuery.trim()) {
       const query = debouncedSearchQuery.toLowerCase();
-      queryFiles = files.filter((file: any) => {
+      queryFiles = queryFiles.filter((file: any) => {
         if (file.deliveryId && file.deliveryId > 0 && file.delivery) {
           return (
             file.delivery.order?.user?.clientName
@@ -211,65 +232,34 @@ export default function FilesPage() {
     const sortedFiles = queryFiles.sort((a: any, b: any) => {
       const dateA = new Date(a.createdAt).getTime();
       const dateB = new Date(b.createdAt).getTime();
-      return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+      return dateB - dateA;
     });
 
     return sortedFiles;
-  }, [files, activeTab, debouncedSearchQuery, sortOrder]);
+  }, [
+    files,
+    debouncedSearchQuery,
+    activeTab,
+    queryType,
+    selectedClient,
+    selectedVendor,
+  ]);
 
-  const groupedFiles = useMemo(() => {
-    if (groupBy === 'none') {
-      return { ungrouped: filteredFiles };
+  // Group files into rows of 4
+  const fileRows = useMemo(() => {
+    if (!filteredFiles || filteredFiles.length === 0) {
+      return [];
     }
 
-    const groups: Record<string, any[]> = {};
+    const rows: IFile[][] = [];
+    const itemsPerRow = 4;
 
-    filteredFiles.forEach((file: any) => {
-      let groupKey = 'N/A';
+    for (let i = 0; i < filteredFiles.length; i += itemsPerRow) {
+      rows.push(filteredFiles.slice(i, i + itemsPerRow));
+    }
 
-      if (groupBy === 'date') {
-        const date =
-          file.expense?.date || file.delivery?.deliveredAt || file.createdAt;
-        if (date) {
-          groupKey = dayjs(date).format('MMM DD, YYYY');
-        }
-      } else if (groupBy === 'customer') {
-        if (file.delivery?.order?.user?.clientName) {
-          groupKey = file.delivery.order.user.clientName;
-        }
-
-        if (file.user?.clientName) {
-          groupKey = file.user.clientName;
-        }
-      } else if (groupBy === 'vendor') {
-        if (file?.vendor?.name) {
-          groupKey = file?.vendor?.name;
-        }
-      }
-
-      if (!groups[groupKey]) {
-        groups[groupKey] = [];
-      }
-      groups[groupKey].push(file);
-    });
-
-    const nonNAGroupKeys = Object.keys(groups).filter((key) => key !== 'N/A');
-
-    // Sort group keys
-    const sortedKeys = nonNAGroupKeys.sort((a, b) => {
-      if (groupBy === 'date') {
-        return dayjs(b).valueOf() - dayjs(a).valueOf();
-      }
-      return a.localeCompare(b);
-    });
-
-    const sortedGroups: Record<string, any[]> = {};
-    sortedKeys.forEach((key) => {
-      sortedGroups[key] = groups[key];
-    });
-
-    return sortedGroups;
-  }, [filteredFiles, groupBy]);
+    return rows;
+  }, [filteredFiles]);
 
   const handleViewFile = (file: IFile) => {
     setSelectedFile(file);
@@ -298,10 +288,15 @@ export default function FilesPage() {
   };
 
   const handleSelectAll = () => {
-    if (selectedFiles.size === filteredFiles.length) {
+    const allFileKeys = filteredFiles.map((f: any) => {
+      const isCheque = f.evidenceType === EvidenceType.CHEQUE;
+      return `${f.id}-${isCheque ? 'cheque' : 'delivery'}`;
+    });
+
+    if (selectedFiles.size === allFileKeys.length) {
       setSelectedFiles(new Set());
     } else {
-      setSelectedFiles(new Set(filteredFiles.map((f: any) => f.id)));
+      setSelectedFiles(new Set(allFileKeys));
     }
   };
 
@@ -364,148 +359,6 @@ export default function FilesPage() {
       setIsDownloadingBatch(false);
     }
   };
-
-  const handleSortMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setSortAnchorEl(event.currentTarget);
-  };
-
-  const handleSortMenuClose = () => {
-    setSortAnchorEl(null);
-  };
-
-  const handleSortSelect = (order: 'newest' | 'oldest') => {
-    setSortOrder(order);
-    handleSortMenuClose();
-  };
-
-  const handleGroupMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setGroupAnchorEl(event.currentTarget);
-  };
-
-  const handleGroupMenuClose = () => {
-    setGroupAnchorEl(null);
-  };
-
-  const handleGroupSelect = (
-    group: 'none' | 'date' | 'customer' | 'vendor',
-  ) => {
-    setGroupBy(group);
-    handleGroupMenuClose();
-  };
-
-  // Flatten grouped files for virtualization
-  const flattenedFiles = useMemo(() => {
-    if (groupBy === 'none') {
-      return filteredFiles.map((file: any, index: number) => ({
-        file,
-        index,
-        isGroupHeader: false,
-        groupKey: null,
-      }));
-    }
-
-    const flattened: Array<{
-      file: any;
-      index: number;
-      isGroupHeader: boolean;
-      groupKey: string | null;
-      fileCount?: number;
-    }> = [];
-    let globalIndex = 0;
-
-    Object.entries(groupedFiles).forEach(([groupKey, files]) => {
-      flattened.push({
-        file: null,
-        index: globalIndex++,
-        isGroupHeader: true,
-        groupKey,
-        fileCount: files.length,
-      });
-
-      files.forEach((file: any) => {
-        flattened.push({
-          file,
-          index: globalIndex++,
-          isGroupHeader: false,
-          groupKey,
-        });
-      });
-    });
-
-    return flattened;
-  }, [filteredFiles, groupedFiles, groupBy]);
-
-  // Calculate items per row based on screen size
-  const itemsPerRow = mdDown ? 1 : 4;
-
-  // Create rows for virtualization
-  const rows = useMemo(() => {
-    const rowsArray: Array<{
-      items: Array<{
-        file: any;
-        index: number;
-        isGroupHeader: boolean;
-        groupKey: string | null;
-        fileCount?: number;
-      }>;
-      rowIndex: number;
-    }> = [];
-
-    if (groupBy === 'none') {
-      // Simple grid layout for ungrouped
-      for (let i = 0; i < flattenedFiles.length; i += itemsPerRow) {
-        rowsArray.push({
-          items: flattenedFiles.slice(i, i + itemsPerRow),
-          rowIndex: Math.floor(i / itemsPerRow),
-        });
-      }
-    } else {
-      // Grouped layout - keep headers separate
-      let currentRow: Array<{
-        file: any;
-        index: number;
-        isGroupHeader: boolean;
-        groupKey: string | null;
-        fileCount?: number;
-      }> = [];
-
-      flattenedFiles.forEach((item: any) => {
-        if (item.isGroupHeader) {
-          // Start new row for group header
-          if (currentRow.length > 0) {
-            rowsArray.push({
-              items: currentRow,
-              rowIndex: rowsArray.length,
-            });
-            currentRow = [];
-          }
-          // Group header takes full row
-          rowsArray.push({
-            items: [item],
-            rowIndex: rowsArray.length,
-          });
-        } else {
-          currentRow.push(item);
-          if (currentRow.length === itemsPerRow) {
-            rowsArray.push({
-              items: currentRow,
-              rowIndex: rowsArray.length,
-            });
-            currentRow = [];
-          }
-        }
-      });
-
-      if (currentRow.length > 0) {
-        rowsArray.push({
-          items: currentRow,
-          rowIndex: rowsArray.length,
-        });
-      }
-    }
-
-    return rowsArray;
-  }, [flattenedFiles, itemsPerRow, groupBy, mdDown]);
 
   return (
     <Sidebar>
@@ -597,50 +450,6 @@ export default function FilesPage() {
             />
           )}
         </ShadowSection>
-
-        {/* Stats Cards */}
-        <Grid container spacing={2} sx={{ mb: 4 }}>
-          <Grid item xs={12} md={6} lg={4}>
-            <OverviewCard
-              text="Total Files"
-              value={filteredFiles.length}
-              icon={
-                <FilterListIcon sx={{ color: primary.main, fontSize: 50 }} />
-              }
-              iconBackground={alpha(primary.main, 0.15)}
-              textColor={neutral[900]}
-            />
-          </Grid>
-          <Grid item xs={12} md={6} lg={4}>
-            <OverviewCard
-              text="Cheque Files"
-              value={
-                filteredFiles.filter(
-                  (file: IFile) => file.evidenceType === EvidenceType.CHEQUE,
-                ).length
-              }
-              icon={<ReceiptIcon sx={{ color: info.main, fontSize: 50 }} />}
-              iconBackground={alpha(info.main, 0.15)}
-              textColor={neutral[900]}
-            />
-          </Grid>
-          <Grid item xs={12} md={6} lg={4}>
-            <OverviewCard
-              text="Delivery Proof Files"
-              value={
-                filteredFiles.filter(
-                  (file: IFile) =>
-                    file.evidenceType === EvidenceType.DELIVERY_PROOF,
-                ).length
-              }
-              icon={
-                <LocalShippingIcon sx={{ color: success.main, fontSize: 50 }} />
-              }
-              iconBackground={alpha(success.main, 0.15)}
-              textColor={neutral[900]}
-            />
-          </Grid>
-        </Grid>
 
         {/* Tabs and Select All Section */}
         <Paper
@@ -760,9 +569,31 @@ export default function FilesPage() {
           </Box>
         </Paper>
 
+        {/* File Count Chip */}
+        {!isLoadingFiles && filteredFiles.length > 0 && (
+          <Box sx={{ mb: 2 }}>
+            <Chip
+              label={`${filteredFiles.length} ${filteredFiles.length === 1 ? 'file' : 'files'}`}
+              size="medium"
+              sx={{
+                backgroundColor: alpha(primary.main, 0.1),
+                color: primary.main,
+                fontWeight: 500,
+                fontSize: '0.75rem',
+              }}
+            />
+          </Box>
+        )}
+
         {/* Files Grid - Virtualized */}
         {isLoadingFiles ? (
-          <Skeleton variant="rectangular" height={600} />
+          <Grid container spacing={3}>
+            {Array.from({ length: 8 }).map((_, index) => (
+              <Grid item xs={12} sm={6} md={4} lg={3} key={`skeleton-${index}`}>
+                <FileCardSkeleton />
+              </Grid>
+            ))}
+          </Grid>
         ) : filteredFiles.length > 0 ? (
           <Box
             sx={{
@@ -771,96 +602,47 @@ export default function FilesPage() {
             }}
           >
             <Virtuoso
-              totalCount={rows.length}
-              data={rows}
+              totalCount={fileRows.length}
+              data={fileRows}
               itemContent={(index, row) => {
-                const firstItem = row.items[0];
-
-                // Render group header
-                if (firstItem.isGroupHeader) {
-                  return (
-                    <Box
-                      key={`header-${firstItem.groupKey}`}
-                      sx={{ mb: 2, mt: index > 0 ? 4 : 0 }}
-                    >
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          mb: 2,
-                          gap: 1,
-                        }}
-                      >
-                        <Typography
-                          variant="h6"
-                          sx={{
-                            fontWeight: 600,
-                            color: neutral[900],
-                          }}
-                        >
-                          {firstItem.groupKey}
-                        </Typography>
-                        <Chip
-                          label={firstItem.fileCount}
-                          size="small"
-                          sx={{
-                            backgroundColor: primary.lightest,
-                            color: primary.main,
-                            fontWeight: 600,
-                          }}
-                        />
-                      </Box>
-                      <Divider />
-                    </Box>
-                  );
-                }
-
-                // Render file cards row
+                // Render file cards row with 4 files per row
                 return (
                   <Grid
                     container
                     spacing={3}
-                    key={`row-${row.rowIndex}`}
+                    key={`row-${index}`}
                     sx={{ mb: 3 }}
                   >
-                    {row.items.map((item) => {
-                      if (item.isGroupHeader) return null;
+                    {row.map((file: IFile) => {
+                      const isCheque =
+                        activeTab === 'delivery-proof' ? false : true;
+                      const fileKey = `${file.id}-${isCheque ? 'cheque' : 'delivery'}`;
+                      const isSelected = selectedFiles.has(fileKey);
+
                       return (
-                        <Grid
-                          item
-                          xs={12}
-                          sm={6}
-                          md={4}
-                          lg={3}
-                          key={item.file.id}
-                        >
-                          {item.file.evidenceType ===
-                          EvidenceType.DELIVERY_PROOF ? (
+                        <Grid item xs={12} sm={6} md={4} lg={3} key={file.id}>
+                          {activeTab === 'delivery-proof' ? (
                             <DeliveryProof
-                              file={item.file}
+                              file={file}
                               handleViewFile={handleViewFile}
                               handleDownloadFile={(file: IFile) =>
                                 handleDownloadFile(file, false)
                               }
-                              isSelected={selectedFiles.has(
-                                `${item.file.id}-delivery`,
-                              )}
+                              isSelected={isSelected}
                               onSelect={() =>
-                                handleToggleFileSelection(item.file.id, false)
+                                handleToggleFileSelection(file.id, false)
                               }
                             />
                           ) : (
                             <Cheque
-                              file={item.file}
+                              file={file as any}
                               handleViewFile={handleViewFile}
                               handleDownloadFile={(file: IFile) =>
                                 handleDownloadFile(file, true)
                               }
-                              isSelected={selectedFiles.has(
-                                `${item.file.id}-cheque`,
-                              )}
+                              isSelected={isSelected}
                               onSelect={() =>
-                                handleToggleFileSelection(item.file.id, true)
+                                handleToggleFileSelection(file.id, true)
                               }
                             />
                           )}

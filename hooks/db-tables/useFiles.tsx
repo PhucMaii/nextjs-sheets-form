@@ -27,6 +27,7 @@ const useFiles = () => {
         `/files/delivery-proof?startDate=${startDate || ''}&endDate=${endDate || ''}`,
       ),
     );
+
     return response.data.data;
   };
 
@@ -41,6 +42,7 @@ const useFiles = () => {
         `/files/vendor-cheque?startDate=${startDate || ''}&endDate=${endDate || ''}`,
       ),
     );
+
     return response.data.data;
   };
 
@@ -55,6 +57,7 @@ const useFiles = () => {
         `/files/client-cheque?startDate=${startDate || ''}&endDate=${endDate || ''}`,
       ),
     );
+
     return response.data.data;
   };
 
