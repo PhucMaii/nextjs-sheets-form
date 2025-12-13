@@ -1,12 +1,12 @@
-import { Orders, PrismaClient } from '@prisma/client';
+import { Orders } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { ORDER_STATUS } from '@/app/utils/enum';
 import { generateListOfDateString } from '@/app/utils/time';
-import { getTodayDate, normalizeDate } from '../utils/date';
+import { formatDate, getTodayDate } from '../utils/date';
 import { getOverdueOrders } from '../utils/order';
-
+import prisma from '@/client';
 
 interface IQuery {
   startDate?: string;
@@ -23,8 +23,6 @@ export const config = {
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { startDate, endDate }: IQuery = req.query;
 
     if (!startDate || !endDate) {
@@ -46,10 +44,8 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       return res.status(401).json({ error: 'User Not Found' });
     }
 
-    const formattedStartDate = normalizeDate(new Date(startDate));
-    const formattedEndDate = normalizeDate(new Date(endDate));
-
-    // formattedEndDate.setDate(formattedEndDate.getDate() - 1);
+    const formattedStartDate = formatDate(startDate);
+    const formattedEndDate = formatDate(endDate);
 
     const dateList = generateListOfDateString(
       formattedStartDate,

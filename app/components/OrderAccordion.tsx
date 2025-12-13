@@ -8,6 +8,7 @@ import {
   Divider,
   Grid,
   IconButton,
+  CircularProgress,
   Table,
   TableBody,
   TableCell,
@@ -15,7 +16,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import StatusText, {
   COLOR_TYPE,
 } from '../admin/[companyId]/components/StatusText';
@@ -24,6 +25,8 @@ import { ORDER_STATUS } from '../utils/enum';
 import { blue, grey } from '@mui/material/colors';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import DownloadIcon from '@mui/icons-material/Download';
+import PrintIcon from '@mui/icons-material/Print';
 import { errorColor } from '../../theme/color';
 import EditOrder from './Modals/EditOrder';
 import DeleteModal from './Modals/DeleteModal';
@@ -32,6 +35,8 @@ import { useDiscount } from '@/hooks/useDiscount';
 import { PaymentStatus } from '@prisma/client';
 import ImageSearchIcon from '@mui/icons-material/ImageSearch';
 import ViewDelivery from './Modals/ViewDelivery';
+import { useReactToPrint } from 'react-to-print';
+import { ComponentToPrint } from '../admin/[companyId]/components/Printing/ComponentToPrint';
 
 interface PropTypes {
   handleDeleteOrder?: (orderId: number) => void;
@@ -53,6 +58,9 @@ export default function OrderAccordion({
   const [isEditOrderOpen, setIsEditOrderOpen] = useState<boolean>(false);
   const [isDeleteOrderOpen, setIsDeleteOrderOpen] = useState<boolean>(false);
   const [isOpenViewDelivery, setIsOpenViewDelivery] = useState<boolean>(false);
+  const [isDownloading, setIsDownloading] = useState<boolean>(false);
+
+  const printRef = useRef(null);
 
   const totalQuantity = order.items?.reduce((acc: number, cV: Item) => {
     return acc + cV.quantity;
@@ -71,6 +79,40 @@ export default function OrderAccordion({
             : COLOR_TYPE.ERROR,
   };
 
+  const handlePrint = useReactToPrint({
+    content: () => printRef.current,
+  });
+
+  const handleDownload = async () => {
+    setIsDownloading(true);
+    try {
+      const response = await fetch('/api/generate-pdf/order-invoices', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orders: [order],
+        }),
+      });
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `order#${order.id}.pdf`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+
+      showNotification?.('success', 'Invoice downloaded successfully');
+    } catch (error: any) {
+      console.error('Error downloading invoice:', error);
+      showNotification?.('error', 'Failed to download invoice');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   return (
     <>
       <ViewDelivery
@@ -78,6 +120,9 @@ export default function OrderAccordion({
         onClose={() => setIsOpenViewDelivery(false)}
         order={order}
       />
+      <div style={{ display: 'none' }}>
+        <ComponentToPrint order={order} ref={printRef} />
+      </div>
       {isEdit &&
         handleUpdateOrderUI &&
         handleDeleteOrder &&
@@ -106,43 +151,93 @@ export default function OrderAccordion({
                 justifyContent="space-between"
                 alignItems="center"
               >
-                <StatusText text={statusText.text} type={statusText.type} />
-                {isEdit && (
-                  <Box display="flex" gap={1}>
-                    <IconButton
-                      sx={{
-                        p: 1,
-                        backgroundColor: `${errorColor} !important`,
-                        borderRadius: '50%',
-                        color: 'white',
-                      }}
-                      onClick={() => setIsDeleteOrderOpen(true)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                    <IconButton
-                      onClick={() => setIsEditOrderOpen(true)}
-                      sx={{
-                        p: 1,
-                        backgroundColor: `${blue[700]} !important`,
-                        borderRadius: '50%',
-                        color: 'white',
-                      }}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                  </Box>
-                )}
-                {order?.paymentStatus && !isEdit ? (
-                  <StatusText
-                    text={order?.paymentStatus}
-                    type={
-                      order?.paymentStatus === PaymentStatus.Paid
-                        ? 'success'
-                        : 'error'
-                    }
-                  />
-                ) : null}
+                <Box display="flex" gap={1} alignItems="center">
+                  <StatusText text={statusText.text} type={statusText.type} />
+                  {order?.paymentStatus && !isEdit ? (
+                    <StatusText
+                      text={order?.paymentStatus}
+                      type={
+                        order?.paymentStatus === PaymentStatus.Paid
+                          ? 'success'
+                          : 'error'
+                      }
+                    />
+                  ) : null}
+                </Box>
+                <Box display="flex" gap={1} alignItems="center">
+                  <IconButton
+                    size="small"
+                    sx={{
+                      p: 1,
+                      backgroundColor: `${blue[500]} !important`,
+                      borderRadius: '50%',
+                      color: 'white',
+                      '&:hover': {
+                        backgroundColor: `${blue[600]} !important`,
+                      },
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDownload();
+                    }}
+                  >
+                    {isDownloading ? (
+                      <CircularProgress size={20} />
+                    ) : (
+                      <DownloadIcon sx={{ fontSize: 18 }} />
+                    )}
+                  </IconButton>
+                  <IconButton
+                    size="small"
+                    sx={{
+                      p: 1,
+                      backgroundColor: `${blue[500]} !important`,
+                      borderRadius: '50%',
+                      color: 'white',
+                      '&:hover': {
+                        backgroundColor: `${blue[600]} !important`,
+                      },
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePrint();
+                    }}
+                  >
+                    <PrintIcon sx={{ fontSize: 18 }} />
+                  </IconButton>
+                  {isEdit && (
+                    <>
+                      <IconButton
+                        sx={{
+                          p: 1,
+                          backgroundColor: `${errorColor} !important`,
+                          borderRadius: '50%',
+                          color: 'white',
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsDeleteOrderOpen(true);
+                        }}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                      <IconButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsEditOrderOpen(true);
+                        }}
+                        sx={{
+                          p: 1,
+                          backgroundColor: `${blue[700]} !important`,
+                          borderRadius: '50%',
+                          color: 'white',
+                        }}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                    </>
+                  )}
+                </Box>
               </Box>
             </Grid>
             <Grid item xs={12} md={2}>

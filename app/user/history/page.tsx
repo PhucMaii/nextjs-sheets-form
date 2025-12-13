@@ -15,7 +15,6 @@ import {
   useMediaQuery,
   Card,
   CardContent,
-  Chip,
   Stack,
   Paper,
   Fade,
@@ -252,77 +251,6 @@ export default function HistoryPage() {
 
   return (
     <Sidebar>
-      {/* Modern Header Section */}
-      {/* <Fade in timeout={800}> */}
-        {/* <Paper
-          elevation={0}
-          sx={{
-            background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
-            color: 'white',
-            p: isMobile ? 2.5 : 3,
-            mb: isMobile ? 1.5 : 2,
-            borderRadius: isMobile ? 1.5 : 2,
-            position: 'relative',
-            overflow: 'hidden',
-            width: '100%',
-            '&::before': {
-              content: '""',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: 'rgba(255, 255, 255, 0.1)',
-              backdropFilter: 'blur(10px)',
-            },
-          }}
-        >
-          <Box position="relative" zIndex={1}>
-            <Grid container spacing={2} alignItems="center">
-              <Grid item xs={12} sm={8}>
-                <Box>
-                  <Typography
-                    variant={isMobile ? 'h6' : 'h5'}
-                    fontWeight="300"
-                    sx={{
-                      mb: 0.5,
-                      opacity: 0.9,
-                      fontSize: isMobile ? '1rem' : '1.25rem',
-                    }}
-                  >
-                    Order History
-                  </Typography>
-                  <Typography
-                    variant={isMobile ? 'h5' : 'h4'}
-                    fontWeight="600"
-                    sx={{ mb: 1, fontSize: isMobile ? '1.25rem' : '1.5rem' }}
-                  >
-                    {tabIdx === 0 ? 'Current Month' : 'Overdue Orders'}
-                  </Typography>
-                </Box>
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <Box
-                  display="flex"
-                  justifyContent={isMobile ? 'flex-start' : 'flex-end'}
-                  gap={1}
-                >
-                  <Chip
-                    label={`${baseClientOrders.length} orders`}
-                    sx={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                      color: 'white',
-                      fontWeight: 500,
-                      backdropFilter: 'blur(10px)',
-                      fontSize: isMobile ? '0.7rem' : '0.8rem',
-                      height: isMobile ? 24 : 28,
-                    }}
-                  />
-                </Box>
-              </Grid>
-            </Grid>
-          </Box>
-        </Paper> */}
         <UserHeader 
           title="Order History"
           subtitle={tabIdx === 0 ? 'Current Month' : 'Overdue Orders'}
@@ -475,13 +403,13 @@ export default function HistoryPage() {
       <Slide direction="up" in timeout={1200}>
         <Box sx={{ mb: isMobile ? 1.5 : 2 }}>
           <Grid container spacing={isMobile ? 1 : 1.5} alignItems="center">
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12}>
               <SelectDateRange
                 dateRange={dateRange}
                 setDateRange={setDateRange}
               />
             </Grid>
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12}>
               <Tabs
                 value={tabIdx}
                 variant={isMobile ? 'fullWidth' : 'standard'}
