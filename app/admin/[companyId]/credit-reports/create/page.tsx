@@ -50,7 +50,7 @@ export default function CreateCreditReport() {
   const [formData, setFormData] = useState<CreditReport | any>({
     userId: 0,
     orderId: 0,
-    reportedDate: dayjs().format('YYYY-MM-DD'),
+    reportedDate: dayjs().format('MM/DD/YYYY'),
     type: CreditType.QUALITY_ISSUE,
     reason: '',
   });
@@ -164,7 +164,7 @@ export default function CreateCreditReport() {
           creditItems: creditItems,
           type: selectedCreditType,
           reason: formData.reason,
-          reportedDate: formData.reportedDate,
+          reportedDate: selectedOrder?.deliveryDate,
           totalLoss: creditSummary.totalLoss,
         },
       );

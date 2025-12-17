@@ -205,6 +205,7 @@ export default function CreditItem({
                     ? {
                         ...creditItem,
                         price: Number(e.target.value),
+                        priceDifference: item?.actualPrice - Number(e.target.value),
                       }
                     : creditItem,
                 ),

@@ -50,7 +50,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         orderId: Number(orderId),
         userId: Number(userId),
         type: type,
-        reportedDate,
+        reportedDate: reportedDate,
         reason: reason,
         totalLoss: totalLoss,
         createdAt: today.dateAndTime,

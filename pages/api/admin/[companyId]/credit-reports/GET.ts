@@ -37,9 +37,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const creditReports = await prisma.creditReport.findMany({
       where: {
         companyId: Number(companyId),
-        reportedDate: {
-          in: listOfDateString,
-        },
+        order: {
+          deliveryDate: {
+            in: listOfDateString,
+          },
+        }
       },
       include: {
         user: true,
