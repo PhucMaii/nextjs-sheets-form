@@ -7,17 +7,14 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const { rawKey, isCheque, fileId } = req.query;
-
-    if (!rawKey) {
-      return res.status(400).json({ error: 'Raw key is required' });
-    }
+    const { isCheque, fileId } = req.query;
 
     if (!fileId) {
       return res.status(400).json({ error: 'File ID is required' });
     }
 
     let fileName = '';
+    let fileKey = '';
 
     if (isCheque === 'true') {
       const cheque = await prisma.cheque.findUnique({
@@ -30,6 +27,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         },
       });
       fileName = `cheque${cheque?.chequeNumber}-${cheque?.user?.clientId}-${cheque?.user?.clientName}`;
+      fileKey = cheque?.fileKeyFront || '';
     } else {
       const file = await prisma.media.findUnique({
         where: {
@@ -53,9 +51,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       }
 
       fileName = `order${file?.delivery?.order?.id}-${file?.delivery?.order?.user?.clientId}-${file?.delivery?.order?.user?.clientName}`;
+      fileKey = file?.fileKey;
     }
 
-    const key = decodeURIComponent(rawKey as string);
+    const key = decodeURIComponent(fileKey);
     const command = new GetObjectCommand({
       Bucket:
         isCheque === 'true'

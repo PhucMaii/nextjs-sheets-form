@@ -48,6 +48,8 @@ import VendorSearch from '../components/Autocomplete/VendorSearch';
 import DescriptionIcon from '@mui/icons-material/Description';
 import FileCardSkeleton from '../components/Skeleton/FileCardSkeleton';
 import DeliveryProofOrInvoice from '../components/Files/DeliveryProofOrInvoice';
+import TransactionTypeSearch from '../components/Autocomplete/TransactionTypeSearch';
+import useNotification from '@/hooks/useNotification';
 
 const clientTabs = [
   {
@@ -75,18 +77,18 @@ const vendorTabs = [
   },
 ];
 
-
-//   {
-//     label: 'Cheque',
-//     value: 'transaction-cheque',
-//     icon: <DescriptionIcon sx={{ fontSize: 18 }} />,
-//   },
-//   {
-//     label: 'Invoices',
-//     value: 'transaction-invoices',
-//     icon: <LocalShippingIcon sx={{ fontSize: 18 }} />,
-//   },
-// ];
+const transactionTabs = [
+  {
+    label: 'Cheque',
+    value: 'transaction-cheque',
+    icon: <ReceiptIcon sx={{ fontSize: 18 }} />,
+  },
+  {
+    label: 'Invoices',
+    value: 'transaction-invoices',
+    icon: <DescriptionIcon sx={{ fontSize: 18 }} />,
+  },
+];
 
 export default function FilesPage() {
   const { companyId }: any = useParams();
@@ -95,10 +97,16 @@ export default function FilesPage() {
     getVendorChequeFiles,
     getDeliveryProofFiles,
     getInvoices,
+    getTransactionChequeFiles,
   } = useFiles();
-
+  const { showNotification, NotificationComp } = useNotification();
   const [activeTab, setActiveTab] = useState<
-    'client-cheque' | 'vendor-cheque' | 'delivery-proof' | 'invoices'
+    | 'client-cheque'
+    | 'vendor-cheque'
+    | 'delivery-proof'
+    | 'invoices'
+    | 'transaction-cheque'
+    | 'transaction-invoices'
   >('client-cheque');
   const firstDayOfLastMonth = new Date();
   firstDayOfLastMonth.setMonth(firstDayOfLastMonth.getMonth() - 1);
@@ -113,10 +121,13 @@ export default function FilesPage() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
   const [isDownloadingBatch, setIsDownloadingBatch] = useState(false);
-  const [queryType, setQueryType] = useState<'clients' | 'vendors'>('clients');
+  const [queryType, setQueryType] = useState<
+    'clients' | 'vendors' | 'transactions'
+  >('clients');
   const [selectedClient, setSelectedClient] = useState<UserType | null>(null);
   const [selectedVendor, setSelectedVendor] = useState<IVendor | null>(null);
-
+  const [selectedTransactionType, setSelectedTransactionType] =
+    useState<any>(null);
   // Fetch all clients
   const { data: clients } = useQuery({
     queryKey: ['clients', companyId],
@@ -133,6 +144,19 @@ export default function FilesPage() {
     queryKey: ['vendors', companyId],
     queryFn: async () => {
       const response = await axios.get(getAdminApiUrl(companyId, '/vendors'));
+      return response.data.data;
+    },
+    initialData: [],
+    enabled: !!companyId,
+  });
+
+  // Fetch all transaction types
+  const { data: transactionTypes } = useQuery({
+    queryKey: ['transactionTypes', companyId],
+    queryFn: async () => {
+      const response = await axios.get(
+        getAdminApiUrl(companyId, '/expenses/type'),
+      );
       return response.data.data;
     },
     initialData: [],
@@ -158,14 +182,17 @@ export default function FilesPage() {
         );
         return data;
       } else if (activeTab === 'delivery-proof') {
-        const data = await getDeliveryProofFiles(
+        const data = await getDeliveryProofFiles(dateRange[0], dateRange[1]);
+        return data;
+      } else if (activeTab === 'invoices') {
+        const data = await getInvoices(companyId, dateRange[0], dateRange[1]);
+        return data;
+      } else if (activeTab === 'transaction-cheque') {
+        const data = await getTransactionChequeFiles(
           companyId,
           dateRange[0],
           dateRange[1],
         );
-        return data;
-      } else if (activeTab === 'invoices') {
-        const data = await getInvoices(companyId, dateRange[0], dateRange[1]);
         return data;
       }
       return [];
@@ -181,6 +208,9 @@ export default function FilesPage() {
     } else if (queryType === 'vendors') {
       setActiveTab('vendor-cheque');
       return vendorTabs;
+    } else if (queryType === 'transactions') {
+      setActiveTab('transaction-cheque');
+      return transactionTabs;
     }
 
     return [];
@@ -213,6 +243,19 @@ export default function FilesPage() {
       queryFiles = files.filter(
         (file: any) => file.vendorId === selectedVendor?.id,
       );
+    } else if (queryType === 'transactions') {
+      if (!selectedTransactionType) {
+        return queryFiles;
+      }
+      if (activeTab === 'transaction-invoices') {
+        queryFiles = files.filter(
+          (file: any) => file.expense?.typeId === selectedTransactionType?.id,
+        );
+      } else if (activeTab === 'transaction-cheque') {
+        queryFiles = files.filter(
+          (file: any) => file.expense?.typeId === selectedTransactionType?.id,
+        );
+      }
     }
 
     if (!debouncedSearchQuery || debouncedSearchQuery.trim() === '') {
@@ -287,24 +330,56 @@ export default function FilesPage() {
   };
 
   const handleDownloadFile = async (file: IFile, isCheque: boolean) => {
-    const fileKey = isCheque ? file.fileKeyFront : file.fileKey;
     const url = await fetch(
-      `/api/admin/${companyId}/files/download?rawKey=${encodeURIComponent(fileKey || '')}&isCheque=${isCheque}&fileId=${file.id}`,
+      `/api/admin/${companyId}/files/download?fileId=${file.id}&isCheque=${isCheque}`,
     );
     const data = await url.json();
     window.open(data.url, '_blank');
   };
 
-  const handleToggleFileSelection = (fileId: number, isCheque: boolean) => {
+  const handleToggleFileSelection = (fileId: number, prefix: string) => {
     setSelectedFiles((prev) => {
       const newSet = new Set(prev);
-      if (newSet.has(`${fileId}-${isCheque ? 'cheque' : 'delivery'}`)) {
-        newSet.delete(`${fileId}-${isCheque ? 'cheque' : 'delivery'}`);
+      if (newSet.has(`${fileId}-${prefix}`)) {
+        newSet.delete(`${fileId}-${prefix}`);
       } else {
-        newSet.add(`${fileId}-${isCheque ? 'cheque' : 'delivery'}`);
+        newSet.add(`${fileId}-${prefix}`);
       }
       return newSet;
     });
+  };
+
+  const handleChangeTab = (
+    tab:
+      | 'client-cheque'
+      | 'vendor-cheque'
+      | 'delivery-proof'
+      | 'invoices'
+      | 'transaction-cheque'
+      | 'transaction-invoices',
+  ) => {
+    if (selectedFiles.size === 0) {
+      setActiveTab(tab);
+    } else {
+      showNotification(
+        'error',
+        'Please download or clear the selected files first',
+      );
+    }
+  };
+
+  const handleChangeQueryType = (
+    queryType: 'clients' | 'vendors' | 'transactions',
+  ) => {
+    if (selectedFiles.size === 0) {
+      setQueryType(queryType);
+    } else {
+      showNotification(
+        'error',
+        'Please download or clear the selected files first',
+      );
+      return;
+    }
   };
 
   const handleSelectAll = () => {
@@ -330,13 +405,9 @@ export default function FilesPage() {
     setIsDownloadingBatch(true);
     try {
       const filesToDownload = filteredFiles
-        .filter((file: any) =>
-          selectedFiles.has(
-            `${file.id}-${file.evidenceType === EvidenceType.CHEQUE ? 'cheque' : 'delivery'}`,
-          ),
-        )
+        .filter((file: any) => selectedFiles.has(`${file.id}-${activeTab}`))
         .map((file: any) => {
-          const isCheque = file.evidenceType === EvidenceType.CHEQUE;
+          const isCheque = activeTab.includes('cheque');
           return {
             id: file.id,
             fileKey: isCheque ? file.fileKeyFront : file.fileKey,
@@ -442,16 +513,23 @@ export default function FilesPage() {
             <Button
               variant={queryType === 'clients' ? 'contained' : 'outlined'}
               startIcon={<PeopleIcon />}
-              onClick={() => setQueryType('clients')}
+              onClick={() => handleChangeQueryType('clients')}
             >
               Clients
             </Button>
             <Button
               variant={queryType === 'vendors' ? 'contained' : 'outlined'}
               startIcon={<StoreIcon />}
-              onClick={() => setQueryType('vendors')}
+              onClick={() => handleChangeQueryType('vendors')}
             >
               Vendors
+            </Button>
+            <Button
+              variant={queryType === 'transactions' ? 'contained' : 'outlined'}
+              startIcon={<DescriptionIcon />}
+              onClick={() => handleChangeQueryType('transactions')}
+            >
+              Transaction
             </Button>
           </Box>
           {queryType === 'clients' ? (
@@ -460,7 +538,7 @@ export default function FilesPage() {
               value={selectedClient}
               onChange={(e, value) => setSelectedClient(value)}
             />
-          ) : (
+          ) : queryType === 'vendors' ? (
             <VendorSearch
               vendors={vendors || []}
               value={selectedVendor}
@@ -468,7 +546,13 @@ export default function FilesPage() {
                 setSelectedVendor(value)
               }
             />
-          )}
+          ) : queryType === 'transactions' ? (
+            <TransactionTypeSearch
+              transactionTypes={transactionTypes}
+              value={selectedTransactionType}
+              onChange={(e, value) => setSelectedTransactionType(value)}
+            />
+          ) : null}
         </ShadowSection>
 
         {/* Tabs and Select All Section */}
@@ -516,7 +600,7 @@ export default function FilesPage() {
 
           <Tabs
             value={activeTab}
-            onChange={(e, newValue) => setActiveTab(newValue)}
+            onChange={(e, newValue) => handleChangeTab(newValue as any)}
             variant={mdDown ? 'scrollable' : 'standard'}
             scrollButtons="auto"
             sx={{
@@ -633,38 +717,46 @@ export default function FilesPage() {
                     key={`row-${index}`}
                     sx={{ mb: 3 }}
                   >
-                    {row.map((file: IFile) => {
+                    {row.map((file: IFile | any) => {
                       const isCheque =
-                        activeTab === 'delivery-proof' ? false : true;
-                      const fileKey = `${file.id}-${isCheque ? 'cheque' : 'delivery'}`;
+                        !!file.render || activeTab.includes('cheque');
+                      const prefix = activeTab;
+                      const fileKey = `${file.id}-${prefix}`;
                       const isSelected = selectedFiles.has(fileKey);
 
                       return (
                         <Grid item xs={12} sm={6} md={4} lg={3} key={file.id}>
                           {activeTab === 'delivery-proof' ||
-                          activeTab === 'invoices' ? (
+                          activeTab === 'invoices' ||
+                          file?.render === 'media' ? (
                             <DeliveryProofOrInvoice
                               file={file}
                               handleViewFile={handleViewFile}
                               handleDownloadFile={(file: IFile) =>
-                                handleDownloadFile(file, false)
+                                handleDownloadFile(file, isCheque)
                               }
                               isSelected={isSelected}
                               onSelect={() =>
-                                handleToggleFileSelection(file.id, false)
+                                handleToggleFileSelection(file.id, prefix)
                               }
-                              label={activeTab === 'delivery-proof' ? 'Delivery Proof' : 'Invoice'}
+                              label={
+                                activeTab === 'delivery-proof'
+                                  ? 'Delivery Proof'
+                                  : file?.render === 'media'
+                                    ? 'Cheque'
+                                    : 'Invoice'
+                              }
                             />
                           ) : (
                             <Cheque
                               file={file as any}
                               handleViewFile={handleViewFile}
                               handleDownloadFile={(file: IFile) =>
-                                handleDownloadFile(file, true)
+                                handleDownloadFile(file, isCheque)
                               }
                               isSelected={isSelected}
                               onSelect={() =>
-                                handleToggleFileSelection(file.id, true)
+                                handleToggleFileSelection(file.id, prefix)
                               }
                             />
                           )}
@@ -777,6 +869,7 @@ export default function FilesPage() {
           </Paper>
         </Slide>
       </Box>
+      {NotificationComp}
     </Sidebar>
   );
 }

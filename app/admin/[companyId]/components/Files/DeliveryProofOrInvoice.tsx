@@ -86,6 +86,7 @@ export default function DeliveryProofOrInvoice({
           style={{
             objectFit: 'cover',
           }}
+          isCheque={label === 'Cheque'}
         />
 
         {/* Type Badge */}
@@ -111,24 +112,6 @@ export default function DeliveryProofOrInvoice({
             )
           }
         />
-
-        {/* Front/Back Badge for Cheques */}
-        {file.note && (
-          <Chip
-            label={file.note === 'front' ? 'Front' : 'Back'}
-            size="small"
-            sx={{
-              position: 'absolute',
-              top: 12,
-              left: 12,
-              backgroundColor: neutral[700],
-              color: 'white',
-              fontWeight: 600,
-              fontSize: '0.65rem',
-              height: 22,
-            }}
-          />
-        )}
 
         {/* Selection Checkbox Overlay */}
         {onSelect && (

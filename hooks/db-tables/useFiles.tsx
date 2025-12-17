@@ -76,12 +76,25 @@ const useFiles = () => {
     return response.data.data;
   };
 
+  const getTransactionChequeFiles = async (
+    companyId: string,
+    startDate: string,
+    endDate: string,
+  ) => {
+    const response = await axios.get(
+      getAdminApiUrl(companyId, `/files/transaction-cheque?startDate=${startDate}&endDate=${endDate}`),
+    );
+
+    return response.data.data;
+  };
+
   return {
     getAllFiles,
     getDeliveryProofFiles,
     getVendorChequeFiles,
     getClientChequeFiles,
     getInvoices,
+    getTransactionChequeFiles,
   };
 };
 

@@ -4,12 +4,15 @@ import { normalizeDate } from '@/pages/api/utils/date';
 import { generateListOfDateString } from '@/app/utils/time';
 import prisma from '@/client';
 import { EvidenceType } from '@prisma/client';
+import { errorResponse } from '@/pages/api/utils/response';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const { companyId, startDate, endDate } = req.query;
     if (!companyId || !startDate || !endDate) {
-      return res.status(400).json({ error: 'Company ID, startDate and endDate are required' });
+      return res
+        .status(400)
+        .json({ error: 'Company ID, startDate and endDate are required' });
     }
 
     const normalizedStartDate = normalizeDate(new Date(startDate as string));
@@ -30,7 +33,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             },
           },
         },
-        vendorId: null
+        vendorId: null,
       },
       include: {
         user: true,
@@ -43,9 +46,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         companyId: Number(companyId),
         evidenceType: EvidenceType.CHEQUE,
         expense: {
-            date: {
-                in: listOfDateString,
-            },
+          date: {
+            in: listOfDateString,
+          },
         },
       },
       include: {
@@ -53,16 +56,18 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
 
+    const allFiles = [
+      ...chequeFiles.map((cheque) => ({ ...cheque, render: 'cheque' })),
+      ...mediaChequeFiles.map((media) => ({ ...media, render: 'media' })),
+    ];
+
     return res.status(200).json({
-      data: {
-        chequeFiles,
-        mediaChequeFiles,
-      },
+      data: allFiles,
       message: 'Cheque files fetched successfully',
     });
   } catch (error: any) {
     console.log('Internal Server Error: ', error);
-    return res.status(500).json({ error: 'Internal Server Error: ' + error });
+    return errorResponse(res, error);
   }
 };
 

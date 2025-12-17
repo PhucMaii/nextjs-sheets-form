@@ -24,6 +24,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const s3Response = await s3.send(command);
 
       const bytes = await s3Response.Body?.transformToByteArray();
+      console.log('bytes', bytes);
 
       const fileName = file.isCheque
         ? `cheque${file.chequeNumber}-${file.user?.clientId}-${file.user?.clientName}`
