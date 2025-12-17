@@ -7,8 +7,8 @@ import { USER_ROLE, getAdminApiUrl } from '@/app/utils/enum';
 import { Order } from '../../../orders/page';
 import ModalHead from '@/app/lib/ModalHead';
 import OrderView, { ORDER_USAGE_PURPOSE } from '@/app/components/OrderView';
-import { SWRFetchData } from '@/app/utils/db';
 import { useParams } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
 
 interface PropTypes extends ModalProps {
   showNotification: (type: AlertColor, message: string) => void;
@@ -25,9 +25,20 @@ export default function EditPrice({
 }: PropTypes) {
   const { companyId }: any = useParams();
 
-  const [sellingItems] = SWRFetchData(
-    getAdminApiUrl(companyId, `/items?userId=${order.userId}`),
-  );
+  // const [sellingItems] = SWRFetchData(
+  //   getAdminApiUrl(companyId, `/items?userId=${order.userId}`),
+  // );
+
+  const { data: sellingItems } = useQuery({
+    queryKey: ['items', companyId, order.userId],
+    queryFn: async () => {
+      const response = await axios.get(
+        getAdminApiUrl(companyId, `/items?userId=${order.userId}`),
+      );
+      return response.data;
+    },
+    enabled: !!order.userId,
+  });
 
   const onUpdateOrder = async (orderParam: Order) => {
     try {

@@ -28,7 +28,6 @@ import {
 } from '@mui/icons-material';
 import ViewImg from '../components/ViewImg';
 import { primary, neutral } from '@/theme/color';
-import DeliveryProof from '../components/Files/DeliveryProof';
 import { IFile, IVendor, UserType } from '@/app/utils/type';
 import { EvidenceType } from '@prisma/client';
 import EmptyFiles from '../components/Files/EmptyFiles';
@@ -48,6 +47,7 @@ import StoreIcon from '@mui/icons-material/Store';
 import VendorSearch from '../components/Autocomplete/VendorSearch';
 import DescriptionIcon from '@mui/icons-material/Description';
 import FileCardSkeleton from '../components/Skeleton/FileCardSkeleton';
+import DeliveryProofOrInvoice from '../components/Files/DeliveryProofOrInvoice';
 
 const clientTabs = [
   {
@@ -75,10 +75,27 @@ const vendorTabs = [
   },
 ];
 
+
+//   {
+//     label: 'Cheque',
+//     value: 'transaction-cheque',
+//     icon: <DescriptionIcon sx={{ fontSize: 18 }} />,
+//   },
+//   {
+//     label: 'Invoices',
+//     value: 'transaction-invoices',
+//     icon: <LocalShippingIcon sx={{ fontSize: 18 }} />,
+//   },
+// ];
+
 export default function FilesPage() {
   const { companyId }: any = useParams();
-  const { getClientChequeFiles, getVendorChequeFiles, getDeliveryProofFiles } =
-    useFiles();
+  const {
+    getClientChequeFiles,
+    getVendorChequeFiles,
+    getDeliveryProofFiles,
+    getInvoices,
+  } = useFiles();
 
   const [activeTab, setActiveTab] = useState<
     'client-cheque' | 'vendor-cheque' | 'delivery-proof' | 'invoices'
@@ -146,6 +163,9 @@ export default function FilesPage() {
           dateRange[0],
           dateRange[1],
         );
+        return data;
+      } else if (activeTab === 'invoices') {
+        const data = await getInvoices(companyId, dateRange[0], dateRange[1]);
         return data;
       }
       return [];
@@ -621,8 +641,9 @@ export default function FilesPage() {
 
                       return (
                         <Grid item xs={12} sm={6} md={4} lg={3} key={file.id}>
-                          {activeTab === 'delivery-proof' ? (
-                            <DeliveryProof
+                          {activeTab === 'delivery-proof' ||
+                          activeTab === 'invoices' ? (
+                            <DeliveryProofOrInvoice
                               file={file}
                               handleViewFile={handleViewFile}
                               handleDownloadFile={(file: IFile) =>
@@ -632,6 +653,7 @@ export default function FilesPage() {
                               onSelect={() =>
                                 handleToggleFileSelection(file.id, false)
                               }
+                              label={activeTab === 'delivery-proof' ? 'Delivery Proof' : 'Invoice'}
                             />
                           ) : (
                             <Cheque

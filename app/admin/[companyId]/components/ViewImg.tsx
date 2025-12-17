@@ -14,6 +14,12 @@ interface IProps extends ModalProps {
   isCheque?: boolean;
 }
 
+const isPdfFile = (fileKey: string): boolean => {
+  if (!fileKey) return false;
+  const extension = fileKey.split('.').pop()?.toLowerCase();
+  return extension === 'pdf';
+};
+
 export default function ViewImg({
   fileKeyFront,
   fileKeyBack,
@@ -50,7 +56,7 @@ export default function ViewImg({
       // }
     };
     fetchUrl();
-  }, [fileKeyFront, fileKeyBack]);
+  }, [fileKeyFront, fileKeyBack, isCheque]);
 
   return (
     <Modal open={open} onClose={onClose}>
@@ -89,32 +95,78 @@ export default function ViewImg({
           }}
         >
           {fileKeyFront && (
-            <Image
-              src={toCDN(urlFront, isCheque)}
-              alt="front"
-              style={{
-                maxWidth: '100%',
-                maxHeight: '100%',
-                objectFit: 'contain',
-              }}
-              width={1000}
-              height={1000}
-              loading="lazy"
-            />
+            <>
+              {isPdfFile(fileKeyFront) ? (
+                <Box
+                  sx={{
+                    width: '100%',
+                    height: '85vh',
+                    minHeight: '600px',
+                    border: 'none',
+                  }}
+                >
+                  <iframe
+                    src={toCDN(urlFront, isCheque)}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      border: 'none',
+                    }}
+                    title="PDF Front"
+                  />
+                </Box>
+              ) : (
+                <Image
+                  src={toCDN(urlFront, isCheque)}
+                  alt="front"
+                  style={{
+                    maxWidth: '100%',
+                    maxHeight: '100%',
+                    objectFit: 'contain',
+                  }}
+                  width={1000}
+                  height={1000}
+                  loading="lazy"
+                />
+              )}
+            </>
           )}
           {fileKeyBack && (
-            <Image
-              src={toCDN(urlBack, isCheque)}
-              alt="back"
-              style={{
-                maxWidth: '100%',
-                maxHeight: '45vh',
-                objectFit: 'contain',
-              }}
-              width={500}
-              height={500}
-              loading="lazy"
-            />
+            <>
+              {isPdfFile(fileKeyBack) ? (
+                <Box
+                  sx={{
+                    width: '100%',
+                    height: '85vh',
+                    minHeight: '600px',
+                    border: 'none',
+                  }}
+                >
+                  <iframe
+                    src={toCDN(urlBack, isCheque)}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      border: 'none',
+                    }}
+                    title="PDF Back"
+                  />
+                </Box>
+              ) : (
+                <Image
+                  src={toCDN(urlBack, isCheque)}
+                  alt="back"
+                  style={{
+                    maxWidth: '100%',
+                    maxHeight: '45vh',
+                    objectFit: 'contain',
+                  }}
+                  width={500}
+                  height={500}
+                  loading="lazy"
+                />
+              )}
+            </>
           )}
         </Box>
       </Box>

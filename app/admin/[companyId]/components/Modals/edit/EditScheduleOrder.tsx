@@ -16,9 +16,9 @@ import axios from 'axios';
 import { LoadingButton } from '@mui/lab';
 import ModalHead from '@/app/lib/ModalHead';
 import OrderView, { ORDER_USAGE_PURPOSE } from '@/app/components/OrderView';
-import { SWRFetchData } from '@/app/utils/db';
 import { Order } from '@/app/admin/[companyId]/orders/page';
 import { useParams } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
 
 interface IProps {
   order: ScheduledOrder;
@@ -41,9 +41,20 @@ export default function EditScheduleOrder({
   const [newRouteId, setNewRouteId] = useState<number>(routeId);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  const [sellingItems] = SWRFetchData(
-    getAdminApiUrl(companyId, `/items?userId=${order.userId}`),
-  );
+  const { data: sellingItems } = useQuery({
+    queryKey: ['items', order.userId],
+    queryFn: async () => {
+      const response = await axios.get(
+        getAdminApiUrl(companyId, `/items?userId=${order.userId}`),
+      );
+      return response.data;
+    },
+    enabled: !!order.userId,
+  });
+
+  // const [sellingItems] = SWRFetchData(
+  //   getAdminApiUrl(companyId, `/items?userId=${order.userId}`),
+  // );
 
   const switchRoute = async () => {
     if (newRouteId === routeId) {

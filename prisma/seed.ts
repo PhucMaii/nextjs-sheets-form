@@ -120,6 +120,25 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
+  await prisma.media.updateMany({
+    where: {
+      evidenceType: "CHEQUE",
+    },
+    data: {
+      companyId: 1,
+    }
+  });
+
+  await prisma.media.updateMany({
+    where: {
+      createdBy: "S Admin - BAO ADMIN"
+    },
+    data: {
+      companyId: 2,
+    }
+  })
+
+  
 }
 
 

@@ -12,10 +12,10 @@ import { getAdminApiUrl, USER_ROLE } from '@/app/utils/enum';
 import { ModalProps } from '../type';
 import ModalHead from '@/app/lib/ModalHead';
 import OrderView, { ORDER_USAGE_PURPOSE } from '@/app/components/OrderView';
-import { SWRFetchData } from '@/app/utils/db';
 import { onUpdateOrder } from '@/app/utils/orders';
 import { useParams } from 'next/navigation';
-
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 interface PropTypes extends ModalProps {
   order: Order;
   // handleUpdateOrderUI: (updatedOrder: Order) => void;
@@ -36,9 +36,20 @@ const EditReportOrder = ({
   const { companyId }: any = useParams();
 
   // const [sellingItems] = SWRFetchData(`${API_URL.ITEM}?userId=${order.userId}`);
-  const [sellingItems] = SWRFetchData(
-    getAdminApiUrl(companyId, `/items?userId=${order.userId}`),
-  );
+  // const [sellingItems] = SWRFetchData(
+  //   getAdminApiUrl(companyId, `/items?userId=${order.userId}`),
+  // );
+
+  const { data: sellingItems } = useQuery({
+    queryKey: ['items', companyId, order.userId],
+    queryFn: async () => {
+      const response = await axios.get(
+        getAdminApiUrl(companyId, `/items?userId=${order.userId}`),
+      );
+      return response.data;
+    },
+    enabled: !!order.userId,
+  });
 
   const onUpdateItem = async (orderParam: Order) => {
     try {

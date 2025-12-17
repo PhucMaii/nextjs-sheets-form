@@ -61,11 +61,27 @@ const useFiles = () => {
     return response.data.data;
   };
 
+  const getInvoices = async (
+    companyId: string,
+    startDate: string,
+    endDate: string,
+  ) => {
+    const response = await axios.get(
+      getAdminApiUrl(
+        companyId,
+        `/files/invoices?startDate=${startDate}&endDate=${endDate}`,
+      ),
+    );
+
+    return response.data.data;
+  };
+
   return {
     getAllFiles,
     getDeliveryProofFiles,
     getVendorChequeFiles,
     getClientChequeFiles,
+    getInvoices,
   };
 };
 

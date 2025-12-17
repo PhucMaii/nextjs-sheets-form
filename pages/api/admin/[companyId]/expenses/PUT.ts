@@ -141,6 +141,7 @@ export const updateBill = async (
         evidenceType: EvidenceType.BILL,
         createdAt: today.dateAndTime,
         createdBy: createdBy,
+        companyId: expense.companyId,
       },
     });
   });
