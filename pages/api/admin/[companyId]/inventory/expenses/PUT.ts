@@ -13,7 +13,7 @@ import { subtractInventoryItem } from '../../orderedItems/single';
 import { getTodayDate } from '@/pages/api/utils/date';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { USER_ROLE } from '@/app/utils/enum';
-import { updateCheque } from '../../expenses/PUT';
+import { updateBill, updateCheque } from '../../expenses/PUT';
 import { recordTransactionInventoryLog } from '@/pages/api/utils/logs';
 
 interface IPurchasedItem {
@@ -49,6 +49,8 @@ interface IBody {
   frontFileType?: string;
   backFileKey?: string;
   backFileType?: string;
+  billFileKey?: string;
+  billFileType?: string;
 }
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
@@ -83,6 +85,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       frontFileType,
       backFileKey,
       backFileType,
+      billFileKey,
+      billFileType,
     }: IBody = req.body;
 
     const updatedAt = getTodayDate().dateAndTime;
@@ -173,6 +177,10 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       backFileType,
       createdBy,
     );
+
+    if (billFileKey && billFileType) {
+      await updateBill(existingExpense, billFileKey, billFileType, createdBy);
+    }
 
     const oldItemIds = oldItems.map((item: any) => {
       return item.id;

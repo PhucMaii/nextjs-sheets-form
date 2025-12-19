@@ -120,27 +120,67 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-  await prisma.media.updateMany({
+  const startDate = new Date('2025-11-01');
+  const endDate = new Date('2025-12-31');
+
+  const dates = generateListOfDateString(startDate, endDate);
+
+  const orderItemsWithNullCost = await prisma.orderedItems.findMany({
     where: {
-      evidenceType: "CHEQUE",
+      cost: null,
+      Orders: {
+        deliveryDate: {
+          in: dates,
+        },
+      },
     },
-    data: {
-      companyId: 1,
-    }
+    include: {
+      Orders: true,
+      fifo: {
+        include: {
+          vendorItem: {
+            include: {
+              unit: true,
+            },
+          },
+        },
+      },
+    },
   });
 
-  await prisma.media.updateMany({
-    where: {
-      createdBy: "S Admin - BAO ADMIN"
-    },
-    data: {
-      companyId: 2,
-    }
-  })
+  const formattedData = orderItemsWithNullCost.map((orderedItem) => {
+    return {
+      id: orderedItem.id,
+      name: orderedItem.name,
+      cost: orderedItem.cost,
+      price: orderedItem.price,
+      quantity: orderedItem.quantity,
+      deliveryDate: orderedItem.Orders?.deliveryDate,
+      orderId: orderedItem.Orders?.id,
+      fifoId: orderedItem.fifoId,
+    };
+  });
 
-  
+  console.log(formattedData, 'formattedData');
+
+
+  // await Promise.allSettled(
+  //   orderItemsWithNullCost.map(async (orderedItem) => {
+  //     const cost = orderedItem.fifo?.price
+  //       ? orderedItem.fifo.price
+  //       : orderedItem.fifo?.vendorItem?.unit?.find(
+  //           (unit: any) => unit.ratio === 1,
+  //         )?.unitPrice || 0;
+  //     const profit = orderedItem.price - cost;
+
+  //     console.log(orderedItem.id, cost, profit, 'id and cost and profit');
+  //     await prisma.orderedItems.update({
+  //       where: { id: orderedItem.id },
+  //       data: { cost: cost, profit: profit },
+  //     });
+  //   }),
+  // );
 }
-
 
 main()
   .then(() => prisma.$disconnect())

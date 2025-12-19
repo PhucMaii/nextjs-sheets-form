@@ -141,6 +141,7 @@ export const createOrderedItems = async (
           createdAt: order.orderTime,
           createdBy: order?.createdBy || '',
           companyId,
+          price: itemUnit?.unitPrice || 0,
         },
         include: {
           vendorItem: true,
@@ -307,7 +308,7 @@ export const createOrderedItems = async (
 
         // If calculate by fifo, need to multiply with ratio since fifo is ratio of 1
         const cost = sortedFifo[fifoIndex]?.price
-          ? sortedFifo[fifoIndex].price * itemUnit.ratio
+          ? sortedFifo[fifoIndex].price * (itemUnit?.ratio || 1)
           : itemUnit?.unitPrice || 0;
 
         const profit = calculateProfit(item, cost);

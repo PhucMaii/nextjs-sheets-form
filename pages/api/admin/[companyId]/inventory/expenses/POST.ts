@@ -8,7 +8,7 @@ import {
 } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate } from '@/pages/api/utils/date';
-import { updateCheque } from '../../expenses/PUT';
+import { updateBill, updateCheque } from '../../expenses/PUT';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { USER_ROLE } from '@/app/utils/enum';
 import {
@@ -49,6 +49,8 @@ interface IBody {
   backFileType?: string;
   status: TRANSACTION_STATUS;
   items: IExpenseItem[];
+  billFileKey?: string;
+  billFileType?: string;
 }
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
@@ -71,6 +73,8 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       frontFileType,
       backFileKey,
       backFileType,
+      billFileKey,
+      billFileType,
     }: IBody = req.body;
 
     const { companyId } = req.query;
@@ -134,6 +138,10 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         discount,
       },
     });
+
+    if (billFileKey && billFileType) {
+      await updateBill(newExpense, billFileKey, billFileType, createdBy);
+    }
 
     await updateCheque(
       newExpense,

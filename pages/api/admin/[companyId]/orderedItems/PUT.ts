@@ -153,101 +153,101 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     const deleteLines = deletes.map(toLines);
 
     // Delete items first
-    await prisma.$transaction(async (tx) => {
-      if (deletes.length > 0) {
-        await tx.orderedItems.deleteMany({
-          where: {
-            id: {
-              in: deletes.map((item: any) => item.id),
+    await prisma.$transaction(
+      async (tx) => {
+        if (deletes.length > 0) {
+          await tx.orderedItems.deleteMany({
+            where: {
+              id: {
+                in: deletes.map((item: any) => item.id),
+              },
             },
-          },
-        });
+          });
 
-        if (isValidToAffectInventory) {
-          for (const item of deletes) {
-            if (item?.fifo && item?.inventoryUnit) {
-              await restockInventoryItem(
-                orderId,
-                item.fifo,
-                item.inventoryUnit,
-                item.quantity,
-              );
+          if (isValidToAffectInventory) {
+            for (const item of deletes) {
+              if (item?.fifo && item?.inventoryUnit) {
+                await restockInventoryItem(
+                  orderId,
+                  item.fifo,
+                  item.inventoryUnit,
+                  item.quantity,
+                );
 
-              await recordOrderInventoryLog(
-                orderId,
-                item?.fifo?.inventoryItemId,
-                item.quantity,
-                InventoryLogType.RESTOCK,
-                InventoryLogFrom.EDIT_ORDER,
-                `Restock ${item.quantity} ${item?.inventoryItem?.name} to inventory due to order ${orderId} removed ${item.name}`,
-              );
+                await recordOrderInventoryLog(
+                  orderId,
+                  item?.fifo?.inventoryItemId,
+                  item.quantity,
+                  InventoryLogType.RESTOCK,
+                  InventoryLogFrom.EDIT_ORDER,
+                  `Restock ${item.quantity} ${item?.inventoryItem?.name} to inventory due to order ${orderId} removed ${item.name}`,
+                );
+              }
             }
           }
         }
-      }
-      // Create new items
-      if (creates.length > 0) {
-        await Promise.allSettled(
-          creates.map(async (item: any) => {
-            await createOrderedItems(Number(companyId), existingOrder as any, [
-              item,
-            ]);
-          }),
-        );
-      }
-
-      // Update items
-      if (updates.length > 0) {
-        await Promise.allSettled(
-          updates.map(async (item: any) => {
-            const cost =
-              (item?.cost / (item?.inventoryUnit?.ratio || 1)) *
-              (item?.inventoryUnit?.ratio || 1);
-            const profit = calculateProfit(item, cost);
-
-            await tx.orderedItems.update({
-              where: {
-                id: item.id,
-              },
-              data: {
-                price: item.price,
-                quantity: item.quantity,
-                cost,
-                profit,
-                inventoryUnitId: item.inventoryUnitId,
-                option: item.option,
-              },
-            });
-
-            if (item?.fifo && item?.inventoryUnit && isValidToAffectInventory) {
-              const difference = item.quantity - item.prevQuantity;
-              const isRestock = difference < 0;
-              await updateSingleInventoryItem(
-                orderId,
-                item.fifo,
-                item.inventoryUnit,
-                item.quantity,
-                item.prevQuantity,
-                item?.prevInventoryUnit,
+        // Create new items
+        if (creates.length > 0) {
+          await Promise.allSettled(
+            creates.map(async (item: any) => {
+              await createOrderedItems(
+                Number(companyId),
+                existingOrder as any,
+                [item],
               );
+            }),
+          );
+        }
 
-              await recordOrderInventoryLog(
-                orderId,
-                item?.fifo?.inventoryItemId,
-                Math.abs(difference),
-                isRestock
-                  ? InventoryLogType.RESTOCK
-                  : InventoryLogType.SUBTRACT,
-                InventoryLogFrom.EDIT_ORDER,
-                `${isRestock ? 'Restock' : 'Subtract'} ${Math.abs(difference)} ${item?.inventoryItem?.name} (item update)`,
-              );
-            }
-          }),
-        );
-      }
-    }, {
-      timeout: 20000,
-    });
+        // Update items
+        if (updates.length > 0) {
+          await Promise.allSettled(
+            updates.map(async (item: any) => {
+              await tx.orderedItems.update({
+                where: {
+                  id: item.id,
+                },
+                data: {
+                  price: item.price,
+                  quantity: item.quantity,
+                  option: item.option,
+                },
+              });
+
+              if (
+                item?.fifo &&
+                item?.inventoryUnit &&
+                isValidToAffectInventory
+              ) {
+                const difference = item.quantity - item.prevQuantity;
+                const isRestock = difference < 0;
+                await updateSingleInventoryItem(
+                  orderId,
+                  item.fifo,
+                  item.inventoryUnit,
+                  item.quantity,
+                  item.prevQuantity,
+                );
+
+                await recordOrderInventoryLog(
+                  orderId,
+                  item?.fifo?.inventoryItemId,
+                  Math.abs(difference),
+                  isRestock
+                    ? InventoryLogType.RESTOCK
+                    : InventoryLogType.SUBTRACT,
+                  InventoryLogFrom.EDIT_ORDER,
+                  `${isRestock ? 'Restock' : 'Subtract'} ${Math.abs(difference)} ${item?.inventoryItem?.name} (item update)`,
+                );
+              }
+            }),
+          );
+        }
+      },
+      {
+        timeout: 20000,
+      },
+    );
 
     const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
 
@@ -399,16 +399,14 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       existingOrder?.user?.email &&
       !existingOrder?.user?.email.includes('INACTIVE')
     ) {
-      await enqueueEmail(
-        {
-          user: existingOrder?.user,
-          order: orderUpdated,
-          orderId,
-          deliveryDate,
-          note,
-          subjectTag: 'EDIT ORDER',
-        }
-      );
+      await enqueueEmail({
+        user: existingOrder?.user,
+        order: orderUpdated,
+        orderId,
+        deliveryDate,
+        note,
+        subjectTag: 'EDIT ORDER',
+      });
     }
 
     const formattedItems = formatItemsWithTotalPrice(orderUpdated?.items);
@@ -454,18 +452,13 @@ export const categorizeUpdatedItems = (
 
       const priceChanged = updatedItem.price !== baseItem?.price;
       const qtyChanged = updatedItem.quantity !== baseItem?.quantity;
-      const unitChanged =
-        updatedItem.inventoryUnitId !== baseItem?.inventoryUnitId;
       const optNameChanged =
         (updatedItem?.option?.name ?? null) !==
         (baseItem?.option?.name ?? null);
 
-      if (priceChanged || qtyChanged || unitChanged || optNameChanged) {
+      if (priceChanged || qtyChanged || optNameChanged) {
         results.push({
           ...baseItem,
-          prevInventoryUnit: baseItem.inventoryUnit,
-          inventoryUnitId: updatedItem.inventoryUnitId,
-          inventoryUnit: updatedItem.inventoryUnit,
           quantity: updatedItem.quantity,
           prevQuantity: baseItem.quantity,
           price: updatedItem.price,
