@@ -55,7 +55,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       vendorId: invoice.expense?.vendors?.[0]?.vendorId,
     }));
 
-    console.log(formattedInvoices);
+    console.log(formattedInvoices.some((invoice: any) => invoice.vendorId === 11));
 
     return res.status(200).json({
       data: formattedInvoices,

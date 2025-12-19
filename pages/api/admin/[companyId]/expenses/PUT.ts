@@ -115,8 +115,10 @@ export const updateBill = async (
   const today = getTodayDate();
 
   await prisma.$transaction(async (tx) => {
+    console.log(expense, 'expense');
     // Check if expense has bill file key yet
     if (expense?.medias && expense?.medias?.length > 0) {
+      console.log(expense.medias, 'expense.medias');
       const isBillFileExists = expense.medias?.find(
         (media: any) => media.evidenceType === EvidenceType.BILL,
       );
@@ -132,6 +134,8 @@ export const updateBill = async (
       }
     }
 
+    console.log(billFileKey, 'billFileKey');
+
     // Create new bill file
     await tx.media.create({
       data: {
@@ -144,6 +148,8 @@ export const updateBill = async (
         companyId: expense.companyId,
       },
     });
+
+    console.log('Create Bill File Successfully');
   });
 
   return {

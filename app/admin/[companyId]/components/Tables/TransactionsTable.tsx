@@ -70,9 +70,13 @@ const TransactionsTable = ({
     if (!transactions || transactions.length === 0) {
       return [];
     }
-    
+
+    console.log(transactions, 'transactions');
+
     return transactions.flatMap((transaction: any) => {
-      return transaction?.medias?.filter((media: any) => media.note === 'front' || media.note === 'back');
+      return transaction?.medias?.filter(
+        (media: any) => media.note === 'front' || media.note === 'back',
+      );
     });
   }, [transactions]);
 
@@ -233,6 +237,8 @@ const TransactionsTable = ({
                   : transaction?.orderedItems?.length > 0
                     ? 'stock'
                     : transaction?.type?.name || 'other';
+
+                    console.log(chequeFiles, 'chequeFiles');
 
                 // Define styling based on transaction type
 

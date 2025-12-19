@@ -263,8 +263,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         id: Number(id),
       });
 
-      console.log(expenses.expenses[0], 'expenses');
-
       return res.status(200).json({
         data: expenses.expenses[0],
         message: 'Fetch Expenses successfully',
@@ -443,6 +441,7 @@ const getExpenseWithVendorId = async (
           vendor: true,
         },
       },
+      medias: true,
       paymentMethod: true,
       orderedItems: {
         include: {
