@@ -42,7 +42,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       data: { isActive: true },
     });
 
-    await runZonesSequentially(Number(programId), existingWaterProgram.zoneWaterPrograms);
+    await runZonesSequentially(
+      Number(programId),
+      existingWaterProgram.zoneWaterPrograms,
+    );
 
     // for (const zoneWaterProgram of existingWaterProgram.zoneWaterPrograms) {
     //   await new Promise((resolve) => {
@@ -81,35 +84,36 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
 export default withAdminAuthGuard(handler);
 
-export const runZonesSequentially = async (programId: number, zoneWaterPrograms: ZoneWater[] | any[]) => {
-  let delayMs = 0;
+const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
+export const runZonesSequentially = async (
+  programId: number,
+  zoneWaterPrograms: ZoneWater[] | any[],
+) => {
   for (const zone of zoneWaterPrograms) {
     const { duration, zoneId } = zone.zoneProgram;
 
-    setTimeout(async () => {
-      try {
-        await axios.get('https://api.hydrawise.com/api/v1/setzone.php', {
-          params: {
-            api_key: process.env.HYDRAWISE_API_KEY,
-            action: 'run',
-            period_id: 999,
-            custom: duration,
-            relay_id: zoneId,
-          },
-        });
-      } catch (error: any) {
-        console.log('Error running zone: ', error);
-      }
-    }, delayMs);
+    // setTimeout(async () => {
+    try {
+      await axios.get('https://api.hydrawise.com/api/v1/setzone.php', {
+        params: {
+          api_key: process.env.HYDRAWISE_API_KEY,
+          action: 'run',
+          period_id: 999,
+          custom: duration,
+          relay_id: zoneId,
+        },
+      });
 
-    delayMs += duration + 2;
+      await sleep((duration + 2) * 1000);
+    } catch (error: any) {
+      console.log('Error running zone: ', error);
+    } finally {
+      await prisma.waterProgram.update({
+        where: { id: programId },
+        data: { isActive: false },
+      });
+    }
   }
 
-  setTimeout(async () => {
-    await prisma.waterProgram.update({
-      where: { id: programId },
-      data: { isActive: false },
-    });
-
-  }, delayMs);
 };

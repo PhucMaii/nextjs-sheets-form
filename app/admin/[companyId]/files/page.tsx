@@ -112,9 +112,7 @@ export default function FilesPage() {
   firstDayOfLastMonth.setMonth(firstDayOfLastMonth.getMonth() - 1);
   firstDayOfLastMonth.setDate(1);
   firstDayOfLastMonth.setHours(0, 0, 0, 0);
-  const [dateRange, setDateRange] = useState<any>(
-    generateMonthRange(firstDayOfLastMonth, -1),
-  );
+  const [dateRange, setDateRange] = useState<any>(generateMonthRange());
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [selectedFile, setSelectedFile] = useState<IFile | null>(null);

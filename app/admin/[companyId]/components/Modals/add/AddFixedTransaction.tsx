@@ -71,6 +71,7 @@ export default function AddFixedTransaction({
     true,
     true,
     true,
+    false,
   );
 
   useEffect(() => {

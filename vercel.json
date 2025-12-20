@@ -35,10 +35,6 @@
     {
       "path": "/api/cron/pre-approve-po",
       "schedule": "0 8 * * *"
-    },
-    {
-      "path": "/api/cron/activate-water-program",
-      "schedule": "*/5 * * * *"
     }
   ],
   "functions": {

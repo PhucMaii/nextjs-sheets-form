@@ -196,9 +196,11 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
+    console.log(justCreatedUnits, 'justCreatedUnits');
     if (sellingItems && sellingItems.length > 0) {
       // Create Selling Items
       const newSellingItems = sellingItems.map((sellingItem: any) => {
+        console.log({ sellingItem }, 'sellingItem');
         const targetUnit = justCreatedUnits.find(
           (unit: any) =>
             unit.unit === sellingItem.inventoryUnit.unit &&

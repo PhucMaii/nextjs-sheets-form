@@ -3,7 +3,7 @@ import { FormControl } from '@mui/material';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
 import {
-  disableChristmasAndNewYear,
+  disableChristmasAndNewYear as disableChristmasAndNewYearUtils,
   formatDateChanged,
   generateRecommendDate,
 } from '@/app/utils/time'; // Assuming this utility exists
@@ -14,6 +14,7 @@ const useSelectDate = (
   fullWidth?: boolean,
   hideLabel?: boolean,
   disablePast?: boolean,
+  disableChristmasAndNewYear: boolean = true,
 ) => {
   const [date, setDate] = useState(
     providedDate ? providedDate : generateRecommendDate(),
@@ -41,7 +42,11 @@ const useSelectDate = (
           sx={{
             borderRadius: 2,
           }}
-          shouldDisableDate={disableChristmasAndNewYear}
+          shouldDisableDate={
+            disableChristmasAndNewYear
+              ? disableChristmasAndNewYearUtils
+              : undefined
+          }
           disablePast={disablePast}
         />
       </LocalizationProvider>
