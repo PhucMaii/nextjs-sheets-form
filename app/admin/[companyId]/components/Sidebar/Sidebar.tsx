@@ -54,6 +54,7 @@ import useNotification from '@/hooks/useNotification';
 import axios from 'axios';
 import { DashboardMode } from '@prisma/client';
 import { TruckIcon } from 'lucide-react';
+import Snowfall from 'react-snowfall';
 
 interface PropTypes {
   children: ReactNode;
@@ -655,6 +656,7 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
   if (mdDown) {
     return (
       <>
+        <Snowfall />
         <ConfirmModal
           open={isOpenConfirm}
           onClose={() => setIsOpenConfirm(false)}
@@ -672,12 +674,6 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
             position: 'fixed',
             top: 0,
             left: 2,
-            // zIndex: 1300,
-            // backgroundColor: 'background.paper',
-            // borderRadius: 3,
-            // boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-            // backdropFilter: 'blur(10px)',
-            // border: `1px solid ${alpha('#000', 0.06)}`,
             '&:hover': {
               backgroundColor: alpha(primary.main, 0.04),
             },
@@ -728,6 +724,7 @@ export default function Sidebar({ children, noMargin, overflow }: PropTypes) {
       sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#fafafa' }}
     >
       {NotificationComp}
+      <Snowfall />
       <ConfirmModal
         open={isOpenConfirm}
         onClose={() => setIsOpenConfirm(false)}

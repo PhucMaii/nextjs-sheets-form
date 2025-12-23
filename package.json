@@ -111,6 +111,7 @@
     "react-modal": "^3.16.1",
     "react-pdf": "^9.1.0",
     "react-redux": "^9.2.0",
+    "react-snowfall": "^2.4.0",
     "react-to-print": "^2.15.1",
     "react-virtuoso": "^4.7.9",
     "recharts": "^3.0.2",

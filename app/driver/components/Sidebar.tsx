@@ -14,7 +14,13 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import React, { ReactNode, useCallback, useContext, useEffect, useState } from 'react';
+import React, {
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
@@ -43,6 +49,7 @@ import ConfirmModal from '@/app/admin/[companyId]/components/Modals/ConfirmModal
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { UserContext } from '@/app/context/UserContextAPI';
 import { DashboardMode } from '@prisma/client';
+import Snowfall from 'react-snowfall';
 
 interface IProps {
   children: ReactNode;
@@ -62,7 +69,7 @@ export default function Sidebar({ children }: IProps) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [role, setRole] = useLocalStorage('role', null);
   const { user, mutate } = useContext(UserContext);
-  
+
   // const [isAsked, setIsAsked, isInitialized] = useLocalStorage(
   //   'isAskedClockIn',
   //   false,
@@ -145,7 +152,10 @@ export default function Sidebar({ children }: IProps) {
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   const renderSwitchRole = () => {
-    if (user?.role === USER_ROLE.ADMIN || user?.role === USER_ROLE.SUPER_ADMIN) {
+    if (
+      user?.role === USER_ROLE.ADMIN ||
+      user?.role === USER_ROLE.SUPER_ADMIN
+    ) {
       return (
         <Button
           onClick={() => setIsOpenConfirm(true)}
@@ -153,11 +163,11 @@ export default function Sidebar({ children }: IProps) {
         >
           Switch To Admin
         </Button>
-      )
+      );
     }
 
     return null;
-  }
+  };
 
   const handleSwitchRole = useCallback(async () => {
     if (user?.role === USER_ROLE.DRIVER) {
@@ -238,13 +248,13 @@ export default function Sidebar({ children }: IProps) {
         <PushReSubscriber />
         <NotificationRequest />
         <ConfirmModal
-        open={isOpenConfirm}
-        onClose={() => setIsOpenConfirm(false)}
-        handleSubmit={handleSwitchRole}
-        showNotification={showNotification}
-        title="Are you sure to switch to admin?"
-        buttonLabel="Yes, I'm sure"
-      />
+          open={isOpenConfirm}
+          onClose={() => setIsOpenConfirm(false)}
+          handleSubmit={handleSwitchRole}
+          showNotification={showNotification}
+          title="Are you sure to switch to admin?"
+          buttonLabel="Yes, I'm sure"
+        />
 
         {shiftSession ? (
           <ShiftBanner
@@ -290,6 +300,7 @@ export default function Sidebar({ children }: IProps) {
           open={isOpenSwitchRole}
           onClose={() => setIsOpenSwitchRole(false)}
         />
+        <Snowfall />
         <Box sx={{ pb: 8, m: 1 }}>
           {/* <Button onClick={sendNotification}>Send notification</Button> */}
           {renderSwitchRole()}
@@ -351,13 +362,13 @@ export default function Sidebar({ children }: IProps) {
       <>
         {NotificationComp}
         <ConfirmModal
-        open={isOpenConfirm}
-        onClose={() => setIsOpenConfirm(false)}
-        handleSubmit={handleSwitchRole}
-        showNotification={showNotification}
-        title="Are you sure to switch to admin?"
-        buttonLabel="Yes, I'm sure"
-      />
+          open={isOpenConfirm}
+          onClose={() => setIsOpenConfirm(false)}
+          handleSubmit={handleSwitchRole}
+          showNotification={showNotification}
+          title="Are you sure to switch to admin?"
+          buttonLabel="Yes, I'm sure"
+        />
         <NotificationRequest />
 
         {shiftSession ? (
@@ -417,6 +428,7 @@ export default function Sidebar({ children }: IProps) {
           >
             {content}
           </Drawer>
+          <Snowfall />
           <Box width="100%">
             <Box
               display="flex"
@@ -499,6 +511,7 @@ export default function Sidebar({ children }: IProps) {
           {content}
         </Drawer>
         <Box width="100%">
+          <Snowfall />
           <Box display="flex" width="100%" flexDirection="column" m={1} gap={2}>
             {renderSwitchRole()}
             {children}
