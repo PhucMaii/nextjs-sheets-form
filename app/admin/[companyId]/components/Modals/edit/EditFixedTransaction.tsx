@@ -31,6 +31,8 @@ import { pstRate } from '@/app/lib/constant';
 import { gstRate } from '@/app/lib/constant';
 import useSelectExpenseType from '@/hooks/select/useSelectExpenseType';
 import { IFixedTransaction } from '@/app/utils/type';
+import dayjs from 'dayjs';
+import StopGenerationToggle from '../../StopGenerationToggle';
 interface IProps extends ModalProps {
   fixedTransaction: IFixedTransaction;
   showNotification: ShowNotificationType;
@@ -56,10 +58,14 @@ export default function EditFixedTransaction({
     updatedTransaction?.defaultSpentBy || undefined,
   );
 
-  const { selectedExpenseType, renderExpenseTypeSearch } = useSelectExpenseType(companyId, fixedTransaction?.type);
+  const { selectedExpenseType, renderExpenseTypeSearch } = useSelectExpenseType(
+    companyId,
+    fixedTransaction?.type,
+  );
 
   useEffect(() => {
     if (fixedTransaction) {
+      const transaction = fixedTransaction as any;
       setUpdatedTransaction({
         ...fixedTransaction,
         hasGST:
@@ -70,33 +76,40 @@ export default function EditFixedTransaction({
           fixedTransaction?.defaultPST && fixedTransaction?.defaultPST > 0
             ? true
             : false,
+        hasStopped: transaction?.hasStopped || false,
+        lastStopAt: transaction?.lastStopAt || null,
       });
     }
   }, [fixedTransaction]);
 
   useEffect(() => {
-      const gst =
+    const gst =
       Math.round(
         (updatedTransaction?.hasGST
-          ? (updatedTransaction?.defaultSubtotal - (updatedTransaction?.discount || 0)) * gstRate
+          ? (updatedTransaction?.defaultSubtotal -
+              (updatedTransaction?.discount || 0)) *
+            gstRate
           : 0) * 100,
       ) / 100;
     const pst =
       Math.round(
         (updatedTransaction?.hasPST
-          ? (updatedTransaction?.defaultSubtotal - (updatedTransaction?.discount || 0)) * pstRate
+          ? (updatedTransaction?.defaultSubtotal -
+              (updatedTransaction?.discount || 0)) *
+            pstRate
           : 0) * 100,
       ) / 100;
-      setUpdatedTransaction((prevState: any) => ({
-        ...prevState,
-        defaultGST: gst,
-        defaultPST: pst,
-        defaultAmount: prevState?.defaultSubtotal + gst + pst - (updatedTransaction?.discount || 0) ,
-      }));
-  }, [
-    updatedTransaction?.hasGST,
-    updatedTransaction?.hasPST,
-  ]);
+    setUpdatedTransaction((prevState: any) => ({
+      ...prevState,
+      defaultGST: gst,
+      defaultPST: pst,
+      defaultAmount:
+        prevState?.defaultSubtotal +
+        gst +
+        pst -
+        (updatedTransaction?.discount || 0),
+    }));
+  }, [updatedTransaction?.hasGST, updatedTransaction?.hasPST]);
 
   const handleDelete = async () => {
     try {
@@ -123,6 +136,14 @@ export default function EditFixedTransaction({
     }
   };
 
+  const handleToggleStopGeneration = (checked: boolean) => {
+    setUpdatedTransaction({
+      ...updatedTransaction,
+      hasStopped: checked,
+      lastStopAt: checked ? dayjs().format('MM/DD/YYYY HH:mm:ss') : null,
+    });
+  };
+
   const handleUpdate = async () => {
     try {
       setIsUpdating(true);
@@ -134,6 +155,10 @@ export default function EditFixedTransaction({
             ...updatedTransaction,
             defaultSpentBy: selectedEmployee,
             typeId: selectedExpenseType?.id,
+            hasStopped: updatedTransaction?.hasStopped || false,
+            lastStopAt: updatedTransaction?.hasStopped
+              ? updatedTransaction?.lastStopAt || dayjs().format('MM/DD/YYYY HH:mm:ss')
+              : null,
           },
         },
       );
@@ -331,6 +356,18 @@ export default function EditFixedTransaction({
                     .value as FIXED_TRANSACTION_STATUS,
                 })
               }
+            />
+          </Grid>
+
+          <Grid item xs={12}>
+            <Divider sx={{ my: 1 }} />
+          </Grid>
+
+          <Grid item xs={12}>
+            <StopGenerationToggle
+              hasStopped={updatedTransaction?.hasStopped || false}
+              lastStopAt={updatedTransaction?.lastStopAt}
+              onChange={handleToggleStopGeneration}
             />
           </Grid>
 

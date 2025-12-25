@@ -1,10 +1,8 @@
 import { YYYYMMDDFormat } from '@/app/utils/time';
 import { RECURRENCE_TYPE, FIXED_TRANSACTION_STATUS } from '@/app/utils/enum';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getTodayDate, normalizeDate } from '../../utils/date';
-
-const prisma = new PrismaClient();
+import prisma from '@/client';
 
 export default async function handler(
   req: NextApiRequest,
@@ -29,7 +27,6 @@ export default async function handler(
 
     for (const transaction of fixedTransactions) {
       // Create a new expense
-      // const admin: any = await getUserInfo(req, res);
       await prisma.expense.create({
         data: {
           amount: transaction?.defaultAmount || 0,
@@ -49,6 +46,16 @@ export default async function handler(
           typeId: transaction.typeId || -1,
         },
       });
+
+      if (transaction.hasStopped) {
+        await prisma.fixedTransaction.update({
+          where: { id: transaction.id },
+          data: { 
+            status: FIXED_TRANSACTION_STATUS.ARCHIVED,
+          },
+        });
+        continue;
+      }
 
       const nextDueDate = calculateNextDueDate(
         transaction.nextDueDate,

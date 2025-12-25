@@ -632,6 +632,8 @@ status                   String
   defaultTransactionStatus String? // Paid & Unpaid
   paymentMethodId          Int
   typeId                   Int?
+  hasStopped                Boolean?
+  lastStopAt               String?
 
   transactions Expense[]
 

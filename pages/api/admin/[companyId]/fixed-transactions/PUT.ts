@@ -1,12 +1,10 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IBody {
   id: number;
   updatedTransaction: any;
 }
-
-const prisma = new PrismaClient();
 
 export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -37,6 +35,8 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         defaultSpentBy: updatedTransaction.defaultSpentBy,
         recurrence: updatedTransaction.recurrence,
         typeId: updatedTransaction.typeId,
+        hasStopped: updatedTransaction.hasStopped || false,
+        lastStopAt: updatedTransaction.lastStopAt || null,
       },
     });
 

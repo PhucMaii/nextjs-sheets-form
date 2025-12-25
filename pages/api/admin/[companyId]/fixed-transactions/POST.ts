@@ -17,6 +17,8 @@ interface IBody {
   note?: string;
   paymentMethodId: number;
   typeId?: number;
+  hasStopped?: boolean;
+  lastStopAt?: string;
 }
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {

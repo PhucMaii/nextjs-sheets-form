@@ -91,6 +91,8 @@ export default function AddFixedTransaction({
         defaultAmount: 0,
         defaultSpentBy: '',
         defaultTransactionStatus: TRANSACTION_STATUS.PAID,
+        hasStopped: false,
+        lastStopAt: null,
       });
     }
   }, [open]);
