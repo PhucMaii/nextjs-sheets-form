@@ -46,8 +46,6 @@ export const InvoicePrint = forwardRef(
     const endMonth = endDate.getMonth() + 1;
     const endYear = endDate.getFullYear();
 
-    console.log('invoice print');
-
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const { debtData, sortDebtKeys } = useApiDebtData(
       client.id,

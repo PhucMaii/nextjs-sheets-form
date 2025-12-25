@@ -188,8 +188,16 @@ export default function DisplayFile({
         onClose={() => setIsOpenViewImg(false)}
         isCheque={isCheque}
       />
-      {fileKey.split('.')[1] === 'pdf' ? (
-        <embed src={url} width={width || '100px'} height={height || '100px'} />
+      {fileKey.split('.')[fileKey.split('.').length - 1] === 'pdf' ? (
+        <iframe
+          src={toCDN(url, isCheque)}
+          style={{
+            width: '100%',
+            height: '100%',
+            border: 'none',
+          }}
+          title="PDF Front"
+        />
       ) : (
         <Image
           src={toCDN(url, isCheque)}
