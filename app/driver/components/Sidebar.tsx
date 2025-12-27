@@ -49,7 +49,6 @@ import ConfirmModal from '@/app/admin/[companyId]/components/Modals/ConfirmModal
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { UserContext } from '@/app/context/UserContextAPI';
 import { DashboardMode } from '@prisma/client';
-import Snowfall from 'react-snowfall';
 
 interface IProps {
   children: ReactNode;
@@ -300,7 +299,6 @@ export default function Sidebar({ children }: IProps) {
           open={isOpenSwitchRole}
           onClose={() => setIsOpenSwitchRole(false)}
         />
-        <Snowfall />
         <Box sx={{ pb: 8, m: 1 }}>
           {/* <Button onClick={sendNotification}>Send notification</Button> */}
           {renderSwitchRole()}
@@ -428,7 +426,6 @@ export default function Sidebar({ children }: IProps) {
           >
             {content}
           </Drawer>
-          <Snowfall />
           <Box width="100%">
             <Box
               display="flex"
@@ -511,7 +508,6 @@ export default function Sidebar({ children }: IProps) {
           {content}
         </Drawer>
         <Box width="100%">
-          <Snowfall />
           <Box display="flex" width="100%" flexDirection="column" m={1} gap={2}>
             {renderSwitchRole()}
             {children}

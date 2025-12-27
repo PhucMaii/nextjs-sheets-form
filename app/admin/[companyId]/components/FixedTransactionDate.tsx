@@ -1,3 +1,4 @@
+import { warning } from '@/theme/color';
 import { Box, Typography, useMediaQuery, Button, Chip } from '@mui/material';
 import { blue, grey } from '@mui/material/colors';
 import React from 'react';
@@ -12,12 +13,13 @@ function FixedTransactionEvent({
   isGrey?: boolean;
 }) {
   const lgDown = useMediaQuery((theme: any) => theme.breakpoints.down('lg'));
+  const backgroundColor = isGrey ? grey[100] : transaction?.hasStopped ? warning[100] : blue[100];
 
   return (
     <Box
       sx={{
         width: '100%',
-        backgroundColor: isGrey ? grey[100] : blue[100],
+        backgroundColor: backgroundColor,
         borderRadius: 1,
         p: 1,
       }}

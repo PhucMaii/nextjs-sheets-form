@@ -35,7 +35,6 @@ import { USER_CATEGORIZED } from '../utils/enum';
 import Image from 'next/image';
 import HolidayText from './HolidayText';
 import LoadingComponent from './LoadingComponent/LoadingComponent';
-import Snowfall from 'react-snowfall';
 
 interface PropTypes {
   children: ReactNode;
@@ -160,7 +159,6 @@ export default function Sidebar({ children }: PropTypes) {
           sx={{ mb: 10, p: 1 }}
         >
           <HolidayText />
-          <Snowfall />
           {children}
         </Box>
         {isOpenSnackbar && (
@@ -263,7 +261,6 @@ export default function Sidebar({ children }: PropTypes) {
               />
             )}
             <HolidayText />
-            <Snowfall />
             <Box
               display="flex"
               width="100%"
@@ -315,7 +312,6 @@ export default function Sidebar({ children }: PropTypes) {
             sx={{ maxWidth: clientMaxWidth, mx: 'auto', zIndex: 50 }}
           >
             <HolidayText />
-            <Snowfall />
             {children}
           </Box>
         </Box>
