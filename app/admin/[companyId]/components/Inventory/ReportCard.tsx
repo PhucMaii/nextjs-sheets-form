@@ -12,6 +12,7 @@ import {
   Paper,
   Stack,
   Tooltip,
+  useMediaQuery,
 } from '@mui/material';
 import {
   User,
@@ -35,6 +36,8 @@ export default function ReportCard({ report, handleDeleteReport }: IProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const isDriverReturn = report.type === InventoryReportType.DRIVER_RETURN;
+
+  const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   // Color scheme based on report type
   const typeConfig = isDriverReturn
@@ -159,7 +162,12 @@ export default function ReportCard({ report, handleDeleteReport }: IProps) {
                   }}
                 />
               </Box>
-              <Box display="flex" alignItems="center" gap={0.75} flexWrap="wrap">
+              <Box
+                display="flex"
+                alignItems="center"
+                gap={0.75}
+                flexWrap="wrap"
+              >
                 <Typography variant="caption" fontWeight="bold">
                   #{report.id} •
                 </Typography>
@@ -229,8 +237,9 @@ export default function ReportCard({ report, handleDeleteReport }: IProps) {
               sx={{
                 p: 1.5,
                 borderRadius: 1.5,
-                display: 'flex',
-                justifyContent: 'space-between',
+                display: smDown ? 'flex' : 'block',
+                gap: 2,
+                // justifyContent: 'space-between',
                 alignItems: 'center',
                 backgroundColor: typeConfig.bgColor,
                 border: '1px solid',
