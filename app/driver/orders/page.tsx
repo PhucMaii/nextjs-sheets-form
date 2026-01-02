@@ -492,7 +492,7 @@ export default function OrdersPage() {
       <SearchModal
         open={isSearchModalOpen}
         onClose={() => setIsSearchModalOpen(false)}
-        orders={orders}
+        orders={ordersResponse?.data.deliveryOrders || []}
         handleUpdateStatus={handleUpdateStatus}
         handleUpdateItem={handleUpdateItem}
         showNotification={showNotification}
