@@ -3,11 +3,9 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { ITEM_CATEGORIZED } from '../../orderedItems/PUT';
 import { formatDate, getTodayDate } from '@/pages/api/utils/date';
 import { generateListOfDateString } from '@/app/utils/time';
-import { PrismaClient } from '@prisma/client';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { USER_ROLE } from '@/app/utils/enum';
-
-const prisma = new PrismaClient();
+import prisma from '@/client';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
@@ -21,8 +19,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       formattedStartDate,
       formattedEndDate,
     );
-
-    console.log({ listOfDateString, startedAt, endedAt });
 
     const baseShifts = await prisma.scheduledShift.findMany({
       where: {
@@ -53,7 +49,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           employeeId: shift.employeeId,
           date: shift.date,
           queryDate: shift.queryDate,
-          hours: shift.hours,
+          hours: Math.round(shift.hours * 100) / 100,
           createdAt: today.dateAndTime,
           createdBy: createdBy,
           assignedBy: createdBy,
@@ -81,7 +77,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             employeeId: shift.employeeId,
             date: shift.date,
             queryDate: shift.queryDate,
-            hours: shift.hours,
+            hours: Math.round(shift.hours * 100) / 100,
             cost: shift.cost,
             isOff: shift?.isOff,
             isSkip: shift?.isSkip,

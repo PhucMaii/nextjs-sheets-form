@@ -37,6 +37,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const scheduleShifts = await prisma.scheduledShift.findMany({
       where: {
         companyId: Number(companyId),
+        isOff: {
+          not: true,
+        },
         queryDate: {
           in: listOfDateStrings,
         },

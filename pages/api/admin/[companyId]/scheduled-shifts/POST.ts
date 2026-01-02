@@ -1,11 +1,10 @@
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
 import { getCreatedBy } from '@/pages/api/import-sheets/utils';
 import { getTodayDate } from '@/pages/api/utils/date';
-import { PayrollType, PrismaClient } from '@prisma/client';
+import { PayrollType } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
-
-const prisma = new PrismaClient();
+import prisma from '@/client';
 
 export default async function POST(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -14,8 +13,6 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
     const session: any = await getServerSession(req, res, authOptions);
 
     const { scheduledShift } = req.body;
-
-    console.log('scheduledShift', scheduledShift);
 
     const today = getTodayDate();
     const createdBy = await getCreatedBy(req, res, session?.user?.role);
@@ -35,7 +32,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         assignedBy: createdBy,
         assignedAt: today.dateAndTime,
         role: scheduledShift.role,
-        hours: scheduledShift.hours,
+        hours: Math.round(scheduledShift.hours * 100) / 100,
         cost,
       },
     });
