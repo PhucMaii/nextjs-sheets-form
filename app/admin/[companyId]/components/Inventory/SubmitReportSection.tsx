@@ -14,6 +14,7 @@ import {
   Chip,
   Collapse,
   Button,
+  useMediaQuery,
 } from '@mui/material';
 import { FileText } from 'lucide-react';
 import { Edit2, X } from 'lucide-react';
@@ -39,7 +40,7 @@ export default function SubmitReportSection({
 }: IProps) {
   const [isCurrentReportExpanded, setIsCurrentReportExpanded] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
   const handleSubmit = async () => {
     setIsSubmitting(true);
     await handleSubmitReport();
@@ -62,6 +63,7 @@ export default function SubmitReportSection({
       <CardContent sx={{ p: 1.5 }}>
         <Box
           display="flex"
+          flexDirection={smDown ? 'column' : 'row'}
           justifyContent="space-between"
           alignItems="center"
           onClick={() => setIsCurrentReportExpanded(!isCurrentReportExpanded)}
@@ -74,22 +76,40 @@ export default function SubmitReportSection({
             <Typography variant="subtitle2" fontWeight={600}>
               Current Report ({currentReportItems.length} items)
             </Typography>
+            {smDown && (
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsCurrentReportExpanded(!isCurrentReportExpanded);
+                }}
+                sx={{ color: 'text.secondary' }}
+              >
+                {isCurrentReportExpanded ? (
+                  <ChevronUp size={18} />
+                ) : (
+                  <ChevronDown size={18} />
+                )}
+              </IconButton>
+            )}
           </Box>
-          <Box display="flex" alignItems="center" gap={1}>
-            <IconButton
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsCurrentReportExpanded(!isCurrentReportExpanded);
-              }}
-              sx={{ color: 'text.secondary' }}
-            >
-              {isCurrentReportExpanded ? (
-                <ChevronUp size={18} />
-              ) : (
-                <ChevronDown size={18} />
-              )}
-            </IconButton>
+          <Box display="flex" mt={smDown ? 1 : 0} width="100%" alignItems="center" gap={1}>
+            {!smDown && (
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsCurrentReportExpanded(!isCurrentReportExpanded);
+                }}
+                sx={{ color: 'text.secondary' }}
+              >
+                {isCurrentReportExpanded ? (
+                  <ChevronUp size={18} />
+                ) : (
+                  <ChevronDown size={18} />
+                )}
+              </IconButton>
+            )}
             <Button
               variant="outlined"
               size="small"
@@ -103,6 +123,7 @@ export default function SubmitReportSection({
                 px: 1.5,
                 minWidth: 'auto',
               }}
+              fullWidth={smDown}
             >
               Clear
             </Button>
@@ -122,6 +143,7 @@ export default function SubmitReportSection({
                 px: 2,
                 minWidth: 'auto',
               }}
+              fullWidth={smDown}
             >
               Submit
             </LoadingButton>

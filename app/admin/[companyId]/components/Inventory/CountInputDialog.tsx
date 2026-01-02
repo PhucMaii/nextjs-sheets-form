@@ -34,6 +34,7 @@ export default function CountInputDialog({
 }: IProps) {
   const { companyId }: any = useParams();
   const [countInput, setCountInput] = useState<number>(0);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
   const quantityInputRef = useRef<HTMLInputElement>(null);
 
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
@@ -70,6 +71,12 @@ export default function CountInputDialog({
       setCountInput(0);
     }
   }, [currentReportItems, selectedItem]);
+
+  const handleSubmit = async () => {
+    setIsSaving(true);
+    await handleSaveCount(countInput, selectedUnit);
+    setIsSaving(false);
+  }
 
   return (
     <Dialog
@@ -141,14 +148,11 @@ export default function CountInputDialog({
           Cancel
         </Button>
         <Button
-          onClick={() => {
-            if (isLoading) return;
-            handleSaveCount(countInput, selectedUnit);
-          }}
+          onClick={handleSubmit}
           variant="contained"
-          disabled={isLoading}
+          disabled={isLoading || isSaving}
         >
-          Save
+          {isSaving ? 'Saving...' : 'Save'}
         </Button>
       </DialogActions>
     </Dialog>

@@ -22,22 +22,62 @@ import {
   ChevronDown,
   ClipboardCheck,
   Truck,
+  EditIcon,
 } from 'lucide-react';
 import { IInventoryReport } from '@/app/utils/type';
 import { InventoryReportType } from '@prisma/client';
 import dayjs from 'dayjs';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
+import CountInputDialog from './CountInputDialog';
+import axios from 'axios';
+import { getAdminApiUrl } from '@/app/utils/enum';
+import { useParams } from 'next/navigation';
+import { ShowNotificationType } from '@/hooks/useNotification';
 
 interface IProps {
   report: IInventoryReport;
   handleDeleteReport: (reportId: number) => void;
+  showNotification: ShowNotificationType;
+  refetchReport: () => void;
 }
-export default function ReportCard({ report, handleDeleteReport }: IProps) {
+export default function ReportCard({
+  report,
+  handleDeleteReport,
+  showNotification,
+  refetchReport,
+}: IProps) {
+  const { companyId }: any = useParams();
   const [isExpanded, setIsExpanded] = useState(false);
-
+  const [isCountInputDialogOpen, setIsCountInputDialogOpen] =
+    useState<boolean>(false);
+  const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const isDriverReturn = report.type === InventoryReportType.DRIVER_RETURN;
 
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
+
+  const handleSaveCount = async (countInput: number, inventoryUnit: any) => {
+    try {
+      const res = await axios.put(
+        getAdminApiUrl(companyId, '/inventory-report/count'),
+        {
+          inventoryCountId: selectedItem?.id,
+          countedQty: countInput,
+          inventoryUnitId: inventoryUnit.id,
+        },
+      );
+      if (res.data.error) {
+        showNotification('error', res.data.error);
+        return;
+      }
+      refetchReport();
+      showNotification('success', res.data.message);
+      setIsCountInputDialogOpen(false);
+      setSelectedItem(null);
+    } catch (error: any) {
+      console.error('Failed to save count:', error);
+      showNotification('error', 'Failed to save count');
+    }
+  };
 
   // Color scheme based on report type
   const typeConfig = isDriverReturn
@@ -308,7 +348,7 @@ export default function ReportCard({ report, handleDeleteReport }: IProps) {
                 flexDirection: 'column',
                 gap: smDown ? 1.5 : 2,
                 justifyContent: 'space-between',
-                alignItems: smDown ? 'flex-start' : 'center',
+                alignItems: 'flex-start',
                 backgroundColor: typeConfig.bgColor,
                 border: '1px solid',
                 borderColor: alpha(typeConfig.primaryColor, 0.2),
@@ -348,11 +388,30 @@ export default function ReportCard({ report, handleDeleteReport }: IProps) {
                     },
                   }}
                 />
+                <IconButton
+                  onClick={() => {
+                    setIsCountInputDialogOpen(true);
+                    setSelectedItem(item);
+                  }}
+                >
+                  <EditIcon size={smDown ? 18 : 14} />
+                </IconButton>
               </Box>
             </Paper>
           ))}
         </Stack>
       </AccordionDetails>
+
+      {selectedItem && (
+        <CountInputDialog
+          isDialogOpen={isCountInputDialogOpen}
+          setIsDialogOpen={setIsCountInputDialogOpen}
+          currentReportItems={[selectedItem]}
+          handleSaveCount={handleSaveCount}
+          selectedItem={{ ...selectedItem, id: selectedItem.inventoryItemId }}
+          setSelectedItem={setSelectedItem}
+        />
+      )}
     </Accordion>
   );
 }

@@ -852,6 +852,8 @@ export default function InventoryReports({ showNotification }: IProps) {
                               reportId: reportId,
                             })
                           }
+                          showNotification={showNotification}
+                          refetchReport={() => refetchReports()}
                         />
                       );
                     })}
