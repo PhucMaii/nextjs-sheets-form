@@ -1,10 +1,4 @@
-import {
-  Box,
-  Button,
-  Grid,
-  Typography,
-  useMediaQuery,
-} from '@mui/material';
+import { Box, Button, Grid, Typography, useMediaQuery } from '@mui/material';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ShadowSection } from '../reports/styled';
 import '../../../../styles/fullCalendar.css';
@@ -55,15 +49,17 @@ export default function ScheduledShifts() {
         totalHours: 0,
         totalCost: 0,
       };
-    const totalHours = scheduledShifts.reduce(
+
+    const validShifts = scheduledShifts.filter((shift) => !shift.isOff);
+    const totalHours = validShifts.reduce(
       (acc, shift) => acc + (shift.hours || 0),
       0,
     );
 
-    const hourlyScheduledShifts = scheduledShifts.filter(
+    const hourlyScheduledShifts = validShifts.filter(
       (shift) => shift.employee?.payrollType === PayrollType.hourly,
     );
-    const salariedScheduledShifts = scheduledShifts.filter(
+    const salariedScheduledShifts = validShifts.filter(
       (shift) => shift.employee?.payrollType === PayrollType.monthly,
     );
     const salaryEmployeesInScheduledShifts = employees.filter(
@@ -87,7 +83,7 @@ export default function ScheduledShifts() {
     const totalCost = totalHourlyCost + totalSalaryCost;
 
     return {
-      totalShifts: scheduledShifts.length,
+      totalShifts: validShifts.length,
       totalHours,
       totalCost,
     };
