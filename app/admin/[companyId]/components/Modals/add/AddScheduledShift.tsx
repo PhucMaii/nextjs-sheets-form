@@ -70,8 +70,9 @@ export default function AddScheduledShift({
         return;
       }
 
-      const hours = newShift.endedAt.diff(newShift.startedAt, 'hours');
-
+      const minutes = newShift.endedAt.diff(newShift.startedAt, 'minutes');
+      const hours = Math.round(minutes / 60 * 100) / 100;
+      
       const response = await axios.post(
         getAdminApiUrl(companyId, '/scheduled-shifts'),
         {
@@ -90,7 +91,7 @@ export default function AddScheduledShift({
               dateStyle: 'full',
             }),
             queryDate: newShift.startedAt.format('MM/DD/YYYY'),
-            hours: Math.round(hours * 100) / 100,
+            hours,
           },
         },
       );
