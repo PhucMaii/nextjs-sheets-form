@@ -3,22 +3,24 @@ import React from 'react';
 import { BoxModal } from '../styled';
 import ModalHead from '@/app/lib/ModalHead';
 
-export default function EditPOItemNote({
+export default function EditNote({
   open,
   onClose,
   item,
   onUpdateNote,
+  title,
 }: {
   open: boolean;
   onClose: () => void;
   item: any;
   onUpdateNote: (note: string) => void;
+  title: string;
 }) {
   return (
     <Modal open={open} onClose={onClose}>
       <BoxModal>
         <ModalHead
-          heading="Edit PO Item Note"
+          heading={title}
           buttonLabel="Save"
           onClick={() => {}}
           buttonProps={{

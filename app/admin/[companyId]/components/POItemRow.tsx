@@ -24,7 +24,7 @@ import { gstRate, pstRate } from '@/app/lib/constant';
 import ReceivedProgress from './ReceivedProgress';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { green, red } from '@mui/material/colors';
-import EditPOItemNote from './Modals/edit/EditPOItemNote';
+import EditNote from './Modals/edit/EditNote';
 
 interface IProps {
   item: any;
@@ -74,13 +74,14 @@ export const POItemRow = ({
   };
   return (
     <>
-      <EditPOItemNote
+      <EditNote
         open={isOpenEditPOItemNote}
         onClose={() => setIsOpenEditPOItemNote(false)}
         item={item}
         onUpdateNote={(note: string) => {
           onChangeItem(index, 'note', note);
         }}
+        title="PO Item Note"
       />
       <Box key={item.id} display="flex" flexDirection="column" gap={2}>
         <Grid

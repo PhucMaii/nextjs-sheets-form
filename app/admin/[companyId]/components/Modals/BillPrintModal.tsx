@@ -7,6 +7,7 @@ import {
   Divider,
   FormControlLabel,
   FormGroup,
+  IconButton,
   Menu,
   MenuItem,
   Modal,
@@ -30,6 +31,7 @@ import { NewManifestPrint } from '../Printing/NewManifestPrint';
 import { SummaryManifest } from '../Printing/SummaryManifest';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { DropdownItemContainer } from '../../orders/styled';
+import ArticleIcon from '@mui/icons-material/Article';
 
 interface PropTypes extends ModalProps {
   routes: IRoutes[];
@@ -109,7 +111,14 @@ const BillPrintModal = ({
     }
   };
 
-  console.log({selectedRoutes, itemManifest})
+  const handleAddNoteToManifest = (note: string, routeId: string) => {
+    const newManifest = { ...itemManifest };
+    const targetRouteManifest = newManifest[routeId];
+    if (targetRouteManifest) {
+      targetRouteManifest.notes = [...targetRouteManifest.notes, note];
+    }
+    setItemManifest(newManifest);
+  };
 
   const handleBillPrint = useReactToPrint({
     content: () => billPrint.current,
@@ -261,25 +270,6 @@ const BillPrintModal = ({
         </RadioGroup>
         <Divider />
         <Box display="flex" justifyContent="right">
-          {/* <Button
-            onClick={handlePrintManifestDetails}
-            disabled={
-              billPrintOption === BILL_PRINT_OPTION.NONE ||
-              selectedRoutes.length === 0
-            }
-            color="info"
-            variant="outlined"
-          >
-            <Box
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              gap={2}
-            >
-              <PrintIcon />
-              <Typography>Manifest</Typography>
-            </Box>
-          </Button> */}
           {manifestPrintButton}
         </Box>
         <Box display="flex" alignItems="center" justifyContent="center">
@@ -326,6 +316,8 @@ const BillPrintModal = ({
                         (baseRoute: IRoutes) => route.id === baseRoute.id,
                       );
                       return (
+                        <Box key={route.id}>
+
                         <FormControlLabel
                           key={route.id}
                           control={
@@ -336,6 +328,11 @@ const BillPrintModal = ({
                           }
                           label={`${route.name} - ${route?.employee?.name}`}
                         />
+
+                        <IconButton onClick={() => handleAddNoteToManifest(route.id)}>
+                          <ArticleIcon />
+                        </IconButton>
+                        </Box>
                       );
                     })}
 

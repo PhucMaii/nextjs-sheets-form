@@ -35,12 +35,12 @@ const QuickViewItem = ({ item }: { item: any }) => {
   const [imgUrl, setImgUrl] = useState<string>('');
 
   useEffect(() => {
-    if (item.inventoryItem.image) {
+    if (item?.inventoryItem?.image) {
       setImgUrl(generateImgUrl(item.inventoryItem.image, false));
     } else {
       setImgUrl('/images/not-found.png');
     }
-  }, [item.inventoryItem.image]);
+  }, [item?.inventoryItem?.image]);
 
     // const getImgUrl = async () => {
     //   const imgLink = await generateImgUrl(item.inventoryItem.image);
@@ -52,22 +52,22 @@ const QuickViewItem = ({ item }: { item: any }) => {
       <Grid item xs={3}>
         <Image
           src={imgUrl}
-          alt={item.inventoryItem.name}
+          alt={item?.inventoryItem?.name || item?.name}
           width={40}
           height={40}
           loading="lazy"
         />
       </Grid>
       <Grid item xs={6}>
-        <Typography variant="subtitle1">{item.inventoryItem.name}</Typography>
-        {item.inventoryItem?.sku && (
+        <Typography variant="subtitle1">{item?.inventoryItem?.name || item?.name}</Typography>
+        {item?.inventoryItem?.sku && (
           <Typography variant="caption" sx={{ color: grey[700] }}>
-            {item.inventoryItem?.sku}
+            {item?.inventoryItem?.sku}
           </Typography>
         )}
       </Grid>
       <Grid item xs={3} sx={{ textAlign: `right` }}>
-        <Typography variant="subtitle1" sx={{fontWeight: 'regular'}}>x {item.quantity}</Typography>
+        <Typography variant="subtitle1" sx={{fontWeight: 'regular'}}>x {item?.quantity}</Typography>
       </Grid>
       <Grid item xs={12}>
         <Divider />
