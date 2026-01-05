@@ -109,6 +109,8 @@ const BillPrintModal = ({
     }
   };
 
+  console.log({selectedRoutes, itemManifest})
+
   const handleBillPrint = useReactToPrint({
     content: () => billPrint.current,
   });

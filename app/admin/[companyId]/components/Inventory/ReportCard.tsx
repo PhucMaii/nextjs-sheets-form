@@ -51,6 +51,7 @@ export default function ReportCard({
   const [isCountInputDialogOpen, setIsCountInputDialogOpen] =
     useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
+  const [isNoteTooltipOpen, setIsNoteTooltipOpen] = useState(false);
   const isDriverReturn = report.type === InventoryReportType.DRIVER_RETURN;
 
   const smDown = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
@@ -271,9 +272,31 @@ export default function ReportCard({
                   {dayjs(report.createdAt).format('HH:mm')}
                 </Typography>
                 {report?.note && (
-                  <Tooltip title={report.note}>
+                  <Tooltip
+                    title={report.note}
+                    open={isNoteTooltipOpen}
+                    onClose={() => setIsNoteTooltipOpen(false)}
+                    disableFocusListener
+                    disableHoverListener
+                    disableTouchListener
+                  >
                     <IconButton
                       size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        setIsNoteTooltipOpen(!isNoteTooltipOpen);
+                      }}
+                      onMouseEnter={() => {
+                        if (!smDown) {
+                          setIsNoteTooltipOpen(true);
+                        }
+                      }}
+                      onMouseLeave={() => {
+                        if (!smDown) {
+                          setIsNoteTooltipOpen(false);
+                        }
+                      }}
                       sx={{
                         ml: -0.5,
                         minWidth: smDown ? 40 : 'auto',
