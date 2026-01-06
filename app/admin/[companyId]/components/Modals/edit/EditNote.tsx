@@ -6,13 +6,13 @@ import ModalHead from '@/app/lib/ModalHead';
 export default function EditNote({
   open,
   onClose,
-  item,
+  note,
   onUpdateNote,
   title,
 }: {
   open: boolean;
   onClose: () => void;
-  item: any;
+  note: string;
   onUpdateNote: (note: string) => void;
   title: string;
 }) {
@@ -35,7 +35,7 @@ export default function EditNote({
 
         <TextField
           label="Note"
-          value={item.note}
+          value={note}
           onChange={(e) => {
             onUpdateNote(e.target.value);
           }}

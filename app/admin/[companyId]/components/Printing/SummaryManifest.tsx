@@ -31,6 +31,8 @@ export const SummaryManifest = forwardRef(
       );
     }
 
+    console.log({ manifest });
+
     return (
       <div ref={ref}>
         <Box sx={{ width: '100%', height: '100%', marginRight: 10 }}>
@@ -67,6 +69,20 @@ export const SummaryManifest = forwardRef(
                     </Typography>
                     <Typography>{currentDate}</Typography>
                   </Box>
+
+                  {manifest[routeId]?.adminNote && (
+                    <Box m={2}>
+                      <Typography
+                        variant="subtitle1"
+                        sx={{ fontStyle: 'italic' }}
+                      >
+                        Admin Note:
+                      </Typography>
+                      <Typography variant="subtitle2" sx={{ fontStyle: 'italic' }}>
+                        {manifest[routeId]?.adminNote}
+                      </Typography>
+                    </Box>
+                  )}
 
                   {/* Summary Manifest Table */}
                   <Table>

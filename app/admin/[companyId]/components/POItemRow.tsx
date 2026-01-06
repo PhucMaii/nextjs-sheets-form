@@ -77,7 +77,7 @@ export const POItemRow = ({
       <EditNote
         open={isOpenEditPOItemNote}
         onClose={() => setIsOpenEditPOItemNote(false)}
-        item={item}
+        note={item?.note || ''}
         onUpdateNote={(note: string) => {
           onChangeItem(index, 'note', note);
         }}

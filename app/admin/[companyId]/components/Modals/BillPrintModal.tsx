@@ -32,6 +32,7 @@ import { SummaryManifest } from '../Printing/SummaryManifest';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { DropdownItemContainer } from '../../orders/styled';
 import ArticleIcon from '@mui/icons-material/Article';
+import EditNote from './edit/EditNote';
 
 interface PropTypes extends ModalProps {
   routes: IRoutes[];
@@ -61,6 +62,11 @@ const BillPrintModal = ({
     BILL_PRINT_OPTION.NONE,
   );
   const [selectedRoutes, setSelectedRoutes] = useState<IRoutes[]>([]);
+  const [editNoteProps, setEditNoteProps] = useState({
+    open: false,
+    note: '',
+    routeId: '',
+  });
   const billPrint: any = useRef();
   const manifestPrint: any = useRef();
   const newManifestPrint: any = useRef();
@@ -109,15 +115,6 @@ const BillPrintModal = ({
     } else {
       setSelectedRoutes((prevRoutes) => [...prevRoutes, targetRoute]);
     }
-  };
-
-  const handleAddNoteToManifest = (note: string, routeId: string) => {
-    const newManifest = { ...itemManifest };
-    const targetRouteManifest = newManifest[routeId];
-    if (targetRouteManifest) {
-      targetRouteManifest.notes = [...targetRouteManifest.notes, note];
-    }
-    setItemManifest(newManifest);
   };
 
   const handleBillPrint = useReactToPrint({
@@ -317,21 +314,30 @@ const BillPrintModal = ({
                       );
                       return (
                         <Box key={route.id}>
+                          <FormControlLabel
+                            key={route.id}
+                            control={
+                              <Checkbox
+                                checked={isChecked}
+                                onChange={(e: any) =>
+                                  handleSelectRoute(e, route)
+                                }
+                              />
+                            }
+                            label={`${route.name} - ${route?.employee?.name}`}
+                          />
 
-                        <FormControlLabel
-                          key={route.id}
-                          control={
-                            <Checkbox
-                              checked={isChecked}
-                              onChange={(e: any) => handleSelectRoute(e, route)}
-                            />
-                          }
-                          label={`${route.name} - ${route?.employee?.name}`}
-                        />
-
-                        <IconButton onClick={() => handleAddNoteToManifest(route.id)}>
-                          <ArticleIcon />
-                        </IconButton>
+                          <IconButton
+                            onClick={() =>
+                              setEditNoteProps({
+                                open: true,
+                                note: '',
+                                routeId: route?.id?.toString() || '',
+                              })
+                            }
+                          >
+                            <ArticleIcon />
+                          </IconButton>
                         </Box>
                       );
                     })}
@@ -367,6 +373,23 @@ const BillPrintModal = ({
             ''
           )}
         </Box>
+        {editNoteProps.routeId && <EditNote
+          open={editNoteProps.open}
+          onClose={() =>
+            setEditNoteProps({ open: false, note: '', routeId: '' })
+          }
+          note={itemManifest[editNoteProps.routeId]?.adminNote || ''}
+          onUpdateNote={(note: string) => {
+            setItemManifest({
+              ...itemManifest,
+              [editNoteProps?.routeId as string]: {
+                ...itemManifest[editNoteProps.routeId as string],
+                adminNote: note,
+              },
+            });
+          }}
+          title="Note"
+        />}
       </BoxModal>
     </Modal>
   );
