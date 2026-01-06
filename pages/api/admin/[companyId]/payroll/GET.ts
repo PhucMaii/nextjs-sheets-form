@@ -8,7 +8,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const { companyId, startDate, endDate } = req.query;
 
     if (!companyId || !startDate || !endDate) {
-      console.log({ companyId, startDate, endDate });
       return res.status(400).json({ error: 'Missing required parameters' });
     }
 
@@ -19,8 +18,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       formattedStartDate,
       formattedEndDate,
     );
-
-    console.log(listOfDateString);
 
     const payrolls = await prisma.payroll.findMany({
       where: {

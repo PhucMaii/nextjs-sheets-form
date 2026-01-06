@@ -175,7 +175,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
 
     const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);
 
-    let dbInventoryItemLeft = existingInventoryItem.vendorItem;
     for (const updatedVendorItem of vendorItems) {
       if (
         !isNaN(Number(updatedVendorItem.vendorItemId)) &&
@@ -206,10 +205,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
           existingVendorItem.id,
           updatedAt,
           createdBy,
-        );
-
-        dbInventoryItemLeft = dbInventoryItemLeft.filter(
-          (item: any) => item.id !== existingVendorItem.id,
         );
       } else {
         // Case: New Vendor Item
@@ -242,12 +237,21 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       }
     }
 
+    // Delete vendor items that are not in the updated vendor items
+    const toDeleteVendorItems: any[] = existingInventoryItem.vendorItem.filter(
+      (item: any) =>
+        !vendorItems.some(
+          (vendorItem: any) => vendorItem.vendorItemId === item.id,
+        ),
+    );
+    console.log(toDeleteVendorItems, 'toDeleteVendorItems');
+
     // Delete old vendor items
-    if (dbInventoryItemLeft.length > 0) {
+    if (toDeleteVendorItems.length > 0) {
       const inventoryUnits = await prisma.inventoryUnit.findMany({
         where: {
           vendorItemId: {
-            notIn: dbInventoryItemLeft.map((item: any) => item.id),
+            notIn: toDeleteVendorItems.map((item: any) => item.id),
           },
           vendorItem: {
             inventoryItemId: existingInventoryItem.id,
@@ -258,7 +262,7 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       const inventoryUnitsWillBeDeleted = await prisma.inventoryUnit.findMany({
         where: {
           vendorItemId: {
-            in: dbInventoryItemLeft.map((item: any) => item.id),
+            in: toDeleteVendorItems.map((item: any) => item.id),
           },
         },
       });
@@ -287,10 +291,18 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         },
       });
 
+      // Delete vendor items that are not in the updated vendor items
+      await prisma.inventoryUnit.deleteMany({
+        where: {
+          id: {
+            in: inventoryUnitsWillBeDeleted.map((item: any) => item.id),
+          },
+        },
+      });
       await prisma.vendorItem.deleteMany({
         where: {
           id: {
-            in: dbInventoryItemLeft.map((item: any) => item.id),
+            in: toDeleteVendorItems.map((item: any) => item.id),
           },
         },
       });

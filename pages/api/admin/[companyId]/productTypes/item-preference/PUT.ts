@@ -97,7 +97,6 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
       );
     }
 
-    console.log(inventoryUnitId, 'inventoryUnitId');
 
     await prisma.itemPreference.update({
       where: {

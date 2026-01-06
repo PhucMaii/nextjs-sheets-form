@@ -414,8 +414,7 @@ const InventoryTemplate = ({
     const newSelectedVendors = selectedVendors.map((vendor) => {
       if (vendor.id === vendorId) {
         if (vendor.units.length === 1) {
-          showNotification('error', 'Vendor must have at least one unit');
-          return vendor;
+          return null;
         }
         if (unit?.ratio === 1) {
           showNotification('error', 'Unit with ratio of 1 cannot be deleted');
@@ -427,7 +426,7 @@ const InventoryTemplate = ({
         };
       }
       return vendor;
-    });
+    }).filter((vendor) => vendor !== null);
     setSelectedVendors(newSelectedVendors);
   };
 
