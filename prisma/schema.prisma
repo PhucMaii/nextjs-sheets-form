@@ -235,13 +235,13 @@ model QuoteItem {
   companyId       Int?
   quoteId         Int
   inventoryItemId Int
-  inventoryUnitId Int
+  inventoryUnitId Int?
   quantity        Int
   price           Int
 
   quote         Quote         @relation(fields: [quoteId], references: [id], onDelete: Cascade)
   inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
-  inventoryUnit InventoryUnit @relation(fields: [inventoryUnitId], references: [id], onDelete: Cascade)
+  inventoryUnit InventoryUnit? @relation(fields: [inventoryUnitId], references: [id], onDelete: Cascade)
   company       Company?      @relation(fields: [companyId], references: [id], onDelete: Cascade)
 }
 
@@ -898,11 +898,11 @@ model ItemPreference {
   price           Float
   isShowDiscount  Boolean?
   prevPrice       Float?
-  inventoryUnitId Int
+  inventoryUnitId Int?
   name            String
   inventoryItem   InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
   type            ItemType      @relation(fields: [typeId], references: [id], onDelete: Cascade)
-  inventoryUnit   InventoryUnit @relation(fields: [inventoryUnitId], references: [id])
+  inventoryUnit   InventoryUnit? @relation(fields: [inventoryUnitId], references: [id])
 }
 
 model ItemType {
@@ -1218,11 +1218,11 @@ model POItem {
   tax             Float?
   costPerItem     Float
   note            String?
-  inventoryUnitId Int
-  qtyDelta        Float?     // this will be converted to ratio of 1
+  inventoryUnitId Int?
+  qtyDelta        Float?   // this will be converted to ratio of 1
 
   inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
-  inventoryUnit InventoryUnit @relation(fields: [inventoryUnitId], references: [id])
+  inventoryUnit InventoryUnit? @relation(fields: [inventoryUnitId], references: [id])
   po            PO            @relation(fields: [poId], references: [id], onDelete: Cascade)
   company       Company?      @relation(fields: [companyId], references: [id])
 
@@ -1235,7 +1235,7 @@ model LossReport {
   companyId       Int?
   inventoryItemId Int
   quantityLost    Int
-  inventoryUnitId Int
+  inventoryUnitId Int?
   totalCost       Float?
   lossType        String
   description     String?
@@ -1247,7 +1247,7 @@ model LossReport {
   medias Media[]
 
   inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
-  inventoryUnit InventoryUnit @relation(fields: [inventoryUnitId], references: [id])
+  inventoryUnit InventoryUnit? @relation(fields: [inventoryUnitId], references: [id])
   company       Company?      @relation(fields: [companyId], references: [id])
 }
 

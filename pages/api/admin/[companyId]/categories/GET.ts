@@ -96,21 +96,20 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             },
           },
         },
-        // orderBy: [
-        //   { inventoryItem: { type: { priority: 'asc' } } }, // Order by type priority first
-        //   { inventoryItem: { indexPos: 'asc' } }, // Then by indexPos
-        // ],
       });
 
-      const returnedItems = items.sort((a: any, b: any) => {
-        const typePriorityDiff =
-          a?.inventoryItem?.type?.priority - b?.inventoryItem?.type?.priority;
+      const returnedItems = [...items].sort((a: any, b: any) => {
+        const aTypePriority = a?.inventoryItem?.type?.priority ?? Infinity;
+        const bTypePriority = b?.inventoryItem?.type?.priority ?? Infinity;
 
-        if (typePriorityDiff !== 0) {
-          return typePriorityDiff;
+        if (aTypePriority !== bTypePriority) {
+          return aTypePriority - bTypePriority;
         }
 
-        return a.inventoryItem.indexPos - b.inventoryItem.indexPos;
+        const aIndex = a?.inventoryItem?.indexPos ?? Infinity;
+        const bIndex = b?.inventoryItem?.indexPos ?? Infinity;
+
+        return aIndex - bIndex;
       });
 
       const itemsWithQtyLeft = returnedItems.map((item: any) => {
@@ -187,9 +186,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     const categories = await prisma.category.findMany({
       where: {
         companyId: Number(companyId),
-        id: all === 'true' ? undefined : {
-          not: websiteItemCategoryId,
-        },
+        id:
+          all === 'true'
+            ? undefined
+            : {
+                not: websiteItemCategoryId,
+              },
       },
       include: {
         users: true,
