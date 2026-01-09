@@ -321,7 +321,7 @@ export default function ScheduledShiftTable({
                       <Typography>
                         {shifts
                           .filter(
-                            (shift: any) => shift.employeeId === employee.id,
+                            (shift: any) => shift.employeeId === employee.id && !shift.isOff,
                           )
                           .reduce(
                             (acc: number, shift: any) =>

@@ -29,6 +29,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       formattedEndDate,
     );
 
+    console.log({ formattedStartDate, formattedEndDate, listOfDateStrings });
+
     // console.log({ listOfDateStrings, formattedStartDate, formattedEndDate });
 
     const { yyyymmddStartDate, yyyymmddEndDate, employeeIds } = req.body;
@@ -37,9 +39,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const scheduleShifts = await prisma.scheduledShift.findMany({
       where: {
         companyId: Number(companyId),
-        isOff: {
-          not: true,
-        },
+        OR :[
+          {
+            isOff: false
+          },
+          {
+            isOff: null
+          }
+        ],
         queryDate: {
           in: listOfDateStrings,
         },
@@ -78,6 +85,19 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       return acc;
     }, {});
+
+    const logScheduledShifts = scheduleShifts.map((shift) => {
+      return {
+        employeeId: shift.employeeId,
+        hours: shift.hours,
+        cost: shift.cost,
+        queryDate: shift.queryDate,
+        startedAt: shift.startedAt,
+        endedAt: shift.endedAt,
+      };
+    });
+
+    console.log({ logScheduledShifts });
 
     const toady = getTodayDate();
     const createdBy = await getCreatedBy(req, res, USER_ROLE.ADMIN);

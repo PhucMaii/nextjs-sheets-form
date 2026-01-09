@@ -21,6 +21,7 @@ import { getAdminApiUrl } from '@/app/utils/enum';
 import { useParams } from 'next/navigation';
 import axios from 'axios';
 import { getRole } from '@/pages/api/utils/employee';
+import { PayrollType } from '@prisma/client';
 
 interface IProps extends ModalProps {
   payroll: IPayroll;
@@ -60,24 +61,25 @@ export default function EditPayroll({
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
-        const response = await axios.delete(getAdminApiUrl(companyId, '/payroll', `id=${payroll.id}`));
+      const response = await axios.delete(
+        getAdminApiUrl(companyId, '/payroll', `id=${payroll.id}`),
+      );
 
-        if (response.data.error) {
-            showNotification('error', response.data.message);
-            return;
-        }
+      if (response.data.error) {
+        showNotification('error', response.data.message);
+        return;
+      }
 
-        await refresh();
-        showNotification('success', 'Payroll deleted successfully');
-        onClose();
-    } catch (error: any){
-        console.log('There was an error: ', error);
-        showNotification('error', 'There was an error: ' + error);
+      await refresh();
+      showNotification('success', 'Payroll deleted successfully');
+      onClose();
+    } catch (error: any) {
+      console.log('There was an error: ', error);
+      showNotification('error', 'There was an error: ' + error);
+    } finally {
+      setIsDeleting(false);
     }
-    finally {
-        setIsDeleting(false);
-    }
-  }
+  };
 
   const handleSave = async () => {
     setIsUpdating(true);
@@ -140,6 +142,14 @@ export default function EditPayroll({
                   setUpdatedPayroll({
                     ...updatedPayroll,
                     hours: +e.target.value,
+                    total:
+                      updatedPayroll.employee.payrollType === PayrollType.hourly
+                        ? Math.round(
+                            +e.target.value *
+                              (updatedPayroll.employee.payRate || 0) *
+                              100,
+                          ) / 100
+                        : updatedPayroll.total || 0,
                   });
                 }}
                 fullWidth

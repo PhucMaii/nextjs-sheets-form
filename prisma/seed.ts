@@ -120,66 +120,39 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-  const startDate = new Date('2025-11-01');
+  const startDate = new Date('2025-12-01');
   const endDate = new Date('2025-12-31');
 
-  const dates = generateListOfDateString(startDate, endDate);
+  const listOfDateStrings = generateListOfDateString(startDate, endDate);
 
-  const orderItemsWithNullCost = await prisma.orderedItems.findMany({
+  const scheduledShifts = await prisma.scheduledShift.findMany({
     where: {
-      cost: null,
-      Orders: {
-        deliveryDate: {
-          in: dates,
+      OR: [
+        {
+          isOff: false,
         },
-      },
-    },
-    include: {
-      Orders: true,
-      fifo: {
-        include: {
-          vendorItem: {
-            include: {
-              unit: true,
-            },
-          },
+        {
+          isOff: null,
         },
+      ],
+      queryDate: {
+        in: listOfDateStrings,
       },
+      employeeId: 10
     },
   });
 
-  const formattedData = orderItemsWithNullCost.map((orderedItem) => {
+  const logScheduledShifts = scheduledShifts.map((shift) => {
     return {
-      id: orderedItem.id,
-      name: orderedItem.name,
-      cost: orderedItem.cost,
-      price: orderedItem.price,
-      quantity: orderedItem.quantity,
-      deliveryDate: orderedItem.Orders?.deliveryDate,
-      orderId: orderedItem.Orders?.id,
-      fifoId: orderedItem.fifoId,
+      employeeId: shift.employeeId,
+      hours: shift.hours,
+      cost: shift.cost,
+      queryDate: shift.queryDate,
+      isOff: shift.isOff,
     };
   });
 
-  console.log(formattedData, 'formattedData');
-
-
-  // await Promise.allSettled(
-  //   orderItemsWithNullCost.map(async (orderedItem) => {
-  //     const cost = orderedItem.fifo?.price
-  //       ? orderedItem.fifo.price
-  //       : orderedItem.fifo?.vendorItem?.unit?.find(
-  //           (unit: any) => unit.ratio === 1,
-  //         )?.unitPrice || 0;
-  //     const profit = orderedItem.price - cost;
-
-  //     console.log(orderedItem.id, cost, profit, 'id and cost and profit');
-  //     await prisma.orderedItems.update({
-  //       where: { id: orderedItem.id },
-  //       data: { cost: cost, profit: profit },
-  //     });
-  //   }),
-  // );
+  console.log({ logScheduledShifts });
 }
 
 main()
