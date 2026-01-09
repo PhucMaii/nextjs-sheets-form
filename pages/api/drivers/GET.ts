@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IQuery {
@@ -7,8 +7,6 @@ interface IQuery {
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
     const { id }: IQuery = req.query;
 
     if (!id) {

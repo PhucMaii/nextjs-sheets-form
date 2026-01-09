@@ -25,7 +25,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
 				companyId: driver.companyId,
 				type: report.type,
 				note: report.note,
-				queryDate: today.date,
+				queryDate: report.queryDate || today.date,
 				createdAt: today.dateAndTime,
 				createdBy: createdBy,
 			},

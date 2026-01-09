@@ -31,28 +31,24 @@ export default function ViewImg({
   const [urlBack, setUrlBack] = useState('');
 
   useEffect(() => {
-    const fetchUrl = async () => {
-      // if (isCheque) {
-      //   if (fileKeyFront) {
-      //     const urlFront = await getLoadUrl(fileKeyFront);
-      //     setUrlFront(urlFront);
-      //   }
-  
-      //   if (fileKeyBack) {
-      //     const urlBack = await getLoadUrl(fileKeyBack);
-      //     setUrlBack(urlBack);
-      //   }        
-      // } else {
-        if (fileKeyFront) {
-          const urlFront = generateImgUrl(fileKeyFront, isCheque);
-          // console.log(urlFront, 'urlFront');
-          setUrlFront(urlFront);
-        }
+    if (open) {
+      setUrlFront('');
+      setUrlBack('');
+    }
+  }, [open]);
 
-        if (fileKeyBack) {
-          const urlBack = generateImgUrl(fileKeyBack, isCheque);
-          setUrlBack(urlBack);
-        }
+  useEffect(() => {
+    const fetchUrl = async () => {
+      if (fileKeyFront) {
+        const urlFront = generateImgUrl(fileKeyFront, isCheque);
+        // console.log(urlFront, 'urlFront');
+        setUrlFront(urlFront);
+      }
+
+      if (fileKeyBack) {
+        const urlBack = generateImgUrl(fileKeyBack, isCheque);
+        setUrlBack(urlBack);
+      }
       // }
     };
     fetchUrl();

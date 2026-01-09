@@ -34,6 +34,8 @@ import { BorderSection } from '@/app/admin/[companyId]/reports/styled';
 import InventoryReportDialog from '../components/Modals/InventoryReportDialog';
 import { useSearchParams } from 'next/navigation';
 import { InventoryReportType } from '@prisma/client';
+import useSelectDate from '@/hooks/useSelectDate';
+import { YYYYMMDDFormat } from '@/app/utils/time';
 
 export default function SubmitInventoryReportPage() {
   const searchParams: any = useSearchParams();
@@ -50,6 +52,16 @@ export default function SubmitInventoryReportPage() {
   const [showReportDrawer, setShowReportDrawer] = useState<boolean>(false);
   const isMobile = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
   const { showNotification, NotificationComp } = useNotification();
+
+  // DatePicker for report date selection (defaults to today)
+  const todayDateString = YYYYMMDDFormat(new Date());
+  const reportDateHook = useSelectDate(
+    todayDateString,
+    true,
+    false,
+    false,
+    true,
+  );
 
   const { data: inventoryItems } = useQuery({
     queryKey: ['driver-inventory-items'],
@@ -137,6 +149,7 @@ export default function SubmitInventoryReportPage() {
         report: {
           note: note,
           type: reportType,
+          queryDate: reportDateHook.date,
           inventoryCounts: currentReportItems.map((item) => ({
             inventoryItemId: item.inventoryItemId,
             inventoryUnitId: item.inventoryUnitId,
@@ -440,6 +453,7 @@ export default function SubmitInventoryReportPage() {
         note={note}
         setNote={setNote}
         isMobile={isMobile}
+        reportDatePicker={reportDateHook.SelectDate}
       />
       <CountInputDialog
         isDialogOpen={isDialogOpen}

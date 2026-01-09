@@ -37,7 +37,7 @@ const withAdminAuthGuard =
         return res.status(404).json({ error: 'User Not Found in DB' });
       }
 
-      if (existingAdmin.role === USER_ROLE.DRIVER) {
+      if (existingAdmin.role === USER_ROLE.DRIVER || existingAdmin.role === USER_ROLE.WAREHOUSE) {
         return res
           .status(404)
           .json({ error: 'You are not authorized to access' });

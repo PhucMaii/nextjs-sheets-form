@@ -3,6 +3,7 @@ import { websiteItemCategoryId } from '@/app/lib/constant';
 import { calculateQtyLeft } from '@/pages/api/utils/items';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { sortItemsByTypeAndIdx } from '../items/GET';
 
 interface IQuery {
   inventoryItemId?: string;
@@ -98,19 +99,11 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         },
       });
 
-      const returnedItems = [...items].sort((a: any, b: any) => {
-        const aTypePriority = a?.inventoryItem?.type?.priority ?? Infinity;
-        const bTypePriority = b?.inventoryItem?.type?.priority ?? Infinity;
-
-        if (aTypePriority !== bTypePriority) {
-          return aTypePriority - bTypePriority;
-        }
-
-        const aIndex = a?.inventoryItem?.indexPos ?? Infinity;
-        const bIndex = b?.inventoryItem?.indexPos ?? Infinity;
-
-        return aIndex - bIndex;
-      });
+      const returnedItems = sortItemsByTypeAndIdx(
+        items,
+        'inventoryItem.type',
+        'inventoryItem.indexPos',
+      );
 
       const itemsWithQtyLeft = returnedItems.map((item: any) => {
         const qtyLeft = calculateQtyLeft(item);

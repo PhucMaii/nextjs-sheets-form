@@ -269,7 +269,7 @@ export default function ReportCard({
                     fontSize: smDown ? '0.75rem' : undefined,
                   }}
                 >
-                  {dayjs(report.createdAt).format('HH:mm')}
+                  { report.queryDate === dayjs(report.createdAt).format('MM/DD/YYYY') ? dayjs(report.createdAt).format('HH:mm') : dayjs(report.createdAt).format('HH:mm MMM DD')}
                 </Typography>
                 {report?.note && (
                   <Tooltip

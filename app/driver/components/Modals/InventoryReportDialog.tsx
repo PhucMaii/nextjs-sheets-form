@@ -33,6 +33,7 @@ interface IProps {
   note: string;
   setNote: (note: string) => void;
   isMobile: boolean;
+  reportDatePicker: JSX.Element;
 }
 
 export default function InventoryReportDialog({
@@ -47,6 +48,7 @@ export default function InventoryReportDialog({
   note,
   setNote,
   isMobile,
+  reportDatePicker,
 }: IProps) {
   return (
     <Dialog
@@ -134,6 +136,12 @@ export default function InventoryReportDialog({
         </Box>
         <Divider />
         <Box sx={{ p: 2 }}>
+          <Box mb={2}>
+            <Typography variant="body2" fontWeight={600} mb={1}>
+              Report Date
+            </Typography>
+            {reportDatePicker}
+          </Box>
           <TextField
             fullWidth
             multiline

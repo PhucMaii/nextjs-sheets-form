@@ -71,8 +71,6 @@ const TransactionsTable = ({
       return [];
     }
 
-    console.log(transactions, 'transactions');
-
     return transactions.flatMap((transaction: any) => {
       return transaction?.medias?.filter(
         (media: any) => media.note === 'front' || media.note === 'back',
@@ -165,6 +163,8 @@ const TransactionsTable = ({
     }
   };
 
+  console.log(chequeFiles, 'cheque files');
+
   return (
     <>
       <DeleteModal
@@ -238,11 +238,9 @@ const TransactionsTable = ({
                     ? 'stock'
                     : transaction?.type?.name || 'other';
 
-                    console.log(chequeFiles, 'chequeFiles');
-
-                // Define styling based on transaction type
-
                 const typeStyles = getTypeStyles(type);
+
+                const expenseFile = chequeFiles.find((file: any) => file.expenseId === transaction.id);
 
                 return (
                   <TableRow
@@ -265,17 +263,15 @@ const TransactionsTable = ({
                       </TableCell>
                     )}
                     <TableCell>
-                      {chequeFiles.length > 0 && (
+                      {expenseFile && (
                         <IconButton
                           onClick={(e: any) => {
                             e.stopPropagation();
                             e.preventDefault();
-                            const frontFileKey = chequeFiles[0]?.fileKey;
-                            const backFileKey = chequeFiles[1]?.fileKey;
                             setViewImgProps({
                               open: true,
-                              fileKeyFront: frontFileKey,
-                              fileKeyBack: backFileKey,
+                              fileKeyFront: expenseFile?.fileKey,
+                              fileKeyBack: null,
                             });
                           }}
                         >

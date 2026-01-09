@@ -1,6 +1,7 @@
 import prisma from '@/client';
 import { getDriverInfo } from '@/pages/api/utils/auth';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { sortItemsByTypeAndIdx } from '../../admin/[companyId]/items/GET';
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -47,13 +48,12 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           },
         },
       },
-      orderBy: {
-        indexPos: 'asc',
-      },
     });
 
+    const returnedInventory = sortItemsByTypeAndIdx(inventory, 'type', 'indexPos');
+
     return res.status(200).json({
-      data: inventory,
+      data: returnedInventory,
       message: 'Fetch Inventory Successfully',
     });
   } catch (error: any) {

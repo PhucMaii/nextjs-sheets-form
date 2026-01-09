@@ -1,8 +1,7 @@
-import { inventoryOrder } from '@/app/lib/constant';
-import { sortedItemKeys } from '@/app/utils/array';
 import { STOCK_STATUS } from '@/app/utils/enum';
 import { IInventoryItem } from '@/app/utils/type';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/client';
+import { sortItemsByTypeAndIdx } from '../items/GET';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 interface IQuery {
@@ -16,10 +15,14 @@ interface IQuery {
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
-
-    const { vendorId, inventoryItemId, companyId, isInternal, includedInternal, isAllowedToCount }: IQuery =
-      req.query;
+    const {
+      vendorId,
+      inventoryItemId,
+      companyId,
+      isInternal,
+      includedInternal,
+      isAllowedToCount,
+    }: IQuery = req.query;
 
     if (vendorId) {
       const vendorItems = await prisma.vendorItem.findMany({
@@ -161,8 +164,14 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
       return res.status(400).json({ error: 'Company ID is required' });
     }
 
-    const internalQuery = isInternal ? { isInternal: true } : !includedInternal ? { OR: [{ isInternal: null }, { isInternal: false }] } : {};
-    const allowedToCountQuery = isAllowedToCount ? { isAllowedToCount: true } : {};
+    const internalQuery = isInternal
+      ? { isInternal: true }
+      : !includedInternal
+        ? { OR: [{ isInternal: null }, { isInternal: false }] }
+        : {};
+    const allowedToCountQuery = isAllowedToCount
+      ? { isAllowedToCount: true }
+      : {};
 
     const inventory: any = await prisma.inventoryItem.findMany({
       where: {
@@ -199,23 +208,17 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           },
         },
       },
-      orderBy: {
-        indexPos: 'asc',
-      },
     });
-
 
     const formattedInventory =
       formatInventoryWithTotalValueAndStatus(inventory);
 
-    const itemNames = formattedInventory.map((item: any) => item.name);
-
-    const sortedItems = sortedItemKeys(itemNames, inventoryOrder);
+    const sortedItems = sortItemsByTypeAndIdx(formattedInventory, 'type', 'indexPos');
 
     const sortedInventoryItem = [];
     for (const item of sortedItems) {
       const inventoryItem: any = formattedInventory.find(
-        (i: any) => i.name === item,
+        (i: any) => i.id === item.id,
       );
 
       const listingCategories = inventoryItem?.item?.map(

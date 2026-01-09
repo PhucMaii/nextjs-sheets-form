@@ -18,7 +18,7 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
         companyId: +companyId,
         type: InventoryReportType.COUNT,
         note: report.note,
-        queryDate: today.date,
+        queryDate: report.queryDate || today.date,
         createdAt: today.dateAndTime,
         createdBy: createdBy,
       },
@@ -33,12 +33,10 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       })),
     });
 
-    return res
-      .status(200)
-      .json({
-        data: newReport,
-        message: 'Inventory report created successfully',
-      });
+    return res.status(200).json({
+      data: newReport,
+      message: 'Inventory report created successfully',
+    });
   } catch (error) {
     return res.status(500).json({ error: 'Failed to create inventory report' });
   }

@@ -42,12 +42,13 @@ import {
   IInventoryItem,
   IInventoryReport,
 } from '@/app/utils/type';
-import { generateMonthRange } from '@/app/utils/time';
+import { generateMonthRange, YYYYMMDDFormat } from '@/app/utils/time';
 import SelectDateRange from '../Select/SelectDateRange';
 import ReportCard from './ReportCard';
 import SubmitReportSection from './SubmitReportSection';
 import ConfirmModal from '../Modals/ConfirmModal';
 import { blueGrey } from '@mui/material/colors';
+import useSelectDate from '@/hooks/useSelectDate';
 
 interface IProps {
   showNotification: (
@@ -82,6 +83,18 @@ export default function InventoryReports({ showNotification }: IProps) {
   const [reportTypeFilterMenuAnchor, setReportTypeFilterMenuAnchor] =
     useState<null | HTMLElement>(null);
   const openReportTypeFilterMenu = Boolean(reportTypeFilterMenuAnchor);
+
+  // DatePicker for report date selection (defaults to today)
+  const todayDateString = YYYYMMDDFormat(new Date());
+  const reportDateHook = useSelectDate(
+    todayDateString,
+    false,
+    false,
+    false,
+    true
+  );
+  const ReportDatePicker = reportDateHook.SelectDate;
+  // reportDateHook.date is available for future use when backend supports custom report dates
 
   const { data: reports, refetch: refetchReports } = useQuery({
     queryKey: ['inventory-reports', dateRange],
@@ -269,6 +282,7 @@ export default function InventoryReports({ showNotification }: IProps) {
             companyId: companyId,
             note: '',
             inventoryCounts: currentReportItems,
+            queryDate: reportDateHook.date,
           },
         },
       );
@@ -700,14 +714,24 @@ export default function InventoryReports({ showNotification }: IProps) {
 
       {/* Compact Current Report Section - Sticky when has items */}
       {currentReportItems.length > 0 && (
-        <SubmitReportSection
-          currentReportItems={currentReportItems}
-          handleSubmitReport={handleSubmitReport}
-          inventoryItems={inventoryItems}
-          handleItemClick={handleItemClick}
-          handleRemoveItem={handleRemoveItem}
-          handleClearReport={handleClearReport}
-        />
+        <Box>
+          <Box mb={1.5}>
+            <Typography variant="body2" fontWeight={600} mb={1}>
+              Report Date
+            </Typography>
+            <Box sx={{ maxWidth: 300 }}>
+              {ReportDatePicker}
+            </Box>
+          </Box>
+          <SubmitReportSection
+            currentReportItems={currentReportItems}
+            handleSubmitReport={handleSubmitReport}
+            inventoryItems={inventoryItems}
+            handleItemClick={handleItemClick}
+            handleRemoveItem={handleRemoveItem}
+            handleClearReport={handleClearReport}
+          />
+        </Box>
       )}
 
       {/* Compact Reports List */}

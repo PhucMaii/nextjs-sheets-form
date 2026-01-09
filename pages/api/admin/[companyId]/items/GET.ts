@@ -1,5 +1,6 @@
 import { testItemId } from '@/app/lib/constant';
 import { calculateQtyLeft } from '@/pages/api/utils/items';
+import { getValueByPath } from '@/pages/api/utils/object';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -149,16 +150,7 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
         // ],
       });
 
-      const returnedItems = items.sort((a: any, b: any) => {
-        const typePriorityDiff =
-          a?.inventoryItem?.type?.priority - b?.inventoryItem?.type?.priority;
-
-        if (typePriorityDiff !== 0) {
-          return typePriorityDiff;
-        }
-
-        return a.inventoryItem.indexPos - b.inventoryItem.indexPos;
-      });
+      const returnedItems = sortItemsByTypeAndIdx(items, 'inventoryItem.type', 'inventoryItem.indexPos');
 
       const itemsWithQtyLeft = returnedItems.map((item: any) => {
         const qtyLeft = calculateQtyLeft(item);
@@ -224,10 +216,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
             },
           },
         },
-        orderBy: [
-          { inventoryItem: { type: { priority: 'asc' } } }, // Order by type priority first
-          { inventoryItem: { indexPos: 'asc' } }, // Then by indexPos
-        ],
+        // orderBy: [
+        //   { inventoryItem: { type: { priority: 'asc' } } }, // Order by type priority first
+        //   { inventoryItem: { indexPos: 'asc' } }, // Then by indexPos
+        // ],
       });
 
       const itemsWithQtyLeft = items.map((item: any) => {
@@ -304,3 +296,25 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     });
   }
 }
+
+export const sortItemsByTypeAndIdx = (
+  items: any[],
+  typePriorityKey: string = 'type',
+  indexPosKey: string = 'indexPos',
+) => {
+  const returnedItems = [...items].sort((a: any, b: any) => {
+    const aTypePriority = getValueByPath(a, typePriorityKey)?.priority ?? Infinity;
+    const bTypePriority = getValueByPath(b, typePriorityKey)?.priority ?? Infinity;
+
+    if (aTypePriority !== bTypePriority) {
+      return aTypePriority - bTypePriority;
+    }
+
+    const aIndex = getValueByPath(a, indexPosKey) ?? Infinity;
+    const bIndex = getValueByPath(b, indexPosKey) ?? Infinity;
+
+    return aIndex - bIndex;
+  });
+
+  return returnedItems;
+};
