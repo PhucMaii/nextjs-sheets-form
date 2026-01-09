@@ -59,6 +59,9 @@ export const gstRate = 0.05;
 export const mainItems = [
   'BEAN 10 LB',
   'BEAN 5 LB',
+  'SS-SOYA 10 LB',
+  'SS-SOYA 5 LB',
+  'SS-SOYA 24X1 LB',
   'BASIL',
   'BEAN 24X1 LB',
   'SOYA 10 LB',

@@ -166,6 +166,14 @@ const loginEmployee = async (credentials: any) => {
   const employee = await prisma.employee.findFirst({
     where: {
       employeeCode: credentials.employeeCode,
+      OR: [
+        {
+          isDeleted: false,
+        },
+        {
+          isDeleted: null,
+        },
+      ],
     },
   });
   if (!employee) {

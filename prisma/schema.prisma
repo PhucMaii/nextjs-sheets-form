@@ -117,6 +117,9 @@ model Employee {
   createdAt    String?
   createdBy    String?
   dashboardMode DashboardMode?
+  isDeleted    Boolean?
+  deletedAt    String?
+  deletedBy    String?
 
   shiftSessions   ShiftSession[]
   routes          Route[]

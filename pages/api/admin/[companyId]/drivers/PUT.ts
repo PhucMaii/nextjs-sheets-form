@@ -30,6 +30,14 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
     const existingDriver = await prisma.employee.findUnique({
       where: {
         id: driverId,
+        OR: [
+          {
+            isDeleted: false,
+          },
+          {
+            isDeleted: null,
+          },
+        ],
       },
     });
 
@@ -45,6 +53,14 @@ export default async function PUT(req: NextApiRequest, res: NextApiResponse) {
         id: {
           not: driverId,
         },
+        OR: [
+          {
+            isDeleted: false,
+          },
+          {
+            isDeleted: null,
+          },
+        ],
         // role: USER_ROLE.DRIVER,
       },
     });

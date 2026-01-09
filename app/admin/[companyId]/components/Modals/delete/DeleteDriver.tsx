@@ -10,6 +10,7 @@ import axios from 'axios';
 import { EMPLOYEE_ROLE, getAdminApiUrl } from '@/app/utils/enum';
 import { useParams } from 'next/navigation';
 import { UserContext } from '@/app/context/UserContextAPI';
+import { useRouter } from 'next/navigation';
 
 interface IProps {
   driver: IDriver;
@@ -26,7 +27,8 @@ export default function DeleteDriver({
   const { companyId }: any = useParams();
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
-
+  const router = useRouter();
+  
   const handleDeleteDriver = async () => {
     if (user?.role !== EMPLOYEE_ROLE.SUPER_ADMIN) {
       showNotification('error', 'You are not authorized to delete a driver');
@@ -34,8 +36,8 @@ export default function DeleteDriver({
     }
     try {
       setIsDeleting(true);
-      const response = await axios.delete(
-        `${getAdminApiUrl(companyId, `/drivers?driverId=${driver.id}`)}`,
+      const response = await axios.put(
+        `${getAdminApiUrl(companyId, `/drivers/delete?driverId=${driver.id}`)}`,
       );
 
       if (response.data.error) {
@@ -45,6 +47,7 @@ export default function DeleteDriver({
       }
 
       mutateDrivers();
+      router.push(`/admin/${companyId}/employees`);
       showNotification('success', response.data.message);
       setIsDeleting(false);
     } catch (error: any) {
@@ -63,6 +66,7 @@ export default function DeleteDriver({
         color="error"
         onClick={(e: any) => {
           e.stopPropagation();
+          e.preventDefault();
           setIsOpen(true);
         }}
       >

@@ -28,6 +28,14 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       where: {
         name: driverName,
         // role: USER_ROLE.DRIVER,
+        OR: [
+          {
+            isDeleted: false,
+          },
+          {
+            isDeleted: null,
+          },
+        ],
       },
     });
 
@@ -44,6 +52,14 @@ export default async function POST(req: NextApiRequest, res: NextApiResponse) {
       const sameEmployeeCode = await prisma.employee.findFirst({
         where: {
           employeeCode: code.toString(),
+          OR: [
+            {
+              isDeleted: false,
+            },
+            {
+              isDeleted: null,
+            },
+          ],
         },
       });
 

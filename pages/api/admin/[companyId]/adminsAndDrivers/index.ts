@@ -19,6 +19,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const employees = await prisma.employee.findMany({
       where: {
         companyId: Number(companyId),
+        OR: [
+          {
+            isDeleted: false,
+          },
+          {
+            isDeleted: null,
+          },
+        ],
       },
     });
 

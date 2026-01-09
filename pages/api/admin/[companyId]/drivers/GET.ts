@@ -1,7 +1,7 @@
 import { days } from '@/app/lib/constant';
-import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { normalizeDate } from '../../../utils/date';
+import prisma from '@/client';
 // import { USER_ROLE } from '@/app/utils/enum';
 // import { USER_ROLE } from '@/app/utils/enum';
 // import { USER_ROLE } from '@/app/utils/enum';
@@ -13,7 +13,6 @@ interface IQuery {
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const prisma = new PrismaClient();
     const { date, companyId } = req.query as IQuery;
 
     if (!companyId) {
@@ -49,6 +48,14 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
     // TODO: Fetch all drivers from employee table where role === driver
     const drivers = await prisma.employee.findMany({
       where: {
+        OR: [
+          {
+            isDeleted: false,
+          },
+          {
+            isDeleted: null,
+          },
+        ],
         companyId: Number(companyId),
         // role: USER_ROLE.DRIVER,
       },

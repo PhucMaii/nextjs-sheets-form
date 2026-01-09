@@ -2,7 +2,9 @@ import ModalHead from '@/app/lib/ModalHead';
 import {
   Box,
   Divider,
+  FormControl,
   InputAdornment,
+  InputLabel,
   MenuItem,
   Modal,
   OutlinedInput,
@@ -24,6 +26,7 @@ import StatusText from '../../StatusText';
 import { calculateTaxWithDiscount } from '@/app/utils/item';
 import DisplayFile from '../DisplayFile';
 import { PresignedFileUpload } from '@/app/components/PresignedFileUpload';
+import { useQuery } from '@tanstack/react-query';
 
 interface IProps extends ModalProps {
   showNotification: ShowNotificationType;
@@ -37,6 +40,17 @@ export default function ConvertToTransaction({
   po,
 }: IProps) {
   const { companyId }: any = useParams();
+
+  // Fetch expense types
+  const { data: expenseTypes } = useQuery({
+    queryKey: ['expenseTypes', companyId],
+    queryFn: async () => {
+      const response = await axios.get(
+        getAdminApiUrl(companyId, '/expenses/type'),
+      );
+      return response.data.data;
+    },
+  });
 
   const [adminsAndDrivers, setAdminsAndDrivers] = useState<string[]>([]);
   const [updatedPOItems, setUpdatedPOItems] = useState<IPOItem[]>([]);
@@ -52,6 +66,8 @@ export default function ConvertToTransaction({
     discount: 0,
     subTotal: po.subtotal,
   });
+  const [selectedExpenseTypeId, setSelectedExpenseTypeId] =
+    useState<number>(-1);
 
   const [paymentMethods, setPaymentMethods] = useState<IPaymentMethod[]>([]);
 
@@ -282,6 +298,7 @@ export default function ConvertToTransaction({
           expenseData: {
             ...expenseData,
             date: date,
+            typeId: selectedExpenseTypeId,
           },
         },
       );
@@ -456,6 +473,30 @@ export default function ConvertToTransaction({
             <Typography>Date</Typography>
             {SelectDate}
           </Box>
+
+          <FormControl fullWidth>
+            <InputLabel htmlFor="assign-type" id="assign-type-label">
+              Assign Type
+            </InputLabel>
+            <Select
+              labelId="assign-type-label"
+              id="assign-type"
+              aria-labelledby="assign-type-label"
+              value={selectedExpenseTypeId}
+              label="Assign Type"
+              fullWidth
+              onChange={(e) => {
+                setSelectedExpenseTypeId(Number(e.target.value));
+              }}
+            >
+              <MenuItem value={-1}>N/A</MenuItem>
+              {expenseTypes?.map((type: any) => (
+                <MenuItem key={type.id} value={type.id}>
+                  {type.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
           <Box display="flex" flexDirection="column" gap={1}>
             <Typography>Invoice</Typography>

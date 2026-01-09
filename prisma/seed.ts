@@ -120,39 +120,32 @@ export const generateListOfDateString = (startDate: Date, endDate: Date) => {
 };
 
 async function main() {
-  const startDate = new Date('2025-12-01');
-  const endDate = new Date('2025-12-31');
-
-  const listOfDateStrings = generateListOfDateString(startDate, endDate);
-
-  const scheduledShifts = await prisma.scheduledShift.findMany({
+  const soya10DELETED = await prisma.orderedItems.findMany({
     where: {
-      OR: [
-        {
-          isOff: false,
-        },
-        {
-          isOff: null,
-        },
-      ],
-      queryDate: {
-        in: listOfDateStrings,
+      inventoryItemId: null,
+      scheduledOrderId: {
+        not: null,
       },
-      employeeId: 10
+    },
+    include: {
+      ScheduleOrders: {
+        include: {
+          user: true,
+        },
+      },
     },
   });
 
-  const logScheduledShifts = scheduledShifts.map((shift) => {
+  const logSoya10DELETED = soya10DELETED.map((item) => {
     return {
-      employeeId: shift.employeeId,
-      hours: shift.hours,
-      cost: shift.cost,
-      queryDate: shift.queryDate,
-      isOff: shift.isOff,
+      id: item.id,
+      scheduledOrderId: item.scheduledOrderId,
+      day: item.ScheduleOrders?.day,
+      scheduledOrder: item.ScheduleOrders?.user?.clientName,
     };
   });
 
-  console.log({ logScheduledShifts });
+  console.log(logSoya10DELETED);
 }
 
 main()

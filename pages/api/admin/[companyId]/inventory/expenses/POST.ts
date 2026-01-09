@@ -558,6 +558,8 @@ export const createFifo = async (
       };
     });
 
+  console.log('fifoItems', fifoItems);
+
   if (fifoItems.length > 0) {
     await prisma.fifo.createMany({
       data: fifoItems,

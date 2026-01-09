@@ -31,6 +31,7 @@ interface IBody {
     discount?: number;
     billFileKey?: string;
     billFileType?: string;
+    typeId?: number;
   };
 }
 
@@ -100,6 +101,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         status: expenseData.status,
         invoice: expenseData.invoice,
         companyId: Number(companyId),
+        typeId: expenseData?.typeId || null,
       },
     });
 

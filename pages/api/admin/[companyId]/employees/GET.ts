@@ -18,13 +18,27 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           },
         },
       });
+      
+      if (employee?.isDeleted) {
+        return res.status(404).json({ error: 'Employee not found' });
+      }
 
       return res.status(200).json({ data: employee });
     }
 
     if (companyId) {
       const employees = await prisma.employee.findMany({
-        where: { companyId: Number(companyId) },
+        where: {
+          companyId: Number(companyId),
+          OR: [
+            {
+              isDeleted: false,
+            },
+            {
+              isDeleted: null,
+            },
+          ],
+        },
         include: {
           adminPages: {
             include: {
@@ -33,8 +47,6 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
           },
         },
       });
-
-      console.log('employees', employees);
 
       return res.status(200).json({ data: employees });
     }
