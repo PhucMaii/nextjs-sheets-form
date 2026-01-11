@@ -240,7 +240,7 @@ const TransactionsTable = ({
 
                 const typeStyles = getTypeStyles(type);
 
-                const expenseFile = chequeFiles.find((file: any) => file.expenseId === transaction.id);
+                const expenseFile = chequeFiles.find((file: any) => file?.expenseId === transaction?.id);
 
                 return (
                   <TableRow
